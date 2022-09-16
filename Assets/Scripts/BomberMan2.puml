@@ -1,0 +1,48 @@
+﻿@startuml
+namespace Manager{
+BattleManager --> PlayerManager
+BattleManager --> StageManager
+
+class BattleManager
+class PlayerManager
+note top of PlayerManager
+・プレイヤーの生成
+・プレイヤーの状態管理
+・プレイヤーリスト
+end note 
+class StageManager
+class SkillManager
+class ResourcesManager
+note top of ResourcesManager
+・AssetBundleなどからplayerのオブジェクトを呼び出す
+end note 
+
+}
+
+namespace Player{
+PlayerPresenter --> PlayerModel
+PlayerPresenter --> PlayerView
+PlayerCore --> PlayerPresenter
+PlayerCore --> PlayerStateIdle
+PlayerCore --> PlayerStateAttack
+
+
+class PlayerModel
+class PlayerView
+class PlayerPresenter
+class PlayerCore
+class PlayerStateIdle
+class PlayerStateAttack 
+class PlayerMove
+}
+
+namespace Attack{
+Slash_Attack ..|> IAttack
+Stab_Attack ..|> IAttack
+
+interface IAttack
+class Slash_Attack
+class Stab_Attack
+
+}
+@enduml

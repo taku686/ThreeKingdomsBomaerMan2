@@ -1,0 +1,298 @@
+fileFormatVersion: 2
+guid: 7ac89f00984270242990897ddeabab65
+timeCreated: 1536137401
+licenseType: Store
+ModelImporter:
+  serializedVersion: 22
+  fileIDToRecycleName:
+    100000: Bip001
+    100002: Bip001 Footsteps
+    100004: Bip001 Head
+    100006: Bip001 HeadNub
+    100008: Bip001 L Calf
+    100010: Bip001 L Clavicle
+    100012: Bip001 L Finger0
+    100014: Bip001 L Finger01
+    100016: Bip001 L Finger0Nub
+    100018: Bip001 L Finger1
+    100020: Bip001 L Finger11
+    100022: Bip001 L Finger1Nub
+    100024: Bip001 L Foot
+    100026: Bip001 L Forearm
+    100028: Bip001 L Hand
+    100030: Bip001 L Thigh
+    100032: Bip001 L Toe0
+    100034: Bip001 L Toe0Nub
+    100036: Bip001 L UpperArm
+    100038: Bip001 Neck
+    100040: Bip001 Pelvis
+    100042: Bip001 Prop1
+    100044: Bip001 Prop2
+    100046: Bip001 R Calf
+    100048: Bip001 R Clavicle
+    100050: Bip001 R Finger0
+    100052: Bip001 R Finger01
+    100054: Bip001 R Finger0Nub
+    100056: Bip001 R Finger1
+    100058: Bip001 R Finger11
+    100060: Bip001 R Finger1Nub
+    100062: Bip001 R Foot
+    100064: Bip001 R Forearm
+    100066: Bip001 R Hand
+    100068: Bip001 R Thigh
+    100070: Bip001 R Toe0
+    100072: Bip001 R Toe0Nub
+    100074: Bip001 R UpperArm
+    100076: Bip001 Spine
+    100078: Bip001 Spine1
+    100080: fx_bottom
+    100082: fx_center
+    100084: fx_top
+    100086: fx_weapon
+    100088: movement
+    100090: weapon_center
+    100092: weapon_center 1
+    100094: weapon_l
+    100096: weapon_r
+    100098: zhugeliang
+    100100: zhugeliang_b_tail_L_Bone01
+    100102: zhugeliang_b_tail_L_Bone02
+    100104: zhugeliang_b_tail_L_Bone03
+    100106: zhugeliang_b_tail_L_Bone04
+    100108: zhugeliang_b_tail_L_Bone05
+    100110: zhugeliang_b_tail_L_Bone06
+    100112: zhugeliang_b_tail_R_Bone01
+    100114: zhugeliang_b_tail_R_Bone02
+    100116: zhugeliang_b_tail_R_Bone03
+    100118: zhugeliang_b_tail_R_Bone04
+    100120: zhugeliang_b_tail_R_Bone05
+    100122: zhugeliang_b_tail_R_Bone06
+    100124: zhugeliang_Bone05
+    100126: zhugeliang_Bone06
+    100128: zhugeliang_Bone07
+    100130: zhugeliang_Bone08
+    100132: zhugeliang_Bone09
+    100134: zhugeliang_Bone10
+    100136: zhugeliang_Bone11
+    100138: zhugeliang_Bone12
+    100140: zhugeliang_Bone13
+    100142: zhugeliang_Bone14
+    100144: zhugeliang_Bone33
+    100146: zhugeliang_Bone34
+    100148: zhugeliang_Bone35
+    100150: zhugeliang_Bone36
+    100152: zhugeliang_Bone37
+    100154: zhugeliang_Bone38
+    100156: zhugeliang_Bone39
+    100158: zhugeliang_Bone40
+    100160: zhugeliang_Bone41
+    100162: zhugeliang_Bone42
+    100164: zhugeliang_Bone43
+    100166: zhugeliang_Bone44
+    100168: zhugeliang_bone_head_m01
+    100170: zhugeliang_bone_head_m02
+    100172: zhugeliang_bone_head_m03
+    100174: zhugeliang_bone_head_m04
+    100176: //RootNode
+    400000: Bip001
+    400002: Bip001 Footsteps
+    400004: Bip001 Head
+    400006: Bip001 HeadNub
+    400008: Bip001 L Calf
+    400010: Bip001 L Clavicle
+    400012: Bip001 L Finger0
+    400014: Bip001 L Finger01
+    400016: Bip001 L Finger0Nub
+    400018: Bip001 L Finger1
+    400020: Bip001 L Finger11
+    400022: Bip001 L Finger1Nub
+    400024: Bip001 L Foot
+    400026: Bip001 L Forearm
+    400028: Bip001 L Hand
+    400030: Bip001 L Thigh
+    400032: Bip001 L Toe0
+    400034: Bip001 L Toe0Nub
+    400036: Bip001 L UpperArm
+    400038: Bip001 Neck
+    400040: Bip001 Pelvis
+    400042: Bip001 Prop1
+    400044: Bip001 Prop2
+    400046: Bip001 R Calf
+    400048: Bip001 R Clavicle
+    400050: Bip001 R Finger0
+    400052: Bip001 R Finger01
+    400054: Bip001 R Finger0Nub
+    400056: Bip001 R Finger1
+    400058: Bip001 R Finger11
+    400060: Bip001 R Finger1Nub
+    400062: Bip001 R Foot
+    400064: Bip001 R Forearm
+    400066: Bip001 R Hand
+    400068: Bip001 R Thigh
+    400070: Bip001 R Toe0
+    400072: Bip001 R Toe0Nub
+    400074: Bip001 R UpperArm
+    400076: Bip001 Spine
+    400078: Bip001 Spine1
+    400080: fx_bottom
+    400082: fx_center
+    400084: fx_top
+    400086: fx_weapon
+    400088: movement
+    400090: weapon_center
+    400092: weapon_center 1
+    400094: weapon_l
+    400096: weapon_r
+    400098: zhugeliang
+    400100: zhugeliang_b_tail_L_Bone01
+    400102: zhugeliang_b_tail_L_Bone02
+    400104: zhugeliang_b_tail_L_Bone03
+    400106: zhugeliang_b_tail_L_Bone04
+    400108: zhugeliang_b_tail_L_Bone05
+    400110: zhugeliang_b_tail_L_Bone06
+    400112: zhugeliang_b_tail_R_Bone01
+    400114: zhugeliang_b_tail_R_Bone02
+    400116: zhugeliang_b_tail_R_Bone03
+    400118: zhugeliang_b_tail_R_Bone04
+    400120: zhugeliang_b_tail_R_Bone05
+    400122: zhugeliang_b_tail_R_Bone06
+    400124: zhugeliang_Bone05
+    400126: zhugeliang_Bone06
+    400128: zhugeliang_Bone07
+    400130: zhugeliang_Bone08
+    400132: zhugeliang_Bone09
+    400134: zhugeliang_Bone10
+    400136: zhugeliang_Bone11
+    400138: zhugeliang_Bone12
+    400140: zhugeliang_Bone13
+    400142: zhugeliang_Bone14
+    400144: zhugeliang_Bone33
+    400146: zhugeliang_Bone34
+    400148: zhugeliang_Bone35
+    400150: zhugeliang_Bone36
+    400152: zhugeliang_Bone37
+    400154: zhugeliang_Bone38
+    400156: zhugeliang_Bone39
+    400158: zhugeliang_Bone40
+    400160: zhugeliang_Bone41
+    400162: zhugeliang_Bone42
+    400164: zhugeliang_Bone43
+    400166: zhugeliang_Bone44
+    400168: zhugeliang_bone_head_m01
+    400170: zhugeliang_bone_head_m02
+    400172: zhugeliang_bone_head_m03
+    400174: zhugeliang_bone_head_m04
+    400176: //RootNode
+    2100000: 'Material #7'
+    4300000: zhugeliang
+    7400000: Walk
+    9500000: //RootNode
+    13700000: zhugeliang
+  externalObjects: {}
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: Walk
+      takeName: Take 001
+      firstFrame: 0
+      lastFrame: 16
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
