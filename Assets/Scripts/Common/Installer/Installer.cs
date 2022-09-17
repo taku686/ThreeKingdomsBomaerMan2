@@ -3,6 +3,7 @@ using Manager.BattleManager;
 using Manager.NetworkManager;
 using Manager.ResourceManager;
 using Player.Common;
+using UI.Title.MainTitle;
 using UnityEngine;
 using Zenject;
 
@@ -18,6 +19,7 @@ namespace Common.Installer
 
         public override void InstallBindings()
         {
+            //Manager
             Container.Bind<InputManager>().FromComponentOn(inputManagerGameObject).AsCached();
             Container.Bind<AnimationManager>().FromComponentOn(animationManagerGameObject).AsCached();
             Container.Bind<PlayerManager>().FromComponentOn(playerManagerGameObject).AsCached();
@@ -27,6 +29,8 @@ namespace Common.Installer
                 .To<ResourceManager>()
                 .FromComponentOn(resourceManagerGameObject)
                 .AsCached();
+            //Model
+            Container.Bind<TitleModel>().AsCached();
         }
     }
 }
