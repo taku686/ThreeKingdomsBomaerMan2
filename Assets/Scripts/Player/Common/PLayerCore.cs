@@ -24,14 +24,6 @@ namespace Player.Common
 
         private StateMachine<PLayerCore> _stateMachine;
 
-        private void Awake()
-        {
-        }
-
-        private void Start()
-        {
-        }
-
         public void Initialize(CharacterData characterData)
         {
             InitializeComponent(characterData);

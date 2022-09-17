@@ -1,4 +1,6 @@
 using Manager;
+using Manager.BattleManager;
+using Manager.NetworkManager;
 using Manager.ResourceManager;
 using Player.Common;
 using UnityEngine;
@@ -11,17 +13,15 @@ namespace Common.Installer
         [SerializeField] private GameObject resourceManagerGameObject;
         [SerializeField] private GameObject inputManagerGameObject;
         [SerializeField] private GameObject animationManagerGameObject;
+        [SerializeField] private GameObject networkManagerGameObject;
+        [SerializeField] private GameObject playerManagerGameObject;
 
         public override void InstallBindings()
         {
             Container.Bind<InputManager>().FromComponentOn(inputManagerGameObject).AsCached();
             Container.Bind<AnimationManager>().FromComponentOn(animationManagerGameObject).AsCached();
-           
-            InstallResourceManager();
-        }
-
-        private void InstallResourceManager()
-        {
+            Container.Bind<PlayerManager>().FromComponentOn(playerManagerGameObject).AsCached();
+            Container.Bind<PhotonNetworkManager>().FromComponentOn(networkManagerGameObject).AsCached();
             Container
                 .Bind<ILoadResource>()
                 .To<ResourceManager>()

@@ -69,7 +69,6 @@ namespace Player.Common
                 if (_isTurn)
                 {
                     await UniTask.Delay(TimeSpan.FromSeconds(GameSettingData.TurnDuration), cancellationToken: _token);
-                    Debug.Log("Turn");
                     _isTurn = false;
                     return;
                 }
