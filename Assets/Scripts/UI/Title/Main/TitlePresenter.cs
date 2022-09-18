@@ -1,17 +1,19 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using UI.Title.MainTitle;
 using UniRx;
 using UnityEngine;
 using Zenject;
 
-namespace UI.Title.MainTitle
+namespace UI.Title.Main
 {
     public partial class TitlePresenter : MonoBehaviour
     {
         [Inject] private TitleModel _titleModel;
-
-        [SerializeField] private TitleView _titleView;
+        [SerializeField] private MainView mainView;
+        [SerializeField] private CharacterSelectView characterSelectView;
         [SerializeField] private Transform characterCreatePosition;
+
 
         private GameObject _character;
         private StateMachine<TitlePresenter> _stateMachine;
@@ -22,6 +24,7 @@ namespace UI.Title.MainTitle
         {
             Main,
             CharacterSelect,
+            CharacterDetail,
             Shop,
             ReadyBattle,
             SelectBattleMode
@@ -29,13 +32,14 @@ namespace UI.Title.MainTitle
 
         private void Start()
         {
-            Initialize();
+            Initialize().Forget();
         }
 
-        private void Initialize()
+
+        private async UniTask Initialize()
         {
             _token = this.GetCancellationTokenOnDestroy();
-            _titleModel.Initialize(_token);
+            await _titleModel.Initialize(_token);
             InitializeState();
             InitializeButton();
             _currentCharacterId.Subscribe(CreateCharacter).AddTo(this);
@@ -44,23 +48,25 @@ namespace UI.Title.MainTitle
 
         private void InitializeState()
         {
-            _stateMachine = new StateMachine<TitlePresenter>(this);
+            _stateMachine = new StateMachine<Main.TitlePresenter>(this);
             _stateMachine.Start<MainState>();
             _stateMachine.AddAnyTransition<MainState>((int)Event.Main);
             _stateMachine.AddTransition<MainState, CharacterSelectState>((int)Event.CharacterSelect);
+            _stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)Event.CharacterDetail);
         }
 
         private void InitializeButton()
         {
-            _titleView.CharacterButton.onClick.AddListener(() => _stateMachine.Dispatch((int)Event.CharacterSelect));
-            _titleView.BackButton.onClick.AddListener(() => _stateMachine.Dispatch((int)Event.Main));
+            mainView.CharacterSelectButton.onClick.AddListener(() =>
+                _stateMachine.Dispatch((int)Event.CharacterSelect));
+            characterSelectView.BackButton.onClick.AddListener(() => _stateMachine.Dispatch((int)Event.Main));
         }
 
         private void DisableTitleGameObject()
         {
-            _titleView.LobbyGameObject.SetActive(false);
-            _titleView.CharacterListGameObject.SetActive(false);
-            _titleView.CharacterDetailGameObject.SetActive(false);
+            mainView.MainGameObject.SetActive(false);
+            mainView.CharacterListGameObject.SetActive(false);
+            mainView.CharacterDetailGameObject.SetActive(false);
         }
 
         private void CreateCharacter(int id)

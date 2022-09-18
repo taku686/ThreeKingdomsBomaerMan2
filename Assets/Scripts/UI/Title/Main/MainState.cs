@@ -1,7 +1,6 @@
-﻿using UnityEngine;
-using State = StateMachine<UI.Title.MainTitle.TitlePresenter>.State;
+﻿using State = StateMachine<UI.Title.Main.TitlePresenter>.State;
 
-namespace UI.Title.MainTitle
+namespace UI.Title.Main
 {
     public partial class TitlePresenter
     {
@@ -23,7 +22,7 @@ namespace UI.Title.MainTitle
             private void Initialize()
             {
                 Owner.DisableTitleGameObject();
-                Owner._titleView.LobbyGameObject.SetActive(true);
+                Owner.mainView.MainGameObject.SetActive(true);
             }
         }
     }

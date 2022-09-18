@@ -7,6 +7,5 @@ namespace Common.Data
     public class UserData : ScriptableObject
     {
         public int currentCharacterID;
-       // public List<int> unLockCharacterIdList;
     }
 }

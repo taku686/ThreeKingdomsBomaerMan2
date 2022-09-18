@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
-using State = StateMachine<UI.Title.MainTitle.TitlePresenter>.State;
+using State = StateMachine<UI.Title.Main.TitlePresenter>.State;
 
-namespace UI.Title.MainTitle
+namespace UI.Title.Main
 {
     public partial class TitlePresenter
     {
-        public class CharacterSelectState : State
+        public class CharacterDetailState : State
         {
             protected override void OnEnter(State prevState)
             {
@@ -23,7 +23,7 @@ namespace UI.Title.MainTitle
             private void Initialize()
             {
                 Owner.DisableTitleGameObject();
-                Owner._titleView.CharacterListGameObject.SetActive(true);
+                Owner.mainView.CharacterDetailGameObject.SetActive(true);
             }
         }
     }

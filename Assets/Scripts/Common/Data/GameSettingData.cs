@@ -28,4 +28,13 @@ namespace Common.Data
         Ryofu,
         Ganryou
     }
+
+    public enum CharacterColor
+    {
+        Blue,
+        Green,
+        Purple,
+        Red,
+        Yellow
+    }
 }

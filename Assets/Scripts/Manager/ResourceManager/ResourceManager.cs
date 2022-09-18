@@ -23,13 +23,20 @@ namespace Manager.ResourceManager
 
         public async UniTask<UserData> LoadUserData(CancellationToken token)
         {
-            var resource = await Resources.LoadAsync<GameObject>(LabelData.UserDataPath).WithCancellation(token);
+            var resource = await Resources.LoadAsync<UserData>(LabelData.UserDataPath).WithCancellation(token);
             return (UserData)resource;
         }
 
         public async UniTask<Sprite> LoadCharacterSprite(int id, CancellationToken token)
         {
-            var resource = await Resources.LoadAsync<GameObject>(LabelData.CharacterSpritePath + id)
+            var resource = await Resources.LoadAsync<Sprite>(LabelData.CharacterSpritePath + id)
+                .WithCancellation(token);
+            return (Sprite)resource;
+        }
+
+        public async UniTask<Sprite> LoadCharacterColor(int id, CancellationToken token)
+        {
+            var resource = await Resources.LoadAsync<Sprite>(LabelData.CharacterColorPath + id)
                 .WithCancellation(token);
             return (Sprite)resource;
         }

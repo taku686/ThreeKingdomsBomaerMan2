@@ -14,7 +14,7 @@ namespace Common.Data
         [SerializeField] private int attack;
         [SerializeField] private int fireRange;
         [SerializeField] private int hp;
-        [SerializeField] private Color charaColor;
+        [SerializeField] private CharacterColor charaColor;
 
         public GameObject CharaObj => charaObj;
         public string Name => name;
@@ -24,7 +24,7 @@ namespace Common.Data
         public int Attack => attack;
         public int FireRange => fireRange;
         public int Hp => hp;
-        public Color CharaColor => charaColor;
+        public CharacterColor CharaColor => charaColor;
         public bool IsLock => isLock;
     }
 }
