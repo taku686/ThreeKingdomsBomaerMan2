@@ -1,5 +1,5 @@
 using System;
-using Interface;
+using Common.Data;
 using Manager;
 using UnityEngine;
 using Zenject;
@@ -10,7 +10,6 @@ namespace Player.Common
     {
         [Inject] private InputManager _inputManager;
         private IPlayerMove _playerMove;
-
         private CharacterData _characterData;
 
         private enum PLayerState
@@ -33,7 +32,7 @@ namespace Player.Common
         private void InitializeComponent(CharacterData characterData)
         {
             _playerMove = GetComponent<PlayerMove>();
-            _playerMove.Initialize();
+            _playerMove.Initialize(characterData.Speed);
             _characterData = characterData;
         }
 

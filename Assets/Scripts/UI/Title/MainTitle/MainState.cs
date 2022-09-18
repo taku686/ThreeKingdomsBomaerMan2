@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using  State = StateMachine<UI.Title.MainTitle.TitlePresenter>.State;
+using State = StateMachine<UI.Title.MainTitle.TitlePresenter>.State;
 
 namespace UI.Title.MainTitle
 {
@@ -22,7 +22,8 @@ namespace UI.Title.MainTitle
 
             private void Initialize()
             {
-                Owner._titleView.LobbyGameObject.SetActive(false);
+                Owner.DisableTitleGameObject();
+                Owner._titleView.LobbyGameObject.SetActive(true);
             }
         }
     }

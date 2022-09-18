@@ -1,4 +1,5 @@
 ﻿using System.Threading;
+using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.ResourceManager;
 using UnityEngine;

@@ -3,7 +3,6 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using Interface;
 using Manager;
 using ModestTree;
 using UniRx;
@@ -16,9 +15,8 @@ namespace Player.Common
     {
         [Inject] private AnimationManager _animationManager;
 
-        [SerializeField] private LayerMask layerMask;
-
-        public float moveSpeed;
+        //  [SerializeField] private LayerMask _layerMask;
+        private float _moveSpeed;
 
         private Vector3 _initRotation;
         private Animator _animator;
@@ -28,12 +26,13 @@ namespace Player.Common
         private bool _isTurn;
 
 
-        public void Initialize()
+        public void Initialize(float moveSpeed)
         {
             _token = this.GetCancellationTokenOnDestroy();
             _animator = GetComponent<Animator>();
             _animationManager.Initialize(transform, _animator);
             _initRotation = transform.localEulerAngles;
+            _moveSpeed = moveSpeed;
             _currentDirection.Pairwise().Subscribe(dir =>
             {
                 transform.DOLocalRotate(GetRotation(dir.Current).eulerAngles, GameSettingData.TurnDuration);
@@ -78,7 +77,7 @@ namespace Player.Common
 
                 bool isHit = Physics.Raycast(new Vector3(start.x, 0.5f, start.z),
                     new Vector3(end.x, 0.5f, end.z) - start,
-                    1, layerMask, QueryTriggerInteraction.Collide);
+                    1, LayerMask.GetMask("BlockingLayer"), QueryTriggerInteraction.Collide);
 
                 // 衝突しておらず、移動中でなく
                 if (!isHit)
@@ -98,7 +97,7 @@ namespace Player.Common
             {
                 var position1 = transform.position;
                 var position = position1;
-                position1 = Vector3.MoveTowards(position, end, moveSpeed * Time.deltaTime);
+                position1 = Vector3.MoveTowards(position, end, _moveSpeed * Time.deltaTime);
                 transform.position = position1;
                 sqrRemainingDistance = (position1 - end).sqrMagnitude;
                 await UniTask.Yield();

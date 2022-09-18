@@ -25,7 +25,8 @@ PlayerPresenter --> PlayerView
 PlayerCore --> PlayerPresenter
 PlayerCore --> PlayerStateIdle
 PlayerCore --> PlayerStateAttack
-
+PlayerCore ..> IPlayerMove
+PlayerMove ..|> IPlayerMove
 
 class PlayerModel
 class PlayerView
@@ -34,6 +35,7 @@ class PlayerCore
 class PlayerStateIdle
 class PlayerStateAttack 
 class PlayerMove
+interface IPlayerMove
 }
 
 namespace Attack{

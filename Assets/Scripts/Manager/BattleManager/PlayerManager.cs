@@ -6,6 +6,7 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.ResourceManager;
+using Photon.Pun;
 using Player.Common;
 using UniRx;
 using UnityEngine;
@@ -22,6 +23,7 @@ namespace Manager.BattleManager
 
         [SerializeField] private CharacterName characterName;
         [SerializeField] private List<Transform> startPointList;
+        [SerializeField] private Transform playerParent;
 
         private void Start()
         {
@@ -34,13 +36,22 @@ namespace Manager.BattleManager
             var characterData =
                 await _resourceManager.LoadCharacterData(LabelData.BachoPath, this.GetCancellationTokenOnDestroy());
             var spawnPoint = GetSpawnPoint((int)PlayerIndex.Player1);
-            var playerObj = Instantiate(characterData.CharaObj, spawnPoint.position, spawnPoint.rotation);
-            playerObj.GetComponent<PLayerCore>().Initialize(characterData);
+            var playerObj = Instantiate(characterData.CharaObj, spawnPoint.position, spawnPoint.rotation, playerParent);
+            InitializeComponent(playerObj, characterData);
         }
 
         private Transform GetSpawnPoint(int index)
         {
             return startPointList[index];
+        }
+
+        private void InitializeComponent(GameObject player, CharacterData characterData)
+        {
+            player.AddComponent<PlayerMove>();
+            var playerCore = player.AddComponent<PLayerCore>();
+            player.AddComponent<ZenAutoInjecter>();
+            UniTask.Yield();
+            playerCore.Initialize(characterData);
         }
 
         private enum PlayerIndex
@@ -52,19 +63,5 @@ namespace Manager.BattleManager
         }
     }
 
-    public enum CharacterName
-    {
-        Bacho,
-        Kanu,
-        Tyouhi,
-        Ryuubi,
-        Syoukatsu,
-        Sonken,
-        Sonsaku,
-        Daikyou,
-        Syuuyu,
-        Sousou,
-        Shibasaku,
-        Kakouton
-    }
+   
 }

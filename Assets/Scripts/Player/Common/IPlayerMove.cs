@@ -1,12 +1,11 @@
-﻿using System.Threading;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace Interface
+namespace Player.Common
 {
     public interface IPlayerMove
     {
-        public void Initialize();
+        public void Initialize(float moveSpeed);
         public UniTaskVoid Move(Vector3 direction);
     }
 }

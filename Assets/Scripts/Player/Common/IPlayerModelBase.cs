@@ -1,3 +1,4 @@
+using Common.Data;
 using Cysharp.Threading.Tasks;
 
 namespace Player.Common

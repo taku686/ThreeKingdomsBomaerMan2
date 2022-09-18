@@ -9,7 +9,7 @@ using Zenject;
 
 namespace Common.Installer
 {
-    public class Installer : MonoInstaller<Installer>
+    public class BattleSceneInstaller : MonoInstaller<BattleSceneInstaller>
     {
         [SerializeField] private GameObject resourceManagerGameObject;
         [SerializeField] private GameObject inputManagerGameObject;
@@ -29,8 +29,7 @@ namespace Common.Installer
                 .To<ResourceManager>()
                 .FromComponentOn(resourceManagerGameObject)
                 .AsCached();
-            //Model
-            Container.Bind<TitleModel>().AsCached();
+          
         }
     }
 }

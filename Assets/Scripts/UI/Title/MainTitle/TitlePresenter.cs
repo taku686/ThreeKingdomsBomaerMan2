@@ -10,7 +10,7 @@ namespace UI.Title.MainTitle
 
         private StateMachine<TitlePresenter> _stateMachine;
 
-        private enum TitleState
+        private enum Event
         {
             Main,
             CharacterSelect,
@@ -27,12 +27,28 @@ namespace UI.Title.MainTitle
         private void Initialize()
         {
             InitializeState();
+            InitializeButton();
         }
 
         private void InitializeState()
         {
             _stateMachine = new StateMachine<TitlePresenter>(this);
             _stateMachine.Start<MainState>();
+            _stateMachine.AddAnyTransition<MainState>((int)Event.Main);
+            _stateMachine.AddTransition<MainState, CharacterSelectState>((int)Event.CharacterSelect);
+        }
+
+        private void InitializeButton()
+        {
+            _titleView.CharacterButton.onClick.AddListener(() => _stateMachine.Dispatch((int)Event.CharacterSelect));
+            _titleView.BackButton.onClick.AddListener(() => _stateMachine.Dispatch((int)Event.Main));
+        }
+
+        private void DisableTitleGameObject()
+        {
+            _titleView.LobbyGameObject.SetActive(false);
+            _titleView.CharacterListGameObject.SetActive(false);
+            _titleView.CharacterDetailGameObject.SetActive(false);
         }
     }
 }

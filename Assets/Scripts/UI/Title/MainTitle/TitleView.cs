@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Common.Data;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,27 +8,39 @@ namespace UI.Title.MainTitle
 {
     public class TitleView : MonoBehaviour
     {
-        [SerializeField] private Button _battleButton;
-        [SerializeField] private Button _battleModeButton;
-        [SerializeField] private Button _characterButton;
-        [SerializeField] private Button _shopButton;
-        [SerializeField] private GameObject _lobbyGameObject;
-        [SerializeField] private GameObject _characterListGameObject;
-        [SerializeField] private GameObject _characterDetailGameObject;
-        
-        public Button BattleButton => _battleButton;
+        //Title_Button
+        [Header("Title"), SerializeField] private Button battleButton;
+        [Header("Title"), SerializeField] private Button battleModeButton;
+        [Header("Title"), SerializeField] private Button characterButton;
+        [Header("Title"), SerializeField] private Button shopButton;
 
-        public Button BattleModeButton => _battleModeButton;
+        //CharacterList_Button
+        [Header("CharacterList"), SerializeField]
+        private Button backButton;
 
-        public Button CharacterButton => _characterButton;
 
-        public Button ShopButton => _shopButton;
+        //GameObject
+        [Header("Title"), SerializeField] private GameObject lobbyGameObject;
 
-        public GameObject LobbyGameObject => _lobbyGameObject;
+        [Header("CharacterList"), SerializeField]
+        private GameObject characterListGameObject;
 
-        public GameObject CharacterListGameObject => _characterListGameObject;
+        [SerializeField] private GameObject characterDetailGameObject;
 
-        public GameObject CharacterDetailGameObject => _characterDetailGameObject;
+        public Button BattleButton => battleButton;
 
+        public Button BattleModeButton => battleModeButton;
+
+        public Button CharacterButton => characterButton;
+
+        public Button ShopButton => shopButton;
+
+        public Button BackButton => backButton;
+
+        public GameObject LobbyGameObject => lobbyGameObject;
+
+        public GameObject CharacterListGameObject => characterListGameObject;
+
+        public GameObject CharacterDetailGameObject => characterDetailGameObject;
     }
 }
