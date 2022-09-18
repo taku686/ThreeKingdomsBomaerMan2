@@ -26,5 +26,6 @@ namespace Common.Data
         Syuuyu,
         Tyouun,
         Ryofu,
+        Ganryou
     }
 }

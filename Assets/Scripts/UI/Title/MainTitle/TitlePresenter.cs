@@ -1,3 +1,6 @@
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using UniRx;
 using UnityEngine;
 using Zenject;
 
@@ -6,9 +9,14 @@ namespace UI.Title.MainTitle
     public partial class TitlePresenter : MonoBehaviour
     {
         [Inject] private TitleModel _titleModel;
-        [SerializeField] private TitleView _titleView;
 
+        [SerializeField] private TitleView _titleView;
+        [SerializeField] private Transform characterCreatePosition;
+
+        private GameObject _character;
         private StateMachine<TitlePresenter> _stateMachine;
+        private CancellationToken _token;
+        private ReactiveProperty<int> _currentCharacterId = new ReactiveProperty<int>(0);
 
         private enum Event
         {
@@ -26,8 +34,12 @@ namespace UI.Title.MainTitle
 
         private void Initialize()
         {
+            _token = this.GetCancellationTokenOnDestroy();
+            _titleModel.Initialize(_token);
             InitializeState();
             InitializeButton();
+            _currentCharacterId.Subscribe(CreateCharacter).AddTo(this);
+            _currentCharacterId.Value = _titleModel.UserData.currentCharacterID;
         }
 
         private void InitializeState()
@@ -49,6 +61,14 @@ namespace UI.Title.MainTitle
             _titleView.LobbyGameObject.SetActive(false);
             _titleView.CharacterListGameObject.SetActive(false);
             _titleView.CharacterDetailGameObject.SetActive(false);
+        }
+
+        private void CreateCharacter(int id)
+        {
+            _titleModel.UserData.currentCharacterID = id;
+            Destroy(_character);
+            _character = Instantiate(_titleModel.GetCharacterData(id).CharaObj, characterCreatePosition.position,
+                characterCreatePosition.rotation, characterCreatePosition);
         }
     }
 }

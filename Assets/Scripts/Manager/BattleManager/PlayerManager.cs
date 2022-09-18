@@ -34,7 +34,7 @@ namespace Manager.BattleManager
         public async UniTask GenerateCharacter()
         {
             var characterData =
-                await _resourceManager.LoadCharacterData(LabelData.BachoPath, this.GetCancellationTokenOnDestroy());
+                await _resourceManager.LoadCharacterData((int)CharacterName.Bacho, this.GetCancellationTokenOnDestroy());
             var spawnPoint = GetSpawnPoint((int)PlayerIndex.Player1);
             var playerObj = Instantiate(characterData.CharaObj, spawnPoint.position, spawnPoint.rotation, playerParent);
             InitializeComponent(playerObj, characterData);
