@@ -7,7 +7,7 @@ using Manager.ResourceManager;
 using UnityEngine;
 using Zenject;
 
-namespace UI.Title.MainTitle
+namespace UI.Title
 {
     public class TitleModel : ScriptableObject
     {

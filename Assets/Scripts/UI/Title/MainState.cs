@@ -1,6 +1,6 @@
-﻿using State = StateMachine<UI.Title.Main.TitlePresenter>.State;
+﻿using State = StateMachine<UI.Title.TitlePresenter>.State;
 
-namespace UI.Title.Main
+namespace UI.Title
 {
     public partial class TitlePresenter
     {

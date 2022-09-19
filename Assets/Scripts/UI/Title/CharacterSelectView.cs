@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace UI.Title.Main
+namespace UI.Title
 {
     public class CharacterSelectView : MonoBehaviour
     {

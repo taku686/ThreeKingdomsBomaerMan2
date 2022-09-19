@@ -3,7 +3,6 @@ using Manager.BattleManager;
 using Manager.NetworkManager;
 using Manager.ResourceManager;
 using Player.Common;
-using UI.Title.MainTitle;
 using UnityEngine;
 using Zenject;
 

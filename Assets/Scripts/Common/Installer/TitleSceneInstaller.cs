@@ -1,5 +1,5 @@
 ﻿using Manager.ResourceManager;
-using UI.Title.MainTitle;
+using UI.Title;
 using UnityEngine;
 using Zenject;
 
