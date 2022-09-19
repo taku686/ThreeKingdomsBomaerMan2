@@ -1,4 +1,8 @@
-﻿using State = StateMachine<UI.Title.TitlePresenter>.State;
+﻿using System;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
+using UnityEngine;
+using State = StateMachine<UI.Title.TitlePresenter>.State;
 
 namespace UI.Title
 {
@@ -19,10 +23,33 @@ namespace UI.Title
             {
             }
 
-            private void Initialize()
+            private async void Initialize()
             {
                 Owner.DisableTitleGameObject();
                 Owner.mainView.MainGameObject.SetActive(true);
+                InitializeButton();
+                await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
+                InitializeAnimation();
+            }
+
+            private void InitializeAnimation()
+            {
+                Owner._character.GetComponent<Animator>().SetTrigger(Active);
+            }
+
+            private void InitializeButton()
+            {
+                Owner.mainView.CharacterSelectButton.onClick.RemoveAllListeners();
+                Owner.mainView.CharacterSelectButton.onClick.AddListener(OnClickCharacterSelect);
+            }
+
+
+            private void OnClickCharacterSelect()
+            {
+                Owner._uiAnimation.OnClickAnimation(
+                        Owner.mainView.CharacterSelectButton.GetComponent<RectTransform>())
+                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.CharacterSelect); })
+                    .SetLink(Owner.gameObject);
             }
         }
     }

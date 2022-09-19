@@ -1,5 +1,6 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using UI.Common;
 using UniRx;
 using UnityEngine;
 using Zenject;
@@ -9,6 +10,7 @@ namespace UI.Title
     public partial class TitlePresenter : MonoBehaviour
     {
         [Inject] private TitleModel _titleModel;
+        [Inject] private UIAnimation _uiAnimation;
         [SerializeField] private MainView mainView;
         [SerializeField] private CharacterSelectView characterSelectView;
         [SerializeField] private CharacterDetailView characterDetailView;
@@ -42,7 +44,6 @@ namespace UI.Title
             _token = this.GetCancellationTokenOnDestroy();
             await _titleModel.Initialize(_token);
             InitializeState();
-            InitializeButton();
             _titleModel.UserData.currentCharacterID.Subscribe(CreateCharacter).AddTo(this);
         }
 
@@ -56,12 +57,7 @@ namespace UI.Title
             _stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)Event.CharacterSelectBack);
         }
 
-        private void InitializeButton()
-        {
-            mainView.CharacterSelectButton.onClick.AddListener(() =>
-                _stateMachine.Dispatch((int)Event.CharacterSelect));
-            characterSelectView.BackButton.onClick.AddListener(() => _stateMachine.Dispatch((int)Event.Main));
-        }
+       
 
         private void DisableTitleGameObject()
         {

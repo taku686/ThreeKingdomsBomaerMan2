@@ -1,9 +1,16 @@
-﻿using State = StateMachine<UI.Title.TitlePresenter>.State;
+﻿using System;
+using Cysharp.Threading.Tasks;
+using UnityEngine;
+using State = StateMachine<UI.Title.TitlePresenter>.State;
 
 namespace UI.Title
 {
     public partial class TitlePresenter
     {
+        private static readonly int Attack = Animator.StringToHash("Attack");
+        private static readonly int Passive = Animator.StringToHash("Passive");
+        private static readonly int Active = Animator.StringToHash("Active");
+
         public class CharacterDetailState : State
         {
             protected override void OnEnter(State prevState)
@@ -19,11 +26,20 @@ namespace UI.Title
             {
             }
 
-            private void Initialize()
+            private async void Initialize()
             {
                 Owner.DisableTitleGameObject();
                 Owner.mainView.CharacterDetailGameObject.SetActive(true);
                 InitializeButton();
+                InitializeContent();
+                await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
+                InitializeAnimation();
+            }
+
+            private void InitializeContent()
+            {
+                Owner.characterDetailView.Name.text =
+                    Owner._titleModel.GetCharacterData(Owner._currentCharacterId).Name;
             }
 
             private void InitializeButton()
@@ -48,6 +64,11 @@ namespace UI.Title
                 Owner.DisableTitleGameObject();
                 Owner.mainView.MainGameObject.SetActive(true);
                 Owner._stateMachine.Dispatch((int)Event.Main);
+            }
+
+            private void InitializeAnimation()
+            {
+                Owner._character.GetComponent<Animator>().SetTrigger(Active);
             }
         }
     }

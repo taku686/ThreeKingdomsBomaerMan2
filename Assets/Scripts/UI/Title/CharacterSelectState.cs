@@ -32,6 +32,7 @@ namespace UI.Title
                 Owner.DisableTitleGameObject();
                 Owner.mainView.CharacterListGameObject.SetActive(true);
                 CreateUIContents();
+                InitializeButton();
             }
 
             private void InitializeButton()

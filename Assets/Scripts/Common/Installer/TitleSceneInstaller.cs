@@ -1,4 +1,5 @@
 ﻿using Manager.ResourceManager;
+using UI.Common;
 using UI.Title;
 using UnityEngine;
 using Zenject;
@@ -15,6 +16,8 @@ namespace Common.Installer
             Container.Bind<ILoadResource>().To<ResourceManager>().FromComponentOn(resourceManagerGameObject).AsCached();
             //Model
             Container.Bind<TitleModel>().FromNew().AsCached();
+            //Other
+            Container.Bind<UIAnimation>().FromNew().AsCached();
         }
     }
 }
