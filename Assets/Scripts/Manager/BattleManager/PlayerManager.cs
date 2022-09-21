@@ -33,10 +33,23 @@ namespace Manager.BattleManager
 
         public async UniTask GenerateCharacter()
         {
+            _token = this.GetCancellationTokenOnDestroy();
+            var userData = await _resourceManager.LoadUserData(_token);
             var characterData =
-                await _resourceManager.LoadCharacterData((int)CharacterName.Bacho, this.GetCancellationTokenOnDestroy());
+                await _resourceManager.LoadCharacterData(userData.currentCharacterID.Value,
+                    this.GetCancellationTokenOnDestroy());
             var spawnPoint = GetSpawnPoint((int)PlayerIndex.Player1);
-            var playerObj = Instantiate(characterData.CharaObj, spawnPoint.position, spawnPoint.rotation, playerParent);
+            var playerObj =
+                PhotonNetwork.Instantiate(LabelData.CharacterPrefabPath + characterData.CharaObj.name,
+                    spawnPoint.position, spawnPoint.rotation);
+            playerObj.transform.SetParent(spawnPoint);
+            var photonView = playerObj.GetComponent<PhotonView>();
+            if (!photonView.IsMine)
+            {
+                return;
+            }
+
+            // var playerObj = Instantiate(characterData.CharaObj, spawnPoint.position, spawnPoint.rotation, playerParent);
             InitializeComponent(playerObj, characterData);
         }
 
@@ -50,7 +63,7 @@ namespace Manager.BattleManager
             player.AddComponent<PlayerMove>();
             var playerCore = player.AddComponent<PLayerCore>();
             player.AddComponent<ZenAutoInjecter>();
-            UniTask.Yield();
+            // UniTask.Yield();
             playerCore.Initialize(characterData);
         }
 
@@ -62,6 +75,4 @@ namespace Manager.BattleManager
             Player4,
         }
     }
-
-   
 }

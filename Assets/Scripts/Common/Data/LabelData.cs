@@ -9,5 +9,6 @@ namespace Common.Data
         public static string UserDataPath = "Data/UserData/UserData";
         public static string CharacterSpritePath = "Sprites/Character/";
         public static string CharacterColorPath = "Sprites/CharacterColor/";
+        public static string CharacterPrefabPath = "Prefabs/Character/";
     }
 }
