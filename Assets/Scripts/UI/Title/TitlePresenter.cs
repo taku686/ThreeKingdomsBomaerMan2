@@ -55,15 +55,16 @@ namespace UI.Title
             _stateMachine.AddTransition<MainState, CharacterSelectState>((int)Event.CharacterSelect);
             _stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)Event.CharacterDetail);
             _stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)Event.CharacterSelectBack);
+            _stateMachine.AddTransition<MainState, BattleReadyState>((int)Event.ReadyBattle);
         }
 
-       
 
         private void DisableTitleGameObject()
         {
             mainView.MainGameObject.SetActive(false);
             mainView.CharacterListGameObject.SetActive(false);
             mainView.CharacterDetailGameObject.SetActive(false);
+            mainView.BattleReadyGameObject.SetActive(false);
         }
 
         private void CreateCharacter(int id)
