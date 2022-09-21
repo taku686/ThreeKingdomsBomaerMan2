@@ -7,7 +7,7 @@ using Zenject;
 
 namespace Player.Common
 {
-    public partial class PLayerCore : MonoBehaviour
+    public partial class PLayerCore : MonoBehaviourPunCallbacks
     {
         private InputManager _inputManager;
         private IPlayerMove _playerMove;
