@@ -43,12 +43,7 @@ namespace Manager.BattleManager
                 PhotonNetwork.Instantiate(LabelData.CharacterPrefabPath + characterData.CharaObj.name,
                     spawnPoint.position, spawnPoint.rotation);
             playerObj.transform.SetParent(spawnPoint);
-            var photonView = playerObj.GetComponent<PhotonView>();
-            if (!photonView.IsMine)
-            {
-                return;
-            }
-
+            //var photonView = playerObj.GetComponent<PhotonView>();
             // var playerObj = Instantiate(characterData.CharaObj, spawnPoint.position, spawnPoint.rotation, playerParent);
             InitializeComponent(playerObj, characterData);
         }
