@@ -37,4 +37,12 @@ namespace Common.Data
         Red,
         Yellow
     }
+
+    public enum PlayerIndex
+    {
+        Player1,
+        Player2,
+        Player3,
+        Player4,
+    }
 }

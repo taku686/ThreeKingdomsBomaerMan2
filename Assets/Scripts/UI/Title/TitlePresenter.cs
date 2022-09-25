@@ -1,5 +1,7 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Manager.NetworkManager;
+using Photon.Pun;
 using UI.Common;
 using UniRx;
 using UnityEngine;
@@ -7,16 +9,17 @@ using Zenject;
 
 namespace UI.Title
 {
-    public partial class TitlePresenter : MonoBehaviour
+    public partial class TitlePresenter : MonoBehaviourPunCallbacks
     {
         [Inject] private TitleModel _titleModel;
         [Inject] private UIAnimation _uiAnimation;
         [SerializeField] private MainView mainView;
         [SerializeField] private CharacterSelectView characterSelectView;
         [SerializeField] private CharacterDetailView characterDetailView;
+        [SerializeField] private BattleReadyView battleReadyView;
+        [SerializeField] private PhotonNetworkManager photonNetworkManager;
         [SerializeField] private Transform characterCreatePosition;
-
-
+        
         private GameObject _character;
         private StateMachine<Title.TitlePresenter> _stateMachine;
         private CancellationToken _token;

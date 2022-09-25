@@ -26,11 +26,6 @@ namespace UI.Title
                 InitializeButton();
             }
 
-            private void InitializeAnimation()
-            {
-                Owner._character.GetComponent<Animator>().SetTrigger(Active);
-            }
-
             private void InitializeButton()
             {
                 Owner.mainView.CharacterSelectButton.onClick.RemoveAllListeners();

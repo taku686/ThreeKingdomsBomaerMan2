@@ -13,7 +13,7 @@ namespace UI.Title
     {
         [Inject] private ILoadResource _resourceManager;
 
-        private readonly Dictionary<int, CharacterData> _characterDataList =
+        private static readonly Dictionary<int, CharacterData> CharacterDataList =
             new Dictionary<int, CharacterData>();
 
         private readonly Dictionary<int, Sprite> _characterSpriteList =
@@ -39,7 +39,7 @@ namespace UI.Title
             for (int i = 0; i < GetCharacterCount(); i++)
             {
                 var characterData = await _resourceManager.LoadCharacterData(i, cancellationToken);
-                _characterDataList.Add(i, characterData);
+                CharacterDataList.Add(i, characterData);
             }
         }
 
@@ -68,7 +68,7 @@ namespace UI.Title
 
         public CharacterData GetCharacterData(int id)
         {
-            return _characterDataList[id];
+            return CharacterDataList[id];
         }
 
         public Sprite GetCharacterSprite(int id)
@@ -84,6 +84,11 @@ namespace UI.Title
         public int GetCharacterCount()
         {
             return Enum.GetValues(typeof(CharacterName)).Length;
+        }
+
+        public CharacterData GetUserEquipCharacterData()
+        {
+            return GetCharacterData(_userData.currentCharacterID.Value);
         }
 
         private int GetCharacterColorCount()

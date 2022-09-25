@@ -19,9 +19,9 @@ namespace Manager.BattleManager
         [Inject] private ILoadResource _resourceManager;
 
         private CancellationToken _token;
-        private List<IPlayerModelBase> _playerList = new List<IPlayerModelBase>();
+       // private List<IPlayerModelBase> _playerList = new List<IPlayerModelBase>();
 
-        [SerializeField] private CharacterName characterName;
+       // [SerializeField] private CharacterName characterName;
         [SerializeField] private List<Transform> startPointList;
         [SerializeField] private Transform playerParent;
 
@@ -43,8 +43,6 @@ namespace Manager.BattleManager
                 PhotonNetwork.Instantiate(LabelData.CharacterPrefabPath + characterData.CharaObj.name,
                     spawnPoint.position, spawnPoint.rotation);
             playerObj.transform.SetParent(playerParent);
-            //var photonView = playerObj.GetComponent<PhotonView>();
-            // var playerObj = Instantiate(characterData.CharaObj, spawnPoint.position, spawnPoint.rotation, playerParent);
             InitializeComponent(playerObj, characterData);
         }
 
@@ -58,16 +56,7 @@ namespace Manager.BattleManager
             player.AddComponent<PlayerMove>();
             var playerCore = player.AddComponent<PLayerCore>();
             player.AddComponent<ZenAutoInjecter>();
-            // UniTask.Yield();
             playerCore.Initialize(characterData);
-        }
-
-        private enum PlayerIndex
-        {
-            Player1,
-            Player2,
-            Player3,
-            Player4,
         }
     }
 }
