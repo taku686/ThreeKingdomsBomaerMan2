@@ -6,18 +6,31 @@ namespace Manager.NetworkManager
 {
     public static class PlayerPropertiesExtensions
     {
-        private const string CharacterDataKey = "Cha";
+        public const string CharacterDataKey = "Cha";
+        public const string PlayerIndexKey = "Index";
         private static readonly Hashtable PropsToSet = new Hashtable();
 
 
         public static int GetCharacterId(this Photon.Realtime.Player player)
         {
-            return (player.CustomProperties[CharacterDataKey] is int characterId) ? characterId : 0;
+            return (player.CustomProperties[CharacterDataKey] is int characterId) ? characterId : -1;
+        }
+        
+        public static int GetPlayerIndex(this Photon.Realtime.Player player)
+        {
+            return (player.CustomProperties[PlayerIndexKey] is int playerIndex) ? playerIndex : -1;
         }
 
         public static void SetCharacterData(this Photon.Realtime.Player player, int characterId)
         {
             PropsToSet[CharacterDataKey] = characterId;
+            player.SetCustomProperties(PropsToSet);
+            PropsToSet.Clear();
+        } 
+
+        public static void SetPlayerIndex(this Photon.Realtime.Player player, int playerIndex)
+        {
+            PropsToSet[PlayerIndexKey] = playerIndex;
             player.SetCustomProperties(PropsToSet);
             PropsToSet.Clear();
         }

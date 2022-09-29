@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +12,9 @@ namespace UI.Title
         [SerializeField] private List<Image> characterList;
         [SerializeField] private List<Image> backGroundList;
         [SerializeField] private List<GameObject> gridGameObjectList;
+        [SerializeField] private List<TextMeshProUGUI> textList;
+
+        public List<TextMeshProUGUI> TextList => textList;
 
         public List<GameObject> GridGameObjectList => gridGameObjectList;
 

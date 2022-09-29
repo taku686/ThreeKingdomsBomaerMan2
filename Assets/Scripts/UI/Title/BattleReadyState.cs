@@ -46,6 +46,8 @@ namespace UI.Title
             {
                 Owner.photonNetworkManager.JoinedRoom.Subscribe(OnJoinedRoom)
                     .AddTo(Owner.gameObject);
+                Owner.photonNetworkManager.LeftRoom.Subscribe(OnLeftRoom)
+                    .AddTo(Owner.gameObject);
             }
 
             private void OnClickBackButton()
@@ -70,15 +72,17 @@ namespace UI.Title
             {
                 Debug.Log(index);
                 var characterData = Owner.photonNetworkManager.CurrentCharacterList[index];
-                Owner.battleReadyView.GridGameObjectList[index].gameObject.SetActive(true);
+                Owner.battleReadyView.TextList[index].text = characterData.Name;
                 Owner.battleReadyView.BackGroundList[index].sprite =
-                    Owner._titleModel.GetCharacterColor(characterData.ID);
+                    Owner._titleModel.GetCharacterColor((int)characterData.CharaColor);
                 Owner.battleReadyView.CharacterList[index].sprite =
                     Owner._titleModel.GetCharacterSprite(characterData.ID);
+                Owner.battleReadyView.GridGameObjectList[index].gameObject.SetActive(true);
             }
 
-            private void OnLeaveRoom()
+            private void OnLeftRoom(int index)
             {
+                Owner.battleReadyView.GridGameObjectList[index].gameObject.SetActive(false);
             }
         }
     }

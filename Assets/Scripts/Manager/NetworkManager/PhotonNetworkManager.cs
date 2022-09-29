@@ -21,22 +21,22 @@ namespace Manager.NetworkManager
 
         // [Inject] private PlayerManager _playerManager;
         private readonly Subject<int> _joinedRoom = new Subject<int>();
-        private readonly Subject<int> _leaveRoom = new Subject<int>();
-        private readonly Dictionary<int, CharacterData> _currentPlayerData = new Dictionary<int, CharacterData>();
+        private readonly Subject<int> _leftRoom = new Subject<int>();
+        private Tuple<int, CharacterData> _currentPlayerData;
         private readonly Dictionary<int, CharacterData> _currentCharacterList = new Dictionary<int, CharacterData>();
         private bool _isJoining;
         public Dictionary<int, CharacterData> CurrentCharacterList => _currentCharacterList;
 
-        public Dictionary<int, CharacterData> CurrentPlayerData => _currentPlayerData;
+        public Tuple<int, CharacterData> CurrentPlayerData => _currentPlayerData;
 
-        public Subject<int> LeaveRoom => _leaveRoom;
+        public Subject<int> LeftRoom => _leftRoom;
 
         public IObservable<int> JoinedRoom => _joinedRoom;
 
         private void Awake()
         {
             CurrentCharacterList.Clear();
-            _currentPlayerData.Clear();
+            _currentPlayerData = new Tuple<int, CharacterData>(0, null);
         }
 
         public void OnStartConnectNetwork()
@@ -54,19 +54,23 @@ namespace Manager.NetworkManager
 
         public override void OnJoinedRoom()
         {
-            PhotonNetwork.LocalPlayer.SetCharacterData(_titleModel.GetUserEquipCharacterData().ID);
             _isJoining = true;
+            PhotonNetwork.LocalPlayer.SetCharacterData(_titleModel.GetUserEquipCharacterData().ID);
+            PhotonNetwork.LocalPlayer.SetPlayerIndex(PhotonNetwork.CurrentRoom.PlayerCount);
         }
 
         public override void OnLeftRoom()
         {
+            _leftRoom.OnNext(_currentPlayerData.Item1);
             _currentCharacterList.Clear();
-            _currentPlayerData.Clear();
+            _currentPlayerData = new Tuple<int, CharacterData>(0, null);
             PhotonNetwork.Disconnect();
         }
 
         public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
         {
+            /*_isJoining = true;
+            newPlayer.SetCharacterData(_titleModel.GetUserEquipCharacterData().ID);*/
         }
 
         public override void OnPlayerPropertiesUpdate(Photon.Realtime.Player targetPlayer, Hashtable changedProps)
@@ -76,7 +80,8 @@ namespace Manager.NetworkManager
 
         private void OnChangeCharacterProperty(Photon.Realtime.Player targetPlayer, Hashtable changedProps)
         {
-            if (_isJoining)
+           
+            /*if (_isJoining)
             {
                 int playerIndex = 0;
                 if (!_currentCharacterList.ContainsKey(GetPlayerIndex(PhotonNetwork.CurrentRoom.PlayerCount)))
@@ -85,8 +90,9 @@ namespace Manager.NetworkManager
                         _titleModel.GetCharacterData(targetPlayer.GetCharacterId()));
                     if (targetPlayer.IsLocal)
                     {
-                        _currentPlayerData.Add(GetPlayerIndex(PhotonNetwork.CurrentRoom.PlayerCount),
-                            _titleModel.GetCharacterData(targetPlayer.GetCharacterId()));
+                        int index = GetPlayerIndex(PhotonNetwork.CurrentRoom.PlayerCount);
+                        var characterData = _titleModel.GetCharacterData(targetPlayer.GetCharacterId());
+                        _currentPlayerData = new Tuple<int, CharacterData>(index, characterData);
                         playerIndex = GetPlayerIndex(PhotonNetwork.CurrentRoom.PlayerCount);
                     }
                 }
@@ -102,8 +108,9 @@ namespace Manager.NetworkManager
 
                             if (targetPlayer.IsLocal)
                             {
-                                _currentPlayerData.Add(GetPlayerIndex(i),
-                                    _titleModel.GetCharacterData(targetPlayer.GetCharacterId()));
+                                int index = GetPlayerIndex(i);
+                                var characterData = _titleModel.GetCharacterData(targetPlayer.GetCharacterId());
+                                _currentPlayerData = new Tuple<int, CharacterData>(index, characterData);
                             }
 
                             playerIndex = GetPlayerIndex(i);
@@ -115,6 +122,12 @@ namespace Manager.NetworkManager
                 _joinedRoom.OnNext(playerIndex);
                 _isJoining = false;
             }
+            */
+        }
+
+        private void OnGUI()
+        {
+            GUILayout.Label(PhotonNetwork.NetworkClientState.ToString());
         }
 
         private int GetPlayerIndex(int index)
