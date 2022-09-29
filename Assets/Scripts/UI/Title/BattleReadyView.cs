@@ -10,6 +10,9 @@ namespace UI.Title
         [SerializeField] private Button backButton;
         [SerializeField] private List<Image> characterList;
         [SerializeField] private List<Image> backGroundList;
+        [SerializeField] private List<GameObject> gridGameObjectList;
+
+        public List<GameObject> GridGameObjectList => gridGameObjectList;
 
         public Button BackButton => backButton;
 

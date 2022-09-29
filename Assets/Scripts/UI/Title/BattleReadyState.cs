@@ -30,9 +30,9 @@ namespace UI.Title
 
             private void InitializeObject()
             {
-                foreach (var image in Owner.battleReadyView.BackGroundList)
+                foreach (var obj in Owner.battleReadyView.GridGameObjectList)
                 {
-                    image.gameObject.SetActive(false);
+                    obj.SetActive(false);
                 }
             }
 
@@ -57,6 +57,7 @@ namespace UI.Title
                         {
                             return;
                         }
+
                         PhotonNetwork.LeaveRoom();
                         Owner.DisableTitleGameObject();
                         Owner.mainView.MainGameObject.SetActive(true);
@@ -69,9 +70,9 @@ namespace UI.Title
             {
                 Debug.Log(index);
                 var characterData = Owner.photonNetworkManager.CurrentCharacterList[index];
-                Owner.battleReadyView.BackGroundList[index].gameObject.SetActive(true);
+                Owner.battleReadyView.GridGameObjectList[index].gameObject.SetActive(true);
                 Owner.battleReadyView.BackGroundList[index].sprite =
-                    Owner._titleModel.GetCharacterSprite(characterData.ID);
+                    Owner._titleModel.GetCharacterColor(characterData.ID);
                 Owner.battleReadyView.CharacterList[index].sprite =
                     Owner._titleModel.GetCharacterSprite(characterData.ID);
             }
