@@ -119,6 +119,12 @@ namespace UI.Title
                     return;
                 }
 
+                if (index == PhotonNetwork.LocalPlayer.ActorNumber)
+                {
+                    GridAllDestroy();
+                    return;
+                }
+
                 Debug.Log("削除");
                 Destroy(grid);
                 _gridDictionary.Remove(index);
@@ -130,6 +136,7 @@ namespace UI.Title
                 {
                     Destroy(grid.Value);
                 }
+
                 _gridDictionary.Clear();
             }
         }
