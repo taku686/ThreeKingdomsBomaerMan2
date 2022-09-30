@@ -19,7 +19,7 @@ namespace UI.Title
         [SerializeField] private BattleReadyView battleReadyView;
         [SerializeField] private PhotonNetworkManager photonNetworkManager;
         [SerializeField] private Transform characterCreatePosition;
-        
+
         private GameObject _character;
         private StateMachine<Title.TitlePresenter> _stateMachine;
         private CancellationToken _token;

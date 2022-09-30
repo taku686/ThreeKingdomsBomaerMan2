@@ -9,19 +9,18 @@ namespace UI.Title
     public class BattleReadyView : MonoBehaviour
     {
         [SerializeField] private Button backButton;
-        [SerializeField] private List<Image> characterList;
+
+        /*[SerializeField] private List<Image> characterList;
         [SerializeField] private List<Image> backGroundList;
         [SerializeField] private List<GameObject> gridGameObjectList;
-        [SerializeField] private List<TextMeshProUGUI> textList;
+        [SerializeField] private List<TextMeshProUGUI> textList;*/
+        [SerializeField] private Transform gridParent;
+        [SerializeField] private GameObject grid;
 
-        public List<TextMeshProUGUI> TextList => textList;
+        public GameObject Grid => grid;
 
-        public List<GameObject> GridGameObjectList => gridGameObjectList;
+        public Transform GridParent => gridParent;
 
         public Button BackButton => backButton;
-
-        public List<Image> CharacterList => characterList;
-
-        public List<Image> BackGroundList => backGroundList;
     }
 }
