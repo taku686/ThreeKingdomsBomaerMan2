@@ -1,27 +1,30 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "Character", menuName = "CharacterData")]
-public class CharacterData : ScriptableObject
+namespace Common.Data
 {
-    public GameObject _charaObj;
-    public string _name;
-    public int _number;
-    public int _speed;
-    public int _bombLimit;
-    public int _attack;
-    public int _firePower;
-    public int _hp;
-    public Color _charaColor;
+    [CreateAssetMenu(fileName = "Character", menuName = "CharacterData")]
+    public class CharacterData : ScriptableObject
+    {
+        [SerializeField] private GameObject charaObj;
+        [SerializeField] private bool isLock;
+        [SerializeField] private string name;
+        [SerializeField] private int id;
+        [SerializeField] private int speed;
+        [SerializeField] private int bombLimit;
+        [SerializeField] private int attack;
+        [SerializeField] private int fireRange;
+        [SerializeField] private int hp;
+        [SerializeField] private CharacterColor charaColor;
 
-    public GameObject CharaObj => _charaObj;
-    public string Name => _name;
-    public int Number => _number;
-    public int Speed => _speed;
-    public int BombLimit => _bombLimit;
-    public int Attack => _attack;
-    public int FirePower => _firePower;
-    public int Hp => _hp;
-    public Color CharaColor => _charaColor;
+        public GameObject CharaObj => charaObj;
+        public string Name => name;
+        public int ID => id;
+        public int Speed => speed;
+        public int BombLimit => bombLimit;
+        public int Attack => attack;
+        public int FireRange => fireRange;
+        public int Hp => hp;
+        public CharacterColor CharaColor => charaColor;
+        public bool IsLock => isLock;
+    }
 }

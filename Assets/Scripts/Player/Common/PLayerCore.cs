@@ -1,18 +1,18 @@
 using System;
-using Interface;
+using Common.Data;
 using Manager;
+using Photon.Pun;
 using UnityEngine;
 using Zenject;
 
 namespace Player.Common
 {
-    public partial class PLayerCore : MonoBehaviour
+    public partial class PLayerCore : MonoBehaviourPunCallbacks
     {
-        [Inject] private InputManager _inputManager;
+        private InputManager _inputManager;
         private IPlayerMove _playerMove;
-
         private CharacterData _characterData;
-
+        private PhotonView _photonView;
         private enum PLayerState
         {
             Idle,
@@ -24,14 +24,6 @@ namespace Player.Common
 
         private StateMachine<PLayerCore> _stateMachine;
 
-        private void Awake()
-        {
-        }
-
-        private void Start()
-        {
-        }
-
         public void Initialize(CharacterData characterData)
         {
             InitializeComponent(characterData);
@@ -40,8 +32,11 @@ namespace Player.Common
 
         private void InitializeComponent(CharacterData characterData)
         {
+            _photonView = gameObject.GetComponent<PhotonView>();
+            _inputManager = gameObject.AddComponent<InputManager>();
+            _inputManager.Initialize(_photonView);
             _playerMove = GetComponent<PlayerMove>();
-            _playerMove.Initialize();
+            _playerMove.Initialize(characterData.Speed);
             _characterData = characterData;
         }
 
