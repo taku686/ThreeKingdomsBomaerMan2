@@ -19,36 +19,33 @@ namespace UI.Title
             {
             }
 
-            protected override void OnUpdate()
-            {
-            }
-
-            private async void Initialize()
+            private void Initialize()
             {
                 Owner.DisableTitleGameObject();
                 Owner.mainView.MainGameObject.SetActive(true);
                 InitializeButton();
-                await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
-                InitializeAnimation();
-            }
-
-            private void InitializeAnimation()
-            {
-                Owner._character.GetComponent<Animator>().SetTrigger(Active);
             }
 
             private void InitializeButton()
             {
                 Owner.mainView.CharacterSelectButton.onClick.RemoveAllListeners();
+                Owner.mainView.BattleReadyButton.onClick.RemoveAllListeners();
                 Owner.mainView.CharacterSelectButton.onClick.AddListener(OnClickCharacterSelect);
+                Owner.mainView.BattleReadyButton.onClick.AddListener(OnClickBattleReady);
             }
 
 
             private void OnClickCharacterSelect()
             {
-                Owner._uiAnimation.OnClickAnimation(
-                        Owner.mainView.CharacterSelectButton.GetComponent<RectTransform>())
+                Owner._uiAnimation.OnClickScaleColorAnimation(Owner.mainView.CharacterSelectButton.gameObject)
                     .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.CharacterSelect); })
+                    .SetLink(Owner.gameObject);
+            }
+
+            private void OnClickBattleReady()
+            {
+                Owner._uiAnimation.OnClickScaleColorAnimation(Owner.mainView.BattleReadyButton.gameObject)
+                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.ReadyBattle); })
                     .SetLink(Owner.gameObject);
             }
         }

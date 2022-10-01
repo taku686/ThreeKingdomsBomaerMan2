@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Common.Data;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -23,9 +24,6 @@ namespace UI.Title
             {
             }
 
-            protected override void OnUpdate()
-            {
-            }
 
             private void Initialize()
             {
@@ -131,16 +129,23 @@ namespace UI.Title
                             characterCreatePosition.position,
                             characterCreatePosition.rotation, characterCreatePosition);
                         Owner._currentCharacterId = characterData.ID;
-                        Owner._stateMachine.Dispatch((int)Event.CharacterDetail);
+                        Owner._uiAnimation.OnClickScaleAnimation(raycastResult.gameObject)
+                            .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.CharacterDetail); })
+                            .SetLink(Owner.gameObject);
                     }
                 }
             }
 
             private void OnClickBack()
             {
-                Owner.DisableTitleGameObject();
-                Owner.mainView.MainGameObject.SetActive(true);
-                Owner._stateMachine.Dispatch((int)Event.Main);
+                Owner._uiAnimation.OnClickScaleColorAnimation(Owner.characterSelectView.BackButton.gameObject)
+                    .OnComplete(() =>
+                    {
+                        Owner.DisableTitleGameObject();
+                        Owner.mainView.MainGameObject.SetActive(true);
+                        Owner._stateMachine.Dispatch((int)Event.Main);
+                    })
+                    .SetLink(Owner.gameObject);
             }
         }
     }
