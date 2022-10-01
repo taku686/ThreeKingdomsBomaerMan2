@@ -31,7 +31,7 @@ namespace Manager.BattleManager
         private void InitializeState()
         {
             _stateMachine = new StateMachine<BattleManager>(this);
-            _stateMachine.Start<BattleManagerStatePlayerCreate>();
+            _stateMachine.Start<PlayerCreateState>();
         }
     }
 }

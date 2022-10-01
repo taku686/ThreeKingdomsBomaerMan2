@@ -17,6 +17,7 @@ namespace UI.Title
         [SerializeField] private CharacterSelectView characterSelectView;
         [SerializeField] private CharacterDetailView characterDetailView;
         [SerializeField] private BattleReadyView battleReadyView;
+        [SerializeField] private SceneTransitionView sceneTransitionView;
         [SerializeField] private PhotonNetworkManager photonNetworkManager;
         [SerializeField] private Transform characterCreatePosition;
 
@@ -33,7 +34,8 @@ namespace UI.Title
             CharacterDetail,
             Shop,
             ReadyBattle,
-            SelectBattleMode
+            SelectBattleMode,
+            SceneTransition
         }
 
         private void Start()
@@ -59,6 +61,7 @@ namespace UI.Title
             _stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)Event.CharacterDetail);
             _stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)Event.CharacterSelectBack);
             _stateMachine.AddTransition<MainState, BattleReadyState>((int)Event.ReadyBattle);
+            _stateMachine.AddTransition<BattleReadyState, SceneTransitionState>((int)Event.SceneTransition);
         }
 
 
@@ -68,6 +71,7 @@ namespace UI.Title
             mainView.CharacterListGameObject.SetActive(false);
             mainView.CharacterDetailGameObject.SetActive(false);
             mainView.BattleReadyGameObject.SetActive(false);
+            mainView.SceneTransitionGameObject.SetActive(false);
         }
 
         private void CreateCharacter(int id)

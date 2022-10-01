@@ -45,4 +45,10 @@ namespace Common.Data
         Player3,
         Player4,
     }
+
+    public enum SceneIndex
+    {
+        Title,
+        BattleScene
+    }
 }

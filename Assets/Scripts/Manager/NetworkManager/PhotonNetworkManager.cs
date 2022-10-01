@@ -35,6 +35,7 @@ namespace Manager.NetworkManager
         private void Awake()
         {
             CurrentRoomCharacterList.Clear();
+            PhotonNetwork.AutomaticallySyncScene = true;
         }
 
         public void OnStartConnectNetwork()
@@ -52,9 +53,12 @@ namespace Manager.NetworkManager
 
         public override void OnJoinRandomFailed(short returnCode, string message)
         {
-            Debug.Log("部屋生成");
             PhotonNetwork.CreateRoom(null, new RoomOptions()
             {
+                MaxPlayers = 4,
+                IsOpen = true,
+                IsVisible = true,
+                EmptyRoomTtl = 0
             }, TypedLobby.Default);
         }
 
@@ -63,18 +67,12 @@ namespace Manager.NetworkManager
             var index = PhotonNetwork.LocalPlayer.ActorNumber;
             PhotonNetwork.LocalPlayer.SetCharacterData(_titleModel.GetUserEquipCharacterData().ID);
             PhotonNetwork.LocalPlayer.SetPlayerIndex(index);
-         
         }
 
         public override void OnLeftRoom()
         {
             _currentRoomCharacterList.Clear();
             PhotonNetwork.Disconnect();
-        }
-
-        public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
-        {
-          //  SetupPlayerInfo(PhotonNetwork.PlayerList);
         }
 
         public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
@@ -88,7 +86,7 @@ namespace Manager.NetworkManager
             {
                 if ((string)prop.Key == PlayerPropertiesExtensions.PlayerIndexKey)
                 {
-                    SetupPlayerInfo(PhotonNetwork.PlayerList);   
+                    SetupPlayerInfo(PhotonNetwork.PlayerList);
                 }
             }
         }

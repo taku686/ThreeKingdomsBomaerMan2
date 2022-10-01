@@ -6,24 +6,16 @@ namespace Manager.BattleManager
 {
     public partial class BattleManager
     {
-        public class BattleManagerStatePlayerCreate : State
+        public class PlayerCreateState : State
         {
             protected override void OnEnter(State prevState)
             {
                 CreatePlayer();
             }
 
-            protected override void OnExit(State nextState)
-            {
-            }
-
-            protected override void OnUpdate()
-            {
-            }
-
             private void CreatePlayer()
             {
-                Owner._networkManager.OnStartConnectNetwork();
+               // Owner._networkManager.OnStartConnectNetwork();
             }
         }
     }

@@ -1,10 +1,7 @@
 ﻿using System.Collections.Generic;
-using Common.Data;
 using DG.Tweening;
-using Manager.NetworkManager;
 using UnityEngine;
 using Photon.Pun;
-using Photon.Realtime;
 using TMPro;
 using UniRx;
 using UnityEngine.UI;
@@ -25,6 +22,11 @@ namespace UI.Title
                 SetupEvent();
             }
 
+            protected override void OnUpdate()
+            {
+                SceneTransition();
+            }
+
             private void Initialize()
             {
                 InitializeButton();
@@ -41,7 +43,9 @@ namespace UI.Title
             private void InitializeButton()
             {
                 Owner.battleReadyView.BackButton.onClick.RemoveAllListeners();
+                Owner.battleReadyView.BattleStartButton.onClick.RemoveAllListeners();
                 Owner.battleReadyView.BackButton.onClick.AddListener(OnClickBackButton);
+                Owner.battleReadyView.BattleStartButton.onClick.AddListener(OnClickSceneTransition);
             }
 
             private void InitializeSubscribe()
@@ -125,10 +129,26 @@ namespace UI.Title
                     return;
                 }
 
-                Debug.Log("削除");
                 Destroy(grid);
                 _gridDictionary.Remove(index);
             }
+
+            private void SceneTransition()
+            {
+                if (!PhotonNetwork.IsMasterClient ||
+                    PhotonNetwork.CurrentRoom.PlayerCount < PhotonNetwork.CurrentRoom.MaxPlayers)
+                {
+                    return;
+                }
+
+                Owner._stateMachine.Dispatch((int)Event.SceneTransition);
+            }
+
+            private void OnClickSceneTransition()
+            {
+                Owner._stateMachine.Dispatch((int)Event.SceneTransition);
+            }
+
 
             private void GridAllDestroy()
             {

@@ -7,8 +7,6 @@ namespace UI.Title
 {
     public partial class TitlePresenter
     {
-        private static readonly int Attack = Animator.StringToHash("Attack");
-        private static readonly int Passive = Animator.StringToHash("Passive");
         private static readonly int Active = Animator.StringToHash("Active");
 
         public class CharacterDetailState : State
@@ -16,14 +14,6 @@ namespace UI.Title
             protected override void OnEnter(State prevState)
             {
                 Initialize();
-            }
-
-            protected override void OnExit(State nextState)
-            {
-            }
-
-            protected override void OnUpdate()
-            {
             }
 
             private async void Initialize()
