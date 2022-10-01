@@ -9,7 +9,7 @@ using Zenject;
 
 namespace UI.Title
 {
-    public class TitleModel : ScriptableObject
+    public class CharacterDataModel : ScriptableObject
     {
         [Inject] private ILoadResource _resourceManager;
 

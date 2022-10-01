@@ -1,30 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Common.Data;
-using Cysharp.Threading.Tasks;
 using ExitGames.Client.Photon;
-using Manager.BattleManager;
 using Photon.Pun;
 using Photon.Realtime;
 using UI.Title;
 using UniRx;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 using Zenject;
 
 namespace Manager.NetworkManager
 {
     public class PhotonNetworkManager : MonoBehaviourPunCallbacks
     {
-        [Inject] private TitleModel _titleModel;
+        [Inject] private CharacterDataModel _characterDataModel;
         private readonly Subject<Photon.Realtime.Player[]> _joinedRoom = new Subject<Photon.Realtime.Player[]>();
         private readonly Subject<int> _leftRoom = new Subject<int>();
 
         private readonly Dictionary<int, CharacterData>
             _currentRoomCharacterList = new Dictionary<int, CharacterData>();
 
-        private bool _isJoining;
         public Dictionary<int, CharacterData> CurrentRoomCharacterList => _currentRoomCharacterList;
 
 
@@ -65,7 +61,7 @@ namespace Manager.NetworkManager
         public override void OnJoinedRoom()
         {
             var index = PhotonNetwork.LocalPlayer.ActorNumber;
-            PhotonNetwork.LocalPlayer.SetCharacterData(_titleModel.GetUserEquipCharacterData().ID);
+            PhotonNetwork.LocalPlayer.SetCharacterData(_characterDataModel.GetUserEquipCharacterData().ID);
             PhotonNetwork.LocalPlayer.SetPlayerIndex(index);
         }
 
@@ -98,12 +94,12 @@ namespace Manager.NetworkManager
                 if (player.IsLocal)
                 {
                     _currentRoomCharacterList[player.ActorNumber] =
-                        _titleModel.GetCharacterData(_titleModel.GetUserEquipCharacterData().ID);
+                        _characterDataModel.GetCharacterData(_characterDataModel.GetUserEquipCharacterData().ID);
                 }
                 else
                 {
                     _currentRoomCharacterList[player.ActorNumber] =
-                        _titleModel.GetCharacterData(player.GetCharacterId());
+                        _characterDataModel.GetCharacterData(player.GetCharacterId());
                 }
             }
 
@@ -115,16 +111,26 @@ namespace Manager.NetworkManager
             GUILayout.Label(PhotonNetwork.NetworkClientState.ToString());
         }
 
-        private int GetPlayerNumber(int index)
+        public int GetPlayerNumber(int index)
         {
-            return index switch
+            var count = 0;
+            foreach (var player in _currentRoomCharacterList.OrderBy(x => x.Key))
             {
-                1 => (int)PlayerIndex.Player1,
-                2 => (int)PlayerIndex.Player2,
-                3 => (int)PlayerIndex.Player3,
-                4 => (int)PlayerIndex.Player4,
-                _ => -1
-            };
+                count++;
+                if (player.Key == index)
+                {
+                    return count switch
+                    {
+                        1 => (int)PlayerIndex.Player1,
+                        2 => (int)PlayerIndex.Player2,
+                        3 => (int)PlayerIndex.Player3,
+                        4 => (int)PlayerIndex.Player4,
+                        _ => -1
+                    };
+                }
+            }
+
+            return -1;
         }
     }
 }

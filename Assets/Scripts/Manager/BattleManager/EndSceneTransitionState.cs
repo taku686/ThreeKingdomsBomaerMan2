@@ -1,21 +1,21 @@
-﻿using Cysharp.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 using State = StateMachine<Manager.BattleManager.BattleManager>.State;
 
 namespace Manager.BattleManager
 {
     public partial class BattleManager
     {
-        public class PlayerCreateState : State
+        public class EndSceneTransitionState : State
         {
             protected override void OnEnter(State prevState)
             {
-                CreatePlayer();
+                OnInitialize();
             }
 
-            private void CreatePlayer()
+            private void OnInitialize()
             {
-               // Owner._networkManager.OnStartConnectNetwork();
+                Debug.Log("EndSceneTransition");
+                Owner._stateMachine.Dispatch((int)Event.PlayerCreate);
             }
         }
     }

@@ -37,7 +37,7 @@ namespace UI.Title
             {
                 Owner.DisableTitleGameObject();
                 Owner.mainView.BattleReadyGameObject.SetActive(true);
-                Owner.photonNetworkManager.OnStartConnectNetwork();
+                Owner._photonNetworkManager.OnStartConnectNetwork();
             }
 
             private void InitializeButton()
@@ -55,10 +55,10 @@ namespace UI.Title
                     return;
                 }
 
-                Owner.photonNetworkManager.JoinedRoom
+                Owner._photonNetworkManager.JoinedRoom
                     .Subscribe(OnJoinedRoom)
                     .AddTo(Owner.gameObject);
-                Owner.photonNetworkManager.LeftRoom.Subscribe(OnLeftRoom)
+                Owner._photonNetworkManager.LeftRoom.Subscribe(OnLeftRoom)
                     .AddTo(Owner.gameObject);
                 _isInitialize = true;
             }
@@ -73,7 +73,7 @@ namespace UI.Title
                             return;
                         }
 
-                        Owner.photonNetworkManager.LeftRoom.OnNext(PhotonNetwork.LocalPlayer.ActorNumber);
+                        Owner._photonNetworkManager.LeftRoom.OnNext(PhotonNetwork.LocalPlayer.ActorNumber);
                         PhotonNetwork.LeaveRoom();
                         Owner.DisableTitleGameObject();
                         Owner.mainView.MainGameObject.SetActive(true);
@@ -92,17 +92,17 @@ namespace UI.Title
                     _gridDictionary[index] = grid;
                     var images = grid.GetComponentsInChildren<Image>();
                     var names = grid.GetComponentsInChildren<TextMeshProUGUI>();
-                    var characterData = Owner.photonNetworkManager.CurrentRoomCharacterList[index];
+                    var characterData = Owner._photonNetworkManager.CurrentRoomCharacterList[index];
                     foreach (var image in images)
                     {
                         if (image.CompareTag("CharacterImage"))
                         {
-                            image.sprite = Owner._titleModel.GetCharacterSprite(characterData.ID);
+                            image.sprite = Owner._characterDataModel.GetCharacterSprite(characterData.ID);
                         }
 
                         if (image.CompareTag("BackGround"))
                         {
-                            image.sprite = Owner._titleModel.GetCharacterColor((int)characterData.CharaColor);
+                            image.sprite = Owner._characterDataModel.GetCharacterColor((int)characterData.CharaColor);
                         }
                     }
 

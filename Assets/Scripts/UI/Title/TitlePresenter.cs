@@ -11,14 +11,14 @@ namespace UI.Title
 {
     public partial class TitlePresenter : MonoBehaviourPunCallbacks
     {
-        [Inject] private TitleModel _titleModel;
+        [Inject] private CharacterDataModel _characterDataModel;
         [Inject] private UIAnimation _uiAnimation;
+        [Inject] private PhotonNetworkManager _photonNetworkManager;
         [SerializeField] private MainView mainView;
         [SerializeField] private CharacterSelectView characterSelectView;
         [SerializeField] private CharacterDetailView characterDetailView;
         [SerializeField] private BattleReadyView battleReadyView;
         [SerializeField] private SceneTransitionView sceneTransitionView;
-        [SerializeField] private PhotonNetworkManager photonNetworkManager;
         [SerializeField] private Transform characterCreatePosition;
 
         private GameObject _character;
@@ -38,18 +38,19 @@ namespace UI.Title
             SceneTransition
         }
 
-        private void Start()
+
+        private async void Start()
         {
-            Initialize().Forget();
+            _token = this.GetCancellationTokenOnDestroy();
+            await Initialize(_token).AttachExternalCancellation(_token);
         }
 
 
-        private async UniTask Initialize()
+        private async UniTask Initialize(CancellationToken token)
         {
-            _token = this.GetCancellationTokenOnDestroy();
-            await _titleModel.Initialize(_token);
+            await _characterDataModel.Initialize(token);
             InitializeState();
-            _titleModel.UserData.currentCharacterID.Subscribe(CreateCharacter).AddTo(this);
+            _characterDataModel.UserData.currentCharacterID.Subscribe(CreateCharacter).AddTo(this);
         }
 
         private void InitializeState()
@@ -76,10 +77,11 @@ namespace UI.Title
 
         private void CreateCharacter(int id)
         {
-            _titleModel.UserData.currentCharacterID.Value = id;
+            _characterDataModel.UserData.currentCharacterID.Value = id;
             var preCharacter = _character;
             Destroy(preCharacter);
-            _character = Instantiate(_titleModel.GetCharacterData(id).CharaObj, characterCreatePosition.position,
+            _character = Instantiate(_characterDataModel.GetCharacterData(id).CharaObj,
+                characterCreatePosition.position,
                 characterCreatePosition.rotation, characterCreatePosition);
         }
     }

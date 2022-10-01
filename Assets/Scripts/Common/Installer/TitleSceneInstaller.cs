@@ -12,11 +12,6 @@ namespace Common.Installer
 
         public override void InstallBindings()
         {
-            //Manager
-            Container.Bind<ILoadResource>().To<ResourceManager>().FromComponentOn(resourceManagerGameObject).AsCached();
-            //Model
-            Container.Bind<TitleModel>().FromNew().AsCached();
-            //Other
             Container.Bind<UIAnimation>().FromNew().AsCached();
         }
     }
