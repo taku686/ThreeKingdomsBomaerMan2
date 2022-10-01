@@ -11,13 +11,14 @@ namespace UI.Title
 {
     public partial class TitlePresenter : MonoBehaviourPunCallbacks
     {
-        [Inject] private TitleModel _titleModel;
+        [Inject] private CharacterDataModel _characterDataModel;
         [Inject] private UIAnimation _uiAnimation;
+        [Inject] private PhotonNetworkManager _photonNetworkManager;
         [SerializeField] private MainView mainView;
         [SerializeField] private CharacterSelectView characterSelectView;
         [SerializeField] private CharacterDetailView characterDetailView;
         [SerializeField] private BattleReadyView battleReadyView;
-        [SerializeField] private PhotonNetworkManager photonNetworkManager;
+        [SerializeField] private SceneTransitionView sceneTransitionView;
         [SerializeField] private Transform characterCreatePosition;
 
         private GameObject _character;
@@ -33,21 +34,23 @@ namespace UI.Title
             CharacterDetail,
             Shop,
             ReadyBattle,
-            SelectBattleMode
-        }
-
-        private void Start()
-        {
-            Initialize().Forget();
+            SelectBattleMode,
+            SceneTransition
         }
 
 
-        private async UniTask Initialize()
+        private async void Start()
         {
             _token = this.GetCancellationTokenOnDestroy();
-            await _titleModel.Initialize(_token);
+            await Initialize(_token).AttachExternalCancellation(_token);
+        }
+
+
+        private async UniTask Initialize(CancellationToken token)
+        {
+            await _characterDataModel.Initialize(token);
             InitializeState();
-            _titleModel.UserData.currentCharacterID.Subscribe(CreateCharacter).AddTo(this);
+            _characterDataModel.UserData.currentCharacterID.Subscribe(CreateCharacter).AddTo(this);
         }
 
         private void InitializeState()
@@ -59,6 +62,7 @@ namespace UI.Title
             _stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)Event.CharacterDetail);
             _stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)Event.CharacterSelectBack);
             _stateMachine.AddTransition<MainState, BattleReadyState>((int)Event.ReadyBattle);
+            _stateMachine.AddTransition<BattleReadyState, SceneTransitionState>((int)Event.SceneTransition);
         }
 
 
@@ -68,14 +72,16 @@ namespace UI.Title
             mainView.CharacterListGameObject.SetActive(false);
             mainView.CharacterDetailGameObject.SetActive(false);
             mainView.BattleReadyGameObject.SetActive(false);
+            mainView.SceneTransitionGameObject.SetActive(false);
         }
 
         private void CreateCharacter(int id)
         {
-            _titleModel.UserData.currentCharacterID.Value = id;
+            _characterDataModel.UserData.currentCharacterID.Value = id;
             var preCharacter = _character;
             Destroy(preCharacter);
-            _character = Instantiate(_titleModel.GetCharacterData(id).CharaObj, characterCreatePosition.position,
+            _character = Instantiate(_characterDataModel.GetCharacterData(id).CharaObj,
+                characterCreatePosition.position,
                 characterCreatePosition.rotation, characterCreatePosition);
         }
     }

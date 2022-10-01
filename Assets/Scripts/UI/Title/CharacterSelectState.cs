@@ -48,7 +48,7 @@ namespace UI.Title
 
                 _gridGroupLists.Clear();
                 GameObject gridGroup = null;
-                for (int i = 0; i < Owner._titleModel.GetCharacterCount(); i++)
+                for (int i = 0; i < Owner._characterDataModel.GetCharacterCount(); i++)
                 {
                     if (i % 5 == 0)
                     {
@@ -59,7 +59,7 @@ namespace UI.Title
 
                     if (gridGroup != null)
                     {
-                        SetupGrip(Owner._titleModel.GetCharacterData(i), gridGroup.transform);
+                        SetupGrip(Owner._characterDataModel.GetCharacterData(i), gridGroup.transform);
                     }
                 }
             }
@@ -78,12 +78,12 @@ namespace UI.Title
                     {
                         if (image.CompareTag("CharacterImage"))
                         {
-                            image.sprite = Owner._titleModel.GetCharacterSprite(characterData.ID);
+                            image.sprite = Owner._characterDataModel.GetCharacterSprite(characterData.ID);
                         }
 
                         if (image.CompareTag("BackGround"))
                         {
-                            image.sprite = Owner._titleModel.GetCharacterColor((int)characterData.CharaColor);
+                            image.sprite = Owner._characterDataModel.GetCharacterColor((int)characterData.CharaColor);
                         }
                     }
 
@@ -104,7 +104,7 @@ namespace UI.Title
                         if (image.gameObject.CompareTag("CharacterImage"))
                         {
                             image.color = Color.black;
-                            image.sprite = Owner._titleModel.GetCharacterSprite(characterData.ID);
+                            image.sprite = Owner._characterDataModel.GetCharacterSprite(characterData.ID);
                         }
                     }
                 }

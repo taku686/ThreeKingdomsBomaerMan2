@@ -1,14 +1,11 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Manager.NetworkManager;
 using Manager.ResourceManager;
 using Photon.Pun;
 using Player.Common;
-using UniRx;
 using UnityEngine;
 using Zenject;
 
@@ -19,26 +16,13 @@ namespace Manager.BattleManager
         [Inject] private ILoadResource _resourceManager;
 
         private CancellationToken _token;
-       // private List<IPlayerModelBase> _playerList = new List<IPlayerModelBase>();
-
-       // [SerializeField] private CharacterName characterName;
         [SerializeField] private List<Transform> startPointList;
         [SerializeField] private Transform playerParent;
 
-        private void Start()
-        {
-            /*_token = this.GetCancellationTokenOnDestroy();
-            GenerateCharacter(_token).Forget();*/
-        }
-
-        public async UniTask GenerateCharacter()
+        public void GenerateCharacter(int playerIndex, CharacterData characterData)
         {
             _token = this.GetCancellationTokenOnDestroy();
-            var userData = await _resourceManager.LoadUserData(_token);
-            var characterData =
-                await _resourceManager.LoadCharacterData(userData.currentCharacterID.Value,
-                    this.GetCancellationTokenOnDestroy());
-            var spawnPoint = GetSpawnPoint((int)PlayerIndex.Player1);
+            var spawnPoint = GetSpawnPoint(playerIndex);
             var playerObj =
                 PhotonNetwork.Instantiate(LabelData.CharacterPrefabPath + characterData.CharaObj.name,
                     spawnPoint.position, spawnPoint.rotation);

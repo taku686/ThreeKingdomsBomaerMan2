@@ -1,10 +1,7 @@
 ﻿using System.Collections.Generic;
-using Common.Data;
 using DG.Tweening;
-using Manager.NetworkManager;
 using UnityEngine;
 using Photon.Pun;
-using Photon.Realtime;
 using TMPro;
 using UniRx;
 using UnityEngine.UI;
@@ -25,6 +22,11 @@ namespace UI.Title
                 SetupEvent();
             }
 
+            protected override void OnUpdate()
+            {
+                SceneTransition();
+            }
+
             private void Initialize()
             {
                 InitializeButton();
@@ -35,13 +37,15 @@ namespace UI.Title
             {
                 Owner.DisableTitleGameObject();
                 Owner.mainView.BattleReadyGameObject.SetActive(true);
-                Owner.photonNetworkManager.OnStartConnectNetwork();
+                Owner._photonNetworkManager.OnStartConnectNetwork();
             }
 
             private void InitializeButton()
             {
                 Owner.battleReadyView.BackButton.onClick.RemoveAllListeners();
+                Owner.battleReadyView.BattleStartButton.onClick.RemoveAllListeners();
                 Owner.battleReadyView.BackButton.onClick.AddListener(OnClickBackButton);
+                Owner.battleReadyView.BattleStartButton.onClick.AddListener(OnClickSceneTransition);
             }
 
             private void InitializeSubscribe()
@@ -51,10 +55,10 @@ namespace UI.Title
                     return;
                 }
 
-                Owner.photonNetworkManager.JoinedRoom
+                Owner._photonNetworkManager.JoinedRoom
                     .Subscribe(OnJoinedRoom)
                     .AddTo(Owner.gameObject);
-                Owner.photonNetworkManager.LeftRoom.Subscribe(OnLeftRoom)
+                Owner._photonNetworkManager.LeftRoom.Subscribe(OnLeftRoom)
                     .AddTo(Owner.gameObject);
                 _isInitialize = true;
             }
@@ -69,7 +73,7 @@ namespace UI.Title
                             return;
                         }
 
-                        Owner.photonNetworkManager.LeftRoom.OnNext(PhotonNetwork.LocalPlayer.ActorNumber);
+                        Owner._photonNetworkManager.LeftRoom.OnNext(PhotonNetwork.LocalPlayer.ActorNumber);
                         PhotonNetwork.LeaveRoom();
                         Owner.DisableTitleGameObject();
                         Owner.mainView.MainGameObject.SetActive(true);
@@ -88,17 +92,17 @@ namespace UI.Title
                     _gridDictionary[index] = grid;
                     var images = grid.GetComponentsInChildren<Image>();
                     var names = grid.GetComponentsInChildren<TextMeshProUGUI>();
-                    var characterData = Owner.photonNetworkManager.CurrentRoomCharacterList[index];
+                    var characterData = Owner._photonNetworkManager.CurrentRoomCharacterList[index];
                     foreach (var image in images)
                     {
                         if (image.CompareTag("CharacterImage"))
                         {
-                            image.sprite = Owner._titleModel.GetCharacterSprite(characterData.ID);
+                            image.sprite = Owner._characterDataModel.GetCharacterSprite(characterData.ID);
                         }
 
                         if (image.CompareTag("BackGround"))
                         {
-                            image.sprite = Owner._titleModel.GetCharacterColor((int)characterData.CharaColor);
+                            image.sprite = Owner._characterDataModel.GetCharacterColor((int)characterData.CharaColor);
                         }
                     }
 
@@ -125,10 +129,26 @@ namespace UI.Title
                     return;
                 }
 
-                Debug.Log("削除");
                 Destroy(grid);
                 _gridDictionary.Remove(index);
             }
+
+            private void SceneTransition()
+            {
+                if (!PhotonNetwork.IsMasterClient ||
+                    PhotonNetwork.CurrentRoom.PlayerCount < PhotonNetwork.CurrentRoom.MaxPlayers)
+                {
+                    return;
+                }
+
+                Owner._stateMachine.Dispatch((int)Event.SceneTransition);
+            }
+
+            private void OnClickSceneTransition()
+            {
+                Owner._stateMachine.Dispatch((int)Event.SceneTransition);
+            }
+
 
             private void GridAllDestroy()
             {
