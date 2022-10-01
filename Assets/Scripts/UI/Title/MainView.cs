@@ -12,6 +12,7 @@ namespace UI.Title
         [SerializeField] private GameObject battleReadyGameObject;
         [SerializeField] private GameObject characterDetailGameObject;
         [SerializeField] private GameObject sceneTransitionGameObject;
+        [SerializeField] private GameObject loginGameObject;
         [SerializeField] private Button characterSelectButton;
         [SerializeField] private Button battleReadyButton;
 
@@ -22,5 +23,6 @@ namespace UI.Title
         public GameObject CharacterDetailGameObject => characterDetailGameObject;
         public GameObject BattleReadyGameObject => battleReadyGameObject;
         public GameObject SceneTransitionGameObject => sceneTransitionGameObject;
+        public GameObject LoginGameObject => loginGameObject;
     }
 }

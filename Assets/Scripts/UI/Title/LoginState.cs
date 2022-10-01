@@ -1,4 +1,5 @@
 ﻿using System;
+using Common;
 using Cysharp.Threading.Tasks;
 using PlayFab;
 using PlayFab.ClientModels;
@@ -18,6 +19,17 @@ namespace UI.Title
         private string customId;
         private string email;
         private string password = "password";
+
+        protected override void OnEnter(State prevState)
+        {
+            OnInitialize();
+        }
+
+        private void OnInitialize()
+        {
+            Owner.DisableTitleGameObject();
+            Owner.mainView.LoginGameObject.SetActive(true);
+        }
 
         private async void Start()
         {
@@ -55,12 +67,12 @@ namespace UI.Title
 
         public async void OnClickSetEmail()
         {
-            await SetEmailAndPasswordAsync().AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+            await SetEmailAndPasswordAsync().AttachExternalCancellation(Owner._token);
         }
 
         public async void OnClickLogin()
         {
-            await LoginEmailAndPasswordAsync().AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+            await LoginEmailAndPasswordAsync().AttachExternalCancellation(Owner._token);
         }
 
         private async UniTask SetEmailAndPasswordAsync()

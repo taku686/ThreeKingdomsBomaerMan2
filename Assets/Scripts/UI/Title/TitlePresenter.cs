@@ -28,6 +28,7 @@ namespace UI.Title
 
         private enum Event
         {
+            Login,
             Main,
             CharacterSelect,
             CharacterSelectBack,
@@ -56,13 +57,14 @@ namespace UI.Title
         private void InitializeState()
         {
             _stateMachine = new StateMachine<Title.TitlePresenter>(this);
-            _stateMachine.Start<MainState>();
+            _stateMachine.Start<LoginState>();
             _stateMachine.AddAnyTransition<MainState>((int)Event.Main);
             _stateMachine.AddTransition<MainState, CharacterSelectState>((int)Event.CharacterSelect);
             _stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)Event.CharacterDetail);
             _stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)Event.CharacterSelectBack);
             _stateMachine.AddTransition<MainState, BattleReadyState>((int)Event.ReadyBattle);
             _stateMachine.AddTransition<BattleReadyState, SceneTransitionState>((int)Event.SceneTransition);
+            _stateMachine.AddTransition<LoginState, MainState>((int)Event.Login);
         }
 
 
@@ -73,6 +75,7 @@ namespace UI.Title
             mainView.CharacterDetailGameObject.SetActive(false);
             mainView.BattleReadyGameObject.SetActive(false);
             mainView.SceneTransitionGameObject.SetActive(false);
+            mainView.LoginGameObject.SetActive(false);
         }
 
         private void CreateCharacter(int id)
