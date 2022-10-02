@@ -14,12 +14,13 @@ namespace UI.Title
         [Inject] private CharacterDataModel _characterDataModel;
         [Inject] private UIAnimation _uiAnimation;
         [Inject] private PhotonNetworkManager _photonNetworkManager;
+        [SerializeField] private Transform characterCreatePosition;
         [SerializeField] private MainView mainView;
         [SerializeField] private CharacterSelectView characterSelectView;
         [SerializeField] private CharacterDetailView characterDetailView;
         [SerializeField] private BattleReadyView battleReadyView;
         [SerializeField] private SceneTransitionView sceneTransitionView;
-        [SerializeField] private Transform characterCreatePosition;
+        [SerializeField] private LoginView loginView;
 
         private GameObject _character;
         private StateMachine<Title.TitlePresenter> _stateMachine;

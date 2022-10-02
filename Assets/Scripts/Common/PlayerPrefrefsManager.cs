@@ -10,14 +10,15 @@ namespace Common
             get
             {
                 string userId = PlayerPrefs.GetString("UserID");
-           
-                if (userId == null)
+                Debug.Log(userId);
+                if (userId == "")
                 {
-                    userId = Guid.NewGuid().ToString("N");
-                    Debug.Log(userId);
+                    userId = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 20);
                     PlayerPrefs.SetString("UserID", userId);
+                    Debug.Log(userId);
                     PlayerPrefs.Save();
                 }
+
                 return userId;
             }
             set
@@ -26,7 +27,7 @@ namespace Common
                 PlayerPrefs.Save();
             }
         }
-    
+
         /// <summary>
         /// メールアドレスを使ってログイン済みなら true
         /// </summary>
@@ -39,6 +40,5 @@ namespace Common
                 PlayerPrefs.Save();
             }
         }
-
     }
 }

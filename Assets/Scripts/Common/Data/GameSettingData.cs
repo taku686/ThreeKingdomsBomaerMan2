@@ -4,6 +4,7 @@ namespace Common.Data
     {
         public static float MoveThreshold = 0.01f;
         public static float TurnDuration = 0.1f;
+        public static string TitleID = "92AF5";
     }
 
     public enum Direction
