@@ -9,12 +9,10 @@ namespace UI.Title
         [SerializeField] private GameObject errorGameObject;
         [SerializeField] private Button retryButton;
         [SerializeField] private Button startButton;
-        [SerializeField] private Slider loadingBar;
         [SerializeField] private TextMeshProUGUI loadingBarText;
         public TextMeshProUGUI LoadingBarText => loadingBarText;
         public GameObject ErrorGameObject => errorGameObject;
         public Button RetryButton => retryButton;
         public Button StartButton => startButton;
-        public Slider LoadingBar => loadingBar;
     }
 }

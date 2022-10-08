@@ -24,6 +24,7 @@ namespace UI.Title
         [SerializeField] private BattleReadyView battleReadyView;
         [SerializeField] private SceneTransitionView sceneTransitionView;
         [SerializeField] private LoginView loginView;
+        [SerializeField] private SettingView settingView;
 
         private GameObject _character;
         private StateMachine<Title.TitlePresenter> _stateMachine;
@@ -40,7 +41,8 @@ namespace UI.Title
             Shop,
             ReadyBattle,
             SelectBattleMode,
-            SceneTransition
+            SceneTransition,
+            Setting
         }
 
 
@@ -78,6 +80,7 @@ namespace UI.Title
             _stateMachine.AddTransition<MainState, BattleReadyState>((int)Event.ReadyBattle);
             _stateMachine.AddTransition<BattleReadyState, SceneTransitionState>((int)Event.SceneTransition);
             _stateMachine.AddTransition<LoginState, MainState>((int)Event.Login);
+            _stateMachine.AddTransition<MainState, SettingState>((int)Event.Setting);
         }
 
 
@@ -89,6 +92,7 @@ namespace UI.Title
             mainView.BattleReadyGameObject.SetActive(false);
             mainView.SceneTransitionGameObject.SetActive(false);
             mainView.LoginGameObject.SetActive(false);
+            mainView.SettingGameObject.SetActive(false);
         }
 
         private void CreateCharacter(int id)

@@ -30,8 +30,10 @@ namespace UI.Title
             {
                 Owner.mainView.CharacterSelectButton.onClick.RemoveAllListeners();
                 Owner.mainView.BattleReadyButton.onClick.RemoveAllListeners();
+                Owner.mainView.SettingButton.onClick.RemoveAllListeners();
                 Owner.mainView.CharacterSelectButton.onClick.AddListener(OnClickCharacterSelect);
                 Owner.mainView.BattleReadyButton.onClick.AddListener(OnClickBattleReady);
+                Owner.mainView.SettingButton.onClick.AddListener(OnClickSetting);
             }
 
 
@@ -46,6 +48,13 @@ namespace UI.Title
             {
                 Owner._uiAnimation.OnClickScaleColorAnimation(Owner.mainView.BattleReadyButton.gameObject)
                     .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.ReadyBattle); })
+                    .SetLink(Owner.gameObject);
+            }
+
+            private void OnClickSetting()
+            {
+                Owner._uiAnimation.OnClickScaleColorAnimation(Owner.mainView.SettingButton.gameObject)
+                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.Setting); })
                     .SetLink(Owner.gameObject);
             }
         }
