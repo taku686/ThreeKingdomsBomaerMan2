@@ -27,7 +27,9 @@ namespace Common.Data
         Syuuyu,
         Tyouun,
         Ryofu,
-        Ganryou
+        Ganryou,
+        Kanu,
+        Kaouen
     }
 
     public enum CharacterColor

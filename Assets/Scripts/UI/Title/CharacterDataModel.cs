@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Manager;
 using Manager.ResourceManager;
 using UnityEngine;
 using Zenject;
@@ -12,7 +13,7 @@ namespace UI.Title
     public class CharacterDataModel : ScriptableObject
     {
         [Inject] private ILoadResource _resourceManager;
-
+        [Inject] private MainManager _mainManager;
         private static readonly Dictionary<int, CharacterData> CharacterDataList =
             new Dictionary<int, CharacterData>();
 
@@ -28,6 +29,10 @@ namespace UI.Title
 
         public async UniTask Initialize(CancellationToken cancellationToken)
         {
+            if (_mainManager.isInitialize)
+            {
+                return;
+            }
             await InitializeCharacterData(cancellationToken);
             await InitializeCharacterSprite(cancellationToken);
             await InitializeUserData(cancellationToken);

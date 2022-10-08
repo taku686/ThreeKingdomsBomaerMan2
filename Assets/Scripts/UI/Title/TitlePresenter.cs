@@ -1,5 +1,7 @@
 using System.Threading;
+using Common.Data;
 using Cysharp.Threading.Tasks;
+using Manager;
 using Manager.NetworkManager;
 using Photon.Pun;
 using UI.Common;
@@ -14,6 +16,7 @@ namespace UI.Title
         [Inject] private CharacterDataModel _characterDataModel;
         [Inject] private UIAnimation _uiAnimation;
         [Inject] private PhotonNetworkManager _photonNetworkManager;
+        [Inject] private MainManager _mainManager;
         [SerializeField] private Transform characterCreatePosition;
         [SerializeField] private MainView mainView;
         [SerializeField] private CharacterSelectView characterSelectView;
@@ -58,7 +61,16 @@ namespace UI.Title
         private void InitializeState()
         {
             _stateMachine = new StateMachine<Title.TitlePresenter>(this);
-            _stateMachine.Start<LoginState>();
+            if (_mainManager.isInitialize)
+            {
+                _stateMachine.Start<MainState>();
+            }
+            else
+            {
+                _stateMachine.Start<LoginState>();
+                _mainManager.isInitialize = true;
+            }
+
             _stateMachine.AddAnyTransition<MainState>((int)Event.Main);
             _stateMachine.AddTransition<MainState, CharacterSelectState>((int)Event.CharacterSelect);
             _stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)Event.CharacterDetail);

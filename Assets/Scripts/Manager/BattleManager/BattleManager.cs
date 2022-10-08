@@ -1,10 +1,12 @@
 using System.Threading;
+using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.NetworkManager;
 using Photon.Pun;
 using Photon.Realtime;
 using UI.Title;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Zenject;
 
 namespace Manager.BattleManager
@@ -33,7 +35,6 @@ namespace Manager.BattleManager
         // Start is called before the first frame update
         async void Start()
         {
-          
             if (isTest)
             {
                 var token = this.GetCancellationTokenOnDestroy();
@@ -78,6 +79,12 @@ namespace Manager.BattleManager
         public override void OnJoinedRoom()
         {
             InitializeState();
+        }
+
+        public void OnClickExit()
+        {
+            PhotonNetwork.Disconnect();
+            SceneManager.LoadScene((int)SceneIndex.Title);
         }
 
         #endregion
