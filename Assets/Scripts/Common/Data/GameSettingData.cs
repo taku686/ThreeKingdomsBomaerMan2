@@ -54,4 +54,10 @@ namespace Common.Data
         Title,
         BattleScene
     }
+
+    public enum Gender
+    {
+        Male,
+        Female
+    }
 }

@@ -1,4 +1,5 @@
-﻿using Manager.ResourceManager;
+﻿using Assets.Scripts.Common.Data;
+using Manager.ResourceManager;
 using UI.Common;
 using UI.Title;
 using UnityEngine;
@@ -13,6 +14,7 @@ namespace Common.Installer
         public override void InstallBindings()
         {
             Container.Bind<UIAnimation>().FromNew().AsCached();
+            Container.Bind<Catalog>().FromNew().AsCached();
         }
     }
 }

@@ -10,12 +10,10 @@ namespace Common
             get
             {
                 string userId = PlayerPrefs.GetString("UserID");
-                Debug.Log(userId);
                 if (userId == "")
                 {
                     userId = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 20);
                     PlayerPrefs.SetString("UserID", userId);
-                    Debug.Log(userId);
                     PlayerPrefs.Save();
                 }
 
