@@ -4,7 +4,9 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager;
+using Manager.BattleManager;
 using Manager.ResourceManager;
+using PlayFab.ClientModels;
 using UnityEngine;
 using Zenject;
 
@@ -13,7 +15,10 @@ namespace UI.Title
     public class CharacterDataModel : ScriptableObject
     {
         [Inject] private ILoadResource _resourceManager;
+
         [Inject] private MainManager _mainManager;
+        private UserManager _userManager;
+
         private static readonly Dictionary<int, CharacterData> CharacterDataList =
             new Dictionary<int, CharacterData>();
 
@@ -23,19 +28,22 @@ namespace UI.Title
         private readonly Dictionary<int, Sprite> _characterColorList =
             new Dictionary<int, Sprite>();
 
-        private UserData _userData;
+        private CatalogItem _catalogItem;
 
-        public UserData UserData => _userData;
+        public User UserData;
+        public CatalogItem CatalogItem => _catalogItem;
 
-        public async UniTask Initialize(CancellationToken cancellationToken)
+        public async UniTask Initialize(UserManager userManager, CancellationToken cancellationToken)
         {
             if (_mainManager.isInitialize)
             {
                 return;
             }
+
+            _userManager = userManager;
             await InitializeCharacterData(cancellationToken);
             await InitializeCharacterSprite(cancellationToken);
-            await InitializeUserData(cancellationToken);
+            InitializeUserData(cancellationToken);
             await InitializeCharacterColor(cancellationToken);
         }
 
@@ -66,9 +74,8 @@ namespace UI.Title
             }
         }
 
-        private async UniTask InitializeUserData(CancellationToken cancellationToken)
+        private void InitializeUserData(CancellationToken cancellationToken)
         {
-            _userData = await _resourceManager.LoadUserData(cancellationToken);
         }
 
         public CharacterData GetCharacterData(int id)
@@ -93,7 +100,7 @@ namespace UI.Title
 
         public CharacterData GetUserEquipCharacterData()
         {
-            return GetCharacterData(_userData.currentCharacterID.Value);
+            return GetCharacterData(_userManager.equipCharacterId.Value);
         }
 
         private int GetCharacterColorCount()

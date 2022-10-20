@@ -16,6 +16,7 @@ namespace Manager.BattleManager
         [Inject] private PhotonNetworkManager _networkManager;
         [Inject] private CharacterDataModel _characterDataModel;
         [Inject] private PlayerManager _playerManager;
+        [Inject] private UserManager _userManager;
         private StateMachine<BattleManager> _stateMachine;
         [SerializeField] private bool isTest;
 
@@ -48,7 +49,7 @@ namespace Manager.BattleManager
 
         private async UniTask OnInitialize(CancellationToken token)
         {
-            await _characterDataModel.Initialize(token).AttachExternalCancellation(token);
+            await _characterDataModel.Initialize(_userManager, token).AttachExternalCancellation(token);
         }
 
         private void InitializeState()

@@ -1,4 +1,5 @@
 using System.Threading;
+using Assets.Scripts.Common.PlayFab;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager;
@@ -17,6 +18,8 @@ namespace UI.Title
         [Inject] private UIAnimation _uiAnimation;
         [Inject] private PhotonNetworkManager _photonNetworkManager;
         [Inject] private MainManager _mainManager;
+        [Inject] private PlayFabManager _playFabManager;
+        [Inject] private UserManager _userManager;
         [SerializeField] private Transform characterCreatePosition;
         [SerializeField] private MainView mainView;
         [SerializeField] private CharacterSelectView characterSelectView;
@@ -55,9 +58,7 @@ namespace UI.Title
 
         private async UniTask Initialize(CancellationToken token)
         {
-            await _characterDataModel.Initialize(token);
             InitializeState();
-            _characterDataModel.UserData.currentCharacterID.Subscribe(CreateCharacter).AddTo(this);
         }
 
         private void InitializeState()
@@ -97,7 +98,7 @@ namespace UI.Title
 
         private void CreateCharacter(int id)
         {
-            _characterDataModel.UserData.currentCharacterID.Value = id;
+            _userManager.equipCharacterId.Value = id;
             var preCharacter = _character;
             Destroy(preCharacter);
             _character = Instantiate(_characterDataModel.GetCharacterData(id).CharaObj,

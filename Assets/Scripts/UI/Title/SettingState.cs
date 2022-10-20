@@ -152,7 +152,6 @@ namespace UI.Title
                 }
                 else
                 {
-                    Debug.Log(response);
                     PlayerPrefsManager.IsLoginEmailAddress = true;
                 }
             }

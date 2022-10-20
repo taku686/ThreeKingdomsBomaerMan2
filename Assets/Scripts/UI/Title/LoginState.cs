@@ -7,6 +7,7 @@ using Cysharp.Threading.Tasks.Linq;
 using PlayFab;
 using PlayFab.ClientModels;
 using TMPro;
+using UniRx;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using State = StateMachine<UI.Title.TitlePresenter>.State;
@@ -17,9 +18,9 @@ namespace UI.Title
     {
         public class LoginState : State
         {
-            private string email;
-            private string password = "password";
-            private CancellationToken token;
+            private const string Email = "test9@gmail.com";
+            private const string Password = "Passw0rd";
+            private CancellationToken _token;
 
             protected override void OnEnter(State prevState)
             {
@@ -28,7 +29,7 @@ namespace UI.Title
 
             private void OnInitialize()
             {
-                token = Owner.GetCancellationTokenOnDestroy();
+                _token = Owner.GetCancellationTokenOnDestroy();
                 Owner.DisableTitleGameObject();
                 InitializeButton();
                 InitializeObject();
@@ -46,27 +47,28 @@ namespace UI.Title
                 Owner.loginView.StartButton.onClick.RemoveAllListeners();
                 Owner.loginView.RetryButton.onClick.AddListener(OnClickRetry);
                 Owner.loginView.StartButton.onClick.AddListener(async () =>
-                    await Login().AttachExternalCancellation(token));
+                    await Login().AttachExternalCancellation(_token));
             }
 
             private async UniTask Login()
             {
-                PlayFabSettings.staticSettings.TitleId = GameSettingData.TitleID;
-                var customID = PlayerPrefsManager.UserID;
-                var request = new LoginWithCustomIDRequest
+                bool result;
+                Owner._playFabManager.Initialize();
+                if (!PlayerPrefsManager.IsLoginEmailAddress)
                 {
-                    CustomId = customID,
-                    CreateAccount = true
-                };
-                var result = await PlayFabClientAPI.LoginWithCustomIDAsync(request).AsUniTask()
-                    .AttachExternalCancellation(token);
-                var message = result.Error is null
-                    ? $"Login Success!! My PlayerID is {result.Result.PlayFabId}"
-                    : result.Error.GenerateErrorReport();
-                var isSuccess = result.Error is null;
-                Debug.Log(message);
-                if (isSuccess)
+                    result = await Owner._playFabManager.LoginWithCustomId().AttachExternalCancellation(_token);
+                }
+                else
                 {
+                    result = await Owner._playFabManager.LoginWithEmail(Email, Password)
+                        .AttachExternalCancellation(_token);
+                }
+
+                if (result)
+                {
+                    await Owner._characterDataModel.Initialize(Owner._userManager, Owner._token);
+                    Owner._userManager.equipCharacterId
+                        .Subscribe(index => { Owner.CreateCharacter(index); }).AddTo(Owner._token);
                     Owner._stateMachine.Dispatch((int)Event.Login);
                 }
                 else
@@ -78,7 +80,7 @@ namespace UI.Title
             private async void OnClickRetry()
             {
                 Owner.loginView.ErrorGameObject.SetActive(false);
-                await Login().AttachExternalCancellation(token);
+                await Login().AttachExternalCancellation(_token);
             }
         }
     }

@@ -42,7 +42,7 @@ namespace UI.Title
 
             private void OnClickBackButton()
             {
-                Owner.CreateCharacter(Owner._characterDataModel.UserData.currentCharacterID.Value);
+                Owner.CreateCharacter(Owner._userManager.equipCharacterId.Value);
                 Owner.DisableTitleGameObject();
                 Owner.mainView.CharacterListGameObject.SetActive(true);
                 Owner._stateMachine.Dispatch((int)Event.CharacterSelectBack);
@@ -50,7 +50,7 @@ namespace UI.Title
 
             private void OnClickSelectButton()
             {
-                Owner._characterDataModel.UserData.currentCharacterID.Value = Owner._currentCharacterId;
+                Owner._userManager.equipCharacterId.Value = Owner._currentCharacterId;
                 Owner.DisableTitleGameObject();
                 Owner.mainView.MainGameObject.SetActive(true);
                 Owner._stateMachine.Dispatch((int)Event.Main);

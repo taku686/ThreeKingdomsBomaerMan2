@@ -1,20 +1,31 @@
-using System.Collections;
 using System.Collections.Generic;
-using Common.Data;
-using UnityEngine;
+using UniRx;
 
-public class User
+namespace Common.Data
 {
-    public Gender Gender;
-    public int EquipCharacterId;
-    public int Level;
-    public string Name;
-    public bool IsTutorial;
-    public Dictionary<int, CharacterData> Characters;
-
-    public static User Create()
+    public class User
     {
-        var user = new User();
-        return user;
+        public Gender Gender;
+        public int EquipCharacterId;
+        public int Level;
+        public string Name;
+        public bool IsTutorial;
+        public Dictionary<int, CharacterData> Characters;
+
+        public void SetUser(User user)
+        {
+            Gender = user.Gender;
+            EquipCharacterId = user.EquipCharacterId;
+            Level = user.Level;
+            Name = user.Name;
+            IsTutorial = user.IsTutorial;
+            Characters = user.Characters;
+        }
+
+        public User Create()
+        {
+            var user = new User();
+            return user;
+        }
     }
 }

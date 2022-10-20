@@ -1,25 +1,30 @@
 using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.Common.Data;
 using Common;
+using Common.Data;
 using Cysharp.Threading.Tasks;
 using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine;
 using UpdateUserDataRequest = PlayFab.ClientModels.UpdateUserDataRequest;
 using Newtonsoft.Json;
+using UI.Title;
 using Zenject;
 
 namespace Assets.Scripts.Common.PlayFab
 {
     public class PlayFabManager : MonoBehaviour
     {
-        private readonly Catalog _catalog = new();
+        [Inject] private CharacterDataModel _characterDataModel;
+        [Inject] private UserManager _userManager;
         private const string Email = "test9@gmail.com";
         private const string Password = "Passw0rd";
+        private GetPlayerCombinedInfoRequestParams _info;
 
         private async UniTaskVoid Start()
         {
-            var token = this.GetCancellationTokenOnDestroy();
+            /*var token = this.GetCancellationTokenOnDestroy();
             Initialize();
             Debug.Log(PlayerPrefsManager.IsLoginEmailAddress);
             if (PlayerPrefsManager.IsLoginEmailAddress)
@@ -33,29 +38,50 @@ namespace Assets.Scripts.Common.PlayFab
             }
 
             await UpdateUserDisplayName("Alan");
-            await UpdateUserDataAsync(nameof(User), User.Create()).AttachExternalCancellation(token);
+            await UpdateUserDataAsync(nameof(User), _user.Create()).AttachExternalCancellation(token);
             await GetUserData(nameof(User)).AttachExternalCancellation(token);
-            await GetCatalogItems().AttachExternalCancellation(token);
+            await GetCatalogItems().AttachExternalCancellation(token);*/
         }
 
         public void Initialize()
         {
             PlayFabSettings.staticSettings.TitleId = "92AF5";
+            _info = new GetPlayerCombinedInfoRequestParams()
+            {
+                GetUserData = true,
+                GetUserAccountInfo = true
+            };
         }
 
-        public async UniTask LoginWithCustomId()
+        public async UniTask<bool> LoginWithCustomId()
         {
             var request = new LoginWithCustomIDRequest
             {
                 CustomId = PlayerPrefsManager.UserID,
+                InfoRequestParameters = _info,
                 CreateAccount = true
             };
 
             var response = await PlayFabClientAPI.LoginWithCustomIDAsync(request);
-            var message = response.Error != null
-                ? response.Error.GenerateErrorReport()
-                : $"Login success!! my PlayFabID is {response.Result.PlayFabId}";
-            Debug.Log(message);
+            if (response.Error != null)
+            {
+                Debug.Log(response.Error.GenerateErrorReport());
+                return false;
+            }
+            else
+            {
+                var user = JsonConvert.DeserializeObject<User>(response.Result.InfoResultPayload.UserData["User"]
+                    .Value);
+                Debug.Log(user);
+                Debug.Log(response.Result.InfoResultPayload.UserData["User"].Value);
+                if (user != null)
+                {
+                    _characterDataModel.UserData = user;
+                    Debug.Log(_characterDataModel.UserData.Name);
+                }
+
+                return true;
+            }
         }
 
         public async UniTask SetEmailAndPassword(string email, string password)
@@ -94,17 +120,13 @@ namespace Assets.Scripts.Common.PlayFab
             }
         }
 
-        public async UniTask LoginWithEmail(string email, string password)
+        public async UniTask<bool> LoginWithEmail(string email, string password)
         {
             var request = new LoginWithEmailAddressRequest
             {
                 Email = email,
                 Password = password,
-                InfoRequestParameters = new GetPlayerCombinedInfoRequestParams
-                {
-                    GetUserAccountInfo = true,
-                    GetUserInventory = true
-                }
+                InfoRequestParameters = _info
             };
             var response = await PlayFabClientAPI.LoginWithEmailAddressAsync(request);
 
@@ -130,12 +152,23 @@ namespace Assets.Scripts.Common.PlayFab
             else
             {
                 Debug.Log($"Login success!! my PlayFabID is {response.Result.PlayFabId}");
+                var user = JsonConvert.DeserializeObject<User>(response.Result.InfoResultPayload.UserData["User"]
+                    .Value);
+                if (user != null)
+                {
+                    
+                    Debug.Log(user.EquipCharacterId);
+                    _userManager.Initialize(user);
+                }
+
                 SetupInventory(response.Result.InfoResultPayload.UserInventory);
                 if (PlayerPrefsManager.IsLoginEmailAddress)
                 {
                     PlayerPrefsManager.UserID = response.Result.InfoResultPayload.AccountInfo.CustomIdInfo.CustomId;
                 }
             }
+
+            return response.Error == null;
         }
 
         public async UniTask UpdateUserDataAsync(string key, User value)
@@ -232,8 +265,8 @@ namespace Assets.Scripts.Common.PlayFab
             {
                 foreach (var item in response.Result.Catalog)
                 {
-                    _catalog.Characters[int.Parse(item.ItemId)] = item;
-                    Debug.Log($"{_catalog.Characters[int.Parse(item.ItemId)].DisplayName}");
+                    /*_catalog.Characters[int.Parse(item.ItemId)] = item;
+                    Debug.Log($"{_catalog.Characters[int.Parse(item.ItemId)].DisplayName}");*/
                 }
             }
         }
