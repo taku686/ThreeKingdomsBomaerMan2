@@ -83,7 +83,9 @@ namespace UI.Title
 
                         if (image.CompareTag("BackGround"))
                         {
-                            image.sprite = Owner._characterDataModel.GetCharacterColor((int)characterData.CharaColor);
+                            image.sprite =
+                                Owner._characterDataModel.GetCharacterColor(
+                                    (int)GameSettingData.GetCharacterColor(characterData.CharaColor));
                         }
                     }
 
@@ -125,7 +127,7 @@ namespace UI.Title
                         var preCharacter = Owner._character;
                         Destroy(preCharacter);
                         var characterData = raycastResult.gameObject.GetComponent<CharacterGrid>().characterData;
-                        Owner._character = Instantiate(characterData.CharaObj,
+                        Owner._character = Instantiate(Owner._characterDataModel.GetCharacterGameObject(characterData.ID),
                             characterCreatePosition.position,
                             characterCreatePosition.rotation, characterCreatePosition);
                         Owner._currentCharacterId = characterData.ID;

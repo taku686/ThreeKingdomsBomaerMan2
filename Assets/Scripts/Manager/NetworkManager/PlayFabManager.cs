@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Common.Data;
+using Assets.Scripts.Common.ResourceManager;
 using Common;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Manager.ResourceManager;
 using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine;
@@ -18,6 +20,7 @@ namespace Assets.Scripts.Common.PlayFab
     {
         [Inject] private CharacterDataModel _characterDataModel;
         [Inject] private UserManager _userManager;
+        [Inject] private CatalogManager _catalogManager;
         private const string Email = "test9@gmail.com";
         private const string Password = "Passw0rd";
         private GetPlayerCombinedInfoRequestParams _info;
@@ -49,8 +52,21 @@ namespace Assets.Scripts.Common.PlayFab
             _info = new GetPlayerCombinedInfoRequestParams()
             {
                 GetUserData = true,
-                GetUserAccountInfo = true
+                GetUserAccountInfo = true,
+                GetTitleData = true,
             };
+        }
+
+        private async UniTask SetData(PlayFabResult<LoginResult> response)
+        {
+            var user = JsonConvert.DeserializeObject<User>(response.Result.InfoResultPayload.UserData["User"]
+                .Value);
+            if (user != null)
+            {
+                _userManager.Initialize(user);
+            }
+
+            await GetCatalogItems().AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
         }
 
         public async UniTask<bool> LoginWithCustomId()
@@ -70,53 +86,8 @@ namespace Assets.Scripts.Common.PlayFab
             }
             else
             {
-                var user = JsonConvert.DeserializeObject<User>(response.Result.InfoResultPayload.UserData["User"]
-                    .Value);
-                Debug.Log(user);
-                Debug.Log(response.Result.InfoResultPayload.UserData["User"].Value);
-                if (user != null)
-                {
-                    _characterDataModel.UserData = user;
-                    Debug.Log(_characterDataModel.UserData.Name);
-                }
-
+                await SetData(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
                 return true;
-            }
-        }
-
-        public async UniTask SetEmailAndPassword(string email, string password)
-        {
-            var request = new AddUsernamePasswordRequest
-            {
-                Username = PlayerPrefsManager.UserID,
-                Email = email,
-                Password = password
-            };
-
-            var response = await PlayFabClientAPI.AddUsernamePasswordAsync(request);
-
-            if (response.Error != null)
-            {
-                switch (response.Error.Error)
-                {
-                    case PlayFabErrorCode.InvalidParams:
-                        Debug.Log("有効なメールアドレスと6~100文字以内のパスワードを入力してください。");
-                        break;
-                    case PlayFabErrorCode.InvalidEmailAddress:
-                        Debug.Log("このメールアドレスは使用できません。");
-                        break;
-                    case PlayFabErrorCode.InvalidPassword:
-                        Debug.Log("このパスワードは使用できません。");
-                        break;
-                    default:
-                        Debug.Log(response.Error.GenerateErrorReport());
-                        break;
-                }
-            }
-            else
-            {
-                Debug.Log("登録完了!!");
-                PlayerPrefsManager.IsLoginEmailAddress = true;
             }
         }
 
@@ -152,16 +123,7 @@ namespace Assets.Scripts.Common.PlayFab
             else
             {
                 Debug.Log($"Login success!! my PlayFabID is {response.Result.PlayFabId}");
-                var user = JsonConvert.DeserializeObject<User>(response.Result.InfoResultPayload.UserData["User"]
-                    .Value);
-                if (user != null)
-                {
-                    
-                    Debug.Log(user.EquipCharacterId);
-                    _userManager.Initialize(user);
-                }
-
-                SetupInventory(response.Result.InfoResultPayload.UserInventory);
+                await SetData(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
                 if (PlayerPrefsManager.IsLoginEmailAddress)
                 {
                     PlayerPrefsManager.UserID = response.Result.InfoResultPayload.AccountInfo.CustomIdInfo.CustomId;
@@ -169,6 +131,43 @@ namespace Assets.Scripts.Common.PlayFab
             }
 
             return response.Error == null;
+        }
+
+
+        public async UniTask SetEmailAndPassword(string email, string password)
+        {
+            var request = new AddUsernamePasswordRequest
+            {
+                Username = PlayerPrefsManager.UserID,
+                Email = email,
+                Password = password
+            };
+
+            var response = await PlayFabClientAPI.AddUsernamePasswordAsync(request);
+
+            if (response.Error != null)
+            {
+                switch (response.Error.Error)
+                {
+                    case PlayFabErrorCode.InvalidParams:
+                        Debug.Log("有効なメールアドレスと6~100文字以内のパスワードを入力してください。");
+                        break;
+                    case PlayFabErrorCode.InvalidEmailAddress:
+                        Debug.Log("このメールアドレスは使用できません。");
+                        break;
+                    case PlayFabErrorCode.InvalidPassword:
+                        Debug.Log("このパスワードは使用できません。");
+                        break;
+                    default:
+                        Debug.Log(response.Error.GenerateErrorReport());
+                        break;
+                }
+            }
+            else
+            {
+                Debug.Log("登録完了!!");
+                PlayerPrefsManager.IsLoginEmailAddress = true;
+            }
         }
 
         public async UniTask UpdateUserDataAsync(string key, User value)
@@ -254,7 +253,7 @@ namespace Assets.Scripts.Common.PlayFab
             }
         }
 
-        public async UniTask GetCatalogItems()
+        private async UniTask GetCatalogItems()
         {
             var response = await PlayFabClientAPI.GetCatalogItemsAsync(new GetCatalogItemsRequest());
             if (response.Error != null)
@@ -263,22 +262,8 @@ namespace Assets.Scripts.Common.PlayFab
             }
             else
             {
-                foreach (var item in response.Result.Catalog)
-                {
-                    /*_catalog.Characters[int.Parse(item.ItemId)] = item;
-                    Debug.Log($"{_catalog.Characters[int.Parse(item.ItemId)].DisplayName}");*/
-                }
-            }
-        }
-
-        private void SetupInventory(List<ItemInstance> items)
-        {
-            foreach (var item in items)
-            {
-                Debug.Log(item.ItemClass);
-                if (item.ItemClass == "Character")
-                {
-                }
+                await _catalogManager.Initialize(response.Result.Catalog)
+                    .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
             }
         }
     }

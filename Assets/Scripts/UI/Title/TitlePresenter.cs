@@ -1,5 +1,6 @@
 using System.Threading;
 using Assets.Scripts.Common.PlayFab;
+using Assets.Scripts.Common.ResourceManager;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager;
@@ -101,7 +102,7 @@ namespace UI.Title
             _userManager.equipCharacterId.Value = id;
             var preCharacter = _character;
             Destroy(preCharacter);
-            _character = Instantiate(_characterDataModel.GetCharacterData(id).CharaObj,
+            _character = Instantiate(_characterDataModel.GetCharacterGameObject(id),
                 characterCreatePosition.position,
                 characterCreatePosition.rotation, characterCreatePosition);
         }

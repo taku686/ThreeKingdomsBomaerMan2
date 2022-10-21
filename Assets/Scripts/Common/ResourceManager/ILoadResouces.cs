@@ -10,7 +10,7 @@ namespace Manager.ResourceManager
     {
         public UniTask<GameObject> LoadGameObject(string path, CancellationToken token);
         public UniTask<GameObject> LoadGameObject(string path, int id, CancellationToken token);
-        public UniTask<CharacterData> LoadCharacterData(int id, CancellationToken token);
+        public CharacterData LoadCharacterData(int id);
         public CatalogItem LoadCatalogItem(int id, CancellationToken token);
 
         public UniTask<UserData> LoadUserData(CancellationToken token);

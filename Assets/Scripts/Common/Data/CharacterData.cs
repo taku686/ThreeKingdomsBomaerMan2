@@ -2,29 +2,78 @@ using UnityEngine;
 
 namespace Common.Data
 {
-    [CreateAssetMenu(fileName = "Character", menuName = "CharacterData")]
-    public class CharacterData : ScriptableObject
+    public class CharacterData
     {
-        [SerializeField] private GameObject charaObj;
-        [SerializeField] private bool isLock;
-        [SerializeField] private string name;
-        [SerializeField] private int id;
-        [SerializeField] private int speed;
-        [SerializeField] private int bombLimit;
-        [SerializeField] private int attack;
-        [SerializeField] private int fireRange;
-        [SerializeField] private int hp;
-        [SerializeField] private CharacterColor charaColor;
+        [SerializeField] private string _charaObj;
+        [SerializeField] private bool _isLock;
+        [SerializeField] private string _name;
+        [SerializeField] private int _id;
+        [SerializeField] private int _speed;
+        [SerializeField] private int _bombLimit;
+        [SerializeField] private int _attack;
+        [SerializeField] private int _fireRange;
+        [SerializeField] private int _hp;
+        [SerializeField] private string _charaColor;
 
-        public GameObject CharaObj => charaObj;
-        public string Name => name;
-        public int ID => id;
-        public int Speed => speed;
-        public int BombLimit => bombLimit;
-        public int Attack => attack;
-        public int FireRange => fireRange;
-        public int Hp => hp;
-        public CharacterColor CharaColor => charaColor;
-        public bool IsLock => isLock;
+        public string CharaObj
+        {
+            get => _charaObj;
+            set => _charaObj = value;
+        }
+
+        public bool IsLock
+        {
+            get => _isLock;
+            set => _isLock = value;
+        }
+
+        public string Name
+        {
+            get => _name;
+            set => _name = value;
+        }
+
+        public int ID
+        {
+            get => _id;
+            set => _id = value;
+        }
+
+        public int Speed
+        {
+            get => _speed;
+            set => _speed = value;
+        }
+
+        public int BombLimit
+        {
+            get => _bombLimit;
+            set => _bombLimit = value;
+        }
+
+        public int Attack
+        {
+            get => _attack;
+            set => _attack = value;
+        }
+
+        public int FireRange
+        {
+            get => _fireRange;
+            set => _fireRange = value;
+        }
+
+        public int Hp
+        {
+            get => _hp;
+            set => _hp = value;
+        }
+
+
+        public string CharaColor
+        {
+            get => _charaColor;
+            set => _charaColor = value;
+        }
     }
 }

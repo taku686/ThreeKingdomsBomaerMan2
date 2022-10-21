@@ -20,12 +20,13 @@ namespace Common.Installer
         public override void InstallBindings()
         {
             // Container.Bind<ILoadResource>().To<ResourceManager>().FromComponentInNewPrefab(resourceManagerGameObject).AsCached();
-            Container.Bind<ILoadResource>().To<CatalogManager>().FromComponentInNewPrefab(catalogManagerGameObject)
-                .AsCached();
+            /*Container.Bind<ILoadResource>().To<CatalogManager>().FromComponentInNewPrefab(catalogManagerGameObject)
+                .AsCached();*/
             Container.Bind<CharacterDataModel>().FromNew().AsCached();
             Container.Bind<PhotonNetworkManager>().FromComponentInNewPrefab(photonNetworkGameObject).AsSingle();
             Container.Bind<MainManager>().FromComponentsInNewPrefab(mainManagerGameObject).AsSingle();
             Container.Bind<UserManager>().FromComponentsInNewPrefab(userManagerGameObject).AsSingle();
+            Container.Bind<CatalogManager>().FromComponentsInNewPrefab(catalogManagerGameObject).AsSingle();
         }
     }
 }

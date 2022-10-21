@@ -20,17 +20,22 @@ namespace Manager.ResourceManager
             throw new System.NotImplementedException();
         }
 
+        public CharacterData LoadCharacterData(int id)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public UniTask<GameObject> LoadGameObject(int id, CancellationToken token)
         {
             throw new System.NotImplementedException();
         }
 
-        public async UniTask<CharacterData> LoadCharacterData(int id, CancellationToken token)
+        /*public async UniTask<CharacterData> LoadCharacterData(int id, CancellationToken token)
         {
             var resource = await Resources.LoadAsync<CharacterData>(LabelData.CharacterDataPath + id)
                 .WithCancellation(token);
             return (CharacterData)resource;
-        }
+        }*/
 
         public CatalogItem LoadCatalogItem(int id, CancellationToken token)
         {

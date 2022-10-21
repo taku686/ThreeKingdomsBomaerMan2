@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
+using Assets.Scripts.Common.ResourceManager;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.NetworkManager;
@@ -13,8 +14,7 @@ namespace Manager.BattleManager
 {
     public class PlayerManager : MonoBehaviour
     {
-        [Inject] private ILoadResource _resourceManager;
-
+        [Inject] private CatalogManager _resourceManager;
         private CancellationToken _token;
         [SerializeField] private List<Transform> startPointList;
         [SerializeField] private Transform playerParent;
@@ -24,7 +24,7 @@ namespace Manager.BattleManager
             _token = this.GetCancellationTokenOnDestroy();
             var spawnPoint = GetSpawnPoint(playerIndex);
             var playerObj =
-                PhotonNetwork.Instantiate(LabelData.CharacterPrefabPath + characterData.CharaObj.name,
+                PhotonNetwork.Instantiate(LabelData.CharacterPrefabPath + characterData.CharaObj,
                     spawnPoint.position, spawnPoint.rotation);
             playerObj.transform.SetParent(playerParent);
             InitializeComponent(playerObj, characterData);

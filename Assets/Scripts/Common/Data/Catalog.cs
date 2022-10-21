@@ -6,6 +6,6 @@ namespace Assets.Scripts.Common.Data
 {
     public class Catalog
     {
-        public Dictionary<int, CatalogItem> Characters;
+        public readonly Dictionary<int, CharacterData> Characters = new Dictionary<int, CharacterData>();
     }
 }

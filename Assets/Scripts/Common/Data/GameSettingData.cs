@@ -5,6 +5,25 @@ namespace Common.Data
         public static float MoveThreshold = 0.01f;
         public static float TurnDuration = 0.1f;
         public static string TitleID = "92AF5";
+
+        public static CharacterColor GetCharacterColor(string color)
+        {
+            switch (color)
+            {
+                case nameof(CharacterColor.Red):
+                    return CharacterColor.Red;
+                case nameof(CharacterColor.Blue):
+                    return CharacterColor.Blue;
+                case nameof(CharacterColor.Green):
+                    return CharacterColor.Green;
+                case nameof(CharacterColor.Purple):
+                    return CharacterColor.Purple;
+                case nameof(CharacterColor.Yellow):
+                    return CharacterColor.Yellow;
+                default:
+                    return CharacterColor.Red;
+            }
+        }
     }
 
     public enum Direction

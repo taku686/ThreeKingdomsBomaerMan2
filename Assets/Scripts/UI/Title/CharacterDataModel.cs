@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using Assets.Scripts.Common.ResourceManager;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager;
@@ -12,11 +13,11 @@ using Zenject;
 
 namespace UI.Title
 {
-    public class CharacterDataModel : ScriptableObject
+    public class CharacterDataModel
     {
-        [Inject] private ILoadResource _resourceManager;
-
+        [Inject] private CatalogManager _resourceManager;
         [Inject] private MainManager _mainManager;
+        [Inject] private CatalogManager _catalogManager;
         private UserManager _userManager;
 
         private static readonly Dictionary<int, CharacterData> CharacterDataList =
@@ -30,7 +31,6 @@ namespace UI.Title
 
         private CatalogItem _catalogItem;
 
-        public User UserData;
         public CatalogItem CatalogItem => _catalogItem;
 
         public async UniTask Initialize(UserManager userManager, CancellationToken cancellationToken)
@@ -41,18 +41,19 @@ namespace UI.Title
             }
 
             _userManager = userManager;
-            await InitializeCharacterData(cancellationToken);
+            InitializeCharacterData();
             await InitializeCharacterSprite(cancellationToken);
             InitializeUserData(cancellationToken);
             await InitializeCharacterColor(cancellationToken);
         }
 
-        private async UniTask InitializeCharacterData(CancellationToken cancellationToken)
+
+        private void InitializeCharacterData()
         {
             for (int i = 0; i < GetCharacterCount(); i++)
             {
-                var characterData = await _resourceManager.LoadCharacterData(i, cancellationToken);
-                CharacterDataList.Add(i, characterData);
+                var characterData = _resourceManager.LoadCharacterData(i);
+                CharacterDataList[i] = characterData;
             }
         }
 
@@ -91,6 +92,11 @@ namespace UI.Title
         public Sprite GetCharacterColor(int id)
         {
             return _characterColorList[id];
+        }
+
+        public GameObject GetCharacterGameObject(int id)
+        {
+            return _catalogManager.CharacterGameObjects[id];
         }
 
         public int GetCharacterCount()

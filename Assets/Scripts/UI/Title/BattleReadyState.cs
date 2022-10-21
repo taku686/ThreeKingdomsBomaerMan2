@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Common.Data;
 using DG.Tweening;
 using UnityEngine;
 using Photon.Pun;
@@ -102,7 +103,9 @@ namespace UI.Title
 
                         if (image.CompareTag("BackGround"))
                         {
-                            image.sprite = Owner._characterDataModel.GetCharacterColor((int)characterData.CharaColor);
+                            image.sprite =
+                                Owner._characterDataModel.GetCharacterColor(
+                                    (int)GameSettingData.GetCharacterColor(characterData.CharaColor));
                         }
                     }
 

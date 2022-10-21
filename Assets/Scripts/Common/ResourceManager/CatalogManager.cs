@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Assets.Scripts.Common.Data;
 using Common.Data;
@@ -10,49 +12,74 @@ using Zenject;
 
 namespace Assets.Scripts.Common.ResourceManager
 {
-    public class CatalogManager : MonoBehaviour, ILoadResource
+    public class CatalogManager : MonoBehaviour
     {
-        private readonly Catalog _catalog;
+        private Catalog _catalog;
         private const string ObjKey = "charaObj";
+        private const string IsLockKey = "isLock";
+        private const string NameKey = "name";
+        private const string IDKey = "id";
+        private const string SpeedKey = "speed";
+        private const string BombLimitKey = "bombLimit";
+        private const string AttackKey = "attack";
+        private const string FireRangeKey = "fireRange";
+        private const string HpKey = "hp";
+        private const string CharaColorKey = "charaColor";
+        private const string CharacterClassKey = "Character";
+        private readonly Dictionary<int, GameObject> _characterGameObjects = new Dictionary<int, GameObject>();
 
-        public CatalogManager(Catalog catalog, User user)
-        {
-            _catalog = catalog;
-            
-          //  _user = user;
-        }
+        public Dictionary<int, GameObject> CharacterGameObjects => _characterGameObjects;
 
-        public UniTask<GameObject> LoadGameObject(string path, CancellationToken token)
+        public async UniTask Initialize(List<CatalogItem> catalogItems)
         {
-            throw new System.NotImplementedException();
-        }
-
-        public async UniTask<GameObject> LoadGameObject(string path, int id, CancellationToken token)
-        {
-            var customData = JsonConvert.DeserializeObject<CharacterData>(_catalog.Characters[id].CustomData);
-            if (customData != null)
+            _catalog = new Catalog();
+            foreach (var item in catalogItems)
             {
-                var resource = await Resources.LoadAsync<GameObject>(path + customData.CharaObj)
-                    .WithCancellation(token);
-                return (GameObject)resource;
+                if (item.ItemClass != CharacterClassKey)
+                {
+                    continue;
+                }
+
+                var customData = JsonConvert.DeserializeObject<CharacterData[]>(item.CustomData);
+                if (customData == null)
+                {
+                    continue;
+                }
+
+                var characterData = new CharacterData
+                {
+                    CharaObj = customData[0].CharaObj,
+                    IsLock = customData[0].IsLock,
+                    Name = customData[0].Name,
+                    ID = customData[0].ID,
+                    Speed = customData[0].Speed,
+                    BombLimit = customData[0].BombLimit,
+                    Attack = customData[0].Attack,
+                    FireRange = customData[0].FireRange,
+                    Hp = customData[0].Hp,
+                };
+                _catalog.Characters[customData[0].ID] = characterData;
+                await LoadGameObject(LabelData.CharacterPrefabPath, customData[0].ID,
+                        this.GetCancellationTokenOnDestroy())
+                    .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
             }
-            else
+        }
+
+        private async UniTask LoadGameObject(string path, int id, CancellationToken token)
+        {
+            var charaObj = _catalog.Characters[id].CharaObj;
+            if (charaObj == null)
             {
-                return null;
+                return;
             }
+
+            var resource = await Resources.LoadAsync<GameObject>(path + charaObj)
+                .WithCancellation(token);
+            _characterGameObjects[id] = (GameObject)resource;
         }
 
-        public UniTask<GameObject> LoadGameObject(int id, CancellationToken token)
-        {
-            throw new System.NotImplementedException();
-        }
 
-        public UniTask<CharacterData> LoadCharacterData(int id, CancellationToken token)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public CatalogItem LoadCatalogItem(int id, CancellationToken token)
+        public CharacterData LoadCharacterData(int id)
         {
             return _catalog.Characters[id];
         }
