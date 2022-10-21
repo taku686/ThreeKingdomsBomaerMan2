@@ -7,8 +7,6 @@ namespace UI.Title
 {
     public partial class TitlePresenter
     {
-        private static readonly int Attack = Animator.StringToHash("Attack");
-        private static readonly int Passive = Animator.StringToHash("Passive");
         private static readonly int Active = Animator.StringToHash("Active");
 
         public class CharacterDetailState : State
@@ -16,14 +14,6 @@ namespace UI.Title
             protected override void OnEnter(State prevState)
             {
                 Initialize();
-            }
-
-            protected override void OnExit(State nextState)
-            {
-            }
-
-            protected override void OnUpdate()
-            {
             }
 
             private async void Initialize()
@@ -39,7 +29,7 @@ namespace UI.Title
             private void InitializeContent()
             {
                 Owner.characterDetailView.Name.text =
-                    Owner._titleModel.GetCharacterData(Owner._currentCharacterId).Name;
+                    Owner._characterDataModel.GetCharacterData(Owner._currentCharacterId).Name;
             }
 
             private void InitializeButton()
@@ -52,7 +42,7 @@ namespace UI.Title
 
             private void OnClickBackButton()
             {
-                Owner.CreateCharacter(Owner._titleModel.UserData.currentCharacterID.Value);
+                Owner.CreateCharacter(Owner._userManager.equipCharacterId.Value);
                 Owner.DisableTitleGameObject();
                 Owner.mainView.CharacterListGameObject.SetActive(true);
                 Owner._stateMachine.Dispatch((int)Event.CharacterSelectBack);
@@ -60,7 +50,7 @@ namespace UI.Title
 
             private void OnClickSelectButton()
             {
-                Owner._titleModel.UserData.currentCharacterID.Value = Owner._currentCharacterId;
+                Owner._userManager.equipCharacterId.Value = Owner._currentCharacterId;
                 Owner.DisableTitleGameObject();
                 Owner.mainView.MainGameObject.SetActive(true);
                 Owner._stateMachine.Dispatch((int)Event.Main);

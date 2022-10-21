@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Common.Data;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -23,9 +24,6 @@ namespace UI.Title
             {
             }
 
-            protected override void OnUpdate()
-            {
-            }
 
             private void Initialize()
             {
@@ -50,7 +48,7 @@ namespace UI.Title
 
                 _gridGroupLists.Clear();
                 GameObject gridGroup = null;
-                for (int i = 0; i < Owner._titleModel.GetCharacterCount(); i++)
+                for (int i = 0; i < Owner._characterDataModel.GetCharacterCount(); i++)
                 {
                     if (i % 5 == 0)
                     {
@@ -61,7 +59,7 @@ namespace UI.Title
 
                     if (gridGroup != null)
                     {
-                        SetupGrip(Owner._titleModel.GetCharacterData(i), gridGroup.transform);
+                        SetupGrip(Owner._characterDataModel.GetCharacterData(i), gridGroup.transform);
                     }
                 }
             }
@@ -80,12 +78,14 @@ namespace UI.Title
                     {
                         if (image.CompareTag("CharacterImage"))
                         {
-                            image.sprite = Owner._titleModel.GetCharacterSprite(characterData.ID);
+                            image.sprite = Owner._characterDataModel.GetCharacterSprite(characterData.ID);
                         }
 
                         if (image.CompareTag("BackGround"))
                         {
-                            image.sprite = Owner._titleModel.GetCharacterColor((int)characterData.CharaColor);
+                            image.sprite =
+                                Owner._characterDataModel.GetCharacterColor(
+                                    (int)GameSettingData.GetCharacterColor(characterData.CharaColor));
                         }
                     }
 
@@ -106,7 +106,7 @@ namespace UI.Title
                         if (image.gameObject.CompareTag("CharacterImage"))
                         {
                             image.color = Color.black;
-                            image.sprite = Owner._titleModel.GetCharacterSprite(characterData.ID);
+                            image.sprite = Owner._characterDataModel.GetCharacterSprite(characterData.ID);
                         }
                     }
                 }
@@ -127,20 +127,27 @@ namespace UI.Title
                         var preCharacter = Owner._character;
                         Destroy(preCharacter);
                         var characterData = raycastResult.gameObject.GetComponent<CharacterGrid>().characterData;
-                        Owner._character = Instantiate(characterData.CharaObj,
+                        Owner._character = Instantiate(Owner._characterDataModel.GetCharacterGameObject(characterData.ID),
                             characterCreatePosition.position,
                             characterCreatePosition.rotation, characterCreatePosition);
                         Owner._currentCharacterId = characterData.ID;
-                        Owner._stateMachine.Dispatch((int)Event.CharacterDetail);
+                        Owner._uiAnimation.OnClickScaleAnimation(raycastResult.gameObject)
+                            .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.CharacterDetail); })
+                            .SetLink(Owner.gameObject);
                     }
                 }
             }
 
             private void OnClickBack()
             {
-                Owner.DisableTitleGameObject();
-                Owner.mainView.MainGameObject.SetActive(true);
-                Owner._stateMachine.Dispatch((int)Event.Main);
+                Owner._uiAnimation.OnClickScaleColorAnimation(Owner.characterSelectView.BackButton.gameObject)
+                    .OnComplete(() =>
+                    {
+                        Owner.DisableTitleGameObject();
+                        Owner.mainView.MainGameObject.SetActive(true);
+                        Owner._stateMachine.Dispatch((int)Event.Main);
+                    })
+                    .SetLink(Owner.gameObject);
             }
         }
     }
