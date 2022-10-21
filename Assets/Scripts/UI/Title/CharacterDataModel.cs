@@ -53,7 +53,6 @@ namespace UI.Title
             for (int i = 0; i < GetCharacterCount(); i++)
             {
                 var characterData = _resourceManager.LoadCharacterData(i);
-                Debug.Log(characterData.Name);
                 CharacterDataList[i] = characterData;
             }
         }

@@ -22,8 +22,9 @@ namespace UI.Title
             private void Initialize()
             {
                 Owner.DisableTitleGameObject();
-                Owner.mainView.MainGameObject.SetActive(true);
+                Owner.CreateCharacter(Owner._userManager.equipCharacterId.Value);
                 InitializeButton();
+                Owner.mainView.MainGameObject.SetActive(true);
             }
 
             private void InitializeButton()
