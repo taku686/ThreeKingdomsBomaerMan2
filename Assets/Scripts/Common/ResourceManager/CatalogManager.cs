@@ -15,16 +15,6 @@ namespace Assets.Scripts.Common.ResourceManager
     public class CatalogManager : MonoBehaviour
     {
         private Catalog _catalog;
-        private const string ObjKey = "charaObj";
-        private const string IsLockKey = "isLock";
-        private const string NameKey = "name";
-        private const string IDKey = "id";
-        private const string SpeedKey = "speed";
-        private const string BombLimitKey = "bombLimit";
-        private const string AttackKey = "attack";
-        private const string FireRangeKey = "fireRange";
-        private const string HpKey = "hp";
-        private const string CharaColorKey = "charaColor";
         private const string CharacterClassKey = "Character";
         private readonly Dictionary<int, GameObject> _characterGameObjects = new Dictionary<int, GameObject>();
 
@@ -57,6 +47,7 @@ namespace Assets.Scripts.Common.ResourceManager
                     Attack = customData[0].Attack,
                     FireRange = customData[0].FireRange,
                     Hp = customData[0].Hp,
+                    CharaColor = customData[0].CharaColor
                 };
                 _catalog.Characters[customData[0].ID] = characterData;
                 await LoadGameObject(LabelData.CharacterPrefabPath, customData[0].ID,
@@ -88,11 +79,6 @@ namespace Assets.Scripts.Common.ResourceManager
         {
             throw new System.NotImplementedException();
         }
-
-        /*public User GetUser(CancellationToken token)
-        {
-            return _user;
-        }*/
 
         public async UniTask<Sprite> LoadCharacterSprite(int id, CancellationToken token)
         {

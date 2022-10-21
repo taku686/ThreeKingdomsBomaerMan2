@@ -69,6 +69,7 @@ namespace UI.Title
                     await Owner._characterDataModel.Initialize(Owner._userManager, Owner._token);
                     Owner._userManager.equipCharacterId
                         .Subscribe(index => { Owner.CreateCharacter(index); }).AddTo(Owner._token);
+                    Owner._mainManager.isInitialize = true;
                     Owner._stateMachine.Dispatch((int)Event.Login);
                 }
                 else

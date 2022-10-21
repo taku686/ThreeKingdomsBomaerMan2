@@ -53,6 +53,7 @@ namespace UI.Title
             for (int i = 0; i < GetCharacterCount(); i++)
             {
                 var characterData = _resourceManager.LoadCharacterData(i);
+                Debug.Log(characterData.Name);
                 CharacterDataList[i] = characterData;
             }
         }
@@ -106,6 +107,7 @@ namespace UI.Title
 
         public CharacterData GetUserEquipCharacterData()
         {
+            Debug.Log(_userManager.equipCharacterId.Value);
             return GetCharacterData(_userManager.equipCharacterId.Value);
         }
 

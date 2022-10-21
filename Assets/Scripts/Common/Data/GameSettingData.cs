@@ -10,15 +10,15 @@ namespace Common.Data
         {
             switch (color)
             {
-                case nameof(CharacterColor.Red):
+                case "Red":
                     return CharacterColor.Red;
-                case nameof(CharacterColor.Blue):
+                case "Blue":
                     return CharacterColor.Blue;
-                case nameof(CharacterColor.Green):
+                case "Green":
                     return CharacterColor.Green;
-                case nameof(CharacterColor.Purple):
+                case "Purple":
                     return CharacterColor.Purple;
-                case nameof(CharacterColor.Yellow):
+                case "Yellow":
                     return CharacterColor.Yellow;
                 default:
                     return CharacterColor.Red;

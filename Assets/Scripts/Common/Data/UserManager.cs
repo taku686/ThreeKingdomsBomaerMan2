@@ -14,9 +14,5 @@ namespace Common.Data
             _user = user;
             equipCharacterId.Subscribe(index => { _user.EquipCharacterId = index; }).AddTo(this);
         }
-
-        public void SetUser(User user)
-        {
-        }
     }
 }

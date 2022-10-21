@@ -103,6 +103,7 @@ namespace UI.Title
 
                         if (image.CompareTag("BackGround"))
                         {
+                            Debug.Log(characterData.Name+characterData.CharaColor);
                             image.sprite =
                                 Owner._characterDataModel.GetCharacterColor(
                                     (int)GameSettingData.GetCharacterColor(characterData.CharaColor));
