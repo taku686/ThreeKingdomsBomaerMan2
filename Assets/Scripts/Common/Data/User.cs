@@ -10,7 +10,7 @@ namespace Common.Data
         public int Level;
         public string Name;
         public bool IsTutorial;
-        public Dictionary<int, CharacterData> Characters;
+        public Dictionary<int, CharacterData> Characters = new Dictionary<int, CharacterData>();
 
         public void SetUser(User user)
         {
@@ -22,9 +22,15 @@ namespace Common.Data
             Characters = user.Characters;
         }
 
-        public User Create()
+        public User Create(CharacterData characterData)
         {
-            var user = new User();
+            var user = this;
+            user.Gender = Gender.Male;
+            user.EquipCharacterId = 0;
+            user.Level = 1;
+            user.Name = "";
+            user.IsTutorial = false;
+            user.Characters[0] = characterData;
             return user;
         }
     }

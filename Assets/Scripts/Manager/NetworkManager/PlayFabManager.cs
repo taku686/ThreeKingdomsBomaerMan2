@@ -23,6 +23,7 @@ namespace Assets.Scripts.Common.PlayFab
         [Inject] private CatalogManager _catalogManager;
         private const string Email = "test9@gmail.com";
         private const string Password = "Passw0rd";
+        private const string UserKey = "User";
         private GetPlayerCombinedInfoRequestParams _info;
 
         private async UniTaskVoid Start()
@@ -59,14 +60,33 @@ namespace Assets.Scripts.Common.PlayFab
 
         private async UniTask SetData(PlayFabResult<LoginResult> response)
         {
-            var user = JsonConvert.DeserializeObject<User>(response.Result.InfoResultPayload.UserData["User"]
-                .Value);
-            if (user != null)
-            {
-                _userManager.Initialize(user);
-            }
-
             await GetCatalogItems().AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+            if (!response.Result.InfoResultPayload.UserData.TryGetValue(UserKey, out UserDataRecord userData))
+            {
+                var characterData = _catalogManager.LoadCharacterData(0);
+                Debug.Log(characterData.Name);
+                await UpdateUserDataAsync(UserKey, new User().Create(characterData))
+                    .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+                //再度ユーザーデータ取得
+                if (!PlayerPrefsManager.IsLoginEmailAddress)
+                {
+                    await LoginWithCustomId().AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+                }
+                else
+                {
+                    await LoginWithEmail(Email, Password)
+                        .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+                }
+            }
+            else
+            {
+                var user = JsonConvert.DeserializeObject<User>(response.Result.InfoResultPayload.UserData[UserKey]
+                    .Value);
+                if (user != null)
+                {
+                    _userManager.Initialize(user);
+                }
+            }
         }
 
         public async UniTask<bool> LoginWithCustomId()
@@ -86,7 +106,7 @@ namespace Assets.Scripts.Common.PlayFab
             }
             else
             {
-                await SetData(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+                await LoginSuccess(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
                 return true;
             }
         }
@@ -123,7 +143,7 @@ namespace Assets.Scripts.Common.PlayFab
             else
             {
                 Debug.Log($"Login success!! my PlayFabID is {response.Result.PlayFabId}");
-                await SetData(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+                await LoginSuccess(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
                 if (PlayerPrefsManager.IsLoginEmailAddress)
                 {
                     PlayerPrefsManager.UserID = response.Result.InfoResultPayload.AccountInfo.CustomIdInfo.CustomId;
@@ -195,7 +215,7 @@ namespace Assets.Scripts.Common.PlayFab
         {
             var request = new UpdateUserDataRequest()
             {
-                KeysToRemove = new List<string> { "User" }
+                KeysToRemove = new List<string> { UserKey }
             };
 
             var response = await PlayFabClientAPI.UpdateUserDataAsync(request);
@@ -265,6 +285,11 @@ namespace Assets.Scripts.Common.PlayFab
                 await _catalogManager.Initialize(response.Result.Catalog)
                     .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
             }
+        }
+
+        private async UniTask LoginSuccess(PlayFabResult<LoginResult> response)
+        {
+            await SetData(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
         }
     }
 }
