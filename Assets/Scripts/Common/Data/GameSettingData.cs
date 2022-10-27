@@ -2,9 +2,11 @@ namespace Common.Data
 {
     public static class GameSettingData
     {
-        public static float MoveThreshold = 0.01f;
+        public static float MoveThreshold = 0.6f;
+        public static float RotateThreshold = 0.01f;
         public static float TurnDuration = 0.1f;
         public static string TitleID = "92AF5";
+        public static string JoystickName = "JoyStickMove";
 
         public static CharacterColor GetCharacterColor(string color)
         {

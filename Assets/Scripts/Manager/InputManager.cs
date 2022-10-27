@@ -1,4 +1,5 @@
-﻿using Photon.Pun;
+﻿using Common.Data;
+using Photon.Pun;
 using UniRx;
 using UnityEngine;
 
@@ -25,8 +26,11 @@ namespace Manager
             {
                 return;
             }
+
+            Debug.Log("Horizontal" + UltimateJoystick.GetHorizontalAxis(GameSettingData.JoystickName));
             _moveDirection.SetValueAndForceNotify(
-                new Vector3Int((int)Input.GetAxisRaw("Horizontal"), 0, (int)Input.GetAxisRaw("Vertical")));
+                new Vector3(UltimateJoystick.GetHorizontalAxis(GameSettingData.JoystickName), 0,
+                    UltimateJoystick.GetVerticalAxis(GameSettingData.JoystickName)));
         }
     }
 }

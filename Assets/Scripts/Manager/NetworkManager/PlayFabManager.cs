@@ -49,7 +49,7 @@ namespace Assets.Scripts.Common.PlayFab
 
         public void Initialize()
         {
-            PlayFabSettings.staticSettings.TitleId = "92AF5";
+            PlayFabSettings.staticSettings.TitleId = GameSettingData.TitleID;
             _info = new GetPlayerCombinedInfoRequestParams()
             {
                 GetUserData = true,

@@ -33,14 +33,39 @@ namespace Player.Common
             _animationManager.Initialize(transform, _animator);
             _initRotation = transform.localEulerAngles;
             _moveSpeed = moveSpeed;
-            _currentDirection.Pairwise().Subscribe(dir =>
+        }
+
+        public async UniTask Rotate(Vector3 direction)
+        {
+            if (_isTurn || (direction.x == 0 && direction.z == 0))
             {
-                transform.DOLocalRotate(GetRotation(dir.Current).eulerAngles, GameSettingData.TurnDuration);
-                if (dir.Current != dir.Previous)
-                {
-                    _isTurn = true;
-                }
-            }).AddTo(this);
+                return;
+            }
+
+            await transform
+                .DOLocalRotate(GetRotation(GetDirection(direction.x, direction.z)).eulerAngles,
+                    GameSettingData.TurnDuration)
+                .AsyncWaitForCompletion();
+            _isTurn = false;
+        }
+
+        public async UniTask Rotate(float dirX, float dirZ)
+        {
+            if (_isTurn || (dirX == 0 && dirZ == 0))
+            {
+                return;
+            }
+
+            await transform
+                .DOLocalRotate(GetRotation(GetDirection(dirX, dirZ)).eulerAngles,
+                    GameSettingData.TurnDuration)
+                .AsyncWaitForCompletion();
+            _isTurn = false;
+        }
+
+        public void AnimationMove(Vector3 direction)
+        {
+            _animationManager.Move(direction.x, direction.z);
         }
 
         public async UniTaskVoid Move(Vector3 direction)
@@ -52,26 +77,38 @@ namespace Player.Common
 
             float xDir = direction.x;
             float zDir = direction.z;
-
-
-            if (xDir != 0)
+            float absX = Mathf.Abs(xDir);
+            float absZ = Mathf.Abs(zDir);
+            if (absX > absZ)
             {
+                if (absX >= GameSettingData.MoveThreshold)
+                {
+                    xDir = xDir > 0 ? 1 : -1;
+                }
+                else
+                {
+                    xDir = 0;
+                }
                 zDir = 0;
             }
-
-
-            _animationManager.Move(xDir, zDir);
-
-            if (xDir != 0 || zDir != 0)
+            else if (absX < absZ)
             {
-                _currentDirection.Value = GetDirection(xDir, zDir);
-                if (_isTurn)
+                if (absZ >= GameSettingData.MoveThreshold)
                 {
-                    await UniTask.Delay(TimeSpan.FromSeconds(GameSettingData.TurnDuration), cancellationToken: _token);
-                    _isTurn = false;
-                    return;
+                    zDir = zDir > 0 ? 1 : -1;
+                }
+                else
+                {
+                    zDir = 0;
                 }
 
+                xDir = 0;
+            }
+            
+            Rotate(xDir, zDir).AttachExternalCancellation(this.GetCancellationTokenOnDestroy()).Forget();
+            _animationManager.Move(xDir, zDir);
+            if (xDir != 0 || zDir != 0)
+            {
                 Vector3 start = transform.position;
                 Vector3 end = start + new Vector3(xDir, 0, zDir);
 
@@ -157,7 +194,7 @@ namespace Player.Common
 
             if (dir == Direction.None)
             {
-                return Quaternion.Euler(Vector3.zero);
+                return transform.rotation;
             }
 
             return Quaternion.Euler(Vector3.zero);
@@ -165,22 +202,22 @@ namespace Player.Common
 
         private Direction GetDirection(float h, float v)
         {
-            if (h > GameSettingData.MoveThreshold)
+            if (h > GameSettingData.RotateThreshold)
             {
                 return Direction.Right;
             }
 
-            if (h < -GameSettingData.MoveThreshold)
+            if (h < -GameSettingData.RotateThreshold)
             {
                 return Direction.Left;
             }
 
-            if (v > GameSettingData.MoveThreshold)
+            if (v > GameSettingData.RotateThreshold)
             {
                 return Direction.Back;
             }
 
-            if (v < -GameSettingData.MoveThreshold)
+            if (v < -GameSettingData.RotateThreshold)
             {
                 return Direction.Forward;
             }
