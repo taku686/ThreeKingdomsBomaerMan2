@@ -12,14 +12,12 @@ namespace Common.Installer
     public class BattleSceneInstaller : MonoInstaller<BattleSceneInstaller>
     {
         [SerializeField] private GameObject inputManagerGameObject;
-        [SerializeField] private GameObject animationManagerGameObject;
         [SerializeField] private GameObject playerManagerGameObject;
 
         public override void InstallBindings()
         {
             //Manager
             Container.Bind<InputManager>().FromComponentOn(inputManagerGameObject).AsCached();
-            Container.Bind<AnimationManager>().FromComponentOn(animationManagerGameObject).AsCached();
             Container.Bind<PlayerManager>().FromComponentOn(playerManagerGameObject).AsCached();
         }
     }

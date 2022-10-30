@@ -1,23 +1,49 @@
 using Common.Data;
 using UnityEngine;
+using Zenject;
 
 namespace Manager
 {
-    public class AnimationManager : MonoBehaviour
+    public class AnimationManager
     {
         private Animator _animator;
-        private Transform _player;
+        private static readonly string MoveKey = "speedv";
 
-        public void Initialize(Transform player, Animator animator)
+        public AnimationManager(Animator animator)
         {
             _animator = animator;
-            _player = player;
         }
 
-        public void Move(float x, float z)
+        [Inject]
+        private void Initialize(Animator animator)
         {
-            var speed = Mathf.Max(Mathf.Abs(x), Mathf.Abs(z));
-            _animator.SetFloat("speedv", speed);
+            _animator = animator;
+        }
+
+        public void Move(Direction direction)
+        {
+            var vec3Dir = DirectionToVector3(direction);
+            var speed = Mathf.Max(Mathf.Abs(vec3Dir.x), Mathf.Abs(vec3Dir.z));
+            _animator.SetFloat(MoveKey, speed);
+        }
+
+        private Vector3 DirectionToVector3(Direction direction)
+        {
+            switch (direction)
+            {
+                case Direction.Forward:
+                    return Vector3.forward;
+                case Direction.Back:
+                    return Vector3.back;
+                case Direction.Left:
+                    return Vector3.left;
+                case Direction.Right:
+                    return Vector3.right;
+                case Direction.None:
+                    return Vector3.zero;
+                default:
+                    return Vector3.zero;
+            }
         }
     }
 }

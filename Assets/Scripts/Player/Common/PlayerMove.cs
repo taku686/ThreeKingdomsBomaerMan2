@@ -14,8 +14,6 @@ namespace Player.Common
     public class PlayerMove : MonoBehaviour, IPlayerMove
     {
         [Inject] private AnimationManager _animationManager;
-
-        //  [SerializeField] private LayerMask _layerMask;
         private float _moveSpeed;
 
         private Vector3 _initRotation;
@@ -30,7 +28,6 @@ namespace Player.Common
         {
             _token = this.GetCancellationTokenOnDestroy();
             _animator = GetComponent<Animator>();
-            _animationManager.Initialize(transform, _animator);
             _initRotation = transform.localEulerAngles;
             _moveSpeed = moveSpeed;
         }
@@ -65,7 +62,7 @@ namespace Player.Common
 
         public void AnimationMove(Vector3 direction)
         {
-            _animationManager.Move(direction.x, direction.z);
+           // _animationManager.Move(direction.x, direction.z);
         }
 
         public async UniTaskVoid Move(Vector3 direction)
@@ -106,7 +103,7 @@ namespace Player.Common
             }
             
             Rotate(xDir, zDir).AttachExternalCancellation(this.GetCancellationTokenOnDestroy()).Forget();
-            _animationManager.Move(xDir, zDir);
+          //  _animationManager.Move(xDir, zDir);
             if (xDir != 0 || zDir != 0)
             {
                 Vector3 start = transform.position;
