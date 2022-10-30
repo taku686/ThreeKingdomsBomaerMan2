@@ -9,10 +9,11 @@ namespace Player.Common
     {
         private Transform _playerTransform;
         private bool _isMoving;
-        private readonly float _rayDistance = 1.1f;
+        private readonly float _rayDistance = 0.9f;
         private LayerMask _blockingLayer;
         private float _moveSpeed;
-        private const float ObstacleDistance = 0.3f;
+        private const float ObstacleDistance = 0.2f;
+        private const float Radius = 0.1f;
 
         private void Start()
         {
@@ -22,7 +23,8 @@ namespace Player.Common
 
         private void Update()
         {
-            Move(new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"))).Forget();
+            Move(new Vector3(UltimateJoystick.GetHorizontalAxis(GameSettingData.JoystickName), 0,
+                UltimateJoystick.GetVerticalAxis(GameSettingData.JoystickName))).Forget();
         }
 
         public void Initialize(float moveSpeed)
@@ -120,7 +122,7 @@ namespace Player.Common
         {
             start = new Vector3(start.x, 0.5f, start.z);
             end = new Vector3(end.x, 0.5f, end.z);
-            return Physics.Raycast(start, end - start, out obstacle, _rayDistance, _blockingLayer,
+            return Physics.SphereCast(start, Radius, end - start, out obstacle, _rayDistance, _blockingLayer,
                 QueryTriggerInteraction.Collide);
         }
 
