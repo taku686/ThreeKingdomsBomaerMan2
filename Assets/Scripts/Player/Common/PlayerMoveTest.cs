@@ -12,8 +12,9 @@ namespace Player.Common
 {
     public class PlayerMoveTest : MonoBehaviour
     {
-        private static readonly float ObstacleDistance = 0.1f;
-        private static readonly float Radius = 0.3f;
+        
+        private static readonly float ObstacleDistance = Mathf.Epsilon;
+        private static readonly float Radius = 0.4f;
         private static readonly float RayDistance = 1.0f - Radius;
         private static readonly float RotateDuration = 0.1f;
         private Vector3 _initRotation;
@@ -51,13 +52,10 @@ namespace Player.Common
 
         private void Update()
         {
-#if UNITY_EDITOR
-            Move(new Vector3(Input.GetAxis("Horizontal"), 0,
-                Input.GetAxis("Vertical"))).Forget();
-#else
-             Move(new Vector3(UltimateJoystick.GetHorizontalAxis(GameSettingData.JoystickName), 0,
+            /*Move(new Vector3(Input.GetAxis("Horizontal"), 0,
+                Input.GetAxis("Vertical"))).Forget();*/
+            Move(new Vector3(UltimateJoystick.GetHorizontalAxis(GameSettingData.JoystickName), 0,
                 UltimateJoystick.GetVerticalAxis(GameSettingData.JoystickName))).Forget();
-#endif
         }
 
         public void Initialize(float moveSpeed)
@@ -196,9 +194,10 @@ namespace Player.Common
                 position1 = Vector3.MoveTowards(position, end, _moveSpeed * Time.deltaTime);
                 transform.position = position1;
                 sqrRemainingDistance = (position1 - end).sqrMagnitude;
-                await UniTask.Yield(PlayerLoopTiming.Update,_cts.Token);
+                await UniTask.Yield(PlayerLoopTiming.Update, _cts.Token);
             }
 
+            _playerTransform.position = end;
             _isMoving = false;
         }
 
