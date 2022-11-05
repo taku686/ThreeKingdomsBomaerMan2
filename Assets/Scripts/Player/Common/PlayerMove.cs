@@ -1,227 +1,328 @@
-﻿using System;
+using System;
+using System.Diagnostics.Eventing.Reader;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Manager;
-using ModestTree;
-using UniRx;
 using UnityEngine;
 using Zenject;
 
 namespace Player.Common
 {
-    public class PlayerMove : MonoBehaviour, IPlayerMove
+    public class PlayerMove : MonoBehaviour
     {
-        [Inject] private AnimationManager _animationManager;
-        private float _moveSpeed;
-
+        private static readonly float ObstacleDistance = Mathf.Epsilon;
+        private static readonly float Radius = 0.3f;
+        private static readonly float RayDistance = 1.0f - Radius;
+        private static readonly float RotateDuration = 0.1f;
         private Vector3 _initRotation;
-        private Animator _animator;
+        private Transform _playerTransform;
         private bool _isMoving;
-        private ReactiveProperty<Direction> _currentDirection = new ReactiveProperty<Direction>(Direction.None);
-        private CancellationToken _token;
-        private bool _isTurn;
+        private LayerMask _blockingLayer;
+        private float _moveSpeed;
+        private Direction _currentDirection;
+        private Direction _prevDirection;
+        private Animator _animator;
+        private AnimationManager _animationManager;
+        private CancellationTokenSource _cts;
 
+        /*void OnDrawGizmos()
+        {
+            Gizmos.color = Color.red;
+            var isHit = Physics.SphereCast(transform.position, Radius, _playerTransform.forward * RayDistance,
+                out var hit);
+            if (isHit)
+            {
+                Gizmos.DrawRay(transform.position, transform.forward * RayDistance);
+                Gizmos.DrawWireSphere(transform.position + transform.forward * (RayDistance), Radius);
+            }
+            else
+            {
+                Gizmos.DrawRay(transform.position, transform.forward * RayDistance);
+                Gizmos.DrawWireSphere(transform.position + transform.forward * (RayDistance), Radius);
+            }
+        }*/
+
+        private void Update()
+        {
+            /*Move(new Vector3(Input.GetAxis("Horizontal"), 0,
+                Input.GetAxis("Vertical"))).Forget();*/
+            /*Move(new Vector3(UltimateJoystick.GetHorizontalAxis(GameSettingData.JoystickName), 0,
+                UltimateJoystick.GetVerticalAxis(GameSettingData.JoystickName))).Forget();*/
+        }
 
         public void Initialize(float moveSpeed)
         {
-            _token = this.GetCancellationTokenOnDestroy();
-            _animator = GetComponent<Animator>();
-            _initRotation = transform.localEulerAngles;
+            _cts = new CancellationTokenSource();
+            _blockingLayer = LayerMask.GetMask("BlockingLayer");
+            _playerTransform = this.transform;
+            _initRotation = _playerTransform.rotation.eulerAngles;
             _moveSpeed = moveSpeed;
-        }
-
-        public async UniTask Rotate(Vector3 direction)
-        {
-            if (_isTurn || (direction.x == 0 && direction.z == 0))
+            if (!gameObject.TryGetComponent(typeof(Animator), out Component animator))
             {
+                Debug.LogError("Animatorがついてない！！");
                 return;
             }
 
-            await transform
-                .DOLocalRotate(GetRotation(GetDirection(direction.x, direction.z)).eulerAngles,
-                    GameSettingData.TurnDuration)
-                .AsyncWaitForCompletion();
-            _isTurn = false;
-        }
-
-        public async UniTask Rotate(float dirX, float dirZ)
-        {
-            if (_isTurn || (dirX == 0 && dirZ == 0))
-            {
-                return;
-            }
-
-            await transform
-                .DOLocalRotate(GetRotation(GetDirection(dirX, dirZ)).eulerAngles,
-                    GameSettingData.TurnDuration)
-                .AsyncWaitForCompletion();
-            _isTurn = false;
-        }
-
-        public void AnimationMove(Vector3 direction)
-        {
-           // _animationManager.Move(direction.x, direction.z);
+            _animator = (Animator)animator;
+            _animationManager = new AnimationManager(_animator);
         }
 
         public async UniTaskVoid Move(Vector3 direction)
         {
             if (_isMoving)
             {
+                var end = _playerTransform.position + _playerTransform.forward * RayDistance;
+                if (IsObstacle(_playerTransform.position, end, out var hit))
+                {
+                    Stop();
+                }
+
                 return;
             }
 
-            float xDir = direction.x;
-            float zDir = direction.z;
-            float absX = Mathf.Abs(xDir);
-            float absZ = Mathf.Abs(zDir);
-            if (absX > absZ)
+            var goDir = GetDirection(direction);
+            _animationManager.Move(goDir);
+            Rotate(goDir, _playerTransform);
+            OnChangeDirection(goDir);
+            if (goDir == Direction.None)
             {
-                if (absX >= GameSettingData.MoveThreshold)
-                {
-                    xDir = xDir > 0 ? 1 : -1;
-                }
-                else
-                {
-                    xDir = 0;
-                }
-                zDir = 0;
+                return;
             }
-            else if (absX < absZ)
+
+            if (goDir == Direction.Right || goDir == Direction.Left)
             {
-                if (absZ >= GameSettingData.MoveThreshold)
-                {
-                    zDir = zDir > 0 ? 1 : -1;
-                }
-                else
-                {
-                    zDir = 0;
-                }
-
-                xDir = 0;
+                direction.z = 0;
             }
-            
-            Rotate(xDir, zDir).AttachExternalCancellation(this.GetCancellationTokenOnDestroy()).Forget();
-          //  _animationManager.Move(xDir, zDir);
-            if (xDir != 0 || zDir != 0)
+
+            if (goDir == Direction.Forward || goDir == Direction.Back)
             {
-                Vector3 start = transform.position;
-                Vector3 end = start + new Vector3(xDir, 0, zDir);
-
-                bool isHit = Physics.Raycast(new Vector3(start.x, 0.5f, start.z),
-                    new Vector3(end.x, 0.5f, end.z) - start,
-                    1, LayerMask.GetMask("BlockingLayer"), QueryTriggerInteraction.Collide);
-
-                // 衝突しておらず、移動中でなく
-                if (!isHit)
-                {
-                    // 滑らかな移動を開始
-                    SmoothMovement(end);
-                }
+                direction.x = 0;
             }
+
+            var position = _playerTransform.position;
+            var target = GetDestination(direction, position);
+            var modifiedTarget = ModifiedDestination(_currentDirection, _prevDirection, target);
+            var isObstacle = IsObstacle(position, modifiedTarget, out var obstacle);
+            if (!isObstacle)
+            {
+                await Movement(position, modifiedTarget)
+                    .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+                return;
+            }
+
+            var canAvoid = CanAvoid(position, obstacle.transform.position, goDir);
+            if (!canAvoid)
+            {
+                return;
+            }
+
+            var avoidDir = AvoidDirection(position, obstacle.transform.position, goDir);
+            var avoidDestination = AvoidDestination(position, avoidDir);
+            isObstacle = IsObstacle(position, avoidDestination, out obstacle);
+            if (isObstacle)
+            {
+                return;
+            }
+
+            var lastDestination = GetDestination(direction, avoidDestination);
+            isObstacle = IsObstacle(avoidDestination, lastDestination, out obstacle);
+            if (isObstacle)
+            {
+                return;
+            }
+
+            Rotate(avoidDir, _playerTransform);
+            _animationManager.Move(avoidDir);
+            await Movement(position, avoidDestination).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+            Rotate(goDir, _playerTransform);
+            _animationManager.Move(goDir);
+            await Movement(position, lastDestination).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
         }
 
-        private async void SmoothMovement(Vector3 end)
+        private Direction GetDirection(Vector3 direction)
         {
-            var sqrRemainingDistance = (transform.position - end).sqrMagnitude;
+            if (direction.x == 0 && direction.z == 0)
+            {
+                return Direction.None;
+            }
+
+            float absX = Mathf.Abs(direction.x);
+            float absZ = Mathf.Abs(direction.z);
+            if (absX > absZ)
+            {
+                return direction.x > 0 ? Direction.Right : Direction.Left;
+            }
+
+            if (absZ > absX)
+            {
+                return direction.z > 0 ? Direction.Forward : Direction.Back;
+            }
+
+            return Direction.None;
+        }
+
+        private Vector3 GetDestination(Vector3 movingDistance, Vector3 player)
+        {
+            return player + movingDistance;
+        }
+
+        private bool IsObstacle(Vector3 start, Vector3 end, out RaycastHit obstacle)
+        {
+            start = new Vector3(start.x, 0.5f, start.z);
+            end = new Vector3(end.x, 0.5f, end.z);
+            return Physics.SphereCast(start, Radius, end - start, out obstacle, RayDistance, _blockingLayer,
+                QueryTriggerInteraction.Collide);
+        }
+
+        private async UniTask Movement(Vector3 start, Vector3 end)
+        {
+            var sqrRemainingDistance = (start - end).sqrMagnitude;
             _isMoving = true;
 
-            while (sqrRemainingDistance > float.Epsilon)
+            while (sqrRemainingDistance > float.Epsilon && !_cts.Token.IsCancellationRequested)
             {
-                var position1 = transform.position;
+                var position1 = _playerTransform.position;
                 var position = position1;
                 position1 = Vector3.MoveTowards(position, end, _moveSpeed * Time.deltaTime);
                 transform.position = position1;
                 sqrRemainingDistance = (position1 - end).sqrMagnitude;
-                await UniTask.Yield();
+                await UniTask.Yield(PlayerLoopTiming.Update, _cts.Token);
             }
 
+            _playerTransform.position = end;
             _isMoving = false;
         }
 
-        private Quaternion GetRotation(float h, float v)
+        private bool CanAvoid(Vector3 playerPos, Vector3 obstaclePos, Direction goDir)
         {
-            if (h > GameSettingData.MoveThreshold)
+            if (goDir == Direction.Back || goDir == Direction.Forward)
             {
-                return Quaternion.Euler(_initRotation + new Vector3(0, -90, 0));
+                return Mathf.Abs(playerPos.x - obstaclePos.x) > ObstacleDistance;
             }
 
-            if (h < -GameSettingData.MoveThreshold)
+            if (goDir == Direction.Left || goDir == Direction.Right)
             {
-                return Quaternion.Euler(_initRotation + new Vector3(0, 90, 0));
+                return Mathf.Abs(playerPos.z - obstaclePos.z) > ObstacleDistance;
             }
 
-            if (v > GameSettingData.MoveThreshold)
-            {
-                return Quaternion.Euler(_initRotation + new Vector3(0, -180, 0));
-            }
-
-            if (v < -GameSettingData.MoveThreshold)
-            {
-                return Quaternion.Euler(_initRotation);
-            }
-            else
-            {
-                return Quaternion.Euler(Vector3.zero);
-            }
+            return false;
         }
 
-        private Quaternion GetRotation(Direction dir)
+        private Direction AvoidDirection(Vector3 playerPos, Vector3 obstaclePos, Direction goDir)
         {
-            if (dir == Direction.Right)
+            if (goDir == Direction.Back || goDir == Direction.Forward)
             {
-                return Quaternion.Euler(_initRotation + new Vector3(0, -90, 0));
+                return playerPos.x > obstaclePos.x ? Direction.Right : Direction.Left;
             }
 
-            if (dir == Direction.Left)
+            if (goDir == Direction.Left || goDir == Direction.Right)
             {
-                return Quaternion.Euler(_initRotation + new Vector3(0, 90, 0));
+                return playerPos.z > obstaclePos.z ? Direction.Forward : Direction.Back;
             }
 
-            if (dir == Direction.Back)
-            {
-                return Quaternion.Euler(_initRotation + new Vector3(0, -180, 0));
-            }
-
-            if (dir == Direction.Forward)
-            {
-                return Quaternion.Euler(_initRotation);
-            }
-
-            if (dir == Direction.None)
-            {
-                return transform.rotation;
-            }
-
-            return Quaternion.Euler(Vector3.zero);
+            return Direction.None;
         }
 
-        private Direction GetDirection(float h, float v)
+        private Vector3 AvoidDestination(Vector3 playerPos, Direction avoidDir)
         {
-            if (h > GameSettingData.RotateThreshold)
+            if (avoidDir == Direction.None)
             {
-                return Direction.Right;
+                return playerPos;
             }
 
-            if (h < -GameSettingData.RotateThreshold)
+            if (avoidDir == Direction.Forward)
             {
-                return Direction.Left;
+                return new Vector3(playerPos.x, playerPos.y, Mathf.Ceil(playerPos.z));
             }
 
-            if (v > GameSettingData.RotateThreshold)
+            if (avoidDir == Direction.Back)
             {
-                return Direction.Back;
+                return new Vector3(playerPos.x, playerPos.y, Mathf.Floor(playerPos.z));
             }
 
-            if (v < -GameSettingData.RotateThreshold)
+            if (avoidDir == Direction.Right)
             {
-                return Direction.Forward;
+                return new Vector3(Mathf.Ceil(playerPos.x), playerPos.y, playerPos.z);
             }
-            else
+
+            if (avoidDir == Direction.Left)
             {
-                return Direction.None;
+                return new Vector3(Mathf.Floor(playerPos.x), playerPos.y, playerPos.z);
             }
+
+            return playerPos;
+        }
+
+        private void Rotate(Direction direction, Transform player)
+        {
+            if (direction == Direction.None)
+            {
+                return;
+            }
+
+            Vector3 nextRotation = _initRotation;
+            switch (direction)
+            {
+                case Direction.Back:
+                    nextRotation = _initRotation;
+                    break;
+                case Direction.Forward:
+                    nextRotation = _initRotation + new Vector3(0, -180, 0);
+                    break;
+                case Direction.Right:
+                    nextRotation = _initRotation + new Vector3(0, -90, 0);
+                    break;
+                case Direction.Left:
+                    nextRotation = _initRotation + new Vector3(0, 90, 0);
+                    break;
+                default:
+                    break;
+            }
+
+            player.DOLocalRotate(nextRotation, RotateDuration);
+        }
+
+        private Vector3 ModifiedDestination(Direction currentDir, Direction prevDir, Vector3 targetPos)
+        {
+            if (currentDir == prevDir || currentDir == Direction.None || prevDir == Direction.None)
+            {
+                return targetPos;
+            }
+
+            if ((currentDir == Direction.Forward || currentDir == Direction.Back) &&
+                (prevDir == Direction.Left || prevDir == Direction.Right))
+            {
+                return new Vector3(targetPos.x, targetPos.y, Mathf.Round(targetPos.z));
+            }
+
+            if ((currentDir == Direction.Left || currentDir == Direction.Right) &&
+                (prevDir == Direction.Forward || prevDir == Direction.Back))
+            {
+                return new Vector3(Mathf.Round(targetPos.x), targetPos.y, targetPos.z);
+            }
+
+            return targetPos;
+        }
+
+        private void OnChangeDirection(Direction currentDirection)
+        {
+            if (_currentDirection == currentDirection)
+            {
+                return;
+            }
+
+            _prevDirection = _currentDirection;
+            _currentDirection = currentDirection;
+        }
+
+        private void Stop()
+        {
+            _isMoving = false;
+            _cts.Cancel();
+            _cts.Dispose();
+            _cts = new CancellationTokenSource();
         }
     }
 }
