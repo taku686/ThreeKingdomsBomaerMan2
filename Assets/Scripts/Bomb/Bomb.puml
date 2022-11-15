@@ -1,0 +1,46 @@
+﻿@startuml
+PlayerCore --> PlayerStateIdle
+PlayerStateIdle --> PlayerPutBomb
+NormalBombData --|> BombDataBase
+NormalBombCreate --|> BombCreateBase
+BombCreateBase --> BombDataBase
+NormalBombCreate --> NormalBombData
+BombManager --> BombCreateBase
+PlayerPutBomb --> BombManager
+class PlayerCore
+{
+
+}
+
+class PlayerStateIdle
+{
+}
+
+abstract class BombDataBase
+{
+- int damageAmount
+- int fireRange
+- ParticleSystem explosionEffect
+- int playerId
+}
+
+abstract class BombCreateBase
+{
+}
+
+class NormalBombCreate
+{
+}
+
+class BombManager
+{
+}
+
+class PlayerPutBomb
+{
+}
+
+class NormalBombData
+{
+}
+@enduml
