@@ -35,7 +35,6 @@ namespace Player.Common
                 }
 
                 _playerTransform = Owner.transform;
-                var token = Owner.GetCancellationTokenOnDestroy();
                 Owner._inputManager.MoveDirection
                     .Subscribe(direction => { Owner._playerMove.Move(direction).Forget(); })
                     .AddTo(Owner.gameObject);

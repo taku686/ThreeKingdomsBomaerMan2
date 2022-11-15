@@ -13,6 +13,7 @@ namespace Player.Common
         private PlayerMove _playerMove;
         private CharacterData _characterData;
         private PhotonView _photonView;
+
         private enum PLayerState
         {
             Idle,
