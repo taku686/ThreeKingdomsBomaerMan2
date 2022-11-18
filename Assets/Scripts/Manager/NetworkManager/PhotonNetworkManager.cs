@@ -31,6 +31,7 @@ namespace Manager.NetworkManager
         private void Awake()
         {
             CurrentRoomCharacterList.Clear();
+            PhotonNetwork.UseRpcMonoBehaviourCache = true;
             PhotonNetwork.AutomaticallySyncScene = true;
         }
 
