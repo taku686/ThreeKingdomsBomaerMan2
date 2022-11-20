@@ -9,7 +9,7 @@ namespace Bomb
         protected override void Explosion()
         {
             Debug.Log("ノーマルボム爆発");
-            OnExplosionSubject.OnNext(Unit.Default);
+            base.Explosion();
         }
     }
 }

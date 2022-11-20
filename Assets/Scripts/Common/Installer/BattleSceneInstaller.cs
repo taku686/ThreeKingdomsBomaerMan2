@@ -1,3 +1,4 @@
+using Bomb;
 using Manager;
 using Manager.BattleManager;
 using Manager.NetworkManager;
@@ -13,12 +14,14 @@ namespace Common.Installer
     {
         [SerializeField] private GameObject inputManagerGameObject;
         [SerializeField] private GameObject playerManagerGameObject;
+        [SerializeField] private GameObject bombProviderGameObject;
 
         public override void InstallBindings()
         {
             //Manager
             Container.Bind<InputManager>().FromComponentOn(inputManagerGameObject).AsCached();
-            Container.Bind<PlayerManager>().FromComponentOn(playerManagerGameObject).AsCached();
+            Container.Bind<PlayerGenerator>().FromComponentOn(playerManagerGameObject).AsCached();
+            Container.Bind<BombProvider>().FromComponentOn(bombProviderGameObject).AsCached();
         }
     }
 }

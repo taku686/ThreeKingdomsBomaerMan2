@@ -12,22 +12,22 @@ using Zenject;
 
 namespace Manager.BattleManager
 {
-    public class PlayerManager : MonoBehaviour
+    public class PlayerGenerator : MonoBehaviour
     {
-        [Inject] private CatalogManager _resourceManager;
-        private CancellationToken _token;
         [SerializeField] private List<Transform> startPointList;
         [SerializeField] private Transform playerParent;
+        private GameObject _playerObj;
+        private static readonly int PlayerNotification = 1;
 
         public void GenerateCharacter(int playerIndex, CharacterData characterData)
         {
-            _token = this.GetCancellationTokenOnDestroy();
             var spawnPoint = GetSpawnPoint(playerIndex);
-            var playerObj =
+            _playerObj =
                 PhotonNetwork.Instantiate(LabelData.CharacterPrefabPath + characterData.CharaObj,
                     spawnPoint.position, spawnPoint.rotation);
-            playerObj.transform.SetParent(playerParent);
-            InitializeComponent(playerObj, characterData);
+            _playerObj.transform.SetParent(playerParent);
+            InitializePlayerComponent(_playerObj, characterData);
+            PlayerGenerateNotification();
         }
 
         private Transform GetSpawnPoint(int index)
@@ -35,12 +35,13 @@ namespace Manager.BattleManager
             return startPointList[index];
         }
 
-        private void InitializeComponent(GameObject player, CharacterData characterData)
+        private void InitializePlayerComponent(GameObject player, CharacterData characterData)
         {
-            player.AddComponent<PlayerMove>();
-            var playerCore = player.AddComponent<PLayerCore>();
-            player.AddComponent<ZenAutoInjecter>();
-            playerCore.Initialize(characterData);
+        }
+
+        private void PlayerGenerateNotification()
+        {
+            PhotonNetwork.LocalPlayer.SetPlayerGenerate(PlayerNotification);
         }
     }
 }

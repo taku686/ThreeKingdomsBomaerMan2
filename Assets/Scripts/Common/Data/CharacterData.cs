@@ -4,16 +4,16 @@ namespace Common.Data
 {
     public class CharacterData
     {
-        [SerializeField] private string _charaObj;
-        [SerializeField] private bool _isLock;
-        [SerializeField] private string _name;
-        [SerializeField] private int _id;
-        [SerializeField] private int _speed;
-        [SerializeField] private int _bombLimit;
-        [SerializeField] private int _attack;
-        [SerializeField] private int _fireRange;
-        [SerializeField] private int _hp;
-        [SerializeField] private string _charaColor;
+        private string _charaObj;
+        private bool _isLock;
+        private string _name;
+        private int _id;
+        private int _speed;
+        private int _bombLimit;
+        private int _attack;
+        private int _fireRange;
+        private int _hp;
+        private string _charaColor;
 
         public string CharaObj
         {

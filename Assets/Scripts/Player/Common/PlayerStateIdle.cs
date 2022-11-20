@@ -38,6 +38,18 @@ namespace Player.Common
                 Owner._inputManager.MoveDirection
                     .Subscribe(direction => { Owner._playerMove.Move(direction).Forget(); })
                     .AddTo(Owner.gameObject);
+                Owner._inputManager.PutBombIObservable
+                    .Subscribe(tuple =>
+                    {
+                        var photonView = Owner._photonView;
+                        var playerId = tuple.Item1;
+                        var serverTime = tuple.Item2;
+                        var damageAmount = Owner._characterData.Attack;
+                        var fireRange = Owner._characterData.FireRange;
+                        Owner._playerPutBomb.PutBomb(photonView, _playerTransform, (int)BombType.Normal, damageAmount,
+                            fireRange, serverTime, playerId);
+                    })
+                    .AddTo(Owner.gameObject);
                 _isSetup = true;
             }
         }

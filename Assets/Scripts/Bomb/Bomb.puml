@@ -3,8 +3,8 @@ PlayerCore --> PlayerStateIdle
 PlayerStateIdle --> PlayerPutBomb
 NormalBombData --|> BombBase
 BombObjectPoolBase --> BombBase
-BombManager --> BombObjectPoolProvider
-PlayerPutBomb --> BombManager
+BombProvider --> BombObjectPoolProvider
+PlayerPutBomb --> BombProvider
 BombBase --> ExplosionEffect
 BombBase --> BombCollision
 NormalBombObjectPool --|> BombObjectPoolBase
@@ -30,6 +30,7 @@ MonoBehaviour
 - int fireRange
 - ParticleSystem explosionEffect
 - int playerId
++ IObservable<Unit> OnFinishIObservable
 --
 + Setup()
 - CountDown()
@@ -38,12 +39,16 @@ MonoBehaviour
 }
 
 
-class BombManager
+class BombProvider
 {
+MonoBehaviour
+--
+選択されたタイプのボム渡し、Poolに返す処理を行う
 }
 
 class PlayerPutBomb
 {
+ボタンが押されたらボムを置く処理を行う
 }
 
 class NormalBombData
@@ -78,6 +83,7 @@ class NormalBombObjectPool
 
 class BombObjectPoolProvider
 {
+MonoBehaviour
 }
 
 note as memo

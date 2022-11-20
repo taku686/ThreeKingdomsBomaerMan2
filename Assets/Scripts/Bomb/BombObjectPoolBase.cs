@@ -1,24 +1,25 @@
 ﻿using UniRx.Toolkit;
 using UnityEngine;
 
-namespace Bomb;
-
-public abstract class BombObjectPoolBase : ObjectPool<BombBase>
+namespace Bomb
 {
-    protected ObjectPool<BombBase> _pool;
-    protected BombBase _bombBase;
-    protected Transform _bombParent;
-
-    public BombObjectPoolBase(BombBase bombBase, Transform parent)
+    public abstract class BombObjectPoolBase : ObjectPool<BombBase>
     {
-        _bombBase = bombBase;
-        _bombParent = parent;
-    }
+        protected ObjectPool<BombBase> Pool;
+        protected BombBase BombBase;
+        protected Transform BombParent;
 
-    protected override BombBase CreateInstance()
-    {
-        var newBomb = GameObject.Instantiate(_bombBase);
-        newBomb.transform.parent = _bombParent;
-        return newBomb;
+        public BombObjectPoolBase(BombBase bombBase, Transform parent)
+        {
+            BombBase = bombBase;
+            BombParent = parent;
+        }
+
+        protected override BombBase CreateInstance()
+        {
+            var newBomb = GameObject.Instantiate(BombBase, BombParent);
+            newBomb.gameObject.SetActive(false);
+            return newBomb;
+        }
     }
 }

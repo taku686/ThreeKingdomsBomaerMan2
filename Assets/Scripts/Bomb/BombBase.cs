@@ -19,33 +19,47 @@ namespace Bomb
         protected readonly Subject<Unit> OnExplosionSubject = new Subject<Unit>();
         private readonly Subject<Unit> _onFinishSubject = new Subject<Unit>();
         private CancellationToken _token;
-        
+        private CancellationTokenSource _cts;
+
         public IObservable<Unit> OnFinishIObservable => _onFinishSubject.Take(1);
+
         public void Setup(int damageAmount, int fireRange, int playerId, int explosionTime)
         {
+            _cts = new CancellationTokenSource();
             _token = this.GetCancellationTokenOnDestroy();
             DamageAmount = damageAmount;
             FireRange = fireRange;
             PlayerId = playerId;
             ExplosionTime = explosionTime;
-            Observable.EveryUpdate().Subscribe(_ => { CountDown(explosionTime); }).AddTo(_token);
-            OnExplosionSubject.Subscribe(_ => { OnDisable(); }).AddTo(_token);
+            Observable.EveryUpdate().Subscribe(_ => { CountDown(explosionTime); }).AddTo(_cts.Token);
         }
 
         private void CountDown(int explosionTime)
         {
-            if (unchecked(explosionTime - PhotonNetwork.ServerTimestamp) >= GameSettingData.ThreeSecondsBeforeExplosion)
+            if (unchecked(PhotonNetwork.ServerTimestamp - explosionTime) >= 0)
             {
                 Explosion();
             }
         }
 
-        protected abstract void Explosion();
-
-        protected void OnDisable()
+        protected virtual void Explosion()
         {
-            Debug.Log("完了");
+            OnDisableBomb();
+        }
+
+        private void OnDisableBomb()
+        {
+            Debug.Log("爆破完了");
+            Cancel();
             _onFinishSubject.OnNext(Unit.Default);
+        }
+
+        private void Cancel()
+        {
+            _cts ??= new CancellationTokenSource();
+            _cts.Cancel();
+            _cts.Dispose();
+            _cts = new CancellationTokenSource();
         }
 
         private void OnDestroy()

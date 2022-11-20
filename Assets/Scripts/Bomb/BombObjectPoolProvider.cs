@@ -4,45 +4,42 @@ using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 
-namespace Bomb;
-
-public class BombObjectPoolProvider : MonoBehaviour
+namespace Bomb
 {
-    [SerializeField] private BombBase normalBomb;
-    [SerializeField] private BombBase penetrationBomb;
-    [SerializeField] private BombBase dangerBomb;
-
-    private BombObjectPoolBase _normalBombPool;
-    private BombObjectPoolBase _penetrationBombPool;
-    private BombObjectPoolBase _dangerBombPool;
-    private CancellationToken _token;
-    private static readonly int PreloadCount = 20;
-    private static readonly int Threshold = 20;
-
-    private void Awake()
+    public class BombObjectPoolProvider : MonoBehaviour
     {
-        _token = this.GetCancellationTokenOnDestroy();
-    }
+        [SerializeField] private BombBase normalBomb;
+        [SerializeField] private BombBase penetrationBomb;
+        [SerializeField] private BombBase dangerBomb;
 
-    public BombObjectPoolBase GetNormalBombPool()
-    {
-        if (_normalBombPool != null)
+        private BombObjectPoolBase _normalBombPool;
+        private BombObjectPoolBase _penetrationBombPool;
+        private BombObjectPoolBase _dangerBombPool;
+        private CancellationToken _token;
+        private static readonly int PreloadCount = 20;
+        private static readonly int Threshold = 20;
+
+        public BombObjectPoolBase GetNormalBombPool()
         {
+            if (_normalBombPool != null)
+            {
+                return _normalBombPool;
+            }
+
+            var parentTransform = new GameObject("NormalBombPool").transform;
+            parentTransform.parent = this.transform;
+
+            _normalBombPool = new NormalObjectPoolBase(normalBomb, parentTransform);
+            _normalBombPool.PreloadAsync(PreloadCount, Threshold).Subscribe().AddTo(_token);
             return _normalBombPool;
         }
+        
 
-        var parentTransform = new GameObject("NormalBombPool").transform;
-        parentTransform.parent = this.transform;
-
-        _normalBombPool = new NormalObjectPoolBase(normalBomb, parentTransform);
-        _normalBombPool.PreloadAsync(PreloadCount, Threshold).Subscribe().AddTo(_token);
-        return _normalBombPool;
-    }
-
-    private void OnDestroy()
-    {
-        _normalBombPool.Dispose();
-        _penetrationBombPool.Dispose();
-        _dangerBombPool.Dispose();
+        private void OnDestroy()
+        {
+            _normalBombPool.Dispose();
+            _penetrationBombPool.Dispose();
+            _dangerBombPool.Dispose();
+        }
     }
 }
