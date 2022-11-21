@@ -22,21 +22,15 @@ namespace Manager.BattleManager
         public void GenerateCharacter(int playerIndex, CharacterData characterData)
         {
             var spawnPoint = GetSpawnPoint(playerIndex);
-            _playerObj =
-                PhotonNetwork.Instantiate(LabelData.CharacterPrefabPath + characterData.CharaObj,
-                    spawnPoint.position, spawnPoint.rotation);
+            _playerObj = PhotonNetwork.Instantiate(LabelData.CharacterPrefabPath + characterData.CharaObj,
+                spawnPoint.position, spawnPoint.rotation);
             _playerObj.transform.SetParent(playerParent);
-            InitializePlayerComponent(_playerObj, characterData);
             PlayerGenerateNotification();
         }
 
         private Transform GetSpawnPoint(int index)
         {
             return startPointList[index];
-        }
-
-        private void InitializePlayerComponent(GameObject player, CharacterData characterData)
-        {
         }
 
         private void PlayerGenerateNotification()

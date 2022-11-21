@@ -10,7 +10,6 @@ namespace Player.Common
 {
     public partial class PLayerCore : MonoBehaviourPunCallbacks
     {
-        [Inject] private BombProvider _bombProvider;
         private InputManager _inputManager;
         private PlayerMove _playerMove;
         private PlayerPutBomb _playerPutBomb;

@@ -3,14 +3,18 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Photon.Pun;
+using UI.Common;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
+using UnityEngine.UI;
+using Zenject;
 
 namespace Manager
 {
     public class InputManager : MonoBehaviour
     {
+        private InputView _inputView;
         private readonly ReactiveProperty<Vector3>
             _moveDirection = new ReactiveProperty<Vector3>(Vector3.zero);
 
@@ -18,6 +22,7 @@ namespace Manager
         private string _joystickName;
         private PhotonView _photonView;
         private CancellationToken _token;
+        private Button _bombButton;
         public ReactiveProperty<Vector3> MoveDirection => _moveDirection;
         public IObservable<Tuple<int, int>> PutBombIObservable => _putBombSubject;
 
@@ -26,6 +31,8 @@ namespace Manager
             _token = this.GetCancellationTokenOnDestroy();
             _photonView = photonView;
             _joystickName = GameSettingData.JoystickName;
+            _inputView = FindObjectOfType<InputView>();
+            _bombButton = _inputView.bombButton;
             if (!_photonView.IsMine)
             {
                 return;
@@ -42,14 +49,14 @@ namespace Manager
 
         private void SetupInputPutBomb()
         {
-            this.UpdateAsObservable().Where(_ => Input.GetKey(KeyCode.Space)).Throttle(TimeSpan.FromSeconds(0.2f))
+            _bombButton.OnClickAsObservable().Throttle(TimeSpan.FromSeconds(0.2f))
                 .Subscribe(
                     _ =>
                     {
                         var playerId = _photonView.ViewID;
                         var explosionTime = PhotonNetwork.ServerTimestamp +
                                             GameSettingData.ThreeMilliSecondsBeforeExplosion;
-                        var tuple = new Tuple<int, int>(playerId,explosionTime);
+                        var tuple = new Tuple<int, int>(playerId, explosionTime);
                         _putBombSubject.OnNext(tuple);
                     }).AddTo(_token);
         }

@@ -1,10 +1,7 @@
 using Bomb;
 using Manager;
 using Manager.BattleManager;
-using Manager.NetworkManager;
-using Manager.ResourceManager;
-using Player.Common;
-using UI.Title;
+using UI.Common;
 using UnityEngine;
 using Zenject;
 
@@ -12,16 +9,18 @@ namespace Common.Installer
 {
     public class BattleSceneInstaller : MonoInstaller<BattleSceneInstaller>
     {
-        [SerializeField] private GameObject inputManagerGameObject;
+        //   [SerializeField] private GameObject inputManagerGameObject;
         [SerializeField] private GameObject playerManagerGameObject;
         [SerializeField] private GameObject bombProviderGameObject;
+        [SerializeField] private GameObject buttonsGameObject;
 
         public override void InstallBindings()
         {
             //Manager
-            Container.Bind<InputManager>().FromComponentOn(inputManagerGameObject).AsCached();
+            //  Container.Bind<InputManager>().FromComponentOn(inputManagerGameObject).AsCached();
             Container.Bind<PlayerGenerator>().FromComponentOn(playerManagerGameObject).AsCached();
             Container.Bind<BombProvider>().FromComponentOn(bombProviderGameObject).AsCached();
+            Container.Bind<InputView>().FromComponentOn(buttonsGameObject).AsCached();
         }
     }
 }

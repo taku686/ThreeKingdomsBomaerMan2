@@ -38,18 +38,17 @@ namespace Manager.BattleManager
             {
                 Owner._networkManager.PlayerGenerateComplete.Subscribe(_ =>
                 {
-                    Debug.Log("player生成完了");
                     var players = GameObject.FindGameObjectsWithTag(GameSettingData.PlayerTag);
                     foreach (var player in players)
                     {
-                        InitializePlayerComponent(player);
+                        InitializePlayerComponent(player).Forget();
                     }
 
                     stateMachine.Dispatch((int)Event.Staging);
                 }).AddTo(Owner.GetCancellationTokenOnDestroy());
             }
 
-            private void InitializePlayerComponent(GameObject player)
+            private async UniTaskVoid InitializePlayerComponent(GameObject player)
             {
                 var playerPutBomb = player.AddComponent<PlayerPutBomb>();
                 playerPutBomb.Initialize(Owner._bombProvider);
@@ -58,11 +57,13 @@ namespace Manager.BattleManager
                 if (!photonView.IsMine)
                 {
                     return;
-                    
                 }
+
                 var playerCore = player.AddComponent<PLayerCore>();
-                player.AddComponent<ZenAutoInjecter>();
+                /*var zenAutoInjecter = player.AddComponent<ZenAutoInjecter>();
+                zenAutoInjecter.ContainerSource = ZenAutoInjecter.ContainerSources.SceneContext;*/
                 var characterData = Owner._networkManager.GetCharacterData(playerId);
+                await UniTask.NextFrame(PlayerLoopTiming.Update, Owner.GetCancellationTokenOnDestroy());
                 playerCore.Initialize(characterData);
             }
         }
