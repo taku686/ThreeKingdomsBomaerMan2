@@ -1,6 +1,4 @@
-﻿using System;
-using Common.Data;
-using Cysharp.Threading.Tasks;
+﻿using Common.Data;
 using UniRx;
 using UnityEngine;
 using State = StateMachine<Player.Common.PLayerCore>.State;

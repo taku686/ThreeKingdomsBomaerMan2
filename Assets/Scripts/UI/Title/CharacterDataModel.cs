@@ -20,13 +20,13 @@ namespace UI.Title
         [Inject] private CatalogManager _catalogManager;
         private UserManager _userManager;
 
-        private static readonly Dictionary<int, CharacterData> CharacterDataList =
+        private static readonly Dictionary<int, CharacterData> CharacterDataDictionary =
             new Dictionary<int, CharacterData>();
 
-        private readonly Dictionary<int, Sprite> _characterSpriteList =
+        private readonly Dictionary<int, Sprite> _characterSpriteDictionary =
             new Dictionary<int, Sprite>();
 
-        private readonly Dictionary<int, Sprite> _characterColorList =
+        private readonly Dictionary<int, Sprite> _characterColorDictionary =
             new Dictionary<int, Sprite>();
 
         private CatalogItem _catalogItem;
@@ -53,7 +53,7 @@ namespace UI.Title
             for (int i = 0; i < GetCharacterCount(); i++)
             {
                 var characterData = _resourceManager.LoadCharacterData(i);
-                CharacterDataList[i] = characterData;
+                CharacterDataDictionary[i] = characterData;
             }
         }
 
@@ -62,7 +62,7 @@ namespace UI.Title
             for (int i = 0; i < GetCharacterCount(); i++)
             {
                 var characterSprite = await _resourceManager.LoadCharacterSprite(i, cancellationToken);
-                _characterSpriteList.Add(i, characterSprite);
+                _characterSpriteDictionary[i] = characterSprite;
             }
         }
 
@@ -71,7 +71,7 @@ namespace UI.Title
             for (int i = 0; i < GetCharacterColorCount(); i++)
             {
                 var characterSprite = await _resourceManager.LoadCharacterColor(i, cancellationToken);
-                _characterColorList.Add(i, characterSprite);
+                _characterColorDictionary[i] = characterSprite;
             }
         }
 
@@ -81,17 +81,17 @@ namespace UI.Title
 
         public CharacterData GetCharacterData(int id)
         {
-            return CharacterDataList[id];
+            return CharacterDataDictionary[id];
         }
 
         public Sprite GetCharacterSprite(int id)
         {
-            return _characterSpriteList[id];
+            return _characterSpriteDictionary[id];
         }
 
         public Sprite GetCharacterColor(int id)
         {
-            return _characterColorList[id];
+            return _characterColorDictionary[id];
         }
 
         public GameObject GetCharacterGameObject(int id)

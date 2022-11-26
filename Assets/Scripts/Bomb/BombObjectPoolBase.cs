@@ -23,6 +23,7 @@ namespace Bomb
             var newBomb = Object.Instantiate(BombBase, BombParent);
             AddCollider(newBomb.gameObject);
             AddRigidbody(newBomb.gameObject);
+            newBomb.Initialize();
             newBomb.gameObject.SetActive(false);
             return newBomb;
         }
@@ -32,7 +33,8 @@ namespace Bomb
             var collider = bomb.AddComponent<BoxCollider>();
             collider.center = ColliderCenter;
             collider.size = ColliderScale;
-            bomb.layer = LayerMask.NameToLayer(GameSettingData.BombLayer);
+            collider.enabled = true;
+            collider.isTrigger = true;
         }
 
         private void AddRigidbody(GameObject bomb)
@@ -42,11 +44,11 @@ namespace Bomb
             rigid.constraints = RigidbodyConstraints.FreezeAll;
         }
 
-        protected override void OnBeforeRent(BombBase instance)
+        /*protected override void OnBeforeRent(BombBase instance)
         {
             var collider = instance.GetComponent<BoxCollider>();
             collider.enabled = true;
             base.OnBeforeRent(instance);
-        }
+        }*/
     }
 }
