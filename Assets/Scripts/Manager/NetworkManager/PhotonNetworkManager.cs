@@ -170,6 +170,7 @@ namespace Manager.NetworkManager
                 return;
             }
 
+            _playerCount = 0;
             _playerGenerateComplete.OnNext(Unit.Default);
         }
     }

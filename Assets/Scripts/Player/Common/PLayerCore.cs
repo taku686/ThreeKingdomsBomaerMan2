@@ -1,10 +1,10 @@
 using System;
-using Bomb;
 using Common.Data;
 using Manager;
 using Photon.Pun;
+using UniRx;
+using UniRx.Triggers;
 using UnityEngine;
-using Zenject;
 
 namespace Player.Common
 {
@@ -15,6 +15,8 @@ namespace Player.Common
         private PlayerPutBomb _playerPutBomb;
         private CharacterData _characterData;
         private PhotonView _photonView;
+        private Animator _animator;
+        private PlayerDead _playerDead;
 
         private enum PLayerState
         {
@@ -35,12 +37,14 @@ namespace Player.Common
 
         private void InitializeComponent(CharacterData characterData)
         {
-            _photonView = gameObject.GetComponent<PhotonView>();
+            _photonView = GetComponent<PhotonView>();
             _inputManager = gameObject.AddComponent<InputManager>();
             _inputManager.Initialize(_photonView);
             _playerMove = gameObject.AddComponent<PlayerMove>();
             _playerMove.Initialize(characterData.Speed);
             _playerPutBomb = GetComponent<PlayerPutBomb>();
+            _animator = GetComponent<Animator>();
+            _playerDead = gameObject.AddComponent<PlayerDead>();
             _characterData = characterData;
         }
 
@@ -48,6 +52,23 @@ namespace Player.Common
         {
             _stateMachine = new StateMachine<PLayerCore>(this);
             _stateMachine.Start<PlayerStateIdle>();
+            _stateMachine.AddAnyTransition<PlayerStateDead>((int)PLayerState.Dead);
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            Dead(other);
+        }
+
+        private void Dead(Collider other)
+        {
+            if (!other.CompareTag(GameSettingData.BombEffectTag))
+            {
+                return;
+            }
+
+            _playerDead.OnTouchExplosion(other);
+            _stateMachine.Dispatch((int)PLayerState.Dead);
         }
     }
 }

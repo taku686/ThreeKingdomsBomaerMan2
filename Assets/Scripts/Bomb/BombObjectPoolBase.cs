@@ -43,12 +43,5 @@ namespace Bomb
             rigid.useGravity = false;
             rigid.constraints = RigidbodyConstraints.FreezeAll;
         }
-
-        /*protected override void OnBeforeRent(BombBase instance)
-        {
-            var collider = instance.GetComponent<BoxCollider>();
-            collider.enabled = true;
-            base.OnBeforeRent(instance);
-        }*/
     }
 }

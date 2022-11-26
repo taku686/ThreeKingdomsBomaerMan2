@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Newtonsoft.Json.Serialization;
+using UnityEngine;
 using State = StateMachine<Player.Common.PLayerCore>.State;
 
 namespace Player.Common
@@ -9,12 +10,12 @@ namespace Player.Common
         {
             protected override void OnEnter(State prevState)
             {
-                
+                Initialize();
             }
 
-            private void Dead()
+            private void Initialize()
             {
-                
+                Owner._playerDead.BigJump(Owner.transform);
             }
         }
     }

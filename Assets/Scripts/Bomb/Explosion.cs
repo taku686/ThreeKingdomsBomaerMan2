@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Common.Data;
+using UnityEngine;
 
 namespace Bomb
 {
@@ -6,5 +7,6 @@ namespace Bomb
     {
         public Transform boxCollider;
         public Transform explosionTransform;
+        public Direction explosionDirection;
     }
 }

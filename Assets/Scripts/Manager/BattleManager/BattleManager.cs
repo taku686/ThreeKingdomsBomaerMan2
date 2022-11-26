@@ -57,5 +57,20 @@ namespace Manager.BattleManager
             PhotonNetwork.Disconnect();
             SceneManager.LoadScene((int)SceneIndex.Title);
         }
+
+        public void OnReborn()
+        {
+            var players = GameObject.FindGameObjectsWithTag(GameSettingData.PlayerTag);
+            foreach (var player in players)
+            {
+                var view = player.GetComponent<PhotonView>();
+                if (!view.IsMine)
+                {
+                    return;
+                }
+
+                player.transform.position = new Vector3(0, 0.5f, 0);
+            }
+        }
     }
 }

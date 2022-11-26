@@ -32,13 +32,6 @@ namespace Bomb
             Vector3.right
         };
 
-        private enum Direction
-        {
-            Forward,
-            Back,
-            Left,
-            Right
-        }
 
         protected override async UniTask Explosion()
         {
@@ -50,28 +43,31 @@ namespace Bomb
             IsExplosion = true;
             var position = transform.position;
             StartPos = new Vector3(position.x, 0.5f, position.z);
-            await UniTask.WhenAll(Explosion(_directions[(int)Direction.Forward], (int)Direction.Forward),
-                Explosion(_directions[(int)Direction.Back], (int)Direction.Back),
-                Explosion(_directions[(int)Direction.Left], (int)Direction.Left),
-                Explosion(_directions[(int)Direction.Right], (int)Direction.Right));
+            await UniTask.WhenAll(Explosion(Direction.Forward),
+                Explosion(Direction.Back),
+                Explosion(Direction.Left),
+                Explosion(Direction.Right));
 
             await base.Explosion();
         }
 
-        private async UniTask Explosion(Vector3 direction, int index)
+        private async UniTask Explosion(Direction direction)
         {
+            var dir = GameSettingData.DirectionToVector3(direction);
+            var index = (int)direction;
             BombRenderer.enabled = false;
             BoxColliderComponent.enabled = false;
-            var isHit = TryGetObstacles(FireRange, direction, StartPos, ObstaclesLayerMask, out var hit);
+            var isHit = TryGetObstacles(FireRange, dir, StartPos, ObstaclesLayerMask, out var hit);
             var fireRange = isHit ? CalculateFireRange(hit, StartPos) : FireRange;
-            var endPos = isHit ? hit.collider.transform.position - direction : StartPos + fireRange * direction;
+            var endPos = isHit ? hit.collider.transform.position - dir : StartPos + fireRange * dir;
             var isExplosion = (endPos - StartPos).magnitude >= MinDistance;
             if (!isExplosion)
             {
                 return;
             }
 
-            await UniTask.WhenAll(SetupCollider(direction, fireRange, explosionList[index].boxCollider),
+            explosionList[index].explosionDirection = direction;
+            await UniTask.WhenAll(SetupCollider(dir, fireRange, explosionList[index].boxCollider),
                 SetupExplosionEffect(ExplosionMoveDuration, endPos, explosionList[index].explosionTransform));
         }
 
