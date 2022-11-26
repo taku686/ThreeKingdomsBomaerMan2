@@ -15,6 +15,8 @@ namespace Manager
     public class InputManager : MonoBehaviour
     {
         private InputView _inputView;
+        private static readonly float InputBombInterval = 0.05f;
+
         private readonly ReactiveProperty<Vector3>
             _moveDirection = new ReactiveProperty<Vector3>(Vector3.zero);
 
@@ -49,7 +51,7 @@ namespace Manager
 
         private void SetupInputPutBomb()
         {
-            _bombButton.OnClickAsObservable().Throttle(TimeSpan.FromSeconds(0.2f))
+            _bombButton.OnClickAsObservable().Throttle(TimeSpan.FromSeconds(InputBombInterval))
                 .Subscribe(
                     _ =>
                     {

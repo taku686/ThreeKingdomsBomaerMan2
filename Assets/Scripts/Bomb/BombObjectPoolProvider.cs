@@ -33,13 +33,13 @@ namespace Bomb
             _normalBombPool.PreloadAsync(PreloadCount, Threshold).Subscribe().AddTo(_token);
             return _normalBombPool;
         }
-        
+
 
         private void OnDestroy()
         {
-            _normalBombPool.Dispose();
-            _penetrationBombPool.Dispose();
-            _dangerBombPool.Dispose();
+            _normalBombPool?.Dispose();
+            _penetrationBombPool?.Dispose();
+            _dangerBombPool?.Dispose();
         }
     }
 }

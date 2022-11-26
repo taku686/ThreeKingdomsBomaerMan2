@@ -165,7 +165,6 @@ namespace Manager.NetworkManager
 
         private void CheckPlayerGenerateComplete(int playerCount)
         {
-            Debug.Log(playerCount);
             if (PhotonNetwork.CurrentRoom.PlayerCount > playerCount)
             {
                 return;

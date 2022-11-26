@@ -14,6 +14,8 @@ namespace Manager.BattleManager
     {
         public class PlayerCreateState : State
         {
+            private static readonly Vector3 ColliderCenter = new Vector3(0, 0.5f, 0);
+
             protected override void OnEnter(State prevState)
             {
                 OnInitialize();
@@ -41,18 +43,19 @@ namespace Manager.BattleManager
                     var players = GameObject.FindGameObjectsWithTag(GameSettingData.PlayerTag);
                     foreach (var player in players)
                     {
-                        InitializePlayerComponent(player).Forget();
+                        InitializePlayerComponent(player);
                     }
 
                     stateMachine.Dispatch((int)Event.Staging);
                 }).AddTo(Owner.GetCancellationTokenOnDestroy());
             }
 
-            private async UniTaskVoid InitializePlayerComponent(GameObject player)
+            private void InitializePlayerComponent(GameObject player)
             {
                 var playerPutBomb = player.AddComponent<PlayerPutBomb>();
                 playerPutBomb.Initialize(Owner._bombProvider);
                 var photonView = player.GetComponent<PhotonView>();
+                AddBoxCollider(player);
                 var playerId = photonView.OwnerActorNr;
                 if (!photonView.IsMine)
                 {
@@ -60,11 +63,22 @@ namespace Manager.BattleManager
                 }
 
                 var playerCore = player.AddComponent<PLayerCore>();
-                /*var zenAutoInjecter = player.AddComponent<ZenAutoInjecter>();
-                zenAutoInjecter.ContainerSource = ZenAutoInjecter.ContainerSources.SceneContext;*/
                 var characterData = Owner._networkManager.GetCharacterData(playerId);
-                await UniTask.NextFrame(PlayerLoopTiming.Update, Owner.GetCancellationTokenOnDestroy());
                 playerCore.Initialize(characterData);
+            }
+
+            private void AddBoxCollider(GameObject player)
+            {
+                var collider = player.AddComponent<BoxCollider>();
+                collider.isTrigger = true;
+                collider.center = ColliderCenter;
+            }
+            
+            private void AddRigidbody(GameObject bomb)
+            {
+                var rigid = bomb.AddComponent<Rigidbody>();
+                rigid.useGravity = false;
+                rigid.constraints = RigidbodyConstraints.FreezeAll;
             }
         }
     }

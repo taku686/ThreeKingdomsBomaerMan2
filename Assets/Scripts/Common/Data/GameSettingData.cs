@@ -1,6 +1,6 @@
 namespace Common.Data
 {
-    public class GameSettingData
+    public static class GameSettingData
     {
         public static readonly float MoveThreshold = 0.6f;
         public static readonly float RotateThreshold = 0.01f;
@@ -8,6 +8,9 @@ namespace Common.Data
         public static readonly string TitleID = "92AF5";
         public static readonly string JoystickName = "JoyStickMove";
         public static readonly string PlayerTag = "Player";
+        public static readonly string BombEffectTag = "BombEffect";
+        public static readonly string ObstacleLayer = "Obstacles";
+        public static readonly string BombLayer = "Bomb";
         public static readonly int ThreeMilliSecondsBeforeExplosion = 3000;
 
         public static CharacterColor GetCharacterColor(string color)
