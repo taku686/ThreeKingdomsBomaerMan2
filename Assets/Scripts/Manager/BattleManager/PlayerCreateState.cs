@@ -56,6 +56,7 @@ namespace Manager.BattleManager
                 playerPutBomb.Initialize(Owner._bombProvider);
                 var photonView = player.GetComponent<PhotonView>();
                 AddBoxCollider(player);
+                AddRigidbody(player);
                 var playerId = photonView.OwnerActorNr;
                 if (!photonView.IsMine)
                 {
@@ -73,10 +74,10 @@ namespace Manager.BattleManager
                 collider.isTrigger = true;
                 collider.center = ColliderCenter;
             }
-            
-            private void AddRigidbody(GameObject bomb)
+
+            private void AddRigidbody(GameObject player)
             {
-                var rigid = bomb.AddComponent<Rigidbody>();
+                var rigid = player.AddComponent<Rigidbody>();
                 rigid.useGravity = false;
                 rigid.constraints = RigidbodyConstraints.FreezeAll;
             }
