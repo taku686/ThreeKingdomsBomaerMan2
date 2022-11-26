@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Common.Data;
 using ExitGames.Client.Photon;
+using ModestTree;
 using Photon.Pun;
 using Photon.Realtime;
 using UI.Title;
@@ -17,21 +18,27 @@ namespace Manager.NetworkManager
         [Inject] private CharacterDataModel _characterDataModel;
         private readonly Subject<Photon.Realtime.Player[]> _joinedRoom = new Subject<Photon.Realtime.Player[]>();
         private readonly Subject<int> _leftRoom = new Subject<int>();
+        private readonly Dictionary<int, GameObject> _playerObjectDictionary = new Dictionary<int, GameObject>();
 
         private readonly Dictionary<int, CharacterData>
             _currentRoomCharacterList = new Dictionary<int, CharacterData>();
 
+        private readonly Subject<Unit> _playerGenerateComplete = new Subject<Unit>();
+        private int _playerCount;
+
+
         public Dictionary<int, CharacterData> CurrentRoomCharacterList => _currentRoomCharacterList;
-
-
+        public Dictionary<int, GameObject> PlayerObjectDictionary => _playerObjectDictionary;
         public Subject<int> LeftRoom => _leftRoom;
-
         public IObservable<Photon.Realtime.Player[]> JoinedRoom => _joinedRoom;
+        public IObservable<Unit> PlayerGenerateComplete => _playerGenerateComplete;
 
         private void Awake()
         {
             CurrentRoomCharacterList.Clear();
+            PhotonNetwork.UseRpcMonoBehaviourCache = true;
             PhotonNetwork.AutomaticallySyncScene = true;
+            _playerCount = 0;
         }
 
         public void OnStartConnectNetwork()
@@ -84,6 +91,12 @@ namespace Manager.NetworkManager
                 {
                     SetupPlayerInfo(PhotonNetwork.PlayerList);
                 }
+
+                if ((string)prop.Key == PlayerPropertiesExtensions.PlayerGenerateKey)
+                {
+                    _playerCount++;
+                    CheckPlayerGenerateComplete(_playerCount);
+                }
             }
         }
 
@@ -131,6 +144,33 @@ namespace Manager.NetworkManager
             }
 
             return -1;
+        }
+
+        public CharacterData GetCharacterData(int playerId)
+        {
+            if (!_currentRoomCharacterList.TryGetValue(playerId, out var value))
+            {
+                Debug.LogError("キャラクター情報がありません");
+                return null;
+            }
+
+
+            return value;
+        }
+
+        public void SetPlayerObjDictionary(int playerId, GameObject playerObj)
+        {
+            _playerObjectDictionary[playerId] = playerObj;
+        }
+
+        private void CheckPlayerGenerateComplete(int playerCount)
+        {
+            if (PhotonNetwork.CurrentRoom.PlayerCount > playerCount)
+            {
+                return;
+            }
+
+            _playerGenerateComplete.OnNext(Unit.Default);
         }
     }
 }

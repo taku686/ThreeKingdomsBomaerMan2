@@ -106,7 +106,6 @@ namespace UI.Title
 
         public CharacterData GetUserEquipCharacterData()
         {
-            Debug.Log(_userManager.equipCharacterId.Value);
             return GetCharacterData(_userManager.equipCharacterId.Value);
         }
 

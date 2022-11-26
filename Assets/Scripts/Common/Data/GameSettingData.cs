@@ -2,11 +2,16 @@ namespace Common.Data
 {
     public static class GameSettingData
     {
-        public static float MoveThreshold = 0.6f;
-        public static float RotateThreshold = 0.01f;
-        public static float TurnDuration = 0.1f;
-        public static string TitleID = "92AF5";
-        public static string JoystickName = "JoyStickMove";
+        public static readonly float MoveThreshold = 0.6f;
+        public static readonly float RotateThreshold = 0.01f;
+        public static readonly float TurnDuration = 0.1f;
+        public static readonly string TitleID = "92AF5";
+        public static readonly string JoystickName = "JoyStickMove";
+        public static readonly string PlayerTag = "Player";
+        public static readonly string BombEffectTag = "BombEffect";
+        public static readonly string ObstacleLayer = "Obstacles";
+        public static readonly string BombLayer = "Bomb";
+        public static readonly int ThreeMilliSecondsBeforeExplosion = 3000;
 
         public static CharacterColor GetCharacterColor(string color)
         {
@@ -80,5 +85,13 @@ namespace Common.Data
     {
         Male,
         Female
+    }
+
+    public enum BombType
+    {
+        Error,
+        Normal,
+        Penetration,
+        Danger
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using Bomb;
 using Common.Data;
 using Manager;
 using Photon.Pun;
@@ -11,6 +12,7 @@ namespace Player.Common
     {
         private InputManager _inputManager;
         private PlayerMove _playerMove;
+        private PlayerPutBomb _playerPutBomb;
         private CharacterData _characterData;
         private PhotonView _photonView;
 
@@ -36,8 +38,9 @@ namespace Player.Common
             _photonView = gameObject.GetComponent<PhotonView>();
             _inputManager = gameObject.AddComponent<InputManager>();
             _inputManager.Initialize(_photonView);
-            _playerMove = GetComponent<PlayerMove>();
+            _playerMove = gameObject.AddComponent<PlayerMove>();
             _playerMove.Initialize(characterData.Speed);
+            _playerPutBomb = GetComponent<PlayerPutBomb>();
             _characterData = characterData;
         }
 

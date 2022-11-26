@@ -1,4 +1,5 @@
 using System.Threading;
+using Bomb;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.NetworkManager;
@@ -15,10 +16,10 @@ namespace Manager.BattleManager
     {
         [Inject] private PhotonNetworkManager _networkManager;
         [Inject] private CharacterDataModel _characterDataModel;
-        [Inject] private PlayerManager _playerManager;
+        [Inject] private PlayerGenerator _playerGenerator;
         [Inject] private UserManager _userManager;
+        [Inject] private BombProvider _bombProvider;
         private StateMachine<BattleManager> _stateMachine;
-        [SerializeField] private bool isTest;
 
         private enum Event
         {
@@ -36,14 +37,6 @@ namespace Manager.BattleManager
         // Start is called before the first frame update
         async void Start()
         {
-            if (isTest)
-            {
-                var token = this.GetCancellationTokenOnDestroy();
-                await OnInitialize(token).AttachExternalCancellation(token);
-                PhotonNetwork.ConnectUsingSettings();
-                return;
-            }
-
             InitializeState();
         }
 
@@ -59,35 +52,10 @@ namespace Manager.BattleManager
             _stateMachine.AddTransition<EndSceneTransitionState, PlayerCreateState>((int)Event.PlayerCreate);
         }
 
-        #region //ToDo 後で消す
-
-        public override void OnConnectedToMaster()
-        {
-            PhotonNetwork.JoinRandomRoom();
-        }
-
-        public override void OnJoinRandomFailed(short returnCode, string message)
-        {
-            PhotonNetwork.CreateRoom(null, new RoomOptions()
-            {
-                MaxPlayers = 4,
-                IsOpen = true,
-                IsVisible = true,
-                EmptyRoomTtl = 0
-            }, TypedLobby.Default);
-        }
-
-        public override void OnJoinedRoom()
-        {
-            InitializeState();
-        }
-
         public void OnClickExit()
         {
             PhotonNetwork.Disconnect();
             SceneManager.LoadScene((int)SceneIndex.Title);
         }
-
-        #endregion
     }
 }

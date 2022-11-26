@@ -41,7 +41,8 @@ namespace Player.Common
         public void Initialize(float moveSpeed)
         {
             _cts = new CancellationTokenSource();
-            _blockingLayer = LayerMask.GetMask("BlockingLayer");
+            _blockingLayer = LayerMask.GetMask(GameSettingData.ObstacleLayer) |
+                             LayerMask.GetMask(GameSettingData.BombLayer);
             _playerTransform = this.transform;
             _initRotation = _playerTransform.rotation.eulerAngles;
             _moveSpeed = moveSpeed;

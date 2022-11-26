@@ -1,0 +1,93 @@
+﻿@startuml
+PlayerCore --> PlayerStateIdle
+PlayerStateIdle --> PlayerPutBomb
+NormalBombData --|> BombBase
+BombObjectPoolBase --> BombBase
+BombProvider --> BombObjectPoolProvider
+PlayerPutBomb --> BombProvider
+BombBase --> ExplosionEffect
+BombBase --> BombCollision
+NormalBombObjectPool --|> BombObjectPoolBase
+BombObjectPoolProvider --> BombObjectPoolBase
+class PlayerCore
+{
+
+}
+
+class PlayerStateIdle
+{
+}
+
+abstract class BombBase
+{
+MonoBehaviour
+・データのセットアップ（ダメージ量、爆破範囲、爆破時刻,誰が作ったか）
+・カウントダウン開始（爆破時刻はボムを作った人から送られてきた値を使用）
+・爆破処理（エフェクト生成、爆破の通知）
+・非アクティブ処理（見た目の非表示、当たり判定を非アクティブ,オブジェクトプールに返却）
+--
+- int damageAmount
+- int fireRange
+- ParticleSystem explosionEffect
+- int playerId
++ IObservable<Unit> OnFinishIObservable
+--
++ Setup()
+- CountDown()
+- Explosion()
+- OnDisable()
+}
+
+
+class BombProvider
+{
+MonoBehaviour
+--
+選択されたタイプのボム渡し、Poolに返す処理を行う
+}
+
+class PlayerPutBomb
+{
+ボタンが押されたらボムを置く処理を行う
+}
+
+class NormalBombData
+{
+}
+
+class ExplosionEffect
+{
+MonoBehaviour
+--
+int ownerId
+int takeDamagePlayerId
+int damageAmount
+}
+
+class BombCollision
+{
+ボムの当たり判定を処理する
+--
+
+}
+
+class BombObjectPoolBase
+{
+ボムのオブジェクトプ-ル
+--
+}
+
+class NormalBombObjectPool
+{
+}
+
+class BombObjectPoolProvider
+{
+MonoBehaviour
+}
+
+note as memo
+・ボムの爆発の場所とタイミングは通信で送って爆破処理自体はそれぞれのローカル環境で行う。
+・オブジェクトプールは借りてきた人が戻す
+end note
+@enduml
