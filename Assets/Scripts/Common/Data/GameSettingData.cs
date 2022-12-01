@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace Common.Data
 {
     public static class GameSettingData
@@ -29,6 +31,23 @@ namespace Common.Data
                     return CharacterColor.Yellow;
                 default:
                     return CharacterColor.Red;
+            }
+        }
+        
+        public static Vector3 DirectionToVector3(Direction direction)
+        {
+            switch (direction)
+            {
+                case Direction.Forward:
+                    return Vector3.forward;
+                case Direction.Back:
+                    return Vector3.back;
+                case Direction.Left:
+                    return Vector3.left;
+                case Direction.Right:
+                    return Vector3.right;
+                default:
+                    return Vector3.zero;
             }
         }
     }

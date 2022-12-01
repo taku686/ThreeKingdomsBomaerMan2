@@ -55,14 +55,14 @@ namespace Manager.BattleManager
                 var playerPutBomb = player.AddComponent<PlayerPutBomb>();
                 playerPutBomb.Initialize(Owner._bombProvider);
                 var photonView = player.GetComponent<PhotonView>();
-                AddBoxCollider(player);
-                AddRigidbody(player);
                 var playerId = photonView.OwnerActorNr;
                 if (!photonView.IsMine)
                 {
                     return;
                 }
 
+                AddBoxCollider(player);
+                AddRigidbody(player);
                 var playerCore = player.AddComponent<PLayerCore>();
                 var characterData = Owner._networkManager.GetCharacterData(playerId);
                 playerCore.Initialize(characterData);

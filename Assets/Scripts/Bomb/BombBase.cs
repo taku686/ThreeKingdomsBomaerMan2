@@ -13,8 +13,7 @@ namespace Bomb
 {
     public abstract class BombBase : MonoBehaviour
     {
-        [SerializeField] protected List<Transform> colliders;
-        [SerializeField] protected List<Transform> explosionTransforms;
+        [SerializeField] protected List<Explosion> explosionList;
         protected static readonly float ExplosionDisplayDuration = 0.9f;
         protected static readonly float MinDistance = 1.0f;
         protected CancellationTokenSource Cts;
@@ -35,30 +34,32 @@ namespace Bomb
 
         public IObservable<Unit> OnFinishIObservable => _onFinishSubject.Take(1);
 
-        public void Setup(int damageAmount, int fireRange, int playerId, int explosionTime)
+        public void Initialize()
         {
-            Cts = new CancellationTokenSource();
-            _token = this.GetCancellationTokenOnDestroy();
             BombRenderer = GetComponent<Renderer>();
             BoxColliderComponent = GetComponent<BoxCollider>();
+            Cts = new CancellationTokenSource();
+            _token = this.GetCancellationTokenOnDestroy();
+            ObstaclesLayerMask = LayerMask.GetMask(GameSettingData.ObstacleLayer);
+            gameObject.layer = LayerMask.NameToLayer(GameSettingData.BombLayer);
+        }
+
+        public void Setup(int damageAmount, int fireRange, int playerId, int explosionTime)
+        {
             BombRenderer.enabled = true;
+            BoxColliderComponent.enabled = true;
             _damageAmount = damageAmount;
             _playerId = playerId;
             _explosionTime = explosionTime;
             FireRange = fireRange;
-            ObstaclesLayerMask = LayerMask.GetMask(GameSettingData.ObstacleLayer);
             IsExplosion = false;
-            var count = 0;
-            foreach (var boxCollider in colliders.Select(x => x.GetComponent<BoxCollider>()))
+            foreach (var boxCollider in explosionList.Select(x => x.boxCollider.GetComponent<BoxCollider>()))
             {
                 boxCollider.isTrigger = true;
-                explosionTransforms[count].gameObject.SetActive(false);
+                boxCollider.gameObject.SetActive(false);
             }
 
             gameObject.UpdateAsObservable().Subscribe(_ => { CountDown(explosionTime); }).AddTo(Cts.Token);
-            gameObject.OnTriggerEnterAsObservable()
-                .Where(effectCollider => effectCollider.CompareTag(GameSettingData.BombEffectTag)).Subscribe(
-                    _ => { Explosion().Forget(); });
         }
 
         private void CountDown(int explosionTime)
@@ -76,7 +77,6 @@ namespace Bomb
 
         protected virtual async UniTask Explosion()
         {
-            await UniTask.NextFrame(Cts.Token);
             OnDisableBomb();
         }
 
@@ -92,6 +92,16 @@ namespace Bomb
             Cts.Cancel();
             Cts.Dispose();
             Cts = new CancellationTokenSource();
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if (!other.CompareTag(GameSettingData.BombEffectTag) || IsExplosion)
+            {
+                return;
+            }
+
+            Explosion().Forget();
         }
 
         private void OnDestroy()

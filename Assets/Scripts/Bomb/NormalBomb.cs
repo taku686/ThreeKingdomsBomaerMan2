@@ -12,7 +12,8 @@ namespace Bomb
     public class NormalBomb : BombBase
     {
         private static readonly float ExplosionMoveDuration = 0.5f;
-        private static readonly Vector3 Origin = new Vector3(0, 0.5f, 0);
+        private static readonly Vector3 EffectOriginPosition = new Vector3(0, 0.5f, 0);
+        private static readonly Vector3 ColliderOriginPosition = Vector3.zero;
 
         private List<Func<Vector3, int, Transform, UniTask>> _colliderFunctions =
             new List<Func<Vector3, int, Transform, UniTask>>();
@@ -31,13 +32,6 @@ namespace Bomb
             Vector3.right
         };
 
-        private enum Direction
-        {
-            Forward,
-            Back,
-            Left,
-            Right
-        }
 
         protected override async UniTask Explosion()
         {
@@ -49,35 +43,37 @@ namespace Bomb
             IsExplosion = true;
             var position = transform.position;
             StartPos = new Vector3(position.x, 0.5f, position.z);
-            await UniTask.WhenAll(Explosion(_directions[(int)Direction.Forward], (int)Direction.Forward),
-                Explosion(_directions[(int)Direction.Back], (int)Direction.Back),
-                Explosion(_directions[(int)Direction.Left], (int)Direction.Left),
-                Explosion(_directions[(int)Direction.Right], (int)Direction.Right));
+            await UniTask.WhenAll(Explosion(Direction.Forward),
+                Explosion(Direction.Back),
+                Explosion(Direction.Left),
+                Explosion(Direction.Right));
 
             await base.Explosion();
         }
 
-        private async UniTask Explosion(Vector3 direction, int index)
+        private async UniTask Explosion(Direction direction)
         {
+            var dir = GameSettingData.DirectionToVector3(direction);
+            var index = (int)direction;
             BombRenderer.enabled = false;
             BoxColliderComponent.enabled = false;
-            var isHit = TryGetObstacles(FireRange, direction, StartPos, ObstaclesLayerMask, out var hit);
+            var isHit = TryGetObstacles(FireRange, dir, StartPos, ObstaclesLayerMask, out var hit);
             var fireRange = isHit ? CalculateFireRange(hit, StartPos) : FireRange;
-            var endPos = isHit ? hit.collider.transform.position - direction : StartPos + fireRange * direction;
+            var endPos = isHit ? hit.collider.transform.position - dir : StartPos + fireRange * dir;
             var isExplosion = (endPos - StartPos).magnitude >= MinDistance;
             if (!isExplosion)
             {
                 return;
             }
 
-            await UniTask.WhenAll(SetupCollider(direction, fireRange, colliders[index]),
-                SetupExplosionEffect(ExplosionMoveDuration, endPos, explosionTransforms[index]));
+            explosionList[index].explosionDirection = direction;
+            await UniTask.WhenAll(SetupCollider(dir, fireRange, explosionList[index].boxCollider),
+                SetupExplosionEffect(ExplosionMoveDuration, endPos, explosionList[index].explosionTransform));
         }
 
         private bool TryGetObstacles(int fireRange, Vector3 direction, Vector3 startPos, LayerMask obstaclesLayer,
             out RaycastHit obstacle)
         {
-            Debug.DrawRay(startPos, direction * fireRange, Color.blue, 1f);
             return Physics.Raycast(startPos, direction, out obstacle, fireRange, obstaclesLayer,
                 QueryTriggerInteraction.Collide);
         }
@@ -91,6 +87,7 @@ namespace Bomb
 
         private async UniTask SetupCollider(Vector3 direction, int fireRange, Transform boxCollider)
         {
+            boxCollider.localPosition = ColliderOriginPosition;
             var isZ = direction.z != 0;
             var colliderScale = isZ ? new Vector3(1, 1, fireRange) : new Vector3(fireRange, 1, 1);
             boxCollider.tag = GameSettingData.BombEffectTag;
@@ -104,7 +101,7 @@ namespace Bomb
 
         private async UniTask SetupExplosionEffect(float moveDuration, Vector3 endPos, Transform explosionEffect)
         {
-            explosionEffect.localPosition = Origin;
+            explosionEffect.localPosition = EffectOriginPosition;
             explosionEffect.gameObject.SetActive(true);
             explosionEffect.DOMove(endPos, moveDuration).SetLink(this.gameObject);
             await UniTask.Delay(TimeSpan.FromSeconds(ExplosionDisplayDuration), cancellationToken: Cts.Token);
