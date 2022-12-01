@@ -1,28 +1,30 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Assets.Scripts.Common.Data;
 using Common.Data;
 using Cysharp.Threading.Tasks;
-using Manager.ResourceManager;
 using Newtonsoft.Json;
 using PlayFab.ClientModels;
 using UnityEngine;
-using Zenject;
 
 namespace Assets.Scripts.Common.ResourceManager
 {
-    public class CatalogManager : MonoBehaviour
+    public class PlayFabCatalogManager : IDisposable
     {
-        private Catalog _catalog;
+        private readonly Catalog _catalog;
         private const string CharacterClassKey = "Character";
         private readonly Dictionary<int, GameObject> _characterGameObjects = new Dictionary<int, GameObject>();
-
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         public Dictionary<int, GameObject> CharacterGameObjects => _characterGameObjects;
+
+        public PlayFabCatalogManager()
+        {
+            _catalog = new Catalog();
+        }
 
         public async UniTask Initialize(List<CatalogItem> catalogItems)
         {
-            _catalog = new Catalog();
             foreach (var item in catalogItems)
             {
                 if (item.ItemClass != CharacterClassKey)
@@ -49,16 +51,16 @@ namespace Assets.Scripts.Common.ResourceManager
                     Hp = customData[0].Hp,
                     CharaColor = customData[0].CharaColor
                 };
-                _catalog.Characters[customData[0].ID] = characterData;
+                _catalog.SetCharacter(customData[0].ID, characterData);
                 await LoadGameObject(LabelData.CharacterPrefabPath, customData[0].ID,
-                        this.GetCancellationTokenOnDestroy())
-                    .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+                        _cancellationTokenSource.Token)
+                    .AttachExternalCancellation(_cancellationTokenSource.Token);
             }
         }
 
         private async UniTask LoadGameObject(string path, int id, CancellationToken token)
         {
-            var charaObj = _catalog.Characters[id].CharaObj;
+            var charaObj = _catalog.GetCharacterData(id).CharaObj;
             if (charaObj == null)
             {
                 return;
@@ -70,14 +72,9 @@ namespace Assets.Scripts.Common.ResourceManager
         }
 
 
-        public CharacterData LoadCharacterData(int id)
+        public CharacterData GetCharacterData(int id)
         {
-            return _catalog.Characters[id];
-        }
-
-        public UniTask<UserData> LoadUserData(CancellationToken token)
-        {
-            throw new System.NotImplementedException();
+            return _catalog.GetCharacterData(id);
         }
 
         public async UniTask<Sprite> LoadCharacterSprite(int id, CancellationToken token)
@@ -92,6 +89,13 @@ namespace Assets.Scripts.Common.ResourceManager
             var resource = await Resources.LoadAsync<Sprite>(LabelData.CharacterColorPath + id)
                 .WithCancellation(token);
             return (Sprite)resource;
+        }
+
+        public void Dispose()
+        {
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
+            _catalog.Dispose();
         }
     }
 }

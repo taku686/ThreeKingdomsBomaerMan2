@@ -2,6 +2,7 @@
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 using State = StateMachine<UI.Title.TitlePresenter>.State;
 
 namespace UI.Title
@@ -24,6 +25,7 @@ namespace UI.Title
                 Owner.DisableTitleGameObject();
                 Owner.CreateCharacter(Owner._userManager.equipCharacterId.Value);
                 InitializeButton();
+                InitializeText();
                 Owner.mainView.MainGameObject.SetActive(true);
             }
 
@@ -35,6 +37,12 @@ namespace UI.Title
                 Owner.mainView.CharacterSelectButton.onClick.AddListener(OnClickCharacterSelect);
                 Owner.mainView.BattleReadyButton.onClick.AddListener(OnClickBattleReady);
                 Owner.mainView.SettingButton.onClick.AddListener(OnClickSetting);
+            }
+
+            private void InitializeText()
+            {
+                Owner.mainView.CoinText.text = Owner._userManager.GetUser().Currency.Coin.ToString("D");
+                Owner.mainView.DiamondText.text = Owner._userManager.GetUser().Currency.Diamond.ToString("D");
             }
 
 

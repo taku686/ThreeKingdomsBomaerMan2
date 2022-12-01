@@ -5,7 +5,9 @@ using Assets.Scripts.Common.ResourceManager;
 using Common;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Manager.NetworkManager;
 using Manager.ResourceManager;
+using ModestTree;
 using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine;
@@ -13,6 +15,7 @@ using UpdateUserDataRequest = PlayFab.ClientModels.UpdateUserDataRequest;
 using Newtonsoft.Json;
 using UI.Title;
 using Zenject;
+using Currency = Common.Data.Currency;
 
 namespace Assets.Scripts.Common.PlayFab
 {
@@ -20,32 +23,11 @@ namespace Assets.Scripts.Common.PlayFab
     {
         [Inject] private CharacterDataModel _characterDataModel;
         [Inject] private UserManager _userManager;
-        [Inject] private CatalogManager _catalogManager;
+        [Inject] private PlayFabCatalogManager _playFabCatalogManager;
+        [Inject] private PlayFabPlayerDataManager _playFabPlayerDataManager;
         private const string Email = "test9@gmail.com";
         private const string Password = "Passw0rd";
-        private const string UserKey = "User";
         private GetPlayerCombinedInfoRequestParams _info;
-
-        private async UniTaskVoid Start()
-        {
-            /*var token = this.GetCancellationTokenOnDestroy();
-            Initialize();
-            Debug.Log(PlayerPrefsManager.IsLoginEmailAddress);
-            if (PlayerPrefsManager.IsLoginEmailAddress)
-            {
-                await LoginWithEmail(Email, Password).AttachExternalCancellation(token);
-            }
-            else
-            {
-                await LoginWithCustomId().AttachExternalCancellation(token);
-                await SetEmailAndPassword(Email, Password).AttachExternalCancellation(token);
-            }
-
-            await UpdateUserDisplayName("Alan");
-            await UpdateUserDataAsync(nameof(User), _user.Create()).AttachExternalCancellation(token);
-            await GetUserData(nameof(User)).AttachExternalCancellation(token);
-            await GetCatalogItems().AttachExternalCancellation(token);*/
-        }
 
         public void Initialize()
         {
@@ -55,38 +37,9 @@ namespace Assets.Scripts.Common.PlayFab
                 GetUserData = true,
                 GetUserAccountInfo = true,
                 GetTitleData = true,
+                GetUserVirtualCurrency = true,
+                GetUserInventory = true
             };
-        }
-
-        private async UniTask SetData(PlayFabResult<LoginResult> response)
-        {
-            await GetCatalogItems().AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
-            if (!response.Result.InfoResultPayload.UserData.TryGetValue(UserKey, out UserDataRecord userData))
-            {
-                var characterData = _catalogManager.LoadCharacterData(0);
-                Debug.Log(characterData.Name);
-                await UpdateUserDataAsync(UserKey, new User().Create(characterData))
-                    .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
-                //再度ユーザーデータ取得
-                if (!PlayerPrefsManager.IsLoginEmailAddress)
-                {
-                    await LoginWithCustomId().AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
-                }
-                else
-                {
-                    await LoginWithEmail(Email, Password)
-                        .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
-                }
-            }
-            else
-            {
-                var user = JsonConvert.DeserializeObject<User>(response.Result.InfoResultPayload.UserData[UserKey]
-                    .Value);
-                if (user != null)
-                {
-                    _userManager.Initialize(user);
-                }
-            }
         }
 
         public async UniTask<bool> LoginWithCustomId()
@@ -104,11 +57,9 @@ namespace Assets.Scripts.Common.PlayFab
                 Debug.Log(response.Error.GenerateErrorReport());
                 return false;
             }
-            else
-            {
-                await LoginSuccess(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
-                return true;
-            }
+
+            await LoginSuccess(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+            return true;
         }
 
         public async UniTask<bool> LoginWithEmail(string email, string password)
@@ -154,6 +105,57 @@ namespace Assets.Scripts.Common.PlayFab
         }
 
 
+        private async UniTask LoginSuccess(PlayFabResult<LoginResult> response)
+        {
+            await SetData(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+        }
+
+        private async UniTask SetData(PlayFabResult<LoginResult> response)
+        {
+            await GetCatalogItems().AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+            if (!response.Result.InfoResultPayload.UserData.TryGetValue(GameSettingData.UserKey,
+                    out UserDataRecord userData))
+            {
+                var characterData = _playFabCatalogManager.GetCharacterData(0);
+                Debug.Log(characterData.Name);
+                var user = new User().Create(characterData);
+                await _playFabPlayerDataManager.UpdateUserDataAsync(GameSettingData.UserKey, user)
+                    .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+                //再度ユーザーデータ取得
+                if (!PlayerPrefsManager.IsLoginEmailAddress)
+                {
+                    await LoginWithCustomId().AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+                }
+                else
+                {
+                    await LoginWithEmail(Email, Password)
+                        .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+                }
+            }
+            else
+            {
+                var user = JsonConvert.DeserializeObject<User>(response.Result.InfoResultPayload
+                    .UserData[GameSettingData.UserKey].Value);
+                var virtualCurrency = response.Result.InfoResultPayload.UserVirtualCurrency;
+                if (!virtualCurrency.TryGetValue(GameSettingData.CoinKey, out var coin))
+                {
+                    return;
+                }
+
+                if (!virtualCurrency.TryGetValue(GameSettingData.DiamondKey, out var diamond))
+                {
+                    return;
+                }
+
+                if (user != null)
+                {
+                    _userManager.Initialize(user);
+                    _userManager.GetUser().Currency.SetCoin(coin);
+                    _userManager.GetUser().Currency.SetDiamond(diamond);
+                }
+            }
+        }
+
         public async UniTask SetEmailAndPassword(string email, string password)
         {
             var request = new AddUsernamePasswordRequest
@@ -190,88 +192,6 @@ namespace Assets.Scripts.Common.PlayFab
             }
         }
 
-        public async UniTask UpdateUserDataAsync(string key, User value)
-        {
-            var userJson = JsonConvert.SerializeObject(value);
-            var request = new UpdateUserDataRequest()
-            {
-                Data = new Dictionary<string, string>
-                {
-                    {
-                        key, userJson
-                    }
-                }
-            };
-
-            var response = await PlayFabClientAPI.UpdateUserDataAsync(request);
-
-            if (response.Error != null)
-            {
-                Debug.Log(response.Error.GenerateErrorReport());
-            }
-        }
-
-        public async UniTask DeletePlayerDataAsync()
-        {
-            var request = new UpdateUserDataRequest()
-            {
-                KeysToRemove = new List<string> { UserKey }
-            };
-
-            var response = await PlayFabClientAPI.UpdateUserDataAsync(request);
-
-            if (response.Error != null)
-            {
-                Debug.Log(response.Error.GenerateErrorReport());
-            }
-        }
-
-        public async UniTask GetUserData(string key)
-        {
-            var request = new global::PlayFab.ClientModels.GetUserDataRequest
-            {
-                PlayFabId = PlayFabSettings.staticPlayer.PlayFabId,
-                Keys = new List<string> { key }
-            };
-
-            var response = await PlayFabClientAPI.GetUserDataAsync(request);
-
-            if (response.Error != null)
-            {
-                Debug.Log(response.Error.GenerateErrorReport());
-            }
-            else
-            {
-                var value = response.Result.Data[key].Value;
-                var user = JsonConvert.DeserializeObject<User>(value);
-                if (user != null) Debug.Log(user.Level);
-            }
-        }
-
-        public async UniTask UpdateUserDisplayName(string playerName)
-        {
-            var request = new UpdateUserTitleDisplayNameRequest
-            {
-                DisplayName = playerName
-            };
-
-            var response = await PlayFabClientAPI.UpdateUserTitleDisplayNameAsync(request);
-            if (response.Error != null)
-            {
-                switch (response.Error.Error)
-                {
-                    case PlayFabErrorCode.InvalidParams:
-                        Debug.Log("名前は3~25文字以内で入力してください。");
-                        break;
-                    case PlayFabErrorCode.ProfaneDisplayName:
-                        Debug.Log("この名前は使用できません。");
-                        break;
-                    default:
-                        Debug.Log(response.Error.GenerateErrorReport());
-                        break;
-                }
-            }
-        }
 
         private async UniTask GetCatalogItems()
         {
@@ -282,14 +202,9 @@ namespace Assets.Scripts.Common.PlayFab
             }
             else
             {
-                await _catalogManager.Initialize(response.Result.Catalog)
+                await _playFabCatalogManager.Initialize(response.Result.Catalog)
                     .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
             }
-        }
-
-        private async UniTask LoginSuccess(PlayFabResult<LoginResult> response)
-        {
-            await SetData(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
         }
     }
 }

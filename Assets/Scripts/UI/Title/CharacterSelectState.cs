@@ -11,7 +11,7 @@ namespace UI.Title
 {
     public partial class TitlePresenter
     {
-        public class CharacterSelectState : StateMachine<Title.TitlePresenter>.State
+        public class CharacterSelectState : State
         {
             private readonly List<GameObject> _gridGroupLists = new List<GameObject>();
 
@@ -52,7 +52,7 @@ namespace UI.Title
                 {
                     if (i % 5 == 0)
                     {
-                        gridGroup = Object.Instantiate(Owner.characterSelectView.HorizontalGroupGameObject,
+                        gridGroup = Instantiate(Owner.characterSelectView.HorizontalGroupGameObject,
                             Owner.characterSelectView.ContentsTransform);
                         _gridGroupLists.Add(gridGroup);
                     }
@@ -66,48 +66,58 @@ namespace UI.Title
 
             private void SetupGrip(CharacterData characterData, Transform parent)
             {
-                if (!characterData.IsLock)
+                if (Owner._userManager.IsGetCharacter(characterData.ID))
                 {
-                    var grid = Object.Instantiate(Owner.characterSelectView.Grid, parent);
-                    grid.GetComponentInChildren<CharacterGrid>().characterData = characterData;
-                    var images = grid.GetComponentsInChildren<Image>();
-                    var names = grid.GetComponentsInChildren<TextMeshProUGUI>();
-                    var button = grid.GetComponent<Button>();
-                    button.onClick.AddListener(OnClickCharacterGrid);
-                    foreach (var image in images)
-                    {
-                        if (image.CompareTag("CharacterImage"))
-                        {
-                            image.sprite = Owner._characterDataModel.GetCharacterSprite(characterData.ID);
-                        }
-
-                        if (image.CompareTag("BackGround"))
-                        {
-                            image.sprite =
-                                Owner._characterDataModel.GetCharacterColor(
-                                    (int)GameSettingData.GetCharacterColor(characterData.CharaColor));
-                        }
-                    }
-
-                    foreach (var name in names)
-                    {
-                        if (name.CompareTag("Name"))
-                        {
-                            name.text = characterData.Name;
-                        }
-                    }
+                    CreateActiveGrid(characterData, parent);
                 }
                 else
                 {
-                    var images = Object.Instantiate(Owner.characterSelectView.GridDisable, parent)
-                        .GetComponentsInChildren<Image>();
-                    foreach (var image in images)
+                    CreateDisableGrid(characterData, parent);
+                }
+            }
+
+            private void CreateActiveGrid(CharacterData characterData, Transform parent)
+            {
+                var grid = Instantiate(Owner.characterSelectView.Grid, parent);
+                grid.GetComponentInChildren<CharacterGrid>().characterData = characterData;
+                var images = grid.GetComponentsInChildren<Image>();
+                var names = grid.GetComponentsInChildren<TextMeshProUGUI>();
+                var button = grid.GetComponent<Button>();
+                button.onClick.AddListener(OnClickCharacterGrid);
+                foreach (var image in images)
+                {
+                    if (image.CompareTag("CharacterImage"))
                     {
-                        if (image.gameObject.CompareTag("CharacterImage"))
-                        {
-                            image.color = Color.black;
-                            image.sprite = Owner._characterDataModel.GetCharacterSprite(characterData.ID);
-                        }
+                        image.sprite = Owner._characterDataModel.GetCharacterSprite(characterData.ID);
+                    }
+
+                    if (image.CompareTag("BackGround"))
+                    {
+                        image.sprite =
+                            Owner._characterDataModel.GetCharacterColor(
+                                (int)GameSettingData.GetCharacterColor(characterData.CharaColor));
+                    }
+                }
+
+                foreach (var name in names)
+                {
+                    if (name.CompareTag("Name"))
+                    {
+                        name.text = characterData.Name;
+                    }
+                }
+            }
+
+            private void CreateDisableGrid(CharacterData characterData, Transform parent)
+            {
+                var images = Instantiate(Owner.characterSelectView.GridDisable, parent)
+                    .GetComponentsInChildren<Image>();
+                foreach (var image in images)
+                {
+                    if (image.gameObject.CompareTag("CharacterImage"))
+                    {
+                        image.color = Color.black;
+                        image.sprite = Owner._characterDataModel.GetCharacterSprite(characterData.ID);
                     }
                 }
             }
@@ -127,7 +137,8 @@ namespace UI.Title
                         var preCharacter = Owner._character;
                         Destroy(preCharacter);
                         var characterData = raycastResult.gameObject.GetComponent<CharacterGrid>().characterData;
-                        Owner._character = Instantiate(Owner._characterDataModel.GetCharacterGameObject(characterData.ID),
+                        Owner._character = Instantiate(
+                            Owner._characterDataModel.GetCharacterGameObject(characterData.ID),
                             characterCreatePosition.position,
                             characterCreatePosition.rotation, characterCreatePosition);
                         Owner._currentCharacterId = characterData.ID;

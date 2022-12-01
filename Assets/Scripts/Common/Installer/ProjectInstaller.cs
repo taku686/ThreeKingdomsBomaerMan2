@@ -14,19 +14,15 @@ namespace Common.Installer
         [SerializeField] private GameObject resourceManagerGameObject;
         [SerializeField] private GameObject photonNetworkGameObject;
         [SerializeField] private GameObject mainManagerGameObject;
-        [SerializeField] private GameObject catalogManagerGameObject;
         [SerializeField] private GameObject userManagerGameObject;
 
         public override void InstallBindings()
         {
-            // Container.Bind<ILoadResource>().To<ResourceManager>().FromComponentInNewPrefab(resourceManagerGameObject).AsCached();
-            /*Container.Bind<ILoadResource>().To<CatalogManager>().FromComponentInNewPrefab(catalogManagerGameObject)
-                .AsCached();*/
             Container.Bind<CharacterDataModel>().FromNew().AsCached();
             Container.Bind<PhotonNetworkManager>().FromComponentInNewPrefab(photonNetworkGameObject).AsSingle();
             Container.Bind<MainManager>().FromComponentsInNewPrefab(mainManagerGameObject).AsSingle();
             Container.Bind<UserManager>().FromComponentsInNewPrefab(userManagerGameObject).AsSingle();
-            Container.Bind<CatalogManager>().FromComponentsInNewPrefab(catalogManagerGameObject).AsSingle();
+            Container.Bind<PlayFabCatalogManager>().FromNew().AsCached();
         }
     }
 }

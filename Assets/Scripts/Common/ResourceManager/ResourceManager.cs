@@ -30,22 +30,9 @@ namespace Manager.ResourceManager
             throw new System.NotImplementedException();
         }
 
-        /*public async UniTask<CharacterData> LoadCharacterData(int id, CancellationToken token)
-        {
-            var resource = await Resources.LoadAsync<CharacterData>(LabelData.CharacterDataPath + id)
-                .WithCancellation(token);
-            return (CharacterData)resource;
-        }*/
-
         public CatalogItem LoadCatalogItem(int id, CancellationToken token)
         {
             throw new System.NotImplementedException();
-        }
-
-        public async UniTask<UserData> LoadUserData(CancellationToken token)
-        {
-            var resource = await Resources.LoadAsync<UserData>(LabelData.UserDataPath).WithCancellation(token);
-            return (UserData)resource;
         }
 
         public User GetUser(CancellationToken token)

@@ -12,10 +12,6 @@ namespace Manager.ResourceManager
         public UniTask<GameObject> LoadGameObject(string path, int id, CancellationToken token);
         public CharacterData LoadCharacterData(int id);
         public CatalogItem LoadCatalogItem(int id, CancellationToken token);
-
-        public UniTask<UserData> LoadUserData(CancellationToken token);
-
-        // public User GetUser(CancellationToken token);
         public UniTask<Sprite> LoadCharacterSprite(int id, CancellationToken token);
         public UniTask<Sprite> LoadCharacterColor(int id, CancellationToken token);
     }

@@ -13,11 +13,11 @@ using Zenject;
 
 namespace UI.Title
 {
-    public class CharacterDataModel
+    public class CharacterDataModel : IDisposable
     {
-        [Inject] private CatalogManager _resourceManager;
+        //[Inject] private PlayFabCatalogManager _resourceManager;
         [Inject] private MainManager _mainManager;
-        [Inject] private CatalogManager _catalogManager;
+        [Inject] private PlayFabCatalogManager _playFabCatalogManager;
         private UserManager _userManager;
 
         private static readonly Dictionary<int, CharacterData> CharacterDataDictionary =
@@ -52,7 +52,7 @@ namespace UI.Title
         {
             for (int i = 0; i < GetCharacterCount(); i++)
             {
-                var characterData = _resourceManager.LoadCharacterData(i);
+                var characterData = _playFabCatalogManager.GetCharacterData(i);
                 CharacterDataDictionary[i] = characterData;
             }
         }
@@ -61,7 +61,7 @@ namespace UI.Title
         {
             for (int i = 0; i < GetCharacterCount(); i++)
             {
-                var characterSprite = await _resourceManager.LoadCharacterSprite(i, cancellationToken);
+                var characterSprite = await _playFabCatalogManager.LoadCharacterSprite(i, cancellationToken);
                 _characterSpriteDictionary[i] = characterSprite;
             }
         }
@@ -70,7 +70,7 @@ namespace UI.Title
         {
             for (int i = 0; i < GetCharacterColorCount(); i++)
             {
-                var characterSprite = await _resourceManager.LoadCharacterColor(i, cancellationToken);
+                var characterSprite = await _playFabCatalogManager.LoadCharacterColor(i, cancellationToken);
                 _characterColorDictionary[i] = characterSprite;
             }
         }
@@ -96,7 +96,7 @@ namespace UI.Title
 
         public GameObject GetCharacterGameObject(int id)
         {
-            return _catalogManager.CharacterGameObjects[id];
+            return _playFabCatalogManager.CharacterGameObjects[id];
         }
 
         public int GetCharacterCount()
@@ -112,6 +112,11 @@ namespace UI.Title
         private int GetCharacterColorCount()
         {
             return Enum.GetValues(typeof(CharacterColor)).Length;
+        }
+        
+
+        public void Dispose()
+        {
         }
     }
 }

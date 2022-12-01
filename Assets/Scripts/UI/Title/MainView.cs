@@ -17,7 +17,8 @@ namespace UI.Title
         [SerializeField] private Button characterSelectButton;
         [SerializeField] private Button battleReadyButton;
         [SerializeField] private Button settingButton;
-
+        [SerializeField] private TextMeshProUGUI coinText;
+        [SerializeField] private TextMeshProUGUI diamondText;
         public Button SettingButton => settingButton;
         public Button BattleReadyButton => battleReadyButton;
         public Button CharacterSelectButton => characterSelectButton;
@@ -28,5 +29,7 @@ namespace UI.Title
         public GameObject SceneTransitionGameObject => sceneTransitionGameObject;
         public GameObject LoginGameObject => loginGameObject;
         public GameObject SettingGameObject => settingGameObject;
+        public TextMeshProUGUI CoinText => coinText;
+        public TextMeshProUGUI DiamondText => diamondText;
     }
 }

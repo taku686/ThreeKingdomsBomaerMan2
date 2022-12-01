@@ -12,7 +12,11 @@ namespace Common.Data
         public static readonly string PlayerTag = "Player";
         public static readonly string BombEffectTag = "BombEffect";
         public static readonly string ObstacleLayer = "Obstacles";
+        public static readonly string UserKey = "User";
         public static readonly string BombLayer = "Bomb";
+        public static readonly string DiamondKey = "MS";
+        public static readonly string CoinKey = "CO";
+        
         public static readonly int ThreeMilliSecondsBeforeExplosion = 3000;
 
         public static CharacterColor GetCharacterColor(string color)
@@ -33,7 +37,7 @@ namespace Common.Data
                     return CharacterColor.Red;
             }
         }
-        
+
         public static Vector3 DirectionToVector3(Direction direction)
         {
             switch (direction)

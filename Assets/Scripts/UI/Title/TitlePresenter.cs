@@ -50,14 +50,14 @@ namespace UI.Title
         }
 
 
-        private async void Start()
+        private void Start()
         {
             _token = this.GetCancellationTokenOnDestroy();
-            await Initialize(_token).AttachExternalCancellation(_token);
+            Initialize();
         }
 
 
-        private async UniTask Initialize(CancellationToken token)
+        private void Initialize()
         {
             InitializeState();
         }
