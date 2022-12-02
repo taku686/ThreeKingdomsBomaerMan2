@@ -79,47 +79,21 @@ namespace UI.Title
             private void CreateActiveGrid(CharacterData characterData, Transform parent)
             {
                 var grid = Instantiate(Owner.characterSelectView.Grid, parent);
-                grid.GetComponentInChildren<CharacterGrid>().characterData = characterData;
-                var images = grid.GetComponentsInChildren<Image>();
-                var names = grid.GetComponentsInChildren<TextMeshProUGUI>();
-                var button = grid.GetComponent<Button>();
-                button.onClick.AddListener(OnClickCharacterGrid);
-                foreach (var image in images)
-                {
-                    if (image.CompareTag("CharacterImage"))
-                    {
-                        image.sprite = Owner._characterDataModel.GetCharacterSprite(characterData.ID);
-                    }
-
-                    if (image.CompareTag("BackGround"))
-                    {
-                        image.sprite =
-                            Owner._characterDataModel.GetCharacterColor(
-                                (int)GameSettingData.GetCharacterColor(characterData.CharaColor));
-                    }
-                }
-
-                foreach (var name in names)
-                {
-                    if (name.CompareTag("Name"))
-                    {
-                        name.text = characterData.Name;
-                    }
-                }
+                var characterGrid = grid.GetComponentInChildren<CharacterGrid>();
+                characterGrid.characterImage.sprite = Owner._characterDataModel.GetCharacterSprite(characterData.ID);
+                characterGrid.backGroundImage.sprite = Owner._characterDataModel.GetCharacterColor(
+                    (int)GameSettingData.GetCharacterColor(characterData.CharaColor));
+                characterGrid.nameText.text = characterData.Name;
+                characterGrid.CharacterData = characterData;
+                characterGrid.gridButton.onClick.AddListener(OnClickCharacterGrid);
             }
 
             private void CreateDisableGrid(CharacterData characterData, Transform parent)
             {
-                var images = Instantiate(Owner.characterSelectView.GridDisable, parent)
-                    .GetComponentsInChildren<Image>();
-                foreach (var image in images)
-                {
-                    if (image.gameObject.CompareTag("CharacterImage"))
-                    {
-                        image.color = Color.black;
-                        image.sprite = Owner._characterDataModel.GetCharacterSprite(characterData.ID);
-                    }
-                }
+                var disableGrid = Instantiate(Owner.characterSelectView.GridDisable, parent)
+                    .GetComponent<CharacterDisableGrid>();
+                disableGrid.characterImage.color = Color.black;
+                disableGrid.characterImage.sprite = Owner._characterDataModel.GetCharacterSprite(characterData.ID);
             }
 
             private void OnClickCharacterGrid()
@@ -136,7 +110,7 @@ namespace UI.Title
                         var characterCreatePosition = Owner.characterCreatePosition;
                         var preCharacter = Owner._character;
                         Destroy(preCharacter);
-                        var characterData = raycastResult.gameObject.GetComponent<CharacterGrid>().characterData;
+                        var characterData = raycastResult.gameObject.GetComponent<CharacterGrid>().CharacterData;
                         Owner._character = Instantiate(
                             Owner._characterDataModel.GetCharacterGameObject(characterData.ID),
                             characterCreatePosition.position,
@@ -159,6 +133,16 @@ namespace UI.Title
                         Owner._stateMachine.Dispatch((int)Event.Main);
                     })
                     .SetLink(Owner.gameObject);
+            }
+
+            private void OnClickPurchaseButton()
+            {
+                var diamond = Owner._userManager.GetUser().Currency.Diamond;
+                if (diamond < GameSettingData.CharacterPrice)
+                {
+                    return;
+                }
+                //todo 続きはここから
             }
         }
     }

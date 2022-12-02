@@ -8,5 +8,6 @@ namespace UI.Title
     public class CharacterDisableGrid : MonoBehaviour
     {
         public Button purchaseButton;
+        public Image characterImage;
     }
 }
