@@ -15,7 +15,7 @@ namespace Manager.BattleManager
     public partial class BattleManager : MonoBehaviourPunCallbacks
     {
         [Inject] private PhotonNetworkManager _networkManager;
-        [Inject] private CharacterDataModel _characterDataModel;
+        [Inject] private CharacterDataManager _characterDataManager;
         [Inject] private PlayerGenerator _playerGenerator;
         [Inject] private UserManager _userManager;
         [Inject] private BombProvider _bombProvider;
@@ -42,7 +42,7 @@ namespace Manager.BattleManager
 
         private async UniTask OnInitialize(CancellationToken token)
         {
-            await _characterDataModel.Initialize(_userManager, token).AttachExternalCancellation(token);
+            await _characterDataManager.Initialize(_userManager, token).AttachExternalCancellation(token);
         }
 
         private void InitializeState()

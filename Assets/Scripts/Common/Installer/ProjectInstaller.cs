@@ -18,7 +18,7 @@ namespace Common.Installer
 
         public override void InstallBindings()
         {
-            Container.Bind<CharacterDataModel>().FromNew().AsCached();
+            Container.Bind<CharacterDataManager>().FromNew().AsCached();
             Container.Bind<PhotonNetworkManager>().FromComponentInNewPrefab(photonNetworkGameObject).AsSingle();
             Container.Bind<MainManager>().FromComponentsInNewPrefab(mainManagerGameObject).AsSingle();
             Container.Bind<UserManager>().FromComponentsInNewPrefab(userManagerGameObject).AsSingle();

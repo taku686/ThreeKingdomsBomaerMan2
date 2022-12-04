@@ -15,7 +15,7 @@ namespace Common.Installer
 
         public override void InstallBindings()
         {
-            Container.Bind<PlayFabManager>().FromComponentOn(playFabManagerGameObject).AsCached();
+            Container.Bind<PlayFabLoginManager>().FromComponentOn(playFabManagerGameObject).AsCached();
             Container.Bind<UIAnimation>().FromNew().AsCached();
             Container.Bind<Catalog>().FromNew().AsCached();
             Container.Bind<User>().FromNew().AsCached();

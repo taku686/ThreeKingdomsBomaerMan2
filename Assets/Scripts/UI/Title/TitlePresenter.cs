@@ -15,11 +15,11 @@ namespace UI.Title
 {
     public partial class TitlePresenter : MonoBehaviourPunCallbacks
     {
-        [Inject] private CharacterDataModel _characterDataModel;
+        [Inject] private CharacterDataManager _characterDataManager;
         [Inject] private UIAnimation _uiAnimation;
         [Inject] private PhotonNetworkManager _photonNetworkManager;
         [Inject] private MainManager _mainManager;
-        [Inject] private PlayFabManager _playFabManager;
+        [Inject] private PlayFabLoginManager _playFabLoginManager;
         [Inject] private UserManager _userManager;
         [SerializeField] private Transform characterCreatePosition;
         [SerializeField] private MainView mainView;
@@ -101,7 +101,7 @@ namespace UI.Title
             _userManager.equipCharacterId.Value = id;
             var preCharacter = _character;
             Destroy(preCharacter);
-            _character = Instantiate(_characterDataModel.GetCharacterGameObject(id),
+            _character = Instantiate(_characterDataManager.GetCharacterGameObject(id),
                 characterCreatePosition.position,
                 characterCreatePosition.rotation, characterCreatePosition);
         }

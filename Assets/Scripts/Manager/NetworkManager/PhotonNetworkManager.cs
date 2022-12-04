@@ -15,7 +15,7 @@ namespace Manager.NetworkManager
 {
     public class PhotonNetworkManager : MonoBehaviourPunCallbacks
     {
-        [Inject] private CharacterDataModel _characterDataModel;
+        [Inject] private CharacterDataManager _characterDataManager;
         private readonly Subject<Photon.Realtime.Player[]> _joinedRoom = new Subject<Photon.Realtime.Player[]>();
         private readonly Subject<int> _leftRoom = new Subject<int>();
         private readonly Dictionary<int, GameObject> _playerObjectDictionary = new Dictionary<int, GameObject>();
@@ -68,7 +68,7 @@ namespace Manager.NetworkManager
         public override void OnJoinedRoom()
         {
             var index = PhotonNetwork.LocalPlayer.ActorNumber;
-            PhotonNetwork.LocalPlayer.SetCharacterData(_characterDataModel.GetUserEquipCharacterData().ID);
+            PhotonNetwork.LocalPlayer.SetCharacterData(_characterDataManager.GetUserEquipCharacterData().ID);
             PhotonNetwork.LocalPlayer.SetPlayerIndex(index);
         }
 
@@ -107,12 +107,12 @@ namespace Manager.NetworkManager
                 if (player.IsLocal)
                 {
                     _currentRoomCharacterList[player.ActorNumber] =
-                        _characterDataModel.GetCharacterData(_characterDataModel.GetUserEquipCharacterData().ID);
+                        _characterDataManager.GetCharacterData(_characterDataManager.GetUserEquipCharacterData().ID);
                 }
                 else
                 {
                     _currentRoomCharacterList[player.ActorNumber] =
-                        _characterDataModel.GetCharacterData(player.GetCharacterId());
+                        _characterDataManager.GetCharacterData(player.GetCharacterId());
                 }
             }
 

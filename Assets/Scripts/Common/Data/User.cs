@@ -12,7 +12,7 @@ namespace Common.Data
         public int Level;
         public string Name;
         public bool IsTutorial;
-        public Currency Currency;
+        public Currency Currency = new Currency();
         public Dictionary<int, CharacterData> Characters = new Dictionary<int, CharacterData>();
 
         public void SetUserData(User user)
