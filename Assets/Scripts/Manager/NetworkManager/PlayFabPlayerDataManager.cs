@@ -7,15 +7,18 @@ using Newtonsoft.Json;
 using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine;
+using Zenject;
 
 namespace Manager.NetworkManager
 {
     public class PlayFabPlayerDataManager : IDisposable
     {
+        [Inject] private UserManager _userManager;
+
         /// <summary>
         /// playerデータの更新
         /// </summary>
-        public async UniTask UpdateUserDataAsync(string key, User value)
+        public async UniTask<bool> TryUpdateUserDataAsync(string key, User value)
         {
             var userJson = JsonConvert.SerializeObject(value);
             var request = new UpdateUserDataRequest()
@@ -33,10 +36,13 @@ namespace Manager.NetworkManager
             if (response.Error != null)
             {
                 Debug.Log(response.Error.GenerateErrorReport());
+                return false;
             }
+            
+            return true;
         }
 
-        public async UniTask GetPlayerData(string key)
+        public async UniTask<User> GetPlayerData(string key)
         {
             var request = new GetUserDataRequest
             {
@@ -48,12 +54,19 @@ namespace Manager.NetworkManager
             if (response.Error != null)
             {
                 Debug.Log(response.Error.GenerateErrorReport());
+                return null;
             }
             else
             {
                 var value = response.Result.Data[key].Value;
                 var user = JsonConvert.DeserializeObject<User>(value);
-                if (user != null) Debug.Log(user.Level);
+                if (user == null)
+                {
+                    return null;
+                }
+
+                _userManager.SetUser(user);
+                return user;
             }
         }
 

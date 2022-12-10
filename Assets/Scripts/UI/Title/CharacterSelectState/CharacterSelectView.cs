@@ -16,11 +16,11 @@ namespace UI.Title
 
         [SerializeField] private Transform contentsTransform;
 
-         [SerializeField] private GemAddPopup gemAddPopup;
+        [SerializeField] private GemAddPopup gemAddPopup;
 
-         public GemAddPopup GemAddPopup => gemAddPopup;
+        public GemAddPopup GemAddPopup => gemAddPopup;
 
-         public Button BackButton => backButton;
+        public Button BackButton => backButton;
 
         public GameObject HorizontalGroupGameObject => horizontalGroupGameObject;
 

@@ -12,7 +12,8 @@ namespace Common.Data
         public int Level;
         public string Name;
         public bool IsTutorial;
-        public Currency Currency = new Currency();
+        public int Gem;
+        public int Coin;
         public Dictionary<int, CharacterData> Characters = new Dictionary<int, CharacterData>();
 
         public void SetUserData(User user)
@@ -23,7 +24,8 @@ namespace Common.Data
             Name = user.Name;
             IsTutorial = user.IsTutorial;
             Characters = user.Characters;
-            Currency = user.Currency;
+            Gem = user.Gem;
+            Coin = user.Coin;
         }
 
         public User GetUserData()
@@ -40,12 +42,13 @@ namespace Common.Data
             user.Name = "";
             user.IsTutorial = false;
             user.Characters[0] = characterData;
+            user.Gem = 0;
+            user.Coin = 0;
             return user;
         }
 
         public void Dispose()
         {
-            Currency?.Dispose();
         }
     }
 }

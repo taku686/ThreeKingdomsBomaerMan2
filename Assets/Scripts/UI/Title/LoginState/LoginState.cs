@@ -1,15 +1,6 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using Common;
-using Common.Data;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.Linq;
-using PlayFab;
-using PlayFab.ClientModels;
-using TMPro;
-using UniRx;
-using UnityEngine;
-using Random = UnityEngine.Random;
 using State = StateMachine<UI.Title.TitlePresenter>.State;
 
 namespace UI.Title
@@ -67,8 +58,6 @@ namespace UI.Title
                 if (result)
                 {
                     await Owner._characterDataManager.Initialize(Owner._userManager, Owner._token);
-                    /*Owner._userManager.equipCharacterId
-                        .Subscribe(index => { Owner.CreateCharacter(index); }).AddTo(Owner._token);*/
                     Owner._mainManager.isInitialize = true;
                     Owner._stateMachine.Dispatch((int)Event.Login);
                 }

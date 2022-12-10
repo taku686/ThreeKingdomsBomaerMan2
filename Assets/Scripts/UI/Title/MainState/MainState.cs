@@ -34,15 +34,17 @@ namespace UI.Title
                 Owner.mainView.CharacterSelectButton.onClick.RemoveAllListeners();
                 Owner.mainView.BattleReadyButton.onClick.RemoveAllListeners();
                 Owner.mainView.SettingButton.onClick.RemoveAllListeners();
+                Owner.mainView.ShopButton.onClick.RemoveAllListeners();
                 Owner.mainView.CharacterSelectButton.onClick.AddListener(OnClickCharacterSelect);
                 Owner.mainView.BattleReadyButton.onClick.AddListener(OnClickBattleReady);
                 Owner.mainView.SettingButton.onClick.AddListener(OnClickSetting);
+                Owner.mainView.ShopButton.onClick.AddListener(OnClickShop);
             }
 
             private void InitializeText()
             {
-                Owner.mainView.CoinText.text = Owner._userManager.GetUser().Currency.Coin.ToString("D");
-                Owner.mainView.DiamondText.text = Owner._userManager.GetUser().Currency.Diamond.ToString("D");
+                Owner.mainView.CoinText.text = Owner._userManager.GetUser().Coin.ToString("D");
+                Owner.mainView.DiamondText.text = Owner._userManager.GetUser().Gem.ToString("D");
             }
 
 
@@ -64,6 +66,13 @@ namespace UI.Title
             {
                 Owner._uiAnimation.OnClickScaleColorAnimation(Owner.mainView.SettingButton.gameObject)
                     .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.Setting); })
+                    .SetLink(Owner.gameObject);
+            }
+
+            private void OnClickShop()
+            {
+                Owner._uiAnimation.OnClickScaleColorAnimation(Owner.mainView.ShopButton.gameObject)
+                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.Shop); })
                     .SetLink(Owner.gameObject);
             }
         }

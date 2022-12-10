@@ -117,10 +117,17 @@ namespace Assets.Scripts.Common.PlayFab
                     out UserDataRecord userData))
             {
                 var characterData = _playFabCatalogManager.GetCharacterData(0);
-                Debug.Log(characterData.Name);
                 var user = new User().Create(characterData);
-                await _playFabPlayerDataManager.UpdateUserDataAsync(GameSettingData.UserKey, user)
+                var virtualCurrency = response.Result.InfoResultPayload.UserVirtualCurrency;
+                user.Coin = virtualCurrency[GameSettingData.CoinKey];
+                user.Gem = virtualCurrency[GameSettingData.GemKey];
+                var isSuccess = await _playFabPlayerDataManager.TryUpdateUserDataAsync(GameSettingData.UserKey, user)
                     .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+                if (!isSuccess)
+                {
+                    Debug.LogError("ユーザーデータの更新に失敗しました");
+                }
+
                 //再度ユーザーデータ取得
                 if (!PlayerPrefsManager.IsLoginEmailAddress)
                 {
@@ -137,21 +144,12 @@ namespace Assets.Scripts.Common.PlayFab
                 var user = JsonConvert.DeserializeObject<User>(response.Result.InfoResultPayload
                     .UserData[GameSettingData.UserKey].Value);
                 var virtualCurrency = response.Result.InfoResultPayload.UserVirtualCurrency;
-                if (!virtualCurrency.TryGetValue(GameSettingData.CoinKey, out var coin))
-                {
-                    return;
-                }
-
-                if (!virtualCurrency.TryGetValue(GameSettingData.DiamondKey, out var diamond))
-                {
-                    return;
-                }
 
                 if (user != null)
                 {
+                    user.Coin = virtualCurrency[GameSettingData.CoinKey];
+                    user.Gem = virtualCurrency[GameSettingData.GemKey];
                     _userManager.Initialize(user);
-                    _userManager.GetUser().Currency.SetCoin(coin);
-                    _userManager.GetUser().Currency.SetDiamond(diamond);
                 }
             }
         }

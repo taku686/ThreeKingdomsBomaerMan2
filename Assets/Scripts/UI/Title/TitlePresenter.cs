@@ -7,6 +7,7 @@ using Manager;
 using Manager.NetworkManager;
 using Photon.Pun;
 using UI.Common;
+using UI.Title.ShopState;
 using UniRx;
 using UnityEngine;
 using Zenject;
@@ -21,6 +22,8 @@ namespace UI.Title
         [Inject] private MainManager _mainManager;
         [Inject] private PlayFabLoginManager _playFabLoginManager;
         [Inject] private UserManager _userManager;
+        [Inject] private PlayFabPlayerDataManager _playFabPlayerDataManager;
+        [Inject] private PlayFabShopManager _playFabShopManager;
         [SerializeField] private Transform characterCreatePosition;
         [SerializeField] private MainView mainView;
         [SerializeField] private CharacterSelectView characterSelectView;
@@ -29,6 +32,7 @@ namespace UI.Title
         [SerializeField] private SceneTransitionView sceneTransitionView;
         [SerializeField] private LoginView loginView;
         [SerializeField] private SettingView settingView;
+        [SerializeField] private ShopView shopView;
 
         private GameObject _character;
         private StateMachine<Title.TitlePresenter> _stateMachine;
@@ -82,6 +86,8 @@ namespace UI.Title
             _stateMachine.AddTransition<BattleReadyState, SceneTransitionState>((int)Event.SceneTransition);
             _stateMachine.AddTransition<LoginState, MainState>((int)Event.Login);
             _stateMachine.AddTransition<MainState, SettingState>((int)Event.Setting);
+            _stateMachine.AddTransition<MainState, ShopState>((int)Event.Shop);
+            _stateMachine.AddTransition<CharacterSelectState, ShopState>((int)Event.Shop);
         }
 
 
@@ -94,6 +100,7 @@ namespace UI.Title
             mainView.SceneTransitionGameObject.SetActive(false);
             mainView.LoginGameObject.SetActive(false);
             mainView.SettingGameObject.SetActive(false);
+            mainView.ShopGameObject.SetActive(false);
         }
 
         private void CreateCharacter(int id)

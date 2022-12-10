@@ -4,7 +4,7 @@ namespace Common.Data
 {
     public static class GameSettingData
     {
-        public static readonly float CharacterPrice = 200;
+        public static readonly int CharacterPrice = 200;
         public static readonly float MoveThreshold = 0.6f;
         public static readonly float RotateThreshold = 0.01f;
         public static readonly float TurnDuration = 0.1f;
@@ -15,7 +15,7 @@ namespace Common.Data
         public static readonly string ObstacleLayer = "Obstacles";
         public static readonly string UserKey = "User";
         public static readonly string BombLayer = "Bomb";
-        public static readonly string DiamondKey = "MS";
+        public static readonly string GemKey = "MS";
         public static readonly string CoinKey = "CO";
         
         public static readonly int ThreeMilliSecondsBeforeExplosion = 3000;
