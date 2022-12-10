@@ -7,6 +7,7 @@ using Manager;
 using Manager.NetworkManager;
 using Photon.Pun;
 using UI.Common;
+using UI.Title.ShopState;
 using UniRx;
 using UnityEngine;
 using Zenject;
@@ -15,12 +16,14 @@ namespace UI.Title
 {
     public partial class TitlePresenter : MonoBehaviourPunCallbacks
     {
-        [Inject] private CharacterDataModel _characterDataModel;
+        [Inject] private CharacterDataManager _characterDataManager;
         [Inject] private UIAnimation _uiAnimation;
         [Inject] private PhotonNetworkManager _photonNetworkManager;
         [Inject] private MainManager _mainManager;
-        [Inject] private PlayFabManager _playFabManager;
+        [Inject] private PlayFabLoginManager _playFabLoginManager;
         [Inject] private UserManager _userManager;
+        [Inject] private PlayFabPlayerDataManager _playFabPlayerDataManager;
+        [Inject] private PlayFabShopManager _playFabShopManager;
         [SerializeField] private Transform characterCreatePosition;
         [SerializeField] private MainView mainView;
         [SerializeField] private CharacterSelectView characterSelectView;
@@ -29,6 +32,7 @@ namespace UI.Title
         [SerializeField] private SceneTransitionView sceneTransitionView;
         [SerializeField] private LoginView loginView;
         [SerializeField] private SettingView settingView;
+        [SerializeField] private ShopView shopView;
 
         private GameObject _character;
         private StateMachine<Title.TitlePresenter> _stateMachine;
@@ -50,14 +54,14 @@ namespace UI.Title
         }
 
 
-        private async void Start()
+        private void Start()
         {
             _token = this.GetCancellationTokenOnDestroy();
-            await Initialize(_token).AttachExternalCancellation(_token);
+            Initialize();
         }
 
 
-        private async UniTask Initialize(CancellationToken token)
+        private void Initialize()
         {
             InitializeState();
         }
@@ -82,6 +86,8 @@ namespace UI.Title
             _stateMachine.AddTransition<BattleReadyState, SceneTransitionState>((int)Event.SceneTransition);
             _stateMachine.AddTransition<LoginState, MainState>((int)Event.Login);
             _stateMachine.AddTransition<MainState, SettingState>((int)Event.Setting);
+            _stateMachine.AddTransition<MainState, ShopState>((int)Event.Shop);
+            _stateMachine.AddTransition<CharacterSelectState, ShopState>((int)Event.Shop);
         }
 
 
@@ -94,6 +100,7 @@ namespace UI.Title
             mainView.SceneTransitionGameObject.SetActive(false);
             mainView.LoginGameObject.SetActive(false);
             mainView.SettingGameObject.SetActive(false);
+            mainView.ShopGameObject.SetActive(false);
         }
 
         private void CreateCharacter(int id)
@@ -101,7 +108,7 @@ namespace UI.Title
             _userManager.equipCharacterId.Value = id;
             var preCharacter = _character;
             Destroy(preCharacter);
-            _character = Instantiate(_characterDataModel.GetCharacterGameObject(id),
+            _character = Instantiate(_characterDataManager.GetCharacterGameObject(id),
                 characterCreatePosition.position,
                 characterCreatePosition.rotation, characterCreatePosition);
         }
