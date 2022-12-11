@@ -5,6 +5,7 @@ using Assets.Scripts.Common.Data;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
+using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine;
 
@@ -13,10 +14,14 @@ namespace Assets.Scripts.Common.ResourceManager
     public class PlayFabCatalogManager : IDisposable
     {
         private readonly Catalog _catalog;
+        private List<CatalogItem> _catalogItemList;
         private const string CharacterClassKey = "Character";
         private readonly Dictionary<int, GameObject> _characterGameObjects = new Dictionary<int, GameObject>();
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         public Dictionary<int, GameObject> CharacterGameObjects => _characterGameObjects;
+        private CancellationTokenSource _cts;
+
+        public List<CatalogItem> CatalogItemList => _catalogItemList;
 
         public PlayFabCatalogManager()
         {
@@ -56,6 +61,18 @@ namespace Assets.Scripts.Common.ResourceManager
                         _cancellationTokenSource.Token)
                     .AttachExternalCancellation(_cancellationTokenSource.Token);
             }
+        }
+
+        public async UniTask<List<CatalogItem>> GetCatalogItems()
+        {
+            var response = await PlayFabClientAPI.GetCatalogItemsAsync(new GetCatalogItemsRequest());
+            if (response.Error != null)
+            {
+                Debug.Log(response.Error.GenerateErrorReport());
+                return null;
+            }
+
+            return _catalogItemList = response.Result.Catalog;
         }
 
         private async UniTask LoadGameObject(string path, int id, CancellationToken token)

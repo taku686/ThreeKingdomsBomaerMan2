@@ -17,6 +17,8 @@ namespace Common.Data
         public static readonly string BombLayer = "Bomb";
         public static readonly string GemKey = "MS";
         public static readonly string CoinKey = "CO";
+        public static readonly string RealMoneyKey = "RM";
+        public static readonly string ConsumableKey = "Consumable";
         
         public static readonly int ThreeMilliSecondsBeforeExplosion = 3000;
 

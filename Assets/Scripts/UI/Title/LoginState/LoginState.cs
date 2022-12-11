@@ -9,7 +9,7 @@ namespace UI.Title
     {
         public class LoginState : State
         {
-            private const string Email = "test9@gmail.com";
+            private const string Email = "takunoshin123456789@gmail.com";
             private const string Password = "Passw0rd";
             private CancellationToken _token;
 

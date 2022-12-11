@@ -1,8 +1,4 @@
-﻿using System;
-using Cysharp.Threading.Tasks;
-using DG.Tweening;
-using UnityEngine;
-using UnityEngine.PlayerLoop;
+﻿using DG.Tweening;
 using State = StateMachine<UI.Title.TitlePresenter>.State;
 
 namespace UI.Title

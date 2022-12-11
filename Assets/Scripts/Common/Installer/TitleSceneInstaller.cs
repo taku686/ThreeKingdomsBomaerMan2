@@ -17,7 +17,6 @@ namespace Common.Installer
         {
             Container.Bind<PlayFabLoginManager>().FromComponentOn(playFabManagerGameObject).AsCached();
             Container.Bind<UIAnimation>().FromNew().AsCached();
-            Container.Bind<Catalog>().FromNew().AsCached();
             Container.Bind<User>().FromNew().AsCached();
             Container.Bind<PlayFabPlayerDataManager>().FromNew().AsCached();
             Container.Bind<PlayFabShopManager>().FromNew().AsCached();
