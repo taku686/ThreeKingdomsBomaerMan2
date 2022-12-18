@@ -7,6 +7,9 @@ namespace UI.Title.ShopState
     {
         [SerializeField] private Button backButton;
         [SerializeField] private Button thousandCoinButton;
+        [SerializeField] private GameObject textGameObject;
+
+        public GameObject TextGameObject => textGameObject;
 
         public Button BackButton => backButton;
         public Button ThousandCoinButton => thousandCoinButton;

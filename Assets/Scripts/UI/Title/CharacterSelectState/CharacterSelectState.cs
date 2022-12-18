@@ -3,10 +3,8 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 using State = StateMachine<UI.Title.TitlePresenter>.State;
 
 namespace UI.Title
@@ -108,12 +106,12 @@ namespace UI.Title
                     .GetComponent<CharacterDisableGrid>();
                 disableGrid.characterImage.color = Color.black;
                 disableGrid.characterImage.sprite = Owner._characterDataManager.GetCharacterSprite(characterData.ID);
-                disableGrid.purchaseButton.onClick.AddListener(async () =>
+                disableGrid.purchaseButton.onClick.AddListener(() => UniTask.Void(async () =>
                 {
                     var token = disableGrid.GetCancellationTokenOnDestroy();
                     await OnClickPurchaseButton(characterData.ID, token)
                         .AttachExternalCancellation(token);
-                });
+                }));
             }
 
 //todo リファクターの必要あり
@@ -188,10 +186,9 @@ namespace UI.Title
                 {
                     return;
                 }
-                
+
                 Owner._userManager.SetUser(user);
                 CreateUIContents();
-
             }
 
             private void OnClickClosePopup()

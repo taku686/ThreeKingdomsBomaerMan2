@@ -37,8 +37,8 @@ namespace UI.Title
                 Owner.loginView.RetryButton.onClick.RemoveAllListeners();
                 Owner.loginView.StartButton.onClick.RemoveAllListeners();
                 Owner.loginView.RetryButton.onClick.AddListener(OnClickRetry);
-                Owner.loginView.StartButton.onClick.AddListener(async () =>
-                    await Login().AttachExternalCancellation(_token));
+                Owner.loginView.StartButton.onClick.AddListener(() => UniTask.Void(async () =>
+                    await Login().AttachExternalCancellation(_token)));
             }
 
             private async UniTask Login()
