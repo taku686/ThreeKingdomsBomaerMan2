@@ -27,7 +27,7 @@ namespace Manager.NetworkManager
             {
                 return;
             }
-            
+
             var options = new InitializationOptions();
             await UnityServices.InitializeAsync(options);
             _isInitialized = true;
@@ -43,11 +43,14 @@ namespace Manager.NetworkManager
 
         public async UniTask<bool> TryPurchaseItem(string itemName, string virtualCurrencyKey, int price)
         {
+            await Login();
             var request = new PurchaseItemRequest()
             {
                 ItemId = itemName,
                 VirtualCurrency = virtualCurrencyKey,
-                Price = price
+                Price = price,
+                StoreId = "MainShop",
+                CatalogVersion = "main"
             };
             var result = await PlayFabClientAPI.PurchaseItemAsync(request);
             _storeController.InitiatePurchase(itemName);
@@ -60,7 +63,8 @@ namespace Manager.NetworkManager
             return true;
         }
 
-        /*private async void Login()
+        
+        private async UniTask Login()
         {
 #if UNITY_IOS
         var request = new LoginWithIOSDeviceIDRequest()
@@ -95,7 +99,7 @@ namespace Manager.NetworkManager
                 Debug.LogError(result.Error.GenerateErrorReport());
             }
 #endif
-        }*/
+        }
 
         public void BuyItemInGooglePlayStore(string itemId)
         {
@@ -103,12 +107,15 @@ namespace Manager.NetworkManager
             {
                 return;
             }
-            var product = _storeController.products.WithID(itemId);
-            _storeController.InitiatePurchase(product);
+
+            /*var product = _storeController.products.WithID(itemId);
+            Debug.Log(product.definition.id);*/
+            _storeController.InitiatePurchase(itemId);
         }
 
         private async void ValidateGooglePlayPurchaseAsync(PurchaseEventArgs e)
         {
+            Debug.Log(e.purchasedProduct.metadata.isoCurrencyCode);
             var googleReceipt = GooglePurchase.FromJson(e.purchasedProduct.receipt);
             var request = new ValidateGooglePlayPurchaseRequest()
             {
@@ -214,6 +221,7 @@ namespace Manager.NetworkManager
 
         public static GooglePurchase FromJson(string json)
         {
+            Debug.Log(json);
             var purchase = JsonUtility.FromJson<GooglePurchase>(json);
             purchase.PayloadData = PayloadData.FromJson(purchase.Payload);
             return purchase;
