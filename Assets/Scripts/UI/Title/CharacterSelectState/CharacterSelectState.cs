@@ -88,6 +88,7 @@ namespace UI.Title
                 }
             }
 
+            // ReSharper disable Unity.PerformanceAnalysis
             private void CreateActiveGrid(CharacterData characterData, Transform parent)
             {
                 var grid = Instantiate(Owner.characterSelectView.Grid, parent);
@@ -97,7 +98,7 @@ namespace UI.Title
                     (int)GameSettingData.GetCharacterColor(characterData.CharaColor));
                 characterGrid.nameText.text = characterData.Name;
                 characterGrid.CharacterData = characterData;
-                characterGrid.gridButton.onClick.AddListener(OnClickCharacterGrid);
+                characterGrid.gridButton.onClick.AddListener(() => { OnClickCharacterGrid(characterData, grid); });
             }
 
             private void CreateDisableGrid(CharacterData characterData, Transform parent)
@@ -106,40 +107,24 @@ namespace UI.Title
                     .GetComponent<CharacterDisableGrid>();
                 disableGrid.characterImage.color = Color.black;
                 disableGrid.characterImage.sprite = Owner._characterDataManager.GetCharacterSprite(characterData.ID);
-                disableGrid.purchaseButton.onClick.AddListener(() => UniTask.Void(async () =>
-                {
-                    var token = disableGrid.GetCancellationTokenOnDestroy();
-                    await OnClickPurchaseButton(characterData.ID, token)
-                        .AttachExternalCancellation(token);
-                }));
+                disableGrid.purchaseButton.onClick.AddListener(() =>
+                    OnClickPurchaseButton(disableGrid.gameObject, characterData.ID,
+                        disableGrid.GetCancellationTokenOnDestroy()));
             }
 
-//todo リファクターの必要あり
-            private void OnClickCharacterGrid()
+            private void OnClickCharacterGrid(CharacterData characterData, GameObject gridGameObject)
             {
-                PointerEventData pointer = new PointerEventData(EventSystem.current);
-                pointer.position = Input.mousePosition;
-                List<RaycastResult> result = new List<RaycastResult>();
-                EventSystem.current.RaycastAll(pointer, result);
-
-                foreach (RaycastResult raycastResult in result)
-                {
-                    if (raycastResult.gameObject.CompareTag("Button"))
-                    {
-                        var characterCreatePosition = Owner.characterCreatePosition;
-                        var preCharacter = Owner._character;
-                        Destroy(preCharacter);
-                        var characterData = raycastResult.gameObject.GetComponent<CharacterGrid>().CharacterData;
-                        Owner._character = Instantiate(
-                            Owner._characterDataManager.GetCharacterGameObject(characterData.ID),
-                            characterCreatePosition.position,
-                            characterCreatePosition.rotation, characterCreatePosition);
-                        Owner._currentCharacterId = characterData.ID;
-                        Owner._uiAnimation.OnClickScaleAnimation(raycastResult.gameObject)
-                            .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.CharacterDetail); })
-                            .SetLink(Owner.gameObject);
-                    }
-                }
+                var characterCreatePosition = Owner.characterCreatePosition;
+                var preCharacter = Owner._character;
+                Destroy(preCharacter);
+                Owner._character = Instantiate(
+                    Owner._characterDataManager.GetCharacterGameObject(characterData.ID),
+                    characterCreatePosition.position,
+                    characterCreatePosition.rotation, characterCreatePosition);
+                Owner._currentCharacterId = characterData.ID;
+                Owner._uiAnimation.OnClickScaleAnimation(gridGameObject)
+                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.CharacterDetail); })
+                    .SetLink(Owner.gameObject);
             }
 
             private void OnClickBack()
@@ -150,52 +135,56 @@ namespace UI.Title
                         Owner.DisableTitleGameObject();
                         Owner.mainView.MainGameObject.SetActive(true);
                         Owner._stateMachine.Dispatch((int)Event.Main);
-                    })
-                    .SetLink(Owner.gameObject);
+                    }).SetLink(Owner.gameObject);
             }
 
-            private async UniTask OnClickPurchaseButton(int characterId, CancellationToken token)
+            private void OnClickPurchaseButton(GameObject disableGrid, int characterId, CancellationToken token)
             {
-                var user = Owner._userManager.GetUser();
-                var characterPrice = GameSettingData.CharacterPrice;
-                var diamond = user.Gem;
-                if (diamond < characterPrice)
-                {
-                    Owner.characterSelectView.GemAddPopup.gameObject.SetActive(true);
-                    return;
-                }
+                Owner._uiAnimation.OnClickScaleAnimation(disableGrid).OnComplete(() =>
+                    UniTask.Void(async () =>
+                    {
+                        var user = Owner._userManager.GetUser();
+                        var characterPrice = GameSettingData.CharacterPrice;
+                        var diamond = user.Gem;
+                        if (diamond < characterPrice)
+                        {
+                            Owner.characterSelectView.GemAddPopup.gameObject.SetActive(true);
+                            return;
+                        }
 
-                var itemName = characterId.ToString();
-                var virtualCurrencyKey = GameSettingData.GemKey;
-                var price = characterPrice;
-                var isSuccessPurchase = await Owner._playFabShopManager
-                    .TryPurchaseItem(itemName, virtualCurrencyKey, price)
-                    .AttachExternalCancellation(token);
-                if (!isSuccessPurchase)
-                {
-                    //todo 購入に失敗したときの処理
-                    return;
-                }
+                        var itemName = characterId.ToString();
+                        var virtualCurrencyKey = GameSettingData.GemKey;
+                        var price = characterPrice;
+                        var isSuccessPurchase = await Owner._playFabShopManager
+                            .TryPurchaseCharacter(itemName, virtualCurrencyKey, price)
+                            .AttachExternalCancellation(token);
+                        if (!isSuccessPurchase)
+                        {
+                            //todo 購入に失敗したときの処理
+                            return;
+                        }
 
-                user.Gem -= characterPrice;
-                user.Characters[characterId] = Owner._characterDataManager.GetCharacterData(characterId);
-                var isSuccessUpdatePlayerData = await Owner._playFabPlayerDataManager
-                    .TryUpdateUserDataAsync(GameSettingData.UserKey, user)
-                    .AttachExternalCancellation(token);
-                if (!isSuccessUpdatePlayerData)
-                {
-                    return;
-                }
+                        user.Gem -= characterPrice;
+                        user.Characters[characterId] = Owner._characterDataManager.GetCharacterData(characterId);
+                        var isSuccessUpdatePlayerData = await Owner._playFabPlayerDataManager
+                            .TryUpdateUserDataAsync(GameSettingData.UserKey, user)
+                            .AttachExternalCancellation(token);
+                        if (!isSuccessUpdatePlayerData)
+                        {
+                            return;
+                        }
 
-                Owner._userManager.SetUser(user);
-                CreateUIContents();
+                        Owner._userManager.SetUser(user);
+                        CreateUIContents();
+                    })).SetLink(disableGrid.gameObject);
             }
 
             private void OnClickClosePopup()
             {
                 var closeButton = Owner.characterSelectView.GemAddPopup.CloseButton.gameObject;
                 var popup = Owner.characterSelectView.GemAddPopup.gameObject;
-                Owner._uiAnimation.OnClickScaleColorAnimation(closeButton).OnComplete(() => { popup.SetActive(false); })
+                Owner._uiAnimation.OnClickScaleColorAnimation(closeButton)
+                    .OnComplete(() => { popup.SetActive(false); })
                     .SetLink(popup);
             }
 

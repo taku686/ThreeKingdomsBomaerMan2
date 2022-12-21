@@ -16,8 +16,8 @@ namespace Assets.Scripts.Common.ResourceManager
         private readonly Catalog _catalog;
         private List<CatalogItem> _catalogItemList;
         private const string CharacterClassKey = "Character";
-        private readonly Dictionary<int, GameObject> _characterGameObjects = new Dictionary<int, GameObject>();
-        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private readonly Dictionary<int, GameObject> _characterGameObjects = new();
+        private readonly CancellationTokenSource _cancellationTokenSource = new();
         public Dictionary<int, GameObject> CharacterGameObjects => _characterGameObjects;
         private CancellationTokenSource _cts;
 
@@ -46,7 +46,7 @@ namespace Assets.Scripts.Common.ResourceManager
                 var characterData = new CharacterData
                 {
                     CharaObj = customData[0].CharaObj,
-                    IsLock = customData[0].IsLock,
+                    Team = customData[0].Team,
                     Name = customData[0].Name,
                     ID = customData[0].ID,
                     Speed = customData[0].Speed,

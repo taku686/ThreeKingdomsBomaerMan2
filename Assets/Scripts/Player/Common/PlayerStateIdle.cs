@@ -1,4 +1,8 @@
-﻿using Common.Data;
+﻿using System;
+using System.Threading;
+using Common.Data;
+using Cysharp.Threading.Tasks;
+using Photon.Pun;
 using UniRx;
 using UnityEngine;
 using State = StateMachine<Player.Common.PLayerCore>.State;
@@ -11,18 +15,40 @@ namespace Player.Common
         {
             private Transform _playerTransform;
             private bool _isSetup;
+            private PlayerMove _playerMove;
+            private CancellationTokenSource _cancellationTokenSource;
 
             protected override void OnEnter(State prevState)
             {
+                base.OnEnter(prevState);
+                InitializeComponent();
+                InitializeCancellationToken();
                 InitialiseIdleState();
+                InitializeButton();
             }
 
             protected override void OnExit(State nextState)
             {
+                base.OnExit(nextState);
+                Cancel();
+                _playerMove = null;
             }
 
             protected override void OnUpdate()
             {
+                if (_playerMove == null)
+                {
+                    return;
+                }
+
+                var direction = new Vector3(UltimateJoystick.GetHorizontalAxis(GameSettingData.JoystickName), 0,
+                    UltimateJoystick.GetVerticalAxis(GameSettingData.JoystickName));
+                _playerMove.Move(direction).Forget();
+            }
+
+            private void InitializeComponent()
+            {
+                _playerMove = Owner._playerMove;
             }
 
             private void InitialiseIdleState()
@@ -32,23 +58,40 @@ namespace Player.Common
                     return;
                 }
 
+                Debug.Log("アイドル状態の初期化");
                 _playerTransform = Owner.transform;
-                Owner._inputManager.MoveDirection
-                    .Subscribe(direction => { Owner._playerMove.Move(direction).Forget(); })
-                    .AddTo(Owner.gameObject);
-                Owner._inputManager.PutBombIObservable
-                    .Subscribe(tuple =>
-                    {
-                        var photonView = Owner._photonView;
-                        var playerId = tuple.Item1;
-                        var serverTime = tuple.Item2;
-                        var damageAmount = Owner._characterData.Attack;
-                        var fireRange = Owner._characterData.FireRange;
-                        Owner._playerPutBomb.PutBomb(photonView, _playerTransform, (int)BombType.Normal, damageAmount,
-                            fireRange, serverTime, playerId);
-                    })
-                    .AddTo(Owner.gameObject);
                 _isSetup = true;
+            }
+
+            private void InitializeCancellationToken()
+            {
+                _cancellationTokenSource ??= new CancellationTokenSource();
+            }
+
+            private void InitializeButton()
+            {
+                Owner._inputManager.BombButton.OnClickAsObservable()
+                    .Throttle(TimeSpan.FromSeconds(GameSettingData.InputBombInterval))
+                    .Subscribe(
+                        _ =>
+                        {
+                            var playerId = Owner._photonView.ViewID;
+                            var explosionTime = PhotonNetwork.ServerTimestamp +
+                                                GameSettingData.ThreeMilliSecondsBeforeExplosion;
+                            var photonView = Owner._photonView;
+                            var damageAmount = Owner._characterData.Attack;
+                            var fireRange = Owner._characterData.FireRange;
+                            Owner._playerPutBomb.PutBomb(photonView, _playerTransform, (int)BombType.Normal,
+                                damageAmount,
+                                fireRange, explosionTime, playerId);
+                        }).AddTo(_cancellationTokenSource.Token);
+            }
+
+            private void Cancel()
+            {
+                _cancellationTokenSource?.Cancel();
+                _cancellationTokenSource?.Dispose();
+                _cancellationTokenSource = null;
             }
         }
     }

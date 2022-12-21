@@ -42,7 +42,8 @@ namespace Bomb
             IsExplosion = true;
             var position = transform.position;
             StartPos = new Vector3(position.x, 0.5f, position.z);
-            await UniTask.WhenAll(Explosion(Direction.Forward),
+            await UniTask.WhenAll(
+                Explosion(Direction.Forward),
                 Explosion(Direction.Back),
                 Explosion(Direction.Left),
                 Explosion(Direction.Right));

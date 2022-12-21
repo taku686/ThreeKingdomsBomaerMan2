@@ -1,11 +1,9 @@
-using UnityEngine;
-
 namespace Common.Data
 {
     public class CharacterData
     {
         private string _charaObj;
-        private bool _isLock;
+        private int _team;
         private string _name;
         private int _id;
         private int _speed;
@@ -21,10 +19,10 @@ namespace Common.Data
             set => _charaObj = value;
         }
 
-        public bool IsLock
+        public int Team
         {
-            get => _isLock;
-            set => _isLock = value;
+            get => _team;
+            set => _team = value;
         }
 
         public string Name

@@ -7,7 +7,8 @@ namespace Common.Data
         public static readonly int CharacterPrice = 200;
         public static readonly float MoveThreshold = 0.6f;
         public static readonly float RotateThreshold = 0.01f;
-        public static readonly float TurnDuration = 0.1f;
+        public static readonly float TurnDuration = 0.3f;
+        public static readonly float InputBombInterval = 0.05f;
         public static readonly string TitleID = "92AF5";
         public static readonly string JoystickName = "JoyStickMove";
         public static readonly string PlayerTag = "Player";
@@ -72,22 +73,6 @@ namespace Common.Data
         None
     }
 
-    public enum CharacterName
-    {
-        Bacho,
-        Ryuubi,
-        Sousou,
-        Sonsaku,
-        Syokatsuryou,
-        Shibasyou,
-        Syuuyu,
-        Tyouun,
-        Ryofu,
-        Ganryou,
-        Kanu,
-        Kaouen
-    }
-
     public enum CharacterColor
     {
         Blue,
@@ -123,5 +108,13 @@ namespace Common.Data
         Normal,
         Penetration,
         Danger
+    }
+
+    public enum Team
+    {
+        Gi,
+        Go,
+        Syoku,
+        Other
     }
 }

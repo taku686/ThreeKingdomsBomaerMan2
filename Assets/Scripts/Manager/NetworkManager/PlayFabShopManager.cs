@@ -63,7 +63,27 @@ namespace Manager.NetworkManager
             return true;
         }
 
-        
+        public async UniTask<bool> TryPurchaseCharacter(string itemName, string virtualCurrencyKey, int price)
+        {
+          //  await Login();
+            var request = new PurchaseItemRequest()
+            {
+                ItemId = itemName,
+                VirtualCurrency = virtualCurrencyKey,
+                Price = price,
+            };
+            var result = await PlayFabClientAPI.PurchaseItemAsync(request);
+            // _storeController.InitiatePurchase(itemName);
+            if (result.Error != null)
+            {
+                Debug.Log(result.Error.GenerateErrorReport());
+                return false;
+            }
+
+            return true;
+        }
+
+
         private async UniTask Login()
         {
 #if UNITY_IOS

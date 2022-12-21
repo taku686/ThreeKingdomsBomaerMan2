@@ -16,14 +16,11 @@ namespace Manager
     public class InputManager : MonoBehaviour
     {
         private InputView _inputView;
-        private static readonly float InputBombInterval = 0.05f;
+
         private const float MaxFillAmount = 1;
         private const float MinFillAmount = 0;
 
-        private readonly ReactiveProperty<Vector3>
-            _moveDirection = new ReactiveProperty<Vector3>(Vector3.zero);
 
-        private readonly Subject<Tuple<int, int>> _putBombSubject = new Subject<Tuple<int, int>>();
         private string _joystickName;
         private PhotonView _photonView;
         private CancellationToken _token;
@@ -31,9 +28,9 @@ namespace Manager
         private Image _skillOneIntervalImage;
         private Image _skillTwoIntervalImage;
         private float _timerSkillOne = 0;
+
         private float _timerSkillTwo = 0;
-        public ReactiveProperty<Vector3> MoveDirection => _moveDirection;
-        public IObservable<Tuple<int, int>> PutBombIObservable => _putBombSubject;
+        public Button BombButton => _bombButton;
 
 
         public void Initialize(PhotonView photonView, float skillOneIntervalTime, float skillTwoIntervalTime)
@@ -51,32 +48,6 @@ namespace Manager
             _skillOneIntervalImage = _inputView.skillOneIntervalImage;
             _skillTwoIntervalImage = _inputView.skillTwoIntervalImage;
             SetupSkillUI(skillOneIntervalTime, skillTwoIntervalTime);
-            SetupInputMove();
-            SetupInputPutBomb();
-        }
-
-        private void SetupInputMove()
-        {
-            Observable.EveryUpdate().Subscribe(_ =>
-            {
-                _moveDirection.SetValueAndForceNotify(
-                    new Vector3(UltimateJoystick.GetHorizontalAxis(_joystickName), 0,
-                        UltimateJoystick.GetVerticalAxis(_joystickName)));
-            }).AddTo(_token);
-        }
-
-        private void SetupInputPutBomb()
-        {
-            _bombButton.OnClickAsObservable().Throttle(TimeSpan.FromSeconds(InputBombInterval))
-                .Subscribe(
-                    _ =>
-                    {
-                        var playerId = _photonView.ViewID;
-                        var explosionTime = PhotonNetwork.ServerTimestamp +
-                                            GameSettingData.ThreeMilliSecondsBeforeExplosion;
-                        var tuple = new Tuple<int, int>(playerId, explosionTime);
-                        _putBombSubject.OnNext(tuple);
-                    }).AddTo(_token);
         }
 
         public void SetOnClickSkillOne(float intervalTime, Action action)
@@ -136,8 +107,6 @@ namespace Manager
 
         private void OnDestroy()
         {
-            _moveDirection.Dispose();
-            _putBombSubject.Dispose();
         }
     }
 }

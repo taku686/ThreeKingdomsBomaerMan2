@@ -12,6 +12,7 @@ namespace Player.Common
         {
             protected override void OnEnter(State prevState)
             {
+                base.OnEnter(prevState);
                 PlayAnimation();
             }
 

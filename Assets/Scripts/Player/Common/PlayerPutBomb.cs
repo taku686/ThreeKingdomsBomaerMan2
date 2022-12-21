@@ -1,8 +1,6 @@
 using Bomb;
-using Common.Data;
 using Photon.Pun;
 using UnityEngine;
-using Zenject;
 
 namespace Player.Common
 {
@@ -18,7 +16,8 @@ namespace Player.Common
         public void PutBomb(PhotonView photonView, Transform playerTransform, int bombType, int damageAmount,
             int fireRange, int explosionTime, int playerId)
         {
-            photonView.RPC(nameof(RpcPutBomb), RpcTarget.All, playerTransform.position, bombType, damageAmount,
+            var playerPos = CalculatePlayerPos(playerTransform.position);
+            photonView.RPC(nameof(RpcPutBomb), RpcTarget.All, playerPos, bombType, damageAmount,
                 fireRange,
                 explosionTime, playerId);
         }
@@ -29,6 +28,13 @@ namespace Player.Common
         {
             var bomb = _bombProvider.GetBomb(bombType, damageAmount, fireRange, explosionTime, playerId);
             bomb.transform.position = playerPos;
+        }
+
+        private Vector3 CalculatePlayerPos(Vector3 playerPos)
+        {
+            var modifiedPlayerPos =
+                new Vector3(Mathf.RoundToInt(playerPos.x), playerPos.y, Mathf.RoundToInt(playerPos.z));
+            return modifiedPlayerPos;
         }
     }
 }

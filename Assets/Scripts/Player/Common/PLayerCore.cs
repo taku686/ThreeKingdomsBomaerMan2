@@ -79,6 +79,7 @@ namespace Player.Common
                 return;
             }
 
+            _stateMachine.Update();
             _inputManager.UpdateSkillUI(SkillOneIntervalTime, SkillTwoIntervalTime);
         }
 
@@ -106,6 +107,10 @@ namespace Player.Common
 
             _playerDead.OnTouchExplosion(other);
             _stateMachine.Dispatch((int)PLayerState.Dead);
+        }
+
+        private void OnDestroy()
+        {
         }
     }
 }
