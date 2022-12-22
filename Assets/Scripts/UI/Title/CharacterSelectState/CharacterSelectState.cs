@@ -88,7 +88,6 @@ namespace UI.Title
                 }
             }
 
-            // ReSharper disable Unity.PerformanceAnalysis
             private void CreateActiveGrid(CharacterData characterData, Transform parent)
             {
                 var grid = Instantiate(Owner.characterSelectView.Grid, parent);
