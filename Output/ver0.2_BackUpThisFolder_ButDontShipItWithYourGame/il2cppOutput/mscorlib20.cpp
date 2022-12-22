@@ -1310,12 +1310,14 @@ struct AppContextSwitches_t542F10E9BE2333B7BE24C8858C8A24EFA6C06D38_StaticFields
 {
 	// System.Boolean System.AppContextSwitches::SetActorAsReferenceWhenCopyingClaimsIdentity
 	bool ___SetActorAsReferenceWhenCopyingClaimsIdentity_0;
+	// System.Boolean System.AppContextSwitches::NoAsyncCurrentCulture
+	bool ___NoAsyncCurrentCulture_1;
 	// System.Boolean System.AppContextSwitches::EnforceJapaneseEraYearRanges
-	bool ___EnforceJapaneseEraYearRanges_1;
+	bool ___EnforceJapaneseEraYearRanges_2;
 	// System.Boolean System.AppContextSwitches::FormatJapaneseFirstYearAsANumber
-	bool ___FormatJapaneseFirstYearAsANumber_2;
+	bool ___FormatJapaneseFirstYearAsANumber_3;
 	// System.Boolean System.AppContextSwitches::EnforceLegacyJapaneseDateParsing
-	bool ___EnforceLegacyJapaneseDateParsing_3;
+	bool ___EnforceLegacyJapaneseDateParsing_4;
 };
 struct Il2CppArrayBounds;
 
@@ -12543,6 +12545,19 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void BinaryWriter_Flush_m191E03B9EEA18D904F95
 		return;
 	}
 }
+// System.Int64 System.IO.BinaryWriter::Seek(System.Int32,System.IO.SeekOrigin)
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int64_t BinaryWriter_Seek_m1BF3D9E75D55BD7B3037574E3E64B1A51681B5D1 (BinaryWriter_tFB94D67EDFA3F6A34744A163BDABE287FDF2ED1E* __this, int32_t ___offset0, int32_t ___origin1, const RuntimeMethod* method) 
+{
+	{
+		Stream_tF844051B786E8F7F4244DBD218D74E8617B9A2DE* L_0 = __this->___OutStream_1;
+		int32_t L_1 = ___offset0;
+		int32_t L_2 = ___origin1;
+		NullCheck(L_0);
+		int64_t L_3;
+		L_3 = VirtualFuncInvoker2< int64_t, int64_t, int32_t >::Invoke(31 /* System.Int64 System.IO.Stream::Seek(System.Int64,System.IO.SeekOrigin) */, L_0, ((int64_t)L_1), L_2);
+		return L_3;
+	}
+}
 // System.Void System.IO.BinaryWriter::Write(System.Boolean)
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void BinaryWriter_Write_m7A9F2DFA4F657F925180347C1F9EDA7A6F199419 (BinaryWriter_tFB94D67EDFA3F6A34744A163BDABE287FDF2ED1E* __this, bool ___value0, const RuntimeMethod* method) 
 {
@@ -13250,7 +13265,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void BinaryWriter_Write7BitEncodedInt_m4E635B
 IL_0004:
 	{
 		uint32_t L_1 = V_0;
-		VirtualActionInvoker1< uint8_t >::Invoke(9 /* System.Void System.IO.BinaryWriter::Write(System.Byte) */, __this, (uint8_t)((int32_t)(uint8_t)((int32_t)((int32_t)L_1|((int32_t)128)))));
+		VirtualActionInvoker1< uint8_t >::Invoke(10 /* System.Void System.IO.BinaryWriter::Write(System.Byte) */, __this, (uint8_t)((int32_t)(uint8_t)((int32_t)((int32_t)L_1|((int32_t)128)))));
 		uint32_t L_2 = V_0;
 		V_0 = ((int32_t)((uint32_t)L_2>>7));
 	}
@@ -13265,7 +13280,7 @@ IL_0016:
 	}
 	{
 		uint32_t L_4 = V_0;
-		VirtualActionInvoker1< uint8_t >::Invoke(9 /* System.Void System.IO.BinaryWriter::Write(System.Byte) */, __this, (uint8_t)((int32_t)(uint8_t)L_4));
+		VirtualActionInvoker1< uint8_t >::Invoke(10 /* System.Void System.IO.BinaryWriter::Write(System.Byte) */, __this, (uint8_t)((int32_t)(uint8_t)L_4));
 		return;
 	}
 }
@@ -37552,7 +37567,7 @@ IL_004c:
 		DateTimeFormatInfo_InsertHash_mE2AB3B8946823ABEB401AA3F03C825A605328F7B(__this, L_16, _stringLiteralAE8B250714571DDED88423CC318BEF084C1CD05D, ((int32_t)3072), 0, NULL);
 		TokenHashValueU5BU5D_t3F8794937D04BA380989A813F33418CED58E80B9* L_17 = ___temp0;
 		DateTimeFormatInfo_InsertHash_mE2AB3B8946823ABEB401AA3F03C825A605328F7B(__this, L_17, _stringLiteral2B86D66477376A42A49B3CD3983CF53BEF4E55A0, ((int32_t)3328), 0, NULL);
-		bool L_18 = ((AppContextSwitches_t542F10E9BE2333B7BE24C8858C8A24EFA6C06D38_StaticFields*)il2cpp_codegen_static_fields_for(AppContextSwitches_t542F10E9BE2333B7BE24C8858C8A24EFA6C06D38_il2cpp_TypeInfo_var))->___EnforceLegacyJapaneseDateParsing_3;
+		bool L_18 = ((AppContextSwitches_t542F10E9BE2333B7BE24C8858C8A24EFA6C06D38_StaticFields*)il2cpp_codegen_static_fields_for(AppContextSwitches_t542F10E9BE2333B7BE24C8858C8A24EFA6C06D38_il2cpp_TypeInfo_var))->___EnforceLegacyJapaneseDateParsing_4;
 		if (L_18)
 		{
 			goto IL_0141;
@@ -38205,7 +38220,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool DateTimeFormatInfo_IsAllowedJapaneseToke
 		s_Il2CppMethodInitialized = true;
 	}
 	{
-		bool L_0 = ((AppContextSwitches_t542F10E9BE2333B7BE24C8858C8A24EFA6C06D38_StaticFields*)il2cpp_codegen_static_fields_for(AppContextSwitches_t542F10E9BE2333B7BE24C8858C8A24EFA6C06D38_il2cpp_TypeInfo_var))->___EnforceLegacyJapaneseDateParsing_3;
+		bool L_0 = ((AppContextSwitches_t542F10E9BE2333B7BE24C8858C8A24EFA6C06D38_StaticFields*)il2cpp_codegen_static_fields_for(AppContextSwitches_t542F10E9BE2333B7BE24C8858C8A24EFA6C06D38_il2cpp_TypeInfo_var))->___EnforceLegacyJapaneseDateParsing_4;
 		if (L_0)
 		{
 			goto IL_0040;
@@ -39910,7 +39925,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool DateTimeFormatInfo_IsAllowed
 		s_Il2CppMethodInitialized = true;
 	}
 	{
-		bool L_0 = ((AppContextSwitches_t542F10E9BE2333B7BE24C8858C8A24EFA6C06D38_StaticFields*)il2cpp_codegen_static_fields_for(AppContextSwitches_t542F10E9BE2333B7BE24C8858C8A24EFA6C06D38_il2cpp_TypeInfo_var))->___EnforceLegacyJapaneseDateParsing_3;
+		bool L_0 = ((AppContextSwitches_t542F10E9BE2333B7BE24C8858C8A24EFA6C06D38_StaticFields*)il2cpp_codegen_static_fields_for(AppContextSwitches_t542F10E9BE2333B7BE24C8858C8A24EFA6C06D38_il2cpp_TypeInfo_var))->___EnforceLegacyJapaneseDateParsing_4;
 		if (L_0)
 		{
 			goto IL_0040;

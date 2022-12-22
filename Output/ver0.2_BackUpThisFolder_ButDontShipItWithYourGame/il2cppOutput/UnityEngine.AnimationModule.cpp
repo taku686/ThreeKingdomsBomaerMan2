@@ -1984,6 +1984,16 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Animator_set_applyRootMotion_mA0953B6AEE
 	_il2cpp_icall_func = (Animator_set_applyRootMotion_mA0953B6AEE43D4AF0837365E7BFF60FCC74B0F98_ftn)il2cpp_codegen_resolve_icall ("UnityEngine.Animator::set_applyRootMotion(System.Boolean)");
 	_il2cpp_icall_func(__this, ___value0);
 }
+// UnityEngine.ScriptableObject UnityEngine.Animator::GetBehaviour(System.Type)
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR ScriptableObject_tB3BFDB921A1B1795B38A5417D3B97A89A140436A* Animator_GetBehaviour_mC89D3A58B66C9579FF8980C1F06F518A8C2E489D (Animator_t8A52E42AE54F76681838FE9E632683EF3952E883* __this, Type_t* ___type0, const RuntimeMethod* method) 
+{
+	typedef ScriptableObject_tB3BFDB921A1B1795B38A5417D3B97A89A140436A* (*Animator_GetBehaviour_mC89D3A58B66C9579FF8980C1F06F518A8C2E489D_ftn) (Animator_t8A52E42AE54F76681838FE9E632683EF3952E883*, Type_t*);
+	static Animator_GetBehaviour_mC89D3A58B66C9579FF8980C1F06F518A8C2E489D_ftn _il2cpp_icall_func;
+	if (!_il2cpp_icall_func)
+	_il2cpp_icall_func = (Animator_GetBehaviour_mC89D3A58B66C9579FF8980C1F06F518A8C2E489D_ftn)il2cpp_codegen_resolve_icall ("UnityEngine.Animator::GetBehaviour(System.Type)");
+	ScriptableObject_tB3BFDB921A1B1795B38A5417D3B97A89A140436A* icallRetVal = _il2cpp_icall_func(__this, ___type0);
+	return icallRetVal;
+}
 // UnityEngine.ScriptableObject[] UnityEngine.Animator::InternalGetBehaviours(System.Type)
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR ScriptableObjectU5BU5D_t1176A2F52A3170D8595E55DD1A82FDE76D120D78* Animator_InternalGetBehaviours_m53FE16BAE89AAB75F82132643848FCBFDD441BFE (Animator_t8A52E42AE54F76681838FE9E632683EF3952E883* __this, Type_t* ___type0, const RuntimeMethod* method) 
 {

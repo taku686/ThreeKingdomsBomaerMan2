@@ -28,7 +28,7 @@ namespace UI.Title
 
             private void InitializeContent()
             {
-                Owner.characterDetailView.Name.text =
+                Owner.characterDetailView.NameText.text =
                     Owner._characterDataManager.GetCharacterData(Owner._currentCharacterId).Name;
             }
 

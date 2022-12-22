@@ -103,7 +103,7 @@ namespace Bomb
         {
             explosionEffect.localPosition = EffectOriginPosition;
             explosionEffect.gameObject.SetActive(true);
-            explosionEffect.DOMove(endPos, moveDuration).SetLink(this.gameObject);
+            explosionEffect.DOMove(endPos, moveDuration).SetLink(gameObject);
             await UniTask.Delay(TimeSpan.FromSeconds(ExplosionDisplayDuration), cancellationToken: Cts.Token);
             explosionEffect.gameObject.SetActive(false);
         }

@@ -1467,6 +1467,29 @@ IL_001b:
 		return L_9;
 	}
 }
+// System.Boolean UnityEngine.Physics::SphereCast(UnityEngine.Vector3,System.Single,UnityEngine.Vector3,UnityEngine.RaycastHit&,System.Single,System.Int32)
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool Physics_SphereCast_m2A41FD7023EC5B89B69E0A8948325BEF46D9597C (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___origin0, float ___radius1, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___direction2, RaycastHit_t6F30BD0B38B56401CA833A1B87BD74F2ACD2F2B5* ___hitInfo3, float ___maxDistance4, int32_t ___layerMask5, const RuntimeMethod* method) 
+{
+	bool V_0 = false;
+	{
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_0 = ___origin0;
+		float L_1 = ___radius1;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_2 = ___direction2;
+		RaycastHit_t6F30BD0B38B56401CA833A1B87BD74F2ACD2F2B5* L_3 = ___hitInfo3;
+		float L_4 = ___maxDistance4;
+		int32_t L_5 = ___layerMask5;
+		bool L_6;
+		L_6 = Physics_SphereCast_mDB2140FE8561D0CE870037527DACC44AB18A346D(L_0, L_1, L_2, L_3, L_4, L_5, 0, NULL);
+		V_0 = L_6;
+		goto IL_0012;
+	}
+
+IL_0012:
+	{
+		bool L_7 = V_0;
+		return L_7;
+	}
+}
 // System.Boolean UnityEngine.Physics::SphereCast(UnityEngine.Ray,System.Single,System.Single,System.Int32,UnityEngine.QueryTriggerInteraction)
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool Physics_SphereCast_m753A9C9335C4815C7C30816B70D3EF51E59F3AAD (Ray_t2B1742D7958DC05BDC3EFC7461D3593E1430DC00 ___ray0, float ___radius1, float ___maxDistance2, int32_t ___layerMask3, int32_t ___queryTriggerInteraction4, const RuntimeMethod* method) 
 {

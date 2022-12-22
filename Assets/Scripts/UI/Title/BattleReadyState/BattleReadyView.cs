@@ -6,12 +6,11 @@ namespace UI.Title
     public class BattleReadyView : MonoBehaviour
     {
         [SerializeField] private Button backButton;
-        
         [SerializeField] private Button battleStartButton;
         [SerializeField] private Transform gridParent;
-        [SerializeField] private GameObject grid;
+        [SerializeField] private BattleReadyGrid battleReadyGrid;
 
-        public GameObject Grid => grid;
+        public BattleReadyGrid BattleReadyGrid => battleReadyGrid;
         public Transform GridParent => gridParent;
         public Button BackButton => backButton;
         public Button BattleStartButton => battleStartButton;

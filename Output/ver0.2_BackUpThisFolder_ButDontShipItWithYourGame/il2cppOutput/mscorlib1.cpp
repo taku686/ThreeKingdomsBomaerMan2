@@ -27692,6 +27692,15 @@ IL_000f:
 		return L_7;
 	}
 }
+// System.String System.String::TrimStart()
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* String_TrimStart_m69C2400B208C8F3D1DE6A3E24B4A1095F2B8EDEA (String_t* __this, const RuntimeMethod* method) 
+{
+	{
+		String_t* L_0;
+		L_0 = String_TrimWhiteSpaceHelper_mA609435C4B34ACBCCF712612CD2AE19D77878575(__this, 0, NULL);
+		return L_0;
+	}
+}
 // System.String System.String::TrimStart(System.Char)
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* String_TrimStart_m210863A5E84BC22EC0487A1543D3680979DD87EE (String_t* __this, Il2CppChar ___trimChar0, const RuntimeMethod* method) 
 {
@@ -27750,6 +27759,15 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* String_TrimEnd_m25B1EA658EE07ADFED5
 	{
 		String_t* L_0;
 		L_0 = String_TrimWhiteSpaceHelper_mA609435C4B34ACBCCF712612CD2AE19D77878575(__this, 1, NULL);
+		return L_0;
+	}
+}
+// System.String System.String::TrimEnd(System.Char)
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* String_TrimEnd_mDB4D96F8312F563656D4115A9F280062E05D2EE8 (String_t* __this, Il2CppChar ___trimChar0, const RuntimeMethod* method) 
+{
+	{
+		String_t* L_0;
+		L_0 = String_TrimHelper_m3DAC04D0C8870DC7CD961F9D9346CF967318E8AF(__this, (Il2CppChar*)((uintptr_t)(&___trimChar0)), 1, 1, NULL);
 		return L_0;
 	}
 }

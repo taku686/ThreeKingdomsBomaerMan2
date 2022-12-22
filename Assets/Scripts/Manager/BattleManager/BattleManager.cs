@@ -35,7 +35,7 @@ namespace Manager.BattleManager
         }
 
         // Start is called before the first frame update
-        async void Start()
+        void Start()
         {
             InitializeState();
         }

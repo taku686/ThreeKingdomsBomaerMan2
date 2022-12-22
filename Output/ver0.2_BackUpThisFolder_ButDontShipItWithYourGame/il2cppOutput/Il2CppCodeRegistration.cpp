@@ -29,6 +29,7 @@ IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_PhotonRealtime_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_PhotonUnityNetworking_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_PhotonUnityNetworking_Demos_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_PhotonUnityNetworking_Utilities_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_Purchasing_Common_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_System_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_System_Configuration_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_System_Core_CodeGenModule;
@@ -54,9 +55,19 @@ IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_GridModule_CodeGenModule
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_IMGUIModule_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_InputLegacyModule_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_InputModule_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_JSONSerializeModule_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_ParticleSystemModule_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_Physics2DModule_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_PhysicsModule_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_Purchasing_AppleCore_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_Purchasing_AppleMacosStub_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_Purchasing_AppleStub_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_Purchasing_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_Purchasing_SecurityCore_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_Purchasing_Security_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_Purchasing_Stores_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_Purchasing_WinRTCore_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_Purchasing_WinRTStub_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_SharedInternalsModule_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_SpriteShapeModule_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_SubsystemsModule_CodeGenModule;
@@ -68,19 +79,30 @@ IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_UIElementsModule_CodeGen
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_UIElementsNativeModule_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_UIModule_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_UI_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_UnityAnalyticsModule_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_UnityWebRequestAssetBundleModule_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_UnityWebRequestModule_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_UnityWebRequestWWWModule_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_VRModule_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_UnityEngine_XRModule_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_Unity_Postprocessing_Runtime_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_Unity_Services_Analytics_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_Unity_Services_Core_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_Unity_Services_Core_Configuration_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_Unity_Services_Core_Device_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_Unity_Services_Core_Environments_Internal_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_Unity_Services_Core_Internal_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_Unity_Services_Core_Registration_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_Unity_Services_Core_Scheduler_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_Unity_Services_Core_Telemetry_CodeGenModule;
+IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_Unity_Services_Core_Threading_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_Unity_TextMeshPro_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_ZenjectU2Dusage_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_Zenject_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g___Generated_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_mscorlib_CodeGenModule;
 IL2CPP_EXTERN_C const Il2CppCodeGenModule* g_CodeGenModules[];
-const Il2CppCodeGenModule* g_CodeGenModules[61] = 
+const Il2CppCodeGenModule* g_CodeGenModules[83] = 
 {
 	(&g_AssemblyU2DCSharpU2Dfirstpass_CodeGenModule),
 	(&g_AssemblyU2DCSharp_CodeGenModule),
@@ -93,6 +115,7 @@ const Il2CppCodeGenModule* g_CodeGenModules[61] =
 	(&g_PhotonUnityNetworking_CodeGenModule),
 	(&g_PhotonUnityNetworking_Demos_CodeGenModule),
 	(&g_PhotonUnityNetworking_Utilities_CodeGenModule),
+	(&g_Purchasing_Common_CodeGenModule),
 	(&g_System_CodeGenModule),
 	(&g_System_Configuration_CodeGenModule),
 	(&g_System_Core_CodeGenModule),
@@ -118,9 +141,19 @@ const Il2CppCodeGenModule* g_CodeGenModules[61] =
 	(&g_UnityEngine_IMGUIModule_CodeGenModule),
 	(&g_UnityEngine_InputLegacyModule_CodeGenModule),
 	(&g_UnityEngine_InputModule_CodeGenModule),
+	(&g_UnityEngine_JSONSerializeModule_CodeGenModule),
 	(&g_UnityEngine_ParticleSystemModule_CodeGenModule),
 	(&g_UnityEngine_Physics2DModule_CodeGenModule),
 	(&g_UnityEngine_PhysicsModule_CodeGenModule),
+	(&g_UnityEngine_Purchasing_AppleCore_CodeGenModule),
+	(&g_UnityEngine_Purchasing_AppleMacosStub_CodeGenModule),
+	(&g_UnityEngine_Purchasing_AppleStub_CodeGenModule),
+	(&g_UnityEngine_Purchasing_CodeGenModule),
+	(&g_UnityEngine_Purchasing_SecurityCore_CodeGenModule),
+	(&g_UnityEngine_Purchasing_Security_CodeGenModule),
+	(&g_UnityEngine_Purchasing_Stores_CodeGenModule),
+	(&g_UnityEngine_Purchasing_WinRTCore_CodeGenModule),
+	(&g_UnityEngine_Purchasing_WinRTStub_CodeGenModule),
 	(&g_UnityEngine_SharedInternalsModule_CodeGenModule),
 	(&g_UnityEngine_SpriteShapeModule_CodeGenModule),
 	(&g_UnityEngine_SubsystemsModule_CodeGenModule),
@@ -132,12 +165,23 @@ const Il2CppCodeGenModule* g_CodeGenModules[61] =
 	(&g_UnityEngine_UIElementsNativeModule_CodeGenModule),
 	(&g_UnityEngine_UIModule_CodeGenModule),
 	(&g_UnityEngine_UI_CodeGenModule),
+	(&g_UnityEngine_UnityAnalyticsModule_CodeGenModule),
 	(&g_UnityEngine_UnityWebRequestAssetBundleModule_CodeGenModule),
 	(&g_UnityEngine_UnityWebRequestModule_CodeGenModule),
 	(&g_UnityEngine_UnityWebRequestWWWModule_CodeGenModule),
 	(&g_UnityEngine_VRModule_CodeGenModule),
 	(&g_UnityEngine_XRModule_CodeGenModule),
 	(&g_Unity_Postprocessing_Runtime_CodeGenModule),
+	(&g_Unity_Services_Analytics_CodeGenModule),
+	(&g_Unity_Services_Core_CodeGenModule),
+	(&g_Unity_Services_Core_Configuration_CodeGenModule),
+	(&g_Unity_Services_Core_Device_CodeGenModule),
+	(&g_Unity_Services_Core_Environments_Internal_CodeGenModule),
+	(&g_Unity_Services_Core_Internal_CodeGenModule),
+	(&g_Unity_Services_Core_Registration_CodeGenModule),
+	(&g_Unity_Services_Core_Scheduler_CodeGenModule),
+	(&g_Unity_Services_Core_Telemetry_CodeGenModule),
+	(&g_Unity_Services_Core_Threading_CodeGenModule),
 	(&g_Unity_TextMeshPro_CodeGenModule),
 	(&g_ZenjectU2Dusage_CodeGenModule),
 	(&g_Zenject_CodeGenModule),
@@ -147,20 +191,20 @@ const Il2CppCodeGenModule* g_CodeGenModules[61] =
 IL2CPP_EXTERN_C const Il2CppCodeRegistration g_CodeRegistration;
 const Il2CppCodeRegistration g_CodeRegistration = 
 {
-	9,
+	10,
 	g_ReversePInvokeWrapperPointers,
-	92451,
+	86213,
 	g_Il2CppGenericMethodPointers,
 	g_Il2CppGenericAdjustorThunks,
-	13579,
+	13960,
 	g_Il2CppInvokerPointers,
-	2833,
+	2954,
 	g_UnresolvedVirtualMethodPointers,
-	509,
+	548,
 	g_Il2CppInteropData,
 	0,
 	NULL,
-	61,
+	83,
 	g_CodeGenModules,
 };
 IL2CPP_EXTERN_C_CONST Il2CppMetadataRegistration g_MetadataRegistration;

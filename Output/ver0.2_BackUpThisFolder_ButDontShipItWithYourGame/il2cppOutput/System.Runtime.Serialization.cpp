@@ -12,6 +12,8 @@
 
 
 
+// System.Attribute
+struct Attribute_tFDA8EFEFB0711976D22474794576DAF28F7440AA;
 // System.Runtime.Serialization.DataContractAttribute
 struct DataContractAttribute_tD065D7D14CC8AA548815166AB8B8210D1B3C699F;
 // System.Runtime.Serialization.DataMemberAttribute
@@ -111,6 +113,8 @@ struct EnumMemberAttribute_t65B5E85E642C96791DD6AE5EAD0276350954126F  : public A
 {
 	// System.String System.Runtime.Serialization.EnumMemberAttribute::value
 	String_t* ___value_0;
+	// System.Boolean System.Runtime.Serialization.EnumMemberAttribute::isValueSetExplicitly
+	bool ___isValueSetExplicitly_1;
 };
 
 // System.Runtime.Serialization.IgnoreDataMemberAttribute
@@ -124,12 +128,26 @@ struct Int32_t680FF22E76F6EFAD4375103CBBFFA0421349384C
 	// System.Int32 System.Int32::m_value
 	int32_t ___m_value_0;
 };
+
+// System.Void
+struct Void_t4861ACF8F4594C3437BB48B6E56783494B843915 
+{
+	union
+	{
+		struct
+		{
+		};
+		uint8_t Void_t4861ACF8F4594C3437BB48B6E56783494B843915__padding[1];
+	};
+};
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
 
 
 
+// System.Void System.Attribute::.ctor()
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Attribute__ctor_m79ED1BF1EE36D1E417BA89A0D9F91F8AAD8D19E2 (Attribute_tFDA8EFEFB0711976D22474794576DAF28F7440AA* __this, const RuntimeMethod* method) ;
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
@@ -199,12 +217,31 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool DataMemberAttribute_get_EmitDefaultValue
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
+// System.Void System.Runtime.Serialization.EnumMemberAttribute::.ctor()
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnumMemberAttribute__ctor_m3F91AFEBFAFB8DA2B8527180896657BC30BA94E3 (EnumMemberAttribute_t65B5E85E642C96791DD6AE5EAD0276350954126F* __this, const RuntimeMethod* method) 
+{
+	{
+		Attribute__ctor_m79ED1BF1EE36D1E417BA89A0D9F91F8AAD8D19E2(__this, NULL);
+		return;
+	}
+}
 // System.String System.Runtime.Serialization.EnumMemberAttribute::get_Value()
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* EnumMemberAttribute_get_Value_mB41126B613B9FD1CD8A05D08FCEC4B6663864BE9 (EnumMemberAttribute_t65B5E85E642C96791DD6AE5EAD0276350954126F* __this, const RuntimeMethod* method) 
 {
 	{
 		String_t* L_0 = __this->___value_0;
 		return L_0;
+	}
+}
+// System.Void System.Runtime.Serialization.EnumMemberAttribute::set_Value(System.String)
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnumMemberAttribute_set_Value_mF6DD8C5291188BCA38A2073FDEA4C76EF1692EB6 (EnumMemberAttribute_t65B5E85E642C96791DD6AE5EAD0276350954126F* __this, String_t* ___value0, const RuntimeMethod* method) 
+{
+	{
+		String_t* L_0 = ___value0;
+		__this->___value_0 = L_0;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___value_0), (void*)L_0);
+		__this->___isValueSetExplicitly_1 = (bool)1;
+		return;
 	}
 }
 #ifdef __clang__

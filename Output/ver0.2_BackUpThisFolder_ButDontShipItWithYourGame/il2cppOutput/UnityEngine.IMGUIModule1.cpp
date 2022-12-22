@@ -244,6 +244,7 @@ IL2CPP_EXTERN_C RuntimeClass* GUILayoutGroup_tD08496E80F283C290B5B90D7BFB3C9C7CC
 IL2CPP_EXTERN_C RuntimeClass* GUILayoutOptionU5BU5D_t24AB80AB9355D784F2C65E12A4D0CC2E0C914CA2_il2cpp_TypeInfo_var;
 IL2CPP_EXTERN_C RuntimeClass* GUILayoutOption_t8B0AA056521747053A3176FCC43E9C3608940A14_il2cpp_TypeInfo_var;
 IL2CPP_EXTERN_C RuntimeClass* GUILayoutUtility_t48D00CD11CFC1E09E8EC2E51D59E735F5D24836F_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* GUIScrollGroup_t4D7230655A7D01ED9BD95916958E34AF09B21FE5_il2cpp_TypeInfo_var;
 IL2CPP_EXTERN_C RuntimeClass* GUISettings_tF2CA7E8B9F62F1FC013BFF053B5FA2709EBA3847_il2cpp_TypeInfo_var;
 IL2CPP_EXTERN_C RuntimeClass* GUISkin_t8C65CE1424D4B5D8D73022E266BDAD3BDE8612D9_il2cpp_TypeInfo_var;
 IL2CPP_EXTERN_C RuntimeClass* GUIStateObjects_t98BE277CEE5125AA017EAE4422D8537F701EE15D_il2cpp_TypeInfo_var;
@@ -328,6 +329,7 @@ IL2CPP_EXTERN_C const RuntimeMethod* List_1_get_Count_m153018B4392442CB2A61FDE8F
 IL2CPP_EXTERN_C const RuntimeMethod* List_1_get_Item_m16B6735ABC6797DEC0C384CD67F15DDE9A5C1360_RuntimeMethod_var;
 IL2CPP_EXTERN_C const RuntimeMethod* ValueCollection_GetEnumerator_m88DC4BD4D4952C7D4B15BE9CC164DF1EAA69A197_RuntimeMethod_var;
 IL2CPP_EXTERN_C const RuntimeType* GUILayoutGroup_tD08496E80F283C290B5B90D7BFB3C9C7CC33CD8D_0_0_0_var;
+IL2CPP_EXTERN_C const RuntimeType* GUIScrollGroup_t4D7230655A7D01ED9BD95916958E34AF09B21FE5_0_0_0_var;
 IL2CPP_EXTERN_C const RuntimeType* GUITargetAttribute_t3F08CE7E00D79CB555B94AA7FA1BCB4B144B922B_0_0_0_var;
 struct Delegate_t_marshaled_com;
 struct Delegate_t_marshaled_pinvoke;
@@ -1857,6 +1859,14 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Rect_tA04E0F8A1830E767F40FB27ECD8D309303571F0
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GUI_BeginGroup_mC984853EB22E39DD58DA1FDC3A6A8BB034B811C7 (Rect_tA04E0F8A1830E767F40FB27ECD8D309303571F0D ___position0, GUIContent_t15E48D4BEB1E6B6044F7DEB5E350800F511C2ED2* ___content1, GUIStyle_t20BA2F9F3FE9D13AAA607EEEBE5547835A6F6580* ___style2, const RuntimeMethod* method) ;
 // System.Void UnityEngine.GUI::EndGroup()
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GUI_EndGroup_mE8C7A3FB87B0EAA3556AB16466D0D640BBEE1675 (const RuntimeMethod* method) ;
+// System.Void UnityEngine.Rect::.ctor(System.Single,System.Single,System.Single,System.Single)
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Rect__ctor_m18C3033D135097BEE424AAA68D91C706D2647F23 (Rect_tA04E0F8A1830E767F40FB27ECD8D309303571F0D* __this, float ___x0, float ___y1, float ___width2, float ___height3, const RuntimeMethod* method) ;
+// UnityEngine.Vector2 UnityEngine.GUI::BeginScrollView(UnityEngine.Rect,UnityEngine.Vector2,UnityEngine.Rect,System.Boolean,System.Boolean,UnityEngine.GUIStyle,UnityEngine.GUIStyle,UnityEngine.GUIStyle)
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 GUI_BeginScrollView_m72973BB341990D9C835DA2FFF2E3621443197ABC (Rect_tA04E0F8A1830E767F40FB27ECD8D309303571F0D ___position0, Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___scrollPosition1, Rect_tA04E0F8A1830E767F40FB27ECD8D309303571F0D ___viewRect2, bool ___alwaysShowHorizontal3, bool ___alwaysShowVertical4, GUIStyle_t20BA2F9F3FE9D13AAA607EEEBE5547835A6F6580* ___horizontalScrollbar5, GUIStyle_t20BA2F9F3FE9D13AAA607EEEBE5547835A6F6580* ___verticalScrollbar6, GUIStyle_t20BA2F9F3FE9D13AAA607EEEBE5547835A6F6580* ___background7, const RuntimeMethod* method) ;
+// System.Void UnityEngine.GUILayout::EndScrollView(System.Boolean)
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GUILayout_EndScrollView_mFC2A596FB4C7734D5EA32926AC58DCF7EA6BB372 (bool ___handleScrollWheel0, const RuntimeMethod* method) ;
+// System.Void UnityEngine.GUI::EndScrollView(System.Boolean)
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GUI_EndScrollView_mD3C01FAC6885E5A625A5F3397A3F24250CACD3C5 (bool ___handleScrollWheel0, const RuntimeMethod* method) ;
 // UnityEngine.GUIStyle UnityEngine.GUISkin::get_window()
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR GUIStyle_t20BA2F9F3FE9D13AAA607EEEBE5547835A6F6580* GUISkin_get_window_m760DAF129E72775DFD18CB71720AD306345E91C2 (GUISkin_t8C65CE1424D4B5D8D73022E266BDAD3BDE8612D9* __this, const RuntimeMethod* method) ;
 // UnityEngine.Rect UnityEngine.GUILayout::DoWindow(System.Int32,UnityEngine.Rect,UnityEngine.GUI/WindowFunction,UnityEngine.GUIContent,UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])
@@ -3148,6 +3158,157 @@ IL_001b:
 
 IL_004f:
 	{
+		return;
+	}
+}
+// UnityEngine.Vector2 UnityEngine.GUILayout::BeginScrollView(UnityEngine.Vector2,System.Boolean,System.Boolean,UnityEngine.GUIStyle,UnityEngine.GUIStyle,UnityEngine.GUIStyle,UnityEngine.GUILayoutOption[])
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 GUILayout_BeginScrollView_mB4B5FB14EEDD30080327F37D9B3AFF8D438CF3AC (Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___scrollPosition0, bool ___alwaysShowHorizontal1, bool ___alwaysShowVertical2, GUIStyle_t20BA2F9F3FE9D13AAA607EEEBE5547835A6F6580* ___horizontalScrollbar3, GUIStyle_t20BA2F9F3FE9D13AAA607EEEBE5547835A6F6580* ___verticalScrollbar4, GUIStyle_t20BA2F9F3FE9D13AAA607EEEBE5547835A6F6580* ___background5, GUILayoutOptionU5BU5D_t24AB80AB9355D784F2C65E12A4D0CC2E0C914CA2* ___options6, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GUILayoutUtility_t48D00CD11CFC1E09E8EC2E51D59E735F5D24836F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GUIScrollGroup_t4D7230655A7D01ED9BD95916958E34AF09B21FE5_0_0_0_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GUIScrollGroup_t4D7230655A7D01ED9BD95916958E34AF09B21FE5_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GUI_tA9CDB3D69DB13D51AD83ABDB587EF95947EC2D2A_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Type_t_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	GUIScrollGroup_t4D7230655A7D01ED9BD95916958E34AF09B21FE5* V_0 = NULL;
+	int32_t V_1 = 0;
+	int32_t V_2 = 0;
+	Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 V_3;
+	memset((&V_3), 0, sizeof(V_3));
+	{
+		GUIUtility_CheckOnGUI_mD167632D5D038DF66CC97F231CD45736D1F556D6(NULL);
+		GUIStyle_t20BA2F9F3FE9D13AAA607EEEBE5547835A6F6580* L_0 = ___background5;
+		RuntimeTypeHandle_t332A452B8B6179E4469B69525D0FE82A88030F7B L_1 = { reinterpret_cast<intptr_t> (GUIScrollGroup_t4D7230655A7D01ED9BD95916958E34AF09B21FE5_0_0_0_var) };
+		il2cpp_codegen_runtime_class_init_inline(Type_t_il2cpp_TypeInfo_var);
+		Type_t* L_2;
+		L_2 = Type_GetTypeFromHandle_m6062B81682F79A4D6DF2640692EE6D9987858C57(L_1, NULL);
+		il2cpp_codegen_runtime_class_init_inline(GUILayoutUtility_t48D00CD11CFC1E09E8EC2E51D59E735F5D24836F_il2cpp_TypeInfo_var);
+		GUILayoutGroup_tD08496E80F283C290B5B90D7BFB3C9C7CC33CD8D* L_3;
+		L_3 = GUILayoutUtility_BeginLayoutGroup_mE922EB7B3D05474F6259C238B7A8C2FFFE1DBC43(L_0, (GUILayoutOptionU5BU5D_t24AB80AB9355D784F2C65E12A4D0CC2E0C914CA2*)NULL, L_2, NULL);
+		V_0 = ((GUIScrollGroup_t4D7230655A7D01ED9BD95916958E34AF09B21FE5*)CastclassSealed((RuntimeObject*)L_3, GUIScrollGroup_t4D7230655A7D01ED9BD95916958E34AF09B21FE5_il2cpp_TypeInfo_var));
+		Event_tEBC6F24B56CE22B9C9AD1AC6C24A6B83BC3860CB* L_4;
+		L_4 = Event_get_current_mBD7135E10C392EAD61AC0A0D2489EF758C8A3FAD(NULL);
+		NullCheck(L_4);
+		int32_t L_5;
+		L_5 = Event_get_type_m8A825D6DA432B967DAA3E22E5C8571620A75F8A8(L_4, NULL);
+		V_2 = L_5;
+		int32_t L_6 = V_2;
+		V_1 = L_6;
+		int32_t L_7 = V_1;
+		if ((((int32_t)L_7) == ((int32_t)8)))
+		{
+			goto IL_0032;
+		}
+	}
+	{
+		goto IL_0076;
+	}
+
+IL_0032:
+	{
+		GUIScrollGroup_t4D7230655A7D01ED9BD95916958E34AF09B21FE5* L_8 = V_0;
+		NullCheck(L_8);
+		((GUILayoutGroup_tD08496E80F283C290B5B90D7BFB3C9C7CC33CD8D*)L_8)->___resetCoords_13 = (bool)1;
+		GUIScrollGroup_t4D7230655A7D01ED9BD95916958E34AF09B21FE5* L_9 = V_0;
+		NullCheck(L_9);
+		((GUILayoutGroup_tD08496E80F283C290B5B90D7BFB3C9C7CC33CD8D*)L_9)->___isVertical_12 = (bool)1;
+		GUIScrollGroup_t4D7230655A7D01ED9BD95916958E34AF09B21FE5* L_10 = V_0;
+		NullCheck(L_10);
+		((GUILayoutEntry_tDF59F19DD000820F64B356D5092C4BEDFE109D5F*)L_10)->___stretchWidth_5 = 1;
+		GUIScrollGroup_t4D7230655A7D01ED9BD95916958E34AF09B21FE5* L_11 = V_0;
+		NullCheck(L_11);
+		((GUILayoutEntry_tDF59F19DD000820F64B356D5092C4BEDFE109D5F*)L_11)->___stretchHeight_6 = 1;
+		GUIScrollGroup_t4D7230655A7D01ED9BD95916958E34AF09B21FE5* L_12 = V_0;
+		GUIStyle_t20BA2F9F3FE9D13AAA607EEEBE5547835A6F6580* L_13 = ___verticalScrollbar4;
+		NullCheck(L_12);
+		L_12->___verticalScrollbar_43 = L_13;
+		Il2CppCodeGenWriteBarrier((void**)(&L_12->___verticalScrollbar_43), (void*)L_13);
+		GUIScrollGroup_t4D7230655A7D01ED9BD95916958E34AF09B21FE5* L_14 = V_0;
+		GUIStyle_t20BA2F9F3FE9D13AAA607EEEBE5547835A6F6580* L_15 = ___horizontalScrollbar3;
+		NullCheck(L_14);
+		L_14->___horizontalScrollbar_42 = L_15;
+		Il2CppCodeGenWriteBarrier((void**)(&L_14->___horizontalScrollbar_42), (void*)L_15);
+		GUIScrollGroup_t4D7230655A7D01ED9BD95916958E34AF09B21FE5* L_16 = V_0;
+		bool L_17 = ___alwaysShowVertical2;
+		NullCheck(L_16);
+		L_16->___needsVerticalScrollbar_41 = L_17;
+		GUIScrollGroup_t4D7230655A7D01ED9BD95916958E34AF09B21FE5* L_18 = V_0;
+		bool L_19 = ___alwaysShowHorizontal1;
+		NullCheck(L_18);
+		L_18->___needsHorizontalScrollbar_40 = L_19;
+		GUIScrollGroup_t4D7230655A7D01ED9BD95916958E34AF09B21FE5* L_20 = V_0;
+		GUILayoutOptionU5BU5D_t24AB80AB9355D784F2C65E12A4D0CC2E0C914CA2* L_21 = ___options6;
+		NullCheck(L_20);
+		VirtualActionInvoker1< GUILayoutOptionU5BU5D_t24AB80AB9355D784F2C65E12A4D0CC2E0C914CA2* >::Invoke(13 /* System.Void UnityEngine.GUILayoutEntry::ApplyOptions(UnityEngine.GUILayoutOption[]) */, L_20, L_21);
+		goto IL_0078;
+	}
+
+IL_0076:
+	{
+		goto IL_0078;
+	}
+
+IL_0078:
+	{
+		GUIScrollGroup_t4D7230655A7D01ED9BD95916958E34AF09B21FE5* L_22 = V_0;
+		NullCheck(L_22);
+		Rect_tA04E0F8A1830E767F40FB27ECD8D309303571F0D L_23 = ((GUILayoutEntry_tDF59F19DD000820F64B356D5092C4BEDFE109D5F*)L_22)->___rect_4;
+		Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 L_24 = ___scrollPosition0;
+		GUIScrollGroup_t4D7230655A7D01ED9BD95916958E34AF09B21FE5* L_25 = V_0;
+		NullCheck(L_25);
+		float L_26 = L_25->___clientWidth_36;
+		GUIScrollGroup_t4D7230655A7D01ED9BD95916958E34AF09B21FE5* L_27 = V_0;
+		NullCheck(L_27);
+		float L_28 = L_27->___clientHeight_37;
+		Rect_tA04E0F8A1830E767F40FB27ECD8D309303571F0D L_29;
+		memset((&L_29), 0, sizeof(L_29));
+		Rect__ctor_m18C3033D135097BEE424AAA68D91C706D2647F23((&L_29), (0.0f), (0.0f), L_26, L_28, /*hidden argument*/NULL);
+		bool L_30 = ___alwaysShowHorizontal1;
+		bool L_31 = ___alwaysShowVertical2;
+		GUIStyle_t20BA2F9F3FE9D13AAA607EEEBE5547835A6F6580* L_32 = ___horizontalScrollbar3;
+		GUIStyle_t20BA2F9F3FE9D13AAA607EEEBE5547835A6F6580* L_33 = ___verticalScrollbar4;
+		GUIStyle_t20BA2F9F3FE9D13AAA607EEEBE5547835A6F6580* L_34 = ___background5;
+		il2cpp_codegen_runtime_class_init_inline(GUI_tA9CDB3D69DB13D51AD83ABDB587EF95947EC2D2A_il2cpp_TypeInfo_var);
+		Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 L_35;
+		L_35 = GUI_BeginScrollView_m72973BB341990D9C835DA2FFF2E3621443197ABC(L_23, L_24, L_29, L_30, L_31, L_32, L_33, L_34, NULL);
+		V_3 = L_35;
+		goto IL_00a9;
+	}
+
+IL_00a9:
+	{
+		Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 L_36 = V_3;
+		return L_36;
+	}
+}
+// System.Void UnityEngine.GUILayout::EndScrollView()
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GUILayout_EndScrollView_mDD058E836F73C5DE669D65011465CB887392085E (const RuntimeMethod* method) 
+{
+	{
+		GUILayout_EndScrollView_mFC2A596FB4C7734D5EA32926AC58DCF7EA6BB372((bool)1, NULL);
+		return;
+	}
+}
+// System.Void UnityEngine.GUILayout::EndScrollView(System.Boolean)
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GUILayout_EndScrollView_mFC2A596FB4C7734D5EA32926AC58DCF7EA6BB372 (bool ___handleScrollWheel0, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GUILayoutUtility_t48D00CD11CFC1E09E8EC2E51D59E735F5D24836F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GUI_tA9CDB3D69DB13D51AD83ABDB587EF95947EC2D2A_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		il2cpp_codegen_runtime_class_init_inline(GUILayoutUtility_t48D00CD11CFC1E09E8EC2E51D59E735F5D24836F_il2cpp_TypeInfo_var);
+		GUILayoutUtility_EndLayoutGroup_m62EDDF35442EC5CE39A4DC11740B87DD45454C26(NULL);
+		bool L_0 = ___handleScrollWheel0;
+		il2cpp_codegen_runtime_class_init_inline(GUI_tA9CDB3D69DB13D51AD83ABDB587EF95947EC2D2A_il2cpp_TypeInfo_var);
+		GUI_EndScrollView_mD3C01FAC6885E5A625A5F3397A3F24250CACD3C5(L_0, NULL);
 		return;
 	}
 }
@@ -10462,6 +10623,27 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float GUIStyle_get_lineHeight_mC814199D1ABA3C
 		float L_2;
 		L_2 = bankers_roundf(L_1);
 		return L_2;
+	}
+}
+// System.Void UnityEngine.GUIStyle::Draw(UnityEngine.Rect,System.Boolean,System.Boolean,System.Boolean,System.Boolean)
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GUIStyle_Draw_m935CF904ACE6CD4170A22453C5D90435F8B85F7C (GUIStyle_t20BA2F9F3FE9D13AAA607EEEBE5547835A6F6580* __this, Rect_tA04E0F8A1830E767F40FB27ECD8D309303571F0D ___position0, bool ___isHover1, bool ___isActive2, bool ___on3, bool ___hasKeyboardFocus4, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GUIContent_t15E48D4BEB1E6B6044F7DEB5E350800F511C2ED2_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		Rect_tA04E0F8A1830E767F40FB27ECD8D309303571F0D L_0 = ___position0;
+		il2cpp_codegen_runtime_class_init_inline(GUIContent_t15E48D4BEB1E6B6044F7DEB5E350800F511C2ED2_il2cpp_TypeInfo_var);
+		GUIContent_t15E48D4BEB1E6B6044F7DEB5E350800F511C2ED2* L_1 = ((GUIContent_t15E48D4BEB1E6B6044F7DEB5E350800F511C2ED2_StaticFields*)il2cpp_codegen_static_fields_for(GUIContent_t15E48D4BEB1E6B6044F7DEB5E350800F511C2ED2_il2cpp_TypeInfo_var))->___none_6;
+		bool L_2 = ___isHover1;
+		bool L_3 = ___isActive2;
+		bool L_4 = ___on3;
+		bool L_5 = ___hasKeyboardFocus4;
+		GUIStyle_Draw_m3DBF8DC58719720455DFC818590D77752BA31008(__this, L_0, L_1, (-1), L_2, L_3, L_4, L_5, NULL);
+		return;
 	}
 }
 // System.Void UnityEngine.GUIStyle::Draw(UnityEngine.Rect,UnityEngine.GUIContent,System.Boolean,System.Boolean,System.Boolean,System.Boolean)
