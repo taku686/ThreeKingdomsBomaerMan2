@@ -25,6 +25,7 @@ namespace Assets.Scripts.Common.PlayFab
         [Inject] private UserManager _userManager;
         [Inject] private PlayFabCatalogManager _playFabCatalogManager;
         [Inject] private PlayFabPlayerDataManager _playFabPlayerDataManager;
+        [Inject] private PlayFabShopManager _playFabShopManager;
         private const string Email = "test9@gmail.com";
         private const string Password = "Passw0rd";
         private GetPlayerCombinedInfoRequestParams _info;
@@ -112,7 +113,10 @@ namespace Assets.Scripts.Common.PlayFab
 
         private async UniTask SetData(PlayFabResult<LoginResult> response)
         {
-            await GetCatalogItems().AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+            var catalogList = await _playFabCatalogManager.GetCatalogItems()
+                .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+            await _playFabCatalogManager.Initialize(catalogList);
+            await _playFabShopManager.InitializePurchasing();
             if (!response.Result.InfoResultPayload.UserData.TryGetValue(GameSettingData.UserKey,
                     out UserDataRecord userData))
             {
@@ -187,21 +191,6 @@ namespace Assets.Scripts.Common.PlayFab
             {
                 Debug.Log("登録完了!!");
                 PlayerPrefsManager.IsLoginEmailAddress = true;
-            }
-        }
-
-
-        private async UniTask GetCatalogItems()
-        {
-            var response = await PlayFabClientAPI.GetCatalogItemsAsync(new GetCatalogItemsRequest());
-            if (response.Error != null)
-            {
-                Debug.Log(response.Error.GenerateErrorReport());
-            }
-            else
-            {
-                await _playFabCatalogManager.Initialize(response.Result.Catalog)
-                    .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
             }
         }
     }

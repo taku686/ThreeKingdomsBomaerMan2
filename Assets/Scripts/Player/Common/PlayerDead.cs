@@ -39,7 +39,7 @@ namespace Player.Common
             var endPosX = isZ ? player.position.x : dir.x * Magnification;
             _endPos = new Vector3(endPosX, EndPosY, endPosZ);
             sequence.Append(player.DOLocalJump(_endPos, JumpPower, JumpCount, JumpDuration))
-                .Join(player.DORotate(EndRotate, JumpDuration, RotateMode.WorldAxisAdd));
+                .Join(player.DORotate(EndRotate, JumpDuration, RotateMode.WorldAxisAdd)).SetLink(player.gameObject);
         }
     }
 }

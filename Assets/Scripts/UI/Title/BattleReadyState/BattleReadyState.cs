@@ -89,33 +89,16 @@ namespace UI.Title
                 foreach (var player in players)
                 {
                     var index = player.ActorNumber;
-                    var grid = Instantiate(Owner.battleReadyView.Grid, Owner.battleReadyView.GridParent);
+                    var grid = Instantiate(Owner.battleReadyView.BattleReadyGrid.gameObject,
+                        Owner.battleReadyView.GridParent);
+                    var battleReadyGrid = grid.GetComponent<BattleReadyGrid>();
                     _gridDictionary[index] = grid;
-                    var images = grid.GetComponentsInChildren<Image>();
-                    var names = grid.GetComponentsInChildren<TextMeshProUGUI>();
                     var characterData = Owner._photonNetworkManager.CurrentRoomCharacterList[index];
-                    foreach (var image in images)
-                    {
-                        if (image.CompareTag("CharacterImage"))
-                        {
-                            image.sprite = Owner._characterDataManager.GetCharacterSprite(characterData.ID);
-                        }
-
-                        if (image.CompareTag("BackGround"))
-                        {
-                            image.sprite =
-                                Owner._characterDataManager.GetCharacterColor(
-                                    (int)GameSettingData.GetCharacterColor(characterData.CharaColor));
-                        }
-                    }
-
-                    foreach (var name in names)
-                    {
-                        if (name.CompareTag("Name"))
-                        {
-                            name.text = characterData.Name;
-                        }
-                    }
+                    battleReadyGrid.characterImage.sprite =
+                        Owner._characterDataManager.GetCharacterSprite(characterData.ID);
+                    battleReadyGrid.backGroundImage.sprite = Owner._characterDataManager.GetCharacterColor(
+                        (int)GameSettingData.GetCharacterColor(characterData.CharaColor));
+                    battleReadyGrid.nameText.text = characterData.Name;
                 }
             }
 
@@ -149,6 +132,11 @@ namespace UI.Title
 
             private void OnClickSceneTransition()
             {
+                if (!PhotonNetwork.IsMasterClient)
+                {
+                    return;
+                }
+
                 Owner._stateMachine.Dispatch((int)Event.SceneTransition);
             }
 

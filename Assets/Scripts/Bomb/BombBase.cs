@@ -104,6 +104,16 @@ namespace Bomb
             Explosion().Forget();
         }
 
+        private void OnTriggerExit(Collider other)
+        {
+            if (!other.CompareTag(GameSettingData.PlayerTag))
+            {
+                return;
+            }
+
+            BoxColliderComponent.isTrigger = false;
+        }
+
         private void OnDestroy()
         {
             _onFinishSubject.Dispose();

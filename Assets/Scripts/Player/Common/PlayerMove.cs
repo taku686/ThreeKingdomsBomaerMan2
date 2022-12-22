@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
@@ -12,9 +11,8 @@ namespace Player.Common
     {
         private static readonly float GridScale = 1.0f;
         private static readonly float ObstacleDistance = 0.05f;
-        private static readonly float Radius = 0.3f;
+        private static readonly float Radius = 0.01f;
         private static readonly float RayDistance = 1.0f - Radius;
-        private static readonly float RotateDuration = 0.1f;
         private Vector3 _initRotation;
         private Transform _playerTransform;
         private bool _isMoving;
@@ -27,23 +25,12 @@ namespace Player.Common
         private CancellationTokenSource _cts;
         private Vector3 _currentDestination;
 
-        private void Start()
-        {
-            Initialize(3);
-        }
-
-        private void Update()
-        {
-            Move(new Vector3(UltimateJoystick.GetHorizontalAxis(GameSettingData.JoystickName), 0,
-                UltimateJoystick.GetVerticalAxis(GameSettingData.JoystickName))).Forget();
-        }
-
         public void Initialize(float moveSpeed)
         {
             _cts = new CancellationTokenSource();
             _blockingLayer = LayerMask.GetMask(GameSettingData.ObstacleLayer) |
                              LayerMask.GetMask(GameSettingData.BombLayer);
-            _playerTransform = this.transform;
+            _playerTransform = transform;
             _initRotation = _playerTransform.rotation.eulerAngles;
             _moveSpeed = moveSpeed;
             if (!gameObject.TryGetComponent(typeof(Animator), out Component animator))
@@ -70,7 +57,7 @@ namespace Player.Common
             }
 
             var goDir = GetDirection(inputValue);
-            Rotate(goDir, _playerTransform);
+            Rotate(goDir, _playerTransform).Forget();
             _animationManager.Move(goDir);
             OnChangeDirection(goDir);
             if (goDir == Direction.None)
@@ -87,7 +74,7 @@ namespace Player.Common
             _currentDestination = modifiedDestination;
             if (!isObstacle)
             {
-                Rotate(modifiedDir, _playerTransform);
+                Rotate(modifiedDir, _playerTransform).Forget();
                 await Movement(playerPos, modifiedDestination)
                     .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
                 return;
@@ -102,7 +89,7 @@ namespace Player.Common
             isObstacle = IsObstacle(playerPos, modifiedDestination, out obstacle);
             if (!isObstacle)
             {
-                Rotate(modifiedDir, _playerTransform);
+                Rotate(modifiedDir, _playerTransform).Forget();
                 await Movement(playerPos, modifiedDestination)
                     .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
             }
@@ -235,9 +222,7 @@ namespace Player.Common
         {
             start = new Vector3(start.x, 0.5f, start.z);
             end = new Vector3(end.x, 0.5f, end.z);
-            Debug.DrawLine(start, end, Color.red, 0.1f);
-            return Physics.SphereCast(start, Radius, end - start, out obstacle, RayDistance, _blockingLayer,
-                QueryTriggerInteraction.Collide);
+            return Physics.SphereCast(start, Radius, end - start, out obstacle, RayDistance, _blockingLayer);
         }
 
         private async UniTask Movement(Vector3 start, Vector3 end)
@@ -274,7 +259,7 @@ namespace Player.Common
             return false;
         }
 
-        private void Rotate(Direction direction, Transform player)
+        private async UniTask Rotate(Direction direction, Transform player)
         {
             if (direction == Direction.None)
             {
@@ -296,11 +281,10 @@ namespace Player.Common
                 case Direction.Left:
                     nextRotation = _initRotation + new Vector3(0, 90, 0);
                     break;
-                default:
-                    break;
             }
 
-            player.DOLocalRotate(nextRotation, RotateDuration);
+            await player.DOLocalRotate(nextRotation, GameSettingData.TurnDuration).SetLink(player.gameObject)
+                .ToUniTask();
         }
 
         private void Stop()

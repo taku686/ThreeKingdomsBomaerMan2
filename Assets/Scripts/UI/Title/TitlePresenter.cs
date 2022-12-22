@@ -108,6 +108,11 @@ namespace UI.Title
             _userManager.equipCharacterId.Value = id;
             var preCharacter = _character;
             Destroy(preCharacter);
+            if (_characterDataManager.GetCharacterGameObject(id) == null)
+            {
+                Debug.Log(id);
+            }
+
             _character = Instantiate(_characterDataManager.GetCharacterGameObject(id),
                 characterCreatePosition.position,
                 characterCreatePosition.rotation, characterCreatePosition);

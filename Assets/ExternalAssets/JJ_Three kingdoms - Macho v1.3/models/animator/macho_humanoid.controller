@@ -1,5 +1,17 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-513861906427478106
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e29959e46c7ea7409560769cde085ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!91 &9100000
 AnimatorController:
   m_ObjectHideFlags: 0
@@ -235,7 +247,7 @@ AnimatorStateMachine:
     m_Position: {x: 940, y: -330, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1102461355796591810}
-    m_Position: {x: 1416, y: -336, z: 0}
+    m_Position: {x: 1420, y: -340, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions:
   - {fileID: 1101450643111123722}
@@ -245,7 +257,8 @@ AnimatorStateMachine:
   m_StateMachineTransitions:
   - first: {fileID: 0}
     second: []
-  m_StateMachineBehaviours: []
+  m_StateMachineBehaviours:
+  - {fileID: -513861906427478106}
   m_AnyStatePosition: {x: 1140, y: -168, z: 0}
   m_EntryPosition: {x: 1176, y: -600, z: 0}
   m_ExitPosition: {x: 1176, y: -72, z: 0}

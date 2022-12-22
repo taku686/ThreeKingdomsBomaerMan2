@@ -42,7 +42,8 @@ namespace Bomb
             IsExplosion = true;
             var position = transform.position;
             StartPos = new Vector3(position.x, 0.5f, position.z);
-            await UniTask.WhenAll(Explosion(Direction.Forward),
+            await UniTask.WhenAll(
+                Explosion(Direction.Forward),
                 Explosion(Direction.Back),
                 Explosion(Direction.Left),
                 Explosion(Direction.Right));
@@ -102,7 +103,7 @@ namespace Bomb
         {
             explosionEffect.localPosition = EffectOriginPosition;
             explosionEffect.gameObject.SetActive(true);
-            explosionEffect.DOMove(endPos, moveDuration).SetLink(this.gameObject);
+            explosionEffect.DOMove(endPos, moveDuration).SetLink(gameObject);
             await UniTask.Delay(TimeSpan.FromSeconds(ExplosionDisplayDuration), cancellationToken: Cts.Token);
             explosionEffect.gameObject.SetActive(false);
         }

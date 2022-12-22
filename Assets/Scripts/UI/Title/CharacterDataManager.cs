@@ -5,8 +5,6 @@ using Assets.Scripts.Common.ResourceManager;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager;
-using Manager.BattleManager;
-using Manager.ResourceManager;
 using PlayFab.ClientModels;
 using UnityEngine;
 using Zenject;
@@ -19,14 +17,11 @@ namespace UI.Title
         [Inject] private PlayFabCatalogManager _playFabCatalogManager;
         private UserManager _userManager;
 
-        private static readonly Dictionary<int, CharacterData> CharacterDataDictionary =
-            new Dictionary<int, CharacterData>();
+        private static readonly Dictionary<int, CharacterData> CharacterDataDictionary = new();
 
-        private readonly Dictionary<int, Sprite> _characterSpriteDictionary =
-            new Dictionary<int, Sprite>();
+        private readonly Dictionary<int, Sprite> _characterSpriteDictionary = new();
 
-        private readonly Dictionary<int, Sprite> _characterColorDictionary =
-            new Dictionary<int, Sprite>();
+        private readonly Dictionary<int, Sprite> _characterColorDictionary = new();
 
         private CatalogItem _catalogItem;
 
@@ -100,7 +95,7 @@ namespace UI.Title
 
         public int GetCharacterCount()
         {
-            return Enum.GetValues(typeof(CharacterName)).Length;
+            return _playFabCatalogManager.CharacterGameObjects.Count;
         }
 
         public CharacterData GetUserEquipCharacterData()
@@ -112,7 +107,7 @@ namespace UI.Title
         {
             return Enum.GetValues(typeof(CharacterColor)).Length;
         }
-        
+
 
         public void Dispose()
         {
