@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using ModestTree;
 using Photon.Pun;
 using Player.Common;
+using UI.Battle;
 using UniRx;
 using UnityEngine;
 using Zenject;
@@ -66,6 +67,9 @@ namespace Manager.BattleManager
                 var playerCore = player.AddComponent<PLayerCore>();
                 var characterData = Owner._networkManager.GetCharacterData(playerId);
                 playerCore.Initialize(characterData);
+                var playerUI = Instantiate(Owner.playerUI, Owner.playerUIParent)
+                    .GetComponentInChildren<PlayerUIBillBoard>();
+                playerUI.Initialize(player.transform);
             }
 
             private void AddBoxCollider(GameObject player)

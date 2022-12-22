@@ -19,6 +19,8 @@ namespace Manager.BattleManager
         [Inject] private PlayerGenerator _playerGenerator;
         [Inject] private UserManager _userManager;
         [Inject] private BombProvider _bombProvider;
+        [SerializeField] private Transform playerUIParent;
+        [SerializeField] private GameObject playerUI;
         private StateMachine<BattleManager> _stateMachine;
 
         private enum Event
