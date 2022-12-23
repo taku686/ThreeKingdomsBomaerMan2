@@ -43,9 +43,8 @@ namespace UI.Title
 
             private async UniTask Login()
             {
-                bool result;
                 Owner._playFabLoginManager.Initialize();
-                if (!PlayerPrefsManager.IsLoginEmailAddress)
+                /*if (!PlayerPrefsManager.IsLoginEmailAddress)
                 {
                     result = await Owner._playFabLoginManager.LoginWithCustomId().AttachExternalCancellation(_token);
                 }
@@ -53,7 +52,8 @@ namespace UI.Title
                 {
                     result = await Owner._playFabLoginManager.LoginWithEmail(Email, Password)
                         .AttachExternalCancellation(_token);
-                }
+                }*/
+                var result = await Owner._playFabLoginManager.Login().AttachExternalCancellation(_token);
 
                 if (result)
                 {
