@@ -41,7 +41,7 @@ namespace Manager.NetworkManager
 
         public async UniTask<bool> TryPurchaseItem(string itemName, string virtualCurrencyKey, int price)
         {
-            await Login();
+            //  await Login();
             var request = new PurchaseItemRequest()
             {
                 ItemId = itemName,
