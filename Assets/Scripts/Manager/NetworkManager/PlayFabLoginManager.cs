@@ -1,21 +1,17 @@
-using System.Collections.Generic;
-using System.Linq;
-using Assets.Scripts.Common.Data;
+using System;
 using Assets.Scripts.Common.ResourceManager;
 using Common;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using GooglePlayGames;
+using GooglePlayGames.BasicApi;
 using Manager.NetworkManager;
-using Manager.ResourceManager;
-using ModestTree;
 using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine;
-using UpdateUserDataRequest = PlayFab.ClientModels.UpdateUserDataRequest;
 using Newtonsoft.Json;
 using UI.Title;
 using Zenject;
-using Currency = Common.Data.Currency;
 
 namespace Assets.Scripts.Common.PlayFab
 {
@@ -105,6 +101,45 @@ namespace Assets.Scripts.Common.PlayFab
             return response.Error == null;
         }
 
+        public async UniTask<bool> Login()
+        {
+/*#if UNITY_EDITOR
+            var request = new LoginWithCustomIDRequest
+            {
+                CustomId = PlayerPrefsManager.UserID,
+                InfoRequestParameters = _info,
+                CreateAccount = true
+            };
+
+            var response = await PlayFabClientAPI.LoginWithCustomIDAsync(request);
+            if (response.Error != null)
+            {
+                Debug.Log(response.Error.GenerateErrorReport());
+                return false;
+            }
+
+            await LoginSuccess(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+            return true;
+#elif UNITY_ANDROID*/
+
+            var request = new LoginWithAndroidDeviceIDRequest()
+            {
+                CreateAccount = true,
+                InfoRequestParameters = _info,
+                AndroidDeviceId = SystemInfo.deviceUniqueIdentifier,
+            };
+            var response = await PlayFabClientAPI.LoginWithAndroidDeviceIDAsync(request);
+
+            if (response.Error != null)
+            {
+                Debug.LogError(response.Error.GenerateErrorReport());
+                return false;
+            }
+
+            await LoginSuccess(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+            return true;
+        }
+
 
         private async UniTask LoginSuccess(PlayFabResult<LoginResult> response)
         {
@@ -133,7 +168,7 @@ namespace Assets.Scripts.Common.PlayFab
                 }
 
                 //再度ユーザーデータ取得
-                if (!PlayerPrefsManager.IsLoginEmailAddress)
+                /*if (!PlayerPrefsManager.IsLoginEmailAddress)
                 {
                     await LoginWithCustomId().AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
                 }
@@ -141,7 +176,8 @@ namespace Assets.Scripts.Common.PlayFab
                 {
                     await LoginWithEmail(Email, Password)
                         .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
-                }
+                }*/
+                await Login().AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
             }
             else
             {

@@ -56,6 +56,7 @@ namespace Assets.Scripts.Common.ResourceManager
                     Hp = customData[0].Hp,
                     CharaColor = customData[0].CharaColor
                 };
+               // Debug.Log(characterData.Name + characterData.Hp);
                 _catalog.SetCharacter(customData[0].ID, characterData);
                 await LoadGameObject(LabelData.CharacterPrefabPath, customData[0].ID,
                         _cancellationTokenSource.Token)

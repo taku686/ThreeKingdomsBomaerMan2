@@ -1,11 +1,12 @@
 using System;
+using Bomb;
 using Common.Data;
+using Cysharp.Threading.Tasks;
 using Manager;
 using Photon.Pun;
-using UniRx;
+using UI.Battle;
 using UniRx.Triggers;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 
 namespace Player.Common
 {
@@ -18,7 +19,15 @@ namespace Player.Common
         private PhotonView _photonView;
         private Animator _animator;
         private PlayerDead _playerDead;
+        private PlayerStatusUI _playerStatusUI;
         private ObservableStateMachineTrigger _animatorTrigger;
+        private PlayerStatusManager _playerStatusManager;
+        private const int DeadHp = 0;
+        private const int InvincibleDuration = 2;
+        private const float WaitDuration = 0.3f;
+        private bool _isDamage;
+        private bool _isInvincible;
+        private Renderer _renderer;
 
         //Todo仮の値
         private const float SkillOneIntervalTime = 3;
@@ -35,14 +44,14 @@ namespace Player.Common
 
         private StateMachine<PLayerCore> _stateMachine;
 
-        public void Initialize(CharacterData characterData)
+        public void Initialize(CharacterData characterData, PlayerStatusUI playerStatusUI)
         {
-            InitializeComponent(characterData);
+            InitializeComponent(characterData, playerStatusUI);
             InitializeState();
             InitializeButton();
         }
 
-        private void InitializeComponent(CharacterData characterData)
+        private void InitializeComponent(CharacterData characterData, PlayerStatusUI playerStatusUI)
         {
             _photonView = GetComponent<PhotonView>();
             _inputManager = gameObject.AddComponent<InputManager>();
@@ -54,6 +63,9 @@ namespace Player.Common
             _animatorTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
             _playerDead = gameObject.AddComponent<PlayerDead>();
             _characterData = characterData;
+            _playerStatusUI = playerStatusUI;
+            _playerStatusManager = new PlayerStatusManager(characterData.Hp * 10);
+            _renderer = GetComponentInChildren<Renderer>();
         }
 
         private void InitializeState()
@@ -81,6 +93,7 @@ namespace Player.Common
 
             _stateMachine.Update();
             _inputManager.UpdateSkillUI(SkillOneIntervalTime, SkillTwoIntervalTime);
+            OnInvincible();
         }
 
         private void OnClickSkillOne()
@@ -95,22 +108,61 @@ namespace Player.Common
 
         private void OnTriggerEnter(Collider other)
         {
-            Dead(other);
+            OnDamage(other);
         }
 
-        private void Dead(Collider other)
+        private async void OnInvincible()
         {
-            if (!other.CompareTag(GameSettingData.BombEffectTag))
+            if (_isInvincible)
             {
                 return;
             }
 
-            _playerDead.OnTouchExplosion(other);
+            _isInvincible = true;
+            while (_isDamage)
+            {
+                _renderer.enabled = false;
+                await UniTask.Delay(TimeSpan.FromSeconds(WaitDuration));
+                _renderer.enabled = true;
+                await UniTask.Delay(TimeSpan.FromSeconds(WaitDuration));
+            }
+
+            _isInvincible = false;
+        }
+
+        private async void OnDamage(Collider other)
+        {
+            if (!other.CompareTag(GameSettingData.BombEffectTag) || _isDamage)
+            {
+                return;
+            }
+
+            _isDamage = true;
+            var explosion = other.GetComponentInParent<Explosion>();
+            _playerStatusManager.CurrentHp -= explosion.damageAmount;
+            Debug.Log(_playerStatusManager.CurrentHp);
+            var hpRate = _playerStatusManager.CurrentHp / (float)_playerStatusManager.MaxHp;
+            await _playerStatusUI.OnDamage(hpRate);
+            await UniTask.Delay(TimeSpan.FromSeconds(InvincibleDuration))
+                .AttachExternalCancellation(gameObject.GetCancellationTokenOnDestroy());
+            _isDamage = false;
+            _renderer.enabled = true;
+            Debug.Log(_playerStatusManager.CurrentHp);
+            if (_playerStatusManager.CurrentHp <= DeadHp)
+            {
+                Dead(explosion);
+            }
+        }
+
+        private void Dead(Explosion explosion)
+        {
+            _playerDead.OnTouchExplosion(explosion);
             _stateMachine.Dispatch((int)PLayerState.Dead);
         }
 
         private void OnDestroy()
         {
+            _playerStatusManager.Dispose();
         }
     }
 }

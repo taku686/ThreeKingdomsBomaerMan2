@@ -47,6 +47,7 @@ namespace UI.Title
             for (int i = 0; i < GetCharacterCount(); i++)
             {
                 var characterData = _playFabCatalogManager.GetCharacterData(i);
+                
                 CharacterDataDictionary[i] = characterData;
             }
         }

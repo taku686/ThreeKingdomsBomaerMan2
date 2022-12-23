@@ -6,7 +6,7 @@ namespace Assets.Scripts.Common.Data
 {
     public class Catalog : IDisposable
     {
-        private readonly Dictionary<int, CharacterData> _characters = new();
+        private readonly Dictionary<int, CharacterData> _characters = new Dictionary<int, CharacterData>();
         public Dictionary<int, CharacterData> Characters => _characters;
 
         public void SetCharacter(int index, CharacterData data)

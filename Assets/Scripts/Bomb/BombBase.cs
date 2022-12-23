@@ -71,11 +71,11 @@ namespace Bomb
 
             if (unchecked(PhotonNetwork.ServerTimestamp - explosionTime) >= 0)
             {
-                Explosion().Forget();
+                Explosion(_damageAmount).Forget();
             }
         }
 
-        protected virtual async UniTask Explosion()
+        protected virtual async UniTask Explosion(int damageAmount)
         {
             OnDisableBomb();
         }
@@ -101,7 +101,7 @@ namespace Bomb
                 return;
             }
 
-            Explosion().Forget();
+            Explosion(_damageAmount).Forget();
         }
 
         private void OnTriggerExit(Collider other)

@@ -8,5 +8,6 @@ namespace Bomb
         public Transform boxCollider;
         public Transform explosionTransform;
         public Direction explosionDirection;
+        public int damageAmount;
     }
 }

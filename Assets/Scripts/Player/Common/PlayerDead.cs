@@ -1,6 +1,7 @@
 ﻿using Bomb;
 using Common.Data;
 using DG.Tweening;
+using UI.Battle;
 using UniRx;
 using UnityEngine;
 
@@ -17,14 +18,9 @@ namespace Player.Common
         private static readonly Vector3 EndRotate = new Vector3(3600, 0, 3600);
         private Vector3 _endPos;
 
-        public void OnTouchExplosion(Collider other)
-        {
-            if (!other.CompareTag(GameSettingData.BombEffectTag))
-            {
-                return;
-            }
 
-            var explosion = other.GetComponentInParent<Explosion>();
+        public void OnTouchExplosion(Explosion explosion)
+        {
             _jumpDirection = explosion.explosionDirection;
         }
 

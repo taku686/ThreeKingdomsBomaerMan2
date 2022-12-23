@@ -5,10 +5,8 @@ using Cysharp.Threading.Tasks;
 using PlayFab;
 using PlayFab.ClientModels;
 using Unity.Services.Core;
-using Unity.Services.Core.Environments;
 using UnityEngine;
 using UnityEngine.Purchasing;
-using UnityEngine.Purchasing.Security;
 using Zenject;
 
 namespace Manager.NetworkManager
@@ -43,7 +41,7 @@ namespace Manager.NetworkManager
 
         public async UniTask<bool> TryPurchaseItem(string itemName, string virtualCurrencyKey, int price)
         {
-            await Login();
+            //  await Login();
             var request = new PurchaseItemRequest()
             {
                 ItemId = itemName,
@@ -65,7 +63,7 @@ namespace Manager.NetworkManager
 
         public async UniTask<bool> TryPurchaseCharacter(string itemName, string virtualCurrencyKey, int price)
         {
-          //  await Login();
+            //  await Login();
             var request = new PurchaseItemRequest()
             {
                 ItemId = itemName,

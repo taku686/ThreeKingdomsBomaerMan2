@@ -46,10 +46,10 @@ namespace UI.Title
                 var button = Owner.shopView.ThousandCoinButton.gameObject;
                 Owner._uiAnimation.OnClickScaleColorAnimation(button).OnComplete(() => UniTask.Void(async () =>
                 {
-                    var isSuccessed = await Owner._playFabShopManager.TryPurchaseItem(ThousandCoinKey,
+                    var isSucceed = await Owner._playFabShopManager.TryPurchaseItem(ThousandCoinKey,
                         GameSettingData.RealMoneyKey,
                         100);
-                    if (isSuccessed)
+                    if (isSucceed)
                     {
                         Owner.shopView.TextGameObject.SetActive(true);
                     }
