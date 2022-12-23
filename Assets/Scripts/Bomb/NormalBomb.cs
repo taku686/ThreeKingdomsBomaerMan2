@@ -32,7 +32,7 @@ namespace Bomb
         };
 
 
-        protected override async UniTask Explosion()
+        protected override async UniTask Explosion(int damageAmount)
         {
             if (IsExplosion)
             {
@@ -43,15 +43,15 @@ namespace Bomb
             var position = transform.position;
             StartPos = new Vector3(position.x, 0.5f, position.z);
             await UniTask.WhenAll(
-                Explosion(Direction.Forward),
-                Explosion(Direction.Back),
-                Explosion(Direction.Left),
-                Explosion(Direction.Right));
+                Explosion(Direction.Forward, damageAmount),
+                Explosion(Direction.Back, damageAmount),
+                Explosion(Direction.Left, damageAmount),
+                Explosion(Direction.Right, damageAmount));
 
-            await base.Explosion();
+            await base.Explosion(damageAmount);
         }
 
-        private async UniTask Explosion(Direction direction)
+        private async UniTask Explosion(Direction direction, int damageAmount)
         {
             var dir = GameSettingData.DirectionToVector3(direction);
             var index = (int)direction;
@@ -67,6 +67,7 @@ namespace Bomb
             }
 
             explosionList[index].explosionDirection = direction;
+            explosionList[index].damageAmount = damageAmount;
             await UniTask.WhenAll(SetupCollider(dir, fireRange, explosionList[index].boxCollider),
                 SetupExplosionEffect(ExplosionMoveDuration, endPos, explosionList[index].explosionTransform));
         }

@@ -103,6 +103,25 @@ namespace Assets.Scripts.Common.PlayFab
 
         public async UniTask<bool> Login()
         {
+/*#if UNITY_EDITOR
+            var request = new LoginWithCustomIDRequest
+            {
+                CustomId = PlayerPrefsManager.UserID,
+                InfoRequestParameters = _info,
+                CreateAccount = true
+            };
+
+            var response = await PlayFabClientAPI.LoginWithCustomIDAsync(request);
+            if (response.Error != null)
+            {
+                Debug.Log(response.Error.GenerateErrorReport());
+                return false;
+            }
+
+            await LoginSuccess(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+            return true;
+#elif UNITY_ANDROID*/
+
             var request = new LoginWithAndroidDeviceIDRequest()
             {
                 CreateAccount = true,
