@@ -12,6 +12,7 @@ namespace Common.Data
         public static readonly string TitleID = "92AF5";
         public static readonly string JoystickName = "JoyStickMove";
         public static readonly string PlayerTag = "Player";
+        public static readonly string BombTag = "Bomb";
         public static readonly string BombEffectTag = "BombEffect";
         public static readonly string ObstacleLayer = "Obstacles";
         public static readonly string UserKey = "User";

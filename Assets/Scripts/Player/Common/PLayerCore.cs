@@ -28,6 +28,7 @@ namespace Player.Common
         private bool _isDamage;
         private bool _isInvincible;
         private Renderer _renderer;
+        private BoxCollider _boxCollider;
 
         //Todo仮の値
         private const float SkillOneIntervalTime = 3;
@@ -66,6 +67,7 @@ namespace Player.Common
             _playerStatusUI = playerStatusUI;
             _playerStatusManager = new PlayerStatusManager(characterData.Hp * 10);
             _renderer = GetComponentInChildren<Renderer>();
+            _boxCollider = GetComponent<BoxCollider>();
         }
 
         private void InitializeState()

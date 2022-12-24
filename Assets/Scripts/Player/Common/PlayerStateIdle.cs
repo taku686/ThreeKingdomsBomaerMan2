@@ -4,6 +4,7 @@ using Common.Data;
 using Cysharp.Threading.Tasks;
 using Photon.Pun;
 using UniRx;
+using UniRx.Triggers;
 using UnityEngine;
 using State = StateMachine<Player.Common.PLayerCore>.State;
 
@@ -58,7 +59,6 @@ namespace Player.Common
                     return;
                 }
 
-                Debug.Log("アイドル状態の初期化");
                 _playerTransform = Owner.transform;
                 _isSetup = true;
             }
@@ -81,7 +81,9 @@ namespace Player.Common
                             var photonView = Owner._photonView;
                             var damageAmount = Owner._characterData.Attack;
                             var fireRange = Owner._characterData.FireRange;
-                            Owner._playerPutBomb.PutBomb(photonView, _playerTransform, (int)BombType.Normal,
+                            var boxCollider = Owner._boxCollider;
+                            Owner._playerPutBomb.PutBomb(boxCollider, photonView, _playerTransform,
+                                (int)BombType.Normal,
                                 damageAmount,
                                 fireRange, explosionTime, playerId);
                         }).AddTo(_cancellationTokenSource.Token);

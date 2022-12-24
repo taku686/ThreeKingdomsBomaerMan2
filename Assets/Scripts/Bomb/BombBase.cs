@@ -46,6 +46,7 @@ namespace Bomb
 
         public void Setup(int damageAmount, int fireRange, int playerId, int explosionTime)
         {
+            gameObject.tag = GameSettingData.BombTag;
             BombRenderer.enabled = true;
             BoxColliderComponent.enabled = true;
             _damageAmount = damageAmount;
