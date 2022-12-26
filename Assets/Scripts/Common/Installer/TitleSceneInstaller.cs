@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.Common.Data;
-using Assets.Scripts.Common.PlayFab;
+﻿using Assets.Scripts.Common.PlayFab;
 using Common.Data;
 using Manager.NetworkManager;
 using UI.Common;
@@ -20,6 +19,7 @@ namespace Common.Installer
             Container.Bind<User>().FromNew().AsCached();
             Container.Bind<PlayFabPlayerDataManager>().FromNew().AsCached();
             Container.Bind<PlayFabShopManager>().FromNew().AsCached();
+            Container.Bind<PlayFabAdsManager>().FromNew().AsCached();
         }
     }
 }

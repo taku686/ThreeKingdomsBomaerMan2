@@ -1,6 +1,5 @@
 using System.Threading;
 using Assets.Scripts.Common.PlayFab;
-using Assets.Scripts.Common.ResourceManager;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager;
@@ -8,9 +7,9 @@ using Manager.NetworkManager;
 using Photon.Pun;
 using UI.Common;
 using UI.Title.ShopState;
-using UniRx;
 using UnityEngine;
 using Zenject;
+using GoogleMobileAds.Api;
 
 namespace UI.Title
 {
@@ -24,6 +23,7 @@ namespace UI.Title
         [Inject] private UserManager _userManager;
         [Inject] private PlayFabPlayerDataManager _playFabPlayerDataManager;
         [Inject] private PlayFabShopManager _playFabShopManager;
+        [Inject] private PlayFabAdsManager _playFabAdsManager;
         [SerializeField] private Transform characterCreatePosition;
         [SerializeField] private MainView mainView;
         [SerializeField] private CharacterSelectView characterSelectView;
@@ -35,9 +35,10 @@ namespace UI.Title
         [SerializeField] private ShopView shopView;
 
         private GameObject _character;
-        private StateMachine<Title.TitlePresenter> _stateMachine;
+        private StateMachine<TitlePresenter> _stateMachine;
         private CancellationToken _token;
         private int _currentCharacterId;
+        private RewardedAd _rewardAd;
 
         private enum Event
         {
@@ -64,6 +65,15 @@ namespace UI.Title
         private void Initialize()
         {
             InitializeState();
+            InitializeAds();
+        }
+
+
+        private void InitializeAds()
+        {
+            _rewardAd = new RewardedAd(GameSettingData.RewardAdsKey);
+            AdRequest request = new AdRequest.Builder().Build();
+            _rewardAd.LoadAd(request);
         }
 
         private void InitializeState()
