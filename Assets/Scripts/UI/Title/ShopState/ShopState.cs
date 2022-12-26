@@ -63,10 +63,7 @@ namespace UI.Title
                 var button = Owner.shopView.AdsButton.gameObject;
                 Owner._uiAnimation.OnClickScaleColorAnimation(button).OnComplete(() => UniTask.Void(async () =>
                 {
-                    Owner._rewardAd.Show();
-                    await Owner._playFabAdsManager.GetAdPlacementAsync(Owner.GetCancellationTokenOnDestroy(),
-                        Owner._rewardAd);
-                    //Owner.shopView.TextGameObject.SetActive(true);
+                    await Owner._playFabAdsManager.GetAdPlacementAsync(Owner.GetCancellationTokenOnDestroy());
                 })).SetLink(button);
             }
         }

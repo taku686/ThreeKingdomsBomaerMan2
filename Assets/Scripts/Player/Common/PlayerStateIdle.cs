@@ -60,6 +60,10 @@ namespace Player.Common
                 }
 
                 _playerTransform = Owner.transform;
+                Owner._inputManager.SetOnClickSkillOne(SkillOneIntervalTime, OnClickSkillOne,
+                    Owner.GetCancellationTokenOnDestroy());
+                Owner._inputManager.SetOnClickSkillTwo(SkillTwoIntervalTime, OnClickSkillTwo,
+                    Owner.GetCancellationTokenOnDestroy());
                 _isSetup = true;
             }
 
@@ -87,6 +91,16 @@ namespace Player.Common
                                 damageAmount,
                                 fireRange, explosionTime, playerId);
                         }).AddTo(_cancellationTokenSource.Token);
+            }
+
+            private void OnClickSkillOne()
+            {
+                Owner._stateMachine.Dispatch((int)PLayerState.Skill1);
+            }
+
+            private void OnClickSkillTwo()
+            {
+                Owner._stateMachine.Dispatch((int)PLayerState.Skill2);
             }
 
             private void Cancel()

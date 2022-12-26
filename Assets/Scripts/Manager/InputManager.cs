@@ -50,24 +50,26 @@ namespace Manager
             SetupSkillUI(skillOneIntervalTime, skillTwoIntervalTime);
         }
 
-        public void SetOnClickSkillOne(float intervalTime, Action action)
+        public void SetOnClickSkillOne(float intervalTime, Action action, CancellationToken token)
         {
             _inputView.skillOneButton.OnClickAsObservable().ThrottleFirst(TimeSpan.FromSeconds(intervalTime)).Subscribe(
                 _ =>
                 {
+                    Debug.Log("skill１発動");
                     ResetSkillOneIntervalImage();
                     action.Invoke();
-                }).AddTo(_token);
+                }).AddTo(token);
         }
 
-        public void SetOnClickSkillTwo(float intervalTime, Action action)
+        public void SetOnClickSkillTwo(float intervalTime, Action action, CancellationToken token)
         {
             _inputView.skillTwoButton.OnClickAsObservable().ThrottleFirst(TimeSpan.FromSeconds(intervalTime))
                 .Subscribe(_ =>
                 {
+                    Debug.Log("skill2発動");
                     ResetSkillTwoIntervalImage();
                     action.Invoke();
-                }).AddTo(_token);
+                }).AddTo(token);
         }
 
         private void ResetSkillOneIntervalImage()

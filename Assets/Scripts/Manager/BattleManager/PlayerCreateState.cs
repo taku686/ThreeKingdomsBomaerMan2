@@ -16,6 +16,7 @@ namespace Manager.BattleManager
         public class PlayerCreateState : State
         {
             private static readonly Vector3 ColliderCenter = new Vector3(0, 0.5f, 0);
+            private static readonly Vector3 ColliderSize = new Vector3(.6f, 0.6f, 0.6f);
 
             protected override void OnEnter(State prevState)
             {
@@ -78,6 +79,7 @@ namespace Manager.BattleManager
                 var collider = player.AddComponent<BoxCollider>();
                 collider.isTrigger = true;
                 collider.center = ColliderCenter;
+                collider.size = ColliderSize;
             }
 
             private void AddRigidbody(GameObject player)

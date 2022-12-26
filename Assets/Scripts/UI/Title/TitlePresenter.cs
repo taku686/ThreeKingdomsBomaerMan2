@@ -38,7 +38,7 @@ namespace UI.Title
         private StateMachine<TitlePresenter> _stateMachine;
         private CancellationToken _token;
         private int _currentCharacterId;
-        private RewardedAd _rewardAd;
+      
 
         private enum Event
         {
@@ -71,9 +71,7 @@ namespace UI.Title
 
         private void InitializeAds()
         {
-            _rewardAd = new RewardedAd(GameSettingData.RewardAdsKey);
-            AdRequest request = new AdRequest.Builder().Build();
-            _rewardAd.LoadAd(request);
+         
         }
 
         private void InitializeState()
