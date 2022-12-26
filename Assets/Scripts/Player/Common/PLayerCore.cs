@@ -31,8 +31,8 @@ namespace Player.Common
         private BoxCollider _boxCollider;
 
         //Todo仮の値
-        private const float SkillOneIntervalTime = 3;
-        private const float SkillTwoIntervalTime = 5;
+        private const float SkillOneIntervalTime = 3f;
+        private const float SkillTwoIntervalTime = 5f;
 
         private enum PLayerState
         {
@@ -49,7 +49,6 @@ namespace Player.Common
         {
             InitializeComponent(characterData, playerStatusUI);
             InitializeState();
-            InitializeButton();
         }
 
         private void InitializeComponent(CharacterData characterData, PlayerStatusUI playerStatusUI)
@@ -80,12 +79,6 @@ namespace Player.Common
             _stateMachine.AddTransition<PlayerStateIdle, PlayerStateSkillTwo>((int)PLayerState.Skill2);
         }
 
-        private void InitializeButton()
-        {
-            _inputManager.SetOnClickSkillOne(SkillOneIntervalTime, OnClickSkillOne);
-            _inputManager.SetOnClickSkillTwo(SkillTwoIntervalTime, OnClickSkillTwo);
-        }
-
         private void Update()
         {
             if (!_photonView.IsMine)
@@ -96,16 +89,6 @@ namespace Player.Common
             _stateMachine.Update();
             _inputManager.UpdateSkillUI(SkillOneIntervalTime, SkillTwoIntervalTime);
             OnInvincible();
-        }
-
-        private void OnClickSkillOne()
-        {
-            _stateMachine.Dispatch((int)PLayerState.Skill1);
-        }
-
-        private void OnClickSkillTwo()
-        {
-            _stateMachine.Dispatch((int)PLayerState.Skill2);
         }
 
         private void OnTriggerEnter(Collider other)
@@ -123,8 +106,18 @@ namespace Player.Common
             _isInvincible = true;
             while (_isDamage)
             {
+                if (_renderer == null)
+                {
+                    break;
+                }
+
                 _renderer.enabled = false;
                 await UniTask.Delay(TimeSpan.FromSeconds(WaitDuration));
+                if (_renderer == null)
+                {
+                    break;
+                }
+
                 _renderer.enabled = true;
                 await UniTask.Delay(TimeSpan.FromSeconds(WaitDuration));
             }
@@ -142,7 +135,6 @@ namespace Player.Common
             _isDamage = true;
             var explosion = other.GetComponentInParent<Explosion>();
             _playerStatusManager.CurrentHp -= explosion.damageAmount;
-            Debug.Log(_playerStatusManager.CurrentHp);
             var hpRate = _playerStatusManager.CurrentHp / (float)_playerStatusManager.MaxHp;
             await _playerStatusUI.OnDamage(hpRate);
             await UniTask.Delay(TimeSpan.FromSeconds(InvincibleDuration))

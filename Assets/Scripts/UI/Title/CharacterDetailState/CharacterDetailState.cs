@@ -110,7 +110,6 @@ namespace UI.Title
                 _characterData = nextCharacterData;
                 CreateCharacter(nextCharacterData);
                 InitializeContent();
-                //await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
                 InitializeAnimation();
             }
 
