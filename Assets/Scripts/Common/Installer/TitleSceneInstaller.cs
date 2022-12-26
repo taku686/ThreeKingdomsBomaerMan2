@@ -20,6 +20,7 @@ namespace Common.Installer
             Container.Bind<PlayFabPlayerDataManager>().FromNew().AsCached();
             Container.Bind<PlayFabShopManager>().FromNew().AsCached();
             Container.Bind<PlayFabAdsManager>().FromNew().AsCached();
+            Container.Bind<PlayFabCommonManager>().FromNew().AsCached();
         }
     }
 }

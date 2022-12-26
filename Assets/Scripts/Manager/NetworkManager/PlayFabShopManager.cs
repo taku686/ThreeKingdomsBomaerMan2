@@ -18,6 +18,7 @@ namespace Manager.NetworkManager
         private IStoreController _storeController;
         private IExtensionProvider _extensionProvider;
         [Inject] private PlayFabCatalogManager _playFabCatalogManager;
+        [Inject] private PlayFabCommonManager _playFabCommonManager;
 
         public async UniTask InitializePurchasing()
         {
@@ -58,12 +59,12 @@ namespace Manager.NetworkManager
                 return false;
             }
 
+            await _playFabCommonManager.SetVirtualCurrency();
             return true;
         }
 
         public async UniTask<bool> TryPurchaseCharacter(string itemName, string virtualCurrencyKey, int price)
         {
-            //  await Login();
             var request = new PurchaseItemRequest()
             {
                 ItemId = itemName,
@@ -71,13 +72,13 @@ namespace Manager.NetworkManager
                 Price = price,
             };
             var result = await PlayFabClientAPI.PurchaseItemAsync(request);
-            // _storeController.InitiatePurchase(itemName);
             if (result.Error != null)
             {
                 Debug.Log(result.Error.GenerateErrorReport());
                 return false;
             }
 
+            await _playFabCommonManager.SetVirtualCurrency();
             return true;
         }
 
@@ -117,18 +118,6 @@ namespace Manager.NetworkManager
                 Debug.LogError(result.Error.GenerateErrorReport());
             }
 #endif
-        }
-
-        public void BuyItemInGooglePlayStore(string itemId)
-        {
-            if (!_isInitialized)
-            {
-                return;
-            }
-
-            /*var product = _storeController.products.WithID(itemId);
-            Debug.Log(product.definition.id);*/
-            _storeController.InitiatePurchase(itemId);
         }
 
         private async void ValidateGooglePlayPurchaseAsync(PurchaseEventArgs e)

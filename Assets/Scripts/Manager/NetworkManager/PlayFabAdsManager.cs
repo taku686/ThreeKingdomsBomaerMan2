@@ -6,6 +6,7 @@ using GoogleMobileAds.Api;
 using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine;
+using Zenject;
 
 namespace Manager.NetworkManager
 {
@@ -15,11 +16,17 @@ namespace Manager.NetworkManager
         private string _rewardId;
         private int? _placementViewsRemaining;
         private double? _placementViewsRestMinutes;
+        [Inject] private PlayFabCommonManager _playFabCommonManager;
+        private RewardedAd _rewardAd;
 
-
-        public async UniTask GetAdPlacementAsync(CancellationToken token, RewardedAd rewardedAd)
+        public async UniTask GetAdPlacementAsync(CancellationToken token)
         {
-            rewardedAd.OnUserEarnedReward += HandleUserEarnedReward;
+            _rewardAd = new RewardedAd(GameSettingData.RewardAdsKey);
+            AdRequest adRequest = new AdRequest.Builder().Build();
+            _rewardAd.LoadAd(adRequest);
+            await UniTask.WaitUntil(() => _rewardAd.IsLoaded(), PlayerLoopTiming.Update, token);
+            _rewardAd.Show();
+            _rewardAd.OnUserEarnedReward += HandleUserEarnedReward;
             var request = new GetAdPlacementsRequest { AppId = GameSettingData.GameID };
             var result = await PlayFabClientAPI.GetAdPlacementsAsync(request);
 
@@ -60,6 +67,20 @@ namespace Manager.NetworkManager
             {
                 if (activity == AdActivity.End)
                 {
+                    var rewardRequest = new RewardAdActivityRequest
+                    {
+                        PlacementId = _placementId,
+                        RewardId = _rewardId
+                    };
+                    var rewardResult = await PlayFabClientAPI.RewardAdActivityAsync(rewardRequest);
+                    if (rewardResult.Error != null)
+                    {
+                        Debug.Log(rewardResult.Error.GenerateErrorReport());
+                        return;
+                    }
+
+                    Debug.Log(rewardResult.Result.RewardResults.GrantedVirtualCurrencies[GameSettingData.GemKey]);
+                    await _playFabCommonManager.SetVirtualCurrency();
                     Debug.Log("ジェムを5個獲得");
                 }
             }
