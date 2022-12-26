@@ -137,7 +137,6 @@ namespace UI.Title
                 _characterData = prevCharacterData;
                 CreateCharacter(prevCharacterData);
                 InitializeContent();
-                //await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
                 InitializeAnimation();
             }
 
