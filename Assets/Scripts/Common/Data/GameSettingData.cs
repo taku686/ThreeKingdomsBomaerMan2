@@ -25,6 +25,9 @@ namespace Common.Data
         public static readonly int SkillTwoHashKey = Animator.StringToHash("Passive");
         public static readonly string SkillOneKey = "Base Layer.Attack";
         public static readonly string SkillTwoKey = "Base Layer.Passive";
+        public static readonly string GameID = "5089859";
+        public static readonly string RewardAdsKey = "ca-app-pub-3940256099942544/5224354917";
+        public static readonly string PlacementName = "testReward";
 
         public static readonly int ThreeMilliSecondsBeforeExplosion = 3000;
 

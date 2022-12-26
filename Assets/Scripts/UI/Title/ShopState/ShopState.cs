@@ -28,8 +28,10 @@ namespace UI.Title
             {
                 Owner.shopView.BackButton.onClick.RemoveAllListeners();
                 Owner.shopView.ThousandCoinButton.onClick.RemoveAllListeners();
+                Owner.shopView.AdsButton.onClick.RemoveAllListeners();
                 Owner.shopView.BackButton.onClick.AddListener(OnCLickBack);
                 Owner.shopView.ThousandCoinButton.onClick.AddListener(OnClickBuyThousandCoin);
+                Owner.shopView.AdsButton.onClick.AddListener(OnClickAds);
             }
 
             private void OnCLickBack()
@@ -53,6 +55,18 @@ namespace UI.Title
                     {
                         Owner.shopView.TextGameObject.SetActive(true);
                     }
+                })).SetLink(button);
+            }
+
+            private void OnClickAds()
+            {
+                var button = Owner.shopView.AdsButton.gameObject;
+                Owner._uiAnimation.OnClickScaleColorAnimation(button).OnComplete(() => UniTask.Void(async () =>
+                {
+                    Owner._rewardAd.Show();
+                    await Owner._playFabAdsManager.GetAdPlacementAsync(Owner.GetCancellationTokenOnDestroy(),
+                        Owner._rewardAd);
+                    //Owner.shopView.TextGameObject.SetActive(true);
                 })).SetLink(button);
             }
         }
