@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Remoting.Messaging;
 using Assets.Scripts.Common.ResourceManager;
 using Common;
 using Common.Data;
@@ -11,23 +12,31 @@ using PlayFab.ClientModels;
 using UnityEngine;
 using Newtonsoft.Json;
 using UI.Title;
+using UI.Title.LoginState;
+using WebSocketSharp;
 using Zenject;
 
 namespace Assets.Scripts.Common.PlayFab
 {
     public class PlayFabLoginManager : MonoBehaviour
     {
-        [Inject] private CharacterDataManager _characterDataManager;
         [Inject] private UserManager _userManager;
         [Inject] private PlayFabCatalogManager _playFabCatalogManager;
         [Inject] private PlayFabPlayerDataManager _playFabPlayerDataManager;
-        [Inject] private PlayFabShopManager _playFabShopManager;
-        private const string Email = "test9@gmail.com";
-        private const string Password = "Passw0rd";
-        private GetPlayerCombinedInfoRequestParams _info;
 
-        public void Initialize()
+        [Inject] private PlayFabShopManager _playFabShopManager;
+
+        /*private const string Email = "test9@gmail.com";
+        private const string Password = "Passw0rd";*/
+        private GetPlayerCombinedInfoRequestParams _info;
+        private DisplayNameView _displayNameView;
+        private GameObject _errorGameObject;
+        private PlayFabResult<LoginResult> _loginResponse;
+
+        public void Initialize(DisplayNameView displayNameView, GameObject errorGameObject)
         {
+            _displayNameView = displayNameView;
+            _errorGameObject = errorGameObject;
             PlayFabSettings.staticSettings.TitleId = GameSettingData.TitleID;
             _info = new GetPlayerCombinedInfoRequestParams()
             {
@@ -39,89 +48,8 @@ namespace Assets.Scripts.Common.PlayFab
             };
         }
 
-        public async UniTask<bool> LoginWithCustomId()
-        {
-            var request = new LoginWithCustomIDRequest
-            {
-                CustomId = PlayerPrefsManager.UserID,
-                InfoRequestParameters = _info,
-                CreateAccount = true
-            };
-
-            var response = await PlayFabClientAPI.LoginWithCustomIDAsync(request);
-            if (response.Error != null)
-            {
-                Debug.Log(response.Error.GenerateErrorReport());
-                return false;
-            }
-
-            await LoginSuccess(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
-            return true;
-        }
-
-        public async UniTask<bool> LoginWithEmail(string email, string password)
-        {
-            var request = new LoginWithEmailAddressRequest
-            {
-                Email = email,
-                Password = password,
-                InfoRequestParameters = _info
-            };
-            var response = await PlayFabClientAPI.LoginWithEmailAddressAsync(request);
-
-            if (response.Error != null)
-            {
-                switch (response.Error.Error)
-                {
-                    case PlayFabErrorCode.InvalidParams:
-                        break;
-                    case PlayFabErrorCode.InvalidEmailOrPassword:
-                        break;
-                    case PlayFabErrorCode.AccountNotFound:
-                        Debug.Log("メールアドレスかパスワードが正しくありません。");
-                        break;
-                    case PlayFabErrorCode.Success:
-                        Debug.Log("登録完了!!");
-                        break;
-                    default:
-                        Debug.Log(response.Error.GenerateErrorReport());
-                        break;
-                }
-            }
-            else
-            {
-                Debug.Log($"Login success!! my PlayFabID is {response.Result.PlayFabId}");
-                await LoginSuccess(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
-                if (PlayerPrefsManager.IsLoginEmailAddress)
-                {
-                    PlayerPrefsManager.UserID = response.Result.InfoResultPayload.AccountInfo.CustomIdInfo.CustomId;
-                }
-            }
-
-            return response.Error == null;
-        }
-
         public async UniTask<bool> Login()
         {
-/*#if UNITY_EDITOR
-            var request = new LoginWithCustomIDRequest
-            {
-                CustomId = PlayerPrefsManager.UserID,
-                InfoRequestParameters = _info,
-                CreateAccount = true
-            };
-
-            var response = await PlayFabClientAPI.LoginWithCustomIDAsync(request);
-            if (response.Error != null)
-            {
-                Debug.Log(response.Error.GenerateErrorReport());
-                return false;
-            }
-
-            await LoginSuccess(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
-            return true;
-#elif UNITY_ANDROID*/
-
             var request = new LoginWithAndroidDeviceIDRequest()
             {
                 CreateAccount = true,
@@ -133,20 +61,20 @@ namespace Assets.Scripts.Common.PlayFab
             if (response.Error != null)
             {
                 Debug.LogError(response.Error.GenerateErrorReport());
+                _errorGameObject.SetActive(true);
                 return false;
             }
 
-            await LoginSuccess(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
-            return true;
+            return await LoginSuccess(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
         }
 
 
-        private async UniTask LoginSuccess(PlayFabResult<LoginResult> response)
+        private async UniTask<bool> LoginSuccess(PlayFabResult<LoginResult> response)
         {
-            await SetData(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+            return await SetData(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
         }
 
-        private async UniTask SetData(PlayFabResult<LoginResult> response)
+        private async UniTask<bool> SetData(PlayFabResult<LoginResult> response)
         {
             var catalogList = await _playFabCatalogManager.GetCatalogItems()
                 .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
@@ -155,29 +83,9 @@ namespace Assets.Scripts.Common.PlayFab
             if (!response.Result.InfoResultPayload.UserData.TryGetValue(GameSettingData.UserKey,
                     out UserDataRecord userData))
             {
-                var characterData = _playFabCatalogManager.GetCharacterData(0);
-                var user = new User().Create(characterData);
-                var virtualCurrency = response.Result.InfoResultPayload.UserVirtualCurrency;
-                user.Coin = virtualCurrency[GameSettingData.CoinKey];
-                user.Gem = virtualCurrency[GameSettingData.GemKey];
-                var isSuccess = await _playFabPlayerDataManager.TryUpdateUserDataAsync(GameSettingData.UserKey, user)
-                    .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
-                if (!isSuccess)
-                {
-                    Debug.LogError("ユーザーデータの更新に失敗しました");
-                }
-
-                //再度ユーザーデータ取得
-                /*if (!PlayerPrefsManager.IsLoginEmailAddress)
-                {
-                    await LoginWithCustomId().AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
-                }
-                else
-                {
-                    await LoginWithEmail(Email, Password)
-                        .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
-                }*/
-                await Login().AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+                _loginResponse = response;
+                _displayNameView.gameObject.SetActive(true);
+                return false;
             }
             else
             {
@@ -190,11 +98,14 @@ namespace Assets.Scripts.Common.PlayFab
                     user.Coin = virtualCurrency[GameSettingData.CoinKey];
                     user.Gem = virtualCurrency[GameSettingData.GemKey];
                     _userManager.Initialize(user);
+                    return true;
                 }
+
+                return false;
             }
         }
 
-        public async UniTask SetEmailAndPassword(string email, string password)
+        /*public async UniTask SetEmailAndPassword(string email, string password)
         {
             var request = new AddUsernamePasswordRequest
             {
@@ -228,6 +139,58 @@ namespace Assets.Scripts.Common.PlayFab
                 Debug.Log("登録完了!!");
                 PlayerPrefsManager.IsLoginEmailAddress = true;
             }
+        }*/
+
+        public async UniTask<bool> CreateUserData()
+        {
+            var characterData = _playFabCatalogManager.GetCharacterData(0);
+            var user = new User().Create(characterData);
+            var virtualCurrency = _loginResponse.Result.InfoResultPayload.UserVirtualCurrency;
+            user.Coin = virtualCurrency[GameSettingData.CoinKey];
+            user.Gem = virtualCurrency[GameSettingData.GemKey];
+            var isSuccess = await _playFabPlayerDataManager.TryUpdateUserDataAsync(GameSettingData.UserKey, user)
+                .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+            if (!isSuccess)
+            {
+                Debug.LogError("ユーザーデータの更新に失敗しました");
+                return false;
+            }
+
+            return await Login().AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+        }
+
+        public async UniTask<bool> SetDisplayName(string displayName)
+        {
+            if (displayName.IsNullOrEmpty())
+            {
+                return false;
+            }
+
+            var request = new UpdateUserTitleDisplayNameRequest
+            {
+                DisplayName = displayName
+            };
+            var response = await PlayFabClientAPI.UpdateUserTitleDisplayNameAsync(request);
+            if (response.Error != null)
+            {
+                switch (response.Error.Error)
+                {
+                    case PlayFabErrorCode.InvalidParams:
+                        Debug.Log("名前の文字数制限エラーです");
+                        _displayNameView.ErrorText.text = "名前は3~15文字以内で入力して下さい。";
+                        return false;
+                    case PlayFabErrorCode.ProfaneDisplayName:
+                        Debug.Log("この名前は使用できません");
+                        _displayNameView.ErrorText.text = "この名前は使用できません。";
+                        return false;
+                    default:
+                        _displayNameView.ErrorText.text = "この名前は使用できません。";
+                        Debug.Log(response.Error.GenerateErrorReport());
+                        return false;
+                }
+            }
+
+            return true;
         }
     }
 }
