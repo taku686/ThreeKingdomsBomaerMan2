@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
@@ -17,20 +18,29 @@ namespace UI.Title
         {
             private CharacterData _characterData;
             private const float MoveAmount = 50;
+            private CancellationTokenSource _cts;
+            private bool _isInitialize;
 
             protected override void OnEnter(State prevState)
             {
                 Initialize();
             }
 
+            protected override void OnExit(State nextState)
+            {
+                Cancel();
+            }
+
             private async void Initialize()
             {
+                SetupCancellationToken();
                 Owner.DisableTitleGameObject();
                 Owner.mainView.CharacterDetailGameObject.SetActive(true);
                 _characterData = Owner._characterDataManager.GetCharacterData(Owner._currentCharacterId);
                 InitializeButton();
                 InitializeContent();
                 InitializeUIAnimation();
+                _isInitialize = true;
                 await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
                 InitializeAnimation();
             }
@@ -61,6 +71,11 @@ namespace UI.Title
 
             private void InitializeUIAnimation()
             {
+                if (_isInitialize)
+                {
+                    return;
+                }
+
                 var leftArrowTransform = Owner.characterDetailView.LeftArrowRect;
                 var rightArrowTransform = Owner.characterDetailView.RightArrowRect;
                 var leftPosition = leftArrowTransform.anchoredPosition3D;
@@ -154,6 +169,29 @@ namespace UI.Title
             private void InitializeAnimation()
             {
                 Owner._character.GetComponent<Animator>().SetTrigger(Active);
+            }
+
+            private void SetupCancellationToken()
+            {
+                if (_cts != null)
+                {
+                    return;
+                }
+
+                _cts = new CancellationTokenSource();
+                _cts.RegisterRaiseCancelOnDestroy(Owner);
+            }
+
+            private void Cancel()
+            {
+                if (_cts == null)
+                {
+                    return;
+                }
+
+                _cts.Cancel();
+                _cts.Dispose();
+                _cts = null;
             }
         }
     }
