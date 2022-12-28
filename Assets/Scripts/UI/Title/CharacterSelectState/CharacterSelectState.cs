@@ -5,11 +5,11 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using State = StateMachine<UI.Title.TitlePresenter>.State;
+using State = StateMachine<UI.Title.TitleBase>.State;
 
 namespace UI.Title
 {
-    public partial class TitlePresenter
+    public partial class TitleBase
     {
         public class CharacterSelectState : State
         {

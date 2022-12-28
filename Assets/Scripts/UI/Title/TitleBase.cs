@@ -13,7 +13,7 @@ using GoogleMobileAds.Api;
 
 namespace UI.Title
 {
-    public partial class TitlePresenter : MonoBehaviourPunCallbacks
+    public partial class TitleBase : MonoBehaviourPunCallbacks
     {
         [Inject] private CharacterDataManager _characterDataManager;
         [Inject] private UIAnimation _uiAnimation;
@@ -35,7 +35,7 @@ namespace UI.Title
         [SerializeField] private ShopView shopView;
 
         private GameObject _character;
-        private StateMachine<TitlePresenter> _stateMachine;
+        private StateMachine<TitleBase> _stateMachine;
         private CancellationToken _token;
         private int _currentCharacterId;
       
@@ -76,7 +76,7 @@ namespace UI.Title
 
         private void InitializeState()
         {
-            _stateMachine = new StateMachine<Title.TitlePresenter>(this);
+            _stateMachine = new StateMachine<Title.TitleBase>(this);
             if (_mainManager.isInitialize)
             {
                 _stateMachine.Start<MainState>();

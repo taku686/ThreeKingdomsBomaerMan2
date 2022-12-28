@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using Bomb;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager;
+using Manager.BattleManager;
 using Photon.Pun;
 using UI.Battle;
 using UniRx.Triggers;
@@ -10,7 +13,7 @@ using UnityEngine;
 
 namespace Player.Common
 {
-    public partial class PLayerCore : MonoBehaviourPunCallbacks
+    public partial class PLayerBase : MonoBehaviourPunCallbacks
     {
         private InputManager _inputManager;
         private PlayerMove _playerMove;
@@ -18,8 +21,10 @@ namespace Player.Common
         private CharacterData _characterData;
         private PhotonView _photonView;
         private Animator _animator;
+
         private PlayerDead _playerDead;
-        private PlayerStatusUI _playerStatusUI;
+
+        //   private PlayerStatusUI _playerStatusUI;
         private ObservableStateMachineTrigger _animatorTrigger;
         private PlayerStatusManager _playerStatusManager;
         private const int DeadHp = 0;
@@ -29,6 +34,8 @@ namespace Player.Common
         private bool _isInvincible;
         private Renderer _renderer;
         private BoxCollider _boxCollider;
+        private CancellationToken _cancellationToken;
+        private string _hpKey;
 
         //Todo仮の値
         private const float SkillOneIntervalTime = 3f;
@@ -43,15 +50,16 @@ namespace Player.Common
             Stop
         }
 
-        private StateMachine<PLayerCore> _stateMachine;
+        private StateMachine<PLayerBase> _stateMachine;
 
-        public void Initialize(CharacterData characterData, PlayerStatusUI playerStatusUI)
+        public void Initialize(CharacterData characterData, string hpKey)
         {
-            InitializeComponent(characterData, playerStatusUI);
+            InitializeComponent(characterData);
             InitializeState();
+            _hpKey = hpKey;
         }
 
-        private void InitializeComponent(CharacterData characterData, PlayerStatusUI playerStatusUI)
+        private void InitializeComponent(CharacterData characterData)
         {
             _photonView = GetComponent<PhotonView>();
             _inputManager = gameObject.AddComponent<InputManager>();
@@ -63,15 +71,16 @@ namespace Player.Common
             _animatorTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
             _playerDead = gameObject.AddComponent<PlayerDead>();
             _characterData = characterData;
-            _playerStatusUI = playerStatusUI;
+            //   _playerStatusUI = playerStatusUI;
             _playerStatusManager = new PlayerStatusManager(characterData.Hp * 10);
             _renderer = GetComponentInChildren<Renderer>();
             _boxCollider = GetComponent<BoxCollider>();
+            _cancellationToken = gameObject.GetCancellationTokenOnDestroy();
         }
 
         private void InitializeState()
         {
-            _stateMachine = new StateMachine<PLayerCore>(this);
+            _stateMachine = new StateMachine<PLayerBase>(this);
             _stateMachine.Start<PlayerStateIdle>();
             _stateMachine.AddAnyTransition<PlayerStateDead>((int)PLayerState.Dead);
             _stateMachine.AddAnyTransition<PlayerStateIdle>((int)PLayerState.Idle);
@@ -112,14 +121,14 @@ namespace Player.Common
                 }
 
                 _renderer.enabled = false;
-                await UniTask.Delay(TimeSpan.FromSeconds(WaitDuration));
+                await UniTask.Delay(TimeSpan.FromSeconds(WaitDuration), cancellationToken: _cancellationToken);
                 if (_renderer == null)
                 {
                     break;
                 }
 
                 _renderer.enabled = true;
-                await UniTask.Delay(TimeSpan.FromSeconds(WaitDuration));
+                await UniTask.Delay(TimeSpan.FromSeconds(WaitDuration), cancellationToken: _cancellationToken);
             }
 
             _isInvincible = false;
@@ -135,13 +144,13 @@ namespace Player.Common
             _isDamage = true;
             var explosion = other.GetComponentInParent<Explosion>();
             _playerStatusManager.CurrentHp -= explosion.damageAmount;
-            var hpRate = _playerStatusManager.CurrentHp / (float)_playerStatusManager.MaxHp;
-            await _playerStatusUI.OnDamage(hpRate);
-            await UniTask.Delay(TimeSpan.FromSeconds(InvincibleDuration))
-                .AttachExternalCancellation(gameObject.GetCancellationTokenOnDestroy());
+            //var hpRate = _playerStatusManager.CurrentHp / (float)_playerStatusManager.MaxHp;
+            //    await _playerStatusUI.OnDamage(hpRate);
+            SynchronizedValue.SetValue(_hpKey, _playerStatusManager.CurrentHp);
+            await UniTask.Delay(TimeSpan.FromSeconds(InvincibleDuration), cancellationToken: _cancellationToken);
             _isDamage = false;
             _renderer.enabled = true;
-            Debug.Log(_playerStatusManager.CurrentHp);
+           // Debug.Log(_playerStatusManager.CurrentHp);
             if (_playerStatusManager.CurrentHp <= DeadHp)
             {
                 Dead(explosion);

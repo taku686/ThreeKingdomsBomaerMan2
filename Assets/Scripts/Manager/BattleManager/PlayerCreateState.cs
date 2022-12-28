@@ -1,17 +1,15 @@
 ﻿using Common.Data;
 using Cysharp.Threading.Tasks;
-using ModestTree;
 using Photon.Pun;
 using Player.Common;
 using UI.Battle;
 using UniRx;
 using UnityEngine;
-using Zenject;
-using State = StateMachine<Manager.BattleManager.BattleManager>.State;
+using State = StateMachine<Manager.BattleManager.BattleBase>.State;
 
 namespace Manager.BattleManager
 {
-    public partial class BattleManager
+    public partial class BattleBase
     {
         public class PlayerCreateState : State
         {
@@ -58,6 +56,14 @@ namespace Manager.BattleManager
                 playerPutBomb.Initialize(Owner._bombProvider);
                 var photonView = player.GetComponent<PhotonView>();
                 var playerId = photonView.OwnerActorNr;
+                var playerUI = Instantiate(Owner.playerUI, Owner.playerUIParent);
+                var playerBillBoardUI = playerUI.GetComponentInChildren<PlayerUIBillBoard>();
+                playerBillBoardUI.Initialize(player.transform);
+                var characterData = Owner._networkManager.GetCharacterData(playerId);
+                var hpKey = playerId + "Hp";
+                SynchronizedValue.Create(hpKey, characterData.Hp * 10);
+                var playerStatusUI = playerUI.GetComponent<PlayerStatusUI>();
+                playerStatusUI.Initialize(SynchronizedValue.GetValue(hpKey), characterData.Hp * 10);
                 if (!photonView.IsMine)
                 {
                     return;
@@ -65,13 +71,8 @@ namespace Manager.BattleManager
 
                 AddBoxCollider(player);
                 AddRigidbody(player);
-                var playerUI = Instantiate(Owner.playerUI, Owner.playerUIParent);
-                var playerBillBoardUI = playerUI.GetComponentInChildren<PlayerUIBillBoard>();
-                playerBillBoardUI.Initialize(player.transform);
-                var playerStatusUI = playerUI.GetComponent<PlayerStatusUI>();
-                var playerCore = player.AddComponent<PLayerCore>();
-                var characterData = Owner._networkManager.GetCharacterData(playerId);
-                playerCore.Initialize(characterData, playerStatusUI);
+                var playerCore = player.AddComponent<PLayerBase>();
+                playerCore.Initialize(characterData, hpKey);
             }
 
             private void AddBoxCollider(GameObject player)

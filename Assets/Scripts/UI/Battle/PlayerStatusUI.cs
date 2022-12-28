@@ -1,24 +1,35 @@
 ﻿using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using UniRx;
 using UnityEngine;
 
 namespace UI.Battle
 {
     public class PlayerStatusUI : MonoBehaviour
     {
-        [SerializeField] private RectTransform _greenGauge;
-        [SerializeField] private RectTransform _redGauge;
+        [SerializeField] private RectTransform greenGauge;
+        [SerializeField] private RectTransform redGauge;
         private const float GreenGaugeMoveDuration = 0.3f;
         private const float RedGaugeMoveDuration = 0.5f;
 
-        public async UniTask OnDamage(float hpRate)
+        public void Initialize(ReadOnlyReactiveProperty<int> hpValue, int maxHp)
         {
-            var endPosX = -_greenGauge.rect.width * (1 - hpRate);
+            hpValue.Subscribe(hp =>
+            {
+                Debug.Log(hp);
+                var hpRate = hp / (float)maxHp;
+                OnDamage(hpRate).Forget();
+            }).AddTo(gameObject);
+        }
+
+        private async UniTask OnDamage(float hpRate)
+        {
+            var endPosX = -greenGauge.rect.width * (1 - hpRate);
             var endPos = new Vector3(endPosX, 0, 0);
-            await _greenGauge.DOLocalMove(endPos, GreenGaugeMoveDuration).SetLink(_greenGauge.gameObject)
-                .WithCancellation(_greenGauge.gameObject.GetCancellationTokenOnDestroy());
-            await _redGauge.DOLocalMove(endPos, RedGaugeMoveDuration).SetLink(_redGauge.gameObject)
-                .WithCancellation(_greenGauge.gameObject.GetCancellationTokenOnDestroy());
+            await greenGauge.DOLocalMove(endPos, GreenGaugeMoveDuration).SetLink(greenGauge.gameObject)
+                .WithCancellation(greenGauge.gameObject.GetCancellationTokenOnDestroy());
+            await redGauge.DOLocalMove(endPos, RedGaugeMoveDuration).SetLink(redGauge.gameObject)
+                .WithCancellation(greenGauge.gameObject.GetCancellationTokenOnDestroy());
         }
     }
 }

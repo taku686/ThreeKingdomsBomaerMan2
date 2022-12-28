@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
-using State = StateMachine<Manager.BattleManager.BattleManager>.State;
+using State = StateMachine<Manager.BattleManager.BattleBase>.State;
 
 namespace Manager.BattleManager
 {
-    public partial class BattleManager
+    public partial class BattleBase
     {
         public class EndSceneTransitionState : State
         {

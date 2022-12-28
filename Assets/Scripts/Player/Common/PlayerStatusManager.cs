@@ -12,6 +12,8 @@ namespace Player.Common
             CurrentHp = maxHp;
             MaxHp = maxHp;
         }
+        
+        
 
         public void Dispose()
         {
