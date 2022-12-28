@@ -12,14 +12,9 @@ namespace UI.Battle
         private const float GreenGaugeMoveDuration = 0.3f;
         private const float RedGaugeMoveDuration = 0.5f;
 
-        public void Initialize(ReadOnlyReactiveProperty<int> hpValue, int maxHp)
+        public void Initialize(ReadOnlyReactiveProperty<float> hpRate)
         {
-            hpValue.Subscribe(hp =>
-            {
-                Debug.Log(hp);
-                var hpRate = hp / (float)maxHp;
-                OnDamage(hpRate).Forget();
-            }).AddTo(gameObject);
+            hpRate.Subscribe(rate => { OnDamage(rate).Forget(); }).AddTo(gameObject);
         }
 
         private async UniTask OnDamage(float hpRate)

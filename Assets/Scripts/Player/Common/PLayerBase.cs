@@ -47,7 +47,6 @@ namespace Player.Common
             Dead,
             Skill1,
             Skill2,
-            Stop
         }
 
         private StateMachine<PLayerBase> _stateMachine;
@@ -64,15 +63,14 @@ namespace Player.Common
             _photonView = GetComponent<PhotonView>();
             _inputManager = gameObject.AddComponent<InputManager>();
             _inputManager.Initialize(_photonView, SkillOneIntervalTime, SkillTwoIntervalTime);
-            _playerMove = gameObject.AddComponent<PlayerMove>();
-            _playerMove.Initialize(characterData.Speed);
             _playerPutBomb = GetComponent<PlayerPutBomb>();
             _animator = GetComponent<Animator>();
             _animatorTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
             _playerDead = gameObject.AddComponent<PlayerDead>();
             _characterData = characterData;
-            //   _playerStatusUI = playerStatusUI;
-            _playerStatusManager = new PlayerStatusManager(characterData.Hp * 10);
+            _playerStatusManager = new PlayerStatusManager(characterData.Hp, characterData.Speed);
+            _playerMove = gameObject.AddComponent<PlayerMove>();
+            _playerMove.Initialize(_playerStatusManager.Speed);
             _renderer = GetComponentInChildren<Renderer>();
             _boxCollider = GetComponent<BoxCollider>();
             _cancellationToken = gameObject.GetCancellationTokenOnDestroy();
@@ -144,13 +142,11 @@ namespace Player.Common
             _isDamage = true;
             var explosion = other.GetComponentInParent<Explosion>();
             _playerStatusManager.CurrentHp -= explosion.damageAmount;
-            //var hpRate = _playerStatusManager.CurrentHp / (float)_playerStatusManager.MaxHp;
-            //    await _playerStatusUI.OnDamage(hpRate);
-            SynchronizedValue.SetValue(_hpKey, _playerStatusManager.CurrentHp);
+            var hpRate = _playerStatusManager.CurrentHp / (float)_playerStatusManager.MaxHp;
+            SynchronizedValue.SetValue(_hpKey, hpRate);
             await UniTask.Delay(TimeSpan.FromSeconds(InvincibleDuration), cancellationToken: _cancellationToken);
             _isDamage = false;
             _renderer.enabled = true;
-           // Debug.Log(_playerStatusManager.CurrentHp);
             if (_playerStatusManager.CurrentHp <= DeadHp)
             {
                 Dead(explosion);

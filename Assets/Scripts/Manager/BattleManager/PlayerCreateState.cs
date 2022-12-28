@@ -15,6 +15,7 @@ namespace Manager.BattleManager
         {
             private static readonly Vector3 ColliderCenter = new Vector3(0, 0.5f, 0);
             private static readonly Vector3 ColliderSize = new Vector3(.6f, 0.6f, 0.6f);
+            private static readonly float MaxRate = 1f;
 
             protected override void OnEnter(State prevState)
             {
@@ -61,9 +62,9 @@ namespace Manager.BattleManager
                 playerBillBoardUI.Initialize(player.transform);
                 var characterData = Owner._networkManager.GetCharacterData(playerId);
                 var hpKey = playerId + "Hp";
-                SynchronizedValue.Create(hpKey, characterData.Hp * 10);
+                SynchronizedValue.Create(hpKey, MaxRate);
                 var playerStatusUI = playerUI.GetComponent<PlayerStatusUI>();
-                playerStatusUI.Initialize(SynchronizedValue.GetValue(hpKey), characterData.Hp * 10);
+                playerStatusUI.Initialize(SynchronizedValue.GetFloatValue(hpKey));
                 if (!photonView.IsMine)
                 {
                     return;
