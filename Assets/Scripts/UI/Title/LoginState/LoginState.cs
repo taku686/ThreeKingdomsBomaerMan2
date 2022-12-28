@@ -9,8 +9,6 @@ namespace UI.Title
     {
         public class LoginState : State
         {
-            private const string Email = "takunoshin123456789@gmail.com";
-            private const string Password = "Passw0rd";
             private CancellationToken _token;
 
             protected override void OnEnter(State prevState)
@@ -30,30 +28,28 @@ namespace UI.Title
             private void InitializeObject()
             {
                 Owner.loginView.ErrorGameObject.SetActive(false);
+                Owner.loginView.DisplayNameView.gameObject.SetActive(false);
             }
 
             private void InitializeButton()
             {
                 Owner.loginView.RetryButton.onClick.RemoveAllListeners();
                 Owner.loginView.StartButton.onClick.RemoveAllListeners();
+                Owner.loginView.DisplayNameView.OkButton.onClick.RemoveAllListeners();
                 Owner.loginView.RetryButton.onClick.AddListener(OnClickRetry);
                 Owner.loginView.StartButton.onClick.AddListener(() => UniTask.Void(async () =>
                     await Login().AttachExternalCancellation(_token)));
+                Owner.loginView.DisplayNameView.OkButton.onClick.AddListener(() => UniTask.Void(async () =>
+                {
+                    await OnClickDisplayName();
+                }));
             }
 
             private async UniTask Login()
             {
-                Owner._playFabLoginManager.Initialize();
-                /*if (!PlayerPrefsManager.IsLoginEmailAddress)
-                {
-                    result = await Owner._playFabLoginManager.LoginWithCustomId().AttachExternalCancellation(_token);
-                }
-                else
-                {
-                    result = await Owner._playFabLoginManager.LoginWithEmail(Email, Password)
-                        .AttachExternalCancellation(_token);
-                }*/
-                var result = await Owner._playFabLoginManager.Login().AttachExternalCancellation(_token);
+                Owner._playFabLoginManager.Initialize(Owner.loginView.DisplayNameView, Owner.loginView.ErrorGameObject);
+                var result = await Owner._playFabLoginManager.Login()
+                    .AttachExternalCancellation(_token);
 
                 if (result)
                 {
@@ -61,9 +57,24 @@ namespace UI.Title
                     Owner._mainManager.isInitialize = true;
                     Owner._stateMachine.Dispatch((int)Event.Login);
                 }
-                else
+            }
+
+            private async UniTask OnClickDisplayName()
+            {
+                var displayName = Owner.loginView.DisplayNameView.InputField.text;
+                var success = await Owner._playFabLoginManager.SetDisplayName(displayName);
+                if (!success)
                 {
-                    Owner.loginView.ErrorGameObject.SetActive(true);
+                    return;
+                }
+
+                var createSuccess = await Owner._playFabLoginManager.CreateUserData();
+                if (createSuccess)
+                {
+                    await Owner._characterDataManager.Initialize(Owner._userManager, Owner._token);
+                    Owner.loginView.DisplayNameView.gameObject.SetActive(false);
+                    Owner._mainManager.isInitialize = true;
+                    Owner._stateMachine.Dispatch((int)Event.Login);
                 }
             }
 
