@@ -11,26 +11,8 @@ namespace Bomb
     public class NormalBomb : BombBase
     {
         private static readonly float ExplosionMoveDuration = 0.5f;
-        private static readonly Vector3 EffectOriginPosition = new Vector3(0, 0.5f, 0);
+        private static readonly Vector3 EffectOriginPosition = new(0, 0.5f, 0);
         private static readonly Vector3 ColliderOriginPosition = Vector3.zero;
-
-        private List<Func<Vector3, int, Transform, UniTask>> _colliderFunctions =
-            new List<Func<Vector3, int, Transform, UniTask>>();
-
-        private List<Func<float, Vector3, Transform, UniTask>> _effectFunctions =
-            new List<Func<float, Vector3, Transform, UniTask>>();
-
-        private List<UniTask> _colliderUniTasks = new List<UniTask>();
-        private List<UniTask> _effectUniTasks = new List<UniTask>();
-
-        private readonly List<Vector3> _directions = new List<Vector3>
-        {
-            Vector3.forward,
-            Vector3.back,
-            Vector3.left,
-            Vector3.right
-        };
-
 
         protected override async UniTask Explosion(int damageAmount)
         {

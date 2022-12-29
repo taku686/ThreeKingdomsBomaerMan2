@@ -26,8 +26,9 @@ namespace Bomb
         private int _damageAmount;
         private int _playerId;
         private int _explosionTime;
-        private readonly Subject<Unit> _onExplosionSubject = new Subject<Unit>();
-        private readonly Subject<Unit> _onFinishSubject = new Subject<Unit>();
+        private readonly Subject<Unit> _onExplosionSubject = new();
+        
+        private readonly Subject<Unit> _onFinishSubject = new();
 
         private CancellationToken _token;
 
@@ -60,7 +61,7 @@ namespace Bomb
                 boxCollider.gameObject.SetActive(false);
             }
 
-            gameObject.UpdateAsObservable().Subscribe(_ => { CountDown(explosionTime); }).AddTo(Cts.Token);
+            gameObject.UpdateAsObservable().Subscribe(_ => { CountDown(_explosionTime); }).AddTo(Cts.Token);
         }
 
         private void CountDown(int explosionTime)

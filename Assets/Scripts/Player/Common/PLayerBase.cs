@@ -21,10 +21,7 @@ namespace Player.Common
         private CharacterData _characterData;
         private PhotonView _photonView;
         private Animator _animator;
-
         private PlayerDead _playerDead;
-
-        //   private PlayerStatusUI _playerStatusUI;
         private ObservableStateMachineTrigger _animatorTrigger;
         private PlayerStatusManager _playerStatusManager;
         private const int DeadHp = 0;
@@ -51,14 +48,15 @@ namespace Player.Common
 
         private StateMachine<PLayerBase> _stateMachine;
 
-        public void Initialize(CharacterData characterData, string hpKey)
+        public void Initialize(PlayerStatusManager playerStatusManager, string hpKey)
         {
-            InitializeComponent(characterData);
-            InitializeState();
             _hpKey = hpKey;
+            _playerStatusManager = playerStatusManager;
+            InitializeComponent();
+            InitializeState();
         }
 
-        private void InitializeComponent(CharacterData characterData)
+        private void InitializeComponent()
         {
             _photonView = GetComponent<PhotonView>();
             _inputManager = gameObject.AddComponent<InputManager>();
@@ -67,8 +65,6 @@ namespace Player.Common
             _animator = GetComponent<Animator>();
             _animatorTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
             _playerDead = gameObject.AddComponent<PlayerDead>();
-            _characterData = characterData;
-            _playerStatusManager = new PlayerStatusManager(characterData.Hp, characterData.Speed);
             _playerMove = gameObject.AddComponent<PlayerMove>();
             _playerMove.Initialize(_playerStatusManager.Speed);
             _renderer = GetComponentInChildren<Renderer>();
@@ -143,7 +139,7 @@ namespace Player.Common
             var explosion = other.GetComponentInParent<Explosion>();
             _playerStatusManager.CurrentHp -= explosion.damageAmount;
             var hpRate = _playerStatusManager.CurrentHp / (float)_playerStatusManager.MaxHp;
-            SynchronizedValue.SetValue(_hpKey, hpRate);
+            SynchronizedValue.Instance.SetValue(_hpKey, hpRate);
             await UniTask.Delay(TimeSpan.FromSeconds(InvincibleDuration), cancellationToken: _cancellationToken);
             _isDamage = false;
             _renderer.enabled = true;

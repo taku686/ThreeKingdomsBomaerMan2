@@ -11,16 +11,11 @@ namespace Manager.BattleManager
     public partial class BattleBase : MonoBehaviourPunCallbacks
     {
         [Inject] private PhotonNetworkManager _networkManager;
-
-        //   [Inject] private CharacterDataManager _characterDataManager;
         [Inject] private PlayerGenerator _playerGenerator;
-
-        //[Inject] private UserManager _userManager;
         [Inject] private BombProvider _bombProvider;
         [SerializeField] private Transform playerUIParent;
         [SerializeField] private GameObject playerUI;
         private StateMachine<BattleBase> _stateMachine;
-        private SynchronizedValue _synchronizedValue;
 
         private enum Event
         {
@@ -42,11 +37,6 @@ namespace Manager.BattleManager
             InitializeComponent();
         }
 
-        /*private async UniTask OnInitialize(CancellationToken token)
-        {
-            await _characterDataManager.Initialize(_userManager, token).AttachExternalCancellation(token);
-        }*/
-
         private void InitializeState()
         {
             _stateMachine = new StateMachine<BattleBase>(this);
@@ -56,13 +46,14 @@ namespace Manager.BattleManager
 
         private void InitializeComponent()
         {
-            _synchronizedValue = gameObject.AddComponent<SynchronizedValue>();
+            gameObject.AddComponent<SynchronizedValue>();
         }
 
 
         //todo デバッグ用後で消す
         public void OnClickExit()
         {
+            SynchronizedValue.Instance.Destroy();
             PhotonNetwork.Disconnect();
             SceneManager.LoadScene((int)SceneIndex.Title);
         }

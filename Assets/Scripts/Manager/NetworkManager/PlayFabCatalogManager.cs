@@ -20,6 +20,7 @@ namespace Assets.Scripts.Common.ResourceManager
         private readonly CancellationTokenSource _cancellationTokenSource = new();
         public Dictionary<int, GameObject> CharacterGameObjects => _characterGameObjects;
         private CancellationTokenSource _cts;
+        private static readonly int ModifiedValue = 10;
 
         public List<CatalogItem> CatalogItemList => _catalogItemList;
 
@@ -51,9 +52,9 @@ namespace Assets.Scripts.Common.ResourceManager
                     Name = customData.Name,
                     ID = customData.ID,
                     Speed = customData.Speed,
-                    BombLimit = customData.BombLimit,
+                    BombLimit = customData.BombLimit / ModifiedValue,
                     Attack = customData.Attack,
-                    FireRange = customData.FireRange,
+                    FireRange = customData.FireRange / ModifiedValue,
                     Hp = customData.Hp,
                     CharaColor = customData.CharaColor
                 };

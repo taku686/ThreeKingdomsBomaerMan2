@@ -11,9 +11,10 @@ namespace Player.Common
         private const float RayDistance = 1f;
         private const float ModifiedValue = 2f;
 
-        public void Initialize(BombProvider bombProvider)
+        public void Initialize(BombProvider bombProvider,PlayerStatusManager playerStatusManager)
         {
             _bombProvider = bombProvider;
+            _bombProvider.Initialize(playerStatusManager);
         }
 
 
@@ -28,8 +29,7 @@ namespace Player.Common
             }
 
             photonView.RPC(nameof(RpcPutBomb), RpcTarget.All, playerPos, bombType, damageAmount,
-                fireRange,
-                explosionTime, playerId);
+                fireRange, explosionTime, playerId);
         }
 
         [PunRPC]
