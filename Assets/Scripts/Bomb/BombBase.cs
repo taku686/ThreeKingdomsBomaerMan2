@@ -14,12 +14,14 @@ namespace Bomb
 {
     public abstract class BombBase : MonoBehaviour
     {
-        [SerializeField] protected List<Explosion> explosionList;
+        [SerializeField] protected List<GameObject> explosionList;
         protected static readonly float ExplosionDisplayDuration = 0.9f;
         protected static readonly float MinDistance = 1.0f;
         protected CancellationTokenSource Cts;
+
         protected int FireRange;
-        protected Vector3 StartPos;
+
+        // protected Vector3 StartPos;
         protected LayerMask ObstaclesLayerMask;
         protected bool IsExplosion;
         protected Renderer BombRenderer;
@@ -60,10 +62,9 @@ namespace Bomb
             FireRange = fireRange;
             BlockShakeAction = stageOrnamentsBlock.Shake;
             IsExplosion = false;
-            foreach (var boxCollider in explosionList.Select(x => x.boxCollider.GetComponent<BoxCollider>()))
+            foreach (var bombEffect in explosionList)
             {
-                boxCollider.isTrigger = true;
-                boxCollider.gameObject.SetActive(false);
+                bombEffect.SetActive(false);
             }
 
             gameObject.UpdateAsObservable().Subscribe(_ => { CountDown(_explosionTime); }).AddTo(Cts.Token);

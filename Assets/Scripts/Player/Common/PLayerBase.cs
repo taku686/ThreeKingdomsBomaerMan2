@@ -96,8 +96,9 @@ namespace Player.Common
 
         private void OnTriggerEnter(Collider other)
         {
-            OnDamage(other);
+            OnDamage(other.gameObject);
         }
+        
 
         private async void OnInvincible()
         {
@@ -128,7 +129,7 @@ namespace Player.Common
             _isInvincible = false;
         }
 
-        private async void OnDamage(Collider other)
+        private async void OnDamage(GameObject other)
         {
             if (!other.CompareTag(GameSettingData.BombEffectTag) || _isDamage)
             {
