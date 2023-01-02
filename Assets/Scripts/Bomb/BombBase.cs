@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
-using Environment;
+using Manager.BattleManager.Environment;
 using Photon.Pun;
 using UniRx;
 using UniRx.Triggers;

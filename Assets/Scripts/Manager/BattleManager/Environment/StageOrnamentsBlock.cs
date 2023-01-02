@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
-namespace Environment
+namespace Manager.BattleManager.Environment
 {
     public class StageOrnamentsBlock : MonoBehaviour
     {

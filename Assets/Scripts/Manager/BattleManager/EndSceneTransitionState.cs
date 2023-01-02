@@ -14,7 +14,7 @@ namespace Manager.BattleManager
 
             private void OnInitialize()
             {
-                Debug.Log("EndSceneTransition");
+                Owner.stageManager.SetupBreakingBlocks();
                 Owner._stateMachine.Dispatch((int)Event.PlayerCreate);
             }
         }

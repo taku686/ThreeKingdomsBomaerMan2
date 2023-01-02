@@ -1,5 +1,4 @@
 ﻿using Common.Data;
-using Environment;
 using Player.Common;
 using UniRx.Toolkit;
 using UnityEngine;
