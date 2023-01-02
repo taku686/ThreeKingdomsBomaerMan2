@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Environment;
 using Photon.Pun;
 using UniRx;
 using UniRx.Triggers;
@@ -23,11 +24,13 @@ namespace Bomb
         protected bool IsExplosion;
         protected Renderer BombRenderer;
         protected BoxCollider BoxColliderComponent;
+        protected Action BlockShakeAction;
         private int _damageAmount;
         private int _playerId;
         private int _explosionTime;
         private readonly Subject<Unit> _onExplosionSubject = new();
-        
+
+
         private readonly Subject<Unit> _onFinishSubject = new();
 
         private CancellationToken _token;
@@ -45,7 +48,8 @@ namespace Bomb
             gameObject.layer = LayerMask.NameToLayer(GameSettingData.BombLayer);
         }
 
-        public void Setup(int damageAmount, int fireRange, int playerId, int explosionTime)
+        public void Setup(int damageAmount, int fireRange, int playerId, int explosionTime,
+            StageOrnamentsBlock stageOrnamentsBlock)
         {
             gameObject.tag = GameSettingData.BombTag;
             BombRenderer.enabled = true;
@@ -54,6 +58,7 @@ namespace Bomb
             _playerId = playerId;
             _explosionTime = explosionTime;
             FireRange = fireRange;
+            BlockShakeAction = stageOrnamentsBlock.Shake;
             IsExplosion = false;
             foreach (var boxCollider in explosionList.Select(x => x.boxCollider.GetComponent<BoxCollider>()))
             {

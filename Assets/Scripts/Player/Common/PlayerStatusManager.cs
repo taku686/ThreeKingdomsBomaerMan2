@@ -42,7 +42,6 @@ namespace Player.Common
             }
 
             CurrentBombLimit++;
-            Debug.Log(CurrentBombLimit);
         }
 
         public void DecrementBombCount()
@@ -53,7 +52,6 @@ namespace Player.Common
             }
 
             CurrentBombLimit--;
-            Debug.Log(CurrentBombLimit);
         }
 
 

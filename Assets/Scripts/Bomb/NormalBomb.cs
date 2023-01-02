@@ -22,6 +22,7 @@ namespace Bomb
             }
 
             IsExplosion = true;
+            BlockShakeAction.Invoke();
             var position = transform.position;
             StartPos = new Vector3(position.x, 0.5f, position.z);
             await UniTask.WhenAll(

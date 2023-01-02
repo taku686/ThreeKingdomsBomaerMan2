@@ -1,5 +1,6 @@
 ﻿using System;
 using Common.Data;
+using Environment;
 using Player.Common;
 using UniRx;
 using UnityEngine;
@@ -9,13 +10,13 @@ namespace Bomb
     public class BombProvider : MonoBehaviour
     {
         [SerializeField] private BombObjectPoolProvider bombObjectPoolProvider;
+        [SerializeField] private StageOrnamentsBlock stageOrnamentsBlock;
         private BombObjectPoolBase _normalBombProvider;
         private BombObjectPoolBase _penetrationBombProvider;
         private BombObjectPoolBase _dangerBombProvider;
 
         public void Initialize(PlayerStatusManager playerStatusManager)
         {
-            Debug.Log(bombObjectPoolProvider);
             _normalBombProvider = bombObjectPoolProvider.GetNormalBombPool(playerStatusManager);
         }
 
@@ -28,7 +29,7 @@ namespace Bomb
                 return null;
             }
 
-            bomb.Setup(damageAmount, fireRange, playerId, explosionTime);
+            bomb.Setup(damageAmount, fireRange, playerId, explosionTime, stageOrnamentsBlock);
             bomb.OnFinishIObservable.Take(1).Subscribe(_ => { bombPool.Return(bomb); });
             return bomb;
         }
