@@ -75,6 +75,7 @@ namespace Manager.BattleManager
 
                 AddBoxCollider(player);
                 AddRigidbody(player);
+                Owner.cameraManager.Initialize(player.transform);
                 var playerCore = player.AddComponent<PLayerBase>();
                 playerCore.Initialize(playerStatusManager, hpKey);
             }

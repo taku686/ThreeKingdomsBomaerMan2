@@ -10,11 +10,9 @@ namespace Manager.BattleManager
 {
     public class SynchronizedValue : MonoBehaviourPunCallbacks
     {
-        private Dictionary<string, ReactiveProperty<int>> _intSynchronizedValueDictionary =
-            new Dictionary<string, ReactiveProperty<int>>();
+        private readonly Dictionary<string, ReactiveProperty<int>> _intSynchronizedValueDictionary = new();
 
-        private Dictionary<string, ReactiveProperty<float>> _floatSynchronizedValueDictionary =
-            new Dictionary<string, ReactiveProperty<float>>();
+        private readonly Dictionary<string, ReactiveProperty<float>> _floatSynchronizedValueDictionary = new();
 
         public static SynchronizedValue Instance;
 
@@ -124,7 +122,7 @@ namespace Manager.BattleManager
             _floatSynchronizedValueDictionary[key].Value = value;
             PhotonNetwork.LocalPlayer.SetPlayerValue(key, value);
         }
-        
+
         public void Destroy()
         {
             _intSynchronizedValueDictionary.Clear();

@@ -1,5 +1,6 @@
 using Bomb;
 using Common.Data;
+using Manager.BattleManager.Camera;
 using Manager.NetworkManager;
 using Photon.Pun;
 using UnityEngine;
@@ -15,6 +16,7 @@ namespace Manager.BattleManager
         [Inject] private BombProvider _bombProvider;
         [SerializeField] private Transform playerUIParent;
         [SerializeField] private GameObject playerUI;
+        [SerializeField] private CameraManager cameraManager;
         private StateMachine<BattleBase> _stateMachine;
 
         private enum Event
