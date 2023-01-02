@@ -1,3 +1,4 @@
+using System;
 using Bomb;
 using Common.Data;
 using Manager.BattleManager.Camera;
@@ -39,6 +40,11 @@ namespace Manager.BattleManager
         {
             InitializeState();
             InitializeComponent();
+        }
+
+        private void Update()
+        {
+            _stateMachine.Update();
         }
 
         private void InitializeState()
