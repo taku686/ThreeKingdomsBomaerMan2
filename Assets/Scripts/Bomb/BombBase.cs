@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Manager.BattleManager.Environment;
 using Photon.Pun;
 using UniRx;
 using UniRx.Triggers;
@@ -23,11 +24,14 @@ namespace Bomb
         protected bool IsExplosion;
         protected Renderer BombRenderer;
         protected BoxCollider BoxColliderComponent;
+        protected Action BlockShakeAction;
         private int _damageAmount;
         private int _playerId;
         private int _explosionTime;
-        private readonly Subject<Unit> _onExplosionSubject = new Subject<Unit>();
-        private readonly Subject<Unit> _onFinishSubject = new Subject<Unit>();
+        private readonly Subject<Unit> _onExplosionSubject = new();
+
+
+        private readonly Subject<Unit> _onFinishSubject = new();
 
         private CancellationToken _token;
 
@@ -44,7 +48,8 @@ namespace Bomb
             gameObject.layer = LayerMask.NameToLayer(GameSettingData.BombLayer);
         }
 
-        public void Setup(int damageAmount, int fireRange, int playerId, int explosionTime)
+        public void Setup(int damageAmount, int fireRange, int playerId, int explosionTime,
+            StageOrnamentsBlock stageOrnamentsBlock)
         {
             gameObject.tag = GameSettingData.BombTag;
             BombRenderer.enabled = true;
@@ -53,6 +58,7 @@ namespace Bomb
             _playerId = playerId;
             _explosionTime = explosionTime;
             FireRange = fireRange;
+            BlockShakeAction = stageOrnamentsBlock.Shake;
             IsExplosion = false;
             foreach (var boxCollider in explosionList.Select(x => x.boxCollider.GetComponent<BoxCollider>()))
             {
@@ -60,7 +66,7 @@ namespace Bomb
                 boxCollider.gameObject.SetActive(false);
             }
 
-            gameObject.UpdateAsObservable().Subscribe(_ => { CountDown(explosionTime); }).AddTo(Cts.Token);
+            gameObject.UpdateAsObservable().Subscribe(_ => { CountDown(_explosionTime); }).AddTo(Cts.Token);
         }
 
         private void CountDown(int explosionTime)

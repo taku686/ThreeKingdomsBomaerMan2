@@ -6,11 +6,11 @@ using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
-using State = StateMachine<UI.Title.TitlePresenter>.State;
+using State = StateMachine<UI.Title.TitleBase>.State;
 
 namespace UI.Title
 {
-    public partial class TitlePresenter
+    public partial class TitleBase
     {
         private static readonly int Active = Animator.StringToHash("Active");
 

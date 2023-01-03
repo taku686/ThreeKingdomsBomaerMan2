@@ -28,6 +28,11 @@ namespace Manager.NetworkManager
             return (player.CustomProperties[PlayerGenerateKey] is int playerGenerate) ? playerGenerate : -1;
         }
 
+        public static object GetPlayerValue(this Photon.Realtime.Player player, string key)
+        {
+            return player.CustomProperties[key];
+        }
+
 
         public static void SetCharacterData(this Photon.Realtime.Player player, int characterId)
         {
@@ -46,6 +51,13 @@ namespace Manager.NetworkManager
         public static void SetPlayerGenerate(this Photon.Realtime.Player player, int playerGenerate)
         {
             PropsToSet[PlayerGenerateKey] = playerGenerate;
+            player.SetCustomProperties(PropsToSet);
+            PropsToSet.Clear();
+        }
+
+        public static void SetPlayerValue(this Photon.Realtime.Player player, string key, object value)
+        {
+            PropsToSet[key] = value;
             player.SetCustomProperties(PropsToSet);
             PropsToSet.Clear();
         }

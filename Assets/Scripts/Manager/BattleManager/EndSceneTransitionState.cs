@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
-using State = StateMachine<Manager.BattleManager.BattleManager>.State;
+using State = StateMachine<Manager.BattleManager.BattleBase>.State;
 
 namespace Manager.BattleManager
 {
-    public partial class BattleManager
+    public partial class BattleBase
     {
         public class EndSceneTransitionState : State
         {
@@ -12,10 +12,16 @@ namespace Manager.BattleManager
                 OnInitialize();
             }
 
+            protected override void OnUpdate()
+            {
+                Debug.Log("初期化処理");
+                Owner._stateMachine.Dispatch((int)Event.PlayerCreate);
+            }
+
             private void OnInitialize()
             {
-                Debug.Log("EndSceneTransition");
-                Owner._stateMachine.Dispatch((int)Event.PlayerCreate);
+                Owner.stageManager.SetupBreakingBlocks();
+               
             }
         }
     }

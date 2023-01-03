@@ -2,11 +2,11 @@
 using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
-using State = StateMachine<Player.Common.PLayerCore>.State;
+using State = StateMachine<Player.Common.PLayerBase>.State;
 
 namespace Player.Common
 {
-    public partial class PLayerCore
+    public partial class PLayerBase
     {
         public class PlayerStateSkillTwo : State
         {

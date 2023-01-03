@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using UniRx;
 using UnityEngine;
 
 namespace Bomb
@@ -11,26 +9,8 @@ namespace Bomb
     public class NormalBomb : BombBase
     {
         private static readonly float ExplosionMoveDuration = 0.5f;
-        private static readonly Vector3 EffectOriginPosition = new Vector3(0, 0.5f, 0);
+        private static readonly Vector3 EffectOriginPosition = new(0, 0.5f, 0);
         private static readonly Vector3 ColliderOriginPosition = Vector3.zero;
-
-        private List<Func<Vector3, int, Transform, UniTask>> _colliderFunctions =
-            new List<Func<Vector3, int, Transform, UniTask>>();
-
-        private List<Func<float, Vector3, Transform, UniTask>> _effectFunctions =
-            new List<Func<float, Vector3, Transform, UniTask>>();
-
-        private List<UniTask> _colliderUniTasks = new List<UniTask>();
-        private List<UniTask> _effectUniTasks = new List<UniTask>();
-
-        private readonly List<Vector3> _directions = new List<Vector3>
-        {
-            Vector3.forward,
-            Vector3.back,
-            Vector3.left,
-            Vector3.right
-        };
-
 
         protected override async UniTask Explosion(int damageAmount)
         {
@@ -40,6 +20,7 @@ namespace Bomb
             }
 
             IsExplosion = true;
+            BlockShakeAction.Invoke();
             var position = transform.position;
             StartPos = new Vector3(position.x, 0.5f, position.z);
             await UniTask.WhenAll(
@@ -90,7 +71,7 @@ namespace Bomb
         {
             boxCollider.localPosition = ColliderOriginPosition;
             var isZ = direction.z != 0;
-            var colliderScale = isZ ? new Vector3(1, 1, fireRange) : new Vector3(fireRange, 1, 1);
+            var colliderScale = isZ ? new Vector3(0.5f, 1, fireRange) : new Vector3(fireRange, 1, 0.5f);
             boxCollider.tag = GameSettingData.BombEffectTag;
             boxCollider.localScale = colliderScale;
             var offset = direction;

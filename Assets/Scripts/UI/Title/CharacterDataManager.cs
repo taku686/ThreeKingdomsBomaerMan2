@@ -37,7 +37,6 @@ namespace UI.Title
             _userManager = userManager;
             InitializeCharacterData();
             await InitializeCharacterSprite(cancellationToken);
-            InitializeUserData(cancellationToken);
             await InitializeCharacterColor(cancellationToken);
         }
 
@@ -68,10 +67,6 @@ namespace UI.Title
                 var characterSprite = await _playFabCatalogManager.LoadCharacterColor(i, cancellationToken);
                 _characterColorDictionary[i] = characterSprite;
             }
-        }
-
-        private void InitializeUserData(CancellationToken cancellationToken)
-        {
         }
 
         public CharacterData GetCharacterData(int id)

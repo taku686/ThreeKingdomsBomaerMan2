@@ -2,11 +2,11 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine.SceneManagement;
-using State = StateMachine<UI.Title.TitlePresenter>.State;
+using State = StateMachine<UI.Title.TitleBase>.State;
 
 namespace UI.Title
 {
-    public partial class TitlePresenter
+    public partial class TitleBase
     {
         public class SceneTransitionState : State
         {

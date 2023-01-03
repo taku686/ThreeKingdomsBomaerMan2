@@ -6,11 +6,11 @@ using Photon.Pun;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
-using State = StateMachine<Player.Common.PLayerCore>.State;
+using State = StateMachine<Player.Common.PLayerBase>.State;
 
 namespace Player.Common
 {
-    public partial class PLayerCore
+    public partial class PLayerBase
     {
         public class PlayerStateIdle : State
         {
@@ -74,7 +74,7 @@ namespace Player.Common
 
             private void InitializeButton()
             {
-                Owner._inputManager.BombButton.OnClickAsObservable()
+                Owner._inputManager.BombButton.OnClickAsObservable().Where(_ => Owner._playerStatusManager.CanPutBomb())
                     .Throttle(TimeSpan.FromSeconds(GameSettingData.InputBombInterval))
                     .Subscribe(
                         _ =>
@@ -83,13 +83,11 @@ namespace Player.Common
                             var explosionTime = PhotonNetwork.ServerTimestamp +
                                                 GameSettingData.ThreeMilliSecondsBeforeExplosion;
                             var photonView = Owner._photonView;
-                            var damageAmount = Owner._characterData.Attack;
-                            var fireRange = Owner._characterData.FireRange;
+                            var damageAmount = Owner._playerStatusManager.DamageAmount;
+                            var fireRange = Owner._playerStatusManager.FireRange;
                             var boxCollider = Owner._boxCollider;
                             Owner._playerPutBomb.PutBomb(boxCollider, photonView, _playerTransform,
-                                (int)BombType.Normal,
-                                damageAmount,
-                                fireRange, explosionTime, playerId);
+                                (int)BombType.Normal, damageAmount, fireRange, explosionTime, playerId);
                         }).AddTo(_cancellationTokenSource.Token);
             }
 

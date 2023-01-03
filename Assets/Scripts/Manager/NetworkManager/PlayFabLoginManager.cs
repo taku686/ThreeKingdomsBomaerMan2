@@ -23,11 +23,7 @@ namespace Assets.Scripts.Common.PlayFab
         [Inject] private UserManager _userManager;
         [Inject] private PlayFabCatalogManager _playFabCatalogManager;
         [Inject] private PlayFabPlayerDataManager _playFabPlayerDataManager;
-
         [Inject] private PlayFabShopManager _playFabShopManager;
-
-        /*private const string Email = "test9@gmail.com";
-        private const string Password = "Passw0rd";*/
         private GetPlayerCombinedInfoRequestParams _info;
         private DisplayNameView _displayNameView;
         private GameObject _errorGameObject;
@@ -104,42 +100,6 @@ namespace Assets.Scripts.Common.PlayFab
                 return false;
             }
         }
-
-        /*public async UniTask SetEmailAndPassword(string email, string password)
-        {
-            var request = new AddUsernamePasswordRequest
-            {
-                Username = PlayerPrefsManager.UserID,
-                Email = email,
-                Password = password
-            };
-
-            var response = await PlayFabClientAPI.AddUsernamePasswordAsync(request);
-
-            if (response.Error != null)
-            {
-                switch (response.Error.Error)
-                {
-                    case PlayFabErrorCode.InvalidParams:
-                        Debug.Log("有効なメールアドレスと6~100文字以内のパスワードを入力してください。");
-                        break;
-                    case PlayFabErrorCode.InvalidEmailAddress:
-                        Debug.Log("このメールアドレスは使用できません。");
-                        break;
-                    case PlayFabErrorCode.InvalidPassword:
-                        Debug.Log("このパスワードは使用できません。");
-                        break;
-                    default:
-                        Debug.Log(response.Error.GenerateErrorReport());
-                        break;
-                }
-            }
-            else
-            {
-                Debug.Log("登録完了!!");
-                PlayerPrefsManager.IsLoginEmailAddress = true;
-            }
-        }*/
 
         public async UniTask<bool> CreateUserData()
         {

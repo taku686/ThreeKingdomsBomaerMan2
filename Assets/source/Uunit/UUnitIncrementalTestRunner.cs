@@ -21,6 +21,7 @@ namespace PlayFab.UUnit
 
         public Dictionary<string, string> extraHeaders;
     }
+
     public static class UUnitIncrementalTestRunner
     {
         public static bool SuiteFinished { get; private set; }
@@ -31,21 +32,23 @@ namespace PlayFab.UUnit
         public static TestTitleData TestTitleData;
 
 #if !DISABLE_PLAYFABCLIENT_API
-        public static PlayFabClientInstanceAPI PfClient = new PlayFabClientInstanceAPI(new PlayFabApiSettings(), new PlayFabAuthenticationContext());
+        public static PlayFabClientInstanceAPI PfClient =
+            new PlayFabClientInstanceAPI(new PlayFabApiSettings(), new PlayFabAuthenticationContext());
+
         private static Action<PlayFabResult<ExecuteCloudScriptResult>> _onComplete;
 #endif
 
         public static TestTitleData VerifyTestTitleData()
         {
 #if NET45 || NETCOREAPP2_0 || NETSTANDARD2_0
-            if(TestTitleData == null)
+            if (TestTitleData == null)
             {
                 try
                 {
-                    var testTitleDataPath = Environment.GetEnvironmentVariable("PF_TEST_TITLE_DATA_JSON");
+                    /*var testTitleDataPath = Environment.GetEnvironmentVariable("PF_TEST_TITLE_DATA_JSON");
                     var jsonContent = File.ReadAllText(testTitleDataPath + "/testTitleData.json");
                     var serializer = PluginManager.GetPlugin<ISerializerPlugin>(PluginContract.PlayFab_Serializer);
-                    TestTitleData = serializer.DeserializeObject<TestTitleData>(jsonContent);
+                    TestTitleData = serializer.DeserializeObject<TestTitleData>(jsonContent);*/
                 }
                 catch (Exception)
                 {
@@ -61,7 +64,8 @@ namespace PlayFab.UUnit
             return TestTitleData;
         }
 
-        public static void Start(bool postResultsToCloudscript = true, string filter = null, TestTitleData testInputs = null
+        public static void Start(bool postResultsToCloudscript = true, string filter = null,
+            TestTitleData testInputs = null
 #if !DISABLE_PLAYFABCLIENT_API
             , Action<PlayFabResult<ExecuteCloudScriptResult>> onComplete = null
 #endif
@@ -130,7 +134,8 @@ namespace PlayFab.UUnit
             var saveRequest = new ExecuteCloudScriptRequest
             {
                 FunctionName = "SaveTestData",
-                FunctionParameter = new Dictionary<string, object> { { "customId", PlayFabSettings.BuildIdentifier }, { "testReport", new[] { testReport } } },
+                FunctionParameter = new Dictionary<string, object>
+                    { { "customId", PlayFabSettings.BuildIdentifier }, { "testReport", new[] { testReport } } },
                 GeneratePlayStreamEvent = true
             };
             try

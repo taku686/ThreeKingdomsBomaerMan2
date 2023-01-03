@@ -4,6 +4,7 @@ namespace Common.Data
     {
         private string _charaObj;
         private int _team;
+        private int _level;
         private string _name;
         private int _id;
         private int _speed;
@@ -23,6 +24,12 @@ namespace Common.Data
         {
             get => _team;
             set => _team = value;
+        }
+
+        public int Level
+        {
+            get => _level;
+            set => _level = value;
         }
 
         public string Name

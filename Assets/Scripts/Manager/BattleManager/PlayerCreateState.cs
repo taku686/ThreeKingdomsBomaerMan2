@@ -1,22 +1,22 @@
 ﻿using Common.Data;
 using Cysharp.Threading.Tasks;
-using ModestTree;
 using Photon.Pun;
 using Player.Common;
 using UI.Battle;
 using UniRx;
 using UnityEngine;
-using Zenject;
-using State = StateMachine<Manager.BattleManager.BattleManager>.State;
+using State = StateMachine<Manager.BattleManager.BattleBase>.State;
 
 namespace Manager.BattleManager
 {
-    public partial class BattleManager
+    public partial class BattleBase
     {
         public class PlayerCreateState : State
         {
-            private static readonly Vector3 ColliderCenter = new Vector3(0, 0.5f, 0);
-            private static readonly Vector3 ColliderSize = new Vector3(.6f, 0.6f, 0.6f);
+            private static readonly Vector3 ColliderCenter = new(0, 0.3f, 0);
+            private static readonly Vector3 ColliderSize = new(0.4f, 0.6f, 0.4f);
+            private static readonly float MaxRate = 1f;
+            private PlayerStatusManager _playerStatusManager;
 
             protected override void OnEnter(State prevState)
             {
@@ -26,7 +26,6 @@ namespace Manager.BattleManager
             private void OnInitialize()
             {
                 CreatePlayer();
-
                 SetPlayerGenerateCompleteSubscribe();
             }
 
@@ -54,10 +53,19 @@ namespace Manager.BattleManager
 
             private void InitializePlayerComponent(GameObject player)
             {
-                var playerPutBomb = player.AddComponent<PlayerPutBomb>();
-                playerPutBomb.Initialize(Owner._bombProvider);
                 var photonView = player.GetComponent<PhotonView>();
                 var playerId = photonView.OwnerActorNr;
+                var characterData = Owner._networkManager.GetCharacterData(playerId);
+                var playerStatusManager = new PlayerStatusManager(characterData, photonView.IsMine);
+                var playerPutBomb = player.AddComponent<PlayerPutBomb>();
+                playerPutBomb.Initialize(Owner._bombProvider, playerStatusManager);
+                var playerUI = Instantiate(Owner.playerUI, Owner.playerUIParent);
+                var playerBillBoardUI = playerUI.GetComponentInChildren<PlayerUIBillBoard>();
+                playerBillBoardUI.Initialize(player.transform);
+                var hpKey = playerId + "Hp";
+                SynchronizedValue.Instance.Create(hpKey, MaxRate);
+                var playerStatusUI = playerUI.GetComponent<PlayerStatusUI>();
+                playerStatusUI.Initialize(SynchronizedValue.Instance.GetFloatValue(hpKey));
                 if (!photonView.IsMine)
                 {
                     return;
@@ -65,13 +73,9 @@ namespace Manager.BattleManager
 
                 AddBoxCollider(player);
                 AddRigidbody(player);
-                var playerUI = Instantiate(Owner.playerUI, Owner.playerUIParent);
-                var playerBillBoardUI = playerUI.GetComponentInChildren<PlayerUIBillBoard>();
-                playerBillBoardUI.Initialize(player.transform);
-                var playerStatusUI = playerUI.GetComponent<PlayerStatusUI>();
-                var playerCore = player.AddComponent<PLayerCore>();
-                var characterData = Owner._networkManager.GetCharacterData(playerId);
-                playerCore.Initialize(characterData, playerStatusUI);
+                Owner.cameraManager.Initialize(player.transform);
+                var playerCore = player.AddComponent<PLayerBase>();
+                playerCore.Initialize(playerStatusManager, hpKey);
             }
 
             private void AddBoxCollider(GameObject player)

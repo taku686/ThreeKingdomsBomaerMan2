@@ -1,5 +1,7 @@
 ﻿using System;
 using Common.Data;
+using Manager.BattleManager.Environment;
+using Player.Common;
 using UniRx;
 using UnityEngine;
 
@@ -7,19 +9,15 @@ namespace Bomb
 {
     public class BombProvider : MonoBehaviour
     {
-        [SerializeField] private BombObjectPoolProvider _bombObjectPoolProvider;
+        [SerializeField] private BombObjectPoolProvider bombObjectPoolProvider;
+        [SerializeField] private StageOrnamentsBlock stageOrnamentsBlock;
         private BombObjectPoolBase _normalBombProvider;
         private BombObjectPoolBase _penetrationBombProvider;
         private BombObjectPoolBase _dangerBombProvider;
 
-        private void Awake()
+        public void Initialize(PlayerStatusManager playerStatusManager)
         {
-            Initialize();
-        }
-
-        private void Initialize()
-        {
-            _normalBombProvider = _bombObjectPoolProvider.GetNormalBombPool();
+            _normalBombProvider = bombObjectPoolProvider.GetNormalBombPool(playerStatusManager);
         }
 
         public BombBase GetBomb(int bombType, int damageAmount, int fireRange, int explosionTime, int playerId)
@@ -31,8 +29,8 @@ namespace Bomb
                 return null;
             }
 
-            bomb.Setup(damageAmount, fireRange, playerId, explosionTime);
-            bomb.OnFinishIObservable.Take(1).Subscribe(_ => bombPool.Return(bomb));
+            bomb.Setup(damageAmount, fireRange, playerId, explosionTime, stageOrnamentsBlock);
+            bomb.OnFinishIObservable.Take(1).Subscribe(_ => { bombPool.Return(bomb); });
             return bomb;
         }
 

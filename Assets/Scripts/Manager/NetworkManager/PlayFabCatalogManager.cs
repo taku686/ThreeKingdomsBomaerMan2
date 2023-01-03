@@ -20,6 +20,7 @@ namespace Assets.Scripts.Common.ResourceManager
         private readonly CancellationTokenSource _cancellationTokenSource = new();
         public Dictionary<int, GameObject> CharacterGameObjects => _characterGameObjects;
         private CancellationTokenSource _cts;
+        private static readonly int ModifiedValue = 10;
 
         public List<CatalogItem> CatalogItemList => _catalogItemList;
 
@@ -37,7 +38,7 @@ namespace Assets.Scripts.Common.ResourceManager
                     continue;
                 }
 
-                var customData = JsonConvert.DeserializeObject<CharacterData[]>(item.CustomData);
+                var customData = JsonConvert.DeserializeObject<CharacterData>(item.CustomData);
                 if (customData == null)
                 {
                     continue;
@@ -45,20 +46,20 @@ namespace Assets.Scripts.Common.ResourceManager
 
                 var characterData = new CharacterData
                 {
-                    CharaObj = customData[0].CharaObj,
-                    Team = customData[0].Team,
-                    Name = customData[0].Name,
-                    ID = customData[0].ID,
-                    Speed = customData[0].Speed,
-                    BombLimit = customData[0].BombLimit,
-                    Attack = customData[0].Attack,
-                    FireRange = customData[0].FireRange,
-                    Hp = customData[0].Hp,
-                    CharaColor = customData[0].CharaColor
+                    CharaObj = customData.CharaObj,
+                    Team = customData.Team,
+                    Level = customData.Level,
+                    Name = customData.Name,
+                    ID = customData.ID,
+                    Speed = customData.Speed,
+                    BombLimit = customData.BombLimit / ModifiedValue,
+                    Attack = customData.Attack,
+                    FireRange = customData.FireRange / ModifiedValue,
+                    Hp = customData.Hp,
+                    CharaColor = customData.CharaColor
                 };
-               // Debug.Log(characterData.Name + characterData.Hp);
-                _catalog.SetCharacter(customData[0].ID, characterData);
-                await LoadGameObject(LabelData.CharacterPrefabPath, customData[0].ID,
+                _catalog.SetCharacter(customData.ID, characterData);
+                await LoadGameObject(LabelData.CharacterPrefabPath, customData.ID,
                         _cancellationTokenSource.Token)
                     .AttachExternalCancellation(_cancellationTokenSource.Token);
             }
