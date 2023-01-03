@@ -21,7 +21,6 @@ namespace Manager.BattleManager
             private void OnInitialize()
             {
                 Owner.stageManager.SetupBreakingBlocks();
-               
             }
         }
     }

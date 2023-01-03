@@ -11,6 +11,7 @@ namespace Bomb
         private static readonly float ExplosionMoveDuration = 0.5f;
         private static readonly Vector3 EffectOriginPosition = new(0, 0.5f, 0);
         private static readonly Vector3 ColliderOriginPosition = Vector3.zero;
+        [SerializeField] private GameObject bombCollider;
 
         protected override async UniTask Explosion(int damageAmount)
         {
@@ -22,35 +23,38 @@ namespace Bomb
             IsExplosion = true;
             BlockShakeAction.Invoke();
             var position = transform.position;
-            StartPos = new Vector3(position.x, 0.5f, position.z);
+            Vector3 startPos = new Vector3(position.x, 0.5f, position.z);
             await UniTask.WhenAll(
-                Explosion(Direction.Forward, damageAmount),
-                Explosion(Direction.Back, damageAmount),
-                Explosion(Direction.Left, damageAmount),
-                Explosion(Direction.Right, damageAmount));
+                Explosion(startPos, Direction.Forward, damageAmount),
+                Explosion(startPos, Direction.Back, damageAmount),
+                Explosion(startPos, Direction.Left, damageAmount),
+                Explosion(startPos, Direction.Right, damageAmount));
 
             await base.Explosion(damageAmount);
         }
 
-        private async UniTask Explosion(Direction direction, int damageAmount)
+        private async UniTask Explosion(Vector3 startPos, Direction direction, int damageAmount)
         {
             var dir = GameSettingData.DirectionToVector3(direction);
             var index = (int)direction;
             BombRenderer.enabled = false;
             BoxColliderComponent.enabled = false;
-            var isHit = TryGetObstacles(FireRange, dir, StartPos, ObstaclesLayerMask, out var hit);
-            var fireRange = isHit ? CalculateFireRange(hit, StartPos) : FireRange;
-            var endPos = isHit ? hit.collider.transform.position - dir : StartPos + fireRange * dir;
-            var isExplosion = (endPos - StartPos).magnitude >= MinDistance;
+            var isHit = TryGetObstacles(FireRange, dir, startPos, ObstaclesLayerMask, out var hit);
+            var fireRange = isHit ? CalculateFireRange(hit, startPos) : FireRange;
+            var endPos = isHit ? hit.collider.transform.position - dir : startPos + fireRange * dir;
+            var distance = (endPos - startPos).magnitude;
+            var isExplosion = distance >= MinDistance;
             if (!isExplosion)
             {
                 return;
             }
 
-            explosionList[index].explosionDirection = direction;
-            explosionList[index].damageAmount = damageAmount;
-            await UniTask.WhenAll(SetupCollider(dir, fireRange, explosionList[index].boxCollider),
-                SetupExplosionEffect(ExplosionMoveDuration, endPos, explosionList[index].explosionTransform));
+            /*explosionList[index].explosionDirection = direction;
+            explosionList[index].damageAmount = damageAmount;*/
+
+            GenerateCollider(startPos, direction, fireRange, damageAmount);
+            await UniTask.WhenAll( //SetupCollider(dir, fireRange, explosionList[index].boxCollider),
+                SetupExplosionEffect(ExplosionMoveDuration, endPos, explosionList[index].transform));
         }
 
         private bool TryGetObstacles(int fireRange, Vector3 direction, Vector3 startPos, LayerMask obstaclesLayer,
@@ -67,7 +71,7 @@ namespace Bomb
             return (int)Mathf.Abs((endPos - startPos).magnitude);
         }
 
-        private async UniTask SetupCollider(Vector3 direction, int fireRange, Transform boxCollider)
+        /*private async UniTask SetupCollider(Vector3 direction, int fireRange, Transform boxCollider)
         {
             boxCollider.localPosition = ColliderOriginPosition;
             var isZ = direction.z != 0;
@@ -79,6 +83,32 @@ namespace Bomb
             boxCollider.gameObject.SetActive(true);
             await UniTask.Delay(TimeSpan.FromSeconds(ExplosionDisplayDuration), cancellationToken: Cts.Token);
             boxCollider.gameObject.SetActive(false);
+        }*/
+
+        private async void GenerateCollider(Vector3 startPos, Direction direction, int fireRange, int damageAmount)
+        {
+            var dir = GameSettingData.DirectionToVector3(direction);
+            for (int i = 0; i < fireRange; i++)
+            {
+                var colliderObj = Instantiate(this.bombCollider, CalculateGeneratePos(startPos, dir, i),
+                    this.bombCollider.transform.rotation, gameObject.transform);
+                var explosion = colliderObj.GetComponent<Explosion>();
+                explosion.explosionDirection = direction;
+                explosion.damageAmount = damageAmount;
+                await UniTask.Delay(TimeSpan.FromSeconds(ExplosionMoveDuration / (float)fireRange),
+                    cancellationToken: Cts.Token);
+            }
+        }
+
+        private Vector3 CalculateGeneratePos(Vector3 startPos, Vector3 direction, int index)
+        {
+            bool isX = direction.x != 0;
+            if (isX)
+            {
+                return new Vector3(startPos.x + direction.x + index, startPos.y, startPos.z);
+            }
+
+            return new Vector3(startPos.x, startPos.y, startPos.z + direction.z * index);
         }
 
         private async UniTask SetupExplosionEffect(float moveDuration, Vector3 endPos, Transform explosionEffect)
