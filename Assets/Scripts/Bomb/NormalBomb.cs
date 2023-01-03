@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using UniRx;
 using UnityEngine;
 
 namespace Bomb
@@ -73,7 +71,7 @@ namespace Bomb
         {
             boxCollider.localPosition = ColliderOriginPosition;
             var isZ = direction.z != 0;
-            var colliderScale = isZ ? new Vector3(1, 1, fireRange) : new Vector3(fireRange, 1, 1);
+            var colliderScale = isZ ? new Vector3(0.5f, 1, fireRange) : new Vector3(fireRange, 1, 0.5f);
             boxCollider.tag = GameSettingData.BombEffectTag;
             boxCollider.localScale = colliderScale;
             var offset = direction;

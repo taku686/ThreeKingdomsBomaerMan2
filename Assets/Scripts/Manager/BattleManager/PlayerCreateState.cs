@@ -13,8 +13,8 @@ namespace Manager.BattleManager
     {
         public class PlayerCreateState : State
         {
-            private static readonly Vector3 ColliderCenter = new(0, 0.5f, 0);
-            private static readonly Vector3 ColliderSize = new(0.6f, 0.6f, 0.6f);
+            private static readonly Vector3 ColliderCenter = new(0, 0.3f, 0);
+            private static readonly Vector3 ColliderSize = new(0.4f, 0.6f, 0.4f);
             private static readonly float MaxRate = 1f;
             private PlayerStatusManager _playerStatusManager;
 
@@ -26,7 +26,6 @@ namespace Manager.BattleManager
             private void OnInitialize()
             {
                 CreatePlayer();
-
                 SetPlayerGenerateCompleteSubscribe();
             }
 
@@ -59,7 +58,6 @@ namespace Manager.BattleManager
                 var characterData = Owner._networkManager.GetCharacterData(playerId);
                 var playerStatusManager = new PlayerStatusManager(characterData, photonView.IsMine);
                 var playerPutBomb = player.AddComponent<PlayerPutBomb>();
-                Debug.Log(Owner._bombProvider);
                 playerPutBomb.Initialize(Owner._bombProvider, playerStatusManager);
                 var playerUI = Instantiate(Owner.playerUI, Owner.playerUIParent);
                 var playerBillBoardUI = playerUI.GetComponentInChildren<PlayerUIBillBoard>();

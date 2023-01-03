@@ -12,10 +12,16 @@ namespace Manager.BattleManager
                 OnInitialize();
             }
 
+            protected override void OnUpdate()
+            {
+                Debug.Log("初期化処理");
+                Owner._stateMachine.Dispatch((int)Event.PlayerCreate);
+            }
+
             private void OnInitialize()
             {
                 Owner.stageManager.SetupBreakingBlocks();
-                Owner._stateMachine.Dispatch((int)Event.PlayerCreate);
+               
             }
         }
     }
