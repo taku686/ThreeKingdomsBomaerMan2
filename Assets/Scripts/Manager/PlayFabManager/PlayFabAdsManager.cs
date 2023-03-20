@@ -21,13 +21,13 @@ namespace Manager.NetworkManager
 
         public async UniTask GetAdPlacementAsync(CancellationToken token)
         {
-            _rewardAd = new RewardedAd(GameSettingData.RewardAdsKey);
+            _rewardAd = new RewardedAd(GameCommonData.RewardAdsKey);
             AdRequest adRequest = new AdRequest.Builder().Build();
             _rewardAd.LoadAd(adRequest);
             await UniTask.WaitUntil(() => _rewardAd.IsLoaded(), PlayerLoopTiming.Update, token);
             _rewardAd.Show();
             _rewardAd.OnUserEarnedReward += HandleUserEarnedReward;
-            var request = new GetAdPlacementsRequest { AppId = GameSettingData.GameID };
+            var request = new GetAdPlacementsRequest { AppId = GameCommonData.GameID };
             var result = await PlayFabClientAPI.GetAdPlacementsAsync(request);
 
             if (result.Error != null)
@@ -36,7 +36,7 @@ namespace Manager.NetworkManager
             }
             else
             {
-                var placement = result.Result.AdPlacements.Find(x => x.PlacementName == GameSettingData.PlacementName);
+                var placement = result.Result.AdPlacements.Find(x => x.PlacementName == GameCommonData.PlacementName);
                 _placementId = placement.PlacementId;
                 _rewardId = placement.RewardId;
                 _placementViewsRemaining = placement.PlacementViewsRemaining;
@@ -79,7 +79,7 @@ namespace Manager.NetworkManager
                         return;
                     }
 
-                    Debug.Log(rewardResult.Result.RewardResults.GrantedVirtualCurrencies[GameSettingData.GemKey]);
+                    Debug.Log(rewardResult.Result.RewardResults.GrantedVirtualCurrencies[GameCommonData.GemKey]);
                     await _playFabCommonManager.SetVirtualCurrency();
                     Debug.Log("ジェムを5個獲得");
                 }

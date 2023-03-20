@@ -49,7 +49,7 @@ namespace UI.Title
                 Owner._uiAnimation.OnClickScaleColorAnimation(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     var isSucceed = await Owner._playFabShopManager.TryPurchaseItem(ThousandCoinKey,
-                        GameSettingData.RealMoneyKey,
+                        GameCommonData.RealMoneyKey,
                         100);
                     if (isSucceed)
                     {

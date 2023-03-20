@@ -37,7 +37,7 @@ namespace Manager
         {
             _token = this.GetCancellationTokenOnDestroy();
             _photonView = photonView;
-            _joystickName = GameSettingData.JoystickName;
+            _joystickName = GameCommonData.JoystickName;
             _inputView = FindObjectOfType<InputView>();
             _bombButton = _inputView.bombButton;
             if (!_photonView.IsMine)

@@ -28,8 +28,8 @@ namespace Player.Common
         public void Initialize(float moveSpeed)
         {
             _cts = new CancellationTokenSource();
-            _blockingLayer = LayerMask.GetMask(GameSettingData.ObstacleLayer) |
-                             LayerMask.GetMask(GameSettingData.BombLayer);
+            _blockingLayer = LayerMask.GetMask(GameCommonData.ObstacleLayer) |
+                             LayerMask.GetMask(GameCommonData.BombLayer);
             _playerTransform = transform;
             _initRotation = _playerTransform.rotation.eulerAngles;
             _moveSpeed = moveSpeed;
@@ -283,7 +283,7 @@ namespace Player.Common
                     break;
             }
 
-            await player.DOLocalRotate(nextRotation, GameSettingData.TurnDuration).SetLink(player.gameObject)
+            await player.DOLocalRotate(nextRotation, GameCommonData.TurnDuration).SetLink(player.gameObject)
                 .ToUniTask();
         }
 

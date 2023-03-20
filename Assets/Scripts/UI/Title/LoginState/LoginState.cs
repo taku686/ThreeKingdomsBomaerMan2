@@ -53,7 +53,7 @@ namespace UI.Title
 
                 if (result)
                 {
-                    await Owner._characterDataManager.Initialize(Owner._userManager, Owner._token);
+                    await Owner._characterDataManager.Initialize(Owner._userDataManager, Owner._token);
                     Owner._mainManager.isInitialize = true;
                     Owner._stateMachine.Dispatch((int)Event.Login);
                 }
@@ -71,7 +71,7 @@ namespace UI.Title
                 var createSuccess = await Owner._playFabLoginManager.CreateUserData();
                 if (createSuccess)
                 {
-                    await Owner._characterDataManager.Initialize(Owner._userManager, Owner._token);
+                    await Owner._characterDataManager.Initialize(Owner._userDataManager, Owner._token);
                     Owner.loginView.DisplayNameView.gameObject.SetActive(false);
                     Owner._mainManager.isInitialize = true;
                     Owner._stateMachine.Dispatch((int)Event.Login);

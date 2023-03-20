@@ -71,7 +71,7 @@ namespace Manager.BattleManager
         //todo デバッグ用後で消す
         public void OnReborn()
         {
-            var players = GameObject.FindGameObjectsWithTag(GameSettingData.PlayerTag);
+            var players = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
             foreach (var player in players)
             {
                 var view = player.GetComponent<PhotonView>();

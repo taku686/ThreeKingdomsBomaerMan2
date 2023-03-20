@@ -90,7 +90,7 @@ namespace UI.Title
 
             private void OnClickBackButton()
             {
-                Owner.CreateCharacter(Owner._userManager.equipCharacterId.Value);
+                Owner.CreateCharacter(Owner._userDataManager.equipCharacterId.Value);
                 Owner.DisableTitleGameObject();
                 Owner.mainView.CharacterListGameObject.SetActive(true);
                 Owner._stateMachine.Dispatch((int)Event.CharacterSelectBack);
@@ -98,19 +98,19 @@ namespace UI.Title
 
             private void OnClickSelectButton()
             {
-                Owner._userManager.equipCharacterId.Value = Owner._currentCharacterId;
+                Owner._userDataManager.equipCharacterId.Value = Owner._currentCharacterId;
                 Owner._stateMachine.Dispatch((int)Event.Main);
             }
 
             private void OnClickRightArrow()
             {
-                if (Owner._userManager.GetUser().Characters.Count <= 1)
+                if (Owner._userDataManager.GetUser().Characters.Count <= 1)
                 {
                     return;
                 }
 
                 CharacterData nextCharacterData = null;
-                var orderCharacters = Owner._userManager.GetUser().Characters.OrderBy(x => x.Key).ToList();
+                var orderCharacters = Owner._userDataManager.GetUser().Characters.OrderBy(x => x.Key).ToList();
 
                 foreach (var keyValuePair in orderCharacters)
                 {
@@ -130,13 +130,13 @@ namespace UI.Title
 
             private void OnClickLeftArrow()
             {
-                if (Owner._userManager.GetUser().Characters.Count <= 1)
+                if (Owner._userDataManager.GetUser().Characters.Count <= 1)
                 {
                     return;
                 }
 
                 CharacterData prevCharacterData = null;
-                var orderCharacters = Owner._userManager.GetUser().Characters.OrderByDescending(x => x.Key).ToList();
+                var orderCharacters = Owner._userDataManager.GetUser().Characters.OrderByDescending(x => x.Key).ToList();
 
                 foreach (var keyValuePair in orderCharacters)
                 {

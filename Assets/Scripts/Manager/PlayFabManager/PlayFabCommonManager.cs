@@ -10,7 +10,7 @@ namespace Manager.NetworkManager
 {
     public class PlayFabCommonManager : IDisposable
     {
-        [Inject] private UserManager _userManager;
+        [Inject] private UserDataManager _userDataManager;
         
         public async UniTask SetVirtualCurrency()
         {
@@ -21,21 +21,21 @@ namespace Manager.NetworkManager
                 return;
             }
 
-            var user = _userManager.GetUser();
+            var user = _userDataManager.GetUser();
             foreach (var item in result.Result.VirtualCurrency)
             {
-                if (item.Key.Equals(GameSettingData.CoinKey))
+                if (item.Key.Equals(GameCommonData.CoinKey))
                 {
                     user.Coin = item.Value;
                 }
 
-                if (item.Key.Equals(GameSettingData.GemKey))
+                if (item.Key.Equals(GameCommonData.GemKey))
                 {
                     user.Gem = item.Value;
                 }
             }
 
-            _userManager.SetUser(user);
+            _userDataManager.SetUser(user);
         }
         
         public void Dispose()

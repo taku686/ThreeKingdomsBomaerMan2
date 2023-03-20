@@ -20,7 +20,7 @@ namespace Assets.Scripts.Common.PlayFab
 {
     public class PlayFabLoginManager : MonoBehaviour
     {
-        [Inject] private UserManager _userManager;
+        [Inject] private UserDataManager _userDataManager;
         [Inject] private PlayFabCatalogManager _playFabCatalogManager;
         [Inject] private PlayFabPlayerDataManager _playFabPlayerDataManager;
         [Inject] private PlayFabShopManager _playFabShopManager;
@@ -33,7 +33,7 @@ namespace Assets.Scripts.Common.PlayFab
         {
             _displayNameView = displayNameView;
             _errorGameObject = errorGameObject;
-            PlayFabSettings.staticSettings.TitleId = GameSettingData.TitleID;
+            PlayFabSettings.staticSettings.TitleId = GameCommonData.TitleID;
             _info = new GetPlayerCombinedInfoRequestParams()
             {
                 GetUserData = true,
@@ -76,7 +76,7 @@ namespace Assets.Scripts.Common.PlayFab
                 .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
             await _playFabCatalogManager.Initialize(catalogList);
             await _playFabShopManager.InitializePurchasing();
-            if (!response.Result.InfoResultPayload.UserData.TryGetValue(GameSettingData.UserKey,
+            if (!response.Result.InfoResultPayload.UserData.TryGetValue(GameCommonData.UserKey,
                     out UserDataRecord userData))
             {
                 _loginResponse = response;
@@ -86,14 +86,14 @@ namespace Assets.Scripts.Common.PlayFab
             else
             {
                 var user = JsonConvert.DeserializeObject<User>(response.Result.InfoResultPayload
-                    .UserData[GameSettingData.UserKey].Value);
+                    .UserData[GameCommonData.UserKey].Value);
                 var virtualCurrency = response.Result.InfoResultPayload.UserVirtualCurrency;
 
                 if (user != null)
                 {
-                    user.Coin = virtualCurrency[GameSettingData.CoinKey];
-                    user.Gem = virtualCurrency[GameSettingData.GemKey];
-                    _userManager.Initialize(user);
+                    user.Coin = virtualCurrency[GameCommonData.CoinKey];
+                    user.Gem = virtualCurrency[GameCommonData.GemKey];
+                    _userDataManager.Initialize(user);
                     return true;
                 }
 
@@ -106,9 +106,9 @@ namespace Assets.Scripts.Common.PlayFab
             var characterData = _playFabCatalogManager.GetCharacterData(0);
             var user = new User().Create(characterData);
             var virtualCurrency = _loginResponse.Result.InfoResultPayload.UserVirtualCurrency;
-            user.Coin = virtualCurrency[GameSettingData.CoinKey];
-            user.Gem = virtualCurrency[GameSettingData.GemKey];
-            var isSuccess = await _playFabPlayerDataManager.TryUpdateUserDataAsync(GameSettingData.UserKey, user)
+            user.Coin = virtualCurrency[GameCommonData.CoinKey];
+            user.Gem = virtualCurrency[GameCommonData.GemKey];
+            var isSuccess = await _playFabPlayerDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, user)
                 .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
             if (!isSuccess)
             {

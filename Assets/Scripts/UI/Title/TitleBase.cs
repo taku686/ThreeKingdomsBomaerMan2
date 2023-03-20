@@ -20,7 +20,7 @@ namespace UI.Title
         [Inject] private PhotonNetworkManager _photonNetworkManager;
         [Inject] private MainManager _mainManager;
         [Inject] private PlayFabLoginManager _playFabLoginManager;
-        [Inject] private UserManager _userManager;
+        [Inject] private UserDataManager _userDataManager;
         [Inject] private PlayFabPlayerDataManager _playFabPlayerDataManager;
         [Inject] private PlayFabShopManager _playFabShopManager;
         [Inject] private PlayFabAdsManager _playFabAdsManager;
@@ -113,7 +113,7 @@ namespace UI.Title
 
         private void CreateCharacter(int id)
         {
-            _userManager.equipCharacterId.Value = id;
+            _userDataManager.equipCharacterId.Value = id;
             var preCharacter = _character;
             Destroy(preCharacter);
             if (_characterDataManager.GetCharacterGameObject(id) == null)

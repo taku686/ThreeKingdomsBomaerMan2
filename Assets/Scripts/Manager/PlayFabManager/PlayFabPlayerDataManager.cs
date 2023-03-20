@@ -13,7 +13,7 @@ namespace Manager.NetworkManager
 {
     public class PlayFabPlayerDataManager : IDisposable
     {
-        [Inject] private UserManager _userManager;
+        [Inject] private UserDataManager _userDataManager;
 
         /// <summary>
         /// playerデータの更新
@@ -46,7 +46,7 @@ namespace Manager.NetworkManager
         {
             var request = new GetUserDataRequest
             {
-                PlayFabId = GameSettingData.TitleID,
+                PlayFabId = GameCommonData.TitleID,
                 Keys = new List<string> { key }
             };
 
@@ -65,7 +65,7 @@ namespace Manager.NetworkManager
                     return null;
                 }
 
-                _userManager.SetUser(user);
+                _userDataManager.SetUser(user);
                 return user;
             }
         }
@@ -74,7 +74,7 @@ namespace Manager.NetworkManager
         {
             var request = new UpdateUserDataRequest()
             {
-                KeysToRemove = new List<string> { GameSettingData.UserKey }
+                KeysToRemove = new List<string> { GameCommonData.UserKey }
             };
 
             var response = await PlayFabClientAPI.UpdateUserDataAsync(request);

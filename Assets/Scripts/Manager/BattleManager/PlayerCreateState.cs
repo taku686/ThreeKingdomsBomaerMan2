@@ -41,7 +41,7 @@ namespace Manager.BattleManager
             {
                 Owner._networkManager.PlayerGenerateComplete.Subscribe(_ =>
                 {
-                    var players = GameObject.FindGameObjectsWithTag(GameSettingData.PlayerTag);
+                    var players = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
                     foreach (var player in players)
                     {
                         InitializePlayerComponent(player);
@@ -74,7 +74,7 @@ namespace Manager.BattleManager
                 AddBoxCollider(player);
                 AddRigidbody(player);
                 Owner.cameraManager.Initialize(player.transform);
-                var playerCore = player.AddComponent<PLayerBase>();
+                var playerCore = player.AddComponent<PLayerCore>();
                 playerCore.Initialize(playerStatusManager, hpKey);
             }
 
