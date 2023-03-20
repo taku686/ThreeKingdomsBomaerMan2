@@ -32,7 +32,7 @@ namespace Manager.NetworkManager
             _isInitialized = true;
             _builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
             foreach (var catalogItem in _playFabCatalogManager.CatalogItemList.FindAll(x =>
-                         x.ItemClass == GameSettingData.ConsumableKey))
+                         x.ItemClass == GameCommonData.ConsumableClassKey))
             {
                 _builder.AddProduct(catalogItem.ItemId, ProductType.Consumable);
             }
@@ -42,7 +42,6 @@ namespace Manager.NetworkManager
 
         public async UniTask<bool> TryPurchaseItem(string itemName, string virtualCurrencyKey, int price)
         {
-            //  await Login();
             var request = new PurchaseItemRequest()
             {
                 ItemId = itemName,

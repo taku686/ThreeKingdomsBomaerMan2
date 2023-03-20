@@ -78,7 +78,7 @@ namespace UI.Title
 
             private void SetupGrip(CharacterData characterData, Transform parent)
             {
-                if (Owner._userManager.IsGetCharacter(characterData.ID))
+                if (Owner._userDataManager.IsGetCharacter(characterData.ID))
                 {
                     CreateActiveGrid(characterData, parent);
                 }
@@ -94,7 +94,7 @@ namespace UI.Title
                 var characterGrid = grid.GetComponentInChildren<CharacterGrid>();
                 characterGrid.characterImage.sprite = Owner._characterDataManager.GetCharacterSprite(characterData.ID);
                 characterGrid.backGroundImage.sprite = Owner._characterDataManager.GetCharacterColor(
-                    (int)GameSettingData.GetCharacterColor(characterData.CharaColor));
+                    (int)GameCommonData.GetCharacterColor(characterData.CharaColor));
                 characterGrid.nameText.text = characterData.Name;
                 characterGrid.CharacterData = characterData;
                 characterGrid.gridButton.onClick.AddListener(() => { OnClickCharacterGrid(characterData, grid); });
@@ -142,8 +142,8 @@ namespace UI.Title
                 Owner._uiAnimation.OnClickScaleAnimation(disableGrid).OnComplete(() =>
                     UniTask.Void(async () =>
                     {
-                        var user = Owner._userManager.GetUser();
-                        var characterPrice = GameSettingData.CharacterPrice;
+                        var user = Owner._userDataManager.GetUser();
+                        var characterPrice = GameCommonData.CharacterPrice;
                         var diamond = user.Gem;
                         if (diamond < characterPrice)
                         {
@@ -152,7 +152,7 @@ namespace UI.Title
                         }
 
                         var itemName = characterId.ToString();
-                        var virtualCurrencyKey = GameSettingData.GemKey;
+                        var virtualCurrencyKey = GameCommonData.GemKey;
                         var price = characterPrice;
                         var isSuccessPurchase = await Owner._playFabShopManager
                             .TryPurchaseCharacter(itemName, virtualCurrencyKey, price)
@@ -166,14 +166,14 @@ namespace UI.Title
                         user.Gem -= characterPrice;
                         user.Characters[characterId] = Owner._characterDataManager.GetCharacterData(characterId);
                         var isSuccessUpdatePlayerData = await Owner._playFabPlayerDataManager
-                            .TryUpdateUserDataAsync(GameSettingData.UserKey, user)
+                            .TryUpdateUserDataAsync(GameCommonData.UserKey, user)
                             .AttachExternalCancellation(token);
                         if (!isSuccessUpdatePlayerData)
                         {
                             return;
                         }
 
-                        Owner._userManager.SetUser(user);
+                        Owner._userDataManager.SetUser(user);
                         CreateUIContents();
                     })).SetLink(disableGrid.gameObject);
             }

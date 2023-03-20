@@ -15,7 +15,7 @@ namespace UI.Title
     {
         [Inject] private MainManager _mainManager;
         [Inject] private PlayFabCatalogManager _playFabCatalogManager;
-        private UserManager _userManager;
+        private UserDataManager _userDataManager;
 
         private static readonly Dictionary<int, CharacterData> CharacterDataDictionary = new();
 
@@ -27,14 +27,14 @@ namespace UI.Title
 
         public CatalogItem CatalogItem => _catalogItem;
 
-        public async UniTask Initialize(UserManager userManager, CancellationToken cancellationToken)
+        public async UniTask Initialize(UserDataManager userDataManager, CancellationToken cancellationToken)
         {
             if (_mainManager.isInitialize)
             {
                 return;
             }
 
-            _userManager = userManager;
+            _userDataManager = userDataManager;
             InitializeCharacterData();
             await InitializeCharacterSprite(cancellationToken);
             await InitializeCharacterColor(cancellationToken);
@@ -96,7 +96,7 @@ namespace UI.Title
 
         public CharacterData GetUserEquipCharacterData()
         {
-            return GetCharacterData(_userManager.equipCharacterId.Value);
+            return GetCharacterData(_userDataManager.equipCharacterId.Value);
         }
 
         private int GetCharacterColorCount()

@@ -13,7 +13,7 @@ using UnityEngine;
 
 namespace Player.Common
 {
-    public partial class PLayerBase : MonoBehaviourPunCallbacks
+    public partial class PLayerCore : MonoBehaviourPunCallbacks
     {
         private InputManager _inputManager;
         private PlayerMove _playerMove;
@@ -34,7 +34,7 @@ namespace Player.Common
         private CancellationToken _cancellationToken;
         private string _hpKey;
 
-        //Todo仮の値
+        //Todo 仮の値
         private const float SkillOneIntervalTime = 3f;
         private const float SkillTwoIntervalTime = 5f;
 
@@ -46,7 +46,7 @@ namespace Player.Common
             Skill2,
         }
 
-        private StateMachine<PLayerBase> _stateMachine;
+        private StateMachine<PLayerCore> _stateMachine;
 
         public void Initialize(PlayerStatusManager playerStatusManager, string hpKey)
         {
@@ -74,7 +74,7 @@ namespace Player.Common
 
         private void InitializeState()
         {
-            _stateMachine = new StateMachine<PLayerBase>(this);
+            _stateMachine = new StateMachine<PLayerCore>(this);
             _stateMachine.Start<PlayerStateIdle>();
             _stateMachine.AddAnyTransition<PlayerStateDead>((int)PLayerState.Dead);
             _stateMachine.AddAnyTransition<PlayerStateIdle>((int)PLayerState.Idle);
@@ -131,7 +131,7 @@ namespace Player.Common
 
         private async void OnDamage(GameObject other)
         {
-            if (!other.CompareTag(GameSettingData.BombEffectTag) || _isDamage)
+            if (!other.CompareTag(GameCommonData.BombEffectTag) || _isDamage)
             {
                 return;
             }

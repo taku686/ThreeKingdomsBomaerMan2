@@ -2,7 +2,6 @@ using Assets.Scripts.Common.ResourceManager;
 using Common.Data;
 using Manager;
 using Manager.NetworkManager;
-using Manager.ResourceManager;
 using UI.Title;
 using UnityEngine;
 using Zenject;
@@ -21,7 +20,7 @@ namespace Common.Installer
             Container.Bind<CharacterDataManager>().FromNew().AsCached();
             Container.Bind<PhotonNetworkManager>().FromComponentInNewPrefab(photonNetworkGameObject).AsSingle();
             Container.Bind<MainManager>().FromComponentsInNewPrefab(mainManagerGameObject).AsSingle();
-            Container.Bind<UserManager>().FromComponentsInNewPrefab(userManagerGameObject).AsSingle();
+            Container.Bind<UserDataManager>().FromComponentsInNewPrefab(userManagerGameObject).AsSingle();
             Container.Bind<PlayFabCatalogManager>().FromNew().AsCached();
         }
     }

@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Common.Data
 {
-    public static class GameSettingData
+    public static class GameCommonData
     {
         public static readonly int CharacterPrice = 200;
         public static readonly float MoveThreshold = 0.6f;
@@ -20,7 +20,11 @@ namespace Common.Data
         public static readonly string GemKey = "MS";
         public static readonly string CoinKey = "CO";
         public static readonly string RealMoneyKey = "RM";
-        public static readonly string ConsumableKey = "Consumable";
+        public static readonly string GachaShopKey = "GachaStore";
+        public static readonly string ConsumableClassKey = "Consumable";
+        public static readonly string BundleClassKey = "Bundle";
+        public static readonly string CharacterGachaItemKey = "bundle01";
+        public static readonly string CharacterMasterKey = "CharacterMaster";
         public static readonly int SkillOneHashKey = Animator.StringToHash("Attack");
         public static readonly int SkillTwoHashKey = Animator.StringToHash("Passive");
         public static readonly string SkillOneKey = "Base Layer.Attack";

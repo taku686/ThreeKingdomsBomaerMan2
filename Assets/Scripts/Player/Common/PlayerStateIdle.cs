@@ -6,11 +6,11 @@ using Photon.Pun;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
-using State = StateMachine<Player.Common.PLayerBase>.State;
+using State = StateMachine<Player.Common.PLayerCore>.State;
 
 namespace Player.Common
 {
-    public partial class PLayerBase
+    public partial class PLayerCore
     {
         public class PlayerStateIdle : State
         {
@@ -42,8 +42,8 @@ namespace Player.Common
                     return;
                 }
 
-                var direction = new Vector3(UltimateJoystick.GetHorizontalAxis(GameSettingData.JoystickName), 0,
-                    UltimateJoystick.GetVerticalAxis(GameSettingData.JoystickName));
+                var direction = new Vector3(UltimateJoystick.GetHorizontalAxis(GameCommonData.JoystickName), 0,
+                    UltimateJoystick.GetVerticalAxis(GameCommonData.JoystickName));
                 _playerMove.Move(direction).Forget();
             }
 
@@ -75,13 +75,13 @@ namespace Player.Common
             private void InitializeButton()
             {
                 Owner._inputManager.BombButton.OnClickAsObservable().Where(_ => Owner._playerStatusManager.CanPutBomb())
-                    .Throttle(TimeSpan.FromSeconds(GameSettingData.InputBombInterval))
+                    .Throttle(TimeSpan.FromSeconds(GameCommonData.InputBombInterval))
                     .Subscribe(
                         _ =>
                         {
                             var playerId = Owner._photonView.ViewID;
                             var explosionTime = PhotonNetwork.ServerTimestamp +
-                                                GameSettingData.ThreeMilliSecondsBeforeExplosion;
+                                                GameCommonData.ThreeMilliSecondsBeforeExplosion;
                             var photonView = Owner._photonView;
                             var damageAmount = Owner._playerStatusManager.DamageAmount;
                             var fireRange = Owner._playerStatusManager.FireRange;

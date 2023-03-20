@@ -97,7 +97,7 @@ namespace UI.Title
                     battleReadyGrid.characterImage.sprite =
                         Owner._characterDataManager.GetCharacterSprite(characterData.ID);
                     battleReadyGrid.backGroundImage.sprite = Owner._characterDataManager.GetCharacterColor(
-                        (int)GameSettingData.GetCharacterColor(characterData.CharaColor));
+                        (int)GameCommonData.GetCharacterColor(characterData.CharaColor));
                     battleReadyGrid.nameText.text = characterData.Name;
                 }
             }

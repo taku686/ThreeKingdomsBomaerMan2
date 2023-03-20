@@ -1,8 +1,8 @@
-﻿using State = StateMachine<Player.Common.PLayerBase>.State;
+﻿using State = StateMachine<Player.Common.PLayerCore>.State;
 
 namespace Player.Common
 {
-    public partial class PLayerBase
+    public partial class PLayerCore
     {
         public class PlayerStateDead : State
         {

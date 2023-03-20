@@ -29,7 +29,7 @@ namespace Player.Common
             var rigid = player.GetComponent<Rigidbody>();
             rigid.constraints = RigidbodyConstraints.None;
             var sequence = DOTween.Sequence();
-            var dir = GameSettingData.DirectionToVector3(_jumpDirection);
+            var dir = GameCommonData.DirectionToVector3(_jumpDirection);
             var isZ = dir.z != 0;
             var endPosZ = isZ ? dir.z * Magnification : player.position.z;
             var endPosX = isZ ? player.position.x : dir.x * Magnification;

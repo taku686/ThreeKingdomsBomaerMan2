@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Common.Data
 {
-    public class UserManager : MonoBehaviour
+    public class UserDataManager : MonoBehaviour
     {
         [HideInInspector] public ReactiveProperty<int> equipCharacterId;
         private User _user;
