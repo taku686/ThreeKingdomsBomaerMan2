@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Common.PlayFab;
 using Common.Data;
 using Manager.NetworkManager;
+using Manager.PlayFabManager;
 using UI.Common;
 using UnityEngine;
 using Zenject;
@@ -21,6 +22,7 @@ namespace Common.Installer
             Container.Bind<PlayFabShopManager>().FromNew().AsCached();
             Container.Bind<PlayFabAdsManager>().FromNew().AsCached();
             Container.Bind<PlayFabCommonManager>().FromNew().AsCached();
+            Container.Bind<PlayFabTitleDataManager>().FromNew().AsCached();
         }
     }
 }

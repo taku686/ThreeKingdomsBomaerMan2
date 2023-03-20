@@ -4,11 +4,11 @@ using DG.Tweening;
 using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine;
-using State = StateMachine<UI.Title.TitleBase>.State;
+using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
 {
-    public partial class TitleBase
+    public partial class TitleCore
     {
         public class SettingState : State
         {

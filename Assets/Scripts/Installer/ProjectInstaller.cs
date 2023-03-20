@@ -3,7 +3,6 @@ using Common.Data;
 using Manager;
 using Manager.DataManager;
 using Manager.NetworkManager;
-using UI.Title;
 using UnityEngine;
 using Zenject;
 
@@ -18,7 +17,7 @@ namespace Common.Installer
 
         public override void InstallBindings()
         {
-            Container.Bind<CharacterDataManager>().FromNew().AsCached();
+            Container.Bind<CharacterDataManager>().FromNew().AsSingle();
             Container.Bind<PhotonNetworkManager>().FromComponentInNewPrefab(photonNetworkGameObject).AsSingle();
             Container.Bind<MainManager>().FromComponentsInNewPrefab(mainManagerGameObject).AsSingle();
             Container.Bind<UserDataManager>().FromComponentsInNewPrefab(userManagerGameObject).AsSingle();

@@ -4,12 +4,10 @@ using System.Threading;
 using Assets.Scripts.Common.ResourceManager;
 using Common.Data;
 using Cysharp.Threading.Tasks;
-using Manager;
 using PlayFab.ClientModels;
-using UnityEngine;
 using Zenject;
 
-namespace UI.Title
+namespace Manager.DataManager
 {
     public class CharacterDataManager : IDisposable
     {
@@ -17,11 +15,11 @@ namespace UI.Title
         [Inject] private PlayFabCatalogManager _playFabCatalogManager;
         private UserDataManager _userDataManager;
 
-        private static readonly Dictionary<int, CharacterData> CharacterDataDictionary = new();
+        private static readonly Dictionary<int, CharacterData> CharacterDatum = new();
 
-        private readonly Dictionary<int, Sprite> _characterSpriteDictionary = new();
+        /*private readonly Dictionary<int, Sprite> _characterSpriteDictionary = new();
 
-        private readonly Dictionary<int, Sprite> _characterColorDictionary = new();
+        private readonly Dictionary<int, Sprite> _characterColorDictionary = new();*/
 
         private CatalogItem _catalogItem;
 
@@ -35,23 +33,23 @@ namespace UI.Title
             }
 
             _userDataManager = userDataManager;
-            InitializeCharacterData();
-            await InitializeCharacterSprite(cancellationToken);
-            await InitializeCharacterColor(cancellationToken);
+            // InitializeCharacterData();
+            /*await InitializeCharacterSprite(cancellationToken);
+            await InitializeCharacterColor(cancellationToken);*/
         }
 
 
-        private void InitializeCharacterData()
+        /*private void InitializeCharacterData()
         {
             for (int i = 0; i < GetCharacterCount(); i++)
             {
                 var characterData = _playFabCatalogManager.GetCharacterData(i);
-                
-                CharacterDataDictionary[i] = characterData;
-            }
-        }
 
-        private async UniTask InitializeCharacterSprite(CancellationToken cancellationToken)
+                CharacterDatum[i] = characterData;
+            }
+        }*/
+
+        /*private async UniTask InitializeCharacterSprite(CancellationToken cancellationToken)
         {
             for (int i = 0; i < GetCharacterCount(); i++)
             {
@@ -67,14 +65,19 @@ namespace UI.Title
                 var characterSprite = await _playFabCatalogManager.LoadCharacterColor(i, cancellationToken);
                 _characterColorDictionary[i] = characterSprite;
             }
+        }*/
+
+        public void SetCharacterData(CharacterData characterData)
+        {
+            CharacterDatum[characterData.ID] = characterData;
         }
 
         public CharacterData GetCharacterData(int id)
         {
-            return CharacterDataDictionary[id];
+            return CharacterDatum[id];
         }
 
-        public Sprite GetCharacterSprite(int id)
+        /*public Sprite GetCharacterSprite(int id)
         {
             return _characterSpriteDictionary[id];
         }
@@ -82,16 +85,11 @@ namespace UI.Title
         public Sprite GetCharacterColor(int id)
         {
             return _characterColorDictionary[id];
-        }
-
-        public GameObject GetCharacterGameObject(int id)
-        {
-            return _playFabCatalogManager.CharacterGameObjects[id];
-        }
+        }*/
 
         public int GetCharacterCount()
         {
-            return _playFabCatalogManager.CharacterGameObjects.Count;
+            return CharacterDatum.Count;
         }
 
         public CharacterData GetUserEquipCharacterData()

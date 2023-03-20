@@ -4,12 +4,11 @@ using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using State = StateMachine<UI.Title.TitleBase>.State;
+using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
 {
-    public partial class TitleBase
+    public partial class TitleCore
     {
         public class CharacterSelectState : State
         {
@@ -92,9 +91,8 @@ namespace UI.Title
             {
                 var grid = Instantiate(Owner.characterSelectView.Grid, parent);
                 var characterGrid = grid.GetComponentInChildren<CharacterGrid>();
-                characterGrid.characterImage.sprite = Owner._characterDataManager.GetCharacterSprite(characterData.ID);
-                characterGrid.backGroundImage.sprite = Owner._characterDataManager.GetCharacterColor(
-                    (int)GameCommonData.GetCharacterColor(characterData.CharaColor));
+                characterGrid.characterImage.sprite = characterData.SelfPortraitSprite;
+                characterGrid.backGroundImage.sprite = characterData.ColorSprite;
                 characterGrid.nameText.text = characterData.Name;
                 characterGrid.CharacterData = characterData;
                 characterGrid.gridButton.onClick.AddListener(() => { OnClickCharacterGrid(characterData, grid); });
@@ -105,7 +103,7 @@ namespace UI.Title
                 var disableGrid = Instantiate(Owner.characterSelectView.GridDisable, parent)
                     .GetComponent<CharacterDisableGrid>();
                 disableGrid.characterImage.color = Color.black;
-                disableGrid.characterImage.sprite = Owner._characterDataManager.GetCharacterSprite(characterData.ID);
+                disableGrid.characterImage.sprite = characterData.SelfPortraitSprite;
                 disableGrid.purchaseButton.onClick.AddListener(() =>
                     OnClickPurchaseButton(disableGrid.gameObject, characterData.ID,
                         disableGrid.GetCancellationTokenOnDestroy()));
@@ -117,7 +115,7 @@ namespace UI.Title
                 var preCharacter = Owner._character;
                 Destroy(preCharacter);
                 Owner._character = Instantiate(
-                    Owner._characterDataManager.GetCharacterGameObject(characterData.ID),
+                    characterData.CharacterObject,
                     characterCreatePosition.position,
                     characterCreatePosition.rotation, characterCreatePosition);
                 Owner._currentCharacterId = characterData.ID;

@@ -6,11 +6,11 @@ using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
-using State = StateMachine<UI.Title.TitleBase>.State;
+using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
 {
-    public partial class TitleBase
+    public partial class TitleCore
     {
         private static readonly int Active = Animator.StringToHash("Active");
 
@@ -136,7 +136,8 @@ namespace UI.Title
                 }
 
                 CharacterData prevCharacterData = null;
-                var orderCharacters = Owner._userDataManager.GetUser().Characters.OrderByDescending(x => x.Key).ToList();
+                var orderCharacters =
+                    Owner._userDataManager.GetUser().Characters.OrderByDescending(x => x.Key).ToList();
 
                 foreach (var keyValuePair in orderCharacters)
                 {
@@ -160,7 +161,7 @@ namespace UI.Title
                 var preCharacter = Owner._character;
                 Destroy(preCharacter);
                 Owner._character = Instantiate(
-                    Owner._characterDataManager.GetCharacterGameObject(characterData.ID),
+                    characterData.CharacterObject,
                     characterCreatePosition.position,
                     characterCreatePosition.rotation, characterCreatePosition);
                 Owner._currentCharacterId = characterData.ID;

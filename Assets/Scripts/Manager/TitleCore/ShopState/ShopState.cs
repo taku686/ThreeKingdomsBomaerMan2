@@ -1,12 +1,11 @@
-﻿using System.Xml.Serialization;
-using Common.Data;
+﻿using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using State = StateMachine<UI.Title.TitleBase>.State;
+using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
 {
-    public partial class TitleBase
+    public partial class TitleCore
     {
         public class ShopState : State
         {
