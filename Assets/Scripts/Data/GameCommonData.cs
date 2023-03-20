@@ -21,9 +21,12 @@ namespace Common.Data
         public static readonly string CoinKey = "CO";
         public static readonly string RealMoneyKey = "RM";
         public static readonly string GachaShopKey = "GachaStore";
+        public static readonly string MainShopKey = "MainShop";
         public static readonly string ConsumableClassKey = "Consumable";
         public static readonly string BundleClassKey = "Bundle";
+        public static readonly string CharacterClassKey = "Character";
         public static readonly string CharacterGachaItemKey = "bundle01";
+        public static readonly string ThousandCoinItemKey = "coin1000";
         public static readonly string CharacterMasterKey = "CharacterMaster";
         public static readonly int SkillOneHashKey = Animator.StringToHash("Attack");
         public static readonly int SkillTwoHashKey = Animator.StringToHash("Passive");

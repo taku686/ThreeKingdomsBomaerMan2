@@ -5,6 +5,7 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Manager.DataManager;
 using UnityEngine;
 using State = StateMachine<UI.Title.TitleCore>.State;
 
@@ -16,8 +17,9 @@ namespace UI.Title
 
         public class CharacterDetailState : State
         {
-            private CharacterData _characterData;
             private const float MoveAmount = 50;
+            private CharacterData _characterData;
+            private CharacterDataManager _characterDataManager;
             private CancellationTokenSource _cts;
             private bool _isInitialize;
 
@@ -37,6 +39,7 @@ namespace UI.Title
                 Owner.DisableTitleGameObject();
                 Owner.mainView.CharacterDetailGameObject.SetActive(true);
                 _characterData = Owner._characterDataManager.GetCharacterData(Owner._currentCharacterId);
+                _characterDataManager = Owner._characterDataManager;
                 InitializeButton();
                 InitializeContent();
                 InitializeUIAnimation();
@@ -110,18 +113,18 @@ namespace UI.Title
                 }
 
                 CharacterData nextCharacterData = null;
-                var orderCharacters = Owner._userDataManager.GetUser().Characters.OrderBy(x => x.Key).ToList();
+                var orderCharacters = Owner._userDataManager.GetUser().Characters.OrderBy(x => x).ToList();
 
-                foreach (var keyValuePair in orderCharacters)
+                foreach (var characterIndex in orderCharacters)
                 {
-                    if (_characterData.ID < keyValuePair.Key)
+                    if (_characterData.ID < characterIndex)
                     {
-                        nextCharacterData = keyValuePair.Value;
+                        nextCharacterData = _characterDataManager.GetCharacterData(characterIndex);
                         break;
                     }
                 }
 
-                nextCharacterData ??= orderCharacters.First().Value;
+                nextCharacterData ??= _characterDataManager.GetCharacterData(orderCharacters.First());
                 _characterData = nextCharacterData;
                 CreateCharacter(nextCharacterData);
                 InitializeContent();
@@ -137,18 +140,18 @@ namespace UI.Title
 
                 CharacterData prevCharacterData = null;
                 var orderCharacters =
-                    Owner._userDataManager.GetUser().Characters.OrderByDescending(x => x.Key).ToList();
+                    Owner._userDataManager.GetUser().Characters.OrderByDescending(x => x).ToList();
 
-                foreach (var keyValuePair in orderCharacters)
+                foreach (var characterIndex in orderCharacters)
                 {
-                    if (_characterData.ID > keyValuePair.Key)
+                    if (_characterData.ID > characterIndex)
                     {
-                        prevCharacterData = keyValuePair.Value;
+                        prevCharacterData = _characterDataManager.GetCharacterData(characterIndex);
                         break;
                     }
                 }
 
-                prevCharacterData ??= orderCharacters.First().Value;
+                prevCharacterData ??= _characterDataManager.GetCharacterData(orderCharacters.First());
                 _characterData = prevCharacterData;
                 CreateCharacter(prevCharacterData);
                 InitializeContent();

@@ -26,7 +26,7 @@ namespace Common.Data
 
         public bool IsGetCharacter(int characterId)
         {
-            return _user.Characters.ContainsKey(characterId);
+            return _user.Characters.Contains(characterId);
         }
 
         private void OnDestroy()

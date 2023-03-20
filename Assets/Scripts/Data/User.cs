@@ -14,7 +14,7 @@ namespace Common.Data
         public bool IsTutorial;
         public int Gem;
         public int Coin;
-        public Dictionary<int, CharacterData> Characters = new Dictionary<int, CharacterData>();
+        public List<int> Characters = new();
 
         public void SetUserData(User user)
         {
@@ -41,7 +41,7 @@ namespace Common.Data
             user.Level = 1;
             user.Name = "";
             user.IsTutorial = false;
-            user.Characters[0] = characterData;
+            user.Characters.Add(characterData.ID);
             user.Gem = 0;
             user.Coin = 0;
             return user;

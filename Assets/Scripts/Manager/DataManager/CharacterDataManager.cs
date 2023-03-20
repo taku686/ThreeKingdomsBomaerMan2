@@ -33,39 +33,8 @@ namespace Manager.DataManager
             }
 
             _userDataManager = userDataManager;
-            // InitializeCharacterData();
-            /*await InitializeCharacterSprite(cancellationToken);
-            await InitializeCharacterColor(cancellationToken);*/
         }
-
-
-        /*private void InitializeCharacterData()
-        {
-            for (int i = 0; i < GetCharacterCount(); i++)
-            {
-                var characterData = _playFabCatalogManager.GetCharacterData(i);
-
-                CharacterDatum[i] = characterData;
-            }
-        }*/
-
-        /*private async UniTask InitializeCharacterSprite(CancellationToken cancellationToken)
-        {
-            for (int i = 0; i < GetCharacterCount(); i++)
-            {
-                var characterSprite = await _playFabCatalogManager.LoadCharacterSprite(i, cancellationToken);
-                _characterSpriteDictionary[i] = characterSprite;
-            }
-        }
-
-        private async UniTask InitializeCharacterColor(CancellationToken cancellationToken)
-        {
-            for (int i = 0; i < GetCharacterColorCount(); i++)
-            {
-                var characterSprite = await _playFabCatalogManager.LoadCharacterColor(i, cancellationToken);
-                _characterColorDictionary[i] = characterSprite;
-            }
-        }*/
+        
 
         public void SetCharacterData(CharacterData characterData)
         {
@@ -76,16 +45,6 @@ namespace Manager.DataManager
         {
             return CharacterDatum[id];
         }
-
-        /*public Sprite GetCharacterSprite(int id)
-        {
-            return _characterSpriteDictionary[id];
-        }
-
-        public Sprite GetCharacterColor(int id)
-        {
-            return _characterColorDictionary[id];
-        }*/
 
         public int GetCharacterCount()
         {

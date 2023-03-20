@@ -162,7 +162,12 @@ namespace UI.Title
                         }
 
                         user.Gem -= characterPrice;
-                        user.Characters[characterId] = Owner._characterDataManager.GetCharacterData(characterId);
+                        if (user.Characters.Contains(characterId))
+                        {
+                            return;
+                        }
+
+                        user.Characters.Add(characterId);
                         var isSuccessUpdatePlayerData = await Owner._playFabPlayerDataManager
                             .TryUpdateUserDataAsync(GameCommonData.UserKey, user)
                             .AttachExternalCancellation(token);
