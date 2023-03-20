@@ -21,9 +21,12 @@ namespace Common.Data
         public static readonly string CoinKey = "CO";
         public static readonly string RealMoneyKey = "RM";
         public static readonly string GachaShopKey = "GachaStore";
+        public static readonly string MainShopKey = "MainShop";
         public static readonly string ConsumableClassKey = "Consumable";
         public static readonly string BundleClassKey = "Bundle";
+        public static readonly string CharacterClassKey = "Character";
         public static readonly string CharacterGachaItemKey = "bundle01";
+        public static readonly string ThousandCoinItemKey = "coin1000";
         public static readonly string CharacterMasterKey = "CharacterMaster";
         public static readonly int SkillOneHashKey = Animator.StringToHash("Attack");
         public static readonly int SkillTwoHashKey = Animator.StringToHash("Passive");
@@ -32,6 +35,12 @@ namespace Common.Data
         public static readonly string GameID = "5089859";
         public static readonly string RewardAdsKey = "ca-app-pub-3940256099942544~3347511713";
         public static readonly string PlacementName = "testReward";
+        public static string CharacterDataPath = "Data/Character/";
+        public static string UserDataPath = "Data/UserData/UserData";
+        public static readonly string CharacterSpritePath = "Sprites/Character/";
+        public static readonly string CharacterColorPath = "Sprites/CharacterColor/";
+        public static readonly string CharacterPrefabPath = "Prefabs/Character/";
+        public static string BattleReadyGridPrefabPath = "Prefabs/UI/BattleReadyGrid";
 
         public static readonly int ThreeMilliSecondsBeforeExplosion = 3000;
 

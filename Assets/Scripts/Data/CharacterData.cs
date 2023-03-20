@@ -1,8 +1,11 @@
+using UnityEngine;
+
 namespace Common.Data
 {
     public class CharacterData
     {
         private string _charaObj;
+        public GameObject CharacterObject;
         private int _team;
         private int _level;
         private string _name;
@@ -13,6 +16,8 @@ namespace Common.Data
         private int _fireRange;
         private int _hp;
         private string _charaColor;
+        public Sprite SelfPortraitSprite;
+        public Sprite ColorSprite;
 
         public string CharaObj
         {

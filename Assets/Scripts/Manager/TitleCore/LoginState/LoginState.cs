@@ -1,11 +1,11 @@
 ﻿using System.Threading;
-using Common;
 using Cysharp.Threading.Tasks;
-using State = StateMachine<UI.Title.TitleBase>.State;
+using Manager.PlayFabManager;
+using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
 {
-    public partial class TitleBase
+    public partial class TitleCore
     {
         public class LoginState : State
         {
@@ -13,10 +13,10 @@ namespace UI.Title
 
             protected override void OnEnter(State prevState)
             {
-                OnInitialize();
+                Initialize();
             }
 
-            private void OnInitialize()
+            private void Initialize()
             {
                 _token = Owner.GetCancellationTokenOnDestroy();
                 Owner.DisableTitleGameObject();
@@ -55,7 +55,7 @@ namespace UI.Title
                 {
                     await Owner._characterDataManager.Initialize(Owner._userDataManager, Owner._token);
                     Owner._mainManager.isInitialize = true;
-                    Owner._stateMachine.Dispatch((int)Event.Login);
+                    Owner._stateMachine.Dispatch((int)Event.Main);
                 }
             }
 

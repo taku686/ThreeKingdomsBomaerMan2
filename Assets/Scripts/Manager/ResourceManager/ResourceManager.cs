@@ -43,14 +43,14 @@ namespace Manager.ResourceManager
 
         public async UniTask<Sprite> LoadCharacterSprite(int id, CancellationToken token)
         {
-            var resource = await Resources.LoadAsync<Sprite>(LabelData.CharacterSpritePath + id)
+            var resource = await Resources.LoadAsync<Sprite>(GameCommonData.CharacterSpritePath + id)
                 .WithCancellation(token);
             return (Sprite)resource;
         }
 
         public async UniTask<Sprite> LoadCharacterColor(int id, CancellationToken token)
         {
-            var resource = await Resources.LoadAsync<Sprite>(LabelData.CharacterColorPath + id)
+            var resource = await Resources.LoadAsync<Sprite>(GameCommonData.CharacterColorPath + id)
                 .WithCancellation(token);
             return (Sprite)resource;
         }

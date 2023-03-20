@@ -18,7 +18,7 @@ namespace Assets.Scripts.Common.ResourceManager
         private const string CharacterClassKey = "Character";
         private readonly Dictionary<int, GameObject> _characterGameObjects = new();
         private readonly CancellationTokenSource _cancellationTokenSource = new();
-        public Dictionary<int, GameObject> CharacterGameObjects => _characterGameObjects;
+    //    public Dictionary<int, GameObject> CharacterGameObjects => _characterGameObjects;
         private CancellationTokenSource _cts;
         private static readonly int ModifiedValue = 10;
 
@@ -59,7 +59,7 @@ namespace Assets.Scripts.Common.ResourceManager
                     CharaColor = customData.CharaColor
                 };
                 _catalog.SetCharacter(customData.ID, characterData);
-                await LoadGameObject(LabelData.CharacterPrefabPath, customData.ID,
+                await LoadGameObject(GameCommonData.CharacterPrefabPath, customData.ID,
                         _cancellationTokenSource.Token)
                     .AttachExternalCancellation(_cancellationTokenSource.Token);
             }
@@ -91,12 +91,12 @@ namespace Assets.Scripts.Common.ResourceManager
         }
 
 
-        public CharacterData GetCharacterData(int id)
+        /*public CharacterData GetCharacterData(int id)
         {
             return _catalog.GetCharacterData(id);
-        }
+        }*/
 
-        public async UniTask<Sprite> LoadCharacterSprite(int id, CancellationToken token)
+        /*public async UniTask<Sprite> LoadCharacterSprite(int id, CancellationToken token)
         {
             var response = await Resources.LoadAsync<Sprite>(LabelData.CharacterSpritePath + id)
                 .WithCancellation(token);
@@ -108,7 +108,7 @@ namespace Assets.Scripts.Common.ResourceManager
             var resource = await Resources.LoadAsync<Sprite>(LabelData.CharacterColorPath + id)
                 .WithCancellation(token);
             return (Sprite)resource;
-        }
+        }*/
 
         public void Dispose()
         {

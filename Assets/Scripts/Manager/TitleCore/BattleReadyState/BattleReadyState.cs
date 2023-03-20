@@ -6,11 +6,11 @@ using Photon.Pun;
 using TMPro;
 using UniRx;
 using UnityEngine.UI;
-using State = StateMachine<UI.Title.TitleBase>.State;
+using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
 {
-    public partial class TitleBase
+    public partial class TitleCore
     {
         public class BattleReadyState : State
         {
@@ -94,10 +94,8 @@ namespace UI.Title
                     var battleReadyGrid = grid.GetComponent<BattleReadyGrid>();
                     _gridDictionary[index] = grid;
                     var characterData = Owner._photonNetworkManager.CurrentRoomCharacterList[index];
-                    battleReadyGrid.characterImage.sprite =
-                        Owner._characterDataManager.GetCharacterSprite(characterData.ID);
-                    battleReadyGrid.backGroundImage.sprite = Owner._characterDataManager.GetCharacterColor(
-                        (int)GameCommonData.GetCharacterColor(characterData.CharaColor));
+                    battleReadyGrid.characterImage.sprite = characterData.SelfPortraitSprite;
+                    battleReadyGrid.backGroundImage.sprite = characterData.ColorSprite;
                     battleReadyGrid.nameText.text = characterData.Name;
                 }
             }

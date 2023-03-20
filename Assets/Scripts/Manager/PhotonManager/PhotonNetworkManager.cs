@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Common.Data;
 using ExitGames.Client.Photon;
+using Manager.DataManager;
 using ModestTree;
 using Photon.Pun;
 using Photon.Realtime;

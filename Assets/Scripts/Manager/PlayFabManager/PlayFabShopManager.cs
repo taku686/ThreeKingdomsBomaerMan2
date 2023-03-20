@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Linq;
 using Assets.Scripts.Common.ResourceManager;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Manager.DataManager;
 using PlayFab;
 using PlayFab.ClientModels;
 using Unity.Services.Core;
@@ -18,7 +20,10 @@ namespace Manager.NetworkManager
         private IStoreController _storeController;
         private IExtensionProvider _extensionProvider;
         [Inject] private PlayFabCatalogManager _playFabCatalogManager;
-        [Inject] private PlayFabCommonManager _playFabCommonManager;
+        [Inject] private PlayFabInventoryManager _playFabInventoryManager;
+        [Inject] private PlayFabPlayerDataManager _playFabPlayerDataManager;
+        [Inject] private CharacterDataManager _characterDataManager;
+        [Inject] private UserDataManager _userDataManager;
 
         public async UniTask InitializePurchasing()
         {
@@ -40,14 +45,15 @@ namespace Manager.NetworkManager
             UnityPurchasing.Initialize(this, _builder);
         }
 
-        public async UniTask<bool> TryPurchaseItem(string itemName, string virtualCurrencyKey, int price)
+        public async UniTask<bool> TryPurchaseItem(string itemName, string virtualCurrencyKey, int price,
+            string shopKey)
         {
             var request = new PurchaseItemRequest()
             {
                 ItemId = itemName,
                 VirtualCurrency = virtualCurrencyKey,
                 Price = price,
-                StoreId = "MainShop",
+                StoreId = shopKey,
                 CatalogVersion = "main"
             };
             var result = await PlayFabClientAPI.PurchaseItemAsync(request);
@@ -58,7 +64,29 @@ namespace Manager.NetworkManager
                 return false;
             }
 
-            await _playFabCommonManager.SetVirtualCurrency();
+            await _playFabInventoryManager.SetVirtualCurrency();
+            return true;
+        }
+
+        public async UniTask<bool> TryPurchaseGacha(string itemName, string virtualCurrencyKey, int price,
+            string shopKey)
+        {
+            var request = new PurchaseItemRequest()
+            {
+                ItemId = itemName,
+                VirtualCurrency = virtualCurrencyKey,
+                Price = price,
+                StoreId = shopKey,
+            };
+            var result = await PlayFabClientAPI.PurchaseItemAsync(request);
+            if (result.Error != null)
+            {
+                Debug.Log(result.Error.GenerateErrorReport());
+                return false;
+            }
+
+            await _playFabInventoryManager.SetVirtualCurrency();
+            await UpdateUserData(result);
             return true;
         }
 
@@ -77,8 +105,30 @@ namespace Manager.NetworkManager
                 return false;
             }
 
-            await _playFabCommonManager.SetVirtualCurrency();
+            await _playFabInventoryManager.SetVirtualCurrency();
             return true;
+        }
+
+        private async UniTask UpdateUserData(PlayFabResult<PurchaseItemResult> result)
+        {
+            var user = _userDataManager.GetUser();
+            var getItems = result.Result.Items.Where(x => x.BundleParent != null);
+            foreach (var item in getItems)
+            {
+                if (item.ItemClass.Equals(GameCommonData.CharacterClassKey))
+                {
+                    var index = int.Parse(item.ItemId);
+                    if (user.Characters.Contains(index))
+                    {
+                        continue;
+                    }
+
+                    user.Characters.Add(_characterDataManager.GetCharacterData(index).ID);
+                }
+            }
+
+            _userDataManager.SetUser(user);
+            await _playFabPlayerDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, user);
         }
 
 

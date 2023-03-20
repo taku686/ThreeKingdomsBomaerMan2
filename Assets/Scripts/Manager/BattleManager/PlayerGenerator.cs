@@ -16,7 +16,7 @@ namespace Manager.BattleManager
         public void GenerateCharacter(int playerIndex, CharacterData characterData)
         {
             var spawnPoint = GetSpawnPoint(playerIndex);
-            _playerObj = PhotonNetwork.Instantiate(LabelData.CharacterPrefabPath + characterData.CharaObj,
+            _playerObj = PhotonNetwork.Instantiate(GameCommonData.CharacterPrefabPath + characterData.CharaObj,
                 spawnPoint.position, spawnPoint.rotation);
             _playerObj.transform.SetParent(playerParent);
             PlayerGenerateNotification();
