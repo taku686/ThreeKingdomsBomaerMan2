@@ -32,6 +32,12 @@ namespace Common.Data
         public static readonly string GameID = "5089859";
         public static readonly string RewardAdsKey = "ca-app-pub-3940256099942544~3347511713";
         public static readonly string PlacementName = "testReward";
+        public static string CharacterDataPath = "Data/Character/";
+        public static string UserDataPath = "Data/UserData/UserData";
+        public static readonly string CharacterSpritePath = "Sprites/Character/";
+        public static readonly string CharacterColorPath = "Sprites/CharacterColor/";
+        public static readonly string CharacterPrefabPath = "Prefabs/Character/";
+        public static string BattleReadyGridPrefabPath = "Prefabs/UI/BattleReadyGrid";
 
         public static readonly int ThreeMilliSecondsBeforeExplosion = 3000;
 

@@ -10,6 +10,7 @@ using UI.Title.ShopState;
 using UnityEngine;
 using Zenject;
 using GoogleMobileAds.Api;
+using Manager.DataManager;
 
 namespace UI.Title
 {

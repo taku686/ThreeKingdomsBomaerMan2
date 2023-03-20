@@ -1,6 +1,7 @@
 using Assets.Scripts.Common.ResourceManager;
 using Common.Data;
 using Manager;
+using Manager.DataManager;
 using Manager.NetworkManager;
 using UI.Title;
 using UnityEngine;
