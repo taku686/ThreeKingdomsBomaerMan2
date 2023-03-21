@@ -46,14 +46,14 @@ namespace Bomb
             BoxColliderComponent = GetComponent<BoxCollider>();
             Cts = new CancellationTokenSource();
             _token = this.GetCancellationTokenOnDestroy();
-            ObstaclesLayerMask = LayerMask.GetMask(GameSettingData.ObstacleLayer);
-            gameObject.layer = LayerMask.NameToLayer(GameSettingData.BombLayer);
+            ObstaclesLayerMask = LayerMask.GetMask(GameCommonData.ObstacleLayer);
+            gameObject.layer = LayerMask.NameToLayer(GameCommonData.BombLayer);
         }
 
         public void Setup(int damageAmount, int fireRange, int playerId, int explosionTime,
             StageOrnamentsBlock stageOrnamentsBlock)
         {
-            gameObject.tag = GameSettingData.BombTag;
+            gameObject.tag = GameCommonData.BombTag;
             BombRenderer.enabled = true;
             BoxColliderComponent.enabled = true;
             _damageAmount = damageAmount;
@@ -104,7 +104,7 @@ namespace Bomb
 
         private void OnTriggerEnter(Collider other)
         {
-            if (!other.CompareTag(GameSettingData.BombEffectTag) || IsExplosion)
+            if (!other.CompareTag(GameCommonData.BombEffectTag) || IsExplosion)
             {
                 return;
             }
@@ -114,7 +114,7 @@ namespace Bomb
 
         private void OnTriggerExit(Collider other)
         {
-            if (!other.CompareTag(GameSettingData.PlayerTag))
+            if (!other.CompareTag(GameCommonData.PlayerTag))
             {
                 return;
             }

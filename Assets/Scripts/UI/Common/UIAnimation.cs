@@ -11,7 +11,7 @@ namespace UI.Common
     {
         private const float Duration = 0.1f;
 
-        public Sequence OnClickScaleColorAnimation(GameObject target)
+        public Sequence ClickScaleColor(GameObject target)
         {
             Sequence preSequence = DOTween.Sequence();
             Sequence postSequence = DOTween.Sequence();
@@ -49,7 +49,7 @@ namespace UI.Common
             return preSequence.Append(postSequence);
         }
 
-        public Sequence OnClickScaleAnimation(GameObject target)
+        public Sequence ClickScale(GameObject target)
         {
             Sequence preSequence = DOTween.Sequence();
             Sequence postSequence = DOTween.Sequence();
@@ -59,6 +59,18 @@ namespace UI.Common
             postSequence.Append(
                 rect.DOScale(1f, 0.1f));
             return preSequence.Append(postSequence);
+        }
+        
+        public async UniTask Open(Transform target, float duration)
+        {
+            await target.DOScale(1f, duration).SetEase(Ease.OutBounce)
+                .WithCancellation(target.GetCancellationTokenOnDestroy());
+        }
+
+        public async UniTask Close(Transform target, float duration)
+        {
+            await target.DOScale(0f, duration).SetEase(Ease.OutQuad)
+                .WithCancellation(target.GetCancellationTokenOnDestroy());
         }
     }
 }

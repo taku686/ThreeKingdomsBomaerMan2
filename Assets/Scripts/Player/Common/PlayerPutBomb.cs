@@ -52,7 +52,7 @@ namespace Player.Common
             var pos = new Vector3(startPos.x, startPos.y + ModifiedValue, startPos.z);
             boxCollider.enabled = false;
             var hasBomb = Physics.Raycast(pos, Vector3.down, RayDistance,
-                LayerMask.GetMask(GameSettingData.BombLayer),
+                LayerMask.GetMask(GameCommonData.BombLayer),
                 QueryTriggerInteraction.Collide);
             boxCollider.enabled = true;
             return hasBomb;

@@ -35,7 +35,7 @@ namespace Bomb
 
         private async UniTask Explosion(Vector3 startPos, Direction direction, int damageAmount)
         {
-            var dir = GameSettingData.DirectionToVector3(direction);
+            var dir = GameCommonData.DirectionToVector3(direction);
             var index = (int)direction;
             BombRenderer.enabled = false;
             BoxColliderComponent.enabled = false;
@@ -87,7 +87,7 @@ namespace Bomb
 
         private async void GenerateCollider(Vector3 startPos, Direction direction, int fireRange, int damageAmount)
         {
-            var dir = GameSettingData.DirectionToVector3(direction);
+            var dir = GameCommonData.DirectionToVector3(direction);
             for (int i = 0; i < fireRange; i++)
             {
                 var colliderObj = Instantiate(this.bombCollider, CalculateGeneratePos(startPos, dir, i),

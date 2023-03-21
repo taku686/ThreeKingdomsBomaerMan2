@@ -41,7 +41,7 @@ namespace Player.Common
 
             await transform
                 .DOLocalRotate(GetRotation(GetDirection(direction.x, direction.z)).eulerAngles,
-                    GameSettingData.TurnDuration)
+                    GameCommonData.TurnDuration)
                 .AsyncWaitForCompletion();
             _isTurn = false;
         }
@@ -55,7 +55,7 @@ namespace Player.Common
 
             await transform
                 .DOLocalRotate(GetRotation(GetDirection(dirX, dirZ)).eulerAngles,
-                    GameSettingData.TurnDuration)
+                    GameCommonData.TurnDuration)
                 .AsyncWaitForCompletion();
             _isTurn = false;
         }
@@ -78,7 +78,7 @@ namespace Player.Common
             float absZ = Mathf.Abs(zDir);
             if (absX > absZ)
             {
-                if (absX >= GameSettingData.MoveThreshold)
+                if (absX >= GameCommonData.MoveThreshold)
                 {
                     xDir = xDir > 0 ? 1 : -1;
                 }
@@ -90,7 +90,7 @@ namespace Player.Common
             }
             else if (absX < absZ)
             {
-                if (absZ >= GameSettingData.MoveThreshold)
+                if (absZ >= GameCommonData.MoveThreshold)
                 {
                     zDir = zDir > 0 ? 1 : -1;
                 }
@@ -142,22 +142,22 @@ namespace Player.Common
 
         private Quaternion GetRotation(float h, float v)
         {
-            if (h > GameSettingData.MoveThreshold)
+            if (h > GameCommonData.MoveThreshold)
             {
                 return Quaternion.Euler(_initRotation + new Vector3(0, -90, 0));
             }
 
-            if (h < -GameSettingData.MoveThreshold)
+            if (h < -GameCommonData.MoveThreshold)
             {
                 return Quaternion.Euler(_initRotation + new Vector3(0, 90, 0));
             }
 
-            if (v > GameSettingData.MoveThreshold)
+            if (v > GameCommonData.MoveThreshold)
             {
                 return Quaternion.Euler(_initRotation + new Vector3(0, -180, 0));
             }
 
-            if (v < -GameSettingData.MoveThreshold)
+            if (v < -GameCommonData.MoveThreshold)
             {
                 return Quaternion.Euler(_initRotation);
             }
@@ -199,22 +199,22 @@ namespace Player.Common
 
         private Direction GetDirection(float h, float v)
         {
-            if (h > GameSettingData.RotateThreshold)
+            if (h > GameCommonData.RotateThreshold)
             {
                 return Direction.Right;
             }
 
-            if (h < -GameSettingData.RotateThreshold)
+            if (h < -GameCommonData.RotateThreshold)
             {
                 return Direction.Left;
             }
 
-            if (v > GameSettingData.RotateThreshold)
+            if (v > GameCommonData.RotateThreshold)
             {
                 return Direction.Back;
             }
 
-            if (v < -GameSettingData.RotateThreshold)
+            if (v < -GameCommonData.RotateThreshold)
             {
                 return Direction.Forward;
             }
