@@ -46,28 +46,28 @@ namespace UI.Title
 
             private void OnClickCharacterSelect()
             {
-                Owner._uiAnimation.OnClickScaleColorAnimation(Owner.mainView.CharacterSelectButton.gameObject)
+                Owner._uiAnimation.ClickScaleColor(Owner.mainView.CharacterSelectButton.gameObject)
                     .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.CharacterSelect); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickBattleReady()
             {
-                Owner._uiAnimation.OnClickScaleColorAnimation(Owner.mainView.BattleReadyButton.gameObject)
+                Owner._uiAnimation.ClickScaleColor(Owner.mainView.BattleReadyButton.gameObject)
                     .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.ReadyBattle); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickSetting()
             {
-                Owner._uiAnimation.OnClickScaleColorAnimation(Owner.mainView.SettingButton.gameObject)
+                Owner._uiAnimation.ClickScaleColor(Owner.mainView.SettingButton.gameObject)
                     .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.Setting); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickShop()
             {
-                Owner._uiAnimation.OnClickScaleColorAnimation(Owner.mainView.ShopButton.gameObject)
+                Owner._uiAnimation.ClickScaleColor(Owner.mainView.ShopButton.gameObject)
                     .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.Shop); })
                     .SetLink(Owner.gameObject);
             }

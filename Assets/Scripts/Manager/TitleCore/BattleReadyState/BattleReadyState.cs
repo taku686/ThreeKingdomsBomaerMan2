@@ -66,7 +66,7 @@ namespace UI.Title
 
             private void OnClickBackButton()
             {
-                Owner._uiAnimation.OnClickScaleColorAnimation(Owner.battleReadyView.BackButton.gameObject)
+                Owner._uiAnimation.ClickScaleColor(Owner.battleReadyView.BackButton.gameObject)
                     .OnComplete(() =>
                     {
                         if (!PhotonNetwork.InRoom)
