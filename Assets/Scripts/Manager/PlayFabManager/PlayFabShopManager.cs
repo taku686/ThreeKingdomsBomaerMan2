@@ -9,6 +9,7 @@ using PlayFab.ClientModels;
 using Unity.Services.Core;
 using UnityEngine;
 using UnityEngine.Purchasing;
+using UnityEngine.UI;
 using Zenject;
 
 namespace Manager.NetworkManager
@@ -69,7 +70,7 @@ namespace Manager.NetworkManager
         }
 
         public async UniTask<bool> TryPurchaseGacha(string itemName, string virtualCurrencyKey, int price,
-            string shopKey)
+            string shopKey, Image rewardImage)
         {
             var request = new PurchaseItemRequest()
             {
@@ -86,9 +87,10 @@ namespace Manager.NetworkManager
             }
 
             await _playFabInventoryManager.SetVirtualCurrency();
-            await UpdateUserData(result);
+            await UpdateUserData(result, rewardImage);
             return true;
         }
+
 
         public async UniTask<bool> TryPurchaseCharacter(string itemName, string virtualCurrencyKey, int price)
         {
@@ -109,7 +111,7 @@ namespace Manager.NetworkManager
             return true;
         }
 
-        private async UniTask UpdateUserData(PlayFabResult<PurchaseItemResult> result)
+        private async UniTask UpdateUserData(PlayFabResult<PurchaseItemResult> result, Image rewardImage)
         {
             var user = _userDataManager.GetUser();
             var getItems = result.Result.Items.Where(x => x.BundleParent != null);
@@ -117,13 +119,16 @@ namespace Manager.NetworkManager
             {
                 if (item.ItemClass.Equals(GameCommonData.CharacterClassKey))
                 {
+                    Debug.Log(item.ItemId);
                     var index = int.Parse(item.ItemId);
+                    var characterData = _characterDataManager.GetCharacterData(index);
+                    rewardImage.sprite = characterData.SelfPortraitSprite;
                     if (user.Characters.Contains(index))
                     {
                         continue;
                     }
 
-                    user.Characters.Add(_characterDataManager.GetCharacterData(index).ID);
+                    user.Characters.Add(characterData.ID);
                 }
             }
 

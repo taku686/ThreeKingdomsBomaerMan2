@@ -119,14 +119,14 @@ namespace UI.Title
                     characterCreatePosition.position,
                     characterCreatePosition.rotation, characterCreatePosition);
                 Owner._currentCharacterId = characterData.ID;
-                Owner._uiAnimation.OnClickScaleAnimation(gridGameObject)
+                Owner._uiAnimation.ClickScale(gridGameObject)
                     .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.CharacterDetail); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickBack()
             {
-                Owner._uiAnimation.OnClickScaleColorAnimation(Owner.characterSelectView.BackButton.gameObject)
+                Owner._uiAnimation.ClickScaleColor(Owner.characterSelectView.BackButton.gameObject)
                     .OnComplete(() =>
                     {
                         Owner.DisableTitleGameObject();
@@ -137,7 +137,7 @@ namespace UI.Title
 
             private void OnClickPurchaseButton(GameObject disableGrid, int characterId, CancellationToken token)
             {
-                Owner._uiAnimation.OnClickScaleAnimation(disableGrid).OnComplete(() =>
+                Owner._uiAnimation.ClickScale(disableGrid).OnComplete(() =>
                     UniTask.Void(async () =>
                     {
                         var user = Owner._userDataManager.GetUser();
@@ -185,7 +185,7 @@ namespace UI.Title
             {
                 var closeButton = Owner.characterSelectView.GemAddPopup.CloseButton.gameObject;
                 var popup = Owner.characterSelectView.GemAddPopup.gameObject;
-                Owner._uiAnimation.OnClickScaleColorAnimation(closeButton)
+                Owner._uiAnimation.ClickScaleColor(closeButton)
                     .OnComplete(() => { popup.SetActive(false); })
                     .SetLink(popup);
             }
@@ -194,7 +194,7 @@ namespace UI.Title
             {
                 var cancelButton = Owner.characterSelectView.GemAddPopup.CancelButton.gameObject;
                 var popup = Owner.characterSelectView.GemAddPopup.gameObject;
-                Owner._uiAnimation.OnClickScaleColorAnimation(cancelButton)
+                Owner._uiAnimation.ClickScaleColor(cancelButton)
                     .OnComplete(() => { popup.SetActive(false); })
                     .SetLink(popup);
             }
@@ -203,7 +203,7 @@ namespace UI.Title
             {
                 var addButton = Owner.characterSelectView.GemAddPopup.AddButton.gameObject;
                 var popup = Owner.characterSelectView.GemAddPopup.gameObject;
-                Owner._uiAnimation.OnClickScaleColorAnimation(addButton).OnComplete(() =>
+                Owner._uiAnimation.ClickScaleColor(addButton).OnComplete(() =>
                     {
                         Owner._stateMachine.Dispatch((int)Event.Shop);
                     })

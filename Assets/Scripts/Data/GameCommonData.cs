@@ -27,6 +27,17 @@ namespace Common.Data
         public static readonly string CharacterClassKey = "Character";
         public static readonly string CharacterGachaItemKey = "bundle01";
         public static readonly string ThousandCoinItemKey = "coin1000";
+        public static readonly string FiveThousandCoinItemKey = "coin5000";
+        public static readonly string TwelveThousandCoinItemKey = "coin12000";
+        public static readonly string TwentyGemItemKey = "gem20";
+        public static readonly string HundredGemKey = "gem100";
+        public static readonly string TwoHundredGemKey = "gem200";
+        public static readonly int ThousandCoinItemPrice = 100;
+        public static readonly int FiveThousandCoinItemPrice = 480;
+        public static readonly int TwelveThousandCoinItemPrice = 980;
+        public static readonly int TwentyGemItemPrice = 100;
+        public static readonly int HundredGemItemPrice = 480;
+        public static readonly int TwoHundredGemItemPrice = 980;
         public static readonly string CharacterMasterKey = "CharacterMaster";
         public static readonly int SkillOneHashKey = Animator.StringToHash("Attack");
         public static readonly int SkillTwoHashKey = Animator.StringToHash("Passive");
@@ -41,7 +52,8 @@ namespace Common.Data
         public static readonly string CharacterColorPath = "Sprites/CharacterColor/";
         public static readonly string CharacterPrefabPath = "Prefabs/Character/";
         public static string BattleReadyGridPrefabPath = "Prefabs/UI/BattleReadyGrid";
-
+        public static readonly float CloseDuration = 0.5f;
+        public static readonly float OpenDuration = 1.0f;
         public static readonly int ThreeMilliSecondsBeforeExplosion = 3000;
 
         public static CharacterColor GetCharacterColor(string color)
