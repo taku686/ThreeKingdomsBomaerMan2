@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 using Manager.DataManager;
 using PlayFab;
 using PlayFab.ClientModels;
+using TMPro;
 using Unity.Services.Core;
 using UnityEngine;
 using UnityEngine.Purchasing;
@@ -65,12 +66,25 @@ namespace Manager.NetworkManager
                 return false;
             }
 
+            foreach (var item in result.Result.Items)
+            {
+                if (item.CustomData[GameCommonData.VirtualCurrencyKey] == virtualCurrencyKey)
+                {
+                    var amount = int.Parse(item.CustomData[GameCommonData.PriceKey]);
+                    var result2 = await AddVirtualCurrency(virtualCurrencyKey, amount);
+                    if (!result2)
+                    {
+                        return false;
+                    }
+                }
+            }
+
             await _playFabInventoryManager.SetVirtualCurrency();
             return true;
         }
 
         public async UniTask<bool> TryPurchaseGacha(string itemName, string virtualCurrencyKey, int price,
-            string shopKey, Image rewardImage)
+            string shopKey, Image rewardImage, TextMeshProUGUI errorText)
         {
             var request = new PurchaseItemRequest()
             {
@@ -83,6 +97,7 @@ namespace Manager.NetworkManager
             if (result.Error != null)
             {
                 Debug.Log(result.Error.GenerateErrorReport());
+                errorText.text = result.Error.ErrorMessage;
                 return false;
             }
 
@@ -134,6 +149,23 @@ namespace Manager.NetworkManager
 
             _userDataManager.SetUser(user);
             await _playFabPlayerDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, user);
+        }
+
+        private async UniTask<bool> AddVirtualCurrency(string virtualCurrencyKey, int amount)
+        {
+            var request = new AddUserVirtualCurrencyRequest()
+            {
+                Amount = amount,
+                VirtualCurrency = virtualCurrencyKey
+            };
+            var result = await PlayFabClientAPI.AddUserVirtualCurrencyAsync(request);
+
+            if (result.Error != null)
+            {
+                return false;
+            }
+
+            return true;
         }
 
 

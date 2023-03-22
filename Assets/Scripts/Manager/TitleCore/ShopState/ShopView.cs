@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace UI.Title.ShopState
@@ -14,11 +15,11 @@ namespace UI.Title.ShopState
         [SerializeField] private Button twoHundredGemButton;
         [SerializeField] private Button adsButton;
         [SerializeField] private Button gachaButton;
-        [SerializeField] private GameObject textGameObject;
         [SerializeField] private RewardGetView rewardGetView;
+        [SerializeField] private PurchaseErrorView purchaseErrorView;
+        public PurchaseErrorView PurchaseErrorView => purchaseErrorView;
         public RewardGetView RewardGetView => rewardGetView;
         public Button AdsButton => adsButton;
-        public GameObject TextGameObject => textGameObject;
         public Button GachaButton => gachaButton;
         public Button BackButton => backButton;
         public Button ThousandCoinButton => thousandCoinButton;
