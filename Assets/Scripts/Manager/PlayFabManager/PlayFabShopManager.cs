@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 using Manager.DataManager;
 using PlayFab;
 using PlayFab.ClientModels;
+using TMPro;
 using Unity.Services.Core;
 using UnityEngine;
 using UnityEngine.Purchasing;
@@ -70,7 +71,7 @@ namespace Manager.NetworkManager
         }
 
         public async UniTask<bool> TryPurchaseGacha(string itemName, string virtualCurrencyKey, int price,
-            string shopKey, Image rewardImage)
+            string shopKey, Image rewardImage, TextMeshProUGUI errorText)
         {
             var request = new PurchaseItemRequest()
             {
@@ -83,6 +84,7 @@ namespace Manager.NetworkManager
             if (result.Error != null)
             {
                 Debug.Log(result.Error.GenerateErrorReport());
+                errorText.text = result.Error.ErrorMessage;
                 return false;
             }
 
