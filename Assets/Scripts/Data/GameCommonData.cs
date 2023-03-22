@@ -16,6 +16,8 @@ namespace Common.Data
         public static readonly string BombEffectTag = "BombEffect";
         public static readonly string ObstacleLayer = "Obstacles";
         public static readonly string UserKey = "User";
+        public static readonly string VirtualCurrencyKey = "vc";
+        public static readonly string PriceKey = "price";
         public static readonly string BombLayer = "Bomb";
         public static readonly string GemKey = "MS";
         public static readonly string CoinKey = "CO";
