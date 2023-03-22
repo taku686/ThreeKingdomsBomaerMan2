@@ -66,6 +66,19 @@ namespace Manager.NetworkManager
                 return false;
             }
 
+            foreach (var item in result.Result.Items)
+            {
+                if (item.CustomData[GameCommonData.VirtualCurrencyKey] == virtualCurrencyKey)
+                {
+                    var amount = int.Parse(item.CustomData[GameCommonData.PriceKey]);
+                    var result2 = await AddVirtualCurrency(virtualCurrencyKey, amount);
+                    if (!result2)
+                    {
+                        return false;
+                    }
+                }
+            }
+
             await _playFabInventoryManager.SetVirtualCurrency();
             return true;
         }
@@ -136,6 +149,23 @@ namespace Manager.NetworkManager
 
             _userDataManager.SetUser(user);
             await _playFabPlayerDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, user);
+        }
+
+        private async UniTask<bool> AddVirtualCurrency(string virtualCurrencyKey, int amount)
+        {
+            var request = new AddUserVirtualCurrencyRequest()
+            {
+                Amount = amount,
+                VirtualCurrency = virtualCurrencyKey
+            };
+            var result = await PlayFabClientAPI.AddUserVirtualCurrencyAsync(request);
+
+            if (result.Error != null)
+            {
+                return false;
+            }
+
+            return true;
         }
 
 
