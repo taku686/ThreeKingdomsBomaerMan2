@@ -119,7 +119,7 @@ namespace Assets.Scripts.Common.PlayFab
             return await Login().AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
         }
 
-        public async UniTask<bool> SetDisplayName(string displayName)
+        /*public async UniTask<bool> SetDisplayName(string displayName)
         {
             if (displayName.IsNullOrEmpty())
             {
@@ -151,6 +151,6 @@ namespace Assets.Scripts.Common.PlayFab
             }
 
             return true;
-        }
+        }*/
     }
 }

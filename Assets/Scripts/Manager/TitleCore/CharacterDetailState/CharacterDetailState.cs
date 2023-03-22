@@ -6,6 +6,7 @@ using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Manager.DataManager;
+using UI.Common;
 using UnityEngine;
 using State = StateMachine<UI.Title.TitleCore>.State;
 
@@ -21,6 +22,7 @@ namespace UI.Title
             private CharacterData _characterData;
             private CharacterDataManager _characterDataManager;
             private CancellationTokenSource _cts;
+            private UIAnimation _uiAnimation;
             private bool _isInitialize;
 
             protected override void OnEnter(State prevState)

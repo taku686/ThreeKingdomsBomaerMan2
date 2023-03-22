@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using Cysharp.Threading.Tasks;
-using Manager.PlayFabManager;
+using Manager.NetworkManager;
 using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
@@ -10,6 +10,8 @@ namespace UI.Title
         public class LoginState : State
         {
             private CancellationToken _token;
+            private PlayFabPlayerDataManager _playFabPlayerDataManager;
+            private LoginView _loginView;
 
             protected override void OnEnter(State prevState)
             {
@@ -19,6 +21,8 @@ namespace UI.Title
             private void Initialize()
             {
                 _token = Owner.GetCancellationTokenOnDestroy();
+                _playFabPlayerDataManager = Owner._playFabPlayerDataManager;
+                _loginView = Owner.loginView;
                 Owner.DisableTitleGameObject();
                 InitializeButton();
                 InitializeObject();
@@ -62,7 +66,8 @@ namespace UI.Title
             private async UniTask OnClickDisplayName()
             {
                 var displayName = Owner.loginView.DisplayNameView.InputField.text;
-                var success = await Owner._playFabLoginManager.SetDisplayName(displayName);
+                var errorText = _loginView.DisplayNameView.ErrorText;
+                var success = await _playFabPlayerDataManager.UpdateUserDisplayName(displayName, errorText);
                 if (!success)
                 {
                     return;

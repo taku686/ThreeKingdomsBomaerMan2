@@ -18,11 +18,11 @@ namespace UI.Title
     public partial class TitleCore : MonoBehaviourPunCallbacks
     {
         [Inject] private CharacterDataManager _characterDataManager;
+        [Inject] private UserDataManager _userDataManager;
         [Inject] private UIAnimation _uiAnimation;
         [Inject] private PhotonNetworkManager _photonNetworkManager;
         [Inject] private MainManager _mainManager;
         [Inject] private PlayFabLoginManager _playFabLoginManager;
-        [Inject] private UserDataManager _userDataManager;
         [Inject] private PlayFabPlayerDataManager _playFabPlayerDataManager;
         [Inject] private PlayFabShopManager _playFabShopManager;
         [Inject] private PlayFabAdsManager _playFabAdsManager;

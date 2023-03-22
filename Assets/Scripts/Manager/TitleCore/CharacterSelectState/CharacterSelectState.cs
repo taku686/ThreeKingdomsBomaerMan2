@@ -19,11 +19,6 @@ namespace UI.Title
                 Initialize();
             }
 
-            protected override void OnExit(State nextState)
-            {
-            }
-
-
             private void Initialize()
             {
                 Owner.DisableTitleGameObject();
