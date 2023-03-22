@@ -23,7 +23,7 @@ namespace UI.Title
         [Inject] private PhotonNetworkManager _photonNetworkManager;
         [Inject] private MainManager _mainManager;
         [Inject] private PlayFabLoginManager _playFabLoginManager;
-        [Inject] private PlayFabPlayerDataManager _playFabPlayerDataManager;
+        [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private PlayFabShopManager _playFabShopManager;
         [Inject] private PlayFabAdsManager _playFabAdsManager;
         [SerializeField] private Transform characterCreatePosition;
@@ -47,7 +47,6 @@ namespace UI.Title
             Login,
             Main,
             CharacterSelect,
-            CharacterSelectBack,
             CharacterDetail,
             Shop,
             ReadyBattle,
@@ -85,7 +84,7 @@ namespace UI.Title
             _stateMachine.AddAnyTransition<MainState>((int)Event.Main);
             _stateMachine.AddTransition<MainState, CharacterSelectState>((int)Event.CharacterSelect);
             _stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)Event.CharacterDetail);
-            _stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)Event.CharacterSelectBack);
+            _stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)Event.CharacterSelect);
             _stateMachine.AddTransition<MainState, BattleReadyState>((int)Event.ReadyBattle);
             _stateMachine.AddTransition<BattleReadyState, SceneTransitionState>((int)Event.SceneTransition);
             _stateMachine.AddTransition<LoginState, MainState>((int)Event.Main);

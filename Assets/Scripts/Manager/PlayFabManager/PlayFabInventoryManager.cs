@@ -13,7 +13,7 @@ namespace Manager.NetworkManager
     {
         [Inject] private UserDataManager _userDataManager;
         [Inject] private CharacterDataManager _characterDataManager;
-        [Inject] private PlayFabPlayerDataManager _playFabPlayerDataManager;
+        [Inject] private PlayFabUserDataManager _playFabUserDataManager;
 
         public async UniTask SetVirtualCurrency()
         {
@@ -61,7 +61,7 @@ namespace Manager.NetworkManager
             }
 
             _userDataManager.SetUser(user);
-            await _playFabPlayerDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, user);
+            await _playFabUserDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, user);
         }
 
         public void Dispose()

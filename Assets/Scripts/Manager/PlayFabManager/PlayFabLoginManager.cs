@@ -20,7 +20,7 @@ namespace Assets.Scripts.Common.PlayFab
         [Inject] private UserDataManager _userDataManager;
         [Inject] private CharacterDataManager _characterDataManager;
         [Inject] private PlayFabCatalogManager _playFabCatalogManager;
-        [Inject] private PlayFabPlayerDataManager _playFabPlayerDataManager;
+        [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private PlayFabShopManager _playFabShopManager;
         [Inject] private PlayFabTitleDataManager _playFabTitleDataManager;
         private GetPlayerCombinedInfoRequestParams _info;
@@ -108,7 +108,7 @@ namespace Assets.Scripts.Common.PlayFab
             var virtualCurrency = _loginResponse.Result.InfoResultPayload.UserVirtualCurrency;
             user.Coin = virtualCurrency[GameCommonData.CoinKey];
             user.Gem = virtualCurrency[GameCommonData.GemKey];
-            var isSuccess = await _playFabPlayerDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, user)
+            var isSuccess = await _playFabUserDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, user)
                 .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
             if (!isSuccess)
             {

@@ -12,7 +12,7 @@ using Zenject;
 
 namespace Manager.NetworkManager
 {
-    public class PlayFabPlayerDataManager : IDisposable
+    public class PlayFabUserDataManager : IDisposable
     {
         [Inject] private UserDataManager _userDataManager;
 

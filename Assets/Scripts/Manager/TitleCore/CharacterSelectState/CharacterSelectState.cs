@@ -163,7 +163,7 @@ namespace UI.Title
                         }
 
                         user.Characters.Add(characterId);
-                        var isSuccessUpdatePlayerData = await Owner._playFabPlayerDataManager
+                        var isSuccessUpdatePlayerData = await Owner._playFabUserDataManager
                             .TryUpdateUserDataAsync(GameCommonData.UserKey, user)
                             .AttachExternalCancellation(token);
                         if (!isSuccessUpdatePlayerData)

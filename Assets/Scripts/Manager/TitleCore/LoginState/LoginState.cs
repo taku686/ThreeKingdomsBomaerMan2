@@ -10,7 +10,7 @@ namespace UI.Title
         public class LoginState : State
         {
             private CancellationToken _token;
-            private PlayFabPlayerDataManager _playFabPlayerDataManager;
+            private PlayFabUserDataManager _playFabUserDataManager;
             private LoginView _loginView;
 
             protected override void OnEnter(State prevState)
@@ -21,7 +21,7 @@ namespace UI.Title
             private void Initialize()
             {
                 _token = Owner.GetCancellationTokenOnDestroy();
-                _playFabPlayerDataManager = Owner._playFabPlayerDataManager;
+                _playFabUserDataManager = Owner._playFabUserDataManager;
                 _loginView = Owner.loginView;
                 Owner.DisableTitleGameObject();
                 InitializeButton();
@@ -67,7 +67,7 @@ namespace UI.Title
             {
                 var displayName = Owner.loginView.DisplayNameView.InputField.text;
                 var errorText = _loginView.DisplayNameView.ErrorText;
-                var success = await _playFabPlayerDataManager.UpdateUserDisplayName(displayName, errorText);
+                var success = await _playFabUserDataManager.UpdateUserDisplayName(displayName, errorText);
                 if (!success)
                 {
                     return;

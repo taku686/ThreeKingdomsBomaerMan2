@@ -23,7 +23,7 @@ namespace Manager.NetworkManager
         private IExtensionProvider _extensionProvider;
         [Inject] private PlayFabCatalogManager _playFabCatalogManager;
         [Inject] private PlayFabInventoryManager _playFabInventoryManager;
-        [Inject] private PlayFabPlayerDataManager _playFabPlayerDataManager;
+        [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private CharacterDataManager _characterDataManager;
         [Inject] private UserDataManager _userDataManager;
 
@@ -148,7 +148,7 @@ namespace Manager.NetworkManager
             }
 
             _userDataManager.SetUser(user);
-            await _playFabPlayerDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, user);
+            await _playFabUserDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, user);
         }
 
         private async UniTask<bool> AddVirtualCurrency(string virtualCurrencyKey, int amount)

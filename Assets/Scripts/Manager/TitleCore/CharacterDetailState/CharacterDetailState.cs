@@ -6,6 +6,7 @@ using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Manager.DataManager;
+using Manager.NetworkManager;
 using UI.Common;
 using UnityEngine;
 using State = StateMachine<UI.Title.TitleCore>.State;
@@ -19,8 +20,10 @@ namespace UI.Title
         public class CharacterDetailState : State
         {
             private const float MoveAmount = 50;
+            private CharacterDetailView _characterDetailView;
             private CharacterData _characterData;
             private CharacterDataManager _characterDataManager;
+            private PlayFabUserDataManager _playFabUserDataManager;
             private CancellationTokenSource _cts;
             private UIAnimation _uiAnimation;
             private bool _isInitialize;
@@ -42,6 +45,7 @@ namespace UI.Title
                 Owner.mainView.CharacterDetailGameObject.SetActive(true);
                 _characterData = Owner._characterDataManager.GetCharacterData(Owner._currentCharacterId);
                 _characterDataManager = Owner._characterDataManager;
+                _characterDetailView = Owner.characterDetailView;
                 InitializeButton();
                 InitializeContent();
                 InitializeUIAnimation();
@@ -95,16 +99,25 @@ namespace UI.Title
 
             private void OnClickBackButton()
             {
-                Owner.CreateCharacter(Owner._userDataManager.equipCharacterId.Value);
-                Owner.DisableTitleGameObject();
-                Owner.mainView.CharacterListGameObject.SetActive(true);
-                Owner._stateMachine.Dispatch((int)Event.CharacterSelectBack);
+                var button = _characterDetailView.BackButton.gameObject;
+                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() =>
+                {
+                    Owner.CreateCharacter(Owner._userDataManager.equipCharacterId.Value);
+                    Owner.DisableTitleGameObject();
+                    Owner.mainView.CharacterListGameObject.SetActive(true);
+                    Owner._stateMachine.Dispatch((int)Event.CharacterSelect);
+                }).SetLink(button);
             }
 
             private void OnClickSelectButton()
             {
-                Owner._userDataManager.equipCharacterId.Value = Owner._currentCharacterId;
-                Owner._stateMachine.Dispatch((int)Event.Main);
+                var button = _characterDetailView.SelectButton.gameObject;
+                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                {
+                    Owner._userDataManager.equipCharacterId.Value = Owner._currentCharacterId;
+
+                    Owner._stateMachine.Dispatch((int)Event.Main);
+                })).SetLink(button);
             }
 
             private void OnClickRightArrow()
