@@ -14,7 +14,9 @@ namespace Common.Data
         public static readonly string PlayerTag = "Player";
         public static readonly string BombTag = "Bomb";
         public static readonly string BombEffectTag = "BombEffect";
+        public static readonly string BreakingWallTag = "BreakingWall";
         public static readonly string ObstacleLayer = "Obstacles";
+        public static readonly string ExplosionLayer = "Explosion";
         public static readonly string UserKey = "User";
         public static readonly string VirtualCurrencyKey = "vc";
         public static readonly string PriceKey = "price";
