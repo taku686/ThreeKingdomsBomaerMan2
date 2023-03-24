@@ -35,7 +35,7 @@ namespace Manager.ResourceManager
             throw new System.NotImplementedException();
         }
 
-        public User GetUser(CancellationToken token)
+        public UserData GetUser(CancellationToken token)
         {
             throw new System.NotImplementedException();
         }

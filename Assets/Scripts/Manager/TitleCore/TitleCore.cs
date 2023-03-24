@@ -18,12 +18,12 @@ namespace UI.Title
     public partial class TitleCore : MonoBehaviourPunCallbacks
     {
         [Inject] private CharacterDataManager _characterDataManager;
+        [Inject] private UserDataManager _userDataManager;
         [Inject] private UIAnimation _uiAnimation;
         [Inject] private PhotonNetworkManager _photonNetworkManager;
         [Inject] private MainManager _mainManager;
         [Inject] private PlayFabLoginManager _playFabLoginManager;
-        [Inject] private UserDataManager _userDataManager;
-        [Inject] private PlayFabPlayerDataManager _playFabPlayerDataManager;
+        [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private PlayFabShopManager _playFabShopManager;
         [Inject] private PlayFabAdsManager _playFabAdsManager;
         [SerializeField] private Transform characterCreatePosition;
@@ -38,8 +38,9 @@ namespace UI.Title
 
         private GameObject _character;
         private StateMachine<TitleCore> _stateMachine;
+
         private CancellationToken _token;
-        private int _currentCharacterId;
+        //     private int _currentCharacterId;
 
 
         private enum Event
@@ -47,7 +48,6 @@ namespace UI.Title
             Login,
             Main,
             CharacterSelect,
-            CharacterSelectBack,
             CharacterDetail,
             Shop,
             ReadyBattle,
@@ -85,7 +85,7 @@ namespace UI.Title
             _stateMachine.AddAnyTransition<MainState>((int)Event.Main);
             _stateMachine.AddTransition<MainState, CharacterSelectState>((int)Event.CharacterSelect);
             _stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)Event.CharacterDetail);
-            _stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)Event.CharacterSelectBack);
+            _stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)Event.CharacterSelect);
             _stateMachine.AddTransition<MainState, BattleReadyState>((int)Event.ReadyBattle);
             _stateMachine.AddTransition<BattleReadyState, SceneTransitionState>((int)Event.SceneTransition);
             _stateMachine.AddTransition<LoginState, MainState>((int)Event.Main);
@@ -109,7 +109,7 @@ namespace UI.Title
 
         private void CreateCharacter(int id)
         {
-            _userDataManager.equipCharacterId.Value = id;
+            _userDataManager.GetUserData().EquipCharacterId = id;
             var preCharacter = _character;
             Destroy(preCharacter);
             var createCharacterData = _characterDataManager.GetCharacterData(id);

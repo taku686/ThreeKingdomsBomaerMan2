@@ -5,7 +5,7 @@ using UnityEngine.Tilemaps;
 
 namespace Common.Data
 {
-    public class User : IDisposable
+    public class UserData : IDisposable
     {
         public Gender Gender;
         public int EquipCharacterId;
@@ -16,24 +16,24 @@ namespace Common.Data
         public int Coin;
         public List<int> Characters = new();
 
-        public void SetUserData(User user)
+        public void SetUserData(UserData userData)
         {
-            Gender = user.Gender;
-            EquipCharacterId = user.EquipCharacterId;
-            Level = user.Level;
-            Name = user.Name;
-            IsTutorial = user.IsTutorial;
-            Characters = user.Characters;
-            Gem = user.Gem;
-            Coin = user.Coin;
+            Gender = userData.Gender;
+            EquipCharacterId = userData.EquipCharacterId;
+            Level = userData.Level;
+            Name = userData.Name;
+            IsTutorial = userData.IsTutorial;
+            Characters = userData.Characters;
+            Gem = userData.Gem;
+            Coin = userData.Coin;
         }
 
-        public User GetUserData()
+        public UserData GetUserData()
         {
             return this;
         }
 
-        public User Create(CharacterData characterData)
+        public UserData Create(CharacterData characterData)
         {
             var user = this;
             user.Gender = Gender.Male;

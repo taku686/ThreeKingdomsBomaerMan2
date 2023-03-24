@@ -43,10 +43,11 @@ namespace Common.Data
         public static readonly string CharacterMasterKey = "CharacterMaster";
         public static readonly int SkillOneHashKey = Animator.StringToHash("Attack");
         public static readonly int SkillTwoHashKey = Animator.StringToHash("Passive");
+        public static readonly int ActiveHashKey = Animator.StringToHash("Active");
         public static readonly string SkillOneKey = "Base Layer.Attack";
         public static readonly string SkillTwoKey = "Base Layer.Passive";
         public static readonly string GameID = "5089859";
-        public static readonly string RewardAdsKey = "ca-app-pub-3940256099942544~3347511713";
+        public static readonly string RewardAdsKey = "ca-app-pub-3940256099942544/1033173712";
         public static readonly string PlacementName = "testReward";
         public static string CharacterDataPath = "Data/Character/";
         public static string UserDataPath = "Data/UserData/UserData";

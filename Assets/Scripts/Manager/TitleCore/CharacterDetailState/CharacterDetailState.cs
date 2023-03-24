@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Manager.DataManager;
+using Manager.NetworkManager;
+using UI.Common;
 using UnityEngine;
 using State = StateMachine<UI.Title.TitleCore>.State;
 
@@ -13,14 +14,16 @@ namespace UI.Title
 {
     public partial class TitleCore
     {
-        private static readonly int Active = Animator.StringToHash("Active");
-
         public class CharacterDetailState : State
         {
             private const float MoveAmount = 50;
-            private CharacterData _characterData;
+
+            private CharacterDetailView _characterDetailView;
             private CharacterDataManager _characterDataManager;
+            private PlayFabUserDataManager _playFabUserDataManager;
+            private UserDataManager _userDataManager;
             private CancellationTokenSource _cts;
+            private UIAnimation _uiAnimation;
             private bool _isInitialize;
 
             protected override void OnEnter(State prevState)
@@ -38,8 +41,10 @@ namespace UI.Title
                 SetupCancellationToken();
                 Owner.DisableTitleGameObject();
                 Owner.mainView.CharacterDetailGameObject.SetActive(true);
-                _characterData = Owner._characterDataManager.GetCharacterData(Owner._currentCharacterId);
                 _characterDataManager = Owner._characterDataManager;
+                _characterDetailView = Owner.characterDetailView;
+                _playFabUserDataManager = Owner._playFabUserDataManager;
+                _userDataManager = Owner._userDataManager;
                 InitializeButton();
                 InitializeContent();
                 InitializeUIAnimation();
@@ -50,14 +55,15 @@ namespace UI.Title
 
             private void InitializeContent()
             {
-                Owner.characterDetailView.NameText.text =
-                    Owner._characterDataManager.GetCharacterData(Owner._currentCharacterId).Name;
+                var equippedCharacterDataId = _userDataManager.GetUserData().EquipCharacterId;
+                var characterData = _characterDataManager.GetCharacterData(equippedCharacterDataId);
+                Owner.characterDetailView.NameText.text = characterData.Name;
                 var characterStatusView = Owner.characterDetailView.CharacterStatusView;
-                characterStatusView.HpText.text = _characterData.Hp.ToString();
-                characterStatusView.DamageText.text = _characterData.Attack.ToString();
-                characterStatusView.SpeedText.text = _characterData.Speed.ToString();
-                characterStatusView.BombLimitText.text = _characterData.BombLimit.ToString();
-                characterStatusView.FireRangeText.text = _characterData.FireRange.ToString();
+                characterStatusView.HpText.text = characterData.Hp.ToString();
+                characterStatusView.DamageText.text = characterData.Attack.ToString();
+                characterStatusView.SpeedText.text = characterData.Speed.ToString();
+                characterStatusView.BombLimitText.text = characterData.BombLimit.ToString();
+                characterStatusView.FireRangeText.text = characterData.FireRange.ToString();
             }
 
             private void InitializeButton()
@@ -93,31 +99,44 @@ namespace UI.Title
 
             private void OnClickBackButton()
             {
-                Owner.CreateCharacter(Owner._userDataManager.equipCharacterId.Value);
-                Owner.DisableTitleGameObject();
-                Owner.mainView.CharacterListGameObject.SetActive(true);
-                Owner._stateMachine.Dispatch((int)Event.CharacterSelectBack);
+                var button = _characterDetailView.BackButton.gameObject;
+                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() =>
+                {
+                    Owner.CreateCharacter(Owner._userDataManager.GetUserData().EquipCharacterId);
+                    Owner.DisableTitleGameObject();
+                    Owner.mainView.CharacterListGameObject.SetActive(true);
+                    Owner._stateMachine.Dispatch((int)Event.CharacterSelect);
+                }).SetLink(button);
             }
 
             private void OnClickSelectButton()
             {
-                Owner._userDataManager.equipCharacterId.Value = Owner._currentCharacterId;
-                Owner._stateMachine.Dispatch((int)Event.Main);
+                var button = _characterDetailView.SelectButton.gameObject;
+                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                {
+                    var userData = _userDataManager.GetUserData();
+                    var result = await _playFabUserDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, userData);
+                    if (result)
+                    {
+                        Owner._stateMachine.Dispatch((int)Event.Main);
+                    }
+                })).SetLink(button);
             }
 
             private void OnClickRightArrow()
             {
-                if (Owner._userDataManager.GetUser().Characters.Count <= 1)
+                var userData = _userDataManager.GetUserData();
+                if (userData.Characters.Count <= 1)
                 {
                     return;
                 }
 
                 CharacterData nextCharacterData = null;
-                var orderCharacters = Owner._userDataManager.GetUser().Characters.OrderBy(x => x).ToList();
-
+                var orderCharacters = userData.Characters.OrderBy(x => x).ToList();
+                var characterData = _userDataManager.GetEquippedCharacterData();
                 foreach (var characterIndex in orderCharacters)
                 {
-                    if (_characterData.ID < characterIndex)
+                    if (characterData.ID < characterIndex)
                     {
                         nextCharacterData = _characterDataManager.GetCharacterData(characterIndex);
                         break;
@@ -125,7 +144,8 @@ namespace UI.Title
                 }
 
                 nextCharacterData ??= _characterDataManager.GetCharacterData(orderCharacters.First());
-                _characterData = nextCharacterData;
+                userData.EquipCharacterId = nextCharacterData.ID;
+                _userDataManager.SetUserData(userData);
                 CreateCharacter(nextCharacterData);
                 InitializeContent();
                 InitializeAnimation();
@@ -133,18 +153,19 @@ namespace UI.Title
 
             private void OnClickLeftArrow()
             {
-                if (Owner._userDataManager.GetUser().Characters.Count <= 1)
+                var userData = _userDataManager.GetUserData();
+                if (userData.Characters.Count <= 1)
                 {
                     return;
                 }
 
                 CharacterData prevCharacterData = null;
-                var orderCharacters =
-                    Owner._userDataManager.GetUser().Characters.OrderByDescending(x => x).ToList();
+                var characterData = _userDataManager.GetEquippedCharacterData();
+                var orderCharacters = userData.Characters.OrderByDescending(x => x).ToList();
 
                 foreach (var characterIndex in orderCharacters)
                 {
-                    if (_characterData.ID > characterIndex)
+                    if (characterData.ID > characterIndex)
                     {
                         prevCharacterData = _characterDataManager.GetCharacterData(characterIndex);
                         break;
@@ -152,7 +173,8 @@ namespace UI.Title
                 }
 
                 prevCharacterData ??= _characterDataManager.GetCharacterData(orderCharacters.First());
-                _characterData = prevCharacterData;
+                userData.EquipCharacterId = prevCharacterData.ID;
+                _userDataManager.SetUserData(userData);
                 CreateCharacter(prevCharacterData);
                 InitializeContent();
                 InitializeAnimation();
@@ -167,12 +189,14 @@ namespace UI.Title
                     characterData.CharacterObject,
                     characterCreatePosition.position,
                     characterCreatePosition.rotation, characterCreatePosition);
-                Owner._currentCharacterId = characterData.ID;
+                var userData = _userDataManager.GetUserData();
+                userData.EquipCharacterId = characterData.ID;
+                _userDataManager.SetUserData(userData);
             }
 
             private void InitializeAnimation()
             {
-                Owner._character.GetComponent<Animator>().SetTrigger(Active);
+                Owner._character.GetComponent<Animator>().SetTrigger(GameCommonData.ActiveHashKey);
             }
 
             private void SetupCancellationToken()
