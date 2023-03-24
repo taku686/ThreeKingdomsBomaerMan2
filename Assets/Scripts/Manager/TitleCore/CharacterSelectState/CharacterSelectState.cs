@@ -12,20 +12,17 @@ namespace UI.Title
     {
         public class CharacterSelectState : State
         {
-            private readonly List<GameObject> _gridGroupLists = new List<GameObject>();
+            private readonly List<GameObject> _gridGroupLists = new();
+            private UserDataManager _userDataManager;
 
             protected override void OnEnter(State prevState)
             {
                 Initialize();
             }
 
-            protected override void OnExit(State nextState)
-            {
-            }
-
-
             private void Initialize()
             {
+                _userDataManager = Owner._userDataManager;
                 Owner.DisableTitleGameObject();
                 Owner.mainView.CharacterListGameObject.SetActive(true);
                 CreateUIContents();
@@ -118,7 +115,9 @@ namespace UI.Title
                     characterData.CharacterObject,
                     characterCreatePosition.position,
                     characterCreatePosition.rotation, characterCreatePosition);
-                Owner._currentCharacterId = characterData.ID;
+                var userData = _userDataManager.GetUserData();
+                userData.EquipCharacterId = characterData.ID;
+                _userDataManager.SetUserData(userData);
                 Owner._uiAnimation.ClickScale(gridGameObject)
                     .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.CharacterDetail); })
                     .SetLink(Owner.gameObject);
@@ -140,7 +139,7 @@ namespace UI.Title
                 Owner._uiAnimation.ClickScale(disableGrid).OnComplete(() =>
                     UniTask.Void(async () =>
                     {
-                        var user = Owner._userDataManager.GetUser();
+                        var user = Owner._userDataManager.GetUserData();
                         var characterPrice = GameCommonData.CharacterPrice;
                         var diamond = user.Gem;
                         if (diamond < characterPrice)
@@ -168,7 +167,7 @@ namespace UI.Title
                         }
 
                         user.Characters.Add(characterId);
-                        var isSuccessUpdatePlayerData = await Owner._playFabPlayerDataManager
+                        var isSuccessUpdatePlayerData = await Owner._playFabUserDataManager
                             .TryUpdateUserDataAsync(GameCommonData.UserKey, user)
                             .AttachExternalCancellation(token);
                         if (!isSuccessUpdatePlayerData)
@@ -176,7 +175,7 @@ namespace UI.Title
                             return;
                         }
 
-                        Owner._userDataManager.SetUser(user);
+                        Owner._userDataManager.SetUserData(user);
                         CreateUIContents();
                     })).SetLink(disableGrid.gameObject);
             }

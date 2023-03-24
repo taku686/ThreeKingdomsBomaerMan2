@@ -12,14 +12,10 @@ namespace UI.Title
                 Initialize();
             }
 
-            protected override void OnExit(State nextState)
-            {
-            }
-
             private void Initialize()
             {
                 Owner.DisableTitleGameObject();
-                Owner.CreateCharacter(Owner._userDataManager.equipCharacterId.Value);
+                Owner.CreateCharacter(Owner._userDataManager.GetUserData().EquipCharacterId);
                 InitializeButton();
                 InitializeText();
                 Owner.mainView.MainGameObject.SetActive(true);
@@ -39,8 +35,8 @@ namespace UI.Title
 
             private void InitializeText()
             {
-                Owner.mainView.CoinText.text = Owner._userDataManager.GetUser().Coin.ToString("D");
-                Owner.mainView.DiamondText.text = Owner._userDataManager.GetUser().Gem.ToString("D");
+                Owner.mainView.CoinText.text = Owner._userDataManager.GetUserData().Coin.ToString("D");
+                Owner.mainView.DiamondText.text = Owner._userDataManager.GetUserData().Gem.ToString("D");
             }
 
 

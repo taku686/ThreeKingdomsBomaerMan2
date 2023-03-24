@@ -6,19 +6,20 @@ using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using PlayFab;
 using PlayFab.ClientModels;
+using TMPro;
 using UnityEngine;
 using Zenject;
 
 namespace Manager.NetworkManager
 {
-    public class PlayFabPlayerDataManager : IDisposable
+    public class PlayFabUserDataManager : IDisposable
     {
         [Inject] private UserDataManager _userDataManager;
 
         /// <summary>
         /// playerデータの更新
         /// </summary>
-        public async UniTask<bool> TryUpdateUserDataAsync(string key, User value)
+        public async UniTask<bool> TryUpdateUserDataAsync(string key, UserData value)
         {
             var userJson = JsonConvert.SerializeObject(value);
             var request = new UpdateUserDataRequest()
@@ -38,11 +39,11 @@ namespace Manager.NetworkManager
                 Debug.Log(response.Error.GenerateErrorReport());
                 return false;
             }
-            
+
             return true;
         }
 
-        public async UniTask<User> GetPlayerData(string key)
+        public async UniTask<UserData> GetPlayerData(string key)
         {
             var request = new GetUserDataRequest
             {
@@ -59,13 +60,13 @@ namespace Manager.NetworkManager
             else
             {
                 var value = response.Result.Data[key].Value;
-                var user = JsonConvert.DeserializeObject<User>(value);
+                var user = JsonConvert.DeserializeObject<UserData>(value);
                 if (user == null)
                 {
                     return null;
                 }
 
-                _userDataManager.SetUser(user);
+                _userDataManager.SetUserData(user);
                 return user;
             }
         }
@@ -85,8 +86,13 @@ namespace Manager.NetworkManager
             }
         }
 
-        public async UniTask UpdateUserDisplayName(string playerName)
+        public async UniTask<bool> UpdateUserDisplayName(string playerName, TextMeshProUGUI errorText)
         {
+            if (string.IsNullOrEmpty(playerName))
+            {
+                return false;
+            }
+
             var request = new UpdateUserTitleDisplayNameRequest
             {
                 DisplayName = playerName
@@ -98,16 +104,21 @@ namespace Manager.NetworkManager
                 switch (response.Error.Error)
                 {
                     case PlayFabErrorCode.InvalidParams:
-                        Debug.Log("名前は3~25文字以内で入力してください。");
-                        break;
+                        Debug.Log("名前の文字数制限エラーです");
+                        errorText.text = "名前は3~15文字以内で入力して下さい。";
+                        return false;
                     case PlayFabErrorCode.ProfaneDisplayName:
-                        Debug.Log("この名前は使用できません。");
-                        break;
+                        Debug.Log("この名前は使用できません");
+                        errorText.text = "この名前は使用できません。";
+                        return false;
                     default:
+                        errorText.text = "この名前は使用できません。";
                         Debug.Log(response.Error.GenerateErrorReport());
-                        break;
+                        return false;
                 }
             }
+
+            return true;
         }
 
         public void Dispose()

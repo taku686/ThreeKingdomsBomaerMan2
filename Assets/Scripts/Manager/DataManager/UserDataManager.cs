@@ -1,37 +1,44 @@
+using Manager.DataManager;
 using UniRx;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Common.Data
 {
     public class UserDataManager : MonoBehaviour
     {
-        [HideInInspector] public ReactiveProperty<int> equipCharacterId;
-        private User _user;
+        private UserData _userData;
+        private CharacterDataManager _characterDataManager;
 
-        public void Initialize(User user)
+        public void Initialize(UserData userData, CharacterDataManager characterDataManager)
         {
-            _user = user;
-            equipCharacterId.Subscribe(index => { _user.EquipCharacterId = index; }).AddTo(this);
+            SetUserData(userData);
+            _characterDataManager = characterDataManager;
         }
 
-        public User GetUser()
+        public UserData GetUserData()
         {
-            return _user;
+            return _userData;
         }
 
-        public void SetUser(User user)
+        public void SetUserData(UserData userData)
         {
-            _user = user;
+            _userData = userData;
+        }
+
+        public CharacterData GetEquippedCharacterData()
+        {
+            return _characterDataManager.GetCharacterData(_userData.EquipCharacterId);
         }
 
         public bool IsGetCharacter(int characterId)
         {
-            return _user.Characters.Contains(characterId);
+            return _userData.Characters.Contains(characterId);
         }
 
         private void OnDestroy()
         {
-            _user?.Dispose();
+            _userData?.Dispose();
         }
     }
 }

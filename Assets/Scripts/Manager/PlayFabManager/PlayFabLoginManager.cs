@@ -20,7 +20,7 @@ namespace Assets.Scripts.Common.PlayFab
         [Inject] private UserDataManager _userDataManager;
         [Inject] private CharacterDataManager _characterDataManager;
         [Inject] private PlayFabCatalogManager _playFabCatalogManager;
-        [Inject] private PlayFabPlayerDataManager _playFabPlayerDataManager;
+        [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private PlayFabShopManager _playFabShopManager;
         [Inject] private PlayFabTitleDataManager _playFabTitleDataManager;
         private GetPlayerCombinedInfoRequestParams _info;
@@ -86,7 +86,7 @@ namespace Assets.Scripts.Common.PlayFab
                 return false;
             }
 
-            var user = JsonConvert.DeserializeObject<User>(response.Result.InfoResultPayload
+            var user = JsonConvert.DeserializeObject<UserData>(response.Result.InfoResultPayload
                 .UserData[GameCommonData.UserKey].Value);
             var virtualCurrency = response.Result.InfoResultPayload.UserVirtualCurrency;
 
@@ -94,7 +94,7 @@ namespace Assets.Scripts.Common.PlayFab
             {
                 user.Coin = virtualCurrency[GameCommonData.CoinKey];
                 user.Gem = virtualCurrency[GameCommonData.GemKey];
-                _userDataManager.Initialize(user);
+                _userDataManager.Initialize(user, _characterDataManager);
                 return true;
             }
 
@@ -104,11 +104,11 @@ namespace Assets.Scripts.Common.PlayFab
         public async UniTask<bool> CreateUserData()
         {
             var characterData = _characterDataManager.GetCharacterData(DefaultCharacterIndex);
-            var user = new User().Create(characterData);
+            var user = new UserData().Create(characterData);
             var virtualCurrency = _loginResponse.Result.InfoResultPayload.UserVirtualCurrency;
             user.Coin = virtualCurrency[GameCommonData.CoinKey];
             user.Gem = virtualCurrency[GameCommonData.GemKey];
-            var isSuccess = await _playFabPlayerDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, user)
+            var isSuccess = await _playFabUserDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, user)
                 .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
             if (!isSuccess)
             {
@@ -117,40 +117,6 @@ namespace Assets.Scripts.Common.PlayFab
             }
 
             return await Login().AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
-        }
-
-        public async UniTask<bool> SetDisplayName(string displayName)
-        {
-            if (displayName.IsNullOrEmpty())
-            {
-                return false;
-            }
-
-            var request = new UpdateUserTitleDisplayNameRequest
-            {
-                DisplayName = displayName
-            };
-            var response = await PlayFabClientAPI.UpdateUserTitleDisplayNameAsync(request);
-            if (response.Error != null)
-            {
-                switch (response.Error.Error)
-                {
-                    case PlayFabErrorCode.InvalidParams:
-                        Debug.Log("名前の文字数制限エラーです");
-                        _displayNameView.ErrorText.text = "名前は3~15文字以内で入力して下さい。";
-                        return false;
-                    case PlayFabErrorCode.ProfaneDisplayName:
-                        Debug.Log("この名前は使用できません");
-                        _displayNameView.ErrorText.text = "この名前は使用できません。";
-                        return false;
-                    default:
-                        _displayNameView.ErrorText.text = "この名前は使用できません。";
-                        Debug.Log(response.Error.GenerateErrorReport());
-                        return false;
-                }
-            }
-
-            return true;
         }
     }
 }
