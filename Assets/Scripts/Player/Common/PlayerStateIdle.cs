@@ -41,9 +41,13 @@ namespace Player.Common
                 {
                     return;
                 }
-
-                var direction = new Vector3(UltimateJoystick.GetHorizontalAxis(GameCommonData.JoystickName), 0,
+#if UNITY_EDITOR
+                var direction = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+#elif UNITY_ANDROID
+   var direction = new Vector3(UltimateJoystick.GetHorizontalAxis(GameCommonData.JoystickName), 0,
                     UltimateJoystick.GetVerticalAxis(GameCommonData.JoystickName));
+#endif
+
                 _playerMove.Move(direction).Forget();
             }
 

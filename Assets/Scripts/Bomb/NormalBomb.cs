@@ -43,6 +43,8 @@ namespace Bomb
             var endPos = CalculateEndPos(isHit, hit, startPos, fireRange, dir);
             var distance = (endPos - startPos).magnitude;
             var isExplosion = distance >= MinDistance;
+            Debug.Log("isHit: " + isHit + " hitObj: " + hit.collider.name + " fireRange: " + fireRange + " dir: " +
+                      direction);
             if (!isExplosion)
             {
                 return;
@@ -63,13 +65,15 @@ namespace Bomb
         {
             var position = hit.transform.position;
             var endPos = new Vector3(position.x, 0.5f, position.z);
+            /*Debug.Log("startPos" + startPos);
+            Debug.Log("endPos" + endPos);*/
             return (int)Mathf.Abs((endPos - startPos).magnitude);
         }
 
         private async void GenerateCollider(Vector3 startPos, Direction direction, int fireRange, int damageAmount)
         {
             var dir = GameCommonData.DirectionToVector3(direction);
-            for (int i = 0; i < fireRange; i++)
+            for (int i = 1; i <= fireRange; i++)
             {
                 var colliderObj = Instantiate(bombCollider, CalculateGeneratePos(startPos, dir, i),
                     bombCollider.transform.rotation, gameObject.transform);
@@ -87,7 +91,7 @@ namespace Bomb
             bool isX = direction.x != 0;
             if (isX)
             {
-                return new Vector3(startPos.x + direction.x + index, startPos.y, startPos.z);
+                return new Vector3(startPos.x + direction.x * index, startPos.y, startPos.z);
             }
 
             return new Vector3(startPos.x, startPos.y, startPos.z + direction.z * index);
