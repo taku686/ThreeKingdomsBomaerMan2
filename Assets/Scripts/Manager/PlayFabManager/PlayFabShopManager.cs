@@ -128,7 +128,7 @@ namespace Manager.NetworkManager
 
         private async UniTask UpdateUserData(PlayFabResult<PurchaseItemResult> result, Image rewardImage)
         {
-            var user = _userDataManager.GetUser();
+            var user = _userDataManager.GetUserData();
             var getItems = result.Result.Items.Where(x => x.BundleParent != null);
             foreach (var item in getItems)
             {
@@ -147,7 +147,7 @@ namespace Manager.NetworkManager
                 }
             }
 
-            _userDataManager.SetUser(user);
+            _userDataManager.SetUserData(user);
             await _playFabUserDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, user);
         }
 

@@ -24,7 +24,7 @@ namespace Manager.NetworkManager
                 return;
             }
 
-            var user = _userDataManager.GetUser();
+            var user = _userDataManager.GetUserData();
             foreach (var item in result.Result.VirtualCurrency)
             {
                 if (item.Key.Equals(GameCommonData.CoinKey))
@@ -38,7 +38,7 @@ namespace Manager.NetworkManager
                 }
             }
 
-            _userDataManager.SetUser(user);
+            _userDataManager.SetUserData(user);
         }
 
         public async UniTask SetInventoryData()
@@ -50,7 +50,7 @@ namespace Manager.NetworkManager
                 return;
             }
 
-            var user = _userDataManager.GetUser();
+            var user = _userDataManager.GetUserData();
             foreach (var item in result.Result.Inventory)
             {
                 if (item.ItemClass.Equals(GameCommonData.CharacterClassKey))
@@ -60,7 +60,7 @@ namespace Manager.NetworkManager
                 }
             }
 
-            _userDataManager.SetUser(user);
+            _userDataManager.SetUserData(user);
             await _playFabUserDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, user);
         }
 

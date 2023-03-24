@@ -38,8 +38,9 @@ namespace UI.Title
 
         private GameObject _character;
         private StateMachine<TitleCore> _stateMachine;
+
         private CancellationToken _token;
-        private int _currentCharacterId;
+        //     private int _currentCharacterId;
 
 
         private enum Event
@@ -108,7 +109,7 @@ namespace UI.Title
 
         private void CreateCharacter(int id)
         {
-            _userDataManager.equipCharacterId.Value = id;
+            _userDataManager.GetUserData().EquipCharacterId = id;
             var preCharacter = _character;
             Destroy(preCharacter);
             var createCharacterData = _characterDataManager.GetCharacterData(id);

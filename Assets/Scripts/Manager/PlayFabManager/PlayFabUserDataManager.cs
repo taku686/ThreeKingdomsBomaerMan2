@@ -19,7 +19,7 @@ namespace Manager.NetworkManager
         /// <summary>
         /// playerデータの更新
         /// </summary>
-        public async UniTask<bool> TryUpdateUserDataAsync(string key, User value)
+        public async UniTask<bool> TryUpdateUserDataAsync(string key, UserData value)
         {
             var userJson = JsonConvert.SerializeObject(value);
             var request = new UpdateUserDataRequest()
@@ -43,7 +43,7 @@ namespace Manager.NetworkManager
             return true;
         }
 
-        public async UniTask<User> GetPlayerData(string key)
+        public async UniTask<UserData> GetPlayerData(string key)
         {
             var request = new GetUserDataRequest
             {
@@ -60,13 +60,13 @@ namespace Manager.NetworkManager
             else
             {
                 var value = response.Result.Data[key].Value;
-                var user = JsonConvert.DeserializeObject<User>(value);
+                var user = JsonConvert.DeserializeObject<UserData>(value);
                 if (user == null)
                 {
                     return null;
                 }
 
-                _userDataManager.SetUser(user);
+                _userDataManager.SetUserData(user);
                 return user;
             }
         }
