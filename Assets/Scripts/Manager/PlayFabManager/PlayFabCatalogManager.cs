@@ -8,64 +8,35 @@ using Newtonsoft.Json;
 using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine;
+using Zenject;
 
 namespace Assets.Scripts.Common.ResourceManager
 {
     public class PlayFabCatalogManager : IDisposable
     {
-        private readonly Catalog _catalog;
-        private List<CatalogItem> _catalogItemList;
-        private const string CharacterClassKey = "Character";
-        private readonly Dictionary<int, GameObject> _characterGameObjects = new();
+        [Inject] private readonly CatalogDataManager _catalogDataManager;
         private readonly CancellationTokenSource _cancellationTokenSource = new();
-    //    public Dictionary<int, GameObject> CharacterGameObjects => _characterGameObjects;
         private CancellationTokenSource _cts;
         private static readonly int ModifiedValue = 10;
 
-        public List<CatalogItem> CatalogItemList => _catalogItemList;
-
-        public PlayFabCatalogManager()
+        public async UniTask Initialize()
         {
-            _catalog = new Catalog();
-        }
-
-        public async UniTask Initialize(List<CatalogItem> catalogItems)
-        {
+            var catalogItems = await GetCatalogItems();
             foreach (var item in catalogItems)
             {
-                if (item.ItemClass != CharacterClassKey)
+                if (item.ItemClass == GameCommonData.CharacterClassKey)
                 {
-                    continue;
+                    SetCharacterData(item);
                 }
 
-                var customData = JsonConvert.DeserializeObject<CharacterData>(item.CustomData);
-                if (customData == null)
+                if (item.ItemClass == GameCommonData.ConsumableClassKey)
                 {
-                    continue;
+                    SetAddVirtualCurrencyItemData(item);
                 }
-
-                var characterData = new CharacterData
-                {
-                    CharaObj = customData.CharaObj,
-                    Team = customData.Team,
-                    Level = customData.Level,
-                    Name = customData.Name,
-                    ID = customData.ID,
-                    Speed = customData.Speed,
-                    BombLimit = customData.BombLimit / ModifiedValue,
-                    Attack = customData.Attack,
-                    FireRange = customData.FireRange / ModifiedValue,
-                    Hp = customData.Hp,
-                    CharaColor = customData.CharaColor
-                };
-                _catalog.SetCharacter(customData.ID, characterData);
-                await LoadGameObject(GameCommonData.CharacterPrefabPath, customData.ID,
-                        _cancellationTokenSource.Token)
-                    .AttachExternalCancellation(_cancellationTokenSource.Token);
             }
         }
 
-        public async UniTask<List<CatalogItem>> GetCatalogItems()
+        private async UniTask<List<CatalogItem>> GetCatalogItems()
         {
             var response = await PlayFabClientAPI.GetCatalogItemsAsync(new GetCatalogItemsRequest());
             if (response.Error != null)
@@ -74,47 +45,63 @@ namespace Assets.Scripts.Common.ResourceManager
                 return null;
             }
 
-            return _catalogItemList = response.Result.Catalog;
+            var catalogItemList = response.Result.Catalog;
+            _catalogDataManager.SetCatalogItemList(catalogItemList);
+            return catalogItemList;
         }
 
-        private async UniTask LoadGameObject(string path, int id, CancellationToken token)
+        private void SetCharacterData(CatalogItem item)
         {
-            var charaObj = _catalog.GetCharacterData(id).CharaObj;
-            if (charaObj == null)
+            var customData = JsonConvert.DeserializeObject<CharacterData>(item.CustomData);
+            if (customData == null)
             {
                 return;
             }
 
-            var resource = await Resources.LoadAsync<GameObject>(path + charaObj)
-                .WithCancellation(token);
-            _characterGameObjects[id] = (GameObject)resource;
+            var characterData = new CharacterData
+            {
+                CharaObj = customData.CharaObj,
+                Team = customData.Team,
+                Level = customData.Level,
+                Name = customData.Name,
+                ID = customData.ID,
+                Speed = customData.Speed,
+                BombLimit = customData.BombLimit / ModifiedValue,
+                Attack = customData.Attack,
+                FireRange = customData.FireRange / ModifiedValue,
+                Hp = customData.Hp,
+                CharaColor = customData.CharaColor
+            };
+            _catalogDataManager.SetCharacter(customData.ID, characterData);
         }
 
-
-        /*public CharacterData GetCharacterData(int id)
+        private void SetAddVirtualCurrencyItemData(CatalogItem item)
         {
-            return _catalog.GetCharacterData(id);
-        }*/
+            if (item.CustomData == null)
+            {
+                return;
+            }
 
-        /*public async UniTask<Sprite> LoadCharacterSprite(int id, CancellationToken token)
-        {
-            var response = await Resources.LoadAsync<Sprite>(LabelData.CharacterSpritePath + id)
-                .WithCancellation(token);
-            return (Sprite)response;
+            var customData = JsonConvert.DeserializeObject<AddVirtualCurrencyItemData>(item.CustomData);
+            if (customData == null)
+            {
+                return;
+            }
+
+            var addVirtualCurrencyItemData = new AddVirtualCurrencyItemData()
+            {
+                vc = customData.vc,
+                price = customData.price,
+                Name = item.ItemId
+            };
+            _catalogDataManager.SetAddVirtualCurrencyData(addVirtualCurrencyItemData);
         }
-
-        public async UniTask<Sprite> LoadCharacterColor(int id, CancellationToken token)
-        {
-            var resource = await Resources.LoadAsync<Sprite>(LabelData.CharacterColorPath + id)
-                .WithCancellation(token);
-            return (Sprite)resource;
-        }*/
 
         public void Dispose()
         {
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
-            _catalog.Dispose();
+            _catalogDataManager.Dispose();
         }
     }
 }

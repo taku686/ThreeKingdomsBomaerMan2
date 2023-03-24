@@ -1,3 +1,4 @@
+using Assets.Scripts.Common.Data;
 using Assets.Scripts.Common.ResourceManager;
 using Common.Data;
 using Manager;
@@ -18,6 +19,7 @@ namespace Common.Installer
         public override void InstallBindings()
         {
             Container.Bind<CharacterDataManager>().FromNew().AsSingle();
+            Container.Bind<CatalogDataManager>().FromNew().AsSingle();
             Container.Bind<PhotonNetworkManager>().FromComponentInNewPrefab(photonNetworkGameObject).AsSingle();
             Container.Bind<MainManager>().FromComponentsInNewPrefab(mainManagerGameObject).AsSingle();
             Container.Bind<UserDataManager>().FromComponentsInNewPrefab(userManagerGameObject).AsSingle();

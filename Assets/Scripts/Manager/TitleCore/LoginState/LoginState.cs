@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using Cysharp.Threading.Tasks;
-using Manager.PlayFabManager;
+using Manager.NetworkManager;
 using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
@@ -10,6 +10,8 @@ namespace UI.Title
         public class LoginState : State
         {
             private CancellationToken _token;
+            private PlayFabUserDataManager _playFabUserDataManager;
+            private LoginView _loginView;
 
             protected override void OnEnter(State prevState)
             {
@@ -19,6 +21,8 @@ namespace UI.Title
             private void Initialize()
             {
                 _token = Owner.GetCancellationTokenOnDestroy();
+                _playFabUserDataManager = Owner._playFabUserDataManager;
+                _loginView = Owner.loginView;
                 Owner.DisableTitleGameObject();
                 InitializeButton();
                 InitializeObject();
@@ -53,7 +57,7 @@ namespace UI.Title
 
                 if (result)
                 {
-                    await Owner._characterDataManager.Initialize(Owner._userDataManager, Owner._token);
+                    Owner._characterDataManager.Initialize(Owner._userDataManager, Owner._token);
                     Owner._mainManager.isInitialize = true;
                     Owner._stateMachine.Dispatch((int)Event.Main);
                 }
@@ -62,7 +66,8 @@ namespace UI.Title
             private async UniTask OnClickDisplayName()
             {
                 var displayName = Owner.loginView.DisplayNameView.InputField.text;
-                var success = await Owner._playFabLoginManager.SetDisplayName(displayName);
+                var errorText = _loginView.DisplayNameView.ErrorText;
+                var success = await _playFabUserDataManager.UpdateUserDisplayName(displayName, errorText);
                 if (!success)
                 {
                     return;
@@ -71,7 +76,7 @@ namespace UI.Title
                 var createSuccess = await Owner._playFabLoginManager.CreateUserData();
                 if (createSuccess)
                 {
-                    await Owner._characterDataManager.Initialize(Owner._userDataManager, Owner._token);
+                    Owner._characterDataManager.Initialize(Owner._userDataManager, Owner._token);
                     Owner.loginView.DisplayNameView.gameObject.SetActive(false);
                     Owner._mainManager.isInitialize = true;
                     Owner._stateMachine.Dispatch((int)Event.Login);
