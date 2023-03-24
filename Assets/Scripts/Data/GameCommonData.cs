@@ -14,7 +14,9 @@ namespace Common.Data
         public static readonly string PlayerTag = "Player";
         public static readonly string BombTag = "Bomb";
         public static readonly string BombEffectTag = "BombEffect";
+        public static readonly string BreakingWallTag = "BreakingWall";
         public static readonly string ObstacleLayer = "Obstacles";
+        public static readonly string ExplosionLayer = "Explosion";
         public static readonly string UserKey = "User";
         public static readonly string VirtualCurrencyKey = "vc";
         public static readonly string PriceKey = "price";
@@ -47,7 +49,7 @@ namespace Common.Data
         public static readonly string SkillOneKey = "Base Layer.Attack";
         public static readonly string SkillTwoKey = "Base Layer.Passive";
         public static readonly string GameID = "5089859";
-        public static readonly string RewardAdsKey = "ca-app-pub-3940256099942544/1033173712";
+        public static readonly string RewardAdsKey = "ca-app-pub-3759795642939239/2878540700";
         public static readonly string PlacementName = "testReward";
         public static string CharacterDataPath = "Data/Character/";
         public static string UserDataPath = "Data/UserData/UserData";

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Common.Data;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -42,7 +43,10 @@ namespace Manager.BattleManager.Environment
                 }
 
                 prohibitPos.Add(createPos);
-                Instantiate(breakingBlocks[0], createPos, breakingBlocks[0].transform.rotation, parentTransform);
+                var breakingWallObj = Instantiate(breakingBlocks[0], createPos, breakingBlocks[0].transform.rotation,
+                    parentTransform);
+                breakingWallObj.AddComponent<BreakingWall>();
+                breakingWallObj.tag = GameCommonData.BreakingWallTag;
                 count++;
             }
         }
