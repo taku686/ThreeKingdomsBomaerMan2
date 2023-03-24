@@ -43,8 +43,6 @@ namespace Bomb
             var endPos = CalculateEndPos(isHit, hit, startPos, fireRange, dir);
             var distance = (endPos - startPos).magnitude;
             var isExplosion = distance >= MinDistance;
-            Debug.Log("isHit: " + isHit + " hitObj: " + hit.collider.name + " fireRange: " + fireRange + " dir: " +
-                      direction);
             if (!isExplosion)
             {
                 return;
@@ -65,8 +63,6 @@ namespace Bomb
         {
             var position = hit.transform.position;
             var endPos = new Vector3(position.x, 0.5f, position.z);
-            /*Debug.Log("startPos" + startPos);
-            Debug.Log("endPos" + endPos);*/
             return (int)Mathf.Abs((endPos - startPos).magnitude);
         }
 

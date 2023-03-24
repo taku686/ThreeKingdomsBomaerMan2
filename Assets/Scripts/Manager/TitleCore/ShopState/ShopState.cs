@@ -1,7 +1,7 @@
 ﻿using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using Newtonsoft.Json.Serialization;
+using Manager.NetworkManager;
 using UI.Common;
 using UI.Title.ShopState;
 using UnityEngine;
@@ -14,6 +14,8 @@ namespace UI.Title
         public class ShopState : State
         {
             private UIAnimation _uiAnimation;
+            private PlayFabShopManager _playFabShopManager;
+            private ShopView _shopView;
 
             protected override void OnEnter(State prevState)
             {
@@ -23,12 +25,17 @@ namespace UI.Title
             private void Initialize()
             {
                 _uiAnimation = Owner._uiAnimation;
+                _playFabShopManager = Owner._playFabShopManager;
+                _shopView = Owner.shopView;
                 Owner.DisableTitleGameObject();
                 InitializeButton();
                 Owner.mainView.ShopGameObject.SetActive(true);
                 Owner.shopView.RewardGetView.gameObject.SetActive(false);
                 Owner.shopView.PurchaseErrorView.gameObject.SetActive(false);
                 Owner.shopView.PurchaseErrorView.errorInfoText.text = "";
+
+                //todo 後で消す
+                _playFabShopManager.DebugText = _shopView.DebugText;
             }
 
             private void InitializeButton()
@@ -46,22 +53,21 @@ namespace UI.Title
                 Owner.shopView.PurchaseErrorView.okButton.onClick.RemoveAllListeners();
                 Owner.shopView.BackButton.onClick.AddListener(OnCLickBack);
                 Owner.shopView.ThousandCoinButton.onClick.AddListener(() =>
-                    OnClickBuyItem(GameCommonData.ThousandCoinItemKey, GameCommonData.ThousandCoinItemPrice,
-                        Owner.shopView.ThousandCoinButton.gameObject));
+                    OnClickBuyItem(GameCommonData.ThousandCoinItemKey, Owner.shopView.ThousandCoinButton.gameObject));
                 Owner.shopView.FiveThousandCoinButton.onClick.AddListener(() =>
-                    OnClickBuyItem(GameCommonData.FiveThousandCoinItemKey, GameCommonData.FiveThousandCoinItemPrice,
+                    OnClickBuyItem(GameCommonData.FiveThousandCoinItemKey,
                         Owner.shopView.FiveThousandCoinButton.gameObject));
                 Owner.shopView.TwelveThousandCoinButton.onClick.AddListener(() =>
-                    OnClickBuyItem(GameCommonData.TwelveThousandCoinItemKey, GameCommonData.TwelveThousandCoinItemPrice,
+                    OnClickBuyItem(GameCommonData.TwelveThousandCoinItemKey,
                         Owner.shopView.TwelveThousandCoinButton.gameObject));
                 Owner.shopView.TwentyGemButton.onClick.AddListener(() =>
-                    OnClickBuyItem(GameCommonData.TwentyGemItemKey, GameCommonData.TwentyGemItemPrice,
+                    OnClickBuyItem(GameCommonData.TwentyGemItemKey,
                         Owner.shopView.TwentyGemButton.gameObject));
                 Owner.shopView.HundredGemButton.onClick.AddListener(() =>
-                    OnClickBuyItem(GameCommonData.HundredGemKey, GameCommonData.HundredGemItemPrice,
+                    OnClickBuyItem(GameCommonData.HundredGemKey,
                         Owner.shopView.HundredGemButton.gameObject));
                 Owner.shopView.TwoHundredGemButton.onClick.AddListener(() =>
-                    OnClickBuyItem(GameCommonData.TwoHundredGemKey, GameCommonData.TwoHundredGemItemPrice,
+                    OnClickBuyItem(GameCommonData.TwoHundredGemKey,
                         Owner.shopView.TwoHundredGemButton.gameObject));
                 Owner.shopView.AdsButton.onClick.AddListener(OnClickAds);
                 Owner.shopView.GachaButton.onClick.AddListener(OnClickCharacterGacha);
@@ -78,15 +84,11 @@ namespace UI.Title
                 }).SetLink(backButton);
             }
 
-            private void OnClickBuyItem(string itemKey, int price, GameObject button)
+            private void OnClickBuyItem(string itemKey, GameObject button)
             {
                 Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
-                    var isSucceed = await Owner._playFabShopManager.TryPurchaseItem(itemKey,
-                        GameCommonData.RealMoneyKey, price, GameCommonData.MainShopKey);
-                    if (isSucceed)
-                    {
-                    }
+                    Owner._playFabShopManager.TryPurchaseItem(itemKey);
                 })).SetLink(button);
             }
 

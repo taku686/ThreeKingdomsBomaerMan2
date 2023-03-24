@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using Assets.Scripts.Common.ResourceManager;
+using Assets.Scripts.Common.Data;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.DataManager;
@@ -21,11 +21,18 @@ namespace Manager.NetworkManager
         private ConfigurationBuilder _builder;
         private IStoreController _storeController;
         private IExtensionProvider _extensionProvider;
-        [Inject] private PlayFabCatalogManager _playFabCatalogManager;
+
+        private string _itemName;
+
+        //  [Inject] private PlayFabCatalogManager _playFabCatalogManager;
         [Inject] private PlayFabInventoryManager _playFabInventoryManager;
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private CharacterDataManager _characterDataManager;
         [Inject] private UserDataManager _userDataManager;
+        [Inject] private CatalogDataManager _catalogDataManager;
+
+        //todo 後で消す
+        public TextMeshProUGUI DebugText;
 
         public async UniTask InitializePurchasing()
         {
@@ -38,7 +45,7 @@ namespace Manager.NetworkManager
             await UnityServices.InitializeAsync(options);
             _isInitialized = true;
             _builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
-            foreach (var catalogItem in _playFabCatalogManager.CatalogItemList.FindAll(x =>
+            foreach (var catalogItem in _catalogDataManager.GetCatalogItems().FindAll(x =>
                          x.ItemClass == GameCommonData.ConsumableClassKey))
             {
                 _builder.AddProduct(catalogItem.ItemId, ProductType.Consumable);
@@ -47,40 +54,10 @@ namespace Manager.NetworkManager
             UnityPurchasing.Initialize(this, _builder);
         }
 
-        public async UniTask<bool> TryPurchaseItem(string itemName, string virtualCurrencyKey, int price,
-            string shopKey)
+        public void TryPurchaseItem(string itemName)
         {
-            var request = new PurchaseItemRequest()
-            {
-                ItemId = itemName,
-                VirtualCurrency = virtualCurrencyKey,
-                Price = price,
-                StoreId = shopKey,
-                CatalogVersion = "main"
-            };
-            var result = await PlayFabClientAPI.PurchaseItemAsync(request);
+            _itemName = itemName;
             _storeController.InitiatePurchase(itemName);
-            if (result.Error != null)
-            {
-                Debug.Log(result.Error.GenerateErrorReport());
-                return false;
-            }
-
-            foreach (var item in result.Result.Items)
-            {
-                if (item.CustomData[GameCommonData.VirtualCurrencyKey] == virtualCurrencyKey)
-                {
-                    var amount = int.Parse(item.CustomData[GameCommonData.PriceKey]);
-                    var result2 = await AddVirtualCurrency(virtualCurrencyKey, amount);
-                    if (!result2)
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            await _playFabInventoryManager.SetVirtualCurrency();
-            return true;
         }
 
         public async UniTask<bool> TryPurchaseGacha(string itemName, string virtualCurrencyKey, int price,
@@ -162,10 +139,34 @@ namespace Manager.NetworkManager
 
             if (result.Error != null)
             {
+                DebugText.text = "仮想通貨追加失敗";
                 return false;
             }
 
+            DebugText.text = "仮想通貨追加";
+            await _playFabInventoryManager.SetVirtualCurrency();
             return true;
+        }
+
+        private string ItemKeyToVirtualCurrencyKey(string itemKey)
+        {
+            switch (itemKey)
+            {
+                case GameCommonData.ThousandCoinItemKey:
+                    return GameCommonData.CoinKey;
+                case GameCommonData.FiveThousandCoinItemKey:
+                    return GameCommonData.CoinKey;
+                case GameCommonData.TwelveThousandCoinItemKey:
+                    return GameCommonData.CoinKey;
+                case GameCommonData.TwentyGemItemKey:
+                    return GameCommonData.GemKey;
+                case GameCommonData.HundredGemKey:
+                    return GameCommonData.GemKey;
+                case GameCommonData.TwoHundredGemKey:
+                    return GameCommonData.GemKey;
+                default:
+                    return null;
+            }
         }
 
 
@@ -223,8 +224,17 @@ namespace Manager.NetworkManager
             if (result.Error != null)
             {
                 Debug.Log("Validated failed" + result.Error.GenerateErrorReport());
+                return;
             }
 
+            var itemData = _catalogDataManager.GetAddVirtualCurrencyItemDatum()
+                .FirstOrDefault(x => x.Name == _itemName);
+            if (itemData == null)
+            {
+                return;
+            }
+
+            await AddVirtualCurrency(itemData.vc, itemData.price);
             Debug.Log("Validated success");
         }
 

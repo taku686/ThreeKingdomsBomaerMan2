@@ -1,9 +1,8 @@
 ﻿using System;
-using UnityEngine;
 
 namespace Common.Data
 {
-    public class Currency : IDisposable
+    public class VirtualCurrency : IDisposable
     {
         private int _diamond;
         private int _coin;

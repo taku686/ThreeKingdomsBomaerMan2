@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using UnityEngine.Serialization;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace UI.Title.ShopState
@@ -17,6 +17,8 @@ namespace UI.Title.ShopState
         [SerializeField] private Button gachaButton;
         [SerializeField] private RewardGetView rewardGetView;
         [SerializeField] private PurchaseErrorView purchaseErrorView;
+        [SerializeField] private TextMeshProUGUI debugText;
+        public TextMeshProUGUI DebugText => debugText;
         public PurchaseErrorView PurchaseErrorView => purchaseErrorView;
         public RewardGetView RewardGetView => rewardGetView;
         public Button AdsButton => adsButton;
