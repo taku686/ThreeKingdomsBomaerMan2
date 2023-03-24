@@ -9,7 +9,6 @@ using PlayFab.ClientModels;
 using UnityEngine;
 using Newtonsoft.Json;
 using UI.Title.LoginState;
-using WebSocketSharp;
 using Zenject;
 
 namespace Assets.Scripts.Common.PlayFab
@@ -73,9 +72,7 @@ namespace Assets.Scripts.Common.PlayFab
 
         private async UniTask<bool> SetData(PlayFabResult<LoginResult> response)
         {
-            var catalogList = await _playFabCatalogManager.GetCatalogItems()
-                .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
-            await _playFabCatalogManager.Initialize(catalogList);
+            await _playFabCatalogManager.Initialize();
             await _playFabShopManager.InitializePurchasing();
             await _playFabTitleDataManager.SetTitleData(response.Result.InfoResultPayload.TitleData);
             if (!response.Result.InfoResultPayload.UserData.TryGetValue(GameCommonData.UserKey,
