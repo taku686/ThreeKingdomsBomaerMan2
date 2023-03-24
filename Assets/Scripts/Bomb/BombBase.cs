@@ -18,10 +18,7 @@ namespace Bomb
         protected static readonly float ExplosionDisplayDuration = 0.9f;
         protected static readonly float MinDistance = 1.0f;
         protected CancellationTokenSource Cts;
-
         protected int FireRange;
-
-        // protected Vector3 StartPos;
         protected LayerMask ObstaclesLayerMask;
         protected bool IsExplosion;
         protected Renderer BombRenderer;
