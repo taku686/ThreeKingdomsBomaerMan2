@@ -49,7 +49,7 @@ namespace Common.Data
         public static readonly string SkillOneKey = "Base Layer.Attack";
         public static readonly string SkillTwoKey = "Base Layer.Passive";
         public static readonly string GameID = "5089859";
-        public static readonly string RewardAdsKey = "ca-app-pub-3940256099942544/1033173712";
+        public static readonly string RewardAdsKey = "ca-app-pub-3759795642939239/2878540700";
         public static readonly string PlacementName = "testReward";
         public static string CharacterDataPath = "Data/Character/";
         public static string UserDataPath = "Data/UserData/UserData";
