@@ -38,6 +38,10 @@ namespace Manager.PlayFabManager
                     await LoadCharacterSprite(characterData.ID, _cancellationTokenSource.Token);
                 characterData.ColorSprite =
                     await LoadCharacterColor(characterData.CharaColor, _cancellationTokenSource.Token);
+                characterData.SkillOneSprite =
+                    await LoadSkillSprite(characterData.ID, characterData.SkillOneId, _cancellationTokenSource.Token);
+                characterData.SkillTwoSprite =
+                    await LoadSkillSprite(characterData.ID, characterData.SkillTwoId, _cancellationTokenSource.Token);
                 characterData.BombLimit /= ModifiedValue;
                 characterData.FireRange /= ModifiedValue;
                 _characterDataManager.SetCharacterData(characterData);
@@ -59,6 +63,14 @@ namespace Manager.PlayFabManager
         private async UniTask<Sprite> LoadCharacterSprite(int id, CancellationToken token)
         {
             var response = await Resources.LoadAsync<Sprite>(GameCommonData.CharacterSpritePath + id)
+                .WithCancellation(token);
+            return (Sprite)response;
+        }
+
+        private async UniTask<Sprite> LoadSkillSprite(int characterId, int skillId, CancellationToken token)
+        {
+            var response = await Resources
+                .LoadAsync<Sprite>(GameCommonData.CharacterSpritePath + characterId + "_" + skillId)
                 .WithCancellation(token);
             return (Sprite)response;
         }

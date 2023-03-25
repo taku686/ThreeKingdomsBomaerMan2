@@ -15,6 +15,7 @@ namespace Common.Data
         public const string BombTag = "Bomb";
         public const string BombEffectTag = "BombEffect";
         public const string BreakingWallTag = "BreakingWall";
+        public const string WeaponTag = "Weapon";
         public const string ObstacleLayer = "Obstacles";
         public const string ExplosionLayer = "Explosion";
         public const string UserKey = "User";
@@ -51,12 +52,10 @@ namespace Common.Data
         public const string GameID = "5089859";
         public const string RewardAdsKey = "ca-app-pub-3759795642939239/2878540700";
         public const string PlacementName = "testReward";
-        public const string CharacterDataPath = "Data/Character/";
-        public const string UserDataPath = "Data/UserData/UserData";
         public const string CharacterSpritePath = "Sprites/Character/";
         public const string CharacterColorPath = "Sprites/CharacterColor/";
         public const string CharacterPrefabPath = "Prefabs/Character/";
-        public const string BattleReadyGridPrefabPath = "Prefabs/UI/BattleReadyGrid";
+        public const string SkillSpritePath = "Sprites/Skill/";
         public const float CloseDuration = 0.5f;
         public const float OpenDuration = 1.0f;
         public const int ThreeMilliSecondsBeforeExplosion = 3000;

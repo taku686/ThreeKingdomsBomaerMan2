@@ -21,10 +21,7 @@ namespace Manager.NetworkManager
         private ConfigurationBuilder _builder;
         private IStoreController _storeController;
         private IExtensionProvider _extensionProvider;
-
         private string _itemName;
-
-        //  [Inject] private PlayFabCatalogManager _playFabCatalogManager;
         [Inject] private PlayFabInventoryManager _playFabInventoryManager;
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private CharacterDataManager _characterDataManager;

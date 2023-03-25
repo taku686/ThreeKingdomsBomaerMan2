@@ -46,14 +46,14 @@ namespace UI.Title
                 _playFabUserDataManager = Owner._playFabUserDataManager;
                 _userDataManager = Owner._userDataManager;
                 InitializeButton();
-                InitializeContent();
+                InitializeUIContent();
                 InitializeUIAnimation();
                 _isInitialize = true;
                 await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
                 InitializeAnimation();
             }
 
-            private void InitializeContent()
+            private void InitializeUIContent()
             {
                 var equippedCharacterDataId = _userDataManager.GetUserData().EquipCharacterId;
                 var characterData = _characterDataManager.GetCharacterData(equippedCharacterDataId);
@@ -147,7 +147,7 @@ namespace UI.Title
                 userData.EquipCharacterId = nextCharacterData.ID;
                 _userDataManager.SetUserData(userData);
                 CreateCharacter(nextCharacterData);
-                InitializeContent();
+                InitializeUIContent();
                 InitializeAnimation();
             }
 
@@ -176,22 +176,13 @@ namespace UI.Title
                 userData.EquipCharacterId = prevCharacterData.ID;
                 _userDataManager.SetUserData(userData);
                 CreateCharacter(prevCharacterData);
-                InitializeContent();
+                InitializeUIContent();
                 InitializeAnimation();
             }
 
             private void CreateCharacter(CharacterData characterData)
             {
-                var characterCreatePosition = Owner.characterCreatePosition;
-                var preCharacter = Owner._character;
-                Destroy(preCharacter);
-                Owner._character = Instantiate(
-                    characterData.CharacterObject,
-                    characterCreatePosition.position,
-                    characterCreatePosition.rotation, characterCreatePosition);
-                var userData = _userDataManager.GetUserData();
-                userData.EquipCharacterId = characterData.ID;
-                _userDataManager.SetUserData(userData);
+                Owner.CreateCharacter(characterData.ID);
             }
 
             private void InitializeAnimation()
