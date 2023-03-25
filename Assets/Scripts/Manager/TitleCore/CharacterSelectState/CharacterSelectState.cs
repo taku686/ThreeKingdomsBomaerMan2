@@ -108,16 +108,7 @@ namespace UI.Title
 
             private void OnClickCharacterGrid(CharacterData characterData, GameObject gridGameObject)
             {
-                var characterCreatePosition = Owner.characterCreatePosition;
-                var preCharacter = Owner._character;
-                Destroy(preCharacter);
-                Owner._character = Instantiate(
-                    characterData.CharacterObject,
-                    characterCreatePosition.position,
-                    characterCreatePosition.rotation, characterCreatePosition);
-                var userData = _userDataManager.GetUserData();
-                userData.EquipCharacterId = characterData.ID;
-                _userDataManager.SetUserData(userData);
+                Owner.CreateCharacter(characterData.ID);
                 Owner._uiAnimation.ClickScale(gridGameObject)
                     .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.CharacterDetail); })
                     .SetLink(Owner.gameObject);

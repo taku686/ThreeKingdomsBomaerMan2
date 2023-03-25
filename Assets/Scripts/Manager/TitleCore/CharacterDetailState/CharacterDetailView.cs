@@ -18,6 +18,9 @@ namespace UI.Title
         [SerializeField] private Button leftArrowButton;
         [SerializeField] private Button rightArrowButton;
         [SerializeField] private CharacterStatusView characterStatusView;
+        [SerializeField] private SkillsView skillsView;
+
+        public SkillsView SkillsView => skillsView;
         public CharacterStatusView CharacterStatusView => characterStatusView;
         public Button BackButton => backButton;
         public TextMeshProUGUI NameText => nameText;

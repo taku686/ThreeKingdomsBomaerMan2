@@ -10,7 +10,6 @@ using UI.Title.ShopState;
 using UnityEngine;
 using Zenject;
 using Manager.DataManager;
-using Manager.PlayFabManager;
 
 
 namespace UI.Title
@@ -35,12 +34,9 @@ namespace UI.Title
         [SerializeField] private LoginView loginView;
         [SerializeField] private SettingView settingView;
         [SerializeField] private ShopView shopView;
-
         private GameObject _character;
         private StateMachine<TitleCore> _stateMachine;
-
         private CancellationToken _token;
-        //     private int _currentCharacterId;
 
 
         private enum Event
@@ -115,12 +111,18 @@ namespace UI.Title
             var createCharacterData = _characterDataManager.GetCharacterData(id);
             if (createCharacterData.CharacterObject == null)
             {
-                Debug.Log(id);
+                Debug.LogError(id);
             }
 
             _character = Instantiate(createCharacterData.CharacterObject,
                 characterCreatePosition.position,
                 characterCreatePosition.rotation, characterCreatePosition);
+            var weapons = GameObject.FindGameObjectsWithTag(GameCommonData.WeaponTag);
+            foreach (var weapon in weapons)
+            {
+                var effect = weapon.GetComponentInChildren<PSMeshRendererUpdater>();
+                effect.UpdateMeshEffect(weapon);
+            }
         }
     }
 }

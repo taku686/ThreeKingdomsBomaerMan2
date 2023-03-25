@@ -19,6 +19,23 @@ namespace Manager.BattleManager
             _playerObj = PhotonNetwork.Instantiate(GameCommonData.CharacterPrefabPath + characterData.CharaObj,
                 spawnPoint.position, spawnPoint.rotation);
             _playerObj.transform.SetParent(playerParent);
+            var effects = _playerObj.GetComponentsInChildren<PSMeshRendererUpdater>();
+            foreach (var effect in effects)
+            {
+                var weapon = effect.transform.parent.gameObject;
+                var particleSystems = effect.GetComponentsInChildren<ParticleSystem>();
+                foreach (var system in particleSystems)
+                {
+                    var systemCollision = system.collision;
+                    var inheritVelocity = system.inheritVelocity;
+                    systemCollision.enabled = false;
+                    inheritVelocity.enabled = false;
+                }
+
+                effect.UpdateMeshEffect(weapon);
+            }
+
+
             PlayerGenerateNotification();
         }
 
