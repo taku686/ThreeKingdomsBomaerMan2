@@ -64,6 +64,10 @@ namespace UI.Title
                 characterStatusView.SpeedText.text = characterData.Speed.ToString();
                 characterStatusView.BombLimitText.text = characterData.BombLimit.ToString();
                 characterStatusView.FireRangeText.text = characterData.FireRange.ToString();
+
+                var skillsView = _characterDetailView.SkillsView;
+                skillsView.skillOneImage.sprite = characterData.SkillOneSprite;
+                skillsView.skillTwoImage.sprite = characterData.SkillTwoSprite;
             }
 
             private void InitializeButton()

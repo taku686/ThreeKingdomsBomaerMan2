@@ -70,7 +70,7 @@ namespace Manager.PlayFabManager
         private async UniTask<Sprite> LoadSkillSprite(int characterId, int skillId, CancellationToken token)
         {
             var response = await Resources
-                .LoadAsync<Sprite>(GameCommonData.CharacterSpritePath + characterId + "_" + skillId)
+                .LoadAsync<Sprite>(GameCommonData.SkillSpritePath + characterId + "_" + skillId)
                 .WithCancellation(token);
             return (Sprite)response;
         }
