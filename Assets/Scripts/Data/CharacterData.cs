@@ -16,8 +16,12 @@ namespace Common.Data
         private int _fireRange;
         private int _hp;
         private string _charaColor;
+        public int SkillOneId;
+        public int SkillTwoId;
         public Sprite SelfPortraitSprite;
         public Sprite ColorSprite;
+        public Sprite SkillOneSprite;
+        public Sprite SkillTwoSprite;
 
         public string CharaObj
         {
