@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using Assets.Scripts.Common.Data;
 using Common.Data;
 using Cysharp.Threading.Tasks;
@@ -22,6 +23,7 @@ namespace Manager.NetworkManager
         private IStoreController _storeController;
         private IExtensionProvider _extensionProvider;
         private string _itemName;
+        private CancellationTokenSource _cancellationTokenSource;
         [Inject] private PlayFabInventoryManager _playFabInventoryManager;
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private CharacterDataManager _characterDataManager;
@@ -33,6 +35,7 @@ namespace Manager.NetworkManager
 
         public async UniTask InitializePurchasing()
         {
+            _cancellationTokenSource = new CancellationTokenSource();
             if (_isInitialized)
             {
                 return;
@@ -76,16 +79,27 @@ namespace Manager.NetworkManager
             }
 
             await _playFabInventoryManager.SetVirtualCurrency();
-            await UpdateUserData(result, rewardImage);
+            var getItems = result.Result.Items.Where(x => x.BundleParent != null);
+            foreach (var item in getItems)
+            {
+                if (item.ItemClass.Equals(GameCommonData.CharacterClassKey))
+                {
+                    var index = int.Parse(item.ItemId);
+                    var characterData = _characterDataManager.GetCharacterData(index);
+                    rewardImage.sprite = characterData.SelfPortraitSprite;
+                    await _userDataManager.AddCharacterData(index);
+                }
+            }
+
             return true;
         }
 
 
-        public async UniTask<bool> TryPurchaseCharacter(string itemName, string virtualCurrencyKey, int price)
+        public async UniTask<bool> TryPurchaseCharacter(int characterId, string virtualCurrencyKey, int price)
         {
             var request = new PurchaseItemRequest()
             {
-                ItemId = itemName,
+                ItemId = characterId.ToString(),
                 VirtualCurrency = virtualCurrencyKey,
                 Price = price,
             };
@@ -97,32 +111,8 @@ namespace Manager.NetworkManager
             }
 
             await _playFabInventoryManager.SetVirtualCurrency();
-            return true;
-        }
-
-        private async UniTask UpdateUserData(PlayFabResult<PurchaseItemResult> result, Image rewardImage)
-        {
-            var user = _userDataManager.GetUserData();
-            var getItems = result.Result.Items.Where(x => x.BundleParent != null);
-            foreach (var item in getItems)
-            {
-                if (item.ItemClass.Equals(GameCommonData.CharacterClassKey))
-                {
-                    Debug.Log(item.ItemId);
-                    var index = int.Parse(item.ItemId);
-                    var characterData = _characterDataManager.GetCharacterData(index);
-                    rewardImage.sprite = characterData.SelfPortraitSprite;
-                    if (user.Characters.Contains(index))
-                    {
-                        continue;
-                    }
-
-                    user.Characters.Add(characterData.ID);
-                }
-            }
-
-            _userDataManager.SetUserData(user);
-            await _playFabUserDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, user);
+            var result2 = await _userDataManager.AddCharacterData(characterId);
+            return result2;
         }
 
         private async UniTask<bool> AddVirtualCurrency(string virtualCurrencyKey, int amount)
@@ -143,27 +133,6 @@ namespace Manager.NetworkManager
             DebugText.text = "仮想通貨追加";
             await _playFabInventoryManager.SetVirtualCurrency();
             return true;
-        }
-
-        private string ItemKeyToVirtualCurrencyKey(string itemKey)
-        {
-            switch (itemKey)
-            {
-                case GameCommonData.ThousandCoinItemKey:
-                    return GameCommonData.CoinKey;
-                case GameCommonData.FiveThousandCoinItemKey:
-                    return GameCommonData.CoinKey;
-                case GameCommonData.TwelveThousandCoinItemKey:
-                    return GameCommonData.CoinKey;
-                case GameCommonData.TwentyGemItemKey:
-                    return GameCommonData.GemKey;
-                case GameCommonData.HundredGemKey:
-                    return GameCommonData.GemKey;
-                case GameCommonData.TwoHundredGemKey:
-                    return GameCommonData.GemKey;
-                default:
-                    return null;
-            }
         }
 
 
@@ -238,6 +207,8 @@ namespace Manager.NetworkManager
 
         public void Dispose()
         {
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
         }
 
         public void OnInitializeFailed(InitializationFailureReason error)

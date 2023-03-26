@@ -37,13 +37,8 @@ namespace Common.Data
         public const string TwentyGemItemKey = "gem20";
         public const string HundredGemKey = "gem100";
         public const string TwoHundredGemKey = "gem200";
-        public const int ThousandCoinItemPrice = 100;
-        public const int FiveThousandCoinItemPrice = 480;
-        public const int TwelveThousandCoinItemPrice = 980;
-        public const int TwentyGemItemPrice = 100;
-        public const int HundredGemItemPrice = 480;
-        public const int TwoHundredGemItemPrice = 980;
         public const string CharacterMasterKey = "CharacterMaster";
+        public const string CharacterLevelMasterKey = "CharacterLevelMaster";
         public static readonly int SkillOneHashKey = Animator.StringToHash("Attack");
         public static readonly int SkillTwoHashKey = Animator.StringToHash("Passive");
         public static readonly int ActiveHashKey = Animator.StringToHash("Active");
@@ -59,6 +54,8 @@ namespace Common.Data
         public const float CloseDuration = 0.5f;
         public const float OpenDuration = 1.0f;
         public const int ThreeMilliSecondsBeforeExplosion = 3000;
+        public const int MaxCharacterLevel = 10;
+        public const int MinCharacterLevel = 0;
 
         public static CharacterColor GetCharacterColor(string color)
         {

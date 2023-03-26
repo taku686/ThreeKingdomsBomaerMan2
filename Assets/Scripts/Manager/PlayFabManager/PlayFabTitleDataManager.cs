@@ -14,6 +14,7 @@ namespace Manager.PlayFabManager
     {
         private const int ModifiedValue = 10;
         [Inject] private CharacterDataManager _characterDataManager;
+        [Inject] private CharacterLevelDataManager _characterLevelDataManager;
         private CancellationTokenSource _cancellationTokenSource;
 
         public void Initialize()
@@ -24,8 +25,13 @@ namespace Manager.PlayFabManager
         public async UniTask SetTitleData(Dictionary<string, string> titleDatum)
         {
             var characterDatum =
-                JsonConvert.DeserializeObject<CharacterData[]>(titleDatum[GameCommonData.CharacterMasterKey]);
+                JsonConvert.DeserializeObject<CharacterData[]>
+                    (titleDatum[GameCommonData.CharacterMasterKey]);
             await SetCharacterData(characterDatum);
+            var characterLevelDatum =
+                JsonConvert.DeserializeObject<CharacterLevelData[]>
+                    (titleDatum[GameCommonData.CharacterLevelMasterKey]);
+            SetCharacterLevelData(characterLevelDatum);
         }
 
         private async UniTask SetCharacterData(CharacterData[] characterDatum)
@@ -45,6 +51,14 @@ namespace Manager.PlayFabManager
                 characterData.BombLimit /= ModifiedValue;
                 characterData.FireRange /= ModifiedValue;
                 _characterDataManager.SetCharacterData(characterData);
+            }
+        }
+
+        private void SetCharacterLevelData(CharacterLevelData[] characterLevelMasterDatum)
+        {
+            foreach (var characterLevelMasterData in characterLevelMasterDatum)
+            {
+                _characterLevelDataManager.SetCharacterLevelData(characterLevelMasterData);
             }
         }
 

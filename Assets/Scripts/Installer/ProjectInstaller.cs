@@ -20,6 +20,7 @@ namespace Common.Installer
         {
             Container.Bind<CharacterDataManager>().FromNew().AsSingle();
             Container.Bind<CatalogDataManager>().FromNew().AsSingle();
+            Container.Bind<CharacterLevelDataManager>().FromNew().AsSingle();
             Container.Bind<PhotonNetworkManager>().FromComponentInNewPrefab(photonNetworkGameObject).AsSingle();
             Container.Bind<MainManager>().FromComponentsInNewPrefab(mainManagerGameObject).AsSingle();
             Container.Bind<UserDataManager>().FromComponentsInNewPrefab(userManagerGameObject).AsSingle();

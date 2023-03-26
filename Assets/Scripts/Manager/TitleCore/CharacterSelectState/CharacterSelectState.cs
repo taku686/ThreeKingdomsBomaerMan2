@@ -139,11 +139,15 @@ namespace UI.Title
                             return;
                         }
 
-                        var itemName = characterId.ToString();
+                        if (user.Characters.Contains(characterId))
+                        {
+                            return;
+                        }
+
                         var virtualCurrencyKey = GameCommonData.GemKey;
                         var price = characterPrice;
                         var isSuccessPurchase = await Owner._playFabShopManager
-                            .TryPurchaseCharacter(itemName, virtualCurrencyKey, price)
+                            .TryPurchaseCharacter(characterId, virtualCurrencyKey, price)
                             .AttachExternalCancellation(token);
                         if (!isSuccessPurchase)
                         {
@@ -151,7 +155,7 @@ namespace UI.Title
                             return;
                         }
 
-                        user.Gem -= characterPrice;
+                        /*user.Gem -= characterPrice;
                         if (user.Characters.Contains(characterId))
                         {
                             return;
@@ -166,7 +170,7 @@ namespace UI.Title
                             return;
                         }
 
-                        Owner._userDataManager.SetUserData(user);
+                        Owner._userDataManager.SetUserData(user);*/
                         CreateUIContents();
                     })).SetLink(disableGrid.gameObject);
             }

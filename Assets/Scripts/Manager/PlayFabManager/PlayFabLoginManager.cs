@@ -91,7 +91,7 @@ namespace Assets.Scripts.Common.PlayFab
             {
                 user.Coin = virtualCurrency[GameCommonData.CoinKey];
                 user.Gem = virtualCurrency[GameCommonData.GemKey];
-                _userDataManager.Initialize(user, _characterDataManager);
+                _userDataManager.Initialize(user, _playFabUserDataManager);
                 return true;
             }
 

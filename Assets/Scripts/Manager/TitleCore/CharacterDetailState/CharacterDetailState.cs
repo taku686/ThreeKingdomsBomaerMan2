@@ -17,7 +17,7 @@ namespace UI.Title
         public class CharacterDetailState : State
         {
             private const float MoveAmount = 50;
-
+            private const string LevelText = "LV <#94aed0><size=170%>";
             private CharacterDetailView _characterDetailView;
             private CharacterDataManager _characterDataManager;
             private PlayFabUserDataManager _playFabUserDataManager;
@@ -57,17 +57,42 @@ namespace UI.Title
             {
                 var equippedCharacterDataId = _userDataManager.GetUserData().EquipCharacterId;
                 var characterData = _characterDataManager.GetCharacterData(equippedCharacterDataId);
+                var currentLevelData = _userDataManager.GetCurrentLevelData(equippedCharacterDataId);
+                var nextLevelData = _userDataManager.GetNextLevelData(equippedCharacterDataId);
+                SetStatusView(characterData, currentLevelData);
+                SetSkillView(characterData, currentLevelData);
+                SetLevelView(currentLevelData, nextLevelData);
+            }
+
+            private void SetStatusView(CharacterData characterData, CharacterLevelData currentLevelData)
+            {
                 Owner.characterDetailView.NameText.text = characterData.Name;
                 var characterStatusView = Owner.characterDetailView.CharacterStatusView;
-                characterStatusView.HpText.text = characterData.Hp.ToString();
-                characterStatusView.DamageText.text = characterData.Attack.ToString();
-                characterStatusView.SpeedText.text = characterData.Speed.ToString();
-                characterStatusView.BombLimitText.text = characterData.BombLimit.ToString();
-                characterStatusView.FireRangeText.text = characterData.FireRange.ToString();
+                characterStatusView.HpText.text = GetModifiedStatus(currentLevelData, characterData.Hp).ToString();
+                characterStatusView.DamageText.text =
+                    GetModifiedStatus(currentLevelData, characterData.Attack).ToString();
+                characterStatusView.SpeedText.text =
+                    GetModifiedStatus(currentLevelData, characterData.Speed).ToString();
+                characterStatusView.BombLimitText.text =
+                    GetModifiedStatus(currentLevelData, characterData.BombLimit).ToString();
+                characterStatusView.FireRangeText.text =
+                    GetModifiedStatus(currentLevelData, characterData.FireRange).ToString();
+            }
 
+            private void SetSkillView(CharacterData characterData, CharacterLevelData currentLevelData)
+            {
                 var skillsView = _characterDetailView.SkillsView;
                 skillsView.skillOneImage.sprite = characterData.SkillOneSprite;
                 skillsView.skillTwoImage.sprite = characterData.SkillTwoSprite;
+                skillsView.skillOneLockImage.enabled = currentLevelData.IsSkillOneActive;
+                skillsView.skillTwoLockImage.enabled = currentLevelData.IsSkillTwoActive;
+            }
+
+            private void SetLevelView(CharacterLevelData currentLevelData, CharacterLevelData nextLevelData)
+            {
+                _characterDetailView.LevelText.text = LevelText + currentLevelData.Level;
+                _characterDetailView.UpgradeInfoText.text = $"Lv{nextLevelData.Level} Upgrade";
+                _characterDetailView.UpgradeText.text = nextLevelData.NeedCoin.ToString("D");
             }
 
             private void InitializeButton()
@@ -192,6 +217,11 @@ namespace UI.Title
             private void InitializeAnimation()
             {
                 Owner._character.GetComponent<Animator>().SetTrigger(GameCommonData.ActiveHashKey);
+            }
+
+            private int GetModifiedStatus(CharacterLevelData currentLevelData, int value)
+            {
+                return Mathf.FloorToInt(currentLevelData.StatusRate * value);
             }
 
             private void SetupCancellationToken()

@@ -8,10 +8,7 @@ namespace UI.Title
     public class CharacterDetailView : MonoBehaviour
     {
         [SerializeField] private Button backButton;
-
-        [FormerlySerializedAs("name")] [SerializeField]
-        private TextMeshProUGUI nameText;
-
+        [SerializeField] private TextMeshProUGUI nameText;
         [SerializeField] private Button selectButton;
         [SerializeField] private RectTransform leftArrowRect;
         [SerializeField] private RectTransform rightArrowRect;
@@ -19,7 +16,15 @@ namespace UI.Title
         [SerializeField] private Button rightArrowButton;
         [SerializeField] private CharacterStatusView characterStatusView;
         [SerializeField] private SkillsView skillsView;
+        [SerializeField] private Button upgradeButton;
+        [SerializeField] private TextMeshProUGUI upgradeText;
+        [SerializeField] private TextMeshProUGUI upgradeInfoText;
+        [SerializeField] private TextMeshProUGUI levelText;
 
+        public Button UpgradeButton => upgradeButton;
+        public TextMeshProUGUI UpgradeText => upgradeText;
+        public TextMeshProUGUI UpgradeInfoText => upgradeInfoText;
+        public TextMeshProUGUI LevelText => levelText;
         public SkillsView SkillsView => skillsView;
         public CharacterStatusView CharacterStatusView => characterStatusView;
         public Button BackButton => backButton;
