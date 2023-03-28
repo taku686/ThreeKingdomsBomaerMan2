@@ -105,7 +105,7 @@ namespace Assets.Scripts.Common.PlayFab
             var virtualCurrency = _loginResponse.Result.InfoResultPayload.UserVirtualCurrency;
             user.Coin = virtualCurrency[GameCommonData.CoinKey];
             user.Gem = virtualCurrency[GameCommonData.GemKey];
-            var isSuccess = await _playFabUserDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, user)
+            var isSuccess = await _playFabUserDataManager.TryUpdateUserDataAsync(user)
                 .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
             if (!isSuccess)
             {

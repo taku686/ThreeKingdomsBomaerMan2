@@ -44,7 +44,7 @@ namespace Common.Data
             userData.Characters.Add(characterId);
             userData.CharacterLevels[characterId] = 0;
             SetUserData(userData);
-            var result = await _playFabUserDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, userData)
+            var result = await _playFabUserDataManager.TryUpdateUserDataAsync(userData)
                 .AttachExternalCancellation(_cancellationTokenSource.Token);
             return result;
         }
@@ -64,6 +64,33 @@ namespace Common.Data
         {
             var level = _userData.CharacterLevels[characterId] + 1;
             return _characterLevelDataManager.GetCharacterLevelData(level);
+        }
+
+        public async UniTask<bool> UpgradeCharacterLevel(int characterId, int level)
+        {
+            if (!_userData.CharacterLevels.ContainsKey(characterId))
+            {
+                return false;
+            }
+
+            if (_userData.CharacterLevels[characterId] >= level)
+            {
+                return false;
+            }
+
+            _userData.CharacterLevels[characterId] = level;
+            var result = await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
+            return result;
+        }
+
+        public int GetCoin()
+        {
+            return _userData.Coin;
+        }
+
+        public int GetGem()
+        {
+            return _userData.Gem;
         }
 
         public bool IsGetCharacter(int characterId)

@@ -1,6 +1,5 @@
 ﻿using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace UI.Title
@@ -20,7 +19,11 @@ namespace UI.Title
         [SerializeField] private TextMeshProUGUI upgradeText;
         [SerializeField] private TextMeshProUGUI upgradeInfoText;
         [SerializeField] private TextMeshProUGUI levelText;
+        [SerializeField] private PurchaseErrorView purchaseErrorView;
+        [SerializeField] private VirtualCurrencyAddPopup virtualCurrencyAddPopup;
 
+        public VirtualCurrencyAddPopup VirtualCurrencyAddPopup => virtualCurrencyAddPopup;
+        public PurchaseErrorView PurchaseErrorView => purchaseErrorView;
         public Button UpgradeButton => upgradeButton;
         public TextMeshProUGUI UpgradeText => upgradeText;
         public TextMeshProUGUI UpgradeInfoText => upgradeInfoText;

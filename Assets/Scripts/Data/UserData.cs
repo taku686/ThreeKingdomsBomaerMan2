@@ -13,7 +13,7 @@ namespace Common.Data
         public int Gem;
         public int Coin;
         public List<int> Characters = new();
-        public Dictionary<int, int> CharacterLevels = new();
+        public readonly Dictionary<int, int> CharacterLevels = new();
 
         public void SetUserData(UserData userData)
         {
@@ -43,7 +43,7 @@ namespace Common.Data
             user.Characters.Add(characterData.ID);
             user.Gem = 0;
             user.Coin = 0;
-            user.CharacterLevels[0] = 1;
+            user.CharacterLevels[0] = 0;
             return user;
         }
 

@@ -17,6 +17,7 @@ namespace UI.Title
     public partial class TitleCore : MonoBehaviourPunCallbacks
     {
         [Inject] private CharacterDataManager _characterDataManager;
+        [Inject] private CharacterLevelDataManager _characterLevelDataManager;
         [Inject] private UserDataManager _userDataManager;
         [Inject] private UIAnimation _uiAnimation;
         [Inject] private PhotonNetworkManager _photonNetworkManager;
@@ -87,6 +88,7 @@ namespace UI.Title
             _stateMachine.AddTransition<LoginState, MainState>((int)Event.Main);
             _stateMachine.AddTransition<MainState, SettingState>((int)Event.Setting);
             _stateMachine.AddTransition<MainState, ShopState>((int)Event.Shop);
+            _stateMachine.AddTransition<CharacterDetailState, ShopState>((int)Event.Shop);
             _stateMachine.AddTransition<CharacterSelectState, ShopState>((int)Event.Shop);
         }
 

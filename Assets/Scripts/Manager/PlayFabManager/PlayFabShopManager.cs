@@ -30,9 +30,6 @@ namespace Manager.NetworkManager
         [Inject] private UserDataManager _userDataManager;
         [Inject] private CatalogDataManager _catalogDataManager;
 
-        //todo 後で消す
-        public TextMeshProUGUI DebugText;
-
         public async UniTask InitializePurchasing()
         {
             _cancellationTokenSource = new CancellationTokenSource();
@@ -97,7 +94,7 @@ namespace Manager.NetworkManager
 
         public async UniTask<bool> TryPurchaseCharacter(int characterId, string virtualCurrencyKey, int price)
         {
-            var request = new PurchaseItemRequest()
+            var request = new PurchaseItemRequest
             {
                 ItemId = characterId.ToString(),
                 VirtualCurrency = virtualCurrencyKey,
@@ -115,9 +112,31 @@ namespace Manager.NetworkManager
             return result2;
         }
 
+        public async UniTask<bool> TryPurchaseUpgradeItem(int level, string virtualCurrencyKey, int price,
+            int characterId, PurchaseErrorView purchaseErrorView)
+        {
+            var request = new PurchaseItemRequest
+            {
+                ItemId = GameCommonData.LevelItemKey + level,
+                VirtualCurrency = virtualCurrencyKey,
+                Price = price,
+            };
+            var result = await PlayFabClientAPI.PurchaseItemAsync(request);
+            if (result.Error != null)
+            {
+                purchaseErrorView.errorInfoText.text = result.Error.ErrorMessage;
+                Debug.Log(result.Error.GenerateErrorReport());
+                return false;
+            }
+
+            await _playFabInventoryManager.SetVirtualCurrency();
+            var result2 = await _userDataManager.UpgradeCharacterLevel(characterId, level);
+            return result2;
+        }
+
         private async UniTask<bool> AddVirtualCurrency(string virtualCurrencyKey, int amount)
         {
-            var request = new AddUserVirtualCurrencyRequest()
+            var request = new AddUserVirtualCurrencyRequest
             {
                 Amount = amount,
                 VirtualCurrency = virtualCurrencyKey
@@ -126,11 +145,9 @@ namespace Manager.NetworkManager
 
             if (result.Error != null)
             {
-                DebugText.text = "仮想通貨追加失敗";
                 return false;
             }
 
-            DebugText.text = "仮想通貨追加";
             await _playFabInventoryManager.SetVirtualCurrency();
             return true;
         }

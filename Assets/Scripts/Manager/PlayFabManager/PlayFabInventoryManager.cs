@@ -61,7 +61,7 @@ namespace Manager.NetworkManager
             }
 
             _userDataManager.SetUserData(user);
-            await _playFabUserDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, user);
+            await _playFabUserDataManager.TryUpdateUserDataAsync(user);
         }
 
         public void Dispose()
