@@ -92,8 +92,8 @@ namespace UI.Title
                 var skillsView = _characterDetailView.SkillsView;
                 skillsView.skillOneImage.sprite = characterData.SkillOneSprite;
                 skillsView.skillTwoImage.sprite = characterData.SkillTwoSprite;
-                skillsView.skillOneLockImage.enabled = currentLevelData.IsSkillOneActive;
-                skillsView.skillTwoLockImage.enabled = currentLevelData.IsSkillTwoActive;
+                skillsView.skillOneLockImage.enabled = !currentLevelData.IsSkillOneActive;
+                skillsView.skillTwoLockImage.enabled = !currentLevelData.IsSkillTwoActive;
             }
 
             private void SetLevelView(CharacterLevelData currentLevelData, CharacterLevelData nextLevelData)

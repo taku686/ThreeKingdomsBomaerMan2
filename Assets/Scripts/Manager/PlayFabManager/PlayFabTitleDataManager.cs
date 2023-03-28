@@ -58,6 +58,7 @@ namespace Manager.PlayFabManager
         {
             foreach (var characterLevelMasterData in characterLevelMasterDatum)
             {
+                Debug.Log(characterLevelMasterData.IsSkillOneActive);
                 _characterLevelDataManager.SetCharacterLevelData(characterLevelMasterData);
             }
         }

@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Manager.DataManager;
@@ -7,7 +8,7 @@ using Zenject;
 
 namespace Common.Data
 {
-    public class UserDataManager : MonoBehaviour
+    public class UserDataManager : IDisposable
     {
         private UserData _userData;
         private CancellationTokenSource _cancellationTokenSource;
@@ -18,7 +19,6 @@ namespace Common.Data
         public void Initialize(UserData userData, PlayFabUserDataManager playFabUserDataManager)
         {
             _cancellationTokenSource = new CancellationTokenSource();
-            _cancellationTokenSource.RegisterRaiseCancelOnDestroy(gameObject);
             _playFabUserDataManager = playFabUserDataManager;
             SetUserData(userData);
         }
@@ -98,11 +98,15 @@ namespace Common.Data
             return _userData.Characters.Contains(characterId);
         }
 
-        private void OnDestroy()
+
+        public void Dispose()
         {
             _userData?.Dispose();
             _cancellationTokenSource.Cancel();
-            _cancellationTokenSource.Dispose();
+            _cancellationTokenSource?.Dispose();
+            _characterDataManager?.Dispose();
+            _characterLevelDataManager?.Dispose();
+            _playFabUserDataManager?.Dispose();
         }
     }
 }

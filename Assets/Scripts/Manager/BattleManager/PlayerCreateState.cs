@@ -5,11 +5,11 @@ using Player.Common;
 using UI.Battle;
 using UniRx;
 using UnityEngine;
-using State = StateMachine<Manager.BattleManager.BattleBase>.State;
+using State = StateMachine<Manager.BattleManager.BattleCore>.State;
 
 namespace Manager.BattleManager
 {
-    public partial class BattleBase
+    public partial class BattleCore
     {
         public class PlayerCreateState : State
         {
@@ -17,6 +17,7 @@ namespace Manager.BattleManager
             private static readonly Vector3 ColliderSize = new(0.4f, 0.6f, 0.4f);
             private static readonly float MaxRate = 1f;
             private PlayerStatusManager _playerStatusManager;
+            private UserDataManager _userDataManager;
 
             protected override void OnEnter(State prevState)
             {
@@ -75,7 +76,8 @@ namespace Manager.BattleManager
                 AddRigidbody(player);
                 Owner.cameraManager.Initialize(player.transform);
                 var playerCore = player.AddComponent<PLayerCore>();
-                playerCore.Initialize(playerStatusManager, hpKey);
+                _userDataManager = Owner._userDataManager;
+                playerCore.Initialize(playerStatusManager, hpKey, characterData, _userDataManager);
             }
 
             private void AddBoxCollider(GameObject player)
