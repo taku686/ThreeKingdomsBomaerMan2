@@ -195,7 +195,7 @@ namespace UI.Title
                     var characterData = _userDataManager.GetEquippedCharacterData();
                     foreach (var characterIndex in orderCharacters)
                     {
-                        if (characterData.ID < characterIndex)
+                        if (characterData.Id < characterIndex)
                         {
                             nextCharacterData = _characterDataManager.GetCharacterData(characterIndex);
                             break;
@@ -203,7 +203,7 @@ namespace UI.Title
                     }
 
                     nextCharacterData ??= _characterDataManager.GetCharacterData(orderCharacters.First());
-                    userData.EquipCharacterId = nextCharacterData.ID;
+                    userData.EquipCharacterId = nextCharacterData.Id;
                     _userDataManager.SetUserData(userData);
                     CreateCharacter(nextCharacterData);
                     SetupUIContent();
@@ -228,7 +228,7 @@ namespace UI.Title
 
                     foreach (var characterIndex in orderCharacters)
                     {
-                        if (characterData.ID > characterIndex)
+                        if (characterData.Id > characterIndex)
                         {
                             prevCharacterData = _characterDataManager.GetCharacterData(characterIndex);
                             break;
@@ -236,7 +236,7 @@ namespace UI.Title
                     }
 
                     prevCharacterData ??= _characterDataManager.GetCharacterData(orderCharacters.First());
-                    userData.EquipCharacterId = prevCharacterData.ID;
+                    userData.EquipCharacterId = prevCharacterData.Id;
                     _userDataManager.SetUserData(userData);
                     CreateCharacter(prevCharacterData);
                     SetupUIContent();
@@ -251,8 +251,8 @@ namespace UI.Title
                 {
                     var coin = _userDataManager.GetCoin();
                     var equippedCharacterData = _userDataManager.GetEquippedCharacterData();
-                    var nextLevelData = _userDataManager.GetNextLevelData(equippedCharacterData.ID);
-                    var currentLevelData = _userDataManager.GetCurrentLevelData(equippedCharacterData.ID);
+                    var nextLevelData = _userDataManager.GetNextLevelData(equippedCharacterData.Id);
+                    var currentLevelData = _userDataManager.GetCurrentLevelData(equippedCharacterData.Id);
                     var virtualCurrencyAddView = _characterDetailView.VirtualCurrencyAddPopup;
                     var purchaseErrorView = _characterDetailView.PurchaseErrorView;
                     if (currentLevelData.Level >= GameCommonData.MaxCharacterLevel)
@@ -269,7 +269,7 @@ namespace UI.Title
                     }
 
                     var result = await _playFabShopManager.TryPurchaseUpgradeItem(nextLevelData.Level,
-                        GameCommonData.CoinKey, nextLevelData.NeedCoin, equippedCharacterData.ID, purchaseErrorView);
+                        GameCommonData.CoinKey, nextLevelData.NeedCoin, equippedCharacterData.Id, purchaseErrorView);
 
                     if (!result)
                     {
@@ -318,7 +318,7 @@ namespace UI.Title
 
             private void CreateCharacter(CharacterData characterData)
             {
-                Owner.CreateCharacter(characterData.ID);
+                Owner.CreateCharacter(characterData.Id);
             }
 
             private void InitializeAnimation()

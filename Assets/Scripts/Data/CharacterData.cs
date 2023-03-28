@@ -18,10 +18,12 @@ namespace Common.Data
         private string _charaColor;
         public int SkillOneId;
         public int SkillTwoId;
+        public int WeaponEffectId;
         public Sprite SelfPortraitSprite;
         public Sprite ColorSprite;
         public Sprite SkillOneSprite;
         public Sprite SkillTwoSprite;
+        public GameObject WeaponEffectObj;
 
         public string CharaObj
         {
@@ -47,7 +49,7 @@ namespace Common.Data
             set => _name = value;
         }
 
-        public int ID
+        public int Id
         {
             get => _id;
             set => _id = value;

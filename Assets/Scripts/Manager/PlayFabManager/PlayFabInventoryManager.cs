@@ -56,7 +56,7 @@ namespace Manager.NetworkManager
                 if (item.ItemClass.Equals(GameCommonData.CharacterClassKey))
                 {
                     var index = int.Parse(item.ItemId);
-                    user.Characters.Add(_characterDataManager.GetCharacterData(index).ID);
+                    user.Characters.Add(_characterDataManager.GetCharacterData(index).Id);
                 }
             }
 

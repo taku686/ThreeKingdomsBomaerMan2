@@ -75,7 +75,7 @@ namespace UI.Title
 
             private void SetupGrip(CharacterData characterData, Transform parent)
             {
-                if (Owner._userDataManager.IsGetCharacter(characterData.ID))
+                if (Owner._userDataManager.IsGetCharacter(characterData.Id))
                 {
                     CreateActiveGrid(characterData, parent);
                 }
@@ -103,13 +103,13 @@ namespace UI.Title
                 disableGrid.characterImage.color = Color.black;
                 disableGrid.characterImage.sprite = characterData.SelfPortraitSprite;
                 disableGrid.purchaseButton.onClick.AddListener(() =>
-                    OnClickPurchaseButton(disableGrid.gameObject, characterData.ID,
+                    OnClickPurchaseButton(disableGrid.gameObject, characterData.Id,
                         disableGrid.GetCancellationTokenOnDestroy()));
             }
 
             private void OnClickCharacterGrid(CharacterData characterData, GameObject gridGameObject)
             {
-                Owner.CreateCharacter(characterData.ID);
+                Owner.CreateCharacter(characterData.Id);
                 Owner._uiAnimation.ClickScale(gridGameObject)
                     .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.CharacterDetail); })
                     .SetLink(Owner.gameObject);

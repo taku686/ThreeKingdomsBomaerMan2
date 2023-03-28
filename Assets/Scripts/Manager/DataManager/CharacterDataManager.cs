@@ -31,7 +31,7 @@ namespace Manager.DataManager
 
         public void SetCharacterData(CharacterData characterData)
         {
-            CharacterDatum[characterData.ID] = characterData;
+            CharacterDatum[characterData.Id] = characterData;
         }
 
         public CharacterData GetCharacterData(int id)

@@ -51,6 +51,7 @@ namespace Common.Data
         public const string CharacterSpritePath = "Sprites/Character/";
         public const string CharacterColorPath = "Sprites/CharacterColor/";
         public const string CharacterPrefabPath = "Prefabs/Character/";
+        public const string WeaponEffectPrefabPath = "Prefabs/WeaponEffect/Effect";
         public const string SkillSpritePath = "Sprites/Skill/";
         public const float CloseDuration = 0.5f;
         public const float OpenDuration = 1.0f;
@@ -94,7 +95,61 @@ namespace Common.Data
                     return Vector3.zero;
             }
         }
+
+        public static Color GetWeaponColor(int characterId)
+        {
+            switch (characterId)
+            {
+                case 0:
+                    return Color.green;
+                case 1:
+                    return Color.red;
+                case 2:
+                    return new Color(0, 7, 255);
+                case 3:
+                    return Color.green;
+                case 4:
+                    return Color.red;
+                case 5:
+                    return new Color(116, 0, 255);
+                case 6:
+                    return Color.blue;
+                case 7:
+                    return new Color(91, 2193, 255);
+                case 8:
+                    return new Color(139, 255, 0);
+                case 9:
+                    return new Color(108, 0, 255);
+                case 10:
+                    return new Color(255, 100, 0);
+                case 11:
+                    return new Color(0, 205, 255);
+                case 12:
+                    return new Color(94, 94, 183);
+                case 13:
+                    return new Color(255, 0, 140);
+                case 14:
+                    return new Color(154, 0, 255);
+                case 15:
+                    return Color.blue;
+                case 16:
+                    return Color.green;
+                case 17:
+                    return new Color(121, 0, 255);
+                case 18:
+                    return new Color(0, 124, 255);
+                case 19:
+                    return new Color(255, 29, 0);
+                case 20:
+                    return Color.green;
+                case 21:
+                    return new Color(130, 0, 8);
+                default:
+                    return Color.black;
+            }
+        }
     }
+
 
     public enum Direction
     {

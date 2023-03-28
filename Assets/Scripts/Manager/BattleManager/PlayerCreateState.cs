@@ -1,4 +1,5 @@
-﻿using Common.Data;
+﻿using System.Linq;
+using Common.Data;
 using Cysharp.Threading.Tasks;
 using Photon.Pun;
 using Player.Common;
@@ -34,7 +35,7 @@ namespace Manager.BattleManager
             {
                 var index = Owner._networkManager.GetPlayerNumber(PhotonNetwork.LocalPlayer.ActorNumber);
                 var characterData =
-                    Owner._networkManager.CurrentRoomCharacterList[PhotonNetwork.LocalPlayer.ActorNumber];
+                    Owner._networkManager.CurrentRoomCharacterDatum[PhotonNetwork.LocalPlayer.ActorNumber];
                 Owner._playerGenerator.GenerateCharacter(index, characterData);
             }
 
@@ -57,6 +58,7 @@ namespace Manager.BattleManager
                 var photonView = player.GetComponent<PhotonView>();
                 var playerId = photonView.OwnerActorNr;
                 var characterData = Owner._networkManager.GetCharacterData(playerId);
+                var characterLevelData = Owner._networkManager.GetCharacterLevelData(playerId);
                 var playerStatusManager = new PlayerStatusManager(characterData, photonView.IsMine);
                 var playerPutBomb = player.AddComponent<PlayerPutBomb>();
                 playerPutBomb.Initialize(Owner._bombProvider, playerStatusManager);
@@ -65,6 +67,7 @@ namespace Manager.BattleManager
                 playerBillBoardUI.Initialize(player.transform);
                 var hpKey = playerId + "Hp";
                 SynchronizedValue.Instance.Create(hpKey, MaxRate);
+                CreateWeaponEffect(player, characterLevelData.Level, characterData);
                 var playerStatusUI = playerUI.GetComponent<PlayerStatusUI>();
                 playerStatusUI.Initialize(SynchronizedValue.Instance.GetFloatValue(hpKey));
                 if (!photonView.IsMine)
@@ -93,6 +96,33 @@ namespace Manager.BattleManager
                 var rigid = player.AddComponent<Rigidbody>();
                 rigid.useGravity = false;
                 rigid.constraints = RigidbodyConstraints.FreezeAll;
+            }
+
+            private void CreateWeaponEffect(GameObject player, int characterLevel, CharacterData characterData)
+            {
+                if (characterLevel < GameCommonData.MaxCharacterLevel)
+                {
+                    return;
+                }
+
+                var weapons = player.GetComponentsInChildren<Transform>()
+                    .Where(x => x.CompareTag(GameCommonData.WeaponTag)).Select(x => x.gameObject);
+                foreach (var weapon in weapons)
+                {
+                    var effectObj = Instantiate(characterData.WeaponEffectObj, weapon.transform);
+                    var particleSystems = effectObj.GetComponentsInChildren<ParticleSystem>();
+                    foreach (var system in particleSystems)
+                    {
+                        var systemCollision = system.collision;
+                        var inheritVelocity = system.inheritVelocity;
+                        systemCollision.enabled = false;
+                        inheritVelocity.enabled = false;
+                    }
+
+                    var effect = effectObj.GetComponentInChildren<PSMeshRendererUpdater>();
+                    effect.Color = GameCommonData.GetWeaponColor(characterData.Id);
+                    effect.UpdateMeshEffect(weapon);
+                }
             }
         }
     }

@@ -40,7 +40,7 @@ namespace Common.Data
             user.Level = 1;
             user.Name = "";
             user.IsTutorial = false;
-            user.Characters.Add(characterData.ID);
+            user.Characters.Add(characterData.Id);
             user.Gem = 0;
             user.Coin = 0;
             user.CharacterLevels[0] = 0;

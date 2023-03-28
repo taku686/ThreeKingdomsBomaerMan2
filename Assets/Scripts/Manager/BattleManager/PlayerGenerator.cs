@@ -19,7 +19,7 @@ namespace Manager.BattleManager
             _playerObj = PhotonNetwork.Instantiate(GameCommonData.CharacterPrefabPath + characterData.CharaObj,
                 spawnPoint.position, spawnPoint.rotation);
             _playerObj.transform.SetParent(playerParent);
-            var effects = _playerObj.GetComponentsInChildren<PSMeshRendererUpdater>();
+            /*var effects = _playerObj.GetComponentsInChildren<PSMeshRendererUpdater>();
             foreach (var effect in effects)
             {
                 var weapon = effect.transform.parent.gameObject;
@@ -33,7 +33,7 @@ namespace Manager.BattleManager
                 }
 
                 effect.UpdateMeshEffect(weapon);
-            }
+            }*/
 
 
             PlayerGenerateNotification();

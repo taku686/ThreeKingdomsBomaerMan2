@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cinemachine;
 using Common.Data;
 using ExitGames.Client.Photon;
 using Manager.DataManager;
@@ -17,18 +18,17 @@ namespace Manager.NetworkManager
     public class PhotonNetworkManager : MonoBehaviourPunCallbacks
     {
         [Inject] private CharacterDataManager _characterDataManager;
-        private readonly Subject<Photon.Realtime.Player[]> _joinedRoom = new Subject<Photon.Realtime.Player[]>();
-        private readonly Subject<int> _leftRoom = new Subject<int>();
-        private readonly Dictionary<int, GameObject> _playerObjectDictionary = new Dictionary<int, GameObject>();
-
-        private readonly Dictionary<int, CharacterData>
-            _currentRoomCharacterList = new Dictionary<int, CharacterData>();
-
-        private readonly Subject<Unit> _playerGenerateComplete = new Subject<Unit>();
+        [Inject] private UserDataManager _userDataManager;
+        [Inject] private CharacterLevelDataManager _characterLevelDataManager;
+        private readonly Subject<Photon.Realtime.Player[]> _joinedRoom = new();
+        private readonly Subject<int> _leftRoom = new();
+        private readonly Dictionary<int, GameObject> _playerObjectDictionary = new();
+        private readonly Dictionary<int, CharacterData> _currentRoomCharacterDatum = new();
+        private readonly Dictionary<int, CharacterLevelData> _currentRoomCharacterLevelDatum = new();
+        private readonly Subject<Unit> _playerGenerateComplete = new();
         private int _playerCount;
-
-
-        public Dictionary<int, CharacterData> CurrentRoomCharacterList => _currentRoomCharacterList;
+        public Dictionary<int, CharacterData> CurrentRoomCharacterDatum => _currentRoomCharacterDatum;
+        public Dictionary<int, CharacterLevelData> CurrentRoomCharacterLevelDatum => _currentRoomCharacterLevelDatum;
         public Dictionary<int, GameObject> PlayerObjectDictionary => _playerObjectDictionary;
         public Subject<int> LeftRoom => _leftRoom;
         public IObservable<Photon.Realtime.Player[]> JoinedRoom => _joinedRoom;
@@ -36,7 +36,7 @@ namespace Manager.NetworkManager
 
         private void Awake()
         {
-            CurrentRoomCharacterList.Clear();
+            CurrentRoomCharacterDatum.Clear();
             PhotonNetwork.UseRpcMonoBehaviourCache = true;
             PhotonNetwork.AutomaticallySyncScene = true;
             _playerCount = 0;
@@ -69,13 +69,17 @@ namespace Manager.NetworkManager
         public override void OnJoinedRoom()
         {
             var index = PhotonNetwork.LocalPlayer.ActorNumber;
-            PhotonNetwork.LocalPlayer.SetCharacterData(_characterDataManager.GetUserEquipCharacterData().ID);
+            var characterId = _characterDataManager.GetUserEquipCharacterData().Id;
+            var characterLevel = _userDataManager.GetCurrentLevelData(characterId).Level;
+            PhotonNetwork.LocalPlayer.SetCharacterData(characterId);
+            PhotonNetwork.LocalPlayer.SetCharacterLevel(characterLevel);
             PhotonNetwork.LocalPlayer.SetPlayerIndex(index);
         }
 
         public override void OnLeftRoom()
         {
-            _currentRoomCharacterList.Clear();
+            _currentRoomCharacterDatum.Clear();
+            _currentRoomCharacterLevelDatum.Clear();
             PhotonNetwork.Disconnect();
         }
 
@@ -105,7 +109,7 @@ namespace Manager.NetworkManager
         {
             foreach (var player in players)
             {
-                if (player.IsLocal)
+                /*if (player.IsLocal)
                 {
                     _currentRoomCharacterList[player.ActorNumber] =
                         _characterDataManager.GetCharacterData(_characterDataManager.GetUserEquipCharacterData().ID);
@@ -114,7 +118,11 @@ namespace Manager.NetworkManager
                 {
                     _currentRoomCharacterList[player.ActorNumber] =
                         _characterDataManager.GetCharacterData(player.GetCharacterId());
-                }
+                }*/
+                _currentRoomCharacterDatum[player.ActorNumber] =
+                    _characterDataManager.GetCharacterData(player.GetCharacterId());
+                _currentRoomCharacterLevelDatum[player.ActorNumber] =
+                    _characterLevelDataManager.GetCharacterLevelData(player.GetCharacterLevel());
             }
 
             _joinedRoom.OnNext(players);
@@ -128,7 +136,7 @@ namespace Manager.NetworkManager
         public int GetPlayerNumber(int index)
         {
             var count = 0;
-            foreach (var player in _currentRoomCharacterList.OrderBy(x => x.Key))
+            foreach (var player in _currentRoomCharacterDatum.OrderBy(x => x.Key))
             {
                 count++;
                 if (player.Key == index)
@@ -149,7 +157,7 @@ namespace Manager.NetworkManager
 
         public CharacterData GetCharacterData(int playerId)
         {
-            if (!_currentRoomCharacterList.TryGetValue(playerId, out var value))
+            if (!_currentRoomCharacterDatum.TryGetValue(playerId, out var value))
             {
                 Debug.LogError("キャラクター情報がありません");
                 return null;
@@ -157,6 +165,18 @@ namespace Manager.NetworkManager
 
 
             return value;
+        }
+
+        public CharacterLevelData GetCharacterLevelData(int playerId)
+        {
+            if (!_currentRoomCharacterLevelDatum.ContainsKey(playerId))
+            {
+                Debug.LogError("キャラクター情報がありません");
+                return null;
+            }
+
+
+            return _currentRoomCharacterLevelDatum[playerId];
         }
 
         public void SetPlayerObjDictionary(int playerId, GameObject playerObj)

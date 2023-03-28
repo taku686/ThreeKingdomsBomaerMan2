@@ -41,7 +41,7 @@ namespace Manager
                 return;
             }
 
-            var currentLevelData = userDataManager.GetCurrentLevelData(characterData.ID);
+            var currentLevelData = userDataManager.GetCurrentLevelData(characterData.Id);
             _skillOneIntervalImage = _inputView.skillOneIntervalImage;
             _skillTwoIntervalImage = _inputView.skillTwoIntervalImage;
             _characterData = characterData;
