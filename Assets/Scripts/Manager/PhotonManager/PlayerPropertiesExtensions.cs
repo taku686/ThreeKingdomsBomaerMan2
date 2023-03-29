@@ -7,7 +7,8 @@ namespace Manager.NetworkManager
 {
     public static class PlayerPropertiesExtensions
     {
-        public const string CharacterDataKey = "Cha";
+        private const string CharacterDataKey = "Cha";
+        private const string CharacterLevelKey = "Lev";
         public const string PlayerIndexKey = "Index";
         public const string PlayerGenerateKey = "Gen";
         private static readonly Hashtable PropsToSet = new Hashtable();
@@ -16,6 +17,11 @@ namespace Manager.NetworkManager
         public static int GetCharacterId(this Photon.Realtime.Player player)
         {
             return (player.CustomProperties[CharacterDataKey] is int characterId) ? characterId : -1;
+        }
+
+        public static int GetCharacterLevel(this Photon.Realtime.Player player)
+        {
+            return (player.CustomProperties[CharacterLevelKey] is int level) ? level : -1;
         }
 
         public static int GetPlayerIndex(this Photon.Realtime.Player player)
@@ -37,6 +43,13 @@ namespace Manager.NetworkManager
         public static void SetCharacterData(this Photon.Realtime.Player player, int characterId)
         {
             PropsToSet[CharacterDataKey] = characterId;
+            player.SetCustomProperties(PropsToSet);
+            PropsToSet.Clear();
+        }
+
+        public static void SetCharacterLevel(this Photon.Realtime.Player player, int characterLevel)
+        {
+            PropsToSet[CharacterLevelKey] = characterLevel;
             player.SetCustomProperties(PropsToSet);
             PropsToSet.Clear();
         }

@@ -1,4 +1,3 @@
-using System;
 using Bomb;
 using Common.Data;
 using Manager.BattleManager.Camera;
@@ -11,16 +10,17 @@ using Zenject;
 
 namespace Manager.BattleManager
 {
-    public partial class BattleBase : MonoBehaviourPunCallbacks
+    public partial class BattleCore : MonoBehaviourPunCallbacks
     {
         [Inject] private PhotonNetworkManager _networkManager;
         [Inject] private PlayerGenerator _playerGenerator;
         [Inject] private BombProvider _bombProvider;
+        [Inject] private UserDataManager _userDataManager;
         [SerializeField] private Transform playerUIParent;
         [SerializeField] private GameObject playerUI;
         [SerializeField] private CameraManager cameraManager;
         [SerializeField] private StageManager stageManager;
-        private StateMachine<BattleBase> _stateMachine;
+        private StateMachine<BattleCore> _stateMachine;
 
         private enum Event
         {
@@ -49,7 +49,7 @@ namespace Manager.BattleManager
 
         private void InitializeState()
         {
-            _stateMachine = new StateMachine<BattleBase>(this);
+            _stateMachine = new StateMachine<BattleCore>(this);
             _stateMachine.Start<EndSceneTransitionState>();
             _stateMachine.AddTransition<EndSceneTransitionState, PlayerCreateState>((int)Event.PlayerCreate);
         }

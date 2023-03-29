@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace UI.Common
@@ -12,5 +10,7 @@ namespace UI.Common
         public Button skillTwoButton;
         public Image skillOneIntervalImage;
         public Image skillTwoIntervalImage;
+        public Image skillOneImage;
+        public Image skillTwoImage;
     }
 }

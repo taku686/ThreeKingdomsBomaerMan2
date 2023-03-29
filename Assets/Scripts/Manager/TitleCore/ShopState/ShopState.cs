@@ -33,9 +33,6 @@ namespace UI.Title
                 Owner.shopView.RewardGetView.gameObject.SetActive(false);
                 Owner.shopView.PurchaseErrorView.gameObject.SetActive(false);
                 Owner.shopView.PurchaseErrorView.errorInfoText.text = "";
-
-                //todo 後で消す
-                _playFabShopManager.DebugText = _shopView.DebugText;
             }
 
             private void InitializeButton()
@@ -64,10 +61,10 @@ namespace UI.Title
                     OnClickBuyItem(GameCommonData.TwentyGemItemKey,
                         Owner.shopView.TwentyGemButton.gameObject));
                 Owner.shopView.HundredGemButton.onClick.AddListener(() =>
-                    OnClickBuyItem(GameCommonData.HundredGemKey,
+                    OnClickBuyItem(GameCommonData.HundredGemItemKey,
                         Owner.shopView.HundredGemButton.gameObject));
                 Owner.shopView.TwoHundredGemButton.onClick.AddListener(() =>
-                    OnClickBuyItem(GameCommonData.TwoHundredGemKey,
+                    OnClickBuyItem(GameCommonData.TwoHundredGemItemKey,
                         Owner.shopView.TwoHundredGemButton.gameObject));
                 Owner.shopView.AdsButton.onClick.AddListener(OnClickAds);
                 Owner.shopView.GachaButton.onClick.AddListener(OnClickCharacterGacha);

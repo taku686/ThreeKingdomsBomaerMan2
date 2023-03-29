@@ -48,19 +48,21 @@ namespace Player.Common
 
         private StateMachine<PLayerCore> _stateMachine;
 
-        public void Initialize(PlayerStatusManager playerStatusManager, string hpKey)
+        public void Initialize(PlayerStatusManager playerStatusManager, string hpKey, CharacterData characterData,
+            UserDataManager userDataManager)
         {
+            _characterData = characterData;
             _hpKey = hpKey;
             _playerStatusManager = playerStatusManager;
-            InitializeComponent();
+            InitializeComponent(_characterData, userDataManager);
             InitializeState();
         }
 
-        private void InitializeComponent()
+        private void InitializeComponent(CharacterData characterData, UserDataManager userDataManager)
         {
             _photonView = GetComponent<PhotonView>();
             _inputManager = gameObject.AddComponent<InputManager>();
-            _inputManager.Initialize(_photonView, SkillOneIntervalTime, SkillTwoIntervalTime);
+            _inputManager.Initialize(_photonView, SkillOneIntervalTime, SkillTwoIntervalTime, characterData,userDataManager);
             _playerPutBomb = GetComponent<PlayerPutBomb>();
             _animator = GetComponent<Animator>();
             _animatorTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
@@ -98,7 +100,7 @@ namespace Player.Common
         {
             OnDamage(other.gameObject);
         }
-        
+
 
         private async void OnInvincible()
         {
