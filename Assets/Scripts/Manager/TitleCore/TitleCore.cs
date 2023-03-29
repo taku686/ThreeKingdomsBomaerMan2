@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using Assets.Scripts.Common.PlayFab;
 using Common.Data;
@@ -35,6 +36,7 @@ namespace UI.Title
         [SerializeField] private LoginView loginView;
         [SerializeField] private SettingView settingView;
         [SerializeField] private ShopView shopView;
+        [SerializeField] private LoginBonusView loginBonusView;
         private GameObject _character;
         private GameObject _weaponEffect;
         private StateMachine<TitleCore> _stateMachine;
@@ -51,7 +53,8 @@ namespace UI.Title
             ReadyBattle,
             SelectBattleMode,
             SceneTransition,
-            Setting
+            Setting,
+            LoginBonus
         }
 
 
@@ -59,6 +62,11 @@ namespace UI.Title
         {
             _token = this.GetCancellationTokenOnDestroy();
             Initialize();
+        }
+
+        private void Update()
+        {
+            _stateMachine.Update();
         }
 
 
@@ -91,6 +99,7 @@ namespace UI.Title
             _stateMachine.AddTransition<MainState, ShopState>((int)Event.Shop);
             _stateMachine.AddTransition<CharacterDetailState, ShopState>((int)Event.Shop);
             _stateMachine.AddTransition<CharacterSelectState, ShopState>((int)Event.Shop);
+            _stateMachine.AddTransition<MainState, LoginBonusState>((int)Event.LoginBonus);
         }
 
 
@@ -104,6 +113,7 @@ namespace UI.Title
             mainView.LoginGameObject.SetActive(false);
             mainView.SettingGameObject.SetActive(false);
             mainView.ShopGameObject.SetActive(false);
+            mainView.LoginBonusObjet.SetActive(false);
         }
 
         private void CreateCharacter(int id)

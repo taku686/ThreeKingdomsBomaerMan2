@@ -148,6 +148,21 @@ namespace Common.Data
                     return Color.black;
             }
         }
+
+        public static LoginBonusStatus GetLoginBonusStatus(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return LoginBonusStatus.Disable;
+                case 1:
+                    return LoginBonusStatus.CanReceive;
+                case 2:
+                    return LoginBonusStatus.Received;
+                default:
+                    return LoginBonusStatus.Exception;
+            }
+        }
     }
 
 
@@ -203,5 +218,13 @@ namespace Common.Data
         Go,
         Syoku,
         Other
+    }
+
+    public enum LoginBonusStatus
+    {
+        Disable,
+        CanReceive,
+        Received,
+        Exception
     }
 }

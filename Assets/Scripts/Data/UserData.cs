@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Common.Data
 {
@@ -14,6 +15,7 @@ namespace Common.Data
         public int Coin;
         public List<int> Characters = new();
         public readonly Dictionary<int, int> CharacterLevels = new();
+        public readonly Dictionary<int, int> LoginBonus = new();
 
         public void SetUserData(UserData userData)
         {
@@ -44,6 +46,11 @@ namespace Common.Data
             user.Gem = 0;
             user.Coin = 0;
             user.CharacterLevels[0] = 0;
+            for (int i = 0; i < 7; i++)
+            {
+                user.LoginBonus[i] = (int)LoginBonusStatus.Disable;
+            }
+
             return user;
         }
 

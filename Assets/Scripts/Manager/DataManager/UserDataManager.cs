@@ -3,6 +3,8 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Manager.DataManager;
 using Manager.NetworkManager;
+using PlayFab.GroupsModels;
+using UI.Title;
 using UnityEngine;
 using Zenject;
 
@@ -47,6 +49,41 @@ namespace Common.Data
             var result = await _playFabUserDataManager.TryUpdateUserDataAsync(userData)
                 .AttachExternalCancellation(_cancellationTokenSource.Token);
             return result;
+        }
+
+        public async UniTask<bool> SetLoginBonus(int index, LoginBonusStatus status)
+        {
+            if (!_userData.LoginBonus.ContainsKey(index))
+            {
+                return false;
+            }
+
+            var userData = GetUserData();
+            userData.LoginBonus[index] = (int)status;
+            SetUserData(userData);
+            var result = await _playFabUserDataManager.TryUpdateUserDataAsync(userData)
+                .AttachExternalCancellation(_cancellationTokenSource.Token);
+            return result;
+        }
+
+        public async UniTask<bool> ResetLoginBonus()
+        {
+            var userData = GetUserData();
+            for (int i = 0; i < _userData.LoginBonus.Count; i++)
+            {
+                _userData.LoginBonus[i] = (int)LoginBonusStatus.Disable;
+            }
+
+            SetUserData(userData);
+            var result = await _playFabUserDataManager.TryUpdateUserDataAsync(userData)
+                .AttachExternalCancellation(_cancellationTokenSource.Token);
+            return result;
+        }
+
+        public LoginBonusStatus GetLoginBonusStatus(int index)
+        {
+            var status = _userData.LoginBonus[index];
+            return GameCommonData.GetLoginBonusStatus(status);
         }
 
         public CharacterData GetEquippedCharacterData()
