@@ -37,6 +37,8 @@ namespace UI.Title
         [SerializeField] private SettingView settingView;
         [SerializeField] private ShopView shopView;
         [SerializeField] private LoginBonusView loginBonusView;
+        [SerializeField] private Sprite coinSprite;
+        [SerializeField] private Sprite gemSprite;
         private GameObject _character;
         private GameObject _weaponEffect;
         private StateMachine<TitleCore> _stateMachine;

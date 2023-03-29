@@ -9,6 +9,7 @@ using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine;
 using Newtonsoft.Json;
+using Photon.Pun;
 using UI.Title.LoginState;
 using Zenject;
 
@@ -29,7 +30,7 @@ namespace Assets.Scripts.Common.PlayFab
         private GameObject _errorGameObject;
         private PlayFabResult<LoginResult> _loginResponse;
         public bool haveLoginBonus;
-     
+
 
         public void Initialize(DisplayNameView displayNameView, GameObject errorGameObject)
         {
@@ -123,7 +124,7 @@ namespace Assets.Scripts.Common.PlayFab
 
         private async UniTask SetLoginBonus(DateTime lastLoginDate)
         {
-            var daySubtraction = DateTime.Today.AddDays(1) - lastLoginDate.Date;
+            var daySubtraction = DateTime.Today - lastLoginDate.Date;
             var dayOfWeek = DateTime.Today.DayOfWeek;
             haveLoginBonus = daySubtraction.Days >= OneDay;
             if (dayOfWeek == DayOfWeek.Sunday)

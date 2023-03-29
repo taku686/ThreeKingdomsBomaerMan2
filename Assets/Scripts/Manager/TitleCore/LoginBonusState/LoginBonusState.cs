@@ -21,12 +21,15 @@ namespace UI.Title
             private PlayFabLoginManager _playFabLoginManager;
             private PlayFabShopManager _playaFabShopManager;
             private GameObject _focusObj;
+            private const int Day4 = 3;
+            private const int Day7 = 6;
 
             protected override void OnEnter(State prevState)
             {
                 Owner.DisableTitleGameObject();
                 Initialize();
                 InitializeButton();
+                InitializeUIContent();
                 SetupLoginImage();
                 OpenLoginBonusPanel().Forget();
             }
@@ -63,6 +66,12 @@ namespace UI.Title
 
                 _loginBonusView.closeButton.onClick.RemoveAllListeners();
                 _loginBonusView.closeButton.onClick.AddListener(OnClickClosePanel);
+            }
+
+            private void InitializeUIContent()
+            {
+                _loginBonusView.purchaseErrorView.gameObject.SetActive(false);
+                _loginBonusView.rewardGetView.gameObject.SetActive(false);
             }
 
             private async UniTask OpenLoginBonusPanel()
@@ -125,6 +134,16 @@ namespace UI.Title
                 Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     //todo　購入処理
+                    if (index is Day4 or Day7)
+                    {
+                        var day = index + 1;
+                        Debug.Log(day);
+                        var errorText = _loginBonusView.purchaseErrorView.errorInfoText;
+                        var rewardImage = _loginBonusView.rewardGetView.rewardImage;
+                        var itemGetResult = await _playaFabShopManager.TryPurchaseGacha(
+                            GameCommonData.LoginBonusItemKey + day, GameCommonData.CoinKey, 0,
+                            GameCommonData.GachaShopKey, rewardImage, errorText);
+                    }
 
                     var result = await _userDataManager.SetLoginBonus(index, LoginBonusStatus.Received);
                     if (!result)

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,4 +7,6 @@ public class LoginBonusView : MonoBehaviour
     public Image[] clearImages = new Image[7];
     public Button closeButton;
     public GameObject focusObj;
+    public PurchaseErrorView purchaseErrorView;
+    public RewardGetView rewardGetView;
 }

@@ -30,6 +30,10 @@ namespace Common.Data
         public const string BundleClassKey = "Bundle";
         public const string CharacterClassKey = "Character";
         public const string LevelClassKey = "Level";
+        public const string LoginBonusClassKey = "LoginBonus";
+        public const string CharacterTagKey = "Character";
+        public const string CoinTagKey = "Coin";
+        public const string GemTagKey = "Gem";
         public const string CharacterGachaItemKey = "bundle01";
         public const string ThousandCoinItemKey = "coin1000";
         public const string FiveThousandCoinItemKey = "coin5000";
@@ -38,6 +42,7 @@ namespace Common.Data
         public const string HundredGemItemKey = "gem100";
         public const string TwoHundredGemItemKey = "gem200";
         public const string LevelItemKey = "level";
+        public const string LoginBonusItemKey = "day";
         public const string CharacterMasterKey = "CharacterMaster";
         public const string CharacterLevelMasterKey = "CharacterLevelMaster";
         public static readonly int SkillOneHashKey = Animator.StringToHash("Attack");
@@ -53,6 +58,7 @@ namespace Common.Data
         public const string CharacterPrefabPath = "Prefabs/Character/";
         public const string WeaponEffectPrefabPath = "Prefabs/WeaponEffect/Effect";
         public const string SkillSpritePath = "Sprites/Skill/";
+        public const string VirtualCurrencySpritePath = "Sprites/VirtualCurrency/";
         public const float CloseDuration = 0.5f;
         public const float OpenDuration = 1.0f;
         public const float ClickIntervalDuration = 0.2f;

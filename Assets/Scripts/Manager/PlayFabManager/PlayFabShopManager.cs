@@ -23,8 +23,10 @@ namespace Manager.NetworkManager
         private IStoreController _storeController;
         private IExtensionProvider _extensionProvider;
         private string _itemName;
+        private Sprite _coinSprite;
+        private Sprite _gemSprite;
         private CancellationTokenSource _cancellationTokenSource;
-        [Inject] private PlayFabInventoryManager _playFabInventoryManager;
+        [Inject] private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private CharacterDataManager _characterDataManager;
         [Inject] private UserDataManager _userDataManager;
@@ -38,9 +40,9 @@ namespace Manager.NetworkManager
                 return;
             }
 
+            _isInitialized = true;
             var options = new InitializationOptions();
             await UnityServices.InitializeAsync(options);
-            _isInitialized = true;
             _builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
             foreach (var catalogItem in _catalogDataManager.GetCatalogItems().FindAll(x =>
                          x.ItemClass == GameCommonData.ConsumableClassKey))
@@ -49,6 +51,11 @@ namespace Manager.NetworkManager
             }
 
             UnityPurchasing.Initialize(this, _builder);
+
+            var coinSprite = await Resources.LoadAsync<Sprite>(GameCommonData.VirtualCurrencySpritePath + "coin");
+            _coinSprite = (Sprite)coinSprite;
+            var gemSprite = await Resources.LoadAsync<Sprite>(GameCommonData.VirtualCurrencySpritePath + "gem");
+            _gemSprite = (Sprite)gemSprite;
         }
 
         public void TryPurchaseItem(string itemName)
@@ -75,16 +82,33 @@ namespace Manager.NetworkManager
                 return false;
             }
 
-            await _playFabInventoryManager.SetVirtualCurrency();
+            await _playFabVirtualCurrencyManager.SetVirtualCurrency();
             var getItems = result.Result.Items.Where(x => x.BundleParent != null);
             foreach (var item in getItems)
             {
                 if (item.ItemClass.Equals(GameCommonData.CharacterClassKey))
                 {
+                    Debug.Log(item.ItemId);
                     var index = int.Parse(item.ItemId);
                     var characterData = _characterDataManager.GetCharacterData(index);
                     rewardImage.sprite = characterData.SelfPortraitSprite;
                     await _userDataManager.AddCharacterData(index);
+                }
+
+                if (item.ItemClass.Equals(GameCommonData.LoginBonusClassKey))
+                {
+                    Debug.Log(item.ItemId);
+                    if (item.DisplayName == GameCommonData.CoinKey)
+                    {
+                        rewardImage.sprite = _coinSprite;
+                        await _playFabVirtualCurrencyManager.SetVirtualCurrency();
+                    }
+
+                    if (item.DisplayName == GameCommonData.GemKey)
+                    {
+                        rewardImage.sprite = _gemSprite;
+                        await _playFabVirtualCurrencyManager.SetVirtualCurrency();
+                    }
                 }
             }
 
@@ -107,12 +131,12 @@ namespace Manager.NetworkManager
                 return false;
             }
 
-            await _playFabInventoryManager.SetVirtualCurrency();
+            await _playFabVirtualCurrencyManager.SetVirtualCurrency();
             var result2 = await _userDataManager.AddCharacterData(characterId);
             return result2;
         }
 
-        public async UniTask<bool> TryPurchaseUpgradeItem(int level, string virtualCurrencyKey, int price,
+        public async UniTask<bool> TryPurchaseLevelUpItem(int level, string virtualCurrencyKey, int price,
             int characterId, PurchaseErrorView purchaseErrorView)
         {
             var request = new PurchaseItemRequest
@@ -129,27 +153,9 @@ namespace Manager.NetworkManager
                 return false;
             }
 
-            await _playFabInventoryManager.SetVirtualCurrency();
+            await _playFabVirtualCurrencyManager.SetVirtualCurrency();
             var result2 = await _userDataManager.UpgradeCharacterLevel(characterId, level);
             return result2;
-        }
-
-        private async UniTask<bool> AddVirtualCurrency(string virtualCurrencyKey, int amount)
-        {
-            var request = new AddUserVirtualCurrencyRequest
-            {
-                Amount = amount,
-                VirtualCurrency = virtualCurrencyKey
-            };
-            var result = await PlayFabClientAPI.AddUserVirtualCurrencyAsync(request);
-
-            if (result.Error != null)
-            {
-                return false;
-            }
-
-            await _playFabInventoryManager.SetVirtualCurrency();
-            return true;
         }
 
 
@@ -217,7 +223,7 @@ namespace Manager.NetworkManager
                 return;
             }
 
-            await AddVirtualCurrency(itemData.vc, itemData.price);
+            await _playFabVirtualCurrencyManager.AddVirtualCurrency(itemData.vc, itemData.price);
             Debug.Log("Validated success");
         }
 

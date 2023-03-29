@@ -268,7 +268,7 @@ namespace UI.Title
                         return;
                     }
 
-                    var result = await _playFabShopManager.TryPurchaseUpgradeItem(nextLevelData.Level,
+                    var result = await _playFabShopManager.TryPurchaseLevelUpItem(nextLevelData.Level,
                         GameCommonData.CoinKey, nextLevelData.NeedCoin, equippedCharacterData.Id, purchaseErrorView);
 
                     if (!result)
