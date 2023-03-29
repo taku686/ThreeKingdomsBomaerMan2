@@ -64,7 +64,7 @@ namespace Assets.Scripts.Common.ResourceManager
                 Team = customData.Team,
                 Level = customData.Level,
                 Name = customData.Name,
-                ID = customData.ID,
+                Id = customData.Id,
                 Speed = customData.Speed,
                 BombLimit = customData.BombLimit / ModifiedValue,
                 Attack = customData.Attack,
@@ -72,7 +72,7 @@ namespace Assets.Scripts.Common.ResourceManager
                 Hp = customData.Hp,
                 CharaColor = customData.CharaColor
             };
-            _catalogDataManager.SetCharacter(customData.ID, characterData);
+            _catalogDataManager.SetCharacter(customData.Id, characterData);
         }
 
         private void SetAddVirtualCurrencyItemData(CatalogItem item)

@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UniRx;
-using UnityEngine.Tilemaps;
 
 namespace Common.Data
 {
@@ -15,6 +13,7 @@ namespace Common.Data
         public int Gem;
         public int Coin;
         public List<int> Characters = new();
+        public readonly Dictionary<int, int> CharacterLevels = new();
 
         public void SetUserData(UserData userData)
         {
@@ -41,9 +40,10 @@ namespace Common.Data
             user.Level = 1;
             user.Name = "";
             user.IsTutorial = false;
-            user.Characters.Add(characterData.ID);
+            user.Characters.Add(characterData.Id);
             user.Gem = 0;
             user.Coin = 0;
+            user.CharacterLevels[0] = 0;
             return user;
         }
 

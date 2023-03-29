@@ -17,6 +17,7 @@ namespace UI.Title
     public partial class TitleCore : MonoBehaviourPunCallbacks
     {
         [Inject] private CharacterDataManager _characterDataManager;
+        [Inject] private CharacterLevelDataManager _characterLevelDataManager;
         [Inject] private UserDataManager _userDataManager;
         [Inject] private UIAnimation _uiAnimation;
         [Inject] private PhotonNetworkManager _photonNetworkManager;
@@ -35,6 +36,7 @@ namespace UI.Title
         [SerializeField] private SettingView settingView;
         [SerializeField] private ShopView shopView;
         private GameObject _character;
+        private GameObject _weaponEffect;
         private StateMachine<TitleCore> _stateMachine;
         private CancellationToken _token;
 
@@ -87,6 +89,7 @@ namespace UI.Title
             _stateMachine.AddTransition<LoginState, MainState>((int)Event.Main);
             _stateMachine.AddTransition<MainState, SettingState>((int)Event.Setting);
             _stateMachine.AddTransition<MainState, ShopState>((int)Event.Shop);
+            _stateMachine.AddTransition<CharacterDetailState, ShopState>((int)Event.Shop);
             _stateMachine.AddTransition<CharacterSelectState, ShopState>((int)Event.Shop);
         }
 
@@ -107,9 +110,11 @@ namespace UI.Title
         {
             _userDataManager.GetUserData().EquipCharacterId = id;
             var preCharacter = _character;
+            var preWeaponEffect = _weaponEffect;
             Destroy(preCharacter);
+            Destroy(preWeaponEffect);
             var createCharacterData = _characterDataManager.GetCharacterData(id);
-            if (createCharacterData.CharacterObject == null)
+            if (createCharacterData.CharacterObject == null || createCharacterData.WeaponEffectObj == null)
             {
                 Debug.LogError(id);
             }
@@ -117,10 +122,25 @@ namespace UI.Title
             _character = Instantiate(createCharacterData.CharacterObject,
                 characterCreatePosition.position,
                 characterCreatePosition.rotation, characterCreatePosition);
+            var currentCharacterLevel = _userDataManager.GetCurrentLevelData(id);
+            if (currentCharacterLevel.Level < GameCommonData.MaxCharacterLevel)
+            {
+                return;
+            }
+
             var weapons = GameObject.FindGameObjectsWithTag(GameCommonData.WeaponTag);
             foreach (var weapon in weapons)
             {
-                var effect = weapon.GetComponentInChildren<PSMeshRendererUpdater>();
+                var effectObj = Instantiate(createCharacterData.WeaponEffectObj, weapon.transform);
+                var particleSystems = effectObj.GetComponentsInChildren<ParticleSystem>();
+                foreach (var system in particleSystems)
+                {
+                    var main = system.main;
+                    main.startColor = GameCommonData.GetWeaponColor(id);
+                }
+
+                var effect = effectObj.GetComponentInChildren<PSMeshRendererUpdater>();
+                effect.Color = GameCommonData.GetWeaponColor(id);
                 effect.UpdateMeshEffect(weapon);
             }
         }

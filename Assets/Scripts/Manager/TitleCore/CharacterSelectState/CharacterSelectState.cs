@@ -33,18 +33,19 @@ namespace UI.Title
             private void InitializeButton()
             {
                 Owner.characterSelectView.BackButton.onClick.RemoveAllListeners();
-                Owner.characterSelectView.GemAddPopup.AddButton.onClick.RemoveAllListeners();
-                Owner.characterSelectView.GemAddPopup.CloseButton.onClick.RemoveAllListeners();
-                Owner.characterSelectView.GemAddPopup.CancelButton.onClick.RemoveAllListeners();
+                Owner.characterSelectView.VirtualCurrencyAddPopup.AddButton.onClick.RemoveAllListeners();
+                Owner.characterSelectView.VirtualCurrencyAddPopup.CloseButton.onClick.RemoveAllListeners();
+                Owner.characterSelectView.VirtualCurrencyAddPopup.CancelButton.onClick.RemoveAllListeners();
                 Owner.characterSelectView.BackButton.onClick.AddListener(OnClickBack);
-                Owner.characterSelectView.GemAddPopup.CancelButton.onClick.AddListener(OnClickCancelPurchase);
-                Owner.characterSelectView.GemAddPopup.CloseButton.onClick.AddListener(OnClickClosePopup);
-                Owner.characterSelectView.GemAddPopup.AddButton.onClick.AddListener(OnClickAddGem);
+                Owner.characterSelectView.VirtualCurrencyAddPopup.CancelButton.onClick.AddListener(
+                    OnClickCancelPurchase);
+                Owner.characterSelectView.VirtualCurrencyAddPopup.CloseButton.onClick.AddListener(OnClickClosePopup);
+                Owner.characterSelectView.VirtualCurrencyAddPopup.AddButton.onClick.AddListener(OnClickAddGem);
             }
 
             private void InitializePopup()
             {
-                Owner.characterSelectView.GemAddPopup.gameObject.SetActive(false);
+                Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject.SetActive(false);
             }
 
             private void CreateUIContents()
@@ -74,7 +75,7 @@ namespace UI.Title
 
             private void SetupGrip(CharacterData characterData, Transform parent)
             {
-                if (Owner._userDataManager.IsGetCharacter(characterData.ID))
+                if (Owner._userDataManager.IsGetCharacter(characterData.Id))
                 {
                     CreateActiveGrid(characterData, parent);
                 }
@@ -102,13 +103,13 @@ namespace UI.Title
                 disableGrid.characterImage.color = Color.black;
                 disableGrid.characterImage.sprite = characterData.SelfPortraitSprite;
                 disableGrid.purchaseButton.onClick.AddListener(() =>
-                    OnClickPurchaseButton(disableGrid.gameObject, characterData.ID,
+                    OnClickPurchaseButton(disableGrid.gameObject, characterData.Id,
                         disableGrid.GetCancellationTokenOnDestroy()));
             }
 
             private void OnClickCharacterGrid(CharacterData characterData, GameObject gridGameObject)
             {
-                Owner.CreateCharacter(characterData.ID);
+                Owner.CreateCharacter(characterData.Id);
                 Owner._uiAnimation.ClickScale(gridGameObject)
                     .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.CharacterDetail); })
                     .SetLink(Owner.gameObject);
@@ -132,18 +133,22 @@ namespace UI.Title
                     {
                         var user = Owner._userDataManager.GetUserData();
                         var characterPrice = GameCommonData.CharacterPrice;
-                        var diamond = user.Gem;
-                        if (diamond < characterPrice)
+                        var gem = _userDataManager.GetGem();
+                        if (gem < characterPrice)
                         {
-                            Owner.characterSelectView.GemAddPopup.gameObject.SetActive(true);
+                            Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject.SetActive(true);
                             return;
                         }
 
-                        var itemName = characterId.ToString();
+                        if (user.Characters.Contains(characterId))
+                        {
+                            return;
+                        }
+
                         var virtualCurrencyKey = GameCommonData.GemKey;
                         var price = characterPrice;
                         var isSuccessPurchase = await Owner._playFabShopManager
-                            .TryPurchaseCharacter(itemName, virtualCurrencyKey, price)
+                            .TryPurchaseCharacter(characterId, virtualCurrencyKey, price)
                             .AttachExternalCancellation(token);
                         if (!isSuccessPurchase)
                         {
@@ -151,30 +156,14 @@ namespace UI.Title
                             return;
                         }
 
-                        user.Gem -= characterPrice;
-                        if (user.Characters.Contains(characterId))
-                        {
-                            return;
-                        }
-
-                        user.Characters.Add(characterId);
-                        var isSuccessUpdatePlayerData = await Owner._playFabUserDataManager
-                            .TryUpdateUserDataAsync(GameCommonData.UserKey, user)
-                            .AttachExternalCancellation(token);
-                        if (!isSuccessUpdatePlayerData)
-                        {
-                            return;
-                        }
-
-                        Owner._userDataManager.SetUserData(user);
                         CreateUIContents();
                     })).SetLink(disableGrid.gameObject);
             }
 
             private void OnClickClosePopup()
             {
-                var closeButton = Owner.characterSelectView.GemAddPopup.CloseButton.gameObject;
-                var popup = Owner.characterSelectView.GemAddPopup.gameObject;
+                var closeButton = Owner.characterSelectView.VirtualCurrencyAddPopup.CloseButton.gameObject;
+                var popup = Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject;
                 Owner._uiAnimation.ClickScaleColor(closeButton)
                     .OnComplete(() => { popup.SetActive(false); })
                     .SetLink(popup);
@@ -182,8 +171,8 @@ namespace UI.Title
 
             private void OnClickCancelPurchase()
             {
-                var cancelButton = Owner.characterSelectView.GemAddPopup.CancelButton.gameObject;
-                var popup = Owner.characterSelectView.GemAddPopup.gameObject;
+                var cancelButton = Owner.characterSelectView.VirtualCurrencyAddPopup.CancelButton.gameObject;
+                var popup = Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject;
                 Owner._uiAnimation.ClickScaleColor(cancelButton)
                     .OnComplete(() => { popup.SetActive(false); })
                     .SetLink(popup);
@@ -191,13 +180,12 @@ namespace UI.Title
 
             private void OnClickAddGem()
             {
-                var addButton = Owner.characterSelectView.GemAddPopup.AddButton.gameObject;
-                var popup = Owner.characterSelectView.GemAddPopup.gameObject;
+                var addButton = Owner.characterSelectView.VirtualCurrencyAddPopup.AddButton.gameObject;
+                var popup = Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject;
                 Owner._uiAnimation.ClickScaleColor(addButton).OnComplete(() =>
-                    {
-                        Owner._stateMachine.Dispatch((int)Event.Shop);
-                    })
-                    .SetLink(popup);
+                {
+                    Owner._stateMachine.Dispatch((int)Event.Shop);
+                }).SetLink(popup);
             }
         }
     }
