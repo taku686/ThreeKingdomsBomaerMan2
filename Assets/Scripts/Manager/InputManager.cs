@@ -16,28 +16,24 @@ namespace Manager
     public class InputManager : MonoBehaviour
     {
         private InputView _inputView;
-
         private const float MaxFillAmount = 1;
         private const float MinFillAmount = 0;
-
-
-        private string _joystickName;
         private PhotonView _photonView;
         private CancellationToken _token;
         private Button _bombButton;
         private Image _skillOneIntervalImage;
         private Image _skillTwoIntervalImage;
-        private float _timerSkillOne = 0;
-
-        private float _timerSkillTwo = 0;
+        private float _timerSkillOne;
+        private float _timerSkillTwo;
+        private CharacterData _characterData;
         public Button BombButton => _bombButton;
 
 
-        public void Initialize(PhotonView photonView, float skillOneIntervalTime, float skillTwoIntervalTime)
+        public void Initialize(PhotonView photonView, float skillOneIntervalTime, float skillTwoIntervalTime,
+            CharacterData characterData, UserDataManager userDataManager)
         {
             _token = this.GetCancellationTokenOnDestroy();
             _photonView = photonView;
-            _joystickName = GameCommonData.JoystickName;
             _inputView = FindObjectOfType<InputView>();
             _bombButton = _inputView.bombButton;
             if (!_photonView.IsMine)
@@ -45,9 +41,12 @@ namespace Manager
                 return;
             }
 
+            var currentLevelData = userDataManager.GetCurrentLevelData(characterData.Id);
             _skillOneIntervalImage = _inputView.skillOneIntervalImage;
             _skillTwoIntervalImage = _inputView.skillTwoIntervalImage;
-            SetupSkillUI(skillOneIntervalTime, skillTwoIntervalTime);
+            _characterData = characterData;
+            Debug.Log(characterData.Name);
+            SetupSkillUI(skillOneIntervalTime, skillTwoIntervalTime, currentLevelData);
         }
 
         public void SetOnClickSkillOne(float intervalTime, Action action, CancellationToken token)
@@ -84,12 +83,17 @@ namespace Manager
             _skillTwoIntervalImage.fillAmount = MinFillAmount;
         }
 
-        private void SetupSkillUI(float skillOneInterval, float skillTwoInterval)
+        private void SetupSkillUI(float skillOneInterval, float skillTwoInterval, CharacterLevelData levelData)
         {
+            Debug.Log(levelData.IsSkillOneActive);
+            _inputView.skillOneButton.gameObject.SetActive(levelData.IsSkillOneActive);
+            _inputView.skillTwoButton.gameObject.SetActive(levelData.IsSkillTwoActive);
             _timerSkillOne = skillOneInterval;
             _timerSkillTwo = skillTwoInterval;
             _skillOneIntervalImage.fillAmount = MaxFillAmount;
             _skillTwoIntervalImage.fillAmount = MaxFillAmount;
+            _inputView.skillOneImage.sprite = _characterData.SkillOneSprite;
+            _inputView.skillTwoImage.sprite = _characterData.SkillTwoSprite;
         }
 
         public void UpdateSkillUI(float skillOneInterval, float skillTwoInterval)

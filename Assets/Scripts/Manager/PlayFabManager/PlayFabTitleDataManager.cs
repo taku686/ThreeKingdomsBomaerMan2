@@ -14,6 +14,7 @@ namespace Manager.PlayFabManager
     {
         private const int ModifiedValue = 10;
         [Inject] private CharacterDataManager _characterDataManager;
+        [Inject] private CharacterLevelDataManager _characterLevelDataManager;
         private CancellationTokenSource _cancellationTokenSource;
 
         public void Initialize()
@@ -24,8 +25,13 @@ namespace Manager.PlayFabManager
         public async UniTask SetTitleData(Dictionary<string, string> titleDatum)
         {
             var characterDatum =
-                JsonConvert.DeserializeObject<CharacterData[]>(titleDatum[GameCommonData.CharacterMasterKey]);
+                JsonConvert.DeserializeObject<CharacterData[]>
+                    (titleDatum[GameCommonData.CharacterMasterKey]);
             await SetCharacterData(characterDatum);
+            var characterLevelDatum =
+                JsonConvert.DeserializeObject<CharacterLevelData[]>
+                    (titleDatum[GameCommonData.CharacterLevelMasterKey]);
+            SetCharacterLevelData(characterLevelDatum);
         }
 
         private async UniTask SetCharacterData(CharacterData[] characterDatum)
@@ -35,16 +41,26 @@ namespace Manager.PlayFabManager
                 characterData.CharacterObject = await LoadGameObject(GameCommonData.CharacterPrefabPath,
                     characterData.CharaObj, _cancellationTokenSource.Token);
                 characterData.SelfPortraitSprite =
-                    await LoadCharacterSprite(characterData.ID, _cancellationTokenSource.Token);
+                    await LoadCharacterSprite(characterData.Id, _cancellationTokenSource.Token);
                 characterData.ColorSprite =
                     await LoadCharacterColor(characterData.CharaColor, _cancellationTokenSource.Token);
                 characterData.SkillOneSprite =
-                    await LoadSkillSprite(characterData.ID, characterData.SkillOneId, _cancellationTokenSource.Token);
+                    await LoadSkillSprite(characterData.Id, characterData.SkillOneId, _cancellationTokenSource.Token);
                 characterData.SkillTwoSprite =
-                    await LoadSkillSprite(characterData.ID, characterData.SkillTwoId, _cancellationTokenSource.Token);
+                    await LoadSkillSprite(characterData.Id, characterData.SkillTwoId, _cancellationTokenSource.Token);
+                characterData.WeaponEffectObj =
+                    await LoadWeaponEffect(characterData.WeaponEffectId, _cancellationTokenSource.Token);
                 characterData.BombLimit /= ModifiedValue;
                 characterData.FireRange /= ModifiedValue;
                 _characterDataManager.SetCharacterData(characterData);
+            }
+        }
+
+        private void SetCharacterLevelData(CharacterLevelData[] characterLevelMasterDatum)
+        {
+            foreach (var characterLevelMasterData in characterLevelMasterDatum)
+            {
+                _characterLevelDataManager.SetCharacterLevelData(characterLevelMasterData);
             }
         }
 
@@ -81,6 +97,13 @@ namespace Manager.PlayFabManager
             var resource = await Resources.LoadAsync<Sprite>(GameCommonData.CharacterColorPath + colorIndex)
                 .WithCancellation(token);
             return (Sprite)resource;
+        }
+
+        private async UniTask<GameObject> LoadWeaponEffect(int weaponEffectId, CancellationToken token)
+        {
+            var resource = await Resources.LoadAsync<GameObject>(GameCommonData.WeaponEffectPrefabPath + weaponEffectId)
+                .WithCancellation(token);
+            return (GameObject)resource;
         }
 
         public void Dispose()

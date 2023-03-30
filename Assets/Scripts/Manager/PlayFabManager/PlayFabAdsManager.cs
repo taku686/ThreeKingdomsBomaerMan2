@@ -16,7 +16,7 @@ namespace Manager.NetworkManager
         private string _rewardId;
         private int? _placementViewsRemaining;
         private double? _placementViewsRestMinutes;
-        [Inject] private PlayFabInventoryManager _playFabInventoryManager;
+        [Inject] private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
         private RewardedAd _rewardAd;
 
         public async UniTask GetAdPlacementAsync(CancellationToken token)
@@ -80,7 +80,7 @@ namespace Manager.NetworkManager
                     }
 
                     Debug.Log(rewardResult.Result.RewardResults.GrantedVirtualCurrencies[GameCommonData.GemKey]);
-                    await _playFabInventoryManager.SetVirtualCurrency();
+                    await _playFabVirtualCurrencyManager.SetVirtualCurrency();
                     Debug.Log("ジェムを5個獲得");
                 }
             }

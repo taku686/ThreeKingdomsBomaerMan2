@@ -24,26 +24,27 @@ namespace Common.Data
         public const string BombLayer = "Bomb";
         public const string GemKey = "MS";
         public const string CoinKey = "CO";
-        public const string RealMoneyKey = "RM";
         public const string GachaShopKey = "GachaStore";
         public const string MainShopKey = "MainShop";
         public const string ConsumableClassKey = "Consumable";
         public const string BundleClassKey = "Bundle";
         public const string CharacterClassKey = "Character";
+        public const string LevelClassKey = "Level";
+        public const string LoginBonusClassKey = "LoginBonus";
+        public const string CharacterTagKey = "Character";
+        public const string CoinTagKey = "Coin";
+        public const string GemTagKey = "Gem";
         public const string CharacterGachaItemKey = "bundle01";
         public const string ThousandCoinItemKey = "coin1000";
         public const string FiveThousandCoinItemKey = "coin5000";
         public const string TwelveThousandCoinItemKey = "coin12000";
         public const string TwentyGemItemKey = "gem20";
-        public const string HundredGemKey = "gem100";
-        public const string TwoHundredGemKey = "gem200";
-        public const int ThousandCoinItemPrice = 100;
-        public const int FiveThousandCoinItemPrice = 480;
-        public const int TwelveThousandCoinItemPrice = 980;
-        public const int TwentyGemItemPrice = 100;
-        public const int HundredGemItemPrice = 480;
-        public const int TwoHundredGemItemPrice = 980;
+        public const string HundredGemItemKey = "gem100";
+        public const string TwoHundredGemItemKey = "gem200";
+        public const string LevelItemKey = "level";
+        public const string LoginBonusItemKey = "day";
         public const string CharacterMasterKey = "CharacterMaster";
+        public const string CharacterLevelMasterKey = "CharacterLevelMaster";
         public static readonly int SkillOneHashKey = Animator.StringToHash("Attack");
         public static readonly int SkillTwoHashKey = Animator.StringToHash("Passive");
         public static readonly int ActiveHashKey = Animator.StringToHash("Active");
@@ -55,10 +56,15 @@ namespace Common.Data
         public const string CharacterSpritePath = "Sprites/Character/";
         public const string CharacterColorPath = "Sprites/CharacterColor/";
         public const string CharacterPrefabPath = "Prefabs/Character/";
+        public const string WeaponEffectPrefabPath = "Prefabs/WeaponEffect/Effect";
         public const string SkillSpritePath = "Sprites/Skill/";
+        public const string VirtualCurrencySpritePath = "Sprites/VirtualCurrency/";
         public const float CloseDuration = 0.5f;
         public const float OpenDuration = 1.0f;
+        public const float ClickIntervalDuration = 0.2f;
         public const int ThreeMilliSecondsBeforeExplosion = 3000;
+        public const int MaxCharacterLevel = 10;
+        public const int MinCharacterLevel = 0;
 
         public static CharacterColor GetCharacterColor(string color)
         {
@@ -95,7 +101,76 @@ namespace Common.Data
                     return Vector3.zero;
             }
         }
+
+        public static Color GetWeaponColor(int characterId)
+        {
+            switch (characterId)
+            {
+                case 0:
+                    return Color.green;
+                case 1:
+                    return Color.red;
+                case 2:
+                    return new Color(0, 7, 255);
+                case 3:
+                    return Color.green;
+                case 4:
+                    return Color.red;
+                case 5:
+                    return new Color(116, 0, 255);
+                case 6:
+                    return Color.blue;
+                case 7:
+                    return new Color(91, 2193, 255);
+                case 8:
+                    return new Color(139, 255, 0);
+                case 9:
+                    return new Color(108, 0, 255);
+                case 10:
+                    return new Color(255, 100, 0);
+                case 11:
+                    return new Color(0, 205, 255);
+                case 12:
+                    return new Color(94, 94, 183);
+                case 13:
+                    return new Color(255, 0, 140);
+                case 14:
+                    return new Color(154, 0, 255);
+                case 15:
+                    return Color.blue;
+                case 16:
+                    return Color.green;
+                case 17:
+                    return new Color(121, 0, 255);
+                case 18:
+                    return new Color(0, 124, 255);
+                case 19:
+                    return new Color(255, 29, 0);
+                case 20:
+                    return Color.green;
+                case 21:
+                    return new Color(130, 0, 8);
+                default:
+                    return Color.black;
+            }
+        }
+
+        public static LoginBonusStatus GetLoginBonusStatus(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return LoginBonusStatus.Disable;
+                case 1:
+                    return LoginBonusStatus.CanReceive;
+                case 2:
+                    return LoginBonusStatus.Received;
+                default:
+                    return LoginBonusStatus.Exception;
+            }
+        }
     }
+
 
     public enum Direction
     {
@@ -149,5 +224,13 @@ namespace Common.Data
         Go,
         Syoku,
         Other
+    }
+
+    public enum LoginBonusStatus
+    {
+        Disable,
+        CanReceive,
+        Received,
+        Exception
     }
 }

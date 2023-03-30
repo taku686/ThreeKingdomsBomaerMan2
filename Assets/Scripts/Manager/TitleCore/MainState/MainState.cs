@@ -1,4 +1,9 @@
-﻿using DG.Tweening;
+﻿using System;
+using Assets.Scripts.Common.PlayFab;
+using Common.Data;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
+using UnityEngine;
 using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
@@ -7,13 +12,24 @@ namespace UI.Title
     {
         public class MainState : State
         {
+            private PlayFabLoginManager _playFabLoginManager;
+            private UserDataManager _userDataManager;
+
             protected override void OnEnter(State prevState)
             {
                 Initialize();
             }
 
+
+            protected override void OnUpdate()
+            {
+                TransitionLoginBonus();
+            }
+
             private void Initialize()
             {
+                _playFabLoginManager = Owner._playFabLoginManager;
+                _userDataManager = Owner._userDataManager;
                 Owner.DisableTitleGameObject();
                 Owner.CreateCharacter(Owner._userDataManager.GetUserData().EquipCharacterId);
                 InitializeButton();
@@ -37,6 +53,17 @@ namespace UI.Title
             {
                 Owner.mainView.CoinText.text = Owner._userDataManager.GetUserData().Coin.ToString("D");
                 Owner.mainView.DiamondText.text = Owner._userDataManager.GetUserData().Gem.ToString("D");
+            }
+
+            private void TransitionLoginBonus()
+            {
+                if (!_playFabLoginManager.haveLoginBonus)
+                {
+                    return;
+                }
+
+                _playFabLoginManager.haveLoginBonus = false;
+                Owner._stateMachine.Dispatch((int)Event.LoginBonus);
             }
 
 
