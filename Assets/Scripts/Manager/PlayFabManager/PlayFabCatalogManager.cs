@@ -33,6 +33,11 @@ namespace Assets.Scripts.Common.ResourceManager
                 {
                     SetAddVirtualCurrencyItemData(item);
                 }
+
+                if (item.ItemClass == GameCommonData.LoginBonusClassKey)
+                {
+                    SetLoginBonusItemData(item);
+                }
             }
         }
 
@@ -95,6 +100,28 @@ namespace Assets.Scripts.Common.ResourceManager
                 Name = item.ItemId
             };
             _catalogDataManager.SetAddVirtualCurrencyData(addVirtualCurrencyItemData);
+        }
+
+        private void SetLoginBonusItemData(CatalogItem item)
+        {
+            if (item.CustomData == null)
+            {
+                return;
+            }
+
+            var customData = JsonConvert.DeserializeObject<AddVirtualCurrencyItemData>(item.CustomData);
+            if (customData == null)
+            {
+                return;
+            }
+
+            var addVirtualCurrencyItemData = new AddVirtualCurrencyItemData()
+            {
+                vc = customData.vc,
+                price = customData.price,
+                Name = item.ItemId
+            };
+            _catalogDataManager.SetLoginBonusItemData(addVirtualCurrencyItemData);
         }
 
         public void Dispose()

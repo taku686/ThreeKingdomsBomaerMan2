@@ -65,7 +65,9 @@ namespace UI.Title
                 }
 
                 _loginBonusView.closeButton.onClick.RemoveAllListeners();
+                _loginBonusView.rewardGetView.okButton.onClick.RemoveAllListeners();
                 _loginBonusView.closeButton.onClick.AddListener(OnClickClosePanel);
+                _loginBonusView.rewardGetView.okButton.onClick.AddListener(OnClickCloseRewardView);
             }
 
             private void InitializeUIContent()
@@ -139,10 +141,38 @@ namespace UI.Title
                         var day = index + 1;
                         Debug.Log(day);
                         var errorText = _loginBonusView.purchaseErrorView.errorInfoText;
-                        var rewardImage = _loginBonusView.rewardGetView.rewardImage;
+                        var rewardView = _loginBonusView.rewardGetView;
+                        var rewardViewObj = _loginBonusView.rewardGetView.gameObject;
                         var itemGetResult = await _playaFabShopManager.TryPurchaseGacha(
                             GameCommonData.LoginBonusItemKey + day, GameCommonData.CoinKey, 0,
-                            GameCommonData.GachaShopKey, rewardImage, errorText);
+                            GameCommonData.GachaShopKey, rewardView, errorText);
+                        if (!itemGetResult)
+                        {
+                            return;
+                        }
+
+                        rewardViewObj.transform.localScale = Vector3.zero;
+                        rewardViewObj.SetActive(true);
+                        await _uiAnimation.Open(rewardViewObj.transform, GameCommonData.OpenDuration);
+                    }
+                    else
+                    {
+                        var day = index + 1;
+                        Debug.Log(day);
+                        var errorText = _loginBonusView.purchaseErrorView.errorInfoText;
+                        var rewardView = _loginBonusView.rewardGetView;
+                        var rewardViewObj = _loginBonusView.rewardGetView.gameObject;
+                        var itemGetResult =
+                            await _playaFabShopManager.TryPurchaseLoginBonusItem(day, GameCommonData.CoinKey, 0,
+                                rewardView, errorText);
+                        if (!itemGetResult)
+                        {
+                            return;
+                        }
+
+                        rewardViewObj.transform.localScale = Vector3.zero;
+                        rewardViewObj.SetActive(true);
+                        await _uiAnimation.Open(rewardViewObj.transform, GameCommonData.OpenDuration);
                     }
 
                     var result = await _userDataManager.SetLoginBonus(index, LoginBonusStatus.Received);
@@ -164,6 +194,17 @@ namespace UI.Title
                     await _uiAnimation.Close(panel, GameCommonData.CloseDuration);
                     panel.gameObject.SetActive(false);
                     Owner._stateMachine.Dispatch((int)Event.Main);
+                })).SetLink(button);
+            }
+
+            private void OnClickCloseRewardView()
+            {
+                var button = _loginBonusView.rewardGetView.okButton.gameObject;
+                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                {
+                    var panel = _loginBonusView.rewardGetView.transform;
+                    await _uiAnimation.Close(panel, GameCommonData.CloseDuration);
+                    panel.gameObject.SetActive(false);
                 })).SetLink(button);
             }
         }

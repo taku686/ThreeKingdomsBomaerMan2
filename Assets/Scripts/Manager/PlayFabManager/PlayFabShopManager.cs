@@ -11,7 +11,6 @@ using TMPro;
 using Unity.Services.Core;
 using UnityEngine;
 using UnityEngine.Purchasing;
-using UnityEngine.UI;
 using Zenject;
 
 namespace Manager.NetworkManager
@@ -65,7 +64,7 @@ namespace Manager.NetworkManager
         }
 
         public async UniTask<bool> TryPurchaseGacha(string itemName, string virtualCurrencyKey, int price,
-            string shopKey, Image rewardImage, TextMeshProUGUI errorText)
+            string shopKey, RewardGetView rewardView, TextMeshProUGUI errorText)
         {
             var request = new PurchaseItemRequest()
             {
@@ -88,27 +87,33 @@ namespace Manager.NetworkManager
             {
                 if (item.ItemClass.Equals(GameCommonData.CharacterClassKey))
                 {
-                    Debug.Log(item.ItemId);
                     var index = int.Parse(item.ItemId);
                     var characterData = _characterDataManager.GetCharacterData(index);
-                    rewardImage.sprite = characterData.SelfPortraitSprite;
+                    rewardView.rewardImage.sprite = characterData.SelfPortraitSprite;
                     await _userDataManager.AddCharacterData(index);
                 }
 
                 if (item.ItemClass.Equals(GameCommonData.LoginBonusClassKey))
                 {
-                    Debug.Log(item.ItemId);
-                    if (item.DisplayName == GameCommonData.CoinKey)
+                    var loginBonusItemData = _catalogDataManager.GetLoginBonusItemData(item.ItemId);
+                    if (loginBonusItemData == null)
                     {
-                        rewardImage.sprite = _coinSprite;
-                        await _playFabVirtualCurrencyManager.SetVirtualCurrency();
+                        return false;
                     }
 
-                    if (item.DisplayName == GameCommonData.GemKey)
+                    if (loginBonusItemData.vc == GameCommonData.CoinKey)
                     {
-                        rewardImage.sprite = _gemSprite;
-                        await _playFabVirtualCurrencyManager.SetVirtualCurrency();
+                        rewardView.rewardImage.sprite = _coinSprite;
+                        rewardView.rewardText.text = loginBonusItemData.price.ToString("D");
                     }
+
+                    if (loginBonusItemData.vc == GameCommonData.GemKey)
+                    {
+                        rewardView.rewardImage.sprite = _gemSprite;
+                        rewardView.rewardText.text = loginBonusItemData.price.ToString("D");
+                    }
+
+                    await _playFabVirtualCurrencyManager.SetVirtualCurrency();
                 }
             }
 
@@ -156,6 +161,51 @@ namespace Manager.NetworkManager
             await _playFabVirtualCurrencyManager.SetVirtualCurrency();
             var result2 = await _userDataManager.UpgradeCharacterLevel(characterId, level);
             return result2;
+        }
+
+        public async UniTask<bool> TryPurchaseLoginBonusItem(int day, string virtualCurrencyKey, int price,
+            RewardGetView rewardView, TextMeshProUGUI errorText)
+        {
+            var request = new PurchaseItemRequest
+            {
+                ItemId = GameCommonData.LoginBonusItemKey + day,
+                VirtualCurrency = virtualCurrencyKey,
+                Price = price,
+            };
+            var result = await PlayFabClientAPI.PurchaseItemAsync(request);
+            if (result.Error != null)
+            {
+                errorText.text = result.Error.ErrorMessage;
+                Debug.Log(result.Error.GenerateErrorReport());
+                return false;
+            }
+
+            foreach (var item in result.Result.Items)
+            {
+                if (item.ItemClass.Equals(GameCommonData.LoginBonusClassKey))
+                {
+                    var loginBonusItemData = _catalogDataManager.GetLoginBonusItemData(item.ItemId);
+                    if (loginBonusItemData == null)
+                    {
+                        return false;
+                    }
+
+                    if (loginBonusItemData.vc == GameCommonData.CoinKey)
+                    {
+                        rewardView.rewardImage.sprite = _coinSprite;
+                        rewardView.rewardText.text = loginBonusItemData.price.ToString("D");
+                    }
+
+                    if (loginBonusItemData.vc == GameCommonData.GemKey)
+                    {
+                        rewardView.rewardImage.sprite = _gemSprite;
+                        rewardView.rewardText.text = loginBonusItemData.price.ToString("D");
+                    }
+                }
+            }
+
+            await _playFabVirtualCurrencyManager.SetVirtualCurrency();
+            return true;
         }
 
 

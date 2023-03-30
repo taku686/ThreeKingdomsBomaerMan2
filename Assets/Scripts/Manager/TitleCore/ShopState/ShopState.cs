@@ -101,20 +101,20 @@ namespace UI.Title
             private void OnClickCharacterGacha()
             {
                 var button = Owner.shopView.GachaButton.gameObject;
-                var rewardView = Owner.shopView.RewardGetView.transform;
-                var rewardImage = Owner.shopView.RewardGetView.rewardImage;
+                var rewardViewTransform = Owner.shopView.RewardGetView.transform;
+                var rewardView = Owner.shopView.RewardGetView;
                 var errorView = Owner.shopView.PurchaseErrorView.transform;
                 var errorInfoText = Owner.shopView.PurchaseErrorView.errorInfoText;
                 Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     var isSucceed = await Owner._playFabShopManager.TryPurchaseGacha(
                         GameCommonData.CharacterGachaItemKey, GameCommonData.GemKey, 100, GameCommonData.GachaShopKey,
-                        rewardImage, errorInfoText);
+                        rewardView, errorInfoText);
                     if (isSucceed)
                     {
-                        rewardView.localScale = Vector3.zero;
-                        rewardView.gameObject.SetActive(true);
-                        await _uiAnimation.Open(rewardView, GameCommonData.OpenDuration);
+                        rewardViewTransform.localScale = Vector3.zero;
+                        rewardViewTransform.gameObject.SetActive(true);
+                        await _uiAnimation.Open(rewardViewTransform, GameCommonData.OpenDuration);
                     }
                     else
                     {
