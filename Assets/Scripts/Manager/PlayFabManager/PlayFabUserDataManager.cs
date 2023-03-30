@@ -19,15 +19,15 @@ namespace Manager.NetworkManager
         /// <summary>
         /// playerデータの更新
         /// </summary>
-        public async UniTask<bool> TryUpdateUserDataAsync(string key, UserData value)
+        public async UniTask<bool> TryUpdateUserDataAsync( UserData value)
         {
             var userJson = JsonConvert.SerializeObject(value);
-            var request = new UpdateUserDataRequest()
+            var request = new UpdateUserDataRequest
             {
                 Data = new Dictionary<string, string>
                 {
                     {
-                        key, userJson
+                        GameCommonData.UserKey, userJson
                     }
                 }
             };

@@ -15,12 +15,14 @@ namespace UI.Title
         [SerializeField] private GameObject loginGameObject;
         [SerializeField] private GameObject settingGameObject;
         [SerializeField] private GameObject shopGameObject;
+        [SerializeField] private GameObject loginBonusObjet;
         [SerializeField] private Button characterSelectButton;
         [SerializeField] private Button battleReadyButton;
         [SerializeField] private Button settingButton;
         [SerializeField] private Button shopButton;
         [SerializeField] private TextMeshProUGUI coinText;
         [SerializeField] private TextMeshProUGUI diamondText;
+        public GameObject LoginBonusObjet => loginBonusObjet;
         public Button SettingButton => settingButton;
         public Button BattleReadyButton => battleReadyButton;
         public Button CharacterSelectButton => characterSelectButton;

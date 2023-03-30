@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GemAddPopup : MonoBehaviour
+public class VirtualCurrencyAddPopup : MonoBehaviour
 {
     [SerializeField] private Button cancelButton;
     [SerializeField] private Button addButton;

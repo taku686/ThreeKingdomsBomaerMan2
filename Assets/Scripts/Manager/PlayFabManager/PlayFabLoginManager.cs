@@ -1,3 +1,4 @@
+using System;
 using Assets.Scripts.Common.ResourceManager;
 using Common.Data;
 using Cysharp.Threading.Tasks;
@@ -8,6 +9,7 @@ using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine;
 using Newtonsoft.Json;
+using Photon.Pun;
 using UI.Title.LoginState;
 using Zenject;
 
@@ -16,6 +18,7 @@ namespace Assets.Scripts.Common.PlayFab
     public class PlayFabLoginManager : MonoBehaviour
     {
         private const int DefaultCharacterIndex = 0;
+        private const int OneDay = 1;
         [Inject] private UserDataManager _userDataManager;
         [Inject] private CharacterDataManager _characterDataManager;
         [Inject] private PlayFabCatalogManager _playFabCatalogManager;
@@ -26,6 +29,8 @@ namespace Assets.Scripts.Common.PlayFab
         private DisplayNameView _displayNameView;
         private GameObject _errorGameObject;
         private PlayFabResult<LoginResult> _loginResponse;
+        public bool haveLoginBonus;
+
 
         public void Initialize(DisplayNameView displayNameView, GameObject errorGameObject)
         {
@@ -61,14 +66,9 @@ namespace Assets.Scripts.Common.PlayFab
                 return false;
             }
 
-            return await LoginSuccess(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
-        }
-
-
-        private async UniTask<bool> LoginSuccess(PlayFabResult<LoginResult> response)
-        {
             return await SetData(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
         }
+
 
         private async UniTask<bool> SetData(PlayFabResult<LoginResult> response)
         {
@@ -87,11 +87,17 @@ namespace Assets.Scripts.Common.PlayFab
                 .UserData[GameCommonData.UserKey].Value);
             var virtualCurrency = response.Result.InfoResultPayload.UserVirtualCurrency;
 
+
             if (user != null)
             {
                 user.Coin = virtualCurrency[GameCommonData.CoinKey];
                 user.Gem = virtualCurrency[GameCommonData.GemKey];
-                _userDataManager.Initialize(user, _characterDataManager);
+                _userDataManager.Initialize(user, _playFabUserDataManager);
+                if (response.Result.LastLoginTime != null)
+                {
+                    await SetLoginBonus(response.Result.LastLoginTime.Value);
+                }
+
                 return true;
             }
 
@@ -105,7 +111,7 @@ namespace Assets.Scripts.Common.PlayFab
             var virtualCurrency = _loginResponse.Result.InfoResultPayload.UserVirtualCurrency;
             user.Coin = virtualCurrency[GameCommonData.CoinKey];
             user.Gem = virtualCurrency[GameCommonData.GemKey];
-            var isSuccess = await _playFabUserDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, user)
+            var isSuccess = await _playFabUserDataManager.TryUpdateUserDataAsync(user)
                 .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
             if (!isSuccess)
             {
@@ -114,6 +120,24 @@ namespace Assets.Scripts.Common.PlayFab
             }
 
             return await Login().AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+        }
+
+        private async UniTask SetLoginBonus(DateTime lastLoginDate)
+        {
+            var daySubtraction = DateTime.Today - lastLoginDate.Date;
+            var dayOfWeek = DateTime.Today.DayOfWeek;
+            haveLoginBonus = daySubtraction.Days >= OneDay;
+            if (dayOfWeek == DayOfWeek.Sunday)
+            {
+                await _userDataManager.ResetLoginBonus();
+            }
+
+            if (!haveLoginBonus)
+            {
+                return;
+            }
+
+            await _userDataManager.SetLoginBonus((int)dayOfWeek, LoginBonusStatus.CanReceive);
         }
     }
 }

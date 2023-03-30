@@ -93,7 +93,7 @@ namespace UI.Title
                         Owner.battleReadyView.GridParent);
                     var battleReadyGrid = grid.GetComponent<BattleReadyGrid>();
                     _gridDictionary[index] = grid;
-                    var characterData = Owner._photonNetworkManager.CurrentRoomCharacterList[index];
+                    var characterData = Owner._photonNetworkManager.CurrentRoomCharacterDatum[index];
                     battleReadyGrid.characterImage.sprite = characterData.SelfPortraitSprite;
                     battleReadyGrid.backGroundImage.sprite = characterData.ColorSprite;
                     battleReadyGrid.nameText.text = characterData.Name;

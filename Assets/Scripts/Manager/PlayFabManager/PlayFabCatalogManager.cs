@@ -33,6 +33,11 @@ namespace Assets.Scripts.Common.ResourceManager
                 {
                     SetAddVirtualCurrencyItemData(item);
                 }
+
+                if (item.ItemClass == GameCommonData.LoginBonusClassKey)
+                {
+                    SetLoginBonusItemData(item);
+                }
             }
         }
 
@@ -64,7 +69,7 @@ namespace Assets.Scripts.Common.ResourceManager
                 Team = customData.Team,
                 Level = customData.Level,
                 Name = customData.Name,
-                ID = customData.ID,
+                Id = customData.Id,
                 Speed = customData.Speed,
                 BombLimit = customData.BombLimit / ModifiedValue,
                 Attack = customData.Attack,
@@ -72,7 +77,7 @@ namespace Assets.Scripts.Common.ResourceManager
                 Hp = customData.Hp,
                 CharaColor = customData.CharaColor
             };
-            _catalogDataManager.SetCharacter(customData.ID, characterData);
+            _catalogDataManager.SetCharacter(customData.Id, characterData);
         }
 
         private void SetAddVirtualCurrencyItemData(CatalogItem item)
@@ -95,6 +100,28 @@ namespace Assets.Scripts.Common.ResourceManager
                 Name = item.ItemId
             };
             _catalogDataManager.SetAddVirtualCurrencyData(addVirtualCurrencyItemData);
+        }
+
+        private void SetLoginBonusItemData(CatalogItem item)
+        {
+            if (item.CustomData == null)
+            {
+                return;
+            }
+
+            var customData = JsonConvert.DeserializeObject<AddVirtualCurrencyItemData>(item.CustomData);
+            if (customData == null)
+            {
+                return;
+            }
+
+            var addVirtualCurrencyItemData = new AddVirtualCurrencyItemData()
+            {
+                vc = customData.vc,
+                price = customData.price,
+                Name = item.ItemId
+            };
+            _catalogDataManager.SetLoginBonusItemData(addVirtualCurrencyItemData);
         }
 
         public void Dispose()

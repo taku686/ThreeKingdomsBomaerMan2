@@ -13,7 +13,6 @@ public class PSMeshRendererUpdater : MonoBehaviour
     List<Material[]> skinnedMaterials = new List<Material[]>();
     public bool IsActive = true;
     public float FadeTime = 1.5f;
-
     bool currentActiveStatus;
     private bool needUpdateAlpha;
 
@@ -21,7 +20,7 @@ public class PSMeshRendererUpdater : MonoBehaviour
     private float currentAlphaTime;
 
     string[] colorProperties =
-   {
+    {
         "_TintColor", "_Color", "_EmissionColor", "_BorderColor", "_ReflectColor", "_RimColor",
         "_MainColor", "_CoreColor", "_FresnelColor"
     };
@@ -62,6 +61,7 @@ public class PSMeshRendererUpdater : MonoBehaviour
             alpha = Mathf.Clamp01(alpha);
             if (Mathf.Abs(prevAlpha - alpha) >= Mathf.Epsilon) UpdateVisibleStatus();
         }
+
         prevAlpha = alpha;
 
         if (needUpdate) UpdateVisibleStatus();
@@ -84,7 +84,8 @@ public class PSMeshRendererUpdater : MonoBehaviour
             var mats = rend.materials;
             for (int i = 0; i < mats.Length; i++)
             {
-                if(mats[i].name.Contains(materialName))  GetStartAlphaByProperties(rend.GetHashCode().ToString(), i, mats[i]);
+                if (mats[i].name.Contains(materialName))
+                    GetStartAlphaByProperties(rend.GetHashCode().ToString(), i, mats[i]);
             }
         }
 
@@ -94,7 +95,8 @@ public class PSMeshRendererUpdater : MonoBehaviour
             var mats = rend.materials;
             for (int i = 0; i < mats.Length; i++)
             {
-                if (mats[i].name.Contains(materialName)) GetStartAlphaByProperties(rend.GetHashCode().ToString(), i, mats[i]);
+                if (mats[i].name.Contains(materialName))
+                    GetStartAlphaByProperties(rend.GetHashCode().ToString(), i, mats[i]);
             }
         }
 
@@ -114,7 +116,8 @@ public class PSMeshRendererUpdater : MonoBehaviour
             var mats = rend.materials;
             for (int i = 0; i < mats.Length; i++)
             {
-                if (mats[i].name.Contains(materialName)) GetStartAlphaByProperties(rend.GetHashCode().ToString(), i, mats[i]);
+                if (mats[i].name.Contains(materialName))
+                    GetStartAlphaByProperties(rend.GetHashCode().ToString(), i, mats[i]);
             }
         }
 
@@ -124,7 +127,8 @@ public class PSMeshRendererUpdater : MonoBehaviour
             var mats = rend.materials;
             for (int i = 0; i < mats.Length; i++)
             {
-                if (mats[i].name.Contains(materialName)) GetStartAlphaByProperties(rend.GetHashCode().ToString(), i, mats[i]);
+                if (mats[i].name.Contains(materialName))
+                    GetStartAlphaByProperties(rend.GetHashCode().ToString(), i, mats[i]);
             }
         }
     }
@@ -135,7 +139,8 @@ public class PSMeshRendererUpdater : MonoBehaviour
         var particles = GetComponentsInChildren<ParticleSystem>(true);
         foreach (var ps in particles)
         {
-             startParticleParameters.Add(ps, new ParticleStartInfo {StartSize = ps.main.startSize, StartSpeed = ps.main.startSpeed});
+            startParticleParameters.Add(ps,
+                new ParticleStartInfo { StartSize = ps.main.startSize, StartSpeed = ps.main.startSpeed });
         }
     }
 
@@ -147,7 +152,8 @@ public class PSMeshRendererUpdater : MonoBehaviour
             var mats = rend.materials;
             for (int i = 0; i < mats.Length; i++)
             {
-                if (mats[i].name.Contains(materialName)) UpdateAlphaByProperties(rend.GetHashCode().ToString(), i, mats[i], alpha);
+                if (mats[i].name.Contains(materialName))
+                    UpdateAlphaByProperties(rend.GetHashCode().ToString(), i, mats[i], alpha);
             }
         }
 
@@ -157,7 +163,8 @@ public class PSMeshRendererUpdater : MonoBehaviour
             var mats = rend.materials;
             for (int i = 0; i < mats.Length; i++)
             {
-                if (mats[i].name.Contains(materialName)) UpdateAlphaByProperties(rend.GetHashCode().ToString(), i, mats[i], alpha);
+                if (mats[i].name.Contains(materialName))
+                    UpdateAlphaByProperties(rend.GetHashCode().ToString(), i, mats[i], alpha);
             }
         }
 
@@ -167,7 +174,8 @@ public class PSMeshRendererUpdater : MonoBehaviour
             var mats = rend.materials;
             for (int i = 0; i < mats.Length; i++)
             {
-                if (mats[i].name.Contains(materialName)) UpdateAlphaByProperties(rend.GetHashCode().ToString(), i, mats[i], alpha);
+                if (mats[i].name.Contains(materialName))
+                    UpdateAlphaByProperties(rend.GetHashCode().ToString(), i, mats[i], alpha);
             }
         }
 
@@ -177,7 +185,8 @@ public class PSMeshRendererUpdater : MonoBehaviour
             var mats = rend.materials;
             for (int i = 0; i < mats.Length; i++)
             {
-                if (mats[i].name.Contains(materialName)) UpdateAlphaByProperties(rend.GetHashCode().ToString(), i, mats[i], alpha);
+                if (mats[i].name.Contains(materialName))
+                    UpdateAlphaByProperties(rend.GetHashCode().ToString(), i, mats[i], alpha);
             }
         }
 
@@ -218,7 +227,9 @@ public class PSMeshRendererUpdater : MonoBehaviour
         {
             if (mat.HasProperty(prop))
             {
-                var startAlpha = startAlphaColors[rendName + materialNumber + prop.ToString()];
+                var startAlpha = startAlphaColors.ContainsKey(rendName + materialNumber + prop.ToString())
+                    ? startAlphaColors[rendName + materialNumber + prop.ToString()]
+                    : 0;
                 var color = mat.GetColor(prop);
                 color.a = alpha * startAlpha;
                 mat.SetColor(prop, color);
@@ -233,7 +244,8 @@ public class PSMeshRendererUpdater : MonoBehaviour
             if (mat.HasProperty(prop))
             {
                 var key = rendName + materialNumber + prop.ToString();
-                if (!startAlphaColors.ContainsKey(key))                startAlphaColors.Add(rendName + materialNumber + prop.ToString(), mat.GetColor(prop).a);
+                if (!startAlphaColors.ContainsKey(key))
+                    startAlphaColors.Add(rendName + materialNumber + prop.ToString(), mat.GetColor(prop).a);
             }
         }
     }
@@ -265,7 +277,6 @@ public class PSMeshRendererUpdater : MonoBehaviour
 
     void CheckScaleIncludedParticles()
     {
-
     }
 
     public void UpdateMeshEffect(GameObject go)
@@ -277,6 +288,7 @@ public class PSMeshRendererUpdater : MonoBehaviour
             Debug.Log("You need set a gameObject");
             return;
         }
+
         MeshObject = go;
         UpdatePSMesh(MeshObject);
         AddMaterialToMesh(MeshObject);
@@ -298,6 +310,7 @@ public class PSMeshRendererUpdater : MonoBehaviour
             realBound = meshRend.bounds.size.magnitude;
             transformMax = meshRend.transform.lossyScale.magnitude;
         }
+
         if (skinMeshRend != null)
         {
             realBound = skinMeshRend.bounds.size.magnitude;
@@ -315,20 +328,21 @@ public class PSMeshRendererUpdater : MonoBehaviour
                 {
                     sh.shapeType = ParticleSystemShapeType.MeshRenderer;
                     sh.meshRenderer = meshRend;
-
                 }
+
                 if (skinMeshRend != null)
                 {
                     sh.shapeType = ParticleSystemShapeType.SkinnedMeshRenderer;
                     sh.skinnedMeshRenderer = skinMeshRend;
-
                 }
             }
 
             var mainPS = particleSys.main;
             var startParticleInfo = startParticleParameters[particleSys];
-            mainPS.startSize = UpdateParticleParam(startParticleInfo.StartSize, mainPS.startSize, (realBound / transformMax) * StartScaleMultiplier);
-            mainPS.startSpeed = UpdateParticleParam(startParticleInfo.StartSpeed, mainPS.startSpeed, (realBound / transformMax) * StartScaleMultiplier);
+            mainPS.startSize = UpdateParticleParam(startParticleInfo.StartSize, mainPS.startSize,
+                (realBound / transformMax) * StartScaleMultiplier);
+            mainPS.startSpeed = UpdateParticleParam(startParticleInfo.StartSpeed, mainPS.startSpeed,
+                (realBound / transformMax) * StartScaleMultiplier);
 
             //var startSize = mainPS.startSize;
             //if (startSize.mode == ParticleSystemCurveMode.TwoConstants)
@@ -342,12 +356,15 @@ public class PSMeshRendererUpdater : MonoBehaviour
             //mainPS.startSize = startSize;
 
 
-
             particleSys.transform.gameObject.SetActive(true);
         }
-        if (meshRend != null) foreach (var light1 in lights) light1.transform.position = meshRend.bounds.center;
-        if (skinMeshRend != null) foreach (var light1 in lights) light1.transform.position = skinMeshRend.bounds.center;
 
+        if (meshRend != null)
+            foreach (var light1 in lights)
+                light1.transform.position = meshRend.bounds.center;
+        if (skinMeshRend != null)
+            foreach (var light1 in lights)
+                light1.transform.position = skinMeshRend.bounds.center;
     }
 
     class ParticleStartInfo
@@ -356,16 +373,17 @@ public class PSMeshRendererUpdater : MonoBehaviour
         public ParticleSystem.MinMaxCurve StartSpeed;
     }
 
-    ParticleSystem.MinMaxCurve UpdateParticleParam(ParticleSystem.MinMaxCurve startParam, ParticleSystem.MinMaxCurve currentParam, float scale)
+    ParticleSystem.MinMaxCurve UpdateParticleParam(ParticleSystem.MinMaxCurve startParam,
+        ParticleSystem.MinMaxCurve currentParam, float scale)
     {
         if (currentParam.mode == ParticleSystemCurveMode.TwoConstants)
         {
-
             currentParam.constantMin = startParam.constantMin * scale;
             currentParam.constantMax = startParam.constantMax * scale;
         }
         else if (currentParam.mode == ParticleSystemCurveMode.Constant)
             currentParam.constant = startParam.constant * scale;
+
         return currentParam;
     }
 
@@ -384,8 +402,8 @@ public class PSMeshRendererUpdater : MonoBehaviour
             meshRenderer.sharedMaterials = AddToSharedMaterial(meshRenderer.sharedMaterials, meshMatEffect);
         }
 
-       // foreach (var skinMeshRenderer in skinMeshRenderers)
-        if(skinMeshRenderer!=null)
+        // foreach (var skinMeshRenderer in skinMeshRenderers)
+        if (skinMeshRenderer != null)
         {
             skinnedMaterials.Add(skinMeshRenderer.sharedMaterials);
             skinMeshRenderer.sharedMaterials = AddToSharedMaterial(skinMeshRenderer.sharedMaterials, meshMatEffect);
@@ -400,6 +418,7 @@ public class PSMeshRendererUpdater : MonoBehaviour
         {
             if (materials[i].name.Contains(materialName)) materials.RemoveAt(i);
         }
+
         //meshMatEffect.Material.name = meshMatEffect.Material.name + materialName;
         materials.Add(meshMatEffect.Material);
         return materials.ToArray();
@@ -422,8 +441,8 @@ public class PSMeshRendererUpdater : MonoBehaviour
             {
                 if (materials[j].name.Contains(materialName)) materials.RemoveAt(j);
             }
-            meshRenderers[i].sharedMaterials = materials.ToArray();
 
+            meshRenderers[i].sharedMaterials = materials.ToArray();
         }
 
         for (int i = 0; i < skinMeshRenderers.Length; i++)
@@ -436,9 +455,10 @@ public class PSMeshRendererUpdater : MonoBehaviour
             {
                 if (materials[j].name.Contains(materialName)) materials.RemoveAt(j);
             }
-            skinMeshRenderers[i].sharedMaterials = materials.ToArray();
 
+            skinMeshRenderers[i].sharedMaterials = materials.ToArray();
         }
+
         rendererMaterials.Clear();
         skinnedMaterials.Clear();
     }

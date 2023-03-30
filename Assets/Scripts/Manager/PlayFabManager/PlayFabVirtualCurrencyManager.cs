@@ -9,7 +9,7 @@ using Zenject;
 
 namespace Manager.NetworkManager
 {
-    public class PlayFabInventoryManager : IDisposable
+    public class PlayFabVirtualCurrencyManager : IDisposable
     {
         [Inject] private UserDataManager _userDataManager;
         [Inject] private CharacterDataManager _characterDataManager;
@@ -41,6 +41,24 @@ namespace Manager.NetworkManager
             _userDataManager.SetUserData(user);
         }
 
+        public async UniTask<bool> AddVirtualCurrency(string virtualCurrencyKey, int amount)
+        {
+            var request = new AddUserVirtualCurrencyRequest
+            {
+                Amount = amount,
+                VirtualCurrency = virtualCurrencyKey
+            };
+            var result = await PlayFabClientAPI.AddUserVirtualCurrencyAsync(request);
+
+            if (result.Error != null)
+            {
+                return false;
+            }
+
+            await SetVirtualCurrency();
+            return true;
+        }
+
         public async UniTask SetInventoryData()
         {
             var result = await PlayFabClientAPI.GetUserInventoryAsync(new GetUserInventoryRequest());
@@ -56,12 +74,12 @@ namespace Manager.NetworkManager
                 if (item.ItemClass.Equals(GameCommonData.CharacterClassKey))
                 {
                     var index = int.Parse(item.ItemId);
-                    user.Characters.Add(_characterDataManager.GetCharacterData(index).ID);
+                    user.Characters.Add(_characterDataManager.GetCharacterData(index).Id);
                 }
             }
 
             _userDataManager.SetUserData(user);
-            await _playFabUserDataManager.TryUpdateUserDataAsync(GameCommonData.UserKey, user);
+            await _playFabUserDataManager.TryUpdateUserDataAsync(user);
         }
 
         public void Dispose()

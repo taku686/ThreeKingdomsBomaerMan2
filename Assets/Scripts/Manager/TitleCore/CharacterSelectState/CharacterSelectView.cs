@@ -16,9 +16,9 @@ namespace UI.Title
 
         [SerializeField] private Transform contentsTransform;
 
-        [SerializeField] private GemAddPopup gemAddPopup;
+        [SerializeField] private VirtualCurrencyAddPopup virtualCurrencyAddPopup;
 
-        public GemAddPopup GemAddPopup => gemAddPopup;
+        public VirtualCurrencyAddPopup VirtualCurrencyAddPopup => virtualCurrencyAddPopup;
 
         public Button BackButton => backButton;
 
