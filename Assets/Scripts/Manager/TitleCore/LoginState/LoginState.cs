@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using Cysharp.Threading.Tasks;
 using Manager.NetworkManager;
+using UnityEngine;
 using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
@@ -26,7 +27,17 @@ namespace UI.Title
                 Owner.DisableTitleGameObject();
                 InitializeButton();
                 InitializeObject();
+                InitializeTitleImage();
                 Owner.mainView.LoginGameObject.SetActive(true);
+            }
+
+            private void InitializeTitleImage()
+            {
+                var sprites = _loginView.TitleSprites;
+                var backgroundImage = _loginView.BackgroundImage;
+                var index = Random.Range(0, sprites.Count);
+                var titleSprite = sprites[index];
+                backgroundImage.sprite = titleSprite;
             }
 
             private void InitializeObject()
