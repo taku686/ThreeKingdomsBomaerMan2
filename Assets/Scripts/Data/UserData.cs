@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Common.Data
 {
@@ -16,6 +15,7 @@ namespace Common.Data
         public List<int> Characters = new();
         public readonly Dictionary<int, int> CharacterLevels = new();
         public readonly Dictionary<int, int> LoginBonus = new();
+        public Dictionary<int, int> MissionProgressDatum = new();
 
         public void SetUserData(UserData userData)
         {
@@ -51,11 +51,16 @@ namespace Common.Data
                 user.LoginBonus[i] = (int)LoginBonusStatus.Disable;
             }
 
+            user.MissionProgressDatum = MissionProgressDatum;
             return user;
         }
 
         public void Dispose()
         {
+            Characters.Clear();
+            CharacterLevels.Clear();
+            LoginBonus.Clear();
+            MissionProgressDatum.Clear();
         }
     }
 }

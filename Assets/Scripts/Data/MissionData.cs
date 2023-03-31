@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Common.Data
 {
-    public class MissionData : MonoBehaviour
+    public class MissionData : IDisposable
     {
         public int index;
         public string rewardId;
@@ -10,5 +11,9 @@ namespace Common.Data
         public int count;
         public int action;
         public int characterId;
+
+        public void Dispose()
+        {
+        }
     }
 }

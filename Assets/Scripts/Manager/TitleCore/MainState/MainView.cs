@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,15 +14,18 @@ namespace UI.Title
         [SerializeField] private GameObject loginGameObject;
         [SerializeField] private GameObject settingGameObject;
         [SerializeField] private GameObject shopGameObject;
-        [SerializeField] private GameObject loginBonusObjet;
+        [SerializeField] private GameObject loginBonusGameObjet;
+        [SerializeField] private GameObject missionGameObject;
         [SerializeField] private Button characterSelectButton;
         [SerializeField] private Button battleReadyButton;
         [SerializeField] private Button settingButton;
         [SerializeField] private Button shopButton;
+        [SerializeField] private Button missionButton;
         [SerializeField] private TextMeshProUGUI coinText;
         [SerializeField] private TextMeshProUGUI diamondText;
-        public GameObject LoginBonusObjet => loginBonusObjet;
+        public GameObject LoginBonusGameObjet => loginBonusGameObjet;
         public Button SettingButton => settingButton;
+        public Button MissionButton => missionButton;
         public Button BattleReadyButton => battleReadyButton;
         public Button CharacterSelectButton => characterSelectButton;
         public Button ShopButton => shopButton;
@@ -34,6 +36,7 @@ namespace UI.Title
         public GameObject SceneTransitionGameObject => sceneTransitionGameObject;
         public GameObject LoginGameObject => loginGameObject;
         public GameObject SettingGameObject => settingGameObject;
+        public GameObject MissionGameObject => missionGameObject;
         public TextMeshProUGUI CoinText => coinText;
         public TextMeshProUGUI DiamondText => diamondText;
         public GameObject ShopGameObject => shopGameObject;

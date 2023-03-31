@@ -76,6 +76,8 @@ namespace UI.Title
 
                 if (!result)
                 {
+                    _commonView.waitPopup.SetActive(false);
+                    _isLoginProcessing = false;
                     return;
                 }
 
@@ -101,11 +103,20 @@ namespace UI.Title
 
             private async UniTask OnClickDisplayName()
             {
+                if (_isLoginProcessing)
+                {
+                    return;
+                }
+
+                _isLoginProcessing = true;
+                _commonView.waitPopup.SetActive(true);
                 var displayName = Owner.loginView.DisplayNameView.InputField.text;
                 var errorText = _loginView.DisplayNameView.ErrorText;
                 var success = await _playFabUserDataManager.UpdateUserDisplayName(displayName, errorText);
                 if (!success)
                 {
+                    _commonView.waitPopup.SetActive(false);
+                    _isLoginProcessing = false;
                     return;
                 }
 
@@ -116,6 +127,8 @@ namespace UI.Title
                     Owner.loginView.DisplayNameView.gameObject.SetActive(false);
                     Owner._mainManager.isInitialize = true;
                     Owner._stateMachine.Dispatch((int)Event.Main);
+                    _commonView.waitPopup.SetActive(false);
+                    _isLoginProcessing = false;
                 }
             }
 

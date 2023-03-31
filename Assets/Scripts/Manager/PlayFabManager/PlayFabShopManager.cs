@@ -95,7 +95,7 @@ namespace Manager.NetworkManager
 
                 if (item.ItemClass.Equals(GameCommonData.LoginBonusClassKey))
                 {
-                    var loginBonusItemData = _catalogDataManager.GetLoginBonusItemData(item.ItemId);
+                    var loginBonusItemData = _catalogDataManager.GetAddVirtualCurrencyItemData(item.ItemId);
                     if (loginBonusItemData == null)
                     {
                         return false;
@@ -184,7 +184,7 @@ namespace Manager.NetworkManager
             {
                 if (item.ItemClass.Equals(GameCommonData.LoginBonusClassKey))
                 {
-                    var loginBonusItemData = _catalogDataManager.GetLoginBonusItemData(item.ItemId);
+                    var loginBonusItemData = _catalogDataManager.GetAddVirtualCurrencyItemData(item.ItemId);
                     if (loginBonusItemData == null)
                     {
                         return false;

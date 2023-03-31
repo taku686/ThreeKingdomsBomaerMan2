@@ -92,7 +92,7 @@ namespace Assets.Scripts.Common.PlayFab
             {
                 user.Coin = virtualCurrency[GameCommonData.CoinKey];
                 user.Gem = virtualCurrency[GameCommonData.GemKey];
-                _userDataManager.Initialize(user, _playFabUserDataManager);
+                await _userDataManager.Initialize(user);
                 if (response.Result.LastLoginTime != null)
                 {
                     await SetLoginBonus(response.Result.LastLoginTime.Value);
@@ -107,11 +107,11 @@ namespace Assets.Scripts.Common.PlayFab
         public async UniTask<bool> CreateUserData()
         {
             var characterData = _characterDataManager.GetCharacterData(DefaultCharacterIndex);
-            var user = new UserData().Create(characterData);
+            var userData = new UserData().Create(characterData);
             var virtualCurrency = _loginResponse.Result.InfoResultPayload.UserVirtualCurrency;
-            user.Coin = virtualCurrency[GameCommonData.CoinKey];
-            user.Gem = virtualCurrency[GameCommonData.GemKey];
-            var isSuccess = await _playFabUserDataManager.TryUpdateUserDataAsync(user)
+            userData.Coin = virtualCurrency[GameCommonData.CoinKey];
+            userData.Gem = virtualCurrency[GameCommonData.GemKey];
+            var isSuccess = await _playFabUserDataManager.TryUpdateUserDataAsync(userData)
                 .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
             if (!isSuccess)
             {

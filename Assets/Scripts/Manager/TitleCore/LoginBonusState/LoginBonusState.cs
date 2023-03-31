@@ -78,7 +78,7 @@ namespace UI.Title
 
             private async UniTask OpenLoginBonusPanel()
             {
-                var panel = Owner.mainView.LoginBonusObjet.transform;
+                var panel = Owner.mainView.LoginBonusGameObjet.transform;
                 panel.localScale = Vector3.zero;
                 panel.gameObject.SetActive(true);
                 await _uiAnimation.Open(panel, GameCommonData.OpenDuration);
@@ -190,7 +190,7 @@ namespace UI.Title
                 var button = _loginBonusView.closeButton.gameObject;
                 Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
-                    var panel = _mainView.LoginBonusObjet.transform;
+                    var panel = _mainView.LoginBonusGameObjet.transform;
                     await _uiAnimation.Close(panel, GameCommonData.CloseDuration);
                     panel.gameObject.SetActive(false);
                     Owner._stateMachine.Dispatch((int)Event.Main);

@@ -27,6 +27,7 @@ namespace Common.Installer
             Container.Bind<MainManager>().FromComponentsInNewPrefab(mainManagerGameObject).AsSingle();
             Container.Bind<UserDataManager>().FromNew().AsSingle();
             Container.Bind<PlayFabCatalogManager>().FromNew().AsCached();
+            Container.Bind<PlayFabUserDataManager>().FromNew().AsCached();
         }
     }
 }

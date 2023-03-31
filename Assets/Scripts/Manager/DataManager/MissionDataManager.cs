@@ -1,13 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Common.Data;
 using UnityEngine;
 
 namespace Manager.DataManager
 {
-    public class MissionDataManager : MonoBehaviour
+    public class MissionDataManager : IDisposable
     {
         private readonly List<MissionData> _missionDatum = new();
+        public List<MissionData> MissionDatum => _missionDatum;
 
         public void AddMissionData(MissionData data)
         {
@@ -17,6 +19,10 @@ namespace Manager.DataManager
         public MissionData GetMissionData(int index)
         {
             return _missionDatum.FirstOrDefault(x => x.index == index);
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

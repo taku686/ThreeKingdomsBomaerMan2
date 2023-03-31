@@ -69,9 +69,9 @@ namespace Manager.PlayFabManager
             }
         }
 
-        private void SetMissionData(MissionData[] MissionDatum)
+        private void SetMissionData(MissionData[] missionDatum)
         {
-            foreach (var missionData in MissionDatum)
+            foreach (var missionData in missionDatum)
             {
                 _missionDataManager.AddMissionData(missionData);
             }
