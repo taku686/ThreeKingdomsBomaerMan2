@@ -60,7 +60,7 @@ namespace UI.Common
                 rect.DOScale(1f, 0.1f));
             return preSequence.Append(postSequence);
         }
-        
+
         public async UniTask Open(Transform target, float duration)
         {
             await target.DOScale(1f, duration).SetEase(Ease.OutBounce)
@@ -71,6 +71,23 @@ namespace UI.Common
         {
             await target.DOScale(0f, duration).SetEase(Ease.OutQuad)
                 .WithCancellation(target.GetCancellationTokenOnDestroy());
+        }
+
+        public void RepeatScale(RectTransform target)
+        {
+            target.DOScale(target.localScale * 1.05f, 1f)
+                .SetRelative(true)
+                .SetEase(Ease.OutQuart)
+                .SetLoops(-1, LoopType.Restart)
+                .SetLink(target.gameObject);
+        }
+
+        public void RepeatRotation(RectTransform target)
+        {
+            target.DOLocalRotate(new Vector3(0, 0, 360), 1f, RotateMode.FastBeyond360)
+                .SetRelative(true)
+                .SetLoops(-1, LoopType.Restart)
+                .SetLink(target.gameObject);
         }
     }
 }

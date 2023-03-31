@@ -1,6 +1,8 @@
 ﻿using System.Threading;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using Manager.NetworkManager;
+using UI.Common;
 using UnityEngine;
 using State = StateMachine<UI.Title.TitleCore>.State;
 
@@ -13,6 +15,9 @@ namespace UI.Title
             private CancellationToken _token;
             private PlayFabUserDataManager _playFabUserDataManager;
             private LoginView _loginView;
+            private CommonView _commonView;
+            private UIAnimation _uiAnimation;
+            private bool _isLoginProcessing;
 
             protected override void OnEnter(State prevState)
             {
@@ -24,6 +29,8 @@ namespace UI.Title
                 _token = Owner.GetCancellationTokenOnDestroy();
                 _playFabUserDataManager = Owner._playFabUserDataManager;
                 _loginView = Owner.loginView;
+                _uiAnimation = Owner._uiAnimation;
+                _commonView = Owner.commonView;
                 Owner.DisableTitleGameObject();
                 InitializeButton();
                 InitializeObject();
@@ -52,8 +59,7 @@ namespace UI.Title
                 Owner.loginView.StartButton.onClick.RemoveAllListeners();
                 Owner.loginView.DisplayNameView.OkButton.onClick.RemoveAllListeners();
                 Owner.loginView.RetryButton.onClick.AddListener(OnClickRetry);
-                Owner.loginView.StartButton.onClick.AddListener(() => UniTask.Void(async () =>
-                    await Login().AttachExternalCancellation(_token)));
+                Owner.loginView.StartButton.onClick.AddListener(OnClickLogin);
                 Owner.loginView.DisplayNameView.OkButton.onClick.AddListener(() => UniTask.Void(async () =>
                 {
                     await OnClickDisplayName();
@@ -62,16 +68,35 @@ namespace UI.Title
 
             private async UniTask Login()
             {
+                _isLoginProcessing = true;
+                _commonView.waitPopup.SetActive(true);
                 Owner._playFabLoginManager.Initialize(Owner.loginView.DisplayNameView, Owner.loginView.ErrorGameObject);
                 var result = await Owner._playFabLoginManager.Login()
                     .AttachExternalCancellation(_token);
 
-                if (result)
+                if (!result)
                 {
-                    Owner._characterDataManager.Initialize(Owner._userDataManager, Owner._token);
-                    Owner._mainManager.isInitialize = true;
-                    Owner._stateMachine.Dispatch((int)Event.Main);
+                    return;
                 }
+
+                Owner._characterDataManager.Initialize(Owner._userDataManager, Owner._token);
+                Owner._mainManager.isInitialize = true;
+                Owner._stateMachine.Dispatch((int)Event.Main);
+                _commonView.waitPopup.SetActive(false);
+                _isLoginProcessing = false;
+            }
+
+            private void OnClickLogin()
+            {
+                if (_isLoginProcessing)
+                {
+                    return;
+                }
+
+                var button = _loginView.StartButton.gameObject;
+                _uiAnimation.ClickScaleColor(button)
+                    .OnComplete(() => UniTask.Void(async () => { await Login(); }))
+                    .SetLink(button);
             }
 
             private async UniTask OnClickDisplayName()
@@ -90,7 +115,7 @@ namespace UI.Title
                     Owner._characterDataManager.Initialize(Owner._userDataManager, Owner._token);
                     Owner.loginView.DisplayNameView.gameObject.SetActive(false);
                     Owner._mainManager.isInitialize = true;
-                    Owner._stateMachine.Dispatch((int)Event.Login);
+                    Owner._stateMachine.Dispatch((int)Event.Main);
                 }
             }
 
