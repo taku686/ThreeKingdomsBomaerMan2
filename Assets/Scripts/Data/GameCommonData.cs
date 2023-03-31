@@ -31,9 +31,6 @@ namespace Common.Data
         public const string CharacterClassKey = "Character";
         public const string LevelClassKey = "Level";
         public const string LoginBonusClassKey = "LoginBonus";
-        public const string CharacterTagKey = "Character";
-        public const string CoinTagKey = "Coin";
-        public const string GemTagKey = "Gem";
         public const string CharacterGachaItemKey = "bundle01";
         public const string ThousandCoinItemKey = "coin1000";
         public const string FiveThousandCoinItemKey = "coin5000";
@@ -45,6 +42,7 @@ namespace Common.Data
         public const string LoginBonusItemKey = "day";
         public const string CharacterMasterKey = "CharacterMaster";
         public const string CharacterLevelMasterKey = "CharacterLevelMaster";
+        public const string MissionMasterKey = "MissionMaster";
         public static readonly int SkillOneHashKey = Animator.StringToHash("Attack");
         public static readonly int SkillTwoHashKey = Animator.StringToHash("Passive");
         public static readonly int ActiveHashKey = Animator.StringToHash("Active");

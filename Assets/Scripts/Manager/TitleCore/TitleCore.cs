@@ -19,6 +19,7 @@ namespace UI.Title
         [Inject] private CharacterDataManager _characterDataManager;
         [Inject] private CharacterLevelDataManager _characterLevelDataManager;
         [Inject] private UserDataManager _userDataManager;
+        [Inject] private MissionDataManager _missionDataManager;
         [Inject] private UIAnimation _uiAnimation;
         [Inject] private PhotonNetworkManager _photonNetworkManager;
         [Inject] private MainManager _mainManager;

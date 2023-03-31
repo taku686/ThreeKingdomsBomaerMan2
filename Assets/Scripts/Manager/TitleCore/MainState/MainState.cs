@@ -1,9 +1,6 @@
-﻿using System;
-using Assets.Scripts.Common.PlayFab;
+﻿using Assets.Scripts.Common.PlayFab;
 using Common.Data;
-using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using UnityEngine;
 using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
