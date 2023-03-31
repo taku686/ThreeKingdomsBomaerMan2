@@ -15,6 +15,7 @@ namespace Manager.PlayFabManager
         private const int ModifiedValue = 10;
         [Inject] private CharacterDataManager _characterDataManager;
         [Inject] private CharacterLevelDataManager _characterLevelDataManager;
+        [Inject] private MissionDataManager _missionDataManager;
         private CancellationTokenSource _cancellationTokenSource;
 
         public void Initialize()
@@ -27,11 +28,15 @@ namespace Manager.PlayFabManager
             var characterDatum =
                 JsonConvert.DeserializeObject<CharacterData[]>
                     (titleDatum[GameCommonData.CharacterMasterKey]);
-            await SetCharacterData(characterDatum);
             var characterLevelDatum =
                 JsonConvert.DeserializeObject<CharacterLevelData[]>
                     (titleDatum[GameCommonData.CharacterLevelMasterKey]);
+            var missionDatum =
+                JsonConvert.DeserializeObject<MissionData[]>
+                    (titleDatum[GameCommonData.MissionMasterKey]);
+            await SetCharacterData(characterDatum);
             SetCharacterLevelData(characterLevelDatum);
+            SetMissionData(missionDatum);
         }
 
         private async UniTask SetCharacterData(CharacterData[] characterDatum)
@@ -61,6 +66,14 @@ namespace Manager.PlayFabManager
             foreach (var characterLevelMasterData in characterLevelMasterDatum)
             {
                 _characterLevelDataManager.SetCharacterLevelData(characterLevelMasterData);
+            }
+        }
+
+        private void SetMissionData(MissionData[] missionDatum)
+        {
+            foreach (var missionData in missionDatum)
+            {
+                _missionDataManager.AddMissionData(missionData);
             }
         }
 

@@ -1,4 +1,5 @@
 using System.Threading;
+using Assets.Scripts.Common.Data;
 using Assets.Scripts.Common.PlayFab;
 using Common.Data;
 using Cysharp.Threading.Tasks;
@@ -19,6 +20,7 @@ namespace UI.Title
         [Inject] private CharacterDataManager _characterDataManager;
         [Inject] private CharacterLevelDataManager _characterLevelDataManager;
         [Inject] private UserDataManager _userDataManager;
+        [Inject] private MissionDataManager _missionDataManager;
         [Inject] private UIAnimation _uiAnimation;
         [Inject] private PhotonNetworkManager _photonNetworkManager;
         [Inject] private MainManager _mainManager;
@@ -26,6 +28,7 @@ namespace UI.Title
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private PlayFabShopManager _playFabShopManager;
         [Inject] private PlayFabAdsManager _playFabAdsManager;
+        [Inject] private CatalogDataManager _catalogDataManager;
         [SerializeField] private Transform characterCreatePosition;
         [SerializeField] private MainView mainView;
         [SerializeField] private CharacterSelectView characterSelectView;
@@ -36,6 +39,7 @@ namespace UI.Title
         [SerializeField] private SettingView settingView;
         [SerializeField] private ShopView shopView;
         [SerializeField] private LoginBonusView loginBonusView;
+        [SerializeField] private MissionView missionView;
         [SerializeField] private CommonView commonView;
         private GameObject _character;
         private GameObject _weaponEffect;
@@ -54,7 +58,8 @@ namespace UI.Title
             SelectBattleMode,
             SceneTransition,
             Setting,
-            LoginBonus
+            LoginBonus,
+            Mission
         }
 
 
@@ -101,6 +106,7 @@ namespace UI.Title
             _stateMachine.AddTransition<CharacterDetailState, ShopState>((int)Event.Shop);
             _stateMachine.AddTransition<CharacterSelectState, ShopState>((int)Event.Shop);
             _stateMachine.AddTransition<MainState, LoginBonusState>((int)Event.LoginBonus);
+            _stateMachine.AddTransition<MainState, MissionState>((int)Event.Mission);
         }
 
 
@@ -114,7 +120,8 @@ namespace UI.Title
             mainView.LoginGameObject.SetActive(false);
             mainView.SettingGameObject.SetActive(false);
             mainView.ShopGameObject.SetActive(false);
-            mainView.LoginBonusObjet.SetActive(false);
+            mainView.LoginBonusGameObjet.SetActive(false);
+            mainView.MissionGameObject.SetActive(false);
         }
 
         private void CreateCharacter(int id)

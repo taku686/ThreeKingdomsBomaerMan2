@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
@@ -19,7 +18,7 @@ namespace Manager.NetworkManager
         /// <summary>
         /// playerデータの更新
         /// </summary>
-        public async UniTask<bool> TryUpdateUserDataAsync( UserData value)
+        public async UniTask<bool> TryUpdateUserDataAsync(UserData value)
         {
             var userJson = JsonConvert.SerializeObject(value);
             var request = new UpdateUserDataRequest
