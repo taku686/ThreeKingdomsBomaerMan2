@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 using Assets.Scripts.Common.PlayFab;
 using Common.Data;
@@ -37,8 +36,7 @@ namespace UI.Title
         [SerializeField] private SettingView settingView;
         [SerializeField] private ShopView shopView;
         [SerializeField] private LoginBonusView loginBonusView;
-        [SerializeField] private Sprite coinSprite;
-        [SerializeField] private Sprite gemSprite;
+        [SerializeField] private CommonView commonView;
         private GameObject _character;
         private GameObject _weaponEffect;
         private StateMachine<TitleCore> _stateMachine;
@@ -74,6 +72,7 @@ namespace UI.Title
 
         private void Initialize()
         {
+            commonView.Initialize();
             InitializeState();
         }
 
