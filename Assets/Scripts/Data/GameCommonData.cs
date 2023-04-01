@@ -65,6 +65,11 @@ namespace Common.Data
         public const int MinCharacterLevel = 0;
         public const int MaxMissionCount = 3;
         public const int MaxMissionProgress = 100;
+        public const int BattleCountActionId = 0;
+        public const int LevelUpActionId = 1;
+        public const int CharacterBattleActionId = 2;
+        public const int ExceptionMissionProgress = 9999;
+        public const int ExceptionCharacterId = 999;
 
         public static CharacterColor GetCharacterColor(string color)
         {

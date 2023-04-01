@@ -29,6 +29,7 @@ namespace UI.Title
         [Inject] private PlayFabShopManager _playFabShopManager;
         [Inject] private PlayFabAdsManager _playFabAdsManager;
         [Inject] private CatalogDataManager _catalogDataManager;
+        [Inject] private MissionManager _missionManager;
         [SerializeField] private Transform characterCreatePosition;
         [SerializeField] private MainView mainView;
         [SerializeField] private CharacterSelectView characterSelectView;
@@ -160,6 +161,23 @@ namespace UI.Title
                 var effect = effectObj.GetComponentInChildren<PSMeshRendererUpdater>();
                 effect.Color = GameCommonData.GetWeaponColor(id);
                 effect.UpdateMeshEffect(weapon);
+            }
+        }
+
+        private void CheckMission(int actionId)
+        {
+            switch (actionId)
+            {
+                case GameCommonData.LevelUpActionId:
+                    _missionManager.CheckMission(GameCommonData.LevelUpActionId);
+                    break;
+                case GameCommonData.BattleCountActionId:
+                    _missionManager.CheckMission(GameCommonData.BattleCountActionId);
+                    break;
+                case GameCommonData.CharacterBattleActionId:
+                    var characterId = _userDataManager.GetEquippedCharacterData().Id;
+                    _missionManager.CheckMission(GameCommonData.CharacterBattleActionId, characterId);
+                    break;
             }
         }
     }

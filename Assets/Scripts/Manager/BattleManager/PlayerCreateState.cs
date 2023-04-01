@@ -25,6 +25,11 @@ namespace Manager.BattleManager
                 OnInitialize();
             }
 
+            protected override void OnUpdate()
+            {
+                Owner._stateMachine.Dispatch((int)Event.BattleStart);
+            }
+
             private void OnInitialize()
             {
                 CreatePlayer();

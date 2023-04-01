@@ -25,6 +25,7 @@ namespace Assets.Scripts.Common.PlayFab
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private PlayFabShopManager _playFabShopManager;
         [Inject] private PlayFabTitleDataManager _playFabTitleDataManager;
+        [Inject] private MissionManager _missionManager;
         private GetPlayerCombinedInfoRequestParams _info;
         private DisplayNameView _displayNameView;
         private GameObject _errorGameObject;
@@ -93,6 +94,7 @@ namespace Assets.Scripts.Common.PlayFab
                 user.Coin = virtualCurrency[GameCommonData.CoinKey];
                 user.Gem = virtualCurrency[GameCommonData.GemKey];
                 await _userDataManager.Initialize(user);
+                _missionManager.Initialize();
                 if (response.Result.LastLoginTime != null)
                 {
                     await SetLoginBonus(response.Result.LastLoginTime.Value);

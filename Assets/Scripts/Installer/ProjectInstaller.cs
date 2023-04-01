@@ -26,6 +26,7 @@ namespace Common.Installer
             Container.Bind<PhotonNetworkManager>().FromComponentInNewPrefab(photonNetworkGameObject).AsSingle();
             Container.Bind<MainManager>().FromComponentsInNewPrefab(mainManagerGameObject).AsSingle();
             Container.Bind<UserDataManager>().FromNew().AsSingle();
+            Container.Bind<MissionManager>().FromNew().AsSingle();
             Container.Bind<PlayFabCatalogManager>().FromNew().AsCached();
             Container.Bind<PlayFabUserDataManager>().FromNew().AsCached();
         }
