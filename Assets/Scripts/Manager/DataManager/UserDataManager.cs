@@ -4,9 +4,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Manager.DataManager;
 using Manager.NetworkManager;
-using PlayFab.GroupsModels;
-using UI.Title;
-using UnityEngine;
 using Zenject;
 using Random = UnityEngine.Random;
 
@@ -25,25 +22,7 @@ namespace Common.Data
         {
             _cancellationTokenSource = new CancellationTokenSource();
             SetUserData(userData);
-            await InitializeMissionData();
-        }
-
-        private async UniTask InitializeMissionData()
-        {
-            if (_userData.MissionProgressDatum.Count >= GameCommonData.MaxMissionCount)
-            {
-                return;
-            }
-
-            var missionDatum = _missionDataManager.MissionDatum;
-            while (_userData.MissionProgressDatum.Count < GameCommonData.MaxMissionCount)
-            {
-                var index = Random.Range(0, missionDatum.Count);
-                var missionIndex = missionDatum[index].index;
-                SetMissionData(missionIndex, 0);
-            }
-
-            await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
+            await AddMissionData();
         }
 
         public UserData GetUserData()
@@ -54,6 +33,12 @@ namespace Common.Data
         public void SetUserData(UserData userData)
         {
             _userData = userData;
+        }
+
+        public async UniTask UpdateUserData(UserData userData)
+        {
+            _userData = userData;
+            await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
         }
 
         public async UniTask<bool> AddCharacterData(int characterId)
@@ -159,6 +144,55 @@ namespace Common.Data
         public Dictionary<int, int> GetMissionProgressDatum()
         {
             return _userData.MissionProgressDatum;
+        }
+
+        public int GetMissionProgress(int missionId)
+        {
+            if (!_userData.MissionProgressDatum.ContainsKey(missionId))
+            {
+                return GameCommonData.ExceptionMissionProgress;
+            }
+
+            return _userData.MissionProgressDatum[missionId];
+        }
+
+        public void SetMissionProgress(int missionId, int missionProgress)
+        {
+            if (!_userData.MissionProgressDatum.ContainsKey(missionId))
+            {
+                return;
+            }
+
+            _userData.MissionProgressDatum[missionId] = missionProgress;
+        }
+
+        public async UniTask AddMissionData()
+        {
+            if (_userData.MissionProgressDatum.Count >= GameCommonData.MaxMissionCount)
+            {
+                return;
+            }
+
+            var missionDatum = _missionDataManager.MissionDatum;
+            while (_userData.MissionProgressDatum.Count < GameCommonData.MaxMissionCount)
+            {
+                var index = Random.Range(0, missionDatum.Count);
+                var missionIndex = missionDatum[index].index;
+                SetMissionData(missionIndex, 0);
+            }
+
+            await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
+        }
+
+        public async UniTask RemoveMissionData(int missionId)
+        {
+            if (!_userData.MissionProgressDatum.ContainsKey(missionId))
+            {
+                return;
+            }
+
+            _userData.MissionProgressDatum.Remove(missionId);
+            await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
         }
 
         public int GetCoin()

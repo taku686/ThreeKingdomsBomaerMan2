@@ -208,6 +208,27 @@ namespace Manager.NetworkManager
             return true;
         }
 
+        public async UniTask<bool> TryPurchaseItem(string itemId, string virtualCurrencyKey, int price,
+            TextMeshProUGUI errorText)
+        {
+            var request = new PurchaseItemRequest
+            {
+                ItemId = itemId,
+                VirtualCurrency = virtualCurrencyKey,
+                Price = price,
+            };
+            var result = await PlayFabClientAPI.PurchaseItemAsync(request);
+            if (result.Error != null)
+            {
+                errorText.text = result.Error.ErrorMessage;
+                Debug.Log(result.Error.GenerateErrorReport());
+                return false;
+            }
+
+            await _playFabVirtualCurrencyManager.SetVirtualCurrency();
+            return true;
+        }
+
 
         private async UniTask Login()
         {

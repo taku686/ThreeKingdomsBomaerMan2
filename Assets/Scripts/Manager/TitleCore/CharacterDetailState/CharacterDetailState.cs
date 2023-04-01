@@ -25,6 +25,7 @@ namespace UI.Title
             private PlayFabUserDataManager _playFabUserDataManager;
             private PlayFabShopManager _playFabShopManager;
             private UserDataManager _userDataManager;
+            private MissionManager _missionManger;
             private CancellationTokenSource _cts;
             private UIAnimation _uiAnimation;
             private bool _isInitialize;
@@ -49,6 +50,7 @@ namespace UI.Title
                 _playFabUserDataManager = Owner._playFabUserDataManager;
                 _playFabShopManager = Owner._playFabShopManager;
                 _userDataManager = Owner._userDataManager;
+                _missionManger = Owner._missionManager;
                 _uiAnimation = Owner._uiAnimation;
                 _characterDetailView.PurchaseErrorView.gameObject.SetActive(false);
                 _characterDetailView.VirtualCurrencyAddPopup.gameObject.SetActive(false);
@@ -116,7 +118,6 @@ namespace UI.Title
                 _characterDetailView.VirtualCurrencyAddPopup.AddButton.onClick.RemoveAllListeners();
                 Owner.characterDetailView.BackButton.onClick.AddListener(OnClickBackButton);
                 Owner.characterDetailView.SelectButton.onClick.AddListener(OnClickSelectButton);
-
                 Owner.characterDetailView.LeftArrowButton.OnClickAsObservable()
                     .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
                     .Subscribe(_ => OnClickLeftArrow()).AddTo(_cts.Token);
@@ -279,6 +280,10 @@ namespace UI.Title
                         return;
                     }
 
+                    Owner.CheckMission(GameCommonData.CharacterBattleActionId);
+                    Owner.CheckMission(GameCommonData.BattleCountActionId);
+                    var userData = _userDataManager.GetUserData();
+                    await _userDataManager.UpdateUserData(userData);
                     SetupUIContent();
                 })).SetLink(button);
             }
