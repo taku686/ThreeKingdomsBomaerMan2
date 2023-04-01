@@ -1,8 +1,9 @@
+using System;
 using UnityEngine;
 
 namespace Common.Data
 {
-    public class CharacterData
+    public class CharacterData : IDisposable
     {
         private string _charaObj;
         public GameObject CharacterObject;
@@ -90,6 +91,10 @@ namespace Common.Data
         {
             get => _charaColor;
             set => _charaColor = value;
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

@@ -1,12 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Manager.DataManager;
 using Manager.NetworkManager;
-using PlayFab.GroupsModels;
-using UI.Title;
-using UnityEngine;
 using Zenject;
+using Random = UnityEngine.Random;
 
 namespace Common.Data
 {
@@ -16,13 +15,14 @@ namespace Common.Data
         private CancellationTokenSource _cancellationTokenSource;
         [Inject] private CharacterDataManager _characterDataManager;
         [Inject] private CharacterLevelDataManager _characterLevelDataManager;
-        private PlayFabUserDataManager _playFabUserDataManager;
+        [Inject] private MissionDataManager _missionDataManager;
+        [Inject] private PlayFabUserDataManager _playFabUserDataManager;
 
-        public void Initialize(UserData userData, PlayFabUserDataManager playFabUserDataManager)
+        public async UniTask Initialize(UserData userData)
         {
             _cancellationTokenSource = new CancellationTokenSource();
-            _playFabUserDataManager = playFabUserDataManager;
             SetUserData(userData);
+            await AddMissionData();
         }
 
         public UserData GetUserData()
@@ -33,6 +33,12 @@ namespace Common.Data
         public void SetUserData(UserData userData)
         {
             _userData = userData;
+        }
+
+        public async UniTask UpdateUserData(UserData userData)
+        {
+            _userData = userData;
+            await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
         }
 
         public async UniTask<bool> AddCharacterData(int characterId)
@@ -118,6 +124,75 @@ namespace Common.Data
             _userData.CharacterLevels[characterId] = level;
             var result = await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
             return result;
+        }
+
+        public void SetMissionData(int index, int progress)
+        {
+            if (_userData.MissionProgressDatum.ContainsKey(index))
+            {
+                return;
+            }
+
+            if (progress >= GameCommonData.MaxMissionProgress)
+            {
+                progress = GameCommonData.MaxMissionProgress;
+            }
+
+            _userData.MissionProgressDatum[index] = progress;
+        }
+
+        public Dictionary<int, int> GetMissionProgressDatum()
+        {
+            return _userData.MissionProgressDatum;
+        }
+
+        public int GetMissionProgress(int missionId)
+        {
+            if (!_userData.MissionProgressDatum.ContainsKey(missionId))
+            {
+                return GameCommonData.ExceptionMissionProgress;
+            }
+
+            return _userData.MissionProgressDatum[missionId];
+        }
+
+        public void SetMissionProgress(int missionId, int missionProgress)
+        {
+            if (!_userData.MissionProgressDatum.ContainsKey(missionId))
+            {
+                return;
+            }
+
+            _userData.MissionProgressDatum[missionId] = missionProgress;
+        }
+
+        public async UniTask AddMissionData()
+        {
+            if (_userData.MissionProgressDatum.Count >= GameCommonData.MaxMissionCount)
+            {
+                return;
+            }
+
+            var missionDatum = _missionDataManager.MissionDatum;
+            while (_userData.MissionProgressDatum.Count < GameCommonData.MaxMissionCount)
+            {
+                var index = Random.Range(0, missionDatum.Count);
+                var missionIndex = missionDatum[index].index;
+                SetMissionData(missionIndex, 0);
+            }
+
+            await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
+        }
+
+        public async UniTask RemoveMissionData(int missionId)
+        {
+            if (!_userData.MissionProgressDatum.ContainsKey(missionId))
+            {
+                return;
+            }
+
+            _userData.MissionProgressDatum.Remove(missionId);
+            await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
         }
 
         public int GetCoin()

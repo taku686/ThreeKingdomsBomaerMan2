@@ -1,5 +1,6 @@
 using Bomb;
 using Common.Data;
+using Cysharp.Threading.Tasks;
 using Manager.BattleManager.Camera;
 using Manager.BattleManager.Environment;
 using Manager.NetworkManager;
@@ -16,6 +17,7 @@ namespace Manager.BattleManager
         [Inject] private PlayerGenerator _playerGenerator;
         [Inject] private BombProvider _bombProvider;
         [Inject] private UserDataManager _userDataManager;
+        [Inject] private MissionManager _missionManager;
         [SerializeField] private Transform playerUIParent;
         [SerializeField] private GameObject playerUI;
         [SerializeField] private CameraManager cameraManager;
@@ -52,11 +54,29 @@ namespace Manager.BattleManager
             _stateMachine = new StateMachine<BattleCore>(this);
             _stateMachine.Start<EndSceneTransitionState>();
             _stateMachine.AddTransition<EndSceneTransitionState, PlayerCreateState>((int)Event.PlayerCreate);
+            _stateMachine.AddTransition<PlayerCreateState, BattleStartState>((int)Event.BattleStart);
         }
 
         private void InitializeComponent()
         {
             gameObject.AddComponent<SynchronizedValue>();
+        }
+
+        private void CheckMission(int actionId)
+        {
+            switch (actionId)
+            {
+                case GameCommonData.LevelUpActionId:
+                    _missionManager.CheckMission(GameCommonData.LevelUpActionId);
+                    break;
+                case GameCommonData.BattleCountActionId:
+                    _missionManager.CheckMission(GameCommonData.BattleCountActionId);
+                    break;
+                case GameCommonData.CharacterBattleActionId:
+                    var characterId = _userDataManager.GetEquippedCharacterData().Id;
+                    _missionManager.CheckMission(GameCommonData.CharacterBattleActionId, characterId);
+                    break;
+            }
         }
 
 

@@ -38,6 +38,11 @@ namespace Assets.Scripts.Common.Data
             return _catalogItemList;
         }
 
+        public CatalogItem GetCatalogItem(string itemId)
+        {
+            return _catalogItemList.FirstOrDefault(x => x.ItemId == itemId);
+        }
+
         public List<AddVirtualCurrencyItemData> GetAddVirtualCurrencyItemDatum()
         {
             return _addVirtualCurrencyItemDatum;
@@ -48,7 +53,7 @@ namespace Assets.Scripts.Common.Data
             return _characters[index];
         }
 
-        public AddVirtualCurrencyItemData GetLoginBonusItemData(string itemId)
+        public AddVirtualCurrencyItemData GetAddVirtualCurrencyItemData(string itemId)
         {
             return _loginBonusItemDatum.FirstOrDefault(x => x.Name == itemId);
         }

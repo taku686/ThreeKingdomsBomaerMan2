@@ -45,7 +45,6 @@ namespace Manager
             _skillOneIntervalImage = _inputView.skillOneIntervalImage;
             _skillTwoIntervalImage = _inputView.skillTwoIntervalImage;
             _characterData = characterData;
-            Debug.Log(characterData.Name);
             SetupSkillUI(skillOneIntervalTime, skillTwoIntervalTime, currentLevelData);
         }
 
@@ -85,7 +84,6 @@ namespace Manager
 
         private void SetupSkillUI(float skillOneInterval, float skillTwoInterval, CharacterLevelData levelData)
         {
-            Debug.Log(levelData.IsSkillOneActive);
             _inputView.skillOneButton.gameObject.SetActive(levelData.IsSkillOneActive);
             _inputView.skillTwoButton.gameObject.SetActive(levelData.IsSkillTwoActive);
             _timerSkillOne = skillOneInterval;

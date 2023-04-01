@@ -30,10 +30,7 @@ namespace Common.Data
         public const string BundleClassKey = "Bundle";
         public const string CharacterClassKey = "Character";
         public const string LevelClassKey = "Level";
-        public const string LoginBonusClassKey = "LoginBonus";
-        public const string CharacterTagKey = "Character";
-        public const string CoinTagKey = "Coin";
-        public const string GemTagKey = "Gem";
+        public const string LoginBonusClassKey = "Consumable";
         public const string CharacterGachaItemKey = "bundle01";
         public const string ThousandCoinItemKey = "coin1000";
         public const string FiveThousandCoinItemKey = "coin5000";
@@ -45,6 +42,7 @@ namespace Common.Data
         public const string LoginBonusItemKey = "day";
         public const string CharacterMasterKey = "CharacterMaster";
         public const string CharacterLevelMasterKey = "CharacterLevelMaster";
+        public const string MissionMasterKey = "MissionMaster";
         public static readonly int SkillOneHashKey = Animator.StringToHash("Attack");
         public static readonly int SkillTwoHashKey = Animator.StringToHash("Passive");
         public static readonly int ActiveHashKey = Animator.StringToHash("Active");
@@ -65,6 +63,13 @@ namespace Common.Data
         public const int ThreeMilliSecondsBeforeExplosion = 3000;
         public const int MaxCharacterLevel = 10;
         public const int MinCharacterLevel = 0;
+        public const int MaxMissionCount = 3;
+        public const int MaxMissionProgress = 100;
+        public const int BattleCountActionId = 0;
+        public const int LevelUpActionId = 1;
+        public const int CharacterBattleActionId = 2;
+        public const int ExceptionMissionProgress = 9999;
+        public const int ExceptionCharacterId = 999;
 
         public static CharacterColor GetCharacterColor(string color)
         {

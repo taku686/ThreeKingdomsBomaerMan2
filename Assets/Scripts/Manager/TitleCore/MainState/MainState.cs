@@ -1,9 +1,6 @@
-﻿using System;
-using Assets.Scripts.Common.PlayFab;
+﻿using Assets.Scripts.Common.PlayFab;
 using Common.Data;
-using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using UnityEngine;
 using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
@@ -14,6 +11,7 @@ namespace UI.Title
         {
             private PlayFabLoginManager _playFabLoginManager;
             private UserDataManager _userDataManager;
+            private MainView _mainView;
 
             protected override void OnEnter(State prevState)
             {
@@ -30,12 +28,15 @@ namespace UI.Title
             {
                 _playFabLoginManager = Owner._playFabLoginManager;
                 _userDataManager = Owner._userDataManager;
+                _mainView = Owner.mainView;
                 Owner.DisableTitleGameObject();
                 Owner.CreateCharacter(Owner._userDataManager.GetUserData().EquipCharacterId);
                 InitializeButton();
                 InitializeText();
-                Owner.mainView.MainGameObject.SetActive(true);
+                _mainView.MainGameObject.SetActive(true);
             }
+
+            
 
             private void InitializeButton()
             {
@@ -43,10 +44,12 @@ namespace UI.Title
                 Owner.mainView.BattleReadyButton.onClick.RemoveAllListeners();
                 Owner.mainView.SettingButton.onClick.RemoveAllListeners();
                 Owner.mainView.ShopButton.onClick.RemoveAllListeners();
+                _mainView.MissionButton.onClick.RemoveAllListeners();
                 Owner.mainView.CharacterSelectButton.onClick.AddListener(OnClickCharacterSelect);
                 Owner.mainView.BattleReadyButton.onClick.AddListener(OnClickBattleReady);
                 Owner.mainView.SettingButton.onClick.AddListener(OnClickSetting);
                 Owner.mainView.ShopButton.onClick.AddListener(OnClickShop);
+                _mainView.MissionButton.onClick.AddListener(OnClickMission);
             }
 
             private void InitializeText()
@@ -92,6 +95,13 @@ namespace UI.Title
             {
                 Owner._uiAnimation.ClickScaleColor(Owner.mainView.ShopButton.gameObject)
                     .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.Shop); })
+                    .SetLink(Owner.gameObject);
+            }
+
+            private void OnClickMission()
+            {
+                Owner._uiAnimation.ClickScaleColor(_mainView.MissionButton.gameObject)
+                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.Mission); })
                     .SetLink(Owner.gameObject);
             }
         }

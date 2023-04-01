@@ -95,7 +95,7 @@ namespace Manager.NetworkManager
 
                 if (item.ItemClass.Equals(GameCommonData.LoginBonusClassKey))
                 {
-                    var loginBonusItemData = _catalogDataManager.GetLoginBonusItemData(item.ItemId);
+                    var loginBonusItemData = _catalogDataManager.GetAddVirtualCurrencyItemData(item.ItemId);
                     if (loginBonusItemData == null)
                     {
                         return false;
@@ -184,7 +184,7 @@ namespace Manager.NetworkManager
             {
                 if (item.ItemClass.Equals(GameCommonData.LoginBonusClassKey))
                 {
-                    var loginBonusItemData = _catalogDataManager.GetLoginBonusItemData(item.ItemId);
+                    var loginBonusItemData = _catalogDataManager.GetAddVirtualCurrencyItemData(item.ItemId);
                     if (loginBonusItemData == null)
                     {
                         return false;
@@ -202,6 +202,27 @@ namespace Manager.NetworkManager
                         rewardView.rewardText.text = loginBonusItemData.price.ToString("D");
                     }
                 }
+            }
+
+            await _playFabVirtualCurrencyManager.SetVirtualCurrency();
+            return true;
+        }
+
+        public async UniTask<bool> TryPurchaseItem(string itemId, string virtualCurrencyKey, int price,
+            TextMeshProUGUI errorText)
+        {
+            var request = new PurchaseItemRequest
+            {
+                ItemId = itemId,
+                VirtualCurrency = virtualCurrencyKey,
+                Price = price,
+            };
+            var result = await PlayFabClientAPI.PurchaseItemAsync(request);
+            if (result.Error != null)
+            {
+                errorText.text = result.Error.ErrorMessage;
+                Debug.Log(result.Error.GenerateErrorReport());
+                return false;
             }
 
             await _playFabVirtualCurrencyManager.SetVirtualCurrency();
