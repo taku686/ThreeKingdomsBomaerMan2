@@ -13,7 +13,7 @@ namespace UI.Title
         [SerializeField] private RectTransform rightArrowRect;
         [SerializeField] private Button leftArrowButton;
         [SerializeField] private Button rightArrowButton;
-        [SerializeField] private CharacterStatusView characterStatusView;
+        [SerializeField] private StatusView statusView;
         [SerializeField] private SkillsView skillsView;
         [SerializeField] private Button upgradeButton;
         [SerializeField] private TextMeshProUGUI upgradeText;
@@ -21,7 +21,9 @@ namespace UI.Title
         [SerializeField] private TextMeshProUGUI levelText;
         [SerializeField] private PurchaseErrorView purchaseErrorView;
         [SerializeField] private VirtualCurrencyAddPopup virtualCurrencyAddPopup;
+        [SerializeField] private QuestionView questionView;
 
+        public QuestionView QuestionView => questionView;
         public VirtualCurrencyAddPopup VirtualCurrencyAddPopup => virtualCurrencyAddPopup;
         public PurchaseErrorView PurchaseErrorView => purchaseErrorView;
         public Button UpgradeButton => upgradeButton;
@@ -29,7 +31,7 @@ namespace UI.Title
         public TextMeshProUGUI UpgradeInfoText => upgradeInfoText;
         public TextMeshProUGUI LevelText => levelText;
         public SkillsView SkillsView => skillsView;
-        public CharacterStatusView CharacterStatusView => characterStatusView;
+        public StatusView StatusView => statusView;
         public Button BackButton => backButton;
         public TextMeshProUGUI NameText => nameText;
         public Button SelectButton => selectButton;
