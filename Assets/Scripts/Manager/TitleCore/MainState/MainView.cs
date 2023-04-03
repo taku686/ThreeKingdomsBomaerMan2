@@ -16,6 +16,7 @@ namespace UI.Title
         [SerializeField] private GameObject shopGameObject;
         [SerializeField] private GameObject loginBonusGameObjet;
         [SerializeField] private GameObject missionGameObject;
+        [SerializeField] private GameObject commonGameObject;
         [SerializeField] private Button characterSelectButton;
         [SerializeField] private Button battleReadyButton;
         [SerializeField] private Button settingButton;
@@ -23,6 +24,7 @@ namespace UI.Title
         [SerializeField] private Button missionButton;
         [SerializeField] private TextMeshProUGUI coinText;
         [SerializeField] private TextMeshProUGUI diamondText;
+        public GameObject CommonGameObject => commonGameObject;
         public GameObject LoginBonusGameObjet => loginBonusGameObjet;
         public Button SettingButton => settingButton;
         public Button MissionButton => missionButton;

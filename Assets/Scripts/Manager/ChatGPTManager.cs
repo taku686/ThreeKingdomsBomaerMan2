@@ -1,33 +1,39 @@
+#nullable enable
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using Common.Data;
 using Cysharp.Threading.Tasks;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class ChatGPTManager : MonoBehaviour
+public class ChatGPTManager : IDisposable
 {
-    private readonly string _apiKey;
-
     //会話履歴を保持するリスト
     private readonly List<ChatGPTMessageModel> _messageList = new();
 
-    public ChatGPTManager(string apiKey)
+
+    public void SetupCharacter(string name, string character)
     {
-        _apiKey = apiKey;
-        _messageList.Add(
-            new ChatGPTMessageModel { role = "system", content = "高潔な武人風に答えて下さい。あなたは劉備です。" });
+        _messageList.Clear();
+        //todo 仮の値
+        _messageList.Add(new ChatGPTMessageModel { role = "system", content = $"あなたは{name}です。性格は高潔な武人です。できるだけ簡潔に要点をまとめて答えてください。" });
     }
 
-    private void Request()
+    public async UniTask Request(string question, TextMeshProUGUI commentText)
     {
-        var chatGPTConnection = new ChatGPTManager("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");
-        //     chatGPTConnection.RequestAsync("{{" + editor.text + "}}");
+        var response = await RequestAsync("{{" + question + "}}");
+        foreach (var choice in response.choices)
+        {
+            Debug.Log("ChatGPT:" + choice.message.content);
+            Debug.Log(response.usage.total_tokens);
+            commentText.text = choice.message.content;
+        }
 //好きな魚料理を1つ教えて など
     }
 
-    public async UniTask<ChatGPTResponseModel> RequestAsync(string userMessage)
+    private async UniTask<ChatGPTResponseModel> RequestAsync(string userMessage)
     {
         //文章生成AIのAPIのエンドポイントを設定
         var apiUrl = "https://api.openai.com/v1/chat/completions";
@@ -37,7 +43,7 @@ public class ChatGPTManager : MonoBehaviour
         //OpenAIのAPIリクエストに必要なヘッダー情報を設定
         var headers = new Dictionary<string, string>
         {
-            { "Authorization", "Bearer " + _apiKey },
+            { "Authorization", "Bearer " + GameCommonData.ChatGptApiKey },
             { "Content-type", "application/json" },
             { "X-Slack-No-Retry", "1" }
         };
@@ -88,6 +94,10 @@ public class ChatGPTManager : MonoBehaviour
 
             return responseObject;
         }
+    }
+
+    public void Dispose()
+    {
     }
 }
 

@@ -10,6 +10,7 @@ namespace Common.Data
         public const float TurnDuration = 0.3f;
         public const float InputBombInterval = 0.05f;
         public const string TitleID = "92AF5";
+        public const string ChatGptApiKey = "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";
         public const string JoystickName = "JoyStickMove";
         public const string PlayerTag = "Player";
         public const string BombTag = "Bomb";
@@ -70,6 +71,7 @@ namespace Common.Data
         public const int CharacterBattleActionId = 2;
         public const int ExceptionMissionProgress = 9999;
         public const int ExceptionCharacterId = 999;
+        public const int CharacterLimit = 40;
 
         public static CharacterColor GetCharacterColor(string color)
         {
