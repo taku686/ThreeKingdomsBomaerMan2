@@ -17,6 +17,7 @@ namespace Common.Data
         private int _fireRange;
         private int _hp;
         private string _charaColor;
+        public string Character;
         public int SkillOneId;
         public int SkillTwoId;
         public int WeaponEffectId;

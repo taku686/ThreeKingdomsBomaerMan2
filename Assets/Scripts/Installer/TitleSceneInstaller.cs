@@ -22,6 +22,7 @@ namespace Common.Installer
             Container.Bind<PlayFabAdsManager>().FromNew().AsCached();
             Container.Bind<PlayFabVirtualCurrencyManager>().FromNew().AsCached();
             Container.Bind<PlayFabTitleDataManager>().FromNew().AsCached();
+            Container.Bind<ChatGPTManager>().FromNew().AsCached();
         }
     }
 }

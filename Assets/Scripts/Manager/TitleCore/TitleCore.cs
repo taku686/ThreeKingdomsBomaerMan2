@@ -30,6 +30,7 @@ namespace UI.Title
         [Inject] private PlayFabAdsManager _playFabAdsManager;
         [Inject] private CatalogDataManager _catalogDataManager;
         [Inject] private MissionManager _missionManager;
+        [Inject] private ChatGPTManager _chatGptManager;
         [SerializeField] private Transform characterCreatePosition;
         [SerializeField] private MainView mainView;
         [SerializeField] private CharacterSelectView characterSelectView;
@@ -78,6 +79,7 @@ namespace UI.Title
 
         private void Initialize()
         {
+            mainView.CommonGameObject.SetActive(true);
             commonView.Initialize();
             InitializeState();
         }
