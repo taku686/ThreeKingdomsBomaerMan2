@@ -17,7 +17,6 @@ public class MissionManager : IDisposable
         {
             var missionData = _missionDataManager.GetMissionData(mission.Key);
             var missionBase = GenerateMissionBase(missionData, _userDataManager);
-            Debug.Log(missionBase);
             _missionBases.Add(missionBase);
         }
     }

@@ -57,8 +57,9 @@ namespace Manager.NetworkManager
             _gemSprite = (Sprite)gemSprite;
         }
 
-        public void TryPurchaseItem(string itemName)
+        public async UniTask TryPurchaseItemByRealMoney(string itemName)
         {
+            await Login();
             _itemName = itemName;
             _storeController.InitiatePurchase(itemName);
         }

@@ -21,7 +21,6 @@ namespace Manager.NetworkManager
             if (result.Error != null)
             {
                 Debug.Log(result.Error.GenerateErrorReport());
-                return;
             }
 
             var user = _userDataManager.GetUserData();
@@ -39,6 +38,46 @@ namespace Manager.NetworkManager
             }
 
             _userDataManager.SetUserData(user);
+        }
+
+        public async UniTask<int> GetCoin()
+        {
+            var result = await PlayFabClientAPI.GetUserInventoryAsync(new GetUserInventoryRequest());
+            if (result.Error != null)
+            {
+                Debug.Log(result.Error.GenerateErrorReport());
+                return GameCommonData.NetworkErrorCode;
+            }
+
+            foreach (var item in result.Result.VirtualCurrency)
+            {
+                if (item.Key.Equals(GameCommonData.CoinKey))
+                {
+                    return item.Value;
+                }
+            }
+
+            return GameCommonData.NetworkErrorCode;
+        }
+
+        public async UniTask<int> GetGem()
+        {
+            var result = await PlayFabClientAPI.GetUserInventoryAsync(new GetUserInventoryRequest());
+            if (result.Error != null)
+            {
+                Debug.Log(result.Error.GenerateErrorReport());
+                return GameCommonData.NetworkErrorCode;
+            }
+
+            foreach (var item in result.Result.VirtualCurrency)
+            {
+                if (item.Key.Equals(GameCommonData.GemKey))
+                {
+                    return item.Value;
+                }
+            }
+
+            return GameCommonData.NetworkErrorCode;
         }
 
         public async UniTask<bool> AddVirtualCurrency(string virtualCurrencyKey, int amount)

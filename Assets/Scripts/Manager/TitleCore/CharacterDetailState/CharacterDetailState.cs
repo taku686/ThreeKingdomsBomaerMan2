@@ -296,8 +296,7 @@ namespace UI.Title
                         return;
                     }
 
-                    Owner.CheckMission(GameCommonData.CharacterBattleActionId);
-                    Owner.CheckMission(GameCommonData.BattleCountActionId);
+                    Owner.CheckMission(GameCommonData.LevelUpActionId);
                     var userData = _userDataManager.GetUserData();
                     await _userDataManager.UpdateUserData(userData);
                     SetupUIContent();

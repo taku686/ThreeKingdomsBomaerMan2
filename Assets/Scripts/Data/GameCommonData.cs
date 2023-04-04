@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Common.Data
@@ -69,8 +70,9 @@ namespace Common.Data
         public const int BattleCountActionId = 0;
         public const int LevelUpActionId = 1;
         public const int CharacterBattleActionId = 2;
-        public const int ExceptionMissionProgress = 9999;
+        public const int ExceptionMissionProgress = 999;
         public const int ExceptionCharacterId = 999;
+        public const int NetworkErrorCode = Int32.MaxValue;
         public const int CharacterLimit = 40;
 
         public static CharacterColor GetCharacterColor(string color)
