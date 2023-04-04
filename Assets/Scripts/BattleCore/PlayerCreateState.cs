@@ -14,7 +14,7 @@ namespace Manager.BattleManager
     {
         public class PlayerCreateState : State
         {
-            private static readonly Vector3 ColliderCenter = new(0, 0.3f, 0);
+            private static readonly Vector3 ColliderCenter = new(0, 0.6f, 0);
             private static readonly Vector3 ColliderSize = new(0.4f, 0.6f, 0.4f);
             private static readonly float MaxRate = 1f;
             private PlayerStatusManager _playerStatusManager;

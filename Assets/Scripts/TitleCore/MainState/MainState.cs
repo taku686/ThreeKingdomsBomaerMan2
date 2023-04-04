@@ -1,8 +1,6 @@
 ﻿using Assets.Scripts.Common.PlayFab;
-using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using UnityEngine;
 using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
@@ -32,8 +30,8 @@ namespace UI.Title
                 Owner.DisableTitleGameObject();
                 Owner.CreateCharacter(Owner._userDataManager.GetUserData().EquipCharacterId);
                 InitializeButton();
-                await InitializeText();
                 _mainView.MainGameObject.SetActive(true);
+                await InitializeText();
             }
 
 
