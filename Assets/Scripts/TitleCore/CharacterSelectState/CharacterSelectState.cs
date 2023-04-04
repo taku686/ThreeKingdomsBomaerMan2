@@ -93,10 +93,12 @@ namespace UI.Title
             {
                 var grid = Instantiate(Owner.characterSelectView.Grid, parent);
                 var characterGrid = grid.GetComponentInChildren<CharacterGrid>();
+                var levelData = _userDataManager.GetCurrentLevelData(characterData.Id);
                 characterGrid.characterImage.sprite = characterData.SelfPortraitSprite;
                 characterGrid.backGroundImage.sprite = characterData.ColorSprite;
                 characterGrid.nameText.text = characterData.Name;
                 characterGrid.CharacterData = characterData;
+                characterGrid.levelText.text = "Lv." + levelData.Level;
                 characterGrid.gridButton.onClick.AddListener(() => { OnClickCharacterGrid(characterData, grid); });
             }
 
