@@ -30,7 +30,7 @@ namespace UI.Title
             private Sprite _coinSprite;
             private Sprite _gemSprite;
             private readonly Dictionary<int, MissionGrid> _missionGrids = new();
-            private bool _inProgress;
+            private bool _isProgress;
 
             protected override void OnEnter(State prevState)
             {
@@ -110,20 +110,31 @@ namespace UI.Title
 
             private void OnClickGetMissionReward(MissionData missionData, GameObject button)
             {
-                if (_inProgress)
+                if (_isProgress)
                 {
                     return;
                 }
 
-                _inProgress = true;
+                _isProgress = true;
                 Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     var errorText = _commonView.purchaseErrorView.errorInfoText;
-                    var result = await _playFabShopManager.TryPurchaseItem(missionData.rewardId,
-                        GameCommonData.CoinKey, 0, errorText);
+                    var rewardData = _catalogDataManager.GetAddVirtualCurrencyItemData(missionData.rewardId);
+                    await _playFabShopManager.TryPurchaseItem(missionData.rewardId, GameCommonData.CoinKey, 0,
+                        errorText);
+                    if (rewardData == null)
+                    {
+                        _isProgress = false;
+                        return;
+                    }
+
+                    var rewardSprite = rewardData.vc == GameCommonData.CoinKey ? _coinSprite : _gemSprite;
+                    await Owner.SetRewardUI(rewardData.price, rewardSprite);
                     await RemoveMission(missionData.index);
                     await AddMission();
-                    _inProgress = false;
+                    await Owner.SetGemText();
+                    await Owner.SetCoinText();
+                    _isProgress = false;
                 })).SetLink(button);
             }
 

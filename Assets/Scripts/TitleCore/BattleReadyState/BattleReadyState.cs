@@ -23,6 +23,11 @@ namespace UI.Title
                 SetupEvent();
             }
 
+            protected override void OnExit(State nextState)
+            {
+                Owner.commonView.virtualCurrencyView.gameObject.SetActive(true);
+            }
+
             protected override void OnUpdate()
             {
                 SceneTransition();
@@ -30,6 +35,7 @@ namespace UI.Title
 
             private void Initialize()
             {
+                Owner.commonView.virtualCurrencyView.gameObject.SetActive(false);
                 InitializeButton();
                 InitializeSubscribe();
             }

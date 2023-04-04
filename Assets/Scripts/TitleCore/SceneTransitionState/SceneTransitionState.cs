@@ -12,12 +12,18 @@ namespace UI.Title
         {
             protected override void OnEnter(State prevState)
             {
-                OnInitialize();
+                Initialize();
             }
 
-            private void OnInitialize()
+            protected override void OnExit(State nextState)
+            {
+                Owner.commonView.virtualCurrencyView.gameObject.SetActive(true);
+            }
+
+            private void Initialize()
             {
                 Owner.DisableTitleGameObject();
+                Owner.commonView.virtualCurrencyView.gameObject.SetActive(false);
                 Owner.mainView.SceneTransitionGameObject.SetActive(true);
                 LoadScene().Forget();
             }
@@ -28,7 +34,7 @@ namespace UI.Title
                 {
                     Owner.sceneTransitionView.LoadingText.text = "Loading..." + x + "%";
                     Owner.sceneTransitionView.LoadingBar.value = x;
-                }),cancellationToken: Owner.gameObject.GetCancellationTokenOnDestroy());
+                }), cancellationToken: Owner.gameObject.GetCancellationTokenOnDestroy());
             }
         }
     }

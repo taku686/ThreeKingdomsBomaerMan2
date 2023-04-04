@@ -24,12 +24,12 @@ namespace UI.Title
             private const int Day4 = 3;
             private const int Day7 = 6;
 
-            protected override void OnEnter(State prevState)
+            protected override async UniTaskVoid OnAsyncEnter(State prevState)
             {
                 Owner.DisableTitleGameObject();
                 Initialize();
                 InitializeButton();
-                InitializeUIContent();
+                await InitializeUIContent();
                 SetupLoginImage();
                 OpenLoginBonusPanel().Forget();
             }
@@ -70,10 +70,13 @@ namespace UI.Title
                 _loginBonusView.rewardGetView.okButton.onClick.AddListener(OnClickCloseRewardView);
             }
 
-            private void InitializeUIContent()
+            private async UniTask InitializeUIContent()
             {
                 _loginBonusView.purchaseErrorView.gameObject.SetActive(false);
                 _loginBonusView.rewardGetView.gameObject.SetActive(false);
+                await Owner.SetCoinText();
+                await Owner.SetGemText();
+                Owner.commonView.virtualCurrencyView.gameObject.SetActive(true);
             }
 
             private async UniTask OpenLoginBonusPanel()
@@ -139,7 +142,6 @@ namespace UI.Title
                     if (index is Day4 or Day7)
                     {
                         var day = index + 1;
-                        Debug.Log(day);
                         var errorText = _loginBonusView.purchaseErrorView.errorInfoText;
                         var rewardView = _loginBonusView.rewardGetView;
                         var rewardViewObj = _loginBonusView.rewardGetView.gameObject;
@@ -158,7 +160,6 @@ namespace UI.Title
                     else
                     {
                         var day = index + 1;
-                        Debug.Log(day);
                         var errorText = _loginBonusView.purchaseErrorView.errorInfoText;
                         var rewardView = _loginBonusView.rewardGetView;
                         var rewardViewObj = _loginBonusView.rewardGetView.gameObject;
@@ -181,6 +182,8 @@ namespace UI.Title
                         return;
                     }
 
+                    await Owner.SetCoinText();
+                    await Owner.SetGemText();
                     SetupLoginImage();
                 })).SetLink(button);
             }

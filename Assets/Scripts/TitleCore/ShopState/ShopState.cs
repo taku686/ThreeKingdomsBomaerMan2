@@ -13,16 +13,18 @@ namespace UI.Title
     {
         public class ShopState : State
         {
+            private const int AddRewardValue = 5;
             private UIAnimation _uiAnimation;
             private PlayFabShopManager _playFabShopManager;
             private ShopView _shopView;
+            private Sprite _gemSprite;
 
             protected override void OnEnter(State prevState)
             {
-                Initialize();
+                Initialize().Forget();
             }
 
-            private void Initialize()
+            private async UniTaskVoid Initialize()
             {
                 _uiAnimation = Owner._uiAnimation;
                 _playFabShopManager = Owner._playFabShopManager;
@@ -30,51 +32,54 @@ namespace UI.Title
                 Owner.DisableTitleGameObject();
                 InitializeButton();
                 Owner.mainView.ShopGameObject.SetActive(true);
-                Owner.shopView.RewardGetView.gameObject.SetActive(false);
-                Owner.shopView.PurchaseErrorView.gameObject.SetActive(false);
-                Owner.shopView.PurchaseErrorView.errorInfoText.text = "";
+                _shopView.RewardGetView.gameObject.SetActive(false);
+                _shopView.PurchaseErrorView.gameObject.SetActive(false);
+                _shopView.PurchaseErrorView.errorInfoText.text = "";
+                var gemSprite = await Resources.LoadAsync<Sprite>(GameCommonData.VirtualCurrencySpritePath + "gem");
+                _gemSprite = (Sprite)gemSprite;
             }
 
             private void InitializeButton()
             {
-                Owner.shopView.BackButton.onClick.RemoveAllListeners();
-                Owner.shopView.ThousandCoinButton.onClick.RemoveAllListeners();
-                Owner.shopView.FiveThousandCoinButton.onClick.RemoveAllListeners();
-                Owner.shopView.TwelveThousandCoinButton.onClick.RemoveAllListeners();
-                Owner.shopView.TwentyGemButton.onClick.RemoveAllListeners();
-                Owner.shopView.HundredGemButton.onClick.RemoveAllListeners();
-                Owner.shopView.TwoHundredGemButton.onClick.RemoveAllListeners();
-                Owner.shopView.AdsButton.onClick.RemoveAllListeners();
-                Owner.shopView.GachaButton.onClick.RemoveAllListeners();
-                Owner.shopView.RewardGetView.okButton.onClick.RemoveAllListeners();
-                Owner.shopView.PurchaseErrorView.okButton.onClick.RemoveAllListeners();
-                Owner.shopView.BackButton.onClick.AddListener(OnCLickBack);
-                Owner.shopView.ThousandCoinButton.onClick.AddListener(() =>
-                    OnClickBuyItem(GameCommonData.ThousandCoinItemKey, Owner.shopView.ThousandCoinButton.gameObject));
-                Owner.shopView.FiveThousandCoinButton.onClick.AddListener(() =>
+                _shopView.BackButton.onClick.RemoveAllListeners();
+                _shopView.ThousandCoinButton.onClick.RemoveAllListeners();
+                _shopView.FiveThousandCoinButton.onClick.RemoveAllListeners();
+                _shopView.TwelveThousandCoinButton.onClick.RemoveAllListeners();
+                _shopView.TwentyGemButton.onClick.RemoveAllListeners();
+                _shopView.HundredGemButton.onClick.RemoveAllListeners();
+                _shopView.TwoHundredGemButton.onClick.RemoveAllListeners();
+                _shopView.AdsButton.onClick.RemoveAllListeners();
+                _shopView.GachaButton.onClick.RemoveAllListeners();
+                _shopView.RewardGetView.okButton.onClick.RemoveAllListeners();
+                _shopView.PurchaseErrorView.okButton.onClick.RemoveAllListeners();
+                _shopView.BackButton.onClick.AddListener(OnCLickBack);
+                _shopView.ThousandCoinButton.onClick.AddListener(() =>
+                    OnClickBuyItem(GameCommonData.ThousandCoinItemKey, _shopView.ThousandCoinButton.gameObject));
+                _shopView.FiveThousandCoinButton.onClick.AddListener(() =>
                     OnClickBuyItem(GameCommonData.FiveThousandCoinItemKey,
-                        Owner.shopView.FiveThousandCoinButton.gameObject));
-                Owner.shopView.TwelveThousandCoinButton.onClick.AddListener(() =>
+                        _shopView.FiveThousandCoinButton.gameObject));
+                _shopView.TwelveThousandCoinButton.onClick.AddListener(() =>
                     OnClickBuyItem(GameCommonData.TwelveThousandCoinItemKey,
-                        Owner.shopView.TwelveThousandCoinButton.gameObject));
-                Owner.shopView.TwentyGemButton.onClick.AddListener(() =>
+                        _shopView.TwelveThousandCoinButton.gameObject));
+                _shopView.TwentyGemButton.onClick.AddListener(() =>
                     OnClickBuyItem(GameCommonData.TwentyGemItemKey,
-                        Owner.shopView.TwentyGemButton.gameObject));
-                Owner.shopView.HundredGemButton.onClick.AddListener(() =>
+                        _shopView.TwentyGemButton.gameObject));
+                _shopView.HundredGemButton.onClick.AddListener(() =>
                     OnClickBuyItem(GameCommonData.HundredGemItemKey,
-                        Owner.shopView.HundredGemButton.gameObject));
-                Owner.shopView.TwoHundredGemButton.onClick.AddListener(() =>
+                        _shopView.HundredGemButton.gameObject));
+                _shopView.TwoHundredGemButton.onClick.AddListener(() =>
                     OnClickBuyItem(GameCommonData.TwoHundredGemItemKey,
-                        Owner.shopView.TwoHundredGemButton.gameObject));
-                Owner.shopView.AdsButton.onClick.AddListener(OnClickAds);
-                Owner.shopView.GachaButton.onClick.AddListener(OnClickCharacterGacha);
-                Owner.shopView.RewardGetView.okButton.onClick.AddListener(OnClickCloseRewardView);
-                Owner.shopView.PurchaseErrorView.okButton.onClick.AddListener(OnClickCloseErrorView);
+                        _shopView.TwoHundredGemButton.gameObject));
+                _shopView.AdsButton.onClick.AddListener(OnClickAds);
+                _shopView.GachaButton.onClick.AddListener(OnClickCharacterGacha);
+                _shopView.RewardGetView.okButton.onClick.AddListener(OnClickCloseRewardView);
+                _shopView.PurchaseErrorView.okButton.onClick.AddListener(OnClickCloseErrorView);
+                Owner.SetupRewardOkButton();
             }
 
             private void OnCLickBack()
             {
-                var backButton = Owner.shopView.BackButton.gameObject;
+                var backButton = _shopView.BackButton.gameObject;
                 Owner._uiAnimation.ClickScaleColor(backButton).OnComplete(() =>
                 {
                     Owner._stateMachine.Dispatch((int)Event.Main);
@@ -85,7 +90,8 @@ namespace UI.Title
             {
                 Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
-                    Owner._playFabShopManager.TryPurchaseItem(itemKey);
+                    await Owner._playFabShopManager.TryPurchaseItemByRealMoney(itemKey);
+                    await SetVirtualCurrencyText();
                 })).SetLink(button);
             }
 
@@ -94,7 +100,15 @@ namespace UI.Title
                 var button = Owner.shopView.AdsButton.gameObject;
                 Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
-                    await Owner._playFabAdsManager.GetAdPlacementAsync(Owner.GetCancellationTokenOnDestroy());
+                    var result =
+                        await Owner._playFabAdsManager.GetAdPlacementAsync(Owner.GetCancellationTokenOnDestroy());
+                    if (!result)
+                    {
+                        return;
+                    }
+
+                    await SetVirtualCurrencyText();
+                    await Owner.SetRewardUI(AddRewardValue, _gemSprite);
                 })).SetLink(button);
             }
 
@@ -114,6 +128,7 @@ namespace UI.Title
                     {
                         rewardViewTransform.localScale = Vector3.zero;
                         rewardViewTransform.gameObject.SetActive(true);
+                        await SetVirtualCurrencyText();
                         await _uiAnimation.Open(rewardViewTransform, GameCommonData.OpenDuration);
                     }
                     else
@@ -145,6 +160,12 @@ namespace UI.Title
                     await _uiAnimation.Close(errorView, GameCommonData.CloseDuration);
                     errorView.gameObject.SetActive(false);
                 })).SetLink(button);
+            }
+
+            private async UniTask SetVirtualCurrencyText()
+            {
+                await Owner.SetCoinText();
+                await Owner.SetGemText();
             }
         }
     }

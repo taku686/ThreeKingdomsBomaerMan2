@@ -3,6 +3,7 @@ using Assets.Scripts.Common.Data;
 using Assets.Scripts.Common.PlayFab;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using Manager;
 using Manager.NetworkManager;
 using Photon.Pun;
@@ -28,6 +29,7 @@ namespace UI.Title
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private PlayFabShopManager _playFabShopManager;
         [Inject] private PlayFabAdsManager _playFabAdsManager;
+        [Inject] private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
         [Inject] private CatalogDataManager _catalogDataManager;
         [Inject] private MissionManager _missionManager;
         [Inject] private ChatGPTManager _chatGptManager;
@@ -51,7 +53,6 @@ namespace UI.Title
 
         private enum Event
         {
-            Login,
             Main,
             CharacterSelect,
             CharacterDetail,
@@ -82,6 +83,7 @@ namespace UI.Title
             mainView.CommonGameObject.SetActive(true);
             commonView.Initialize();
             InitializeState();
+            InitializeButton();
         }
 
 
@@ -98,6 +100,7 @@ namespace UI.Title
             }
 
             _stateMachine.AddAnyTransition<MainState>((int)Event.Main);
+            _stateMachine.AddAnyTransition<ShopState>((int)Event.Shop);
             _stateMachine.AddTransition<MainState, CharacterSelectState>((int)Event.CharacterSelect);
             _stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)Event.CharacterDetail);
             _stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)Event.CharacterSelect);
@@ -105,11 +108,17 @@ namespace UI.Title
             _stateMachine.AddTransition<BattleReadyState, SceneTransitionState>((int)Event.SceneTransition);
             _stateMachine.AddTransition<LoginState, MainState>((int)Event.Main);
             _stateMachine.AddTransition<MainState, SettingState>((int)Event.Setting);
-            _stateMachine.AddTransition<MainState, ShopState>((int)Event.Shop);
-            _stateMachine.AddTransition<CharacterDetailState, ShopState>((int)Event.Shop);
-            _stateMachine.AddTransition<CharacterSelectState, ShopState>((int)Event.Shop);
             _stateMachine.AddTransition<MainState, LoginBonusState>((int)Event.LoginBonus);
             _stateMachine.AddTransition<MainState, MissionState>((int)Event.Mission);
+        }
+
+        private void InitializeButton()
+        {
+            var gemAddButton = commonView.virtualCurrencyView.gemAddButton;
+            var coinAddButton = commonView.virtualCurrencyView.coinAddButton;
+            SetupRewardOkButton();
+            gemAddButton.onClick.AddListener(() => { OnClickTransitionShopState(gemAddButton.gameObject); });
+            coinAddButton.onClick.AddListener(() => { OnClickTransitionShopState(coinAddButton.gameObject); });
         }
 
 
@@ -127,7 +136,7 @@ namespace UI.Title
             mainView.MissionGameObject.SetActive(false);
         }
 
-        private void CreateCharacter(int id)
+        private bool CreateCharacter(int id)
         {
             _userDataManager.GetUserData().EquipCharacterId = id;
             var preCharacter = _character;
@@ -138,6 +147,7 @@ namespace UI.Title
             if (createCharacterData.CharacterObject == null || createCharacterData.WeaponEffectObj == null)
             {
                 Debug.LogError(id);
+                return false;
             }
 
             _character = Instantiate(createCharacterData.CharacterObject,
@@ -146,7 +156,7 @@ namespace UI.Title
             var currentCharacterLevel = _userDataManager.GetCurrentLevelData(id);
             if (currentCharacterLevel.Level < GameCommonData.MaxCharacterLevel)
             {
-                return;
+                return true;
             }
 
             var weapons = GameObject.FindGameObjectsWithTag(GameCommonData.WeaponTag);
@@ -164,6 +174,8 @@ namespace UI.Title
                 effect.Color = GameCommonData.GetWeaponColor(id);
                 effect.UpdateMeshEffect(weapon);
             }
+
+            return true;
         }
 
         private void CheckMission(int actionId)
@@ -181,6 +193,43 @@ namespace UI.Title
                     _missionManager.CheckMission(GameCommonData.CharacterBattleActionId, characterId);
                     break;
             }
+        }
+
+        private async UniTask SetCoinText()
+        {
+            var coin = await _playFabVirtualCurrencyManager.GetCoin();
+            commonView.virtualCurrencyView.coinText.text = coin.ToString("D");
+        }
+
+        private async UniTask SetGemText()
+        {
+            var gem = await _playFabVirtualCurrencyManager.GetGem();
+            commonView.virtualCurrencyView.gemText.text = gem.ToString("D");
+        }
+
+        private void OnClickTransitionShopState(GameObject button)
+        {
+            _uiAnimation.ClickScale(button).OnComplete(() => { _stateMachine.Dispatch((int)Event.Shop); })
+                .SetLink(button);
+        }
+
+        private void SetupRewardOkButton()
+        {
+            commonView.rewardGetView.okButton.onClick.RemoveAllListeners();
+            commonView.rewardGetView.okButton.onClick.AddListener(() => UniTask.Void(async () =>
+            {
+                await _uiAnimation.Close(commonView.rewardGetView.transform, GameCommonData.CloseDuration);
+            }));
+        }
+
+        private async UniTask SetRewardUI(int value, Sprite rewardSprite)
+        {
+            var rewardView = commonView.rewardGetView;
+            rewardView.rewardImage.sprite = rewardSprite;
+            rewardView.rewardText.text = value == 1 ? "" : value.ToString("D");
+            rewardView.transform.localScale = Vector3.zero;
+            rewardView.gameObject.SetActive(true);
+            await _uiAnimation.Open(rewardView.transform, GameCommonData.OpenDuration);
         }
     }
 }

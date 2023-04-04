@@ -14,13 +14,19 @@ namespace UI.Title
         {
             protected override void OnEnter(State prevState)
             {
-                OnInitialize();
+                Initialize();
             }
 
-            private void OnInitialize()
+            protected override void OnExit(State nextState)
+            {
+                Owner.commonView.virtualCurrencyView.gameObject.SetActive(true);
+            }
+
+            private void Initialize()
             {
                 InitializeButton();
                 InitializeObject();
+                Owner.commonView.virtualCurrencyView.gameObject.SetActive(false);
                 Owner.DisableTitleGameObject();
                 Owner.mainView.SettingGameObject.SetActive(true);
             }

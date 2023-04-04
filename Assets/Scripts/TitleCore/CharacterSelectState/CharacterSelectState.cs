@@ -3,6 +3,7 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Manager.NetworkManager;
 using UnityEngine;
 using State = StateMachine<UI.Title.TitleCore>.State;
 
@@ -14,6 +15,8 @@ namespace UI.Title
         {
             private readonly List<GameObject> _gridGroupLists = new();
             private UserDataManager _userDataManager;
+            private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
+            private bool _isProcessing;
 
             protected override void OnEnter(State prevState)
             {
@@ -23,6 +26,7 @@ namespace UI.Title
             private void Initialize()
             {
                 _userDataManager = Owner._userDataManager;
+                _playFabVirtualCurrencyManager = Owner._playFabVirtualCurrencyManager;
                 Owner.DisableTitleGameObject();
                 Owner.mainView.CharacterListGameObject.SetActive(true);
                 CreateUIContents();
@@ -103,61 +107,92 @@ namespace UI.Title
                 disableGrid.characterImage.color = Color.black;
                 disableGrid.characterImage.sprite = characterData.SelfPortraitSprite;
                 disableGrid.purchaseButton.onClick.AddListener(() =>
-                    OnClickPurchaseButton(disableGrid.gameObject, characterData.Id,
+                    OnClickPurchaseButton(disableGrid.gameObject, characterData,
                         disableGrid.GetCancellationTokenOnDestroy()));
             }
 
             private void OnClickCharacterGrid(CharacterData characterData, GameObject gridGameObject)
             {
-                Owner.CreateCharacter(characterData.Id);
-                Owner._uiAnimation.ClickScale(gridGameObject)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.CharacterDetail); })
-                    .SetLink(Owner.gameObject);
+                if (_isProcessing)
+                {
+                    return;
+                }
+
+                _isProcessing = true;
+                var result = Owner.CreateCharacter(characterData.Id);
+                if (!result)
+                {
+                    _isProcessing = false;
+                    return;
+                }
+
+                Owner._uiAnimation.ClickScale(gridGameObject).OnComplete(() =>
+                {
+                    Owner._stateMachine.Dispatch((int)Event.CharacterDetail);
+                    _isProcessing = false;
+                }).SetLink(Owner.gameObject);
             }
 
             private void OnClickBack()
             {
-                Owner._uiAnimation.ClickScaleColor(Owner.characterSelectView.BackButton.gameObject)
-                    .OnComplete(() =>
-                    {
-                        Owner.DisableTitleGameObject();
-                        Owner.mainView.MainGameObject.SetActive(true);
-                        Owner._stateMachine.Dispatch((int)Event.Main);
-                    }).SetLink(Owner.gameObject);
+                Owner._uiAnimation.ClickScaleColor(Owner.characterSelectView.BackButton.gameObject).OnComplete(() =>
+                {
+                    Owner.DisableTitleGameObject();
+                    Owner.mainView.MainGameObject.SetActive(true);
+                    Owner._stateMachine.Dispatch((int)Event.Main);
+                }).SetLink(Owner.gameObject);
             }
 
-            private void OnClickPurchaseButton(GameObject disableGrid, int characterId, CancellationToken token)
+            private void OnClickPurchaseButton(GameObject disableGrid, CharacterData characterData,
+                CancellationToken token)
             {
-                Owner._uiAnimation.ClickScale(disableGrid).OnComplete(() =>
-                    UniTask.Void(async () =>
+                if (_isProcessing)
+                {
+                    return;
+                }
+
+                _isProcessing = true;
+                Owner._uiAnimation.ClickScale(disableGrid).OnComplete(() => UniTask.Void(async () =>
+                {
+                    var user = Owner._userDataManager.GetUserData();
+                    var characterPrice = GameCommonData.CharacterPrice;
+                    var gem = await _playFabVirtualCurrencyManager.GetGem();
+                    if (gem == GameCommonData.NetworkErrorCode)
                     {
-                        var user = Owner._userDataManager.GetUserData();
-                        var characterPrice = GameCommonData.CharacterPrice;
-                        var gem = _userDataManager.GetGem();
-                        if (gem < characterPrice)
-                        {
-                            Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject.SetActive(true);
-                            return;
-                        }
+                        _isProcessing = false;
+                        return;
+                    }
 
-                        if (user.Characters.Contains(characterId))
-                        {
-                            return;
-                        }
+                    if (gem < characterPrice)
+                    {
+                        Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject.SetActive(true);
+                        _isProcessing = false;
+                        return;
+                    }
 
-                        var virtualCurrencyKey = GameCommonData.GemKey;
-                        var price = characterPrice;
-                        var isSuccessPurchase = await Owner._playFabShopManager
-                            .TryPurchaseCharacter(characterId, virtualCurrencyKey, price)
-                            .AttachExternalCancellation(token);
-                        if (!isSuccessPurchase)
-                        {
-                            //todo 購入に失敗したときの処理
-                            return;
-                        }
+                    if (user.Characters.Contains(characterData.Id))
+                    {
+                        _isProcessing = false;
+                        return;
+                    }
 
-                        CreateUIContents();
-                    })).SetLink(disableGrid.gameObject);
+                    var virtualCurrencyKey = GameCommonData.GemKey;
+                    var price = characterPrice;
+                    var isSuccessPurchase = await Owner._playFabShopManager
+                        .TryPurchaseCharacter(characterData.Id, virtualCurrencyKey, price)
+                        .AttachExternalCancellation(token);
+                    if (!isSuccessPurchase)
+                    {
+                        //todo 購入に失敗したときの処理
+                        _isProcessing = false;
+                        return;
+                    }
+
+                    await Owner.SetGemText();
+                    await Owner.SetRewardUI(1, characterData.SelfPortraitSprite);
+                    CreateUIContents();
+                    _isProcessing = false;
+                })).SetLink(disableGrid.gameObject);
             }
 
             private void OnClickClosePopup()

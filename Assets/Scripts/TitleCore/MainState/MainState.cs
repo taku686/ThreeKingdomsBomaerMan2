@@ -1,6 +1,8 @@
 ﻿using Assets.Scripts.Common.PlayFab;
 using Common.Data;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using UnityEngine;
 using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
@@ -10,12 +12,11 @@ namespace UI.Title
         public class MainState : State
         {
             private PlayFabLoginManager _playFabLoginManager;
-            private UserDataManager _userDataManager;
             private MainView _mainView;
 
             protected override void OnEnter(State prevState)
             {
-                Initialize();
+                Initialize().Forget();
             }
 
 
@@ -24,19 +25,17 @@ namespace UI.Title
                 TransitionLoginBonus();
             }
 
-            private void Initialize()
+            private async UniTaskVoid Initialize()
             {
                 _playFabLoginManager = Owner._playFabLoginManager;
-                _userDataManager = Owner._userDataManager;
                 _mainView = Owner.mainView;
                 Owner.DisableTitleGameObject();
                 Owner.CreateCharacter(Owner._userDataManager.GetUserData().EquipCharacterId);
                 InitializeButton();
-                InitializeText();
+                await InitializeText();
                 _mainView.MainGameObject.SetActive(true);
             }
 
-            
 
             private void InitializeButton()
             {
@@ -52,10 +51,11 @@ namespace UI.Title
                 _mainView.MissionButton.onClick.AddListener(OnClickMission);
             }
 
-            private void InitializeText()
+            private async UniTask InitializeText()
             {
-                Owner.mainView.CoinText.text = Owner._userDataManager.GetUserData().Coin.ToString("D");
-                Owner.mainView.DiamondText.text = Owner._userDataManager.GetUserData().Gem.ToString("D");
+                await Owner.SetCoinText();
+                await Owner.SetGemText();
+                Owner.commonView.virtualCurrencyView.gameObject.SetActive(true);
             }
 
             private void TransitionLoginBonus()
