@@ -18,17 +18,22 @@ namespace UI.Title
         public class CharacterDetailState : State
         {
             private const float MoveAmount = 50;
+            private const int DefaultPage = 1;
             private const string LevelText = "LV <#94aed0><size=170%>";
             private CharacterDetailView _characterDetailView;
+            private CommonView _commonView;
             private CharacterDataManager _characterDataManager;
             private CharacterLevelDataManager _characterLevelDataManager;
             private PlayFabUserDataManager _playFabUserDataManager;
             private PlayFabShopManager _playFabShopManager;
             private UserDataManager _userDataManager;
             private MissionManager _missionManger;
+            private ChatGPTManager _chatGptManager;
             private CancellationTokenSource _cts;
             private UIAnimation _uiAnimation;
             private bool _isInitialize;
+            private bool _canQuestion;
+            private int _pageCount;
 
             protected override void OnEnter(State prevState)
             {
@@ -47,18 +52,22 @@ namespace UI.Title
                 _characterDataManager = Owner._characterDataManager;
                 _characterLevelDataManager = Owner._characterLevelDataManager;
                 _characterDetailView = Owner.characterDetailView;
+                _commonView = Owner.commonView;
                 _playFabUserDataManager = Owner._playFabUserDataManager;
                 _playFabShopManager = Owner._playFabShopManager;
                 _userDataManager = Owner._userDataManager;
                 _missionManger = Owner._missionManager;
+                _chatGptManager = Owner._chatGptManager;
                 _uiAnimation = Owner._uiAnimation;
                 _characterDetailView.PurchaseErrorView.gameObject.SetActive(false);
                 _characterDetailView.VirtualCurrencyAddPopup.gameObject.SetActive(false);
+                _characterDetailView.QuestionView.commentObj.SetActive(false);
                 InitializeButton();
                 SetupUIContent();
                 InitializeUIAnimation();
                 Owner.mainView.CharacterDetailGameObject.SetActive(true);
                 _isInitialize = true;
+                _canQuestion = true;
                 await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
                 InitializeAnimation();
             }
@@ -72,12 +81,13 @@ namespace UI.Title
                 SetStatusView(characterData, currentLevelData);
                 SetSkillView(characterData, currentLevelData);
                 SetLevelView(currentLevelData, nextLevelData);
+                _chatGptManager.SetupCharacter(characterData.Name, characterData.Character);
             }
 
             private void SetStatusView(CharacterData characterData, CharacterLevelData currentLevelData)
             {
                 Owner.characterDetailView.NameText.text = characterData.Name;
-                var characterStatusView = Owner.characterDetailView.CharacterStatusView;
+                var characterStatusView = Owner.characterDetailView.StatusView;
                 characterStatusView.HpText.text = GetModifiedStatus(currentLevelData, characterData.Hp).ToString();
                 characterStatusView.DamageText.text =
                     GetModifiedStatus(currentLevelData, characterData.Attack).ToString();
@@ -116,6 +126,9 @@ namespace UI.Title
                 _characterDetailView.VirtualCurrencyAddPopup.CancelButton.onClick.RemoveAllListeners();
                 _characterDetailView.VirtualCurrencyAddPopup.CloseButton.onClick.RemoveAllListeners();
                 _characterDetailView.VirtualCurrencyAddPopup.AddButton.onClick.RemoveAllListeners();
+                _characterDetailView.QuestionView.sendButton.onClick.RemoveAllListeners();
+                _characterDetailView.QuestionView.closeButton.onClick.RemoveAllListeners();
+                _commonView.errorView.okButton.onClick.RemoveAllListeners();
                 Owner.characterDetailView.BackButton.onClick.AddListener(OnClickBackButton);
                 Owner.characterDetailView.SelectButton.onClick.AddListener(OnClickSelectButton);
                 Owner.characterDetailView.LeftArrowButton.OnClickAsObservable()
@@ -133,6 +146,9 @@ namespace UI.Title
                     OnClickCloseVirtualCurrencyAddView(_characterDetailView.VirtualCurrencyAddPopup.CloseButton
                         .gameObject));
                 _characterDetailView.VirtualCurrencyAddPopup.AddButton.onClick.AddListener(OnClickAddVirtualCurrency);
+                _characterDetailView.QuestionView.sendButton.onClick.AddListener(OnClickSendQuestion);
+                _characterDetailView.QuestionView.closeButton.onClick.AddListener(OnClickCloseComment);
+                _commonView.errorView.okButton.onClick.AddListener(OnClickCloseErrorView);
             }
 
             private void InitializeUIAnimation()
@@ -280,8 +296,7 @@ namespace UI.Title
                         return;
                     }
 
-                    Owner.CheckMission(GameCommonData.CharacterBattleActionId);
-                    Owner.CheckMission(GameCommonData.BattleCountActionId);
+                    Owner.CheckMission(GameCommonData.LevelUpActionId);
                     var userData = _userDataManager.GetUserData();
                     await _userDataManager.UpdateUserData(userData);
                     SetupUIContent();
@@ -321,8 +336,77 @@ namespace UI.Title
                 )).SetLink(button);
             }
 
+            private void OnClickSendQuestion()
+            {
+                if (!_canQuestion)
+                {
+                    return;
+                }
+
+                _commonView.waitPopup.SetActive(true);
+                _canQuestion = false;
+                var button = _characterDetailView.QuestionView.sendButton.gameObject;
+                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                    {
+                        var question = _characterDetailView.QuestionView.questionField.text;
+                        var commentTransform = _characterDetailView.QuestionView.commentObj.transform;
+                        var commentText = _characterDetailView.QuestionView.commentText;
+                        if (question.Length > GameCommonData.CharacterLimit)
+                        {
+                            _commonView.waitPopup.SetActive(false);
+                            _canQuestion = true;
+                            await OpenErrorView();
+                            return;
+                        }
+
+                        await _chatGptManager.Request(question, commentText);
+                        _commonView.waitPopup.SetActive(false);
+                        commentText.pageToDisplay = DefaultPage;
+                        commentTransform.localScale = Vector3.zero;
+                        commentTransform.gameObject.SetActive(true);
+                        await _uiAnimation.Open(commentTransform, GameCommonData.OpenDuration);
+                        _canQuestion = true;
+                    }
+                )).SetLink(button);
+            }
+
+            private void OnClickCloseComment()
+            {
+                var button = _characterDetailView.QuestionView.closeButton.gameObject;
+                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                    {
+                        var comment = _characterDetailView.QuestionView.commentObj.transform;
+                        await _uiAnimation.Close(comment, GameCommonData.CloseDuration);
+                        comment.gameObject.SetActive(false);
+                    }
+                )).SetLink(button);
+            }
+
+            private void OnClickCloseErrorView()
+            {
+                var button = _commonView.errorView.okButton.gameObject;
+                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                    {
+                        var errorView = _commonView.errorView.transform;
+                        await _uiAnimation.Close(errorView, GameCommonData.CloseDuration);
+                        errorView.gameObject.SetActive(false);
+                    }
+                )).SetLink(button);
+            }
+
+            private async UniTask OpenErrorView()
+            {
+                var errorView = _commonView.errorView;
+                var errorViewObj = _commonView.errorView.gameObject;
+                _commonView.errorView.errorInfoText.text = $"{GameCommonData.CharacterLimit}文字以内で質問してください。";
+                errorView.transform.localScale = Vector3.zero;
+                errorViewObj.SetActive(true);
+                await _uiAnimation.Open(errorView.transform, GameCommonData.OpenDuration);
+            }
+
             private void CreateCharacter(CharacterData characterData)
             {
+                _chatGptManager.SetupCharacter(characterData.Name, characterData.Character);
                 Owner.CreateCharacter(characterData.Id);
             }
 

@@ -18,9 +18,17 @@ namespace Manager.NetworkManager
         private double? _placementViewsRestMinutes;
         [Inject] private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
         private RewardedAd _rewardAd;
+        private bool _isProcessing;
 
-        public async UniTask GetAdPlacementAsync(CancellationToken token)
+        public async UniTask<bool> GetAdPlacementAsync(CancellationToken token)
         {
+            if (_isProcessing)
+            {
+                _isProcessing = false;
+                return false;
+            }
+
+            _isProcessing = true;
             _rewardAd = new RewardedAd(GameCommonData.RewardAdsKey);
             AdRequest adRequest = new AdRequest.Builder().Build();
             _rewardAd.LoadAd(adRequest);
@@ -32,16 +40,19 @@ namespace Manager.NetworkManager
 
             if (result.Error != null)
             {
+                _isProcessing = false;
                 Debug.Log(result.Error.GenerateErrorReport());
+                return false;
             }
-            else
-            {
-                var placement = result.Result.AdPlacements.Find(x => x.PlacementName == GameCommonData.PlacementName);
-                _placementId = placement.PlacementId;
-                _rewardId = placement.RewardId;
-                _placementViewsRemaining = placement.PlacementViewsRemaining;
-                _placementViewsRestMinutes = placement.PlacementViewsResetMinutes;
-            }
+
+            var placement = result.Result.AdPlacements.Find(x => x.PlacementName == GameCommonData.PlacementName);
+            _placementId = placement.PlacementId;
+            _rewardId = placement.RewardId;
+            _placementViewsRemaining = placement.PlacementViewsRemaining;
+            _placementViewsRestMinutes = placement.PlacementViewsResetMinutes;
+
+            await UniTask.WaitUntil(() => _isProcessing == false, PlayerLoopTiming.Update, token);
+            return true;
         }
 
         private async UniTask ReportAdActivityAsync(AdActivity activity)
@@ -79,9 +90,8 @@ namespace Manager.NetworkManager
                         return;
                     }
 
-                    Debug.Log(rewardResult.Result.RewardResults.GrantedVirtualCurrencies[GameCommonData.GemKey]);
+                    _isProcessing = false;
                     await _playFabVirtualCurrencyManager.SetVirtualCurrency();
-                    Debug.Log("ジェムを5個獲得");
                 }
             }
         }
