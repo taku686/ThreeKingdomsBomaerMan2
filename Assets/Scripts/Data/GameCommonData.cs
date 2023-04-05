@@ -59,6 +59,7 @@ namespace Common.Data
         public const string WeaponEffectPrefabPath = "Prefabs/WeaponEffect/Effect";
         public const string SkillSpritePath = "Sprites/Skill/";
         public const string VirtualCurrencySpritePath = "Sprites/VirtualCurrency/";
+        public const string LevelText = "Lv.";
         public const float CloseDuration = 0.5f;
         public const float OpenDuration = 1.0f;
         public const float ClickIntervalDuration = 0.2f;
