@@ -19,6 +19,7 @@ namespace UI.Title
         {
             private const float MoveAmount = 50;
             private const int DefaultPage = 1;
+            private const int UpgradeButtonIntervalDuration = 1;
             private const string LevelText = "LV <#94aed0><size=170%>";
             private CharacterDetailView _characterDetailView;
             private CommonView _commonView;
@@ -138,7 +139,9 @@ namespace UI.Title
                 Owner.characterDetailView.RightArrowButton.OnClickAsObservable()
                     .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
                     .Subscribe(_ => OnClickRightArrow()).AddTo(_cts.Token);
-                _characterDetailView.UpgradeButton.onClick.AddListener(OnClickUpgrade);
+                _characterDetailView.UpgradeButton.OnClickAsObservable()
+                    .ThrottleFirst(TimeSpan.FromSeconds(UpgradeButtonIntervalDuration))
+                    .Subscribe(_ => OnClickUpgrade()).AddTo(_cts.Token);
                 _characterDetailView.PurchaseErrorView.okButton.onClick.AddListener(OnClickClosePurchaseErrorView);
                 _characterDetailView.VirtualCurrencyAddPopup.CancelButton.onClick.AddListener(() =>
                     OnClickCloseVirtualCurrencyAddView(_characterDetailView.VirtualCurrencyAddPopup.CancelButton
