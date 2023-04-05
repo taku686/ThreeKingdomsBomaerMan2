@@ -19,7 +19,7 @@ namespace UI.Title
         {
             private const float MoveAmount = 50;
             private const int DefaultPage = 1;
-            private const int UpgradeButtonIntervalDuration = 1;
+            private const int UpgradeButtonIntervalDuration = 2;
             private const string LevelText = "LV <#94aed0><size=170%>";
             private CharacterDetailView _characterDetailView;
             private CommonView _commonView;
@@ -283,9 +283,9 @@ namespace UI.Title
                         return;
                     }
 
-                    var equippedCharacterData = _userDataManager.GetEquippedCharacterData();
-                    var nextLevelData = _userDataManager.GetNextLevelData(equippedCharacterData.Id);
-                    var currentLevelData = _userDataManager.GetCurrentLevelData(equippedCharacterData.Id);
+                    var characterData = _userDataManager.GetEquippedCharacterData();
+                    var nextLevelData = _userDataManager.GetNextLevelData(characterData.Id);
+                    var currentLevelData = _userDataManager.GetCurrentLevelData(characterData.Id);
                     var virtualCurrencyAddView = _characterDetailView.VirtualCurrencyAddPopup;
                     var purchaseErrorView = _characterDetailView.PurchaseErrorView;
                     if (currentLevelData.Level >= GameCommonData.MaxCharacterLevel)
@@ -304,7 +304,7 @@ namespace UI.Title
                     }
 
                     var result = await _playFabShopManager.TryPurchaseLevelUpItem(nextLevelData.Level,
-                        GameCommonData.CoinKey, nextLevelData.NeedCoin, equippedCharacterData.Id, purchaseErrorView);
+                        GameCommonData.CoinKey, nextLevelData.NeedCoin, characterData.Id, purchaseErrorView);
 
                     if (!result)
                     {
@@ -320,6 +320,11 @@ namespace UI.Title
                     await _userDataManager.UpdateUserData(userData);
                     await Owner.SetCoinText();
                     SetupUIContent();
+                    if (nextLevelData.Level == GameCommonData.MaxCharacterLevel)
+                    {
+                        CreateCharacter(characterData);
+                    }
+
                     _isProcessing = false;
                 })).SetLink(button);
             }
