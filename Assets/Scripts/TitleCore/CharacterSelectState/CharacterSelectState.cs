@@ -93,10 +93,12 @@ namespace UI.Title
             {
                 var grid = Instantiate(Owner.characterSelectView.Grid, parent);
                 var characterGrid = grid.GetComponentInChildren<CharacterGrid>();
+                var levelData = _userDataManager.GetCurrentLevelData(characterData.Id);
                 characterGrid.characterImage.sprite = characterData.SelfPortraitSprite;
                 characterGrid.backGroundImage.sprite = characterData.ColorSprite;
                 characterGrid.nameText.text = characterData.Name;
                 characterGrid.CharacterData = characterData;
+                characterGrid.levelText.text = GameCommonData.LevelText + levelData.Level;
                 characterGrid.gridButton.onClick.AddListener(() => { OnClickCharacterGrid(characterData, grid); });
             }
 
@@ -199,8 +201,7 @@ namespace UI.Title
             {
                 var closeButton = Owner.characterSelectView.VirtualCurrencyAddPopup.CloseButton.gameObject;
                 var popup = Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject;
-                Owner._uiAnimation.ClickScaleColor(closeButton)
-                    .OnComplete(() => { popup.SetActive(false); })
+                Owner._uiAnimation.ClickScaleColor(closeButton).OnComplete(() => { popup.SetActive(false); })
                     .SetLink(popup);
             }
 
@@ -208,8 +209,7 @@ namespace UI.Title
             {
                 var cancelButton = Owner.characterSelectView.VirtualCurrencyAddPopup.CancelButton.gameObject;
                 var popup = Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject;
-                Owner._uiAnimation.ClickScaleColor(cancelButton)
-                    .OnComplete(() => { popup.SetActive(false); })
+                Owner._uiAnimation.ClickScaleColor(cancelButton).OnComplete(() => { popup.SetActive(false); })
                     .SetLink(popup);
             }
 
@@ -217,10 +217,8 @@ namespace UI.Title
             {
                 var addButton = Owner.characterSelectView.VirtualCurrencyAddPopup.AddButton.gameObject;
                 var popup = Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject;
-                Owner._uiAnimation.ClickScaleColor(addButton).OnComplete(() =>
-                {
-                    Owner._stateMachine.Dispatch((int)Event.Shop);
-                }).SetLink(popup);
+                Owner._uiAnimation.ClickScaleColor(addButton)
+                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.Shop); }).SetLink(popup);
             }
         }
     }

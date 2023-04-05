@@ -1,5 +1,4 @@
-﻿using System;
-using Common.Data;
+﻿using Common.Data;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,5 +12,6 @@ namespace UI.Title
         public Image backGroundImage;
         public TextMeshProUGUI nameText;
         public Button gridButton;
+        public TextMeshProUGUI levelText;
     }
 }
