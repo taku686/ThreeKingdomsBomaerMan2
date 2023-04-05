@@ -130,6 +130,8 @@ namespace UI.Title
                     return;
                 }
 
+                PhotonNetwork.CurrentRoom.IsOpen = false;
+                PhotonNetwork.CurrentRoom.IsVisible = false;
                 Owner._stateMachine.Dispatch((int)Event.SceneTransition);
             }
 
@@ -140,6 +142,8 @@ namespace UI.Title
                     return;
                 }
 
+                PhotonNetwork.CurrentRoom.IsOpen = false;
+                PhotonNetwork.CurrentRoom.IsVisible = false;
                 Owner._stateMachine.Dispatch((int)Event.SceneTransition);
             }
 
