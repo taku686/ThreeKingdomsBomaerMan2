@@ -57,6 +57,7 @@ namespace Common.Data
         public const string CharacterColorPath = "Sprites/CharacterColor/";
         public const string CharacterPrefabPath = "Prefabs/Character/";
         public const string WeaponEffectPrefabPath = "Prefabs/WeaponEffect/Effect";
+        public const string StagePrefabPath = "Prefabs/Stage/";
         public const string SkillSpritePath = "Sprites/Skill/";
         public const string VirtualCurrencySpritePath = "Sprites/VirtualCurrency/";
         public const string LevelText = "Lv.";
