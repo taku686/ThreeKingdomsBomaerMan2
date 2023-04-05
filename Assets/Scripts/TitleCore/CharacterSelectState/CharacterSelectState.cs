@@ -98,7 +98,7 @@ namespace UI.Title
                 characterGrid.backGroundImage.sprite = characterData.ColorSprite;
                 characterGrid.nameText.text = characterData.Name;
                 characterGrid.CharacterData = characterData;
-                characterGrid.levelText.text = "Lv." + levelData.Level;
+                characterGrid.levelText.text = GameCommonData.LevelText + levelData.Level;
                 characterGrid.gridButton.onClick.AddListener(() => { OnClickCharacterGrid(characterData, grid); });
             }
 
