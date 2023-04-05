@@ -1,4 +1,5 @@
 ﻿using Common.Data;
+using Photon.Pun;
 using UnityEngine;
 
 namespace Manager.BattleManager.Environment
@@ -12,7 +13,7 @@ namespace Manager.BattleManager.Environment
                 return;
             }
 
-            Destroy(gameObject);
+            PhotonNetwork.Destroy(gameObject);
         }
     }
 }
