@@ -14,8 +14,9 @@ namespace UI.Title
     {
         public class BattleReadyState : State
         {
-            private readonly Dictionary<int, GameObject> _gridDictionary = new Dictionary<int, GameObject>();
+            private readonly Dictionary<int, GameObject> _gridDictionary = new();
             private bool _isInitialize;
+            private UserDataManager _userDataManager;
 
             protected override void OnEnter(State prevState)
             {
@@ -35,6 +36,7 @@ namespace UI.Title
 
             private void Initialize()
             {
+                _userDataManager = Owner._userDataManager;
                 Owner.commonView.virtualCurrencyView.gameObject.SetActive(false);
                 InitializeButton();
                 InitializeSubscribe();
@@ -62,31 +64,26 @@ namespace UI.Title
                     return;
                 }
 
-                Owner._photonNetworkManager.JoinedRoom
-                    .Subscribe(OnJoinedRoom)
-                    .AddTo(Owner.gameObject);
-                Owner._photonNetworkManager.LeftRoom.Subscribe(OnLeftRoom)
-                    .AddTo(Owner.gameObject);
+                Owner._photonNetworkManager.JoinedRoom.Subscribe(OnJoinedRoom).AddTo(Owner.gameObject);
+                Owner._photonNetworkManager.LeftRoom.Subscribe(OnLeftRoom).AddTo(Owner.gameObject);
                 _isInitialize = true;
             }
 
             private void OnClickBackButton()
             {
-                Owner._uiAnimation.ClickScaleColor(Owner.battleReadyView.BackButton.gameObject)
-                    .OnComplete(() =>
+                Owner._uiAnimation.ClickScaleColor(Owner.battleReadyView.BackButton.gameObject).OnComplete(() =>
+                {
+                    if (!PhotonNetwork.InRoom)
                     {
-                        if (!PhotonNetwork.InRoom)
-                        {
-                            return;
-                        }
+                        return;
+                    }
 
-                        Owner._photonNetworkManager.LeftRoom.OnNext(PhotonNetwork.LocalPlayer.ActorNumber);
-                        PhotonNetwork.LeaveRoom();
-                        Owner.DisableTitleGameObject();
-                        Owner.mainView.MainGameObject.SetActive(true);
-                        Owner._stateMachine.Dispatch((int)Event.Main);
-                    })
-                    .SetLink(Owner.gameObject);
+                    Owner._photonNetworkManager.LeftRoom.OnNext(PhotonNetwork.LocalPlayer.ActorNumber);
+                    PhotonNetwork.LeaveRoom();
+                    Owner.DisableTitleGameObject();
+                    Owner.mainView.MainGameObject.SetActive(true);
+                    Owner._stateMachine.Dispatch((int)Event.Main);
+                }).SetLink(Owner.gameObject);
             }
 
             private void OnJoinedRoom(Photon.Realtime.Player[] players)
@@ -95,14 +92,16 @@ namespace UI.Title
                 foreach (var player in players)
                 {
                     var index = player.ActorNumber;
+                    var characterData = Owner._photonNetworkManager.CurrentRoomCharacterDatum[index];
+                    var levelData = Owner._photonNetworkManager.GetCharacterLevelData(index);
                     var grid = Instantiate(Owner.battleReadyView.BattleReadyGrid.gameObject,
                         Owner.battleReadyView.GridParent);
                     var battleReadyGrid = grid.GetComponent<BattleReadyGrid>();
                     _gridDictionary[index] = grid;
-                    var characterData = Owner._photonNetworkManager.CurrentRoomCharacterDatum[index];
                     battleReadyGrid.characterImage.sprite = characterData.SelfPortraitSprite;
                     battleReadyGrid.backGroundImage.sprite = characterData.ColorSprite;
                     battleReadyGrid.nameText.text = characterData.Name;
+                    battleReadyGrid.levelText.text = GameCommonData.LevelText + levelData.Level;
                 }
             }
 
