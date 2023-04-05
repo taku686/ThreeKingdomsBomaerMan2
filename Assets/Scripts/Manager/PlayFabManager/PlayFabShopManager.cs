@@ -159,7 +159,7 @@ namespace Manager.NetworkManager
                 return false;
             }
 
-            await _playFabVirtualCurrencyManager.SetVirtualCurrency();
+        //    await _playFabVirtualCurrencyManager.SetVirtualCurrency();
             var result2 = await _userDataManager.UpgradeCharacterLevel(characterId, level);
             return result2;
         }
