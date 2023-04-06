@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Common.Data;
+using Photon.Pun;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -13,9 +14,15 @@ namespace Manager.BattleManager.Environment
         private const int GenerateMaxCount = 100;
         private const int Width = 8;
         private const int Height = 5;
+        private const string TreeObjName = "Tree";
 
         public void SetupBreakingBlocks()
         {
+            if (!PhotonNetwork.IsMasterClient)
+            {
+                return;
+            }
+
             int count = 0;
             while (count <= GenerateMaxCount)
             {
@@ -43,11 +50,18 @@ namespace Manager.BattleManager.Environment
                 }
 
                 prohibitPos.Add(createPos);
-                var breakingWallObj = Instantiate(breakingBlocks[0], createPos, breakingBlocks[0].transform.rotation,
-                    parentTransform);
+
+                var breakingWallObj = PhotonNetwork.InstantiateRoomObject(
+                    GameCommonData.StagePrefabPath + TreeObjName,
+                    createPos, breakingBlocks[0].transform.rotation);
+                breakingWallObj.transform.SetParent(parentTransform);
                 breakingWallObj.AddComponent<BreakingWall>();
                 breakingWallObj.tag = GameCommonData.BreakingWallTag;
                 count++;
+
+
+                /*var breakingWallObj = Instantiate(breakingBlocks[0], createPos, breakingBlocks[0].transform.rotation,
+                    parentTransform);*/
             }
         }
     }

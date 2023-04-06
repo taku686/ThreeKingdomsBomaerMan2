@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// ステートマシン
@@ -35,10 +36,19 @@ public class StateMachine<TOwner>
             OnEnter(prevState);
         }
 
+        internal async UniTaskVoid AsyncEnter(State prevState)
+        {
+            OnAsyncEnter(prevState).Forget();
+        }
+
         /// <summary>
         /// ステートを開始した時に呼ばれる
         /// </summary>
         protected virtual void OnEnter(State prevState)
+        {
+        }
+
+        protected async virtual UniTaskVoid OnAsyncEnter(State prevState)
         {
         }
 
@@ -180,10 +190,11 @@ public class StateMachine<TOwner>
     /// </summary>
     /// <param name="firstState">起動時のステート</param>
     /// <param name="param">パラメータ</param>
-    public void Start(State firstState)
+    private void Start(State firstState)
     {
         CurrentState = firstState;
         CurrentState.Enter(null);
+        CurrentState.AsyncEnter(null);
     }
 
     /// <summary>
@@ -226,6 +237,7 @@ public class StateMachine<TOwner>
     {
         CurrentState.Exit(nextState);
         nextState.Enter(CurrentState);
+        nextState.AsyncEnter(CurrentState);
         CurrentState = nextState;
     }
 }

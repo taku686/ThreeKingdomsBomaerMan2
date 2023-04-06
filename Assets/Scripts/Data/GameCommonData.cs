@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Common.Data
@@ -56,8 +57,10 @@ namespace Common.Data
         public const string CharacterColorPath = "Sprites/CharacterColor/";
         public const string CharacterPrefabPath = "Prefabs/Character/";
         public const string WeaponEffectPrefabPath = "Prefabs/WeaponEffect/Effect";
+        public const string StagePrefabPath = "Prefabs/Stage/";
         public const string SkillSpritePath = "Sprites/Skill/";
         public const string VirtualCurrencySpritePath = "Sprites/VirtualCurrency/";
+        public const string LevelText = "Lv.";
         public const float CloseDuration = 0.5f;
         public const float OpenDuration = 1.0f;
         public const float ClickIntervalDuration = 0.2f;
@@ -69,8 +72,9 @@ namespace Common.Data
         public const int BattleCountActionId = 0;
         public const int LevelUpActionId = 1;
         public const int CharacterBattleActionId = 2;
-        public const int ExceptionMissionProgress = 9999;
+        public const int ExceptionMissionProgress = 999;
         public const int ExceptionCharacterId = 999;
+        public const int NetworkErrorCode = Int32.MaxValue;
         public const int CharacterLimit = 40;
 
         public static CharacterColor GetCharacterColor(string color)

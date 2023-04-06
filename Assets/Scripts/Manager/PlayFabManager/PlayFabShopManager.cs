@@ -57,8 +57,9 @@ namespace Manager.NetworkManager
             _gemSprite = (Sprite)gemSprite;
         }
 
-        public void TryPurchaseItem(string itemName)
+        public async UniTask TryPurchaseItemByRealMoney(string itemName)
         {
+            await Login();
             _itemName = itemName;
             _storeController.InitiatePurchase(itemName);
         }
@@ -158,7 +159,6 @@ namespace Manager.NetworkManager
                 return false;
             }
 
-            await _playFabVirtualCurrencyManager.SetVirtualCurrency();
             var result2 = await _userDataManager.UpgradeCharacterLevel(characterId, level);
             return result2;
         }

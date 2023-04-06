@@ -122,8 +122,9 @@ namespace Common.Data
             }
 
             _userData.CharacterLevels[characterId] = level;
-            var result = await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
-            return result;
+            /*var result = await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
+            return result;*/
+            return true;
         }
 
         public void SetMissionData(int index, int progress)

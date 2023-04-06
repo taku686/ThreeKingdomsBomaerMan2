@@ -62,7 +62,8 @@ namespace Player.Common
         {
             _photonView = GetComponent<PhotonView>();
             _inputManager = gameObject.AddComponent<InputManager>();
-            _inputManager.Initialize(_photonView, SkillOneIntervalTime, SkillTwoIntervalTime, characterData,userDataManager);
+            _inputManager.Initialize(_photonView, SkillOneIntervalTime, SkillTwoIntervalTime, characterData,
+                userDataManager);
             _playerPutBomb = GetComponent<PlayerPutBomb>();
             _animator = GetComponent<Animator>();
             _animatorTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
@@ -143,13 +144,14 @@ namespace Player.Common
             _playerStatusManager.CurrentHp -= explosion.damageAmount;
             var hpRate = _playerStatusManager.CurrentHp / (float)_playerStatusManager.MaxHp;
             SynchronizedValue.Instance.SetValue(_hpKey, hpRate);
-            await UniTask.Delay(TimeSpan.FromSeconds(InvincibleDuration), cancellationToken: _cancellationToken);
-            _isDamage = false;
-            _renderer.enabled = true;
             if (_playerStatusManager.CurrentHp <= DeadHp)
             {
                 Dead(explosion);
             }
+
+            await UniTask.Delay(TimeSpan.FromSeconds(InvincibleDuration), cancellationToken: _cancellationToken);
+            _isDamage = false;
+            _renderer.enabled = true;
         }
 
         private void Dead(Explosion explosion)
