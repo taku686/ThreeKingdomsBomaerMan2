@@ -112,9 +112,18 @@ namespace UI.Title
 
             private void SetLevelView(CharacterLevelData currentLevelData, CharacterLevelData nextLevelData)
             {
-                _characterDetailView.LevelText.text = LevelText + currentLevelData.Level;
-                _characterDetailView.UpgradeInfoText.text = $"Lv{nextLevelData.Level} Upgrade";
-                _characterDetailView.UpgradeText.text = nextLevelData.NeedCoin.ToString("D");
+                if (currentLevelData.Level < GameCommonData.MaxCharacterLevel)
+                {
+                    _characterDetailView.LevelText.text = LevelText + currentLevelData.Level;
+                    _characterDetailView.UpgradeInfoText.text = $"Lv{nextLevelData.Level} Upgrade";
+                    _characterDetailView.UpgradeText.text = nextLevelData.NeedCoin.ToString("D");
+                }
+                else
+                {
+                    _characterDetailView.LevelText.text = LevelText + currentLevelData.Level;
+                    _characterDetailView.UpgradeInfoText.text = "Max Level";
+                    _characterDetailView.UpgradeText.text = "  ∞  ";
+                }
             }
 
             private void InitializeButton()
@@ -167,8 +176,7 @@ namespace UI.Title
                 var leftPosition = leftArrowTransform.anchoredPosition3D;
                 var rightPosition = rightArrowTransform.anchoredPosition3D;
                 leftArrowTransform.DOLocalMove(new Vector3(leftPosition.x + MoveAmount, leftPosition.y, leftPosition.z),
-                        1f)
-                    .SetLoops(-1, LoopType.Yoyo).SetLink(leftArrowTransform.gameObject);
+                    1f).SetLoops(-1, LoopType.Yoyo).SetLink(leftArrowTransform.gameObject);
                 rightArrowTransform
                     .DOLocalMove(new Vector3(rightPosition.x - MoveAmount, rightPosition.y, rightPosition.z), 1f)
                     .SetLoops(-1, LoopType.Yoyo).SetLink(rightArrowTransform.gameObject);
@@ -273,6 +281,14 @@ namespace UI.Title
                 }
 
                 _isProcessing = true;
+                var characterData = _userDataManager.GetEquippedCharacterData();
+                var currentLevelData = _userDataManager.GetCurrentLevelData(characterData.Id);
+                if (currentLevelData.Level >= GameCommonData.MaxCharacterLevel)
+                {
+                    _isProcessing = false;
+                    return;
+                }
+
                 var button = _characterDetailView.UpgradeButton.gameObject;
                 Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
@@ -283,9 +299,8 @@ namespace UI.Title
                         return;
                     }
 
-                    var characterData = _userDataManager.GetEquippedCharacterData();
+
                     var nextLevelData = _userDataManager.GetNextLevelData(characterData.Id);
-                    var currentLevelData = _userDataManager.GetCurrentLevelData(characterData.Id);
                     var virtualCurrencyAddView = _characterDetailView.VirtualCurrencyAddPopup;
                     var purchaseErrorView = _characterDetailView.PurchaseErrorView;
                     if (currentLevelData.Level >= GameCommonData.MaxCharacterLevel)
@@ -376,7 +391,19 @@ namespace UI.Title
                         var question = _characterDetailView.QuestionView.questionField.text;
                         var commentTransform = _characterDetailView.QuestionView.commentObj.transform;
                         var commentText = _characterDetailView.QuestionView.commentText;
+                        var errorText = _commonView.errorView.errorInfoText;
                         if (question.Length > GameCommonData.CharacterLimit)
+                        {
+                            _commonView.waitPopup.SetActive(false);
+                            _canQuestion = true;
+                            var errorInfo = $"{GameCommonData.CharacterLimit}文字以内で質問してください。";
+                            await OpenErrorView();
+                            return;
+                        }
+
+                        var result = await _playFabShopManager.TryPurchaseItem(GameCommonData.QuestionItemKey,
+                            GameCommonData.TicketKey, 1, errorText);
+                        if (!result)
                         {
                             _commonView.waitPopup.SetActive(false);
                             _canQuestion = true;
@@ -386,10 +413,12 @@ namespace UI.Title
 
                         await _chatGptManager.Request(question, commentText);
                         _commonView.waitPopup.SetActive(false);
+                        await Owner.SetTicketText();
                         commentText.pageToDisplay = DefaultPage;
                         commentTransform.localScale = Vector3.zero;
                         commentTransform.gameObject.SetActive(true);
                         await _uiAnimation.Open(commentTransform, GameCommonData.OpenDuration);
+
                         _canQuestion = true;
                     }
                 )).SetLink(button);
@@ -419,11 +448,20 @@ namespace UI.Title
                 )).SetLink(button);
             }
 
+            private async UniTask OpenErrorView(string errorText)
+            {
+                var errorView = _commonView.errorView;
+                var errorViewObj = _commonView.errorView.gameObject;
+                _commonView.errorView.errorInfoText.text = errorText;
+                errorView.transform.localScale = Vector3.zero;
+                errorViewObj.SetActive(true);
+                await _uiAnimation.Open(errorView.transform, GameCommonData.OpenDuration);
+            }
+
             private async UniTask OpenErrorView()
             {
                 var errorView = _commonView.errorView;
                 var errorViewObj = _commonView.errorView.gameObject;
-                _commonView.errorView.errorInfoText.text = $"{GameCommonData.CharacterLimit}文字以内で質問してください。";
                 errorView.transform.localScale = Vector3.zero;
                 errorViewObj.SetActive(true);
                 await _uiAnimation.Open(errorView.transform, GameCommonData.OpenDuration);

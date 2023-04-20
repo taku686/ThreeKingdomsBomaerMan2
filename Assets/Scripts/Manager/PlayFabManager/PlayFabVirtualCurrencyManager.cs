@@ -35,6 +35,11 @@ namespace Manager.NetworkManager
                 {
                     user.Gem = item.Value;
                 }
+
+                if (item.Key.Equals(GameCommonData.TicketKey))
+                {
+                    user.Ticket = item.Value;
+                }
             }
 
             _userDataManager.SetUserData(user);
@@ -72,6 +77,26 @@ namespace Manager.NetworkManager
             foreach (var item in result.Result.VirtualCurrency)
             {
                 if (item.Key.Equals(GameCommonData.GemKey))
+                {
+                    return item.Value;
+                }
+            }
+
+            return GameCommonData.NetworkErrorCode;
+        }
+
+        public async UniTask<int> GetTicket()
+        {
+            var result = await PlayFabClientAPI.GetUserInventoryAsync(new GetUserInventoryRequest());
+            if (result.Error != null)
+            {
+                Debug.Log(result.Error.GenerateErrorReport());
+                return GameCommonData.NetworkErrorCode;
+            }
+
+            foreach (var item in result.Result.VirtualCurrency)
+            {
+                if (item.Key.Equals(GameCommonData.TicketKey))
                 {
                     return item.Value;
                 }

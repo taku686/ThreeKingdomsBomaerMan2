@@ -12,6 +12,7 @@ namespace Common.Data
         public bool IsTutorial;
         public int Gem;
         public int Coin;
+        public int Ticket;
         public List<int> Characters = new();
         public readonly Dictionary<int, int> CharacterLevels = new();
         public readonly Dictionary<int, int> LoginBonus = new();
@@ -27,6 +28,7 @@ namespace Common.Data
             Characters = userData.Characters;
             Gem = userData.Gem;
             Coin = userData.Coin;
+            Ticket = userData.Ticket;
         }
 
         public UserData GetUserData()
@@ -45,6 +47,7 @@ namespace Common.Data
             user.Characters.Add(characterData.Id);
             user.Gem = 0;
             user.Coin = 0;
+            user.Ticket = 0;
             user.CharacterLevels[0] = 0;
             for (int i = 0; i < 7; i++)
             {
