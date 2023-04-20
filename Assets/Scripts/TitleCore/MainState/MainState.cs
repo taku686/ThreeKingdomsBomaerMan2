@@ -53,6 +53,7 @@ namespace UI.Title
             {
                 await Owner.SetCoinText();
                 await Owner.SetGemText();
+                await Owner.SetTicketText();
                 Owner.commonView.virtualCurrencyView.gameObject.SetActive(true);
             }
 

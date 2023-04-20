@@ -9,4 +9,6 @@ public class VirtualCurrencyView : MonoBehaviour
     public TextMeshProUGUI gemText;
     public Button coinAddButton;
     public TextMeshProUGUI coinText;
+    public Button ticketAddButton;
+    public TextMeshProUGUI ticketText;
 }

@@ -26,6 +26,7 @@ namespace Common.Data
         public const string BombLayer = "Bomb";
         public const string GemKey = "MS";
         public const string CoinKey = "CO";
+        public const string TicketKey = "TK";
         public const string GachaShopKey = "GachaStore";
         public const string MainShopKey = "MainShop";
         public const string ConsumableClassKey = "Consumable";
@@ -42,6 +43,7 @@ namespace Common.Data
         public const string TwoHundredGemItemKey = "gem200";
         public const string LevelItemKey = "level";
         public const string LoginBonusItemKey = "day";
+        public const string QuestionItemKey = "Question";
         public const string CharacterMasterKey = "CharacterMaster";
         public const string CharacterLevelMasterKey = "CharacterLevelMaster";
         public const string MissionMasterKey = "MissionMaster";

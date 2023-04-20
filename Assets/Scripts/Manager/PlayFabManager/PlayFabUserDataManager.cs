@@ -56,18 +56,16 @@ namespace Manager.NetworkManager
                 Debug.Log(response.Error.GenerateErrorReport());
                 return null;
             }
-            else
-            {
-                var value = response.Result.Data[key].Value;
-                var user = JsonConvert.DeserializeObject<UserData>(value);
-                if (user == null)
-                {
-                    return null;
-                }
 
-                _userDataManager.SetUserData(user);
-                return user;
+            var value = response.Result.Data[key].Value;
+            var user = JsonConvert.DeserializeObject<UserData>(value);
+            if (user == null)
+            {
+                return null;
             }
+
+            _userDataManager.SetUserData(user);
+            return user;
         }
 
         public async UniTask DeletePlayerDataAsync()
