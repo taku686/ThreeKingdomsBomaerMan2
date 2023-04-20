@@ -116,9 +116,11 @@ namespace UI.Title
         {
             var gemAddButton = commonView.virtualCurrencyView.gemAddButton;
             var coinAddButton = commonView.virtualCurrencyView.coinAddButton;
+            var ticketAddButton = commonView.virtualCurrencyView.ticketAddButton;
             SetupRewardOkButton();
             gemAddButton.onClick.AddListener(() => { OnClickTransitionShopState(gemAddButton.gameObject); });
             coinAddButton.onClick.AddListener(() => { OnClickTransitionShopState(coinAddButton.gameObject); });
+            ticketAddButton.onClick.AddListener(() => { OnClickTransitionShopState(ticketAddButton.gameObject); });
         }
 
 
@@ -205,6 +207,12 @@ namespace UI.Title
         {
             var gem = await _playFabVirtualCurrencyManager.GetGem();
             commonView.virtualCurrencyView.gemText.text = gem.ToString("D");
+        }
+
+        private async UniTask SetTicketText()
+        {
+            var ticket = await _playFabVirtualCurrencyManager.GetTicket();
+            commonView.virtualCurrencyView.ticketText.text = ticket.ToString("D");
         }
 
         private void OnClickTransitionShopState(GameObject button)

@@ -88,6 +88,8 @@ namespace UI.Title
                     var missionGrid = Instantiate(_missionView.missionGrid, _missionView.gridParent);
                     var progressValue =
                         (int)(data.Value / (float)missionData.count * GameCommonData.MaxMissionProgress);
+                    progressValue = progressValue >= GameCommonData.MaxMissionProgress
+                        ? GameCommonData.MaxMissionProgress : progressValue;
                     _missionGrids[missionData.index] = missionGrid;
                     missionGrid.progressSlider.maxValue = GameCommonData.MaxMissionProgress;
                     missionGrid.progressSlider.value = progressValue;
