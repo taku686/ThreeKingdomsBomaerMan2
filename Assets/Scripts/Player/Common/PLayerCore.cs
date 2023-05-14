@@ -32,6 +32,8 @@ namespace Player.Common
         private Renderer _renderer;
         private BoxCollider _boxCollider;
         private CancellationToken _cancellationToken;
+        private SkillBase _skillOne;
+        private SkillBase _skillTwo;
         private string _hpKey;
 
         //Todo 仮の値
