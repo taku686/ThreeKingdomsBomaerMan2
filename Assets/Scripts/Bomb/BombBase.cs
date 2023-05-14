@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
@@ -28,8 +27,6 @@ namespace Bomb
         private int _playerId;
         private int _explosionTime;
         private readonly Subject<Unit> _onExplosionSubject = new();
-
-
         private readonly Subject<Unit> _onFinishSubject = new();
 
         private CancellationToken _token;

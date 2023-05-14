@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using UnityEngine;
 
 namespace Common.Data
@@ -95,6 +96,23 @@ namespace Common.Data
                     return CharacterColor.Yellow;
                 default:
                     return CharacterColor.Red;
+            }
+        }
+
+        public static Vector3 GetPlayerDirection(float rotation)
+        {
+            switch (rotation)
+            {
+                case -180:
+                    return Vector3.back;
+                case 0:
+                    return Vector3.forward;
+                case -90:
+                    return Vector3.left;
+                case 90:
+                    return Vector3.right;
+                default:
+                    return Vector3.zero;
             }
         }
 
