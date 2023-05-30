@@ -1,3 +1,5 @@
+using System;
+using Pathfinding;
 using UnityEngine;
 
 namespace Enemy
@@ -5,6 +7,7 @@ namespace Enemy
     public partial class EnemyCore : MonoBehaviour
     {
         private StateMachine<EnemyCore> _stateMachine;
+        private Seeker _seeker;
 
         private enum EnemyState
         {
@@ -17,8 +20,14 @@ namespace Enemy
             Dead
         }
 
+        private void Start()
+        {
+            Initialize();
+        }
+
         public void Initialize()
         {
+            _seeker = GetComponent<Seeker>();
             InitializeState();
         }
 
