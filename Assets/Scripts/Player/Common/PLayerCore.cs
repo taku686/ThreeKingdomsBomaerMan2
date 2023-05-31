@@ -17,13 +17,13 @@ namespace Player.Common
     {
         private InputManager _inputManager;
         private PlayerMove _playerMove;
-        private PlayerPutBomb _playerPutBomb;
+        private PutBomb _putBomb;
         private CharacterData _characterData;
         private PhotonView _photonView;
         private Animator _animator;
         private PlayerDead _playerDead;
         private ObservableStateMachineTrigger _animatorTrigger;
-        private PlayerStatusManager _playerStatusManager;
+        private CharacterStatusManager _characterStatusManager;
         private const int DeadHp = 0;
         private const int InvincibleDuration = 2;
         private const float WaitDuration = 0.3f;
@@ -48,12 +48,12 @@ namespace Player.Common
 
         private StateMachine<PLayerCore> _stateMachine;
 
-        public void Initialize(PlayerStatusManager playerStatusManager, string hpKey, CharacterData characterData,
+        public void Initialize(CharacterStatusManager characterStatusManager, string hpKey, CharacterData characterData,
             UserDataManager userDataManager)
         {
             _characterData = characterData;
             _hpKey = hpKey;
-            _playerStatusManager = playerStatusManager;
+            _characterStatusManager = characterStatusManager;
             InitializeComponent(_characterData, userDataManager);
             InitializeState();
         }
@@ -64,12 +64,12 @@ namespace Player.Common
             _inputManager = gameObject.AddComponent<InputManager>();
             _inputManager.Initialize(_photonView, SkillOneIntervalTime, SkillTwoIntervalTime, characterData,
                 userDataManager);
-            _playerPutBomb = GetComponent<PlayerPutBomb>();
+            _putBomb = GetComponent<PutBomb>();
             _animator = GetComponent<Animator>();
             _animatorTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
             _playerDead = gameObject.AddComponent<PlayerDead>();
             _playerMove = gameObject.AddComponent<PlayerMove>();
-            _playerMove.Initialize(_playerStatusManager.Speed);
+            _playerMove.Initialize(_characterStatusManager.Speed);
             _renderer = GetComponentInChildren<Renderer>();
             _boxCollider = GetComponent<BoxCollider>();
             _cancellationToken = gameObject.GetCancellationTokenOnDestroy();
@@ -141,10 +141,10 @@ namespace Player.Common
 
             _isDamage = true;
             var explosion = other.GetComponentInParent<Explosion>();
-            _playerStatusManager.CurrentHp -= explosion.damageAmount;
-            var hpRate = _playerStatusManager.CurrentHp / (float)_playerStatusManager.MaxHp;
+            _characterStatusManager.CurrentHp -= explosion.damageAmount;
+            var hpRate = _characterStatusManager.CurrentHp / (float)_characterStatusManager.MaxHp;
             SynchronizedValue.Instance.SetValue(_hpKey, hpRate);
-            if (_playerStatusManager.CurrentHp <= DeadHp)
+            if (_characterStatusManager.CurrentHp <= DeadHp)
             {
                 Dead(explosion);
             }
@@ -162,7 +162,7 @@ namespace Player.Common
 
         private void OnDestroy()
         {
-            _playerStatusManager.Dispose();
+            _characterStatusManager.Dispose();
         }
     }
 }

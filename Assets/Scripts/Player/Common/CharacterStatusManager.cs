@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Player.Common
 {
-    public class PlayerStatusManager : IDisposable
+    public class CharacterStatusManager : IDisposable
     {
         private bool _isMine;
         private const float HpRate = 1.8f;
@@ -17,7 +17,7 @@ namespace Player.Common
         public readonly int DamageAmount;
         public readonly int FireRange;
 
-        public PlayerStatusManager(CharacterData characterData, bool isMine)
+        public CharacterStatusManager(CharacterData characterData, bool isMine)
         {
             CurrentHp = (int)(characterData.Hp * HpRate);
             MaxHp = (int)(characterData.Hp * HpRate);

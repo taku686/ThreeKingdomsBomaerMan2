@@ -17,7 +17,7 @@ namespace Manager.BattleManager
             private static readonly Vector3 ColliderCenter = new(0, 0.6f, 0);
             private static readonly Vector3 ColliderSize = new(0.4f, 0.6f, 0.4f);
             private static readonly float MaxRate = 1f;
-            private PlayerStatusManager _playerStatusManager;
+            private CharacterStatusManager _characterStatusManager;
             private UserDataManager _userDataManager;
 
             protected override void OnEnter(State prevState)
@@ -64,8 +64,8 @@ namespace Manager.BattleManager
                 var playerId = photonView.OwnerActorNr;
                 var characterData = Owner._networkManager.GetCharacterData(playerId);
                 var characterLevelData = Owner._networkManager.GetCharacterLevelData(playerId);
-                var playerStatusManager = new PlayerStatusManager(characterData, photonView.IsMine);
-                var playerPutBomb = player.AddComponent<PlayerPutBomb>();
+                var playerStatusManager = new CharacterStatusManager(characterData, photonView.IsMine);
+                var playerPutBomb = player.AddComponent<PutBomb>();
                 playerPutBomb.Initialize(Owner._bombProvider, playerStatusManager);
                 var playerUI = Instantiate(Owner.playerUI, Owner.playerUIParent);
                 var playerBillBoardUI = playerUI.GetComponentInChildren<PlayerUIBillBoard>();

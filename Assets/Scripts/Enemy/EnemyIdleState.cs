@@ -1,6 +1,7 @@
 ﻿using Common.Data;
 using Pathfinding;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 using State = StateMachine<Enemy.EnemyCore>.State;
 
 namespace Enemy
@@ -9,26 +10,48 @@ namespace Enemy
     {
         public class EnemyIdleState : State
         {
-            private Seeker _seeker;
+            private StateMachine<EnemyCore> _stateMachine;
+            private bool _isDecideTarget;
 
             protected override void OnEnter(State prevState)
             {
                 Initialize();
             }
 
+            protected override void OnUpdate()
+            {
+                DecideTarget();
+                if (_isDecideTarget)
+                {
+                    _isDecideTarget = false;
+                    _stateMachine.Dispatch((int)EnemyState.Move);
+                }
+            }
+
             private void Initialize()
             {
-                _seeker = Owner._seeker;
-                DecideTarget();
+                _stateMachine = Owner._stateMachine;
             }
 
 
             private void DecideTarget()
             {
+                if (_isDecideTarget)
+                {
+                    return;
+                }
+
                 var targets = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
+                if (targets == null)
+                {
+                    return;
+                }
+
+                Debug.Log("ターゲット発見");
                 var targetIndex = Random.Range(0, targets.Length);
                 var target = targets[targetIndex];
-                _seeker.StartPath(Owner.transform.position, target.transform.position);
+                Owner._target = target.transform;
+                _isDecideTarget = true;
             }
         }
     }

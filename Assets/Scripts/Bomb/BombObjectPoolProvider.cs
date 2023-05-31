@@ -20,7 +20,7 @@ namespace Bomb
         private static readonly int PreloadCount = 20;
         private static readonly int Threshold = 20;
 
-        public BombObjectPoolBase GetNormalBombPool(PlayerStatusManager playerStatusManager)
+        public BombObjectPoolBase GetNormalBombPool(CharacterStatusManager characterStatusManager)
         {
             if (_normalBombPool != null)
             {
@@ -30,7 +30,7 @@ namespace Bomb
             var parentTransform = new GameObject("NormalBombPool").transform;
             parentTransform.parent = this.transform;
 
-            _normalBombPool = new NormalObjectPoolBase(normalBomb, parentTransform,playerStatusManager);
+            _normalBombPool = new NormalObjectPoolBase(normalBomb, parentTransform,characterStatusManager);
             _normalBombPool.PreloadAsync(PreloadCount, Threshold).Subscribe().AddTo(_token);
             return _normalBombPool;
         }

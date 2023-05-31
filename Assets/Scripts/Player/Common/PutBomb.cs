@@ -5,20 +5,20 @@ using UnityEngine;
 
 namespace Player.Common
 {
-    public class PlayerPutBomb : MonoBehaviour
+    public class PutBomb : MonoBehaviour
     {
         private BombProvider _bombProvider;
         private const float RayDistance = 1f;
         private const float ModifiedValue = 2f;
 
-        public void Initialize(BombProvider bombProvider,PlayerStatusManager playerStatusManager)
+        public void Initialize(BombProvider bombProvider,CharacterStatusManager characterStatusManager)
         {
             _bombProvider = bombProvider;
-            _bombProvider.Initialize(playerStatusManager);
+            _bombProvider.Initialize(characterStatusManager);
         }
 
 
-        public void PutBomb(BoxCollider boxCollider, PhotonView photonView, Transform playerTransform, int bombType,
+        public void SetBomb(BoxCollider boxCollider, PhotonView photonView, Transform playerTransform, int bombType,
             int damageAmount,
             int fireRange, int explosionTime, int playerId)
         {
