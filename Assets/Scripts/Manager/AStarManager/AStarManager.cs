@@ -1,5 +1,7 @@
 using System;
+using Common.Data;
 using Cysharp.Threading.Tasks;
+using Manager.BattleManager.Environment;
 using Pathfinding;
 using UnityEngine;
 using UniRx;
@@ -17,6 +19,7 @@ public class AStarManager : MonoBehaviour
     private void Start()
     {
         DebugOnClickStageGenerate();
+        InitializeSubscribe();
     }
 
     private void CalculateMap()
@@ -34,6 +37,33 @@ public class AStarManager : MonoBehaviour
         }
 
         // guo.updatePhysics = true;
+    }
+
+    private void InitializeSubscribe()
+    {
+        var breakingWalls = GameObject.FindGameObjectsWithTag(GameCommonData.BreakingWallTag);
+        foreach (var breakingWall in breakingWalls)
+        {
+            var breakingWallSc = breakingWall.GetComponent<BreakingWall>();
+            if (breakingWallSc == null)
+            {
+                continue;
+            }
+
+            breakingWallSc.onDestroy.Subscribe(_ => { ScanMap(); })
+                .AddTo(breakingWall.gameObject.GetCancellationTokenOnDestroy());
+        }
+    }
+
+    public void CalculateMap(Bounds bounds)
+    {
+        var guo = new GraphUpdateObject(bounds);
+        AstarPath.active.AddWorkItem(ctx => { AstarPath.active.UpdateGraphs(guo); });
+    }
+
+    public void ScanMap()
+    {
+        AstarPath.active.Scan();
     }
 
     private void DebugOnClickStageGenerate()

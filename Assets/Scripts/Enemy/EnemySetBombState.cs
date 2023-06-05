@@ -10,18 +10,31 @@ namespace Enemy
     {
         public class EnemyPutBombState : State
         {
+            private StateMachine<EnemyCore> _stateMachine;
             private PhotonView _photonView;
             private CharacterStatusManager _characterStatusManager;
+            private MapManager _mapManager;
             private BoxCollider _boxCollider;
             private PutBomb _putBomb;
+            private bool _isPutBomb;
 
             protected override void OnEnter(State prevState)
             {
                 Initialize();
             }
 
+            protected override void OnUpdate()
+            {
+                if (_isPutBomb)
+                {
+                    _stateMachine.Dispatch((int)EnemyState.Escape);
+                }
+            }
+
             private void Initialize()
             {
+                _isPutBomb = false;
+                _stateMachine = Owner._stateMachine;
                 _photonView = Owner._photonView;
                 _characterStatusManager = Owner._characterStatusManager;
                 _boxCollider = Owner._boxCollider;
@@ -33,14 +46,14 @@ namespace Enemy
             {
                 Debug.Log("ボム設置");
                 var playerId = _photonView.ViewID;
-                var explosionTime = PhotonNetwork.ServerTimestamp +
-                                    GameCommonData.ThreeMilliSecondsBeforeExplosion;
+                var explosionTime = PhotonNetwork.ServerTimestamp + GameCommonData.ThreeMilliSecondsBeforeExplosion;
                 var photonView = _photonView;
                 var damageAmount = _characterStatusManager.DamageAmount;
                 var fireRange = _characterStatusManager.FireRange;
                 var boxCollider = _boxCollider;
                 _putBomb.SetBomb(boxCollider, photonView, Owner.transform,
                     (int)BombType.Normal, damageAmount, fireRange, explosionTime, playerId);
+                _isPutBomb = true;
             }
         }
     }

@@ -12,6 +12,7 @@ namespace Enemy
             private AILerp _aiLerp;
             private Transform _target;
             private StateMachine<EnemyCore> _stateMachine;
+
             protected override void OnEnter(State prevState)
             {
                 Debug.Log("移動開始");
@@ -28,6 +29,12 @@ namespace Enemy
                 if (_aiLerp.reachedEndOfPath)
                 {
                     Debug.Log("行き止まり");
+                    _stateMachine.Dispatch((int)EnemyState.PutBomb);
+                }
+
+                if (_aiLerp.reachedDestination)
+                {
+                    Debug.Log("目的地に到達");
                     _stateMachine.Dispatch((int)EnemyState.PutBomb);
                 }
             }
@@ -47,7 +54,6 @@ namespace Enemy
                 {
                     return;
                 }
-
 
                 Debug.Log("パスセット");
                 _seeker.StartPath(Owner.transform.position, _target.position, OnPathComplete);

@@ -19,6 +19,7 @@ namespace Manager.BattleManager
             private static readonly float MaxRate = 1f;
             private CharacterStatusManager _characterStatusManager;
             private UserDataManager _userDataManager;
+            private MapManager _mapManager;
 
             protected override void OnEnter(State prevState)
             {
@@ -66,7 +67,7 @@ namespace Manager.BattleManager
                 var characterLevelData = Owner._networkManager.GetCharacterLevelData(playerId);
                 var playerStatusManager = new CharacterStatusManager(characterData, photonView.IsMine);
                 var playerPutBomb = player.AddComponent<PutBomb>();
-                playerPutBomb.Initialize(Owner._bombProvider, playerStatusManager);
+                playerPutBomb.Initialize(Owner._bombProvider, playerStatusManager, _mapManager);
                 var playerUI = Instantiate(Owner.playerUI, Owner.playerUIParent);
                 var playerBillBoardUI = playerUI.GetComponentInChildren<PlayerUIBillBoard>();
                 playerBillBoardUI.Initialize(player.transform);

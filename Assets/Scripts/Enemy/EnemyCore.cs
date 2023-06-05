@@ -1,6 +1,4 @@
-using System;
 using Bomb;
-using Cysharp.Threading.Tasks;
 using Manager.DataManager;
 using Pathfinding;
 using Photon.Pun;
@@ -15,6 +13,7 @@ namespace Enemy
     {
         [Inject] private CharacterDataManager _characterDataManager;
         [SerializeField] private BombProvider bombProvider;
+        [SerializeField] private MapManager mapManager;
         private BoxCollider _boxCollider;
         private CharacterStatusManager _characterStatusManager;
         private PhotonView _photonView;
@@ -39,7 +38,7 @@ namespace Enemy
 
         private void Start()
         {
-            Initialize().Forget();
+            Initialize();
         }
 
         private void Update()
@@ -47,7 +46,7 @@ namespace Enemy
             _stateMachine.Update();
         }
 
-        public async UniTaskVoid Initialize()
+        public void Initialize()
         {
             InitializeState();
             _seeker = GetComponent<Seeker>();
@@ -57,7 +56,6 @@ namespace Enemy
             SetupCharacterStatusManager();
             SetupPutBomb();
             DebugSetting();
-            await UniTask.WaitUntil(() => _joinedRoom);
         }
 
         //todo あとでけす
@@ -80,7 +78,7 @@ namespace Enemy
             _joinedRoom = true;
         }
 
-
+//todo ここまで
         private void SetupBoxCollider()
         {
             _boxCollider = gameObject.AddComponent<BoxCollider>();
@@ -98,7 +96,7 @@ namespace Enemy
         private void SetupPutBomb()
         {
             _putBomb = gameObject.AddComponent<PutBomb>();
-            _putBomb.Initialize(bombProvider, _characterStatusManager);
+            _putBomb.Initialize(bombProvider, _characterStatusManager, mapManager);
         }
 
         private void InitializeState()
@@ -108,7 +106,10 @@ namespace Enemy
             _stateMachine.AddAnyTransition<EnemyIdleState>((int)EnemyState.Idle);
             _stateMachine.AddAnyTransition<EnemyDeadState>((int)EnemyState.Dead);
             _stateMachine.AddTransition<EnemyIdleState, EnemyMoveState>((int)EnemyState.Move);
+            _stateMachine.AddTransition<EnemyEscapeState, EnemyMoveState>((int)EnemyState.Move);
             _stateMachine.AddTransition<EnemyMoveState, EnemyPutBombState>((int)EnemyState.PutBomb);
+            _stateMachine.AddTransition<EnemyPutBombState, EnemyEscapeState>((int)EnemyState.Escape);
+            _stateMachine.AddTransition<EnemyEscapeState, EnemyEscapeState>((int)EnemyState.Escape);
         }
     }
 }

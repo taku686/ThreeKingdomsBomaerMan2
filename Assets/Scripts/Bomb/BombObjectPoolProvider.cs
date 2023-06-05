@@ -12,6 +12,7 @@ namespace Bomb
         [SerializeField] private BombBase normalBomb;
         [SerializeField] private BombBase penetrationBomb;
         [SerializeField] private BombBase dangerBomb;
+        [SerializeField] private MapManager mapManager;
 
         private BombObjectPoolBase _normalBombPool;
         private BombObjectPoolBase _penetrationBombPool;
@@ -28,9 +29,9 @@ namespace Bomb
             }
 
             var parentTransform = new GameObject("NormalBombPool").transform;
-            parentTransform.parent = this.transform;
+            parentTransform.parent = transform;
 
-            _normalBombPool = new NormalObjectPoolBase(normalBomb, parentTransform,characterStatusManager);
+            _normalBombPool = new NormalObjectPoolBase(normalBomb, parentTransform, characterStatusManager, mapManager);
             _normalBombPool.PreloadAsync(PreloadCount, Threshold).Subscribe().AddTo(_token);
             return _normalBombPool;
         }

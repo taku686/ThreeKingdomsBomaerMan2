@@ -22,6 +22,7 @@ namespace Manager.BattleManager
         [SerializeField] private GameObject playerUI;
         [SerializeField] private CameraManager cameraManager;
         [SerializeField] private StageManager stageManager;
+        [SerializeField] private MapManager mapManager;
         private StateMachine<BattleCore> _stateMachine;
 
         private enum Event
