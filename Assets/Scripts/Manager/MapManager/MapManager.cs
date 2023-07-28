@@ -30,22 +30,6 @@ public class MapManager : MonoBehaviour
 
     private void AddBlockArea()
     {
-        /*for (int i = -9; i < 10; i++)
-        {
-            for (int j = -6; j < 7; j++)
-            {
-                AddMap(Area.Block, i, j);
-            }
-        }
-
-        for (int i = -8; i < 9; i++)
-        {
-            for (int j = -5; j < 6; j++)
-            {
-                RemoveMap(i, j);
-            }
-        }*/
-
         for (int i = -7; i < 8; i += 2)
         {
             for (int j = -4; j < 5; j += 2)
@@ -63,9 +47,9 @@ public class MapManager : MonoBehaviour
 
     private void AddNoneArea()
     {
-        for (int i = -8; i < 9; i++)
+        for (int i = (int)MinX; i <= (int)MaxX; i++)
         {
-            for (int j = -5; j < 6; j++)
+            for (int j = (int)MinZ; j <= MaxZ; j++)
             {
                 var point = new Tuple<float, float>(i, j);
                 if (_map.ContainsKey(point))
