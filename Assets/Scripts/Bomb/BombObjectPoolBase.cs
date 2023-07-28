@@ -9,16 +9,19 @@ namespace Bomb
     {
         protected ObjectPool<BombBase> Pool;
         private readonly BombBase _bombBase;
-        private readonly PlayerStatusManager _playerStatusManager;
+        private readonly CharacterStatusManager _characterStatusManager;
+        private MapManager _mapManager;
         private readonly Transform _bombParent;
         private static readonly Vector3 ColliderCenter = new Vector3(0, 0.5f, 0);
         private static readonly Vector3 ColliderScale = new Vector3(0.7f, 1, 0.7f);
 
-        protected BombObjectPoolBase(BombBase bombBase, Transform parent, PlayerStatusManager playerStatusManager)
+        protected BombObjectPoolBase(BombBase bombBase, Transform parent, CharacterStatusManager characterStatusManager,
+            MapManager mapManager)
         {
             _bombBase = bombBase;
             _bombParent = parent;
-            _playerStatusManager = playerStatusManager;
+            _characterStatusManager = characterStatusManager;
+            _mapManager = mapManager;
         }
 
         protected override BombBase CreateInstance()
@@ -33,13 +36,23 @@ namespace Bomb
 
         protected override void OnBeforeRent(BombBase instance)
         {
-            _playerStatusManager.IncrementBombCount();
+            _characterStatusManager.IncrementBombCount();
             base.OnBeforeRent(instance);
         }
 
         protected override void OnBeforeReturn(BombBase instance)
         {
-            _playerStatusManager.DecrementBombCount();
+            var position = instance.transform.position;
+            _mapManager.RemoveMap(position.x, position.z);
+            for (int i = 1; i <= instance.fireRange; i++)
+            {
+                _mapManager.RemoveMap(position.x + i, position.z);
+                _mapManager.RemoveMap(position.x - i, position.z);
+                _mapManager.RemoveMap(position.x, position.z + i);
+                _mapManager.RemoveMap(position.x, position.z - i);
+            }
+
+            _characterStatusManager.DecrementBombCount();
             base.OnBeforeReturn(instance);
         }
 

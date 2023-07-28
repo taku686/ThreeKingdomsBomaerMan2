@@ -13,9 +13,7 @@ namespace Common.Installer
 
     {
         [SerializeField] private GameObject photonNetworkGameObject;
-
         [SerializeField] private GameObject mainManagerGameObject;
-        //[SerializeField] private GameObject userManagerGameObject;
 
         public override void InstallBindings()
         {

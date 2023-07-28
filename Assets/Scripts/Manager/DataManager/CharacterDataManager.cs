@@ -4,6 +4,7 @@ using System.Threading;
 using Common.Data;
 using PlayFab.ClientModels;
 using Zenject;
+using Random = UnityEngine.Random;
 
 namespace Manager.DataManager
 {
@@ -39,6 +40,12 @@ namespace Manager.DataManager
             return CharacterDatum[id];
         }
 
+        public CharacterData GetRandomCharacterData()
+        {
+            var index = Random.Range(0, CharacterDatum.Count);
+            return CharacterDatum[index];
+        }
+
         public int GetCharacterCount()
         {
             return CharacterDatum.Count;
@@ -57,6 +64,19 @@ namespace Manager.DataManager
 
         public void Dispose()
         {
+        }
+
+        public CharacterData DebugGetCharacterData()
+        {
+            var characterData = new CharacterData()
+            {
+                Hp = 100,
+                Speed = 100,
+                BombLimit = 10,
+                Attack = 100,
+                FireRange = 10
+            };
+            return characterData;
         }
     }
 }

@@ -53,7 +53,6 @@ namespace Manager
             _inputView.skillOneButton.OnClickAsObservable().ThrottleFirst(TimeSpan.FromSeconds(intervalTime)).Subscribe(
                 _ =>
                 {
-                    Debug.Log("skill１発動");
                     ResetSkillOneIntervalImage();
                     action.Invoke();
                 }).AddTo(token);
@@ -64,7 +63,6 @@ namespace Manager
             _inputView.skillTwoButton.OnClickAsObservable().ThrottleFirst(TimeSpan.FromSeconds(intervalTime))
                 .Subscribe(_ =>
                 {
-                    Debug.Log("skill2発動");
                     ResetSkillTwoIntervalImage();
                     action.Invoke();
                 }).AddTo(token);

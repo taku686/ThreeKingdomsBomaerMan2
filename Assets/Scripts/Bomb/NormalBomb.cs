@@ -38,8 +38,8 @@ namespace Bomb
             var index = (int)direction;
             BombRenderer.enabled = false;
             BoxColliderComponent.enabled = false;
-            var isHit = TryGetObstacles(FireRange, dir, startPos, ObstaclesLayerMask, out var hit);
-            var fireRange = isHit ? CalculateFireRange(hit, startPos) : FireRange;
+            var isHit = TryGetObstacles(base.fireRange, dir, startPos, ObstaclesLayerMask, out var hit);
+            var fireRange = isHit ? CalculateFireRange(hit, startPos) : base.fireRange;
             var endPos = CalculateEndPos(isHit, hit, startPos, fireRange, dir);
             var distance = (endPos - startPos).magnitude;
             var isExplosion = distance >= MinDistance;

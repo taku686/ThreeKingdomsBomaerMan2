@@ -1,5 +1,4 @@
-﻿using System;
-using Common.Data;
+﻿using Common.Data;
 using Manager.BattleManager.Environment;
 using Player.Common;
 using UniRx;
@@ -15,9 +14,9 @@ namespace Bomb
         private BombObjectPoolBase _penetrationBombProvider;
         private BombObjectPoolBase _dangerBombProvider;
 
-        public void Initialize(PlayerStatusManager playerStatusManager)
+        public void Initialize(CharacterStatusManager characterStatusManager)
         {
-            _normalBombProvider = bombObjectPoolProvider.GetNormalBombPool(playerStatusManager);
+            _normalBombProvider = bombObjectPoolProvider.GetNormalBombPool(characterStatusManager);
         }
 
         public BombBase GetBomb(int bombType, int damageAmount, int fireRange, int explosionTime, int playerId)

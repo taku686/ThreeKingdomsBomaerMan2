@@ -6,7 +6,8 @@ namespace Bomb
 {
     public class NormalObjectPoolBase : BombObjectPoolBase
     {
-        public NormalObjectPoolBase(BombBase bombBase, Transform parent,PlayerStatusManager playerStatusManager) : base(bombBase, parent,playerStatusManager)
+        public NormalObjectPoolBase(BombBase bombBase, Transform parent, CharacterStatusManager characterStatusManager,
+            MapManager mapManager) : base(bombBase, parent, characterStatusManager, mapManager)
         {
         }
     }

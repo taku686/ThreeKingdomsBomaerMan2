@@ -17,7 +17,7 @@ namespace Bomb
         protected static readonly float ExplosionDisplayDuration = 0.9f;
         protected static readonly float MinDistance = 1.0f;
         protected CancellationTokenSource Cts;
-        protected int FireRange;
+        public int fireRange;
         protected LayerMask ObstaclesLayerMask;
         protected bool IsExplosion;
         protected Renderer BombRenderer;
@@ -53,7 +53,7 @@ namespace Bomb
             _damageAmount = damageAmount;
             _playerId = playerId;
             _explosionTime = explosionTime;
-            FireRange = fireRange;
+            this.fireRange = fireRange;
             BlockShakeAction = stageOrnamentsBlock.Shake;
             IsExplosion = false;
             foreach (var bombEffect in explosionList)
