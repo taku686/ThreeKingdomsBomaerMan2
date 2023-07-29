@@ -29,14 +29,13 @@ namespace UI.Title
                 _uiAnimation = Owner._uiAnimation;
                 _playFabShopManager = Owner._playFabShopManager;
                 _shopView = Owner.shopView;
-                Owner.DisableTitleGameObject();
                 InitializeButton();
-                Owner.mainView.ShopGameObject.SetActive(true);
                 _shopView.RewardGetView.gameObject.SetActive(false);
                 _shopView.PurchaseErrorView.gameObject.SetActive(false);
                 _shopView.PurchaseErrorView.errorInfoText.text = "";
                 var gemSprite = await Resources.LoadAsync<Sprite>(GameCommonData.VirtualCurrencySpritePath + "gem");
                 _gemSprite = (Sprite)gemSprite;
+                Owner.SwitchUiObject(TitleCoreEvent.Shop, true);
             }
 
             private void InitializeButton()
@@ -82,7 +81,7 @@ namespace UI.Title
                 var backButton = _shopView.BackButton.gameObject;
                 Owner._uiAnimation.ClickScaleColor(backButton).OnComplete(() =>
                 {
-                    Owner._stateMachine.Dispatch((int)Event.Main);
+                    Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main);
                 }).SetLink(backButton);
             }
 

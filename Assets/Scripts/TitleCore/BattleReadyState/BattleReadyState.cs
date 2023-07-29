@@ -21,12 +21,10 @@ namespace UI.Title
             protected override void OnEnter(State prevState)
             {
                 Initialize();
-                SetupEvent();
             }
 
             protected override void OnExit(State nextState)
             {
-                Owner.commonView.virtualCurrencyView.gameObject.SetActive(true);
             }
 
             protected override void OnUpdate()
@@ -37,15 +35,14 @@ namespace UI.Title
             private void Initialize()
             {
                 _userDataManager = Owner._userDataManager;
-                Owner.commonView.virtualCurrencyView.gameObject.SetActive(false);
                 InitializeButton();
                 InitializeSubscribe();
+                SetupEvent();
+                Owner.SwitchUiObject(TitleCoreEvent.ReadyBattle, false);
             }
 
             private void SetupEvent()
             {
-                Owner.DisableTitleGameObject();
-                Owner.mainView.BattleReadyGameObject.SetActive(true);
                 Owner._photonNetworkManager.OnStartConnectNetwork();
             }
 
@@ -82,7 +79,7 @@ namespace UI.Title
                     PhotonNetwork.LeaveRoom();
                     Owner.DisableTitleGameObject();
                     Owner.mainView.MainGameObject.SetActive(true);
-                    Owner._stateMachine.Dispatch((int)Event.Main);
+                    Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main);
                 }).SetLink(Owner.gameObject);
             }
 
@@ -132,7 +129,7 @@ namespace UI.Title
 
                 PhotonNetwork.CurrentRoom.IsOpen = false;
                 PhotonNetwork.CurrentRoom.IsVisible = false;
-                Owner._stateMachine.Dispatch((int)Event.SceneTransition);
+                Owner._stateMachine.Dispatch((int)TitleCoreEvent.SceneTransition);
             }
 
             private void OnClickSceneTransition()
@@ -144,7 +141,7 @@ namespace UI.Title
 
                 PhotonNetwork.CurrentRoom.IsOpen = false;
                 PhotonNetwork.CurrentRoom.IsVisible = false;
-                Owner._stateMachine.Dispatch((int)Event.SceneTransition);
+                Owner._stateMachine.Dispatch((int)TitleCoreEvent.SceneTransition);
             }
 
 

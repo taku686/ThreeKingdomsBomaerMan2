@@ -79,6 +79,7 @@ namespace Common.Data
         public const int ExceptionCharacterId = 999;
         public const int NetworkErrorCode = Int32.MaxValue;
         public const int CharacterLimit = 40;
+        public const int FadeOutTime = 1;
 
         public static CharacterColor GetCharacterColor(string color)
         {
@@ -110,6 +111,7 @@ namespace Common.Data
                 case -90:
                     return Vector3.left;
                 case 90:
+                    return Vector3.right;
                     return Vector3.right;
                 default:
                     return Vector3.zero;

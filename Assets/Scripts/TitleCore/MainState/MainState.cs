@@ -27,11 +27,10 @@ namespace UI.Title
             {
                 _playFabLoginManager = Owner._playFabLoginManager;
                 _mainView = Owner.mainView;
-                Owner.DisableTitleGameObject();
                 Owner.CreateCharacter(Owner._userDataManager.GetUserData().EquipCharacterId);
                 InitializeButton();
-                _mainView.MainGameObject.SetActive(true);
                 await InitializeText();
+                Owner.SwitchUiObject(TitleCoreEvent.Main, true);
             }
 
 
@@ -65,42 +64,42 @@ namespace UI.Title
                 }
 
                 _playFabLoginManager.haveLoginBonus = false;
-                Owner._stateMachine.Dispatch((int)Event.LoginBonus);
+                Owner._stateMachine.Dispatch((int)TitleCoreEvent.LoginBonus);
             }
 
 
             private void OnClickCharacterSelect()
             {
                 Owner._uiAnimation.ClickScaleColor(Owner.mainView.CharacterSelectButton.gameObject)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.CharacterSelect); })
+                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)TitleCoreEvent.CharacterSelect); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickBattleReady()
             {
                 Owner._uiAnimation.ClickScaleColor(Owner.mainView.BattleReadyButton.gameObject)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.ReadyBattle); })
+                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)TitleCoreEvent.ReadyBattle); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickSetting()
             {
                 Owner._uiAnimation.ClickScaleColor(Owner.mainView.SettingButton.gameObject)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.Setting); })
+                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)TitleCoreEvent.Setting); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickShop()
             {
                 Owner._uiAnimation.ClickScaleColor(Owner.mainView.ShopButton.gameObject)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.Shop); })
+                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)TitleCoreEvent.Shop); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickMission()
             {
                 Owner._uiAnimation.ClickScaleColor(_mainView.MissionButton.gameObject)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.Mission); })
+                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)TitleCoreEvent.Mission); })
                     .SetLink(Owner.gameObject);
             }
         }

@@ -17,15 +17,12 @@ namespace UI.Title
 
             protected override void OnExit(State nextState)
             {
-                Owner.commonView.virtualCurrencyView.gameObject.SetActive(true);
             }
 
             private void Initialize()
             {
-                Owner.DisableTitleGameObject();
-                Owner.commonView.virtualCurrencyView.gameObject.SetActive(false);
-                Owner.mainView.SceneTransitionGameObject.SetActive(true);
                 LoadScene().Forget();
+                Owner.SwitchUiObject(TitleCoreEvent.SceneTransition, false);
             }
 
             private async UniTask LoadScene()

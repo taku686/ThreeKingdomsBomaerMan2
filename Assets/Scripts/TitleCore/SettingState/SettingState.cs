@@ -26,9 +26,7 @@ namespace UI.Title
             {
                 InitializeButton();
                 InitializeObject();
-                Owner.commonView.virtualCurrencyView.gameObject.SetActive(false);
-                Owner.DisableTitleGameObject();
-                Owner.mainView.SettingGameObject.SetActive(true);
+                Owner.SwitchUiObject(TitleCoreEvent.Setting, false);
             }
 
             private void InitializeButton()
@@ -60,7 +58,7 @@ namespace UI.Title
             private void OnClickCloseSetting()
             {
                 Owner._uiAnimation.ClickScaleColor(Owner.settingView.SettingCloseButton.gameObject)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.Main); })
+                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main); })
                     .SetLink(Owner.gameObject);
             }
 

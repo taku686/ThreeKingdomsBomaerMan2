@@ -50,7 +50,6 @@ namespace UI.Title
             private async void Initialize()
             {
                 SetupCancellationToken();
-                Owner.DisableTitleGameObject();
                 _characterDataManager = Owner._characterDataManager;
                 _characterLevelDataManager = Owner._characterLevelDataManager;
                 _characterDetailView = Owner.characterDetailView;
@@ -67,7 +66,7 @@ namespace UI.Title
                 InitializeButton();
                 SetupUIContent();
                 InitializeUIAnimation();
-                Owner.mainView.CharacterDetailGameObject.SetActive(true);
+                Owner.SwitchUiObject(TitleCoreEvent.CharacterDetail, true);
                 _isInitialize = true;
                 _canQuestion = true;
                 await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
@@ -190,7 +189,7 @@ namespace UI.Title
                     Owner.CreateCharacter(Owner._userDataManager.GetUserData().EquipCharacterId);
                     Owner.DisableTitleGameObject();
                     Owner.mainView.CharacterListGameObject.SetActive(true);
-                    Owner._stateMachine.Dispatch((int)Event.CharacterSelect);
+                    Owner._stateMachine.Dispatch((int)TitleCoreEvent.CharacterSelect);
                 }).SetLink(button);
             }
 
@@ -203,7 +202,7 @@ namespace UI.Title
                     var result = await _playFabUserDataManager.TryUpdateUserDataAsync(userData);
                     if (result)
                     {
-                        Owner._stateMachine.Dispatch((int)Event.Main);
+                        Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main);
                     }
                 })).SetLink(button);
             }
@@ -360,7 +359,7 @@ namespace UI.Title
                 var button = _characterDetailView.VirtualCurrencyAddPopup.AddButton.gameObject;
                 Owner._uiAnimation.ClickScaleColor(button).OnComplete(() =>
                 {
-                    Owner._stateMachine.Dispatch((int)Event.Shop);
+                    Owner._stateMachine.Dispatch((int)TitleCoreEvent.Shop);
                 }).SetLink(button);
             }
 
