@@ -147,7 +147,7 @@ namespace UI.Title
                 {
                     var missionView = _mainView.MissionGameObject.transform;
                     await _uiAnimation.Close(missionView, GameCommonData.CloseDuration);
-                    Owner._stateMachine.Dispatch((int)Event.Main);
+                    Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main);
                 })).SetLink(button);
             }
 

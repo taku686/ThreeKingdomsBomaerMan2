@@ -82,7 +82,7 @@ namespace UI.Title
                     PhotonNetwork.LeaveRoom();
                     Owner.DisableTitleGameObject();
                     Owner.mainView.MainGameObject.SetActive(true);
-                    Owner._stateMachine.Dispatch((int)Event.Main);
+                    Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main);
                 }).SetLink(Owner.gameObject);
             }
 
@@ -132,7 +132,7 @@ namespace UI.Title
 
                 PhotonNetwork.CurrentRoom.IsOpen = false;
                 PhotonNetwork.CurrentRoom.IsVisible = false;
-                Owner._stateMachine.Dispatch((int)Event.SceneTransition);
+                Owner._stateMachine.Dispatch((int)TitleCoreEvent.SceneTransition);
             }
 
             private void OnClickSceneTransition()
@@ -144,7 +144,7 @@ namespace UI.Title
 
                 PhotonNetwork.CurrentRoom.IsOpen = false;
                 PhotonNetwork.CurrentRoom.IsVisible = false;
-                Owner._stateMachine.Dispatch((int)Event.SceneTransition);
+                Owner._stateMachine.Dispatch((int)TitleCoreEvent.SceneTransition);
             }
 
 

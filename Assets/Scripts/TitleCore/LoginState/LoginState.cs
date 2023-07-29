@@ -83,7 +83,7 @@ namespace UI.Title
 
                 Owner._characterDataManager.Initialize(Owner._userDataManager, Owner._token);
                 Owner._mainManager.isInitialize = true;
-                Owner._stateMachine.Dispatch((int)Event.Main);
+                Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main);
                 _commonView.waitPopup.SetActive(false);
                 _isLoginProcessing = false;
             }
@@ -126,7 +126,7 @@ namespace UI.Title
                     Owner._characterDataManager.Initialize(Owner._userDataManager, Owner._token);
                     Owner.loginView.DisplayNameView.gameObject.SetActive(false);
                     Owner._mainManager.isInitialize = true;
-                    Owner._stateMachine.Dispatch((int)Event.Main);
+                    Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main);
                     _commonView.waitPopup.SetActive(false);
                     _isLoginProcessing = false;
                 }

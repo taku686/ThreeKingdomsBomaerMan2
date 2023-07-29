@@ -82,7 +82,7 @@ namespace UI.Title
                 var backButton = _shopView.BackButton.gameObject;
                 Owner._uiAnimation.ClickScaleColor(backButton).OnComplete(() =>
                 {
-                    Owner._stateMachine.Dispatch((int)Event.Main);
+                    Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main);
                 }).SetLink(backButton);
             }
 

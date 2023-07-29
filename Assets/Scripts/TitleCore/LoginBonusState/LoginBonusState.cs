@@ -196,7 +196,7 @@ namespace UI.Title
                     var panel = _mainView.LoginBonusGameObjet.transform;
                     await _uiAnimation.Close(panel, GameCommonData.CloseDuration);
                     panel.gameObject.SetActive(false);
-                    Owner._stateMachine.Dispatch((int)Event.Main);
+                    Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main);
                 })).SetLink(button);
             }
 

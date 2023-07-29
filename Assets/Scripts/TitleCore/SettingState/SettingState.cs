@@ -60,7 +60,7 @@ namespace UI.Title
             private void OnClickCloseSetting()
             {
                 Owner._uiAnimation.ClickScaleColor(Owner.settingView.SettingCloseButton.gameObject)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.Main); })
+                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main); })
                     .SetLink(Owner.gameObject);
             }
 

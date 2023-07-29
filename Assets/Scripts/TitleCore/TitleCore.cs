@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using System.Threading;
 using Assets.Scripts.Common.Data;
 using Assets.Scripts.Common.PlayFab;
@@ -12,6 +14,7 @@ using UI.Title.ShopState;
 using UnityEngine;
 using Zenject;
 using Manager.DataManager;
+using UnityEngine.SceneManagement;
 
 
 namespace UI.Title
@@ -33,6 +36,7 @@ namespace UI.Title
         [Inject] private CatalogDataManager _catalogDataManager;
         [Inject] private MissionManager _missionManager;
         [Inject] private ChatGPTManager _chatGptManager;
+        [SerializeField] private Fade fade;
         [SerializeField] private Transform characterCreatePosition;
         [SerializeField] private MainView mainView;
         [SerializeField] private CharacterSelectView characterSelectView;
@@ -49,9 +53,10 @@ namespace UI.Title
         private GameObject _weaponEffect;
         private StateMachine<TitleCore> _stateMachine;
         private CancellationToken _token;
+        [SerializeField] private GameObject[] uiObjects;
 
 
-        private enum Event
+        private enum TitleCoreEvent
         {
             Main,
             CharacterSelect,
@@ -99,17 +104,19 @@ namespace UI.Title
                 _stateMachine.Start<LoginState>();
             }
 
-            _stateMachine.AddAnyTransition<MainState>((int)Event.Main);
-            _stateMachine.AddAnyTransition<ShopState>((int)Event.Shop);
-            _stateMachine.AddTransition<MainState, CharacterSelectState>((int)Event.CharacterSelect);
-            _stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)Event.CharacterDetail);
-            _stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)Event.CharacterSelect);
-            _stateMachine.AddTransition<MainState, BattleReadyState>((int)Event.ReadyBattle);
-            _stateMachine.AddTransition<BattleReadyState, SceneTransitionState>((int)Event.SceneTransition);
-            _stateMachine.AddTransition<LoginState, MainState>((int)Event.Main);
-            _stateMachine.AddTransition<MainState, SettingState>((int)Event.Setting);
-            _stateMachine.AddTransition<MainState, LoginBonusState>((int)Event.LoginBonus);
-            _stateMachine.AddTransition<MainState, MissionState>((int)Event.Mission);
+            _stateMachine.AddAnyTransition<MainState>((int)TitleCoreEvent.Main);
+            _stateMachine.AddAnyTransition<ShopState>((int)TitleCoreEvent.Shop);
+            _stateMachine.AddTransition<MainState, CharacterSelectState>((int)TitleCoreEvent.CharacterSelect);
+            _stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>(
+                (int)TitleCoreEvent.CharacterDetail);
+            _stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>(
+                (int)TitleCoreEvent.CharacterSelect);
+            _stateMachine.AddTransition<MainState, BattleReadyState>((int)TitleCoreEvent.ReadyBattle);
+            _stateMachine.AddTransition<BattleReadyState, SceneTransitionState>((int)TitleCoreEvent.SceneTransition);
+            _stateMachine.AddTransition<LoginState, MainState>((int)TitleCoreEvent.Main);
+            _stateMachine.AddTransition<MainState, SettingState>((int)TitleCoreEvent.Setting);
+            _stateMachine.AddTransition<MainState, LoginBonusState>((int)TitleCoreEvent.LoginBonus);
+            _stateMachine.AddTransition<MainState, MissionState>((int)TitleCoreEvent.Mission);
         }
 
         private void InitializeButton()
@@ -180,6 +187,41 @@ namespace UI.Title
             return true;
         }
 
+        private async UniTask SwitchUiObject(int index)
+        {
+            TransitionAnimation(() =>
+            {
+                foreach (var ui in uiObjects)
+                {
+                    ui.SetActive(false);
+                }
+
+                //  SoundManager.Instance.PlaySingle(SoundManager.Se.SceneChange);
+                //  upperCommonView.virtualCurrencyView.gameObject.SetActive(_isViewVirtualCurrencyUI);
+                uiObjects[index].SetActive(true);
+            });
+        }
+
+        private void TransitionAnimation(Action action)
+        {
+            fade.FadeIn(GameCommonData.FadeOutTime, () =>
+            {
+                action.Invoke();
+                fade.FadeOut(GameCommonData.FadeOutTime, null);
+            }, false);
+        }
+
+        private void SceneTransitionAnimation(int loadSceneIndex)
+        {
+            fade.FadeIn(GameCommonData.FadeOutTime,
+                () => UniTask.Void(async () => { await SceneManager.LoadSceneAsync(loadSceneIndex); }), false);
+        }
+
+        private void TransitionState(TitleCoreEvent gameCoreEvent)
+        {
+            _stateMachine.Dispatch((int)gameCoreEvent);
+        }
+
         private void CheckMission(int actionId)
         {
             switch (actionId)
@@ -217,7 +259,7 @@ namespace UI.Title
 
         private void OnClickTransitionShopState(GameObject button)
         {
-            _uiAnimation.ClickScale(button).OnComplete(() => { _stateMachine.Dispatch((int)Event.Shop); })
+            _uiAnimation.ClickScale(button).OnComplete(() => { _stateMachine.Dispatch((int)TitleCoreEvent.Shop); })
                 .SetLink(button);
         }
 

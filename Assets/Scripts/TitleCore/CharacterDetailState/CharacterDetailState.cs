@@ -190,7 +190,7 @@ namespace UI.Title
                     Owner.CreateCharacter(Owner._userDataManager.GetUserData().EquipCharacterId);
                     Owner.DisableTitleGameObject();
                     Owner.mainView.CharacterListGameObject.SetActive(true);
-                    Owner._stateMachine.Dispatch((int)Event.CharacterSelect);
+                    Owner._stateMachine.Dispatch((int)TitleCoreEvent.CharacterSelect);
                 }).SetLink(button);
             }
 
@@ -203,7 +203,7 @@ namespace UI.Title
                     var result = await _playFabUserDataManager.TryUpdateUserDataAsync(userData);
                     if (result)
                     {
-                        Owner._stateMachine.Dispatch((int)Event.Main);
+                        Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main);
                     }
                 })).SetLink(button);
             }
@@ -360,7 +360,7 @@ namespace UI.Title
                 var button = _characterDetailView.VirtualCurrencyAddPopup.AddButton.gameObject;
                 Owner._uiAnimation.ClickScaleColor(button).OnComplete(() =>
                 {
-                    Owner._stateMachine.Dispatch((int)Event.Shop);
+                    Owner._stateMachine.Dispatch((int)TitleCoreEvent.Shop);
                 }).SetLink(button);
             }
 

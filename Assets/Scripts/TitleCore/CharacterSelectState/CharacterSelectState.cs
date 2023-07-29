@@ -130,7 +130,7 @@ namespace UI.Title
 
                 Owner._uiAnimation.ClickScale(gridGameObject).OnComplete(() =>
                 {
-                    Owner._stateMachine.Dispatch((int)Event.CharacterDetail);
+                    Owner._stateMachine.Dispatch((int)TitleCoreEvent.CharacterDetail);
                     _isProcessing = false;
                 }).SetLink(Owner.gameObject);
             }
@@ -141,7 +141,7 @@ namespace UI.Title
                 {
                     Owner.DisableTitleGameObject();
                     Owner.mainView.MainGameObject.SetActive(true);
-                    Owner._stateMachine.Dispatch((int)Event.Main);
+                    Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main);
                 }).SetLink(Owner.gameObject);
             }
 
@@ -218,7 +218,7 @@ namespace UI.Title
                 var addButton = Owner.characterSelectView.VirtualCurrencyAddPopup.AddButton.gameObject;
                 var popup = Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject;
                 Owner._uiAnimation.ClickScaleColor(addButton)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)Event.Shop); }).SetLink(popup);
+                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)TitleCoreEvent.Shop); }).SetLink(popup);
             }
         }
     }
