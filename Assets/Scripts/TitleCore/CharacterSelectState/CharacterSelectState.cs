@@ -27,11 +27,9 @@ namespace UI.Title
             {
                 _userDataManager = Owner._userDataManager;
                 _playFabVirtualCurrencyManager = Owner._playFabVirtualCurrencyManager;
-                Owner.DisableTitleGameObject();
-                Owner.mainView.CharacterListGameObject.SetActive(true);
                 CreateUIContents();
-                InitializePopup();
                 InitializeButton();
+                Owner.SwitchUiObject(TitleCoreEvent.CharacterSelect, true);
             }
 
             private void InitializeButton()
@@ -47,10 +45,6 @@ namespace UI.Title
                 Owner.characterSelectView.VirtualCurrencyAddPopup.AddButton.onClick.AddListener(OnClickAddGem);
             }
 
-            private void InitializePopup()
-            {
-                Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject.SetActive(false);
-            }
 
             private void CreateUIContents()
             {
@@ -139,8 +133,6 @@ namespace UI.Title
             {
                 Owner._uiAnimation.ClickScaleColor(Owner.characterSelectView.BackButton.gameObject).OnComplete(() =>
                 {
-                    Owner.DisableTitleGameObject();
-                    Owner.mainView.MainGameObject.SetActive(true);
                     Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main);
                 }).SetLink(Owner.gameObject);
             }

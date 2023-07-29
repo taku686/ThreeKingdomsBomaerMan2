@@ -58,16 +58,17 @@ namespace UI.Title
 
         private enum TitleCoreEvent
         {
+            Login,
             Main,
             CharacterSelect,
             CharacterDetail,
             Shop,
             ReadyBattle,
-            SelectBattleMode,
             SceneTransition,
             Setting,
             LoginBonus,
-            Mission
+            Mission,
+            SelectBattleMode,
         }
 
 
@@ -79,13 +80,13 @@ namespace UI.Title
 
         private void Update()
         {
-            _stateMachine.Update();
+            _stateMachine?.Update();
         }
 
 
         private void Initialize()
         {
-            mainView.CommonGameObject.SetActive(true);
+            fade.InitializeInSceneTransition(1, ProjectCommonData.Instance.isSceneTransition);
             commonView.Initialize();
             InitializeState();
             InitializeButton();
@@ -187,7 +188,7 @@ namespace UI.Title
             return true;
         }
 
-        private async UniTask SwitchUiObject(int index)
+        private void SwitchUiObject(TitleCoreEvent titleCoreEvent, bool isViewVirtualCurrencyUi)
         {
             TransitionAnimation(() =>
             {
@@ -197,8 +198,8 @@ namespace UI.Title
                 }
 
                 //  SoundManager.Instance.PlaySingle(SoundManager.Se.SceneChange);
-                //  upperCommonView.virtualCurrencyView.gameObject.SetActive(_isViewVirtualCurrencyUI);
-                uiObjects[index].SetActive(true);
+                commonView.virtualCurrencyView.gameObject.SetActive(isViewVirtualCurrencyUi);
+                uiObjects[(int)titleCoreEvent].SetActive(true);
             });
         }
 

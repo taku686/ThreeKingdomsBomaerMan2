@@ -26,9 +26,7 @@ namespace UI.Title
             {
                 InitializeButton();
                 InitializeObject();
-                Owner.commonView.virtualCurrencyView.gameObject.SetActive(false);
-                Owner.DisableTitleGameObject();
-                Owner.mainView.SettingGameObject.SetActive(true);
+                Owner.SwitchUiObject(TitleCoreEvent.Setting, false);
             }
 
             private void InitializeButton()

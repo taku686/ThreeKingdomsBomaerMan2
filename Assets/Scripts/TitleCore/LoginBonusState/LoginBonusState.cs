@@ -24,14 +24,9 @@ namespace UI.Title
             private const int Day4 = 3;
             private const int Day7 = 6;
 
-            protected override async UniTaskVoid OnAsyncEnter(State prevState)
+            protected override void OnEnter(State prevState)
             {
-                Owner.DisableTitleGameObject();
-                Initialize();
-                InitializeButton();
-                await InitializeUIContent();
-                SetupLoginImage();
-                OpenLoginBonusPanel().Forget();
+                Initialize().Forget();
             }
 
             protected override void OnExit(State nextState)
@@ -39,7 +34,7 @@ namespace UI.Title
                 Destroy(_focusObj);
             }
 
-            private void Initialize()
+            private async UniTask Initialize()
             {
                 _uiAnimation = Owner._uiAnimation;
                 _loginBonusView = Owner.loginBonusView;
@@ -47,6 +42,10 @@ namespace UI.Title
                 _userDataManager = Owner._userDataManager;
                 _playFabLoginManager = Owner._playFabLoginManager;
                 _playaFabShopManager = Owner._playFabShopManager;
+                InitializeButton();
+                await InitializeUIContent();
+                SetupLoginImage();
+                Owner.SwitchUiObject(TitleCoreEvent.LoginBonus, true);
             }
 
             private void InitializeButton()
@@ -76,16 +75,8 @@ namespace UI.Title
                 _loginBonusView.rewardGetView.gameObject.SetActive(false);
                 await Owner.SetCoinText();
                 await Owner.SetGemText();
-                Owner.commonView.virtualCurrencyView.gameObject.SetActive(true);
             }
 
-            private async UniTask OpenLoginBonusPanel()
-            {
-                var panel = Owner.mainView.LoginBonusGameObjet.transform;
-                panel.localScale = Vector3.zero;
-                panel.gameObject.SetActive(true);
-                await _uiAnimation.Open(panel, GameCommonData.OpenDuration);
-            }
 
             private void SetupLoginImage()
             {

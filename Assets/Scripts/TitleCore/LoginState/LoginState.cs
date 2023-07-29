@@ -31,11 +31,11 @@ namespace UI.Title
                 _loginView = Owner.loginView;
                 _uiAnimation = Owner._uiAnimation;
                 _commonView = Owner.commonView;
-                Owner.DisableTitleGameObject();
+
                 InitializeButton();
                 InitializeObject();
                 InitializeTitleImage();
-                Owner.mainView.LoginGameObject.SetActive(true);
+                Owner.SwitchUiObject(TitleCoreEvent.Login, false);
             }
 
             private void InitializeTitleImage()

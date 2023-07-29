@@ -55,22 +55,13 @@ namespace UI.Title
                 _uiAnimation = Owner._uiAnimation;
                 await GenerateMissionGrid();
                 InitializeButton();
-                Owner.DisableTitleGameObject();
-                OpenMissionPanel().Forget();
+                Owner.SwitchUiObject(TitleCoreEvent.Mission, true);
             }
 
             private void InitializeButton()
             {
                 _missionView.backButton.onClick.RemoveAllListeners();
                 _missionView.backButton.onClick.AddListener(OnClickBack);
-            }
-
-            private async UniTask OpenMissionPanel()
-            {
-                var panel = _mainView.MissionGameObject.transform;
-                panel.localScale = Vector3.zero;
-                panel.gameObject.SetActive(true);
-                await _uiAnimation.Open(panel, GameCommonData.OpenDuration);
             }
 
             private async UniTask GenerateMissionGrid()
@@ -89,7 +80,8 @@ namespace UI.Title
                     var progressValue =
                         (int)(data.Value / (float)missionData.count * GameCommonData.MaxMissionProgress);
                     progressValue = progressValue >= GameCommonData.MaxMissionProgress
-                        ? GameCommonData.MaxMissionProgress : progressValue;
+                        ? GameCommonData.MaxMissionProgress
+                        : progressValue;
                     _missionGrids[missionData.index] = missionGrid;
                     missionGrid.progressSlider.maxValue = GameCommonData.MaxMissionProgress;
                     missionGrid.progressSlider.value = progressValue;

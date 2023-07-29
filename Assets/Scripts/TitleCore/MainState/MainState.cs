@@ -27,11 +27,10 @@ namespace UI.Title
             {
                 _playFabLoginManager = Owner._playFabLoginManager;
                 _mainView = Owner.mainView;
-                Owner.DisableTitleGameObject();
                 Owner.CreateCharacter(Owner._userDataManager.GetUserData().EquipCharacterId);
                 InitializeButton();
-                _mainView.MainGameObject.SetActive(true);
                 await InitializeText();
+                Owner.SwitchUiObject(TitleCoreEvent.Main, true);
             }
 
 
