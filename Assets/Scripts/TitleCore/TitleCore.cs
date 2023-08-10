@@ -14,7 +14,9 @@ using UI.Title.ShopState;
 using UnityEngine;
 using Zenject;
 using Manager.DataManager;
+using UniRx;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 
 namespace UI.Title
@@ -188,7 +190,7 @@ namespace UI.Title
             return true;
         }
 
-        private void SwitchUiObject(TitleCoreEvent titleCoreEvent, bool isViewVirtualCurrencyUi)
+        private void SwitchUiObject(TitleCoreEvent titleCoreEvent, bool isViewVirtualCurrencyUi, Action action = null)
         {
             TransitionAnimation(() =>
             {
@@ -197,7 +199,7 @@ namespace UI.Title
                     ui.SetActive(false);
                 }
 
-                //  SoundManager.Instance.PlaySingle(SoundManager.Se.SceneChange);
+                action?.Invoke();
                 commonView.virtualCurrencyView.gameObject.SetActive(isViewVirtualCurrencyUi);
                 uiObjects[(int)titleCoreEvent].SetActive(true);
             });
@@ -281,6 +283,53 @@ namespace UI.Title
             rewardView.transform.localScale = Vector3.zero;
             rewardView.gameObject.SetActive(true);
             await _uiAnimation.Open(rewardView.transform, GameCommonData.OpenDuration);
+        }
+
+        private void SetupButton(Button button, Action action, CancellationToken token)
+        {
+            if (button == null)
+            {
+                Debug.LogError("ボタンが設定されていません。");
+                return;
+            }
+
+            button.OnClickAsObservable()
+                .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
+                .Subscribe(_ =>
+                {
+                    _uiAnimation.ClickScaleColor(button.gameObject)
+                        .OnComplete(() => { action?.Invoke(); })
+                        .SetLink(button.gameObject);
+                }).AddTo(token);
+        }
+
+        private void SetupButtonAsync(Button button, Func<UniTask> asyncFunc, CancellationToken token)
+        {
+            if (button == null)
+            {
+                Debug.LogError("ボタンが設定されていません。");
+                return;
+            }
+
+            button.OnClickAsObservable()
+                .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
+                .Subscribe(_ =>
+                {
+                    _uiAnimation.ClickScaleColor(button.gameObject)
+                        .OnComplete(() => UniTask.Void(async () => { await asyncFunc?.Invoke(); }))
+                        .SetLink(button.gameObject);
+                }).AddTo(token);
+        }
+
+        private void Cancel(CancellationTokenSource cts)
+        {
+            if (cts == null)
+            {
+                return;
+            }
+
+            cts.Cancel();
+            cts.Dispose();
         }
     }
 }

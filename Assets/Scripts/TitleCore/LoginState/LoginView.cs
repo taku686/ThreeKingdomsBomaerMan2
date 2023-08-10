@@ -2,6 +2,7 @@
 using TMPro;
 using UI.Title.LoginState;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace UI.Title
@@ -10,7 +11,7 @@ namespace UI.Title
     {
         [SerializeField] private GameObject errorGameObject;
         [SerializeField] private Button retryButton;
-        [SerializeField] private Button startButton;
+        [FormerlySerializedAs("startButton")] [SerializeField] private Button loginButton;
         [SerializeField] private TextMeshProUGUI loadingBarText;
         [SerializeField] private DisplayNameView displayNameView;
         [SerializeField] private List<Sprite> titleSprites = new();
@@ -22,6 +23,6 @@ namespace UI.Title
         public TextMeshProUGUI LoadingBarText => loadingBarText;
         public GameObject ErrorGameObject => errorGameObject;
         public Button RetryButton => retryButton;
-        public Button StartButton => startButton;
+        public Button LoginButton => loginButton;
     }
 }

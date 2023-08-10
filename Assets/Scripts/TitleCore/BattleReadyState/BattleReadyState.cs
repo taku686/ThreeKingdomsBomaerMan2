@@ -23,9 +23,6 @@ namespace UI.Title
                 Initialize();
             }
 
-            protected override void OnExit(State nextState)
-            {
-            }
 
             protected override void OnUpdate()
             {
