@@ -36,7 +36,7 @@ public class StateMachine<TOwner>
             OnEnter(prevState);
         }
 
-        internal async UniTaskVoid AsyncEnter(State prevState)
+        internal async UniTask AsyncEnter(State prevState)
         {
             OnAsyncEnter(prevState).Forget();
         }
@@ -88,6 +88,21 @@ public class StateMachine<TOwner>
         /// ステートを終了した時に呼ばれる
         /// </summary>
         protected virtual void OnExit(State nextState)
+        {
+        }
+
+        /// <summary>
+        /// ステート終了
+        /// </summary>
+        internal void LateExit(State nextState)
+        {
+            OnLateExit(nextState);
+        }
+
+        /// <summary>
+        /// ステートを終了した時に呼ばれる
+        /// </summary>
+        protected virtual void OnLateExit(State nextState)
         {
         }
     }
@@ -226,18 +241,19 @@ public class StateMachine<TOwner>
             }
         }
 
-        Change(to);
+        Change(to).Forget();
     }
 
     /// <summary>
     /// ステートを変更する
     /// </summary>
     /// <param name="nextState">遷移先のステート</param>
-    private void Change(State nextState)
+    private async UniTask Change(State nextState)
     {
         CurrentState.Exit(nextState);
         nextState.Enter(CurrentState);
-        nextState.AsyncEnter(CurrentState);
+        await nextState.AsyncEnter(CurrentState);
+        CurrentState.LateExit(nextState);
         CurrentState = nextState;
     }
 }

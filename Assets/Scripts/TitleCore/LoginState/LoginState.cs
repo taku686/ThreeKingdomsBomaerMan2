@@ -12,7 +12,7 @@ namespace UI.Title
     {
         public class LoginState : State
         {
-            private CancellationToken _token;
+            private CancellationTokenSource _cts;
             private PlayFabUserDataManager _playFabUserDataManager;
             private LoginView _loginView;
             private CommonView _commonView;
@@ -24,9 +24,14 @@ namespace UI.Title
                 Initialize();
             }
 
+            protected override void OnLateExit(State nextState)
+            {
+                Owner.Cancel(_cts);
+            }
+
             private void Initialize()
             {
-                _token = Owner.GetCancellationTokenOnDestroy();
+                _cts = new CancellationTokenSource();
                 _playFabUserDataManager = Owner._playFabUserDataManager;
                 _loginView = Owner.loginView;
                 _uiAnimation = Owner._uiAnimation;
@@ -55,15 +60,9 @@ namespace UI.Title
 
             private void InitializeButton()
             {
-                Owner.loginView.RetryButton.onClick.RemoveAllListeners();
-                Owner.loginView.StartButton.onClick.RemoveAllListeners();
-                Owner.loginView.DisplayNameView.OkButton.onClick.RemoveAllListeners();
-                Owner.loginView.RetryButton.onClick.AddListener(OnClickRetry);
-                Owner.loginView.StartButton.onClick.AddListener(OnClickLogin);
-                Owner.loginView.DisplayNameView.OkButton.onClick.AddListener(() => UniTask.Void(async () =>
-                {
-                    await OnClickDisplayName();
-                }));
+                Owner.SetupButtonAsync(_loginView.RetryButton, OnClickRetry, _cts.Token);
+                Owner.SetupButtonAsync(_loginView.LoginButton, OnClickLogin, _cts.Token);
+                Owner.SetupButtonAsync(_loginView.DisplayNameView.OkButton, OnClickDisplayName, _cts.Token);
             }
 
             private async UniTask Login()
@@ -72,7 +71,7 @@ namespace UI.Title
                 _commonView.waitPopup.SetActive(true);
                 Owner._playFabLoginManager.Initialize(Owner.loginView.DisplayNameView, Owner.loginView.ErrorGameObject);
                 var result = await Owner._playFabLoginManager.Login()
-                    .AttachExternalCancellation(_token);
+                    .AttachExternalCancellation(_cts.Token);
 
                 if (!result)
                 {
@@ -88,17 +87,14 @@ namespace UI.Title
                 _isLoginProcessing = false;
             }
 
-            private void OnClickLogin()
+            private async UniTask OnClickLogin()
             {
                 if (_isLoginProcessing)
                 {
                     return;
                 }
 
-                var button = _loginView.StartButton.gameObject;
-                _uiAnimation.ClickScaleColor(button)
-                    .OnComplete(() => UniTask.Void(async () => { await Login(); }))
-                    .SetLink(button);
+                await Login();
             }
 
             private async UniTask OnClickDisplayName()
@@ -132,10 +128,10 @@ namespace UI.Title
                 }
             }
 
-            private async void OnClickRetry()
+            private async UniTask OnClickRetry()
             {
                 Owner.loginView.ErrorGameObject.SetActive(false);
-                await Login().AttachExternalCancellation(_token);
+                await Login().AttachExternalCancellation(_cts.Token);
             }
         }
     }
