@@ -55,6 +55,7 @@ namespace UI.Title
         private GameObject _weaponEffect;
         private StateMachine<TitleCore> _stateMachine;
         private CancellationToken _token;
+        private CancellationTokenSource _cts;
         [SerializeField] private GameObject[] uiObjects;
 
 
@@ -80,6 +81,11 @@ namespace UI.Title
             Initialize();
         }
 
+        private void OnDestroy()
+        {
+            Cancel(_cts);
+        }
+
         private void Update()
         {
             _stateMachine?.Update();
@@ -88,6 +94,7 @@ namespace UI.Title
 
         private void Initialize()
         {
+            _cts = new CancellationTokenSource();
             fade.InitializeInSceneTransition(1, ProjectCommonData.Instance.isSceneTransition);
             commonView.Initialize();
             InitializeState();
@@ -128,9 +135,9 @@ namespace UI.Title
             var coinAddButton = commonView.virtualCurrencyView.coinAddButton;
             var ticketAddButton = commonView.virtualCurrencyView.ticketAddButton;
             SetupRewardOkButton();
-            gemAddButton.onClick.AddListener(() => { OnClickTransitionShopState(gemAddButton.gameObject); });
-            coinAddButton.onClick.AddListener(() => { OnClickTransitionShopState(coinAddButton.gameObject); });
-            ticketAddButton.onClick.AddListener(() => { OnClickTransitionShopState(ticketAddButton.gameObject); });
+            OnClickTransitionState(gemAddButton, TitleCoreEvent.Shop, _cts.Token);
+            OnClickTransitionState(coinAddButton, TitleCoreEvent.Shop, _cts.Token);
+            OnClickTransitionState(ticketAddButton, TitleCoreEvent.Shop, _cts.Token);
         }
 
 
@@ -210,7 +217,7 @@ namespace UI.Title
             fade.FadeIn(GameCommonData.FadeOutTime, () =>
             {
                 action.Invoke();
-                fade.FadeOut(GameCommonData.FadeOutTime, null);
+                fade.FadeOut(GameCommonData.FadeOutTime);
             }, false);
         }
 
@@ -260,10 +267,22 @@ namespace UI.Title
             commonView.virtualCurrencyView.ticketText.text = ticket.ToString("D");
         }
 
-        private void OnClickTransitionShopState(GameObject button)
+        private void OnClickTransitionState(Button button, TitleCoreEvent titleCoreEvent, CancellationToken token)
         {
-            _uiAnimation.ClickScale(button).OnComplete(() => { _stateMachine.Dispatch((int)TitleCoreEvent.Shop); })
-                .SetLink(button);
+            if (button == null)
+            {
+                Debug.LogError("ボタンが設定されていません。");
+                return;
+            }
+
+            button.OnClickAsObservable()
+                .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
+                .Subscribe(_ =>
+                {
+                    _uiAnimation.ClickScaleColor(button.gameObject)
+                        .OnComplete(() => { _stateMachine.Dispatch((int)titleCoreEvent); })
+                        .SetLink(button.gameObject);
+                }).AddTo(token);
         }
 
         private void SetupRewardOkButton()

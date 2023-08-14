@@ -65,6 +65,22 @@ namespace UI.Title
                 Owner.SetupButtonAsync(_loginView.DisplayNameView.OkButton, OnClickDisplayName, _cts.Token);
             }
 
+            private async UniTask OnClickLogin()
+            {
+                if (_isLoginProcessing)
+                {
+                    return;
+                }
+
+                await Login();
+            }
+
+            private async UniTask OnClickRetry()
+            {
+                Owner.loginView.ErrorGameObject.SetActive(false);
+                await Login().AttachExternalCancellation(_cts.Token);
+            }
+
             private async UniTask Login()
             {
                 _isLoginProcessing = true;
@@ -85,16 +101,6 @@ namespace UI.Title
                 Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main);
                 _commonView.waitPopup.SetActive(false);
                 _isLoginProcessing = false;
-            }
-
-            private async UniTask OnClickLogin()
-            {
-                if (_isLoginProcessing)
-                {
-                    return;
-                }
-
-                await Login();
             }
 
             private async UniTask OnClickDisplayName()
@@ -126,12 +132,6 @@ namespace UI.Title
                     _commonView.waitPopup.SetActive(false);
                     _isLoginProcessing = false;
                 }
-            }
-
-            private async UniTask OnClickRetry()
-            {
-                Owner.loginView.ErrorGameObject.SetActive(false);
-                await Login().AttachExternalCancellation(_cts.Token);
             }
         }
     }

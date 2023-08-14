@@ -9,7 +9,6 @@ using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine;
 using Newtonsoft.Json;
-using Photon.Pun;
 using UI.Title.LoginState;
 using Zenject;
 
@@ -19,6 +18,7 @@ namespace Assets.Scripts.Common.PlayFab
     {
         private const int DefaultCharacterIndex = 0;
         private const int OneDay = 1;
+        private const int TimeDifference = 9;
         [Inject] private UserDataManager _userDataManager;
         [Inject] private CharacterDataManager _characterDataManager;
         [Inject] private PlayFabCatalogManager _playFabCatalogManager;
@@ -97,6 +97,8 @@ namespace Assets.Scripts.Common.PlayFab
                 _missionManager.Initialize();
                 if (response.Result.LastLoginTime != null)
                 {
+                    await HaveLoginBonus(response.Result);
+                    //todo 後で消す
                     await SetLoginBonus(response.Result.LastLoginTime.Value);
                 }
 
@@ -140,6 +142,29 @@ namespace Assets.Scripts.Common.PlayFab
             }
 
             await _userDataManager.SetLoginBonus((int)dayOfWeek, LoginBonusStatus.CanReceive);
+        }
+
+        private async UniTask<bool> HaveLoginBonus(LoginResult loginResult)
+        {
+            var loginDateTime = loginResult.InfoResultPayload.AccountInfo.TitleInfo.LastLogin;
+            var lastLoginDateTime = loginResult.LastLoginTime;
+            if (loginDateTime == null || lastLoginDateTime == null)
+            {
+                return false;
+            }
+
+            var loginDate = (loginDateTime + TimeSpan.FromHours(TimeDifference))?.Date;
+            var lastLoginDate = (lastLoginDateTime + TimeSpan.FromHours(TimeDifference))?.Date;
+            if (loginDate != lastLoginDate)
+            {
+                var result = await _playFabShopManager.TryPurchaseItem(GameCommonData.LoginBonusNotificationItemKey,
+                    GameCommonData.CoinKey, 0, null);
+                return result;
+            }
+
+            var loginBonusNotificationItem =
+                await _userDataManager.GetItemInstance(GameCommonData.LoginBonusNotificationItemKey);
+            return loginBonusNotificationItem != null;
         }
     }
 }

@@ -42,6 +42,7 @@ namespace Common.Data
         public const string TwentyGemItemKey = "gem20";
         public const string HundredGemItemKey = "gem100";
         public const string TwoHundredGemItemKey = "gem200";
+        public const string LoginBonusNotificationItemKey = "LoginBonusNotification";
         public const string LevelItemKey = "level";
         public const string LoginBonusItemKey = "day";
         public const string QuestionItemKey = "Question";

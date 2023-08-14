@@ -220,7 +220,11 @@ namespace Manager.NetworkManager
             var result = await PlayFabClientAPI.PurchaseItemAsync(request);
             if (result.Error != null)
             {
-                errorText.text = result.Error.ErrorMessage;
+                if (errorText != null)
+                {
+                    errorText.text = result.Error.ErrorMessage;
+                }
+
                 Debug.Log(result.Error.GenerateErrorReport());
                 return false;
             }
