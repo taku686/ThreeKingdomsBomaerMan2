@@ -45,14 +45,14 @@ namespace UI.Title
 
             private async UniTask Initialize()
             {
-                _missionDataManager = Owner._missionDataManager;
-                _userDataManager = Owner._userDataManager;
-                _catalogDataManager = Owner._catalogDataManager;
-                _playFabShopManager = Owner._playFabShopManager;
+                _missionDataManager = Owner.missionDataManager;
+                _userDataManager = Owner.userDataManager;
+                _catalogDataManager = Owner.catalogDataManager;
+                _playFabShopManager = Owner.playFabShopManager;
                 _mainView = Owner.mainView;
                 _missionView = Owner.missionView;
                 _commonView = Owner.commonView;
-                _uiAnimation = Owner._uiAnimation;
+                _uiAnimation = Owner.uiAnimation;
                 await GenerateMissionGrid();
                 InitializeButton();
                 Owner.SwitchUiObject(TitleCoreEvent.Mission, true);
@@ -110,7 +110,7 @@ namespace UI.Title
                 }
 
                 _isProgress = true;
-                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     var errorText = _commonView.purchaseErrorView.errorInfoText;
                     var rewardData = _catalogDataManager.GetAddVirtualCurrencyItemData(missionData.rewardId);
@@ -135,11 +135,11 @@ namespace UI.Title
             private void OnClickBack()
             {
                 var button = _missionView.backButton.gameObject;
-                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     var missionView = _mainView.MissionGameObject.transform;
                     await _uiAnimation.Close(missionView, GameCommonData.CloseDuration);
-                    Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main);
+                    Owner.stateMachine.Dispatch((int)TitleCoreEvent.Main);
                 })).SetLink(button);
             }
 

@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using Manager.BattleManager.Camera;
 using Manager.BattleManager.Environment;
 using Manager.NetworkManager;
+using MoreMountains.Tools;
 using Photon.Pun;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -86,7 +87,7 @@ namespace Manager.BattleManager
         {
             SynchronizedValue.Instance.Destroy();
             PhotonNetwork.Disconnect();
-            SceneManager.LoadScene((int)SceneIndex.Title);
+            MMSceneLoadingManager.LoadScene(GameCommonData.TitleScene);
         }
 
         //todo デバッグ用後で消す

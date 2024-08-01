@@ -25,8 +25,8 @@ namespace UI.Title
 
             private void Initialize()
             {
-                _userDataManager = Owner._userDataManager;
-                _playFabVirtualCurrencyManager = Owner._playFabVirtualCurrencyManager;
+                _userDataManager = Owner.userDataManager;
+                _playFabVirtualCurrencyManager = Owner.playFabVirtualCurrencyManager;
                 CreateUIContents();
                 InitializeButton();
                 Owner.SwitchUiObject(TitleCoreEvent.CharacterSelect, true);
@@ -55,7 +55,7 @@ namespace UI.Title
 
                 _gridGroupLists.Clear();
                 GameObject gridGroup = null;
-                for (int i = 0; i < Owner._characterDataManager.GetCharacterCount(); i++)
+                for (int i = 0; i < Owner.characterDataManager.GetCharacterCount(); i++)
                 {
                     if (i % 5 == 0)
                     {
@@ -66,14 +66,14 @@ namespace UI.Title
 
                     if (gridGroup != null)
                     {
-                        SetupGrip(Owner._characterDataManager.GetCharacterData(i), gridGroup.transform);
+                        SetupGrip(Owner.characterDataManager.GetCharacterData(i), gridGroup.transform);
                     }
                 }
             }
 
             private void SetupGrip(CharacterData characterData, Transform parent)
             {
-                if (Owner._userDataManager.IsGetCharacter(characterData.Id))
+                if (Owner.userDataManager.IsGetCharacter(characterData.Id))
                 {
                     CreateActiveGrid(characterData, parent);
                 }
@@ -122,18 +122,18 @@ namespace UI.Title
                     return;
                 }
 
-                Owner._uiAnimation.ClickScale(gridGameObject).OnComplete(() =>
+                Owner.uiAnimation.ClickScale(gridGameObject).OnComplete(() =>
                 {
-                    Owner._stateMachine.Dispatch((int)TitleCoreEvent.CharacterDetail);
+                    Owner.stateMachine.Dispatch((int)TitleCoreEvent.CharacterDetail);
                     _isProcessing = false;
                 }).SetLink(Owner.gameObject);
             }
 
             private void OnClickBack()
             {
-                Owner._uiAnimation.ClickScaleColor(Owner.characterSelectView.BackButton.gameObject).OnComplete(() =>
+                Owner.uiAnimation.ClickScaleColor(Owner.characterSelectView.BackButton.gameObject).OnComplete(() =>
                 {
-                    Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main);
+                    Owner.stateMachine.Dispatch((int)TitleCoreEvent.Main);
                 }).SetLink(Owner.gameObject);
             }
 
@@ -146,9 +146,9 @@ namespace UI.Title
                 }
 
                 _isProcessing = true;
-                Owner._uiAnimation.ClickScale(disableGrid).OnComplete(() => UniTask.Void(async () =>
+                Owner.uiAnimation.ClickScale(disableGrid).OnComplete(() => UniTask.Void(async () =>
                 {
-                    var user = Owner._userDataManager.GetUserData();
+                    var user = Owner.userDataManager.GetUserData();
                     var characterPrice = GameCommonData.CharacterPrice;
                     var gem = await _playFabVirtualCurrencyManager.GetGem();
                     if (gem == GameCommonData.NetworkErrorCode)
@@ -172,7 +172,7 @@ namespace UI.Title
 
                     var virtualCurrencyKey = GameCommonData.GemKey;
                     var price = characterPrice;
-                    var isSuccessPurchase = await Owner._playFabShopManager
+                    var isSuccessPurchase = await Owner.playFabShopManager
                         .TryPurchaseCharacter(characterData.Id, virtualCurrencyKey, price)
                         .AttachExternalCancellation(token);
                     if (!isSuccessPurchase)
@@ -193,7 +193,7 @@ namespace UI.Title
             {
                 var closeButton = Owner.characterSelectView.VirtualCurrencyAddPopup.CloseButton.gameObject;
                 var popup = Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject;
-                Owner._uiAnimation.ClickScaleColor(closeButton).OnComplete(() => { popup.SetActive(false); })
+                Owner.uiAnimation.ClickScaleColor(closeButton).OnComplete(() => { popup.SetActive(false); })
                     .SetLink(popup);
             }
 
@@ -201,7 +201,7 @@ namespace UI.Title
             {
                 var cancelButton = Owner.characterSelectView.VirtualCurrencyAddPopup.CancelButton.gameObject;
                 var popup = Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject;
-                Owner._uiAnimation.ClickScaleColor(cancelButton).OnComplete(() => { popup.SetActive(false); })
+                Owner.uiAnimation.ClickScaleColor(cancelButton).OnComplete(() => { popup.SetActive(false); })
                     .SetLink(popup);
             }
 
@@ -209,8 +209,8 @@ namespace UI.Title
             {
                 var addButton = Owner.characterSelectView.VirtualCurrencyAddPopup.AddButton.gameObject;
                 var popup = Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject;
-                Owner._uiAnimation.ClickScaleColor(addButton)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)TitleCoreEvent.Shop); }).SetLink(popup);
+                Owner.uiAnimation.ClickScaleColor(addButton)
+                    .OnComplete(() => { Owner.stateMachine.Dispatch((int)TitleCoreEvent.Shop); }).SetLink(popup);
             }
         }
     }

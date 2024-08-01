@@ -23,21 +23,21 @@ namespace UI.Title
 {
     public partial class TitleCore : MonoBehaviourPunCallbacks
     {
-        [Inject] private CharacterDataManager _characterDataManager;
-        [Inject] private CharacterLevelDataManager _characterLevelDataManager;
-        [Inject] private UserDataManager _userDataManager;
-        [Inject] private MissionDataManager _missionDataManager;
-        [Inject] private UIAnimation _uiAnimation;
-        [Inject] private PhotonNetworkManager _photonNetworkManager;
-        [Inject] private MainManager _mainManager;
-        [Inject] private PlayFabLoginManager _playFabLoginManager;
-        [Inject] private PlayFabUserDataManager _playFabUserDataManager;
-        [Inject] private PlayFabShopManager _playFabShopManager;
-        [Inject] private PlayFabAdsManager _playFabAdsManager;
-        [Inject] private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
-        [Inject] private CatalogDataManager _catalogDataManager;
-        [Inject] private MissionManager _missionManager;
-        [Inject] private ChatGPTManager _chatGptManager;
+        [Inject] private CharacterDataManager characterDataManager;
+        [Inject] private CharacterLevelDataManager characterLevelDataManager;
+        [Inject] private UserDataManager userDataManager;
+        [Inject] private MissionDataManager missionDataManager;
+        [Inject] private UIAnimation uiAnimation;
+        [Inject] private PhotonNetworkManager photonNetworkManager;
+        [Inject] private MainManager mainManager;
+        [Inject] private PlayFabLoginManager playFabLoginManager;
+        [Inject] private PlayFabUserDataManager playFabUserDataManager;
+        [Inject] private PlayFabShopManager playFabShopManager;
+        [Inject] private PlayFabAdsManager playFabAdsManager;
+        [Inject] private PlayFabVirtualCurrencyManager playFabVirtualCurrencyManager;
+        [Inject] private CatalogDataManager catalogDataManager;
+        [Inject] private MissionManager missionManager;
+        [Inject] private ChatGPTManager chatGptManager;
         [SerializeField] private Fade fade;
         [SerializeField] private Transform characterCreatePosition;
         [SerializeField] private MainView mainView;
@@ -51,11 +51,11 @@ namespace UI.Title
         [SerializeField] private LoginBonusView loginBonusView;
         [SerializeField] private MissionView missionView;
         [SerializeField] private CommonView commonView;
-        private GameObject _character;
-        private GameObject _weaponEffect;
-        private StateMachine<TitleCore> _stateMachine;
-        private CancellationToken _token;
-        private CancellationTokenSource _cts;
+        private GameObject character;
+        private GameObject weaponEffect;
+        private StateMachine<TitleCore> stateMachine;
+        private CancellationToken token;
+        private CancellationTokenSource cts;
         [SerializeField] private GameObject[] uiObjects;
 
 
@@ -77,24 +77,24 @@ namespace UI.Title
 
         private void Start()
         {
-            _token = this.GetCancellationTokenOnDestroy();
+            token = this.GetCancellationTokenOnDestroy();
             Initialize();
         }
 
         private void OnDestroy()
         {
-            Cancel(_cts);
+            Cancel(cts);
         }
 
         private void Update()
         {
-            _stateMachine?.Update();
+            stateMachine?.Update();
         }
 
 
         private void Initialize()
         {
-            _cts = new CancellationTokenSource();
+            cts = new CancellationTokenSource();
             fade.InitializeInSceneTransition(1, ProjectCommonData.Instance.isSceneTransition);
             commonView.Initialize();
             InitializeState();
@@ -104,29 +104,27 @@ namespace UI.Title
 
         private void InitializeState()
         {
-            _stateMachine = new StateMachine<TitleCore>(this);
-            if (_mainManager.isInitialize)
+            stateMachine = new StateMachine<TitleCore>(this);
+            if (mainManager.isInitialize)
             {
-                _stateMachine.Start<MainState>();
+                stateMachine.Start<MainState>();
             }
             else
             {
-                _stateMachine.Start<LoginState>();
+                stateMachine.Start<LoginState>();
             }
 
-            _stateMachine.AddAnyTransition<MainState>((int)TitleCoreEvent.Main);
-            _stateMachine.AddAnyTransition<ShopState>((int)TitleCoreEvent.Shop);
-            _stateMachine.AddTransition<MainState, CharacterSelectState>((int)TitleCoreEvent.CharacterSelect);
-            _stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>(
-                (int)TitleCoreEvent.CharacterDetail);
-            _stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>(
-                (int)TitleCoreEvent.CharacterSelect);
-            _stateMachine.AddTransition<MainState, BattleReadyState>((int)TitleCoreEvent.ReadyBattle);
-            _stateMachine.AddTransition<BattleReadyState, SceneTransitionState>((int)TitleCoreEvent.SceneTransition);
-            _stateMachine.AddTransition<LoginState, MainState>((int)TitleCoreEvent.Main);
-            _stateMachine.AddTransition<MainState, SettingState>((int)TitleCoreEvent.Setting);
-            _stateMachine.AddTransition<MainState, LoginBonusState>((int)TitleCoreEvent.LoginBonus);
-            _stateMachine.AddTransition<MainState, MissionState>((int)TitleCoreEvent.Mission);
+            stateMachine.AddAnyTransition<MainState>((int)TitleCoreEvent.Main);
+            stateMachine.AddAnyTransition<ShopState>((int)TitleCoreEvent.Shop);
+            stateMachine.AddTransition<MainState, CharacterSelectState>((int)TitleCoreEvent.CharacterSelect);
+            stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)TitleCoreEvent.CharacterDetail);
+            stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)TitleCoreEvent.CharacterSelect);
+            stateMachine.AddTransition<MainState, BattleReadyState>((int)TitleCoreEvent.ReadyBattle);
+            stateMachine.AddTransition<BattleReadyState, SceneTransitionState>((int)TitleCoreEvent.SceneTransition);
+            stateMachine.AddTransition<LoginState, MainState>((int)TitleCoreEvent.Main);
+            stateMachine.AddTransition<MainState, SettingState>((int)TitleCoreEvent.Setting);
+            stateMachine.AddTransition<MainState, LoginBonusState>((int)TitleCoreEvent.LoginBonus);
+            stateMachine.AddTransition<MainState, MissionState>((int)TitleCoreEvent.Mission);
         }
 
         private void InitializeButton()
@@ -135,9 +133,9 @@ namespace UI.Title
             var coinAddButton = commonView.virtualCurrencyView.coinAddButton;
             var ticketAddButton = commonView.virtualCurrencyView.ticketAddButton;
             SetupRewardOkButton();
-            OnClickTransitionState(gemAddButton, TitleCoreEvent.Shop, _cts.Token);
-            OnClickTransitionState(coinAddButton, TitleCoreEvent.Shop, _cts.Token);
-            OnClickTransitionState(ticketAddButton, TitleCoreEvent.Shop, _cts.Token);
+            OnClickTransitionState(gemAddButton, TitleCoreEvent.Shop, cts.Token);
+            OnClickTransitionState(coinAddButton, TitleCoreEvent.Shop, cts.Token);
+            OnClickTransitionState(ticketAddButton, TitleCoreEvent.Shop, cts.Token);
         }
 
 
@@ -157,22 +155,22 @@ namespace UI.Title
 
         private bool CreateCharacter(int id)
         {
-            _userDataManager.GetUserData().EquipCharacterId = id;
-            var preCharacter = _character;
-            var preWeaponEffect = _weaponEffect;
+            userDataManager.GetUserData().EquipCharacterId = id;
+            var preCharacter = character;
+            var preWeaponEffect = weaponEffect;
             Destroy(preCharacter);
             Destroy(preWeaponEffect);
-            var createCharacterData = _characterDataManager.GetCharacterData(id);
+            var createCharacterData = characterDataManager.GetCharacterData(id);
             if (createCharacterData.CharacterObject == null || createCharacterData.WeaponEffectObj == null)
             {
                 Debug.LogError(id);
                 return false;
             }
 
-            _character = Instantiate(createCharacterData.CharacterObject,
+            character = Instantiate(createCharacterData.CharacterObject,
                 characterCreatePosition.position,
                 characterCreatePosition.rotation, characterCreatePosition);
-            var currentCharacterLevel = _userDataManager.GetCurrentLevelData(id);
+            var currentCharacterLevel = userDataManager.GetCurrentLevelData(id);
             if (currentCharacterLevel.Level < GameCommonData.MaxCharacterLevel)
             {
                 return true;
@@ -229,7 +227,7 @@ namespace UI.Title
 
         private void TransitionState(TitleCoreEvent gameCoreEvent)
         {
-            _stateMachine.Dispatch((int)gameCoreEvent);
+            stateMachine.Dispatch((int)gameCoreEvent);
         }
 
         private void CheckMission(int actionId)
@@ -237,33 +235,33 @@ namespace UI.Title
             switch (actionId)
             {
                 case GameCommonData.LevelUpActionId:
-                    _missionManager.CheckMission(GameCommonData.LevelUpActionId);
+                    missionManager.CheckMission(GameCommonData.LevelUpActionId);
                     break;
                 case GameCommonData.BattleCountActionId:
-                    _missionManager.CheckMission(GameCommonData.BattleCountActionId);
+                    missionManager.CheckMission(GameCommonData.BattleCountActionId);
                     break;
                 case GameCommonData.CharacterBattleActionId:
-                    var characterId = _userDataManager.GetEquippedCharacterData().Id;
-                    _missionManager.CheckMission(GameCommonData.CharacterBattleActionId, characterId);
+                    var characterId = userDataManager.GetEquippedCharacterData().Id;
+                    missionManager.CheckMission(GameCommonData.CharacterBattleActionId, characterId);
                     break;
             }
         }
 
         private async UniTask SetCoinText()
         {
-            var coin = await _playFabVirtualCurrencyManager.GetCoin();
+            var coin = await playFabVirtualCurrencyManager.GetCoin();
             commonView.virtualCurrencyView.coinText.text = coin.ToString("D");
         }
 
         private async UniTask SetGemText()
         {
-            var gem = await _playFabVirtualCurrencyManager.GetGem();
+            var gem = await playFabVirtualCurrencyManager.GetGem();
             commonView.virtualCurrencyView.gemText.text = gem.ToString("D");
         }
 
         private async UniTask SetTicketText()
         {
-            var ticket = await _playFabVirtualCurrencyManager.GetTicket();
+            var ticket = await playFabVirtualCurrencyManager.GetTicket();
             commonView.virtualCurrencyView.ticketText.text = ticket.ToString("D");
         }
 
@@ -279,8 +277,8 @@ namespace UI.Title
                 .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
                 .Subscribe(_ =>
                 {
-                    _uiAnimation.ClickScaleColor(button.gameObject)
-                        .OnComplete(() => { _stateMachine.Dispatch((int)titleCoreEvent); })
+                    uiAnimation.ClickScaleColor(button.gameObject)
+                        .OnComplete(() => { stateMachine.Dispatch((int)titleCoreEvent); })
                         .SetLink(button.gameObject);
                 }).AddTo(token);
         }
@@ -290,7 +288,7 @@ namespace UI.Title
             commonView.rewardGetView.okButton.onClick.RemoveAllListeners();
             commonView.rewardGetView.okButton.onClick.AddListener(() => UniTask.Void(async () =>
             {
-                await _uiAnimation.Close(commonView.rewardGetView.transform, GameCommonData.CloseDuration);
+                await uiAnimation.Close(commonView.rewardGetView.transform, GameCommonData.CloseDuration);
             }));
         }
 
@@ -301,7 +299,7 @@ namespace UI.Title
             rewardView.rewardText.text = value == 1 ? "" : value.ToString("D");
             rewardView.transform.localScale = Vector3.zero;
             rewardView.gameObject.SetActive(true);
-            await _uiAnimation.Open(rewardView.transform, GameCommonData.OpenDuration);
+            await uiAnimation.Open(rewardView.transform, GameCommonData.OpenDuration);
         }
 
         private void SetupButton(Button button, Action action, CancellationToken token)
@@ -316,7 +314,7 @@ namespace UI.Title
                 .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
                 .Subscribe(_ =>
                 {
-                    _uiAnimation.ClickScaleColor(button.gameObject)
+                    uiAnimation.ClickScaleColor(button.gameObject)
                         .OnComplete(() => { action?.Invoke(); })
                         .SetLink(button.gameObject);
                 }).AddTo(token);
@@ -334,7 +332,7 @@ namespace UI.Title
                 .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
                 .Subscribe(_ =>
                 {
-                    _uiAnimation.ClickScaleColor(button.gameObject)
+                    uiAnimation.ClickScaleColor(button.gameObject)
                         .OnComplete(() => UniTask.Void(async () => { await asyncFunc?.Invoke(); }))
                         .SetLink(button.gameObject);
                 }).AddTo(token);

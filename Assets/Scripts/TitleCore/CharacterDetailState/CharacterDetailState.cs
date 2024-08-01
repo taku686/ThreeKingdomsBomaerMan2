@@ -50,16 +50,16 @@ namespace UI.Title
             private async void Initialize()
             {
                 SetupCancellationToken();
-                _characterDataManager = Owner._characterDataManager;
-                _characterLevelDataManager = Owner._characterLevelDataManager;
+                _characterDataManager = Owner.characterDataManager;
+                _characterLevelDataManager = Owner.characterLevelDataManager;
                 _characterDetailView = Owner.characterDetailView;
                 _commonView = Owner.commonView;
-                _playFabUserDataManager = Owner._playFabUserDataManager;
-                _playFabShopManager = Owner._playFabShopManager;
-                _playFabVirtualCurrencyManager = Owner._playFabVirtualCurrencyManager;
-                _userDataManager = Owner._userDataManager;
-                _chatGptManager = Owner._chatGptManager;
-                _uiAnimation = Owner._uiAnimation;
+                _playFabUserDataManager = Owner.playFabUserDataManager;
+                _playFabShopManager = Owner.playFabShopManager;
+                _playFabVirtualCurrencyManager = Owner.playFabVirtualCurrencyManager;
+                _userDataManager = Owner.userDataManager;
+                _chatGptManager = Owner.chatGptManager;
+                _uiAnimation = Owner.uiAnimation;
                 _characterDetailView.PurchaseErrorView.gameObject.SetActive(false);
                 _characterDetailView.VirtualCurrencyAddPopup.gameObject.SetActive(false);
                 _characterDetailView.QuestionView.commentObj.SetActive(false);
@@ -184,25 +184,25 @@ namespace UI.Title
             private void OnClickBackButton()
             {
                 var button = _characterDetailView.BackButton.gameObject;
-                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() =>
+                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() =>
                 {
-                    Owner.CreateCharacter(Owner._userDataManager.GetUserData().EquipCharacterId);
+                    Owner.CreateCharacter(Owner.userDataManager.GetUserData().EquipCharacterId);
                     Owner.DisableTitleGameObject();
                     Owner.mainView.CharacterListGameObject.SetActive(true);
-                    Owner._stateMachine.Dispatch((int)TitleCoreEvent.CharacterSelect);
+                    Owner.stateMachine.Dispatch((int)TitleCoreEvent.CharacterSelect);
                 }).SetLink(button);
             }
 
             private void OnClickSelectButton()
             {
                 var button = _characterDetailView.SelectButton.gameObject;
-                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     var userData = _userDataManager.GetUserData();
                     var result = await _playFabUserDataManager.TryUpdateUserDataAsync(userData);
                     if (result)
                     {
-                        Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main);
+                        Owner.stateMachine.Dispatch((int)TitleCoreEvent.Main);
                     }
                 })).SetLink(button);
             }
@@ -210,7 +210,7 @@ namespace UI.Title
             private void OnClickRightArrow()
             {
                 var button = _characterDetailView.RightArrowButton.gameObject;
-                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() =>
+                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() =>
                 {
                     var userData = _userDataManager.GetUserData();
                     if (userData.Characters.Count <= 1)
@@ -242,7 +242,7 @@ namespace UI.Title
             private void OnClickLeftArrow()
             {
                 var button = _characterDetailView.LeftArrowButton.gameObject;
-                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() =>
+                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() =>
                 {
                     var userData = _userDataManager.GetUserData();
                     if (userData.Characters.Count <= 1)
@@ -289,7 +289,7 @@ namespace UI.Title
                 }
 
                 var button = _characterDetailView.UpgradeButton.gameObject;
-                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     var coin = await _playFabVirtualCurrencyManager.GetCoin();
                     if (coin == GameCommonData.NetworkErrorCode)
@@ -345,7 +345,7 @@ namespace UI.Title
 
             private void OnClickCloseVirtualCurrencyAddView(GameObject button)
             {
-                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                     {
                         var virtualCurrencyAddView = _characterDetailView.VirtualCurrencyAddPopup;
                         await _uiAnimation.Close(virtualCurrencyAddView.transform, GameCommonData.CloseDuration);
@@ -357,16 +357,16 @@ namespace UI.Title
             private void OnClickAddVirtualCurrency()
             {
                 var button = _characterDetailView.VirtualCurrencyAddPopup.AddButton.gameObject;
-                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() =>
+                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() =>
                 {
-                    Owner._stateMachine.Dispatch((int)TitleCoreEvent.Shop);
+                    Owner.stateMachine.Dispatch((int)TitleCoreEvent.Shop);
                 }).SetLink(button);
             }
 
             private void OnClickClosePurchaseErrorView()
             {
                 var button = _characterDetailView.PurchaseErrorView.okButton.gameObject;
-                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                     {
                         var purchaseErrorView = _characterDetailView.PurchaseErrorView;
                         await _uiAnimation.Close(purchaseErrorView.transform, GameCommonData.CloseDuration);
@@ -385,7 +385,7 @@ namespace UI.Title
                 _commonView.waitPopup.SetActive(true);
                 _canQuestion = false;
                 var button = _characterDetailView.QuestionView.sendButton.gameObject;
-                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                     {
                         var question = _characterDetailView.QuestionView.questionField.text;
                         var commentTransform = _characterDetailView.QuestionView.commentObj.transform;
@@ -426,7 +426,7 @@ namespace UI.Title
             private void OnClickCloseComment()
             {
                 var button = _characterDetailView.QuestionView.closeButton.gameObject;
-                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                     {
                         var comment = _characterDetailView.QuestionView.commentObj.transform;
                         await _uiAnimation.Close(comment, GameCommonData.CloseDuration);
@@ -438,7 +438,7 @@ namespace UI.Title
             private void OnClickCloseErrorView()
             {
                 var button = _commonView.errorView.okButton.gameObject;
-                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                     {
                         var errorView = _commonView.errorView.transform;
                         await _uiAnimation.Close(errorView, GameCommonData.CloseDuration);
@@ -474,7 +474,7 @@ namespace UI.Title
 
             private void InitializeAnimation()
             {
-                Owner._character.GetComponent<Animator>().SetTrigger(GameCommonData.ActiveHashKey);
+                Owner.character.GetComponent<Animator>().SetTrigger(GameCommonData.ActiveHashKey);
             }
 
             private int GetModifiedStatus(CharacterLevelData currentLevelData, int value)

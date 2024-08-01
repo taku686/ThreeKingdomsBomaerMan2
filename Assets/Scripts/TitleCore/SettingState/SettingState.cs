@@ -57,28 +57,28 @@ namespace UI.Title
 
             private void OnClickCloseSetting()
             {
-                Owner._uiAnimation.ClickScaleColor(Owner.settingView.SettingCloseButton.gameObject)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main); })
+                Owner.uiAnimation.ClickScaleColor(Owner.settingView.SettingCloseButton.gameObject)
+                    .OnComplete(() => { Owner.stateMachine.Dispatch((int)TitleCoreEvent.Main); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickCloseSignUp()
             {
-                Owner._uiAnimation.ClickScaleColor(Owner.settingView.SignUpCloseButton.gameObject)
+                Owner.uiAnimation.ClickScaleColor(Owner.settingView.SignUpCloseButton.gameObject)
                     .OnComplete(() => { Owner.settingView.SignUpGameObject.SetActive(false); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickCloseSignIn()
             {
-                Owner._uiAnimation.ClickScaleColor(Owner.settingView.SignInCloseButton.gameObject)
+                Owner.uiAnimation.ClickScaleColor(Owner.settingView.SignInCloseButton.gameObject)
                     .OnComplete(() => { Owner.settingView.SignInGameObject.SetActive(false); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickBackToSignUpButton()
             {
-                Owner._uiAnimation.ClickScaleColor(Owner.settingView.BackToSignUpButton.gameObject)
+                Owner.uiAnimation.ClickScaleColor(Owner.settingView.BackToSignUpButton.gameObject)
                     .OnComplete(() =>
                     {
                         Owner.settingView.SignInGameObject.SetActive(false);
@@ -89,14 +89,14 @@ namespace UI.Title
 
             private void OnClickAccountButton()
             {
-                Owner._uiAnimation.ClickScaleColor(Owner.settingView.AccountRegisterButton.gameObject)
+                Owner.uiAnimation.ClickScaleColor(Owner.settingView.AccountRegisterButton.gameObject)
                     .OnComplete(() => { Owner.settingView.SignUpGameObject.SetActive(true); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickAlreadySignInButton()
             {
-                Owner._uiAnimation.ClickScaleColor(Owner.settingView.AlreadySignInButton.gameObject)
+                Owner.uiAnimation.ClickScaleColor(Owner.settingView.AlreadySignInButton.gameObject)
                     .OnComplete(() =>
                     {
                         Owner.settingView.SignInGameObject.SetActive(true);
@@ -107,20 +107,20 @@ namespace UI.Title
 
             private void OnClickSetEmail()
             {
-                Owner._uiAnimation.ClickScaleColor(Owner.settingView.SignUpButton.gameObject)
+                Owner.uiAnimation.ClickScaleColor(Owner.settingView.SignUpButton.gameObject)
                     .OnComplete(async () =>
                     {
-                        await SetEmailAndPasswordAsync().AttachExternalCancellation(Owner._token);
+                        await SetEmailAndPasswordAsync().AttachExternalCancellation(Owner.token);
                     })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickLogin()
             {
-                Owner._uiAnimation.ClickScaleColor(Owner.settingView.SignInButton.gameObject)
+                Owner.uiAnimation.ClickScaleColor(Owner.settingView.SignInButton.gameObject)
                     .OnComplete(async () =>
                     {
-                        await LoginEmailAndPasswordAsync().AttachExternalCancellation(Owner._token);
+                        await LoginEmailAndPasswordAsync().AttachExternalCancellation(Owner.token);
                     })
                     .SetLink(Owner.gameObject);
             }

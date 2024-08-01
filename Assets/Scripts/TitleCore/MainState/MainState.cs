@@ -9,8 +9,8 @@ namespace UI.Title
     {
         public class MainState : State
         {
-            private PlayFabLoginManager _playFabLoginManager;
-            private MainView _mainView;
+            private PlayFabLoginManager playFabLoginManager;
+            private MainView mainView;
 
             protected override void OnEnter(State prevState)
             {
@@ -20,14 +20,14 @@ namespace UI.Title
 
             protected override void OnUpdate()
             {
-                TransitionLoginBonus();
+             //   TransitionLoginBonus();
             }
 
             private async UniTaskVoid Initialize()
             {
-                _playFabLoginManager = Owner._playFabLoginManager;
-                _mainView = Owner.mainView;
-                Owner.CreateCharacter(Owner._userDataManager.GetUserData().EquipCharacterId);
+                playFabLoginManager = Owner.playFabLoginManager;
+                mainView = Owner.mainView;
+                Owner.CreateCharacter(Owner.userDataManager.GetUserData().EquipCharacterId);
                 InitializeButton();
                 await InitializeText();
                 Owner.SwitchUiObject(TitleCoreEvent.Main, true);
@@ -40,12 +40,12 @@ namespace UI.Title
                 Owner.mainView.BattleReadyButton.onClick.RemoveAllListeners();
                 Owner.mainView.SettingButton.onClick.RemoveAllListeners();
                 Owner.mainView.ShopButton.onClick.RemoveAllListeners();
-                _mainView.MissionButton.onClick.RemoveAllListeners();
+                mainView.MissionButton.onClick.RemoveAllListeners();
                 Owner.mainView.CharacterSelectButton.onClick.AddListener(OnClickCharacterSelect);
                 Owner.mainView.BattleReadyButton.onClick.AddListener(OnClickBattleReady);
                 Owner.mainView.SettingButton.onClick.AddListener(OnClickSetting);
                 Owner.mainView.ShopButton.onClick.AddListener(OnClickShop);
-                _mainView.MissionButton.onClick.AddListener(OnClickMission);
+                mainView.MissionButton.onClick.AddListener(OnClickMission);
             }
 
             private async UniTask InitializeText()
@@ -58,48 +58,48 @@ namespace UI.Title
 
             private void TransitionLoginBonus()
             {
-                if (!_playFabLoginManager.haveLoginBonus)
+                if (!playFabLoginManager.haveLoginBonus)
                 {
                     return;
                 }
 
-                _playFabLoginManager.haveLoginBonus = false;
-                Owner._stateMachine.Dispatch((int)TitleCoreEvent.LoginBonus);
+                playFabLoginManager.haveLoginBonus = false;
+                Owner.stateMachine.Dispatch((int)TitleCoreEvent.LoginBonus);
             }
 
 
             private void OnClickCharacterSelect()
             {
-                Owner._uiAnimation.ClickScaleColor(Owner.mainView.CharacterSelectButton.gameObject)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)TitleCoreEvent.CharacterSelect); })
+                Owner.uiAnimation.ClickScaleColor(Owner.mainView.CharacterSelectButton.gameObject)
+                    .OnComplete(() => { Owner.stateMachine.Dispatch((int)TitleCoreEvent.CharacterSelect); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickBattleReady()
             {
-                Owner._uiAnimation.ClickScaleColor(Owner.mainView.BattleReadyButton.gameObject)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)TitleCoreEvent.ReadyBattle); })
+                Owner.uiAnimation.ClickScaleColor(Owner.mainView.BattleReadyButton.gameObject)
+                    .OnComplete(() => { Owner.stateMachine.Dispatch((int)TitleCoreEvent.ReadyBattle); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickSetting()
             {
-                Owner._uiAnimation.ClickScaleColor(Owner.mainView.SettingButton.gameObject)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)TitleCoreEvent.Setting); })
+                Owner.uiAnimation.ClickScaleColor(Owner.mainView.SettingButton.gameObject)
+                    .OnComplete(() => { Owner.stateMachine.Dispatch((int)TitleCoreEvent.Setting); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickShop()
             {
-                Owner._uiAnimation.ClickScaleColor(Owner.mainView.ShopButton.gameObject)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)TitleCoreEvent.Shop); })
+                Owner.uiAnimation.ClickScaleColor(Owner.mainView.ShopButton.gameObject)
+                    .OnComplete(() => { Owner.stateMachine.Dispatch((int)TitleCoreEvent.Shop); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickMission()
             {
-                Owner._uiAnimation.ClickScaleColor(_mainView.MissionButton.gameObject)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)TitleCoreEvent.Mission); })
+                Owner.uiAnimation.ClickScaleColor(mainView.MissionButton.gameObject)
+                    .OnComplete(() => { Owner.stateMachine.Dispatch((int)TitleCoreEvent.Mission); })
                     .SetLink(Owner.gameObject);
             }
         }

@@ -21,10 +21,10 @@ namespace Common.Data
         public const string WeaponTag = "Weapon";
         public const string ObstacleLayer = "Obstacles";
         public const string ExplosionLayer = "Explosion";
+        public const string BombLayer = "Bomb";
         public const string UserKey = "User";
         public const string VirtualCurrencyKey = "vc";
         public const string PriceKey = "price";
-        public const string BombLayer = "Bomb";
         public const string GemKey = "MS";
         public const string CoinKey = "CO";
         public const string TicketKey = "TK";
@@ -65,6 +65,8 @@ namespace Common.Data
         public const string SkillSpritePath = "Sprites/Skill/";
         public const string VirtualCurrencySpritePath = "Sprites/VirtualCurrency/";
         public const string LevelText = "Lv.";
+        public const string TitleScene = "Title";
+        public const string BattleScene = "Battle";
         public const float CloseDuration = 0.5f;
         public const float OpenDuration = 1.0f;
         public const float ClickIntervalDuration = 0.2f;
@@ -230,12 +232,6 @@ namespace Common.Data
         Player2,
         Player3,
         Player4,
-    }
-
-    public enum SceneIndex
-    {
-        Title,
-        BattleScene
     }
 
     public enum Gender

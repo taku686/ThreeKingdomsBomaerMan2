@@ -283,7 +283,7 @@ namespace Player.Common
                     break;
             }
 
-            await player.DOLocalRotate(nextRotation, GameCommonData.TurnDuration).SetLink(player.gameObject);
+            await player.DOLocalRotate(nextRotation, GameCommonData.TurnDuration).SetLink(player.gameObject).ToUniTask();
         }
 
         private void Stop()
@@ -291,7 +291,7 @@ namespace Player.Common
             _isMoving = false;
             _cts.Cancel();
             _cts.Dispose();
-            _cts = new CancellationTokenSource();
+            _cts = new CancellationTokenSource(); 
         }
     }
 }

@@ -24,6 +24,16 @@ public class UltimateJoystickReadme : ScriptableObject
 	}
 	public VersionHistory[] versionHistory = new VersionHistory[]
 	{
+		// VERSION 3.2.1 //
+		new VersionHistory ()
+		{
+			versionNumber = "3.2.1",
+			changes = new string[]
+			{
+				// GENERAL CHANGES //
+				"Implemented a small check to ensure the Awake() function will always be called even if the user has the Enter Play Mode Settings enabled without checking the Reload Scene option",
+			},
+		},
 		// VERSION 3.2.0 //
 		new VersionHistory ()
 		{

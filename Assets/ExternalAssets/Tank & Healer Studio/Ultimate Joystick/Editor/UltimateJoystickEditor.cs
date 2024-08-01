@@ -736,12 +736,6 @@ public class UltimateJoystickEditor : Editor
 				EditorGUI.indentLevel = 0;
 				GUILayout.Space( afterIndentSpace );
 			}
-
-			// EDIT: 
-			//EditorGUI.BeginChangeCheck();
-   //         EditorGUILayout.PropertyField( useTouchInput, new GUIContent( "Use Touch Input", "Determines if the joystick should use input from the EventSystem or directly calculate from the touch input on the screen." ) );
-   //         if( EditorGUI.EndChangeCheck() )
-   //             serializedObject.ApplyModifiedProperties();
         }
 
 		// VISUAL OPTIONS //

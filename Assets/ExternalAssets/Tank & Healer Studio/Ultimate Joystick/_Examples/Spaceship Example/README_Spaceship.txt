@@ -15,7 +15,7 @@ with the scripts to allow use within versions 5.0.0 and 5.3.0 of Unity.
 		First, the Ultimate Joystick is used for the input to move the spaceship around. We are using a Vector2 variable
 	and storing the Ultimate Joystick's position within the Update function.
 
-		movePosition = UltimateJoystick.GetPosition( "Movement" );
+		movePosition = new Vector2( UltimateJoystick.GetHorizontalAxis( "Movement" ), UltimateJoystick.GetVerticalAxis( "Movement" ) );
 
 	In the FixedUpdate function we are creating a Vector3 to store a position that the player's transform can look at.
 	We do this by taking the current position of the player, plus the new lookRot Vector3.
@@ -38,7 +38,7 @@ with the scripts to allow use within versions 5.0.0 and 5.3.0 of Unity.
 	on the spaceship. This is done in much the same way as the movement of the spaceship. We are catching the users input
 	from the joystick in the Update function.
 
-		shootPosition = UltimateJoystick.GetPosition( "Shooting" );
+		shootPosition = new Vector3( UltimateJoystick.GetHorizontalAxis( "Shooting" ), 0, UltimateJoystick.GetVerticalAxis( "Shooting" ) );
 
 	The process next is the exact same as with the movement. We will be creating a Vector3 variable to store the position
 	that the joystick should be looking at. After getting the position of the joystick in the right axis, the we apply the
@@ -72,9 +72,6 @@ with the scripts to allow use within versions 5.0.0 and 5.3.0 of Unity.
 ----------------
 	Support Email:
 		TankAndHealerStudio@outlook.com
-
-	Network Meteoroid Package:
-		https://www.assetstore.unity3d.com/en/#!/content/62227
 
 	Support Website:
 		http://www.tankandhealerstudio.com/assets.html

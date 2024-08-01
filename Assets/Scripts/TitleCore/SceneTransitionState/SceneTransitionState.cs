@@ -1,7 +1,5 @@
 ﻿using Common.Data;
-using System.Threading;
-using Cysharp.Threading.Tasks;
-using UnityEngine.SceneManagement;
+using MoreMountains.Tools;
 using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
@@ -21,17 +19,13 @@ namespace UI.Title
 
             private void Initialize()
             {
-                LoadScene().Forget();
+                LoadScene();
                 Owner.SwitchUiObject(TitleCoreEvent.SceneTransition, false);
             }
 
-            private async UniTask LoadScene()
+            private void LoadScene()
             {
-                await SceneManager.LoadSceneAsync((int)SceneIndex.BattleScene).ToUniTask(Progress.Create<float>(x =>
-                {
-                    Owner.sceneTransitionView.LoadingText.text = "Loading..." + x + "%";
-                    Owner.sceneTransitionView.LoadingBar.value = x;
-                }), cancellationToken: Owner.gameObject.GetCancellationTokenOnDestroy());
+                MMSceneLoadingManager.LoadScene(GameCommonData.BattleScene);
             }
         }
     }

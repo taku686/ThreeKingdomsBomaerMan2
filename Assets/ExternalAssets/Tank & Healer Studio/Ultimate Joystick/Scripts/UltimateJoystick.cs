@@ -148,7 +148,12 @@ public class UltimateJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
 		// If the game is not running then return.
 		if( !Application.isPlaying )
 			return;
-		
+
+#if UNITY_EDITOR
+		if( UnityEditor.EditorSettings.enterPlayModeOptionsEnabled && UnityEditor.EditorSettings.enterPlayModeOptions.HasFlag( UnityEditor.EnterPlayModeOptions.DisableSceneReload ) )
+			Awake();
+#endif
+
 		// If the user wants to transition on different input...
 		if( inputTransition )
 		{
@@ -192,7 +197,7 @@ public class UltimateJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
 		// If the joystick is already in use, then return.
 		if( joystickState )
 			return;
-
+		
 		// If the user wants a circular boundary but does not want a custom activation range...
 		if( boundary == Boundary.Circular && !customActivationRange )
 		{
@@ -513,9 +518,11 @@ public class UltimateJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
 		joystickBase.anchorMin = new Vector2( 0.5f, 0.5f );
 		joystickBase.anchorMax = new Vector2( 0.5f, 0.5f );
 		joystickBase.pivot = new Vector2( 0.5f, 0.5f );
-		
+
 		// Configure the position that the user wants the joystick to be located.
 		Vector2 joystickPosition = new Vector2( canvasRectTrans.sizeDelta.x * ( positionHorizontal / 100 ) - ( textureSize * ( positionHorizontal / 100 ) ) + ( textureSize / 2 ), canvasRectTrans.sizeDelta.y * ( positionVertical / 100 ) - ( textureSize * ( positionVertical / 100 ) ) + ( textureSize / 2 ) ) - ( canvasRectTrans.sizeDelta / 2 );
+		//Vector2 bottomLeft = new Vector2( -canvasRectTrans.sizeDelta.x / 2 + ( textureSize / 2 ), -canvasRectTrans.sizeDelta.y / 2 + ( textureSize / 2 ) );
+		//Vector2 joystickPosition = bottomLeft + new Vector2( canvasRectTrans.sizeDelta.x * ( positionHorizontal / 100 ), canvasRectTrans.sizeDelta.y * ( positionVertical / 100 ) );
 
 		if( anchor == Anchor.Right )
 			joystickPosition.x = -joystickPosition.x;
@@ -855,7 +862,7 @@ public class UltimateJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler
 	{
 		// Store the relative position of the joystick and divide the Vector by the radius of the joystick. This will normalize the values.
 		Vector2 joystickPosition = ( joystick.localPosition * ParentCanvas.scaleFactor ) / radius;
-
+		
 		// If the distance of the joystick from center is less that the dead zone set by the user...
 		if( GetDistance() <= deadZone )
 		{

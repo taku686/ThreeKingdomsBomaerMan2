@@ -36,12 +36,12 @@ namespace UI.Title
 
             private async UniTask Initialize()
             {
-                _uiAnimation = Owner._uiAnimation;
+                _uiAnimation = Owner.uiAnimation;
                 _loginBonusView = Owner.loginBonusView;
                 _mainView = Owner.mainView;
-                _userDataManager = Owner._userDataManager;
-                _playFabLoginManager = Owner._playFabLoginManager;
-                _playaFabShopManager = Owner._playFabShopManager;
+                _userDataManager = Owner.userDataManager;
+                _playFabLoginManager = Owner.playFabLoginManager;
+                _playaFabShopManager = Owner.playFabShopManager;
                 InitializeButton();
                 await InitializeUIContent();
                 SetupLoginImage();
@@ -127,7 +127,7 @@ namespace UI.Title
             private void OnClickRewardButton(int index)
             {
                 var button = _loginBonusView.buttons[index].gameObject;
-                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     //todo　購入処理
                     if (index is Day4 or Day7)
@@ -146,7 +146,8 @@ namespace UI.Title
 
                         rewardViewObj.transform.localScale = Vector3.zero;
                         rewardViewObj.SetActive(true);
-                        await _uiAnimation.Open(rewardViewObj.transform, GameCommonData.OpenDuration);
+                        await _uiAnimation.Open(rewardViewObj.transform, GameCommonData.OpenDuration)
+                            .AttachExternalCancellation(rewardViewObj.GetCancellationTokenOnDestroy());
                     }
                     else
                     {
@@ -164,7 +165,8 @@ namespace UI.Title
 
                         rewardViewObj.transform.localScale = Vector3.zero;
                         rewardViewObj.SetActive(true);
-                        await _uiAnimation.Open(rewardViewObj.transform, GameCommonData.OpenDuration);
+                        await _uiAnimation.Open(rewardViewObj.transform, GameCommonData.OpenDuration)
+                            .AttachExternalCancellation(rewardViewObj.GetCancellationTokenOnDestroy());
                     }
 
                     var result = await _userDataManager.SetLoginBonus(index, LoginBonusStatus.Received);
@@ -182,22 +184,24 @@ namespace UI.Title
             private void OnClickClosePanel()
             {
                 var button = _loginBonusView.closeButton.gameObject;
-                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     var panel = _mainView.LoginBonusGameObjet.transform;
-                    await _uiAnimation.Close(panel, GameCommonData.CloseDuration);
+                    await _uiAnimation.Close(panel, GameCommonData.CloseDuration)
+                        .AttachExternalCancellation(panel.GetCancellationTokenOnDestroy());
                     panel.gameObject.SetActive(false);
-                    Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main);
+                    Owner.stateMachine.Dispatch((int)TitleCoreEvent.Main);
                 })).SetLink(button);
             }
 
             private void OnClickCloseRewardView()
             {
                 var button = _loginBonusView.rewardGetView.okButton.gameObject;
-                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     var panel = _loginBonusView.rewardGetView.transform;
-                    await _uiAnimation.Close(panel, GameCommonData.CloseDuration);
+                    await _uiAnimation.Close(panel, GameCommonData.CloseDuration)
+                        .AttachExternalCancellation(panel.GetCancellationTokenOnDestroy());;
                     panel.gameObject.SetActive(false);
                 })).SetLink(button);
             }

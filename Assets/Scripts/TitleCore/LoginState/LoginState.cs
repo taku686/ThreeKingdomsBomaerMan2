@@ -32,9 +32,9 @@ namespace UI.Title
             private void Initialize()
             {
                 _cts = new CancellationTokenSource();
-                _playFabUserDataManager = Owner._playFabUserDataManager;
+                _playFabUserDataManager = Owner.playFabUserDataManager;
                 _loginView = Owner.loginView;
-                _uiAnimation = Owner._uiAnimation;
+                _uiAnimation = Owner.uiAnimation;
                 _commonView = Owner.commonView;
 
                 InitializeButton();
@@ -85,8 +85,8 @@ namespace UI.Title
             {
                 _isLoginProcessing = true;
                 _commonView.waitPopup.SetActive(true);
-                Owner._playFabLoginManager.Initialize(Owner.loginView.DisplayNameView, Owner.loginView.ErrorGameObject);
-                var result = await Owner._playFabLoginManager.Login()
+                Owner.playFabLoginManager.Initialize(Owner.loginView.DisplayNameView, Owner.loginView.ErrorGameObject);
+                var result = await Owner.playFabLoginManager.Login()
                     .AttachExternalCancellation(_cts.Token);
 
                 if (!result)
@@ -96,9 +96,9 @@ namespace UI.Title
                     return;
                 }
 
-                Owner._characterDataManager.Initialize(Owner._userDataManager, Owner._token);
-                Owner._mainManager.isInitialize = true;
-                Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main);
+                Owner.characterDataManager.Initialize(Owner.userDataManager, Owner.token);
+                Owner.mainManager.isInitialize = true;
+                Owner.stateMachine.Dispatch((int)TitleCoreEvent.Main);
                 _commonView.waitPopup.SetActive(false);
                 _isLoginProcessing = false;
             }
@@ -122,13 +122,13 @@ namespace UI.Title
                     return;
                 }
 
-                var createSuccess = await Owner._playFabLoginManager.CreateUserData();
+                var createSuccess = await Owner.playFabLoginManager.CreateUserData();
                 if (createSuccess)
                 {
-                    Owner._characterDataManager.Initialize(Owner._userDataManager, Owner._token);
+                    Owner.characterDataManager.Initialize(Owner.userDataManager, Owner.token);
                     Owner.loginView.DisplayNameView.gameObject.SetActive(false);
-                    Owner._mainManager.isInitialize = true;
-                    Owner._stateMachine.Dispatch((int)TitleCoreEvent.Main);
+                    Owner.mainManager.isInitialize = true;
+                    Owner.stateMachine.Dispatch((int)TitleCoreEvent.Main);
                     _commonView.waitPopup.SetActive(false);
                     _isLoginProcessing = false;
                 }

@@ -93,7 +93,7 @@ namespace MoreMountains.Tools
 
 				SceneDatas.Remove(_currentSceneName);
 				
-				MMPersistencySceneData sceneData = new MMPersistencySceneData();
+				MMPersistenceSceneData sceneData = new MMPersistenceSceneData();
 				sceneData.ObjectDatas = new DictionaryStringString();
 				
 				IMMPersistent[] persistents = FindAllPersistentObjects();
@@ -108,7 +108,7 @@ namespace MoreMountains.Tools
 
 				SceneDatas.Add(_currentSceneName, sceneData);
 
-				MMPersistencyEvent.Trigger(MMPersistencyEventType.DataSavedToMemory, PersistencyID);
+				MMPersistenceEvent.Trigger(MMPersistenceEventType.DataSavedToMemory, PersistencyID);
 			}
 
 			/// <summary>
@@ -118,7 +118,7 @@ namespace MoreMountains.Tools
 			{
 				ComputeCurrentSceneName();
 				
-				if (!SceneDatas.TryGetValue(_currentSceneName, out MMPersistencySceneData sceneData))
+				if (!SceneDatas.TryGetValue(_currentSceneName, out MMPersistenceSceneData sceneData))
 				{
 					return;
 				}
@@ -137,7 +137,7 @@ namespace MoreMountains.Tools
 					}
 				}
 				
-				MMPersistencyEvent.Trigger(MMPersistencyEventType.DataLoadedFromMemory, PersistencyID);
+				MMPersistenceEvent.Trigger(MMPersistenceEventType.DataLoadedFromMemory, PersistencyID);
 			}
 
 			/// <summary>
@@ -145,13 +145,13 @@ namespace MoreMountains.Tools
 			/// </summary>
 			public virtual void SaveFromMemoryToFile()
 			{
-				MMPersistencyManagerData saveData = new MMPersistencyManagerData();
-				saveData.PersistencyID = PersistencyID;
+				MMPersistenceManagerData saveData = new MMPersistenceManagerData();
+				saveData.PersistenceID = PersistencyID;
 				saveData.SaveDate = DateTime.Now.ToString();
 				saveData.SceneDatas = SceneDatas;
 				MMSaveLoadManager.Save(saveData, DetermineSaveName(), _saveFolderName);
 				
-				MMPersistencyEvent.Trigger(MMPersistencyEventType.DataSavedFromMemoryToFile, PersistencyID);
+				MMPersistenceEvent.Trigger(MMPersistenceEventType.DataSavedFromMemoryToFile, PersistencyID);
 			}
 
 			/// <summary>
@@ -159,13 +159,13 @@ namespace MoreMountains.Tools
 			/// </summary>
 			public virtual void LoadFromFileToMemory()
 			{
-				MMPersistencyManagerData saveData = (MMPersistencyManagerData)MMSaveLoadManager.Load(typeof(MMPersistencyManagerData), DetermineSaveName(), _saveFolderName);
+				MMPersistenceManagerData saveData = (MMPersistenceManagerData)MMSaveLoadManager.Load(typeof(MMPersistenceManagerData), DetermineSaveName(), _saveFolderName);
 				if ((saveData != null) && (saveData.SceneDatas != null))
 				{
 					SceneDatas = new DictionaryStringSceneData();
 					SceneDatas = saveData.SceneDatas;	
 				}
-				MMPersistencyEvent.Trigger(MMPersistencyEventType.DataLoadedFromFileToMemory, PersistencyID);
+				MMPersistenceEvent.Trigger(MMPersistenceEventType.DataLoadedFromFileToMemory, PersistencyID);
 			}
 			
 			/// <summary>
@@ -202,7 +202,7 @@ namespace MoreMountains.Tools
 			/// <param name="sceneName"></param>
 			public virtual void DeletePersistencyMemoryForScene(string sceneName)
 			{
-				if (!SceneDatas.TryGetValue(_currentSceneName, out MMPersistencySceneData sceneData))
+				if (!SceneDatas.TryGetValue(_currentSceneName, out MMPersistenceSceneData sceneData))
 				{
 					return;
 				}
