@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace MoreMountains.Tools
 {
@@ -17,10 +18,15 @@ namespace MoreMountains.Tools
 		public float SkinWidth = 0.1f;
 		public bool RepositionRigidbody = true;
 		/// the layer mask to filter when to reposition rigidbody
-		public LayerMask RepositionRigidbodyLayerMask; 
+		public LayerMask RepositionRigidbodyLayerMask;
 
-		protected float _smallestBoundsWidth; 
-		protected float _adjustedSmallestBoundsWidth; 
+		public enum AdjustmentAxis { Auto, X, Y, Z }
+		/// the local axis of the collider to use for adjustment (usually you'll want to use the axis the object is moving on)
+		public AdjustmentAxis Adjustment = AdjustmentAxis.Auto;
+		
+
+		protected float _adjustmentDistance; 
+		protected float _adjustedDistance; 
 		protected float _squaredBoundsWidth; 
 		protected Vector3 _positionLastFrame; 
 		protected Rigidbody _rigidbody;
@@ -58,9 +64,27 @@ namespace MoreMountains.Tools
 
 			_collider = GetComponent<Collider>();
 
-			_smallestBoundsWidth = Mathf.Min(Mathf.Min(_collider.bounds.extents.x, _collider.bounds.extents.y), _collider.bounds.extents.z); 
-			_adjustedSmallestBoundsWidth = _smallestBoundsWidth * (1.0f - SkinWidth); 
-			_squaredBoundsWidth = _smallestBoundsWidth * _smallestBoundsWidth; 
+			_adjustmentDistance = ComputeAdjustmentDistance();
+			_adjustedDistance = _adjustmentDistance * (1.0f - SkinWidth); 
+			_squaredBoundsWidth = _adjustmentDistance * _adjustmentDistance; 
+		}
+
+		/// <summary>
+		/// Determines the adjustment distance, over which we decide whether or not we've moved too far
+		/// </summary>
+		/// <returns></returns>
+		protected virtual float ComputeAdjustmentDistance()
+		{
+			switch (Adjustment)
+			{
+				case AdjustmentAxis.X:
+					return _collider.bounds.extents.x;
+				case AdjustmentAxis.Y:
+					return _collider.bounds.extents.y;
+				case AdjustmentAxis.Z:
+					return _collider.bounds.extents.z;
+			}
+			return Mathf.Min(Mathf.Min(_collider.bounds.extents.x, _collider.bounds.extents.y), _collider.bounds.extents.z);
 		}
 
 		/// <summary>
@@ -106,8 +130,8 @@ namespace MoreMountains.Tools
 							var hitLayer = hitInfo.collider.gameObject.layer;
 							if (0 != (1 << hitLayer & RepositionRigidbodyLayerMask))
 							{
-								this.transform.position = hitInfo.point - (_lastMovement / movementMagnitude) * _adjustedSmallestBoundsWidth;
-								_rigidbody.position = hitInfo.point - (_lastMovement / movementMagnitude) * _adjustedSmallestBoundsWidth;
+								this.transform.position = hitInfo.point - (_lastMovement / movementMagnitude) * _adjustedDistance;
+								_rigidbody.position = hitInfo.point - (_lastMovement / movementMagnitude) * _adjustedDistance;
 							}
 						}						
 					}

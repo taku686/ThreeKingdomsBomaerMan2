@@ -37,7 +37,7 @@ namespace MoreMountains.Tools
 		/// <summary>
 		/// Returns the current element
 		/// </summary>
-		public T Current => this[CurrentIndex];
+		public virtual T Current => this[CurrentIndex];
 
 		/// <summary>
 		/// Increments the current index (towards the "right" of the list)

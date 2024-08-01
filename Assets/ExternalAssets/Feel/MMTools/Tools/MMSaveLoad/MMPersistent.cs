@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
@@ -27,6 +29,9 @@ namespace MoreMountains.Tools
 		/// whether or not to save this object's active state
 		[Tooltip("whether or not to save this object's active state")]
 		public bool SaveActiveState = true;
+		/// whether or not to save this object's components' enabled states
+		[Tooltip("whether or not to save this object's components' enabled states")]
+		public bool SaveEnabledStates = false;
 		
 		/// <summary>
 		/// A struct used to store and serialize the data we want to save
@@ -38,6 +43,14 @@ namespace MoreMountains.Tools
 			public Quaternion LocalRotation;
 			public Vector3 LocalScale;
 			public bool ActiveState;
+			public List<ComponentData> ComponentEnabledStates;
+		}
+
+		[Serializable]
+		public struct ComponentData
+		{
+			public string Name;
+			public bool EnabledState;
 		}
 
 		/// <summary>
@@ -46,10 +59,17 @@ namespace MoreMountains.Tools
 		/// <returns></returns>
 		public override string OnSave()
 		{
+			List<ComponentData> saveEnabledStates = null;
+			if (SaveEnabledStates)
+			{
+				saveEnabledStates = GetCurrentComponents();
+			}
 			return JsonUtility.ToJson(new Data { Position = this.transform.position, 
 													LocalRotation = this.transform.localRotation, 
 													LocalScale = this.transform.localScale, 
-													ActiveState = this.gameObject.activeSelf });
+													ActiveState = this.gameObject.activeSelf,
+													ComponentEnabledStates = saveEnabledStates
+			});
 		}
 
 		/// <summary>
@@ -77,6 +97,58 @@ namespace MoreMountains.Tools
 			{
 				this.gameObject.SetActive(JsonUtility.FromJson<Data>(data).ActiveState);	
 			}
+
+			if (SaveEnabledStates)
+			{
+				List<ComponentData> loadedList = JsonUtility.FromJson<Data>(data).ComponentEnabledStates;
+				
+				Behaviour[] components = gameObject.GetComponents<Behaviour>();
+				Renderer[] renderers = gameObject.GetComponents<Renderer>();
+
+				if (loadedList.Count != components.Length + renderers.Length)
+				{
+					return;
+				}
+
+				int total = 0;
+				for (int i = 0; i < components.Length; i++)
+				{
+					if (loadedList[i].Name == components[i].name)
+					{
+						components[i].enabled = loadedList[i].EnabledState;
+					}
+
+					total++;
+				}
+				
+				for (int j = 0; j < renderers.Length; j++)
+				{
+					if (loadedList[total+j].Name == renderers[j].name)
+					{
+						renderers[j].enabled = loadedList[total+j].EnabledState;
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Grabs all components on this object
+		/// </summary>
+		protected virtual List<ComponentData> GetCurrentComponents()
+		{
+			List<ComponentData> currentComponents = new List<ComponentData>();
+			Behaviour[] components = gameObject.GetComponents<Behaviour>();
+			Renderer[] renderers = gameObject.GetComponents<Renderer>();
+			foreach (Behaviour component in components) 
+			{ 
+				currentComponents.Add(new ComponentData { Name = component.name, EnabledState = component.enabled }); 
+			}
+			foreach (Renderer renderer in renderers) 
+			{ 
+				currentComponents.Add(new ComponentData { Name = renderer.name, EnabledState = renderer.enabled }); 
+			}
+
+			return currentComponents;
 		}
 	}	
 }

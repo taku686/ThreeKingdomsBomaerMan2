@@ -54,7 +54,7 @@ namespace MoreMountains.Feedbacks
 		/// <returns></returns>
 		protected virtual IEnumerator PauseWait()
 		{
-			yield return WaitFor(PauseDuration);
+			yield return WaitFor(ApplyTimeMultiplier(PauseDuration));
 		}
 
 		/// <summary>

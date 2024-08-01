@@ -69,13 +69,13 @@ namespace MoreMountains.Tools
 		/// Now every time this character's movement state changes, the OnMMEvent method will be called, and you can do whatever you want with it.
 		/// 
 		/// whether or not this state machine broadcasts events 
-		public bool TriggerEvents { get; set; }
+		public virtual bool TriggerEvents { get; set; }
 		/// the name of the target gameobject
 		public GameObject Target;
 		/// the current character's movement state
-		public T CurrentState { get; protected set; }
+		public virtual T CurrentState { get; protected set; }
 		/// the character's movement state before entering the current one
-		public T PreviousState { get; protected set; }
+		public virtual T PreviousState { get; protected set; }
 
 		public delegate void OnStateChangeDelegate();
 		/// an event you can listen to to listen locally to changes on that state machine

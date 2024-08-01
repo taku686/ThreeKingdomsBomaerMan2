@@ -26,9 +26,9 @@ namespace MoreMountains.Tools
 		/// the level, to read from a MMRadioBroadcaster
 		public virtual float Level { get { return CurrentLevel; } }
 		/// the time, unscaled or scaled
-		public float TimescaleTime { get { return (TimeScale == TimeScales.Scaled) ? Time.time : Time.unscaledTime; } }
+		public virtual float TimescaleTime { get { return (TimeScale == TimeScales.Scaled) ? Time.time : Time.unscaledTime; } }
 		/// the delta time, unscaled or not
-		public float TimescaleDeltaTime { get { return (TimeScale == TimeScales.Scaled) ? Time.deltaTime : Time.unscaledDeltaTime; } }
+		public virtual float TimescaleDeltaTime { get { return (TimeScale == TimeScales.Scaled) ? Time.deltaTime : Time.unscaledDeltaTime; } }
 
 		[Header("Signal")]
 		/// the selected signal mode

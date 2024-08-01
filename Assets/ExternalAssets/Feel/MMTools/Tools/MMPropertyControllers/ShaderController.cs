@@ -213,6 +213,9 @@ namespace MoreMountains.Tools
 		/// whether or not this controller should go back to sleep after a OneTime
 		[Tooltip("whether or not this controller should go back to sleep after a OneTime")]
 		public bool DisableGameObjectAfterOneTime = false;
+		/// whether or not to initialize the initial value to the current value on a OneTime play
+		[Tooltip("whether or not to initialize the initial value to the current value on a OneTime play")]
+		public bool GetInitialValueOnOneTime = false;
 
 		[Header("AudioAnalyzer")]
 		/// the bound audio analyzer used to drive this controller
@@ -517,6 +520,11 @@ namespace MoreMountains.Tools
 				Initialization();
 			}
 
+			if (GetInitialValueOnOneTime)
+			{
+				InitialValue = GetInitialValue();
+			}
+
 			if (RendererIsNull() || (!PropertyFound))
 			{
 				return;
@@ -752,6 +760,10 @@ namespace MoreMountains.Tools
 					CurrentValue = OneTimeCurve.Evaluate(1f);
 					CurrentValue = MMMaths.Remap(CurrentValue, 0f, 1f, OneTimeRemapMin, OneTimeRemapMax);
 					CurrentValue *= OneTimeAmplitude;
+					if (AddToInitialValue)
+					{
+						CurrentValue += InitialValue;
+					}
 				}
 				SetValue(CurrentValue);
 				if (DisableAfterOneTime)

@@ -141,7 +141,7 @@ namespace MoreMountains.Feedbacks
 				_wiggle.PositionWiggleProperties.AmplitudeMax = Vector3.one * amplitude;
 			}
 
-			_shakeStartedTimestamp = Time.time;
+			_shakeStartedTimestamp = Time.unscaledTime;
 			_wiggle.PositionWiggleProperties.UseUnscaledTime = useUnscaledTime;
 			_wiggle.PositionWiggleProperties.FrequencyMin = frequency;
 			_wiggle.PositionWiggleProperties.FrequencyMax = frequency;

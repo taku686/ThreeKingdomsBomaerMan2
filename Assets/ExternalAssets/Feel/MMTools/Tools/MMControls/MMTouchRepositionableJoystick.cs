@@ -41,7 +41,7 @@ namespace MoreMountains.Tools
 
 			// we store the detection zone's initial position
 			_rectTransform = GetComponent<RectTransform>();
-			_initialPosition = _rectTransform.position;
+			_initialPosition = BackgroundCanvasGroup.GetComponent<RectTransform>().position;
 		}
 
 		/// <summary>

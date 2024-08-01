@@ -91,6 +91,12 @@ namespace MoreMountains.FeedbacksForThirdParty
 		[Range(-100f, 100f)]
 		public float RemapContrastOne = 100f;
 
+		[MMFInspectorGroup("Color Filter", true, 50)]
+		/// the gradient to use to animate the color filter over time
+		[Tooltip("the gradient to use to animate the color filter over time")]
+		[GradientUsage(true)]
+		public Gradient ColorFilterGradient;
+
 		/// the duration of this feedback is the duration of the shake
 		public override float FeedbackDuration { get { return ApplyTimeMultiplier(ShakeDuration); }  set { ShakeDuration = value;  } }
 
@@ -111,6 +117,7 @@ namespace MoreMountains.FeedbacksForThirdParty
 				ShakeHueShift, RemapHueShiftZero, RemapHueShiftOne, 
 				ShakeSaturation, RemapSaturationZero, RemapSaturationOne, 
 				ShakeContrast, RemapContrastZero, RemapContrastOne, 
+				true, ColorFilterGradient,
 				FeedbackDuration,                     
 				RelativeIntensity, intensityMultiplier, ChannelData(Channel), ResetShakerValuesAfterShake, ResetTargetValuesAfterShake, NormalPlayDirection, Timing.TimescaleMode);
             
@@ -133,6 +140,7 @@ namespace MoreMountains.FeedbacksForThirdParty
 				ShakeHueShift, RemapHueShiftZero, RemapHueShiftOne, 
 				ShakeSaturation, RemapSaturationZero, RemapSaturationOne, 
 				ShakeContrast, RemapContrastZero, RemapContrastOne, 
+				true, ColorFilterGradient,
 				FeedbackDuration,                     
 				stop:true);
             

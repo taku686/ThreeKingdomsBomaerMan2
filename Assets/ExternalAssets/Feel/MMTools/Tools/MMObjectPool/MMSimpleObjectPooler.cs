@@ -18,7 +18,7 @@ namespace MoreMountains.Tools
 		/// if true, the pool will automatically add objects to the itself if needed
 		public bool PoolCanExpand = true;
 	    
-		public List<MMSimpleObjectPooler> Owner { get; set; }
+		public virtual List<MMSimpleObjectPooler> Owner { get; set; }
 		private void OnDestroy() { Owner?.Remove(this); }
 
 		/// <summary>

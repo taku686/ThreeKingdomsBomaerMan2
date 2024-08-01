@@ -57,7 +57,7 @@ namespace MoreMountains.FeedbacksForThirdParty
 		public virtual float GetTime() { return (TimescaleMode == TimescaleModes.Scaled) ? Time.time : Time.unscaledTime; }
 		public virtual float GetDeltaTime() { return (TimescaleMode == TimescaleModes.Scaled) ? Time.deltaTime : Time.unscaledDeltaTime; }
 
-		public TimescaleModes TimescaleMode { get; set; }
+		public virtual TimescaleModes TimescaleMode { get; set; }
         
 		protected Camera _camera;
 		protected float _initialFieldOfView;
@@ -148,7 +148,6 @@ namespace MoreMountains.FeedbacksForThirdParty
 			_transitionDuration = transitionDuration;
 			_direction = 1;
 			_destinationReached = false;
-			_initialFieldOfView = _camera.fieldOfView;
 			_zoomStartedAt = GetTime();
 
 			if (tweenType != null)

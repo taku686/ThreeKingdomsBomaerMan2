@@ -79,7 +79,6 @@ namespace MoreMountains.Feedbacks
 	public class MMTimeManager : MMSingleton<MMTimeManager>
 	{	
 		[Header("Default Values")]
-		[MMFInformationAttribute("Put this component in your scene and it'll catch MMFreezeFrameEvents and MMTimeScaleEvents, allowing you to control the flow of time.", MMFInformationAttribute.InformationType.Info, false)]
 		/// The reference time scale, to which the system will go back to after all time is changed
 		[Tooltip("The reference time scale, to which the system will go back to after all time is changed")]
 		public float NormalTimeScale = 1f;
@@ -117,6 +116,15 @@ namespace MoreMountains.Feedbacks
 		protected float _startedAt;
 		protected bool _lerpingBackToNormal = false;
 		protected float _timeScaleLastTime = float.NegativeInfinity;
+		
+		/// <summary>
+		/// Statics initialization to support enter play modes
+		/// </summary>
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		protected static void InitializeStatics()
+		{
+			_instance = null;
+		}
 
 		/// <summary>
 		/// A method used from the inspector to test the system

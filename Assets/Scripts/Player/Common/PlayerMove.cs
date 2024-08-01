@@ -283,8 +283,7 @@ namespace Player.Common
                     break;
             }
 
-            await player.DOLocalRotate(nextRotation, GameCommonData.TurnDuration).SetLink(player.gameObject)
-                .ToUniTask();
+            await player.DOLocalRotate(nextRotation, GameCommonData.TurnDuration).SetLink(player.gameObject);
         }
 
         private void Stop()

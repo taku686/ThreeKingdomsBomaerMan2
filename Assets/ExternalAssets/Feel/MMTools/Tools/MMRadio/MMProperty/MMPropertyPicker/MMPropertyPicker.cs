@@ -21,7 +21,7 @@ namespace MoreMountains.Tools
 		/// the name of the property to link to
 		public string TargetPropertyName;
 		/// whether or not this property has been found
-		public bool PropertyFound { get; protected set; }
+		public virtual bool PropertyFound { get; protected set; }
         
 		protected MMProperty _targetMMProperty;
 		protected bool _initialized = false;

@@ -22,7 +22,7 @@ namespace MoreMountains.Tools
 		/// Force desktop mode (gamepad, keyboard...) or mobile (touch controls) 
 		[Tooltip("Force desktop mode (gamepad, keyboard...) or mobile (touch controls)")]
 		public InputForcedMode ForcedMode;
-		public bool IsMobile { get; protected set; }
+		public virtual bool IsMobile { get; protected set; }
 
 		protected CanvasGroup _canvasGroup;
 		protected float _initialMobileControlsAlpha;

@@ -44,6 +44,12 @@ namespace MoreMountains.Feedbacks
 		/// the force mode to apply
 		[Tooltip("the force mode to apply")]
 		public ForceMode AppliedForceMode = ForceMode.Impulse;
+		/// if this is true, the velocity of the rigidbody will be reset before applying the new force
+		[Tooltip("if this is true, the velocity of the rigidbody will be reset before applying the new force")]
+		public bool ResetVelocityOnPlay = false;
+		/// if this is true, the magnitude of the min/max force will be applied in the target transform's forward direction
+		[Tooltip("if this is true, the magnitude of the min/max force will be applied in the target transform's forward direction")] 
+		public bool ForwardForce = false;
 
 		protected Vector3 _force;
 
@@ -81,6 +87,16 @@ namespace MoreMountains.Feedbacks
 		/// <param name="rb"></param>
 		protected virtual void ApplyForce(Rigidbody rb)
 		{
+			if(ResetVelocityOnPlay)
+			{
+				rb.velocity = Vector3.zero;
+			}
+
+			if (ForwardForce)
+			{
+				_force = _force.magnitude * rb.transform.forward;
+			}
+			
 			switch (Mode)
 			{
 				case Modes.AddForce:

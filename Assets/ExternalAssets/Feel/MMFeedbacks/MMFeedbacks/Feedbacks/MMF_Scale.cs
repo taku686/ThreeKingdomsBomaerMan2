@@ -30,6 +30,7 @@ namespace MoreMountains.Feedbacks
 		public override bool HasCustomInspectors { get { return true; } }
 		#endif
 		public override bool HasAutomatedTargetAcquisition => true;
+		public override bool CanForceInitialValue => true;
 		protected override void AutomateTargetAcquisition() => AnimateScaleTarget = FindAutomatedTarget<Transform>();
 
 		[MMFInspectorGroup("Scale Mode", true, 12, true)]

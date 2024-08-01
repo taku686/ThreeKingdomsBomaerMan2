@@ -177,6 +177,7 @@ namespace MoreMountains.Feedbacks
 			{
 				Turn(false);    
 			}
+			Owner.StopCoroutine(_coroutine);
 			_coroutine = null;
 		}
 

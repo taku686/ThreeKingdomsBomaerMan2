@@ -12,7 +12,7 @@ namespace MoreMountains.Feedbacks
 	public class MMF_PlayerEnabler : MonoBehaviour
 	{
 		/// the MMFeedbacks to pilot
-		public MMF_Player TargetMmfPlayer { get; set; }
+		public virtual MMF_Player TargetMmfPlayer { get; set; }
         
 		/// <summary>
 		/// On enable, we re-enable (and thus play) our MMFeedbacks if needed

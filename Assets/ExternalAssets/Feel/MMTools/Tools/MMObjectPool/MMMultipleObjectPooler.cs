@@ -42,7 +42,7 @@ namespace MoreMountains.Tools
 		[MMCondition("MutualizeWaitingPools", true)]
 		public string MutualizedPoolName = "";
 		
-		public List<MMMultipleObjectPooler> Owner { get; set; }
+		public virtual List<MMMultipleObjectPooler> Owner { get; set; }
 		private void OnDestroy() { Owner?.Remove(this); }
 		
 		/// the actual object pool

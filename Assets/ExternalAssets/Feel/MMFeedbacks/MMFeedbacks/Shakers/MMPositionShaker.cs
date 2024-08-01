@@ -111,7 +111,7 @@ namespace MoreMountains.Feedbacks
 			GrabInitialPosition();
 		}
 
-		protected virtual void GrabInitialPosition()
+		public virtual void GrabInitialPosition()
 		{
 			switch (Mode)
 			{

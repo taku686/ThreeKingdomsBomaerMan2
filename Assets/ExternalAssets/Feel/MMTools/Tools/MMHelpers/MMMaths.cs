@@ -528,6 +528,11 @@ namespace MoreMountains.Tools
 		/// <param name="amount">Amount.</param>
 		public static float Approach(float from, float to, float amount)
 		{
+			if (Mathf.Approximately(from, to))
+			{
+				return from;
+			}
+			
 			if (from < to)
 			{
 				from += amount;
@@ -536,7 +541,8 @@ namespace MoreMountains.Tools
 					return to;
 				}
 			}
-			else
+			
+			if (from > to)
 			{
 				from -= amount;
 				if (from < to)
@@ -544,6 +550,7 @@ namespace MoreMountains.Tools
 					return to;
 				}
 			}
+			
 			return from;
 		} 
 

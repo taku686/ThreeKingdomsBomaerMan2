@@ -71,6 +71,12 @@ namespace MoreMountains.Tools
 	public static class MMEventManager 
 	{
 		private static Dictionary<Type, List<MMEventListenerBase>> _subscribersList;
+		
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		static void InitializeStatics()
+		{
+			_subscribersList = new Dictionary<Type, List<MMEventListenerBase>>();
+		}
 
 		static MMEventManager()
 		{

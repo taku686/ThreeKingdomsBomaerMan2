@@ -20,9 +20,9 @@ namespace  MoreMountains.Tools
 		public float ChancePercentage;
         
 		/// the computed low bound of this object's range
-		public float RangeFrom { get; set; }
+		public virtual float RangeFrom { get; set; }
 		/// the computed high bound of this object's range
-		public float RangeTo { get; set; }
+		public virtual float RangeTo { get; set; }
 	}
     
     

@@ -25,63 +25,92 @@ namespace MoreMountains.Tools
 		[MMInformation("This component will apply squash and stretch based on velocity (either position based or computed from a Rigidbody. It has to be put on an intermediary level in the hierarchy, between the logic (top level) and the model (bottom level).", MMInformationAttribute.InformationType.Info, false)]
 		[Header("Velocity Detection")]
 		/// the possible ways to get velocity from
+		[Tooltip("the possible ways to get velocity from")]
 		public Modes Mode = Modes.Position;
-		/// whether we should use deltaTime or unscaledDeltaTime;
+		/// whether we should use deltaTime or unscaledDeltaTime
+		[Tooltip("whether we should use deltaTime or unscaledDeltaTime")]
 		public Timescales Timescale = Timescales.Regular;
-
 
 		[Header("Settings")]
 		/// the intensity of the squash and stretch
+		[Tooltip("the intensity of the squash and stretch")]
 		public float Intensity = 0.02f;
 		/// the maximum velocity of your parent object, used to remap the computed one
+		[Tooltip("the maximum velocity of your parent object, used to remap the computed one")]
 		public float MaximumVelocity = 1f;
 
 		[Header("Rescale")]
 		/// the minimum scale to apply to this object
-		public Vector2 MinimumScale = new Vector2(0.5f, 0.5f);
+		[Tooltip("the minimum scale to apply to this object")]
+		public Vector3 MinimumScale = new Vector3(0.5f, 0.5f, 0.5f);
 		/// the maximum scale to apply to this object
-		public Vector2 MaximumScale = new Vector2(2f, 2f);
+		[Tooltip("the maximum scale to apply to this object")]
+		public Vector3 MaximumScale = new Vector3(2f, 2f, 2f);
+		/// whether or not to rescale on the x axis
+		[Tooltip("whether or not to rescale on the x axis")]
+		public bool RescaleX = true;
+		/// whether or not to rescale on the y axis
+		[Tooltip("whether or not to rescale on the y axis")]
+		public bool RescaleY = true;
+		/// whether or not to rescale on the z axis
+		[Tooltip("whether or not to rescale on the z axis")]
+		public bool RescaleZ = true;
+		/// whether or not to rotate the transform to align with the current direction
+		[Tooltip("whether or not to rotate the transform to align with the current direction")]
+		public bool RotateToMatchDirection = true;
 
 		[Header("Squash")]
 		/// if this is true, the object will squash once velocity goes below the specified threshold
+		[Tooltip("if this is true, the object will squash once velocity goes below the specified threshold")]
 		public bool AutoSquashOnStop = false;
 		/// the curve to apply when squashing the object (this describes scale on x and z, will be inverted for y to maintain mass)
+		[Tooltip("the curve to apply when squashing the object (this describes scale on x and z, will be inverted for y to maintain mass)")]
 		public AnimationCurve SquashCurve = new AnimationCurve(new Keyframe(0, 0), new Keyframe(0.5f, 1f), new Keyframe(1, 0f));
 		/// the velocity threshold after which a squash can be triggered if the object stops
+		[Tooltip("the velocity threshold after which a squash can be triggered if the object stops")]
 		public float SquashVelocityThreshold = 0.1f;
 		/// the maximum duration of the squash (will be reduced if velocity is low)
+		[Tooltip("the maximum duration of the squash (will be reduced if velocity is low)")]
 		[MMVector("Min","Max")]
 		public Vector2 SquashDuration = new Vector2(0.25f, 0.5f);
 		/// the maximum intensity of the squash
+		[Tooltip("the maximum intensity of the squash")]
 		[MMVector("Min", "Max")]
 		public Vector2 SquashIntensity = new Vector2(0f, 1f);
 
 		[Header("Spring")] 
 		/// whether or not to add extra spring to the squash and stretch
+		[Tooltip("whether or not to add extra spring to the squash and stretch")]
 		public bool Spring = false;
 		/// the damping to apply to the spring
+		[Tooltip("the damping to apply to the spring")]
 		[MMCondition("Spring", true)]
 		public float SpringDamping = 0.3f;
 		/// the spring's frequency
+		[Tooltip("the spring's frequency")]
 		[MMCondition("Spring", true)] 
 		public float SpringFrequency = 3f;
 		/// the speed of the spring
+		[Tooltip("the speed of the spring")]
 		[MMCondition("Spring", true)] 
 		public float SpringSpeed = 10f;
         
 		[Header("Debug")]
 		[MMReadOnly]
 		/// the current velocity of the parent object
+		[Tooltip("the current velocity of the parent object")]
 		public Vector3 Velocity;
 		[MMReadOnly]
 		/// the remapped velocity
+		[Tooltip("the remapped velocity")]
 		public float RemappedVelocity;
 		[MMReadOnly]
 		/// the current velocity magnitude
+		[Tooltip("the current velocity magnitude")]
 		public float VelocityMagnitude;
 
-		public float TimescaleTime { get { return (Timescale == Timescales.Regular) ? Time.time : Time.unscaledTime; } }
-		public float TimescaleDeltaTime { get { return (Timescale == Timescales.Regular) ? Time.deltaTime : Time.unscaledDeltaTime; } }
+		public virtual float TimescaleTime { get { return (Timescale == Timescales.Regular) ? Time.time : Time.unscaledTime; } }
+		public virtual float TimescaleDeltaTime { get { return (Timescale == Timescales.Regular) ? Time.deltaTime : Time.unscaledDeltaTime; } }
 
 		protected Rigidbody2D _rigidbody2D;
 		protected Rigidbody _rigidbody;
@@ -97,12 +126,10 @@ namespace MoreMountains.Tools
 		protected bool _squashing = false;
 		protected float _squashIntensity;
 		protected float _squashDuration;
-
 		protected bool _movementStarted = false;
 		protected float _lastVelocity = 0f;
 		protected Vector3 _springScale;
 		protected Vector3 _springVelocity = Vector3.zero;
-
 
 		/// <summary>
 		/// On start, we initialize our component
@@ -203,6 +230,10 @@ namespace MoreMountains.Tools
 		/// </summary>
 		protected virtual void ComputeNewRotation()
 		{
+			if (!RotateToMatchDirection)
+			{
+				return;
+			}
 			if (VelocityMagnitude > 0.01f)
 			{
 				_newRotation = Quaternion.FromToRotation(Vector3.up, _direction);
@@ -220,9 +251,10 @@ namespace MoreMountains.Tools
 			if (_squashing)
 			{
 				float elapsed = MMMaths.Remap(TimescaleTime - _squashStartedAt, 0f, _squashDuration, 0f, 1f);
-				_newLocalScale.x = _initialScale.x + SquashCurve.Evaluate(elapsed) * _squashIntensity;
-				_newLocalScale.y = _initialScale.y - SquashCurve.Evaluate(elapsed) * _squashIntensity;
-				_newLocalScale.z = _initialScale.z + SquashCurve.Evaluate(elapsed) * _squashIntensity;
+				float curveValue = SquashCurve.Evaluate(elapsed);
+				_newLocalScale.x = _initialScale.x + curveValue * _squashIntensity;
+				_newLocalScale.y = _initialScale.y - curveValue * _squashIntensity;
+				_newLocalScale.z = _initialScale.z + curveValue * _squashIntensity;
 
 				if (elapsed >= 1f)
 				{
@@ -239,11 +271,25 @@ namespace MoreMountains.Tools
 
 			_newLocalScale.x = Mathf.Clamp(_newLocalScale.x, MinimumScale.x, MaximumScale.x);
 			_newLocalScale.y = Mathf.Clamp(_newLocalScale.y, MinimumScale.y, MaximumScale.y);
+			_newLocalScale.z = Mathf.Clamp(_newLocalScale.z, MinimumScale.z, MaximumScale.z);
 
 			if (Spring)
 			{
 				MMMaths.Spring(ref _springScale, _newLocalScale, ref _springVelocity, SpringDamping, SpringFrequency, SpringSpeed, Time.deltaTime);
 				_newLocalScale = _springScale;
+			}
+			
+			if (!RescaleX)
+			{
+				_newLocalScale.x = _initialScale.x;
+			}
+			if (!RescaleY)
+			{
+				_newLocalScale.y = _initialScale.y;
+			}
+			if (!RescaleZ)
+			{
+				_newLocalScale.z = _initialScale.z;
 			}
 
 			this.transform.localScale = _newLocalScale;

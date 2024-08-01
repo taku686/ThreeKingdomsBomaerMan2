@@ -185,10 +185,10 @@ namespace MoreMountains.Feedbacks
 			if (!AnimateScaleZ) { _pointAScale.z = TargetTransform.localScale.z; _pointBScale.z = _pointAScale.z; }
 
 			IsPlaying = true;
-			float journey = NormalPlayDirection ? 0f : Duration;
-			while ((journey >= 0) && (journey <= Duration) && (Duration > 0))
+			float journey = NormalPlayDirection ? 0f : FeedbackDuration;
+			while ((journey >= 0) && (journey <= FeedbackDuration) && (FeedbackDuration > 0))
 			{
-				float percent = Mathf.Clamp01(journey / Duration);
+				float percent = Mathf.Clamp01(journey / FeedbackDuration);
 				ChangeTransformValues(percent);
 				journey += NormalPlayDirection ? FeedbackDeltaTime : -FeedbackDeltaTime;
 				yield return null;

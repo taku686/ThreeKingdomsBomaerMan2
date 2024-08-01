@@ -60,7 +60,7 @@ namespace MoreMountains.FeedbacksForThirdParty
 		public virtual float GetTime() { return (TimescaleMode == TimescaleModes.Scaled) ? Time.time : Time.unscaledTime; }
 		public virtual float GetDeltaTime() { return (TimescaleMode == TimescaleModes.Scaled) ? Time.deltaTime : Time.unscaledDeltaTime; }
 
-		public TimescaleModes TimescaleMode { get; set; }
+		public virtual TimescaleModes TimescaleMode { get; set; }
 		
 		#if MM_CINEMACHINE
 		protected Cinemachine.CinemachineFreeLook _freeLookCamera;

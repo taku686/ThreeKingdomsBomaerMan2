@@ -48,6 +48,11 @@ namespace MoreMountains.Feedbacks
 		public bool RelativeAmplitude = true;
 		/// if this is true, all amplitude values will match the x amplitude value
 		public bool UniformValues = false;
+		/// if this is true, when randomizing amplitude, the resulting vector's length will be forced to match ForcedVectorLength
+		public bool ForceVectorLength = false;
+		/// the length of the randomized amplitude if ForceVectorLength is true
+		[MMCondition("ForceVectorLength", true)]
+		public float ForcedVectorLength = 1f;
 
 		[Header("Curve")]
 		/// a curve to animate this property on
@@ -252,9 +257,13 @@ namespace MoreMountains.Feedbacks
 			RandomizeVector3(ref internalProperties.randomAmplitude, properties.AmplitudeMin, properties.AmplitudeMax);
 			RandomizeVector3(ref internalProperties.randomNoiseFrequency, properties.NoiseFrequencyMin, properties.NoiseFrequencyMax);
 			RandomizeVector3(ref internalProperties.randomNoiseShift, properties.NoiseShiftMin, properties.NoiseShiftMax);
-
 			RandomizeVector3(ref internalProperties.remapZero, properties.RemapCurveZeroMin, properties.RemapCurveZeroMax);
 			RandomizeVector3(ref internalProperties.remapOne, properties.RemapCurveOneMin, properties.RemapCurveOneMax);
+
+			if (properties.ForceVectorLength)
+			{
+				internalProperties.randomAmplitude = internalProperties.randomAmplitude.normalized * properties.ForcedVectorLength; 
+			}
 
 			internalProperties.newValue = DetermineNewValue(properties, internalProperties.newValue, internalProperties.initialValue, ref internalProperties.startValue, 
 				ref internalProperties.randomAmplitude, ref internalProperties.randomFrequency, ref internalProperties.pauseDuration, true);

@@ -25,6 +25,7 @@ namespace MoreMountains.Feedbacks
 		public override bool HasCustomInspectors => true; 
 		#endif
 		public override bool HasRandomness => true;
+		public override bool CanForceInitialValue => true;
 		public override bool HasAutomatedTargetAcquisition => true;
 		protected override void AutomateTargetAcquisition() => AnimatePositionTarget = FindAutomatedTargetGameObject();
 		

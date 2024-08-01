@@ -24,8 +24,8 @@ namespace MoreMountains.Tools
 	/// </summary>
 	public class MMShufflebag<T> 
 	{
-		public int Capacity { get { return _contents.Capacity; } }
-		public int Size { get { return _contents.Count; } }
+		public virtual int Capacity { get { return _contents.Capacity; } }
+		public virtual int Size { get { return _contents.Count; } }
 
 		protected List<T> _contents;
 		protected T _currentItem;

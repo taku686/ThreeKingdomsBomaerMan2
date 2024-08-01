@@ -46,7 +46,7 @@ namespace MoreMountains.Tools
 		[Tooltip("If you set this to true, you'll need to actually press the axis for it to be triggered, otherwise a simple hover will trigger it (better for touch input).")]
 		public bool MouseMode = false;
 
-		public ButtonStates CurrentState { get; protected set; }
+		public virtual ButtonStates CurrentState { get; protected set; }
 
 		protected CanvasGroup _canvasGroup;
 		protected float _initialOpacity;

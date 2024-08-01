@@ -75,11 +75,11 @@ namespace  MoreMountains.Feedbacks
 		[Tooltip("This event will fire every time this MMFeedbacks plays its last MMFeedback")]
 		public UnityEvent OnComplete;
 
-		public bool OnPlayIsNull { get; protected set; }
-		public bool OnPauseIsNull { get; protected set; }
-		public bool OnResumeIsNull { get; protected set; }
-		public bool OnRevertIsNull { get; protected set; }
-		public bool OnCompleteIsNull { get; protected set; }
+		public virtual bool OnPlayIsNull { get; protected set; }
+		public virtual bool OnPauseIsNull { get; protected set; }
+		public virtual bool OnResumeIsNull { get; protected set; }
+		public virtual bool OnRevertIsNull { get; protected set; }
+		public virtual bool OnCompleteIsNull { get; protected set; }
 
 		/// <summary>
 		/// On init we store for each event whether or not we have one to invoke

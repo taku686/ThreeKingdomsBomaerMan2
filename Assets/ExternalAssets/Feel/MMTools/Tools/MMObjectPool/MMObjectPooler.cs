@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
@@ -29,6 +28,12 @@ namespace MoreMountains.Tools
 		protected bool _onSceneLoadedRegistered = false;
         
 		public static List<MMObjectPool> _pools = new List<MMObjectPool>(_initialPoolsListCapacity);
+		
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		protected static void InitializeStatics()
+		{
+			Instance = null;
+		}
 
 		/// <summary>
 		/// Adds a pooler to the static list if needed

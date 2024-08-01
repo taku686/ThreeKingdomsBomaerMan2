@@ -111,10 +111,10 @@ namespace MoreMountains.Feedbacks
 		public int TargetBPM = 120;
 		
 		/// from any class, you can set UseScriptDrivenTimescale:true, from there, instead of looking at Time.time, Time.deltaTime (or their unscaled equivalents), this feedback will compute time based on the values you feed them via ScriptDrivenDeltaTime and ScriptDrivenTime
-		public bool UseScriptDrivenTimescale { get; set; }
+		public virtual bool UseScriptDrivenTimescale { get; set; }
 		/// the value this feedback should use for delta time
-		public float ScriptDrivenDeltaTime { get; set; }
+		public virtual float ScriptDrivenDeltaTime { get; set; }
 		/// the value this feedback should use for time
-		public float ScriptDrivenTime { get; set; }
+		public virtual float ScriptDrivenTime { get; set; }
 	}
 }

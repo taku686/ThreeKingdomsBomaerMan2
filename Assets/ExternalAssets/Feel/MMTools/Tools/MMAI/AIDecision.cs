@@ -13,8 +13,10 @@ namespace MoreMountains.Tools
 		/// Decide will be performed every frame while the Brain is in a state this Decision is in. Should return true or false, which will then determine the transition's outcome.
 		public abstract bool Decide();
 
+		/// a label you can set to organize your AI Decisions, not used by anything else 
+		[Tooltip("a label you can set to organize your AI Decisions, not used by anything else")]
 		public string Label;
-		public bool DecisionInProgress { get; set; }
+		public virtual bool DecisionInProgress { get; set; }
 		protected AIBrain _brain;
         
 		/// <summary>

@@ -34,7 +34,6 @@ namespace MoreMountains.FeedbacksForThirdParty
 		/// whether or not to clear impulses (stopping camera shakes) when the Stop method is called on that feedback
 		[Tooltip("whether or not to clear impulses (stopping camera shakes) when the Stop method is called on that feedback")]
 		public bool ClearImpulseOnStop = false;
-
 		/// the duration of this feedback is the duration of the impulse
 		public override float FeedbackDuration { get { return m_ImpulseDefinition != null ? m_ImpulseDefinition.m_TimeEnvelope.Duration : 0f; } }
 		#endif

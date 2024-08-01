@@ -141,6 +141,7 @@ namespace MoreMountains.Feedbacks
 				Turn(false);
 			}
 			IsPlaying = false;
+			Owner.StopCoroutine(_coroutine);
 			_coroutine = null;
 			yield return null;
 		}
@@ -174,6 +175,8 @@ namespace MoreMountains.Feedbacks
 			{
 				Turn(false);    
 			}
+			Owner.StopCoroutine(_coroutine);
+			_coroutine = null;
 		}
 
 		/// <summary>

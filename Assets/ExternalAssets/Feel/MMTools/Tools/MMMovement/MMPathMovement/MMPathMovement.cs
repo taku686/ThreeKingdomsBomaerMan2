@@ -47,7 +47,7 @@ namespace MoreMountains.Tools
 		[Tooltip("the movement speed")]
 		public float MovementSpeed = 1;
 		/// returns the current speed at which the object is traveling
-		public Vector3 CurrentSpeed { get; protected set; }
+		public virtual Vector3 CurrentSpeed { get; protected set; }
 		/// the movement type of the object
 		[Tooltip("the movement type of the object")]
 		public PossibleAccelerationType AccelerationType = PossibleAccelerationType.ConstantSpeed;

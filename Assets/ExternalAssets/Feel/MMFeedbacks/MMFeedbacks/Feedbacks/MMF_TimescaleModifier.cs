@@ -21,7 +21,7 @@ namespace MoreMountains.Feedbacks
 		/// - change : sets the timescale to a new value, forever (until you change it again)
 		/// - reset : resets the timescale to its previous value
 		/// </summary>
-		public enum Modes { Shake, Change, Reset }
+		public enum Modes { Shake, Change, Reset, Unfreeze }
 
 		/// sets the inspector color for this feedback
 		#if UNITY_EDITOR
@@ -104,6 +104,9 @@ namespace MoreMountains.Feedbacks
 					break;
 				case Modes.Reset:
 					MMTimeScaleEvent.Trigger(MMTimeScaleMethods.Reset, TimeScale, 0f, false, 0f, true);
+					break;
+				case Modes.Unfreeze:
+					MMTimeScaleEvent.Trigger(MMTimeScaleMethods.Unfreeze, TimeScale, 0f, false, 0f, true);
 					break;
 			}     
 		}

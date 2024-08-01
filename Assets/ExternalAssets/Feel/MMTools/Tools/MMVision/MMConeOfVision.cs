@@ -88,7 +88,7 @@ namespace MoreMountains.Tools
 		protected RaycastHit _raycastAtAngleHit;
 		protected int _numberOfVerticesLastTime = 0;
 
-		public Vector3 Center { get { return this.transform.position + Offset;  } }
+		public virtual Vector3 Center { get { return this.transform.position + Offset;  } }
 
 		protected virtual void Awake()
 		{

@@ -29,6 +29,7 @@ namespace MoreMountains.Feedbacks
 		/// the duration of this feedback is the duration of the zoom
 		public override float FeedbackDuration { get { return ApplyTimeMultiplier(ZoomDuration); } set { ZoomDuration = value; } }
 		public override bool HasChannel => true;
+		public override bool CanForceInitialValue => true;
 
 		[MMFInspectorGroup("Camera Zoom", true, 72)]
 		/// the zoom mode (for : forward for TransitionDuration, static for Duration, backwards for TransitionDuration)

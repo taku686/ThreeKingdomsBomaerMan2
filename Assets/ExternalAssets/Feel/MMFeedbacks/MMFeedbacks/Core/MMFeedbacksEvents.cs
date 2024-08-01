@@ -39,7 +39,7 @@ namespace  MoreMountains.Feedbacks
 		static public void Register(Delegate callback) { OnEvent += callback; }
 		static public void Unregister(Delegate callback) { OnEvent -= callback; }
 
-		public enum EventTypes { Play, Pause, Resume, Revert, Complete, SkipToTheEnd, RestoreInitialValues }
+		public enum EventTypes { Play, Pause, Resume, Revert, Complete, SkipToTheEnd, RestoreInitialValues, Loop }
 		public delegate void Delegate(MMFeedbacks source, EventTypes type);
 		static public void Trigger(MMFeedbacks source, EventTypes type)
 		{
@@ -99,13 +99,13 @@ namespace  MoreMountains.Feedbacks
 		[Tooltip("This event will fire every time this MMFeedbacks gets skipped to the end")]
 		public UnityEvent OnSkipToTheEnd;
 
-		public bool OnPlayIsNull { get; protected set; }
-		public bool OnPauseIsNull { get; protected set; }
-		public bool OnResumeIsNull { get; protected set; }
-		public bool OnRevertIsNull { get; protected set; }
-		public bool OnCompleteIsNull { get; protected set; }
-		public bool OnRestoreInitialValuesIsNull { get; protected set; }
-		public bool OnSkipToTheEndIsNull { get; protected set; }
+		public virtual bool OnPlayIsNull { get; protected set; }
+		public virtual bool OnPauseIsNull { get; protected set; }
+		public virtual bool OnResumeIsNull { get; protected set; }
+		public virtual bool OnRevertIsNull { get; protected set; }
+		public virtual bool OnCompleteIsNull { get; protected set; }
+		public virtual bool OnRestoreInitialValuesIsNull { get; protected set; }
+		public virtual bool OnSkipToTheEndIsNull { get; protected set; }
 
 		/// <summary>
 		/// On init we store for each event whether or not we have one to invoke

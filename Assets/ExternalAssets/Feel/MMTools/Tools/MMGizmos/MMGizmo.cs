@@ -145,24 +145,24 @@ namespace MoreMountains.Tools
 		[Tooltip("when in Property mode, the property whose value to display on the gizmo")]
 		public MMPropertyPicker TargetProperty;
 		
-		public bool Initialized { get; set; }
-		public SphereCollider _sphereCollider { get; set; }
-		public BoxCollider _boxCollider { get; set; }
-		public MeshCollider _meshCollider { get; set; }
-		public CircleCollider2D _circleCollider2D { get; set; }
-		public BoxCollider2D _boxCollider2D { get; set; }
-		public Vector3 _vector3Zero { get; set; }
-		public Vector3 _newPosition { get; set; }
-		public Vector2 _worldToGUIPosition { get; set; }
-		public Rect _textureRect { get; set; }
-		public GUIStyle _textGUIStyle { get; set; }
-		public string _textToDisplay { get; set; }
-		public bool _sphereColliderNotNull { get; set; }
-		public bool _boxColliderNotNull { get; set; }
-		public bool _meshColliderNotNull { get; set; }
-		public bool _circleCollider2DNotNull { get; set; }
-		public bool _boxCollider2DNotNull { get; set; }
-		public bool _positionTextureNotNull { get; set; }
+		public virtual bool Initialized { get; set; }
+		public virtual SphereCollider _sphereCollider { get; set; }
+		public virtual BoxCollider _boxCollider { get; set; }
+		public virtual MeshCollider _meshCollider { get; set; }
+		public virtual CircleCollider2D _circleCollider2D { get; set; }
+		public virtual BoxCollider2D _boxCollider2D { get; set; }
+		public virtual Vector3 _vector3Zero { get; set; }
+		public virtual Vector3 _newPosition { get; set; }
+		public virtual Vector2 _worldToGUIPosition { get; set; }
+		public virtual Rect _textureRect { get; set; }
+		public virtual GUIStyle _textGUIStyle { get; set; }
+		public virtual string _textToDisplay { get; set; }
+		public virtual bool _sphereColliderNotNull { get; set; }
+		public virtual bool _boxColliderNotNull { get; set; }
+		public virtual bool _meshColliderNotNull { get; set; }
+		public virtual bool _circleCollider2DNotNull { get; set; }
+		public virtual bool _boxCollider2DNotNull { get; set; }
+		public virtual bool _positionTextureNotNull { get; set; }
 		
 		#if UNITY_EDITOR
 		

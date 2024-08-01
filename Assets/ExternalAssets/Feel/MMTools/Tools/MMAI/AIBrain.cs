@@ -19,7 +19,7 @@ namespace MoreMountains.Tools
 		/// the collection of states
 		public List<AIState> States;
 		/// this brain's current state
-		public AIState CurrentState { get; protected set; }
+		public virtual AIState CurrentState { get; protected set; }
 		/// the time we've spent in the current state
 		[MMReadOnly]
 		public float TimeInThisState;

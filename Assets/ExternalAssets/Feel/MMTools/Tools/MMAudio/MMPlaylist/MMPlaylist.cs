@@ -21,6 +21,7 @@ namespace MoreMountains.Tools
 			OnEvent?.Invoke(channel);
 		}
 	}
+	
 	public struct MMPlaylistStopEvent
 	{
 		static private event Delegate OnEvent;
@@ -34,6 +35,7 @@ namespace MoreMountains.Tools
 			OnEvent?.Invoke(channel);
 		}
 	}
+	
 	public struct MMPlaylistPauseEvent
 	{
 		static private event Delegate OnEvent;
@@ -47,6 +49,7 @@ namespace MoreMountains.Tools
 			OnEvent?.Invoke(channel);
 		}
 	}
+	
 	public struct MMPlaylistPlayNextEvent
 	{
 		static private event Delegate OnEvent;
@@ -60,6 +63,7 @@ namespace MoreMountains.Tools
 			OnEvent?.Invoke(channel);
 		}
 	}
+	
 	public struct MMPlaylistPlayPreviousEvent
 	{
 		static private event Delegate OnEvent;
@@ -88,6 +92,62 @@ namespace MoreMountains.Tools
 		}
 	}
 
+	public struct MMPlaylistVolumeMultiplierEvent
+	{
+		static private event Delegate OnEvent;
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)] private static void RuntimeInitialization() { OnEvent = null; }
+		static public void Register(Delegate callback) { OnEvent += callback; }
+		static public void Unregister(Delegate callback) { OnEvent -= callback; }
+
+		public delegate void Delegate(int channel, float newVolumeMultiplier, bool applyVolumeMultiplierInstantly = false);
+		static public void Trigger(int channel, float newVolumeMultiplier, bool applyVolumeMultiplierInstantly = false)
+		{
+			OnEvent?.Invoke(channel, newVolumeMultiplier, applyVolumeMultiplierInstantly);
+		}
+	}
+
+	public struct MMPlaylistPitchMultiplierEvent
+	{
+		static private event Delegate OnEvent;
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)] private static void RuntimeInitialization() { OnEvent = null; }
+		static public void Register(Delegate callback) { OnEvent += callback; }
+		static public void Unregister(Delegate callback) { OnEvent -= callback; }
+
+		public delegate void Delegate(int channel, float newPitchMultiplier, bool applyPitchMultiplierInstantly = false);
+		static public void Trigger(int channel, float newPitchMultiplier, bool applyPitchMultiplierInstantly = false)
+		{
+			OnEvent?.Invoke(channel, newPitchMultiplier, applyPitchMultiplierInstantly);
+		}
+	}
+	
+	public struct MMPlaylistChangeEvent
+	{
+		static private event Delegate OnEvent;
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)] private static void RuntimeInitialization() { OnEvent = null; }
+		static public void Register(Delegate callback) { OnEvent += callback; }
+		static public void Unregister(Delegate callback) { OnEvent -= callback; }
+
+		public delegate void Delegate(int channel, MMSMPlaylist newPlaylist, bool andPlay);
+		static public void Trigger(int channel, MMSMPlaylist newPlaylist, bool andPlay)
+		{
+			OnEvent?.Invoke(channel, newPlaylist, andPlay);
+		}
+	}
+	
+	public struct MMPlaylistNewSongStartedEvent
+	{
+		static private event Delegate OnEvent;
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)] private static void RuntimeInitialization() { OnEvent = null; }
+		static public void Register(Delegate callback) { OnEvent += callback; }
+		static public void Unregister(Delegate callback) { OnEvent -= callback; }
+
+		public delegate void Delegate(int channel);
+		static public void Trigger(int channel)
+		{
+			OnEvent?.Invoke(channel);
+		}
+	}
+
 	[System.Serializable]
 	public class MMPlaylistSong
 	{
@@ -95,7 +155,7 @@ namespace MoreMountains.Tools
 		public AudioSource TargetAudioSource;
 		/// the min (when it's off) and max (when it's playing) volume for this source
 		[MMVector("Min", "Max")]
-		public Vector2 Volume = new Vector2(1f, 1f);
+		public Vector2 Volume = new Vector2(0f, 1f);
 		/// a random delay in seconds to apply, between its RMin and RMax
 		[MMVector("RMin", "RMax")]
 		public Vector2 InitialDelay = Vector2.zero;
@@ -130,7 +190,7 @@ namespace MoreMountains.Tools
 				return;
 			}
 			
-			this.Volume = new Vector2(1f, 1f);
+			this.Volume = new Vector2(0f, 1f);
 			this.InitialDelay = Vector2.zero;
 			this.CrossFadeDuration = new Vector2(2f, 2f);
 			this.Pitch = Vector2.one;
@@ -234,16 +294,25 @@ namespace MoreMountains.Tools
 		/// a next song test button
 		[MMInspectorButton("PlayTargetSong")]
 		public bool TargetSongButton;
+		/// a next song test button
+		[MMInspectorButton("QueueTargetSong")]
+		public bool QueueTargetSongButton;
+		/// a next song test button
+		[MMInspectorButton("SetLoopTargetSong")]
+		public bool SetLoopTargetSongButton;
+		/// a next song test button
+		[MMInspectorButton("StopLoopTargetSong")]
+		public bool StopLoopTargetSongButton;
         
 		protected int _songsPlayedSoFar = 0;
 		protected int _songsPlayedThisCycle = 0;
 		protected Coroutine _coroutine;
 		protected bool _shouldResumeOnApplicationPause = false;
-		
 		public static bool HasInstance => _instance != null;
 		public static MMPlaylist Current => _instance;
 		protected static MMPlaylist _instance;
 		protected bool _enabled;
+		protected int _queuedSong = -1;
 		
 		/// <summary>
 		/// Singleton design pattern
@@ -520,6 +589,13 @@ namespace MoreMountains.Tools
 				return -1;
 			}
 
+			if (_queuedSong != -1)
+			{
+				int newRequestedIndex = _queuedSong;
+				_queuedSong = -1;
+				return newRequestedIndex;
+			}
+
 			int newIndex = CurrentlyPlayingIndex;
 			if (RandomOrder)
 			{
@@ -592,6 +668,11 @@ namespace MoreMountains.Tools
 		{
 			_coroutine = StartCoroutine(PlaySong(songIndex));
 		}
+
+		public virtual void QueueSongAtIndex(int songIndex)
+		{
+			_queuedSong = songIndex;
+		}
         
 		/// <summary>
 		/// Pauses the current song
@@ -625,6 +706,14 @@ namespace MoreMountains.Tools
 		}
 
 		/// <summary>
+		/// Will change the current track loop status
+		/// </summary>
+		public virtual void SetLoop(bool loop)
+		{
+			Songs[CurrentlyPlayingIndex].TargetAudioSource.loop = loop;
+		}
+
+		/// <summary>
 		/// Plays the next song in the playlist
 		/// </summary>
 		public virtual void PlayNextSong()
@@ -646,6 +735,22 @@ namespace MoreMountains.Tools
 		{
 			int newIndex = Mathf.Clamp(TargetSongIndex, 0, Songs.Count - 1);
 			PlayAtIndex(newIndex);
+		}
+
+		protected virtual void QueueTargetSong()
+		{
+			int newIndex = Mathf.Clamp(TargetSongIndex, 0, Songs.Count - 1);
+			QueueSongAtIndex(newIndex);
+		}
+
+		protected virtual void SetLoopTargetSong()
+		{
+			SetLoop(true);
+		}
+
+		protected virtual void StopLoopTargetSong()
+		{
+			SetLoop(false);
 		}
 
 		protected virtual void OnPlayEvent(int channel)
@@ -684,6 +789,16 @@ namespace MoreMountains.Tools
 			_coroutine = StartCoroutine(PlaySong(index));
 		}
 
+		protected virtual void OnMMPlaylistVolumeMultiplierEvent(int channel, float newVolumeMultiplier, bool applyVolumeMultiplierInstantly = false)
+		{
+			if (channel != Channel) { return; }
+			VolumeMultiplier = newVolumeMultiplier;
+			if (applyVolumeMultiplierInstantly)
+			{
+				Songs[CurrentlyPlayingIndex].TargetAudioSource.volume = Songs[CurrentlyPlayingIndex].Volume.y * VolumeMultiplier; 
+			}
+		}
+
 		/// <summary>
 		/// On enable, starts listening for playlist events
 		/// </summary>
@@ -695,6 +810,7 @@ namespace MoreMountains.Tools
 			MMPlaylistPlayPreviousEvent.Register(OnPlayPreviousEvent);
 			MMPlaylistStopEvent.Register(OnStopEvent);
 			MMPlaylistPlayIndexEvent.Register(OnPlayIndexEvent);
+			MMPlaylistVolumeMultiplierEvent.Register(OnMMPlaylistVolumeMultiplierEvent);
 		}
 
 		/// <summary>
@@ -708,6 +824,7 @@ namespace MoreMountains.Tools
 			MMPlaylistPlayPreviousEvent.Unregister(OnPlayPreviousEvent);
 			MMPlaylistStopEvent.Unregister(OnStopEvent);
 			MMPlaylistPlayIndexEvent.Unregister(OnPlayIndexEvent);
+			MMPlaylistVolumeMultiplierEvent.Unregister(OnMMPlaylistVolumeMultiplierEvent);
 		}
         
 		protected bool _firstDeserialization = true;

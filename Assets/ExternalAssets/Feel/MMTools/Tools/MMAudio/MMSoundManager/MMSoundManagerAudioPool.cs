@@ -59,8 +59,12 @@ namespace MoreMountains.Tools
 		/// <returns></returns>
 		public virtual IEnumerator AutoDisableAudioSource(float duration, AudioSource source, AudioClip clip, bool doNotAutoRecycleIfNotDonePlaying, float playbackTime, float playbackDuration)
 		{
+			while (source.time == 0 && source.isPlaying)
+			{
+				yield return null;
+			}
 			float initialWait = (playbackDuration > 0) ? playbackDuration : duration;
-			yield return MMCoroutine.WaitFor(initialWait);
+			yield return MMCoroutine.WaitForUnscaled(initialWait);
 			if (source.clip != clip)
 			{
 				yield break;
@@ -68,7 +72,7 @@ namespace MoreMountains.Tools
 			if (doNotAutoRecycleIfNotDonePlaying)
 			{
 				float maxTime = (playbackDuration > 0) ? playbackTime + playbackDuration : source.clip.length;
-				while (source.time < maxTime)
+				while ((source.time != 0) && (source.time <= maxTime))
 				{
 					yield return null;
 				}

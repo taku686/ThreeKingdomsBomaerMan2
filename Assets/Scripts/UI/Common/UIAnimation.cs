@@ -63,14 +63,12 @@ namespace UI.Common
 
         public async UniTask Open(Transform target, float duration)
         {
-            await target.DOScale(1f, duration).SetEase(Ease.OutBounce)
-                .WithCancellation(target.GetCancellationTokenOnDestroy());
+            await target.DOScale(1f, duration).SetEase(Ease.OutBounce);
         }
 
         public async UniTask Close(Transform target, float duration)
         {
-            await target.DOScale(0f, duration).SetEase(Ease.OutQuad)
-                .WithCancellation(target.GetCancellationTokenOnDestroy());
+            await target.DOScale(0f, duration).SetEase(Ease.OutQuad);
         }
 
         public void RepeatScale(RectTransform target)

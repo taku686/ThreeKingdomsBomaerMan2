@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using MoreMountains.Tools;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace MoreMountains.Feedbacks
 {
@@ -41,6 +43,14 @@ namespace MoreMountains.Feedbacks
 		[Tooltip("whether we are in an infinite loop at this time or not")]
 		[MMFReadOnly]
 		public bool InInfiniteLoop = false;
+		/// whether or not to trigger a Loop MMFeedbacksEvent when this looper is reached
+		[Tooltip("whether or not to trigger a Loop MMFeedbacksEvent when this looper is reached")]
+		public bool TriggerMMFeedbacksEvents = true;
+
+		[Header("Events")] 
+		/// a Unity Event to invoke when the looper is reached
+		[Tooltip("a Unity Event to invoke when the looper is reached")]
+		public UnityEvent OnLoop;
 
 		/// sets the color of this feedback in the inspector
 		#if UNITY_EDITOR
@@ -74,6 +84,21 @@ namespace MoreMountains.Feedbacks
 				InInfiniteLoop = InfiniteLoop;
 				NumberOfLoopsLeft--;
 				Owner.StartCoroutine(PlayPause());
+				TriggerOnLoop(Owner);
+			}
+		}
+		
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="source"></param>
+		public virtual void TriggerOnLoop(MMFeedbacks source)
+		{
+			OnLoop.Invoke();
+
+			if (TriggerMMFeedbacksEvents)
+			{
+				MMFeedbacksEvent.Trigger(source, MMFeedbacksEvent.EventTypes.Loop);
 			}
 		}
 

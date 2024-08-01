@@ -286,6 +286,8 @@ namespace MoreMountains.Feedbacks
 		protected override void CustomInitialization(MMF_Player owner)
 		{
 			base.CustomInitialization(owner);
+			HandleSO();
+			
 			if (RandomUnique)
 			{
 				_randomUniqueShuffleBag = new MMShufflebag<int>(RandomSfx.Length);
@@ -317,16 +319,9 @@ namespace MoreMountains.Feedbacks
 			{
 				return;
 			}
-
-			HandleSO();
             
 			float intensityMultiplier = ComputeIntensity(feedbacksIntensity, position);
             
-			if (Sfx != null)
-			{
-				PlaySound(Sfx, position, intensityMultiplier);
-				return;
-			}
 
 			if (RandomSfx.Length > 0)
 			{
@@ -335,7 +330,14 @@ namespace MoreMountains.Feedbacks
 				if (_randomClip != null)
 				{
 					PlaySound(_randomClip, position, intensityMultiplier);
+					return;
 				}
+			}
+			
+			if (Sfx != null)
+			{
+				PlaySound(Sfx, position, intensityMultiplier);
+				return;
 			}
 		}
 
@@ -495,8 +497,7 @@ namespace MoreMountains.Feedbacks
 			_options.SpatialBlendCurve = SpatialBlendCurve;
 			_options.UseReverbZoneMixCurve = UseReverbZoneMixCurve;
 			_options.ReverbZoneMixCurve = ReverbZoneMixCurve;
-			
-			_options.DoNotAutoRecycleIfNotDonePlaying = (_randomPlaybackDuration > 0) ? true : false;
+			_options.DoNotAutoRecycleIfNotDonePlaying = true;
 
 			_playedAudioSource = MMSoundManagerSoundPlayEvent.Trigger(sfx, _options);
 

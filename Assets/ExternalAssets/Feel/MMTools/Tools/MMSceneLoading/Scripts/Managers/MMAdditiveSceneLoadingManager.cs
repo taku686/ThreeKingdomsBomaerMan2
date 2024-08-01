@@ -18,10 +18,8 @@ namespace MoreMountains.Tools
 	[Serializable]
 	public class MMAdditiveSceneLoadingManagerSettings
 	{
-		
 		/// the possible ways to unload scenes
 		public enum UnloadMethods { None, ActiveScene, AllScenes };
-		
 		/// the name of the MMSceneLoadingManager scene you want to use when in additive mode
 		[Tooltip("the name of the MMSceneLoadingManager scene you want to use when in additive mode")]
 		public string LoadingSceneName = "MMAdditiveLoadingScreen";
@@ -58,6 +56,9 @@ namespace MoreMountains.Tools
 		/// when in additive loading mode, the speed at which the loader's progress bar should move
 		[Tooltip("when in additive loading mode, the speed at which the loader's progress bar should move")]
 		public float ProgressBarSpeed = 5f;
+		/// a list of progress intervals (values should be between 0 and 1) and their associated speeds, letting you have the bar progress less linearly
+		[Tooltip("a list of progress intervals (values should be between 0 and 1) and their associated speeds, letting you have the bar progress less linearly")]
+		public List<MMSceneLoadingSpeedInterval> SpeedIntervals;
 		/// when in additive loading mode, the selective additive fade mode
 		[Tooltip("when in additive loading mode, the selective additive fade mode")]
 		public MMAdditiveSceneLoadingManager.FadeModes FadeMode = MMAdditiveSceneLoadingManager.FadeModes.FadeInThenOut;
@@ -70,20 +71,32 @@ namespace MoreMountains.Tools
 		         "If left empty, that scene will be automatically created, but you can specify any scene to use for that. Usually you'll want your own anti spill scene to be just an empty scene, but you can customize its lighting settings for example.")]
 		public string AntiSpillSceneName = "";
 	}
+
+	/// <summary>
+	/// A class used to define different interpolation speeds for specific progress intervals
+	/// </summary>
+	[Serializable]
+	public class MMSceneLoadingSpeedInterval
+	{
+		/// The progress interval (between 0 and 1) 
+		public MMInterval<float> Interval;
+		/// the speed at which the bar should move on that interval
+		public float Speed = 1f;
+	}
 	
 	/// <summary>
 	/// A class to load scenes using a loading screen instead of just the default API
 	/// This is a new version of the classic LoadingSceneManager (now renamed to MMSceneLoadingManager for consistency)
 	/// </summary>
-	public class MMAdditiveSceneLoadingManager : MonoBehaviour 
+	public class MMAdditiveSceneLoadingManager : MMMonoBehaviour 
 	{
 		/// The possible orders in which to play fades (depends on the fade you've set in your loading screen
 		public enum FadeModes { FadeInThenOut, FadeOutThenIn }
-
-		[Header("Audio Listener")] 
+		
+		[MMInspectorGroup("Audio Listener", true, 3)]
 		public AudioListener LoadingAudioListener;
 		
-		[Header("Settings")]
+		[MMInspectorGroup("Settings", true, 10)]
 		/// the ID on which to trigger a fade, has to match the ID on the fader in your scene
 		[Tooltip("the ID on which to trigger a fade, has to match the ID on the fader in your scene")]
 		public int FaderID = 500;
@@ -91,7 +104,7 @@ namespace MoreMountains.Tools
 		[Tooltip("whether or not to output debug messages to the console")]
 		public bool DebugMode = false;
 
-		[Header("Progress Events")] 
+		[MMInspectorGroup("Progress Events", true, 11)]
 		/// an event used to update progress 
 		[Tooltip("an event used to update progress")]
 		public ProgressEvent SetRealtimeProgressValue;
@@ -99,7 +112,7 @@ namespace MoreMountains.Tools
 		[Tooltip("an event used to update progress with interpolation")]
 		public ProgressEvent SetInterpolatedProgressValue;
 
-		[Header("State Events")]
+		[MMInspectorGroup("State Events", true, 12)]
 		/// an event that will be invoked when the load starts
 		[Tooltip("an event that will be invoked when the load starts")]
 		public UnityEvent OnLoadStarted;
@@ -139,6 +152,7 @@ namespace MoreMountains.Tools
 
 		protected static bool _interpolateProgress;
 		protected static float _progressInterpolationSpeed;
+		protected static List<MMSceneLoadingSpeedInterval> _speedIntervals;
 		protected static float _beforeEntryFadeDelay;
 		protected static MMTweenType _entryFadeTween;
 		protected static float _entryFadeDuration;
@@ -172,7 +186,8 @@ namespace MoreMountains.Tools
 		{
 			LoadScene(sceneToLoadName, settings.LoadingSceneName, settings.ThreadPriority, settings.SecureLoad, settings.InterpolateProgress,
 				settings.BeforeEntryFadeDelay, settings.EntryFadeDuration, settings.AfterEntryFadeDelay, settings.BeforeExitFadeDelay,
-				settings.ExitFadeDuration, settings.EntryFadeTween, settings.ExitFadeTween, settings.ProgressBarSpeed, settings.FadeMode, settings.UnloadMethod, settings.AntiSpillSceneName);
+				settings.ExitFadeDuration, settings.EntryFadeTween, settings.ExitFadeTween, settings.ProgressBarSpeed, settings.FadeMode, settings.UnloadMethod, settings.AntiSpillSceneName,
+				settings.SpeedIntervals);
 		}
         
 		/// <summary>
@@ -191,7 +206,8 @@ namespace MoreMountains.Tools
 			float progressBarSpeed = 5f, 
 			FadeModes fadeMode = FadeModes.FadeInThenOut,
 			MMAdditiveSceneLoadingManagerSettings.UnloadMethods unloadMethod = MMAdditiveSceneLoadingManagerSettings.UnloadMethods.AllScenes,
-			string antiSpillSceneName = "")
+			string antiSpillSceneName = "",
+			List<MMSceneLoadingSpeedInterval> speedIntervals = null)
 		{
 			if (_loadingInProgress)
 			{
@@ -244,6 +260,7 @@ namespace MoreMountains.Tools
 			_fadeMode = fadeMode;
 			_interpolateProgress = interpolateProgress;
 			_antiSpillSceneName = antiSpillSceneName;
+			_speedIntervals = speedIntervals;
 
 			SceneManager.LoadScene(_loadingScreenSceneName, LoadSceneMode.Additive);
 		}
@@ -322,7 +339,7 @@ namespace MoreMountains.Tools
 
 			if (_interpolateProgress)
 			{
-				_interpolatedLoadProgress = MMMaths.Approach(_interpolatedLoadProgress, _loadProgress, Time.unscaledDeltaTime * _progressInterpolationSpeed);
+				_interpolatedLoadProgress = MMMaths.Approach(_interpolatedLoadProgress, _loadProgress, Time.unscaledDeltaTime * ComputeInterpolationSpeed(_interpolatedLoadProgress));
 				if (!_setInterpolatedProgressValueIsNull)
 				{
 					SetInterpolatedProgressValue.Invoke(_interpolatedLoadProgress);	
@@ -332,6 +349,27 @@ namespace MoreMountains.Tools
 			{
 				SetInterpolatedProgressValue.Invoke(_loadProgress);	
 			}
+		}
+
+		/// <summary>
+		/// Computes the interpolation speed to apply for a specific progress time 
+		/// </summary>
+		/// <param name="t"></param>
+		/// <returns></returns>
+		public static float ComputeInterpolationSpeed(float t) 
+		{
+			if ((_speedIntervals != null) && (_speedIntervals.Count > 0))
+			{
+				foreach (MMSceneLoadingSpeedInterval interval in _speedIntervals)
+				{
+					if (interval.Interval.Contains(t))
+					{
+						return interval.Speed;
+					}
+				}
+			}
+
+			return _progressInterpolationSpeed;
 		}
 
 		/// <summary>

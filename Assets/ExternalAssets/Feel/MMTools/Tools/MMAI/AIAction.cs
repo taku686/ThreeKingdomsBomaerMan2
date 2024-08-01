@@ -15,9 +15,11 @@ namespace MoreMountains.Tools
 		public InitializationModes InitializationMode;
 		protected bool _initialized;
 		
+		/// a label you can set to organize your AI Actions, not used by anything else 
+		[Tooltip("a label you can set to organize your AI Actions, not used by anything else")]
 		public string Label;
 		public abstract void PerformAction();
-		public bool ActionInProgress { get; set; }
+		public virtual bool ActionInProgress { get; set; }
 		protected AIBrain _brain;
 
 		protected virtual bool ShouldInitialize

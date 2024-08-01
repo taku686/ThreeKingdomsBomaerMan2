@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEditor;
@@ -18,11 +19,8 @@ namespace MoreMountains.Feedbacks
 		// Single Copy --------------------------------------------------------------------
 
 		static public System.Type Type { get; private set; }
-		static List<SerializedProperty> Properties = new List<SerializedProperty>();
-        
 		public static readonly List<MMF_Feedback> CopiedFeedbacks = new List<MMF_Feedback>();
-
-		public static List<MMF_Player> ShouldKeepChanges = new List<MMF_Player>();
+		public static readonly Dictionary<MMF_Player, List<MMF_Feedback>> RuntimeChanges = new Dictionary<MMF_Player, List<MMF_Feedback>>();
 
 		static string[] IgnoreList = new string[]
 		{
@@ -71,7 +69,6 @@ namespace MoreMountains.Feedbacks
 
 		// Multiple Copy ----------------------------------------------------------
 
-
 		static public void PasteAll(MMF_PlayerEditor targetEditor)
 		{
 			foreach (MMF_Feedback feedback in MMF_PlayerCopy.CopiedFeedbacks)
@@ -79,6 +76,41 @@ namespace MoreMountains.Feedbacks
 				targetEditor.TargetMmfPlayer.AddFeedback(feedback);
 			}
 			CopiedFeedbacks.Clear();
+		}
+		
+		// Runtime Changes
+
+		static public void StoreRuntimeChanges(MMF_Player player)
+		{
+			RuntimeChanges[player] = new List<MMF_Feedback>();
+			foreach (MMF_Feedback feedback in player.FeedbacksList)
+			{
+				Type feedbackType = feedback.GetType();
+				MMF_Feedback newFeedback = (MMF_Feedback)Activator.CreateInstance(feedbackType);
+				EditorUtility.CopySerializedManagedFieldsOnly(feedback, newFeedback);
+				RuntimeChanges[player].Add(newFeedback);    
+			}
+		}
+
+		static public void ApplyRuntimeChanges(MMF_Player player)
+		{
+			SerializedObject playerSerialized = new SerializedObject(player);
+			playerSerialized.Update();
+			Undo.RecordObject(player, "Replace all feedbacks");
+			player.FeedbacksList.Clear();
+			foreach (MMF_Feedback feedback in MMF_PlayerCopy.RuntimeChanges[player])
+			{
+				player.AddFeedback(feedback);
+			}
+			playerSerialized.ApplyModifiedProperties();
+			PrefabUtility.RecordPrefabInstancePropertyModifications(player);
+			if (MMF_PlayerConfiguration.Instance.AutoDisableKeepPlaymodeChanges)
+			{
+				playerSerialized.Update();
+				player.KeepPlayModeChanges = false;    
+				playerSerialized.ApplyModifiedProperties();
+			}
+			player.RefreshCache();
 		}
 	}
 }

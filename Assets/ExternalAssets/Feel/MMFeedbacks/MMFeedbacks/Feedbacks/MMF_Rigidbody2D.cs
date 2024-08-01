@@ -55,6 +55,9 @@ namespace MoreMountains.Feedbacks
 		/// the force mode to apply
 		[Tooltip("the force mode to apply")]
 		public ForceMode2D AppliedForceMode = ForceMode2D.Impulse;
+		/// if this is true, the velocity of the rigidbody will be reset before applying the new force
+		[Tooltip("if this is true, the velocity of the rigidbody will be reset before applying the new force")]
+		public bool ResetVelocityOnPlay = false;
 
 		protected Vector2 _force;
 		protected float _torque;
@@ -85,6 +88,11 @@ namespace MoreMountains.Feedbacks
 		/// <param name="feedbacksIntensity"></param>
 		protected virtual void ApplyForce(Rigidbody2D rb, float feedbacksIntensity)
 		{
+			if(ResetVelocityOnPlay)
+			{
+				rb.velocity = Vector2.zero;
+			}
+			
 			switch (Mode)
 			{
 				case Modes.AddForce:

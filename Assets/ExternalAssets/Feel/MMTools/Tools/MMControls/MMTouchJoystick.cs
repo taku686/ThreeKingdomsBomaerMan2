@@ -139,7 +139,7 @@ namespace MoreMountains.Tools
 		public bool DrawGizmos = true;
 
 		/// the render mode of the parent canvas this stick is on
-		public RenderMode ParentCanvasRenderMode { get; protected set; }
+		public virtual RenderMode ParentCanvasRenderMode { get; protected set; }
 
 		protected Vector2 _neutralPosition;
 		protected Vector2 _newTargetPosition;

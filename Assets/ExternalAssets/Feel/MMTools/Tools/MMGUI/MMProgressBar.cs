@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-using System.Collections.Generic;
-using MoreMountains.Tools;
 #if MM_TEXTMESHPRO
 using TMPro;
 #endif
@@ -183,14 +181,24 @@ namespace MoreMountains.Tools
 		/// the curve to map the bump animation color animation on
 		[Tooltip("the curve to map the bump animation color animation on")]
 		public AnimationCurve BumpColorAnimationCurve = new AnimationCurve(new Keyframe(0, 0), new Keyframe(0.3f, 1f), new Keyframe(1, 0));
+		/// if this is true, the BumpIntensityMultiplier curve will be evaluated to apply a multiplier to the bump intensity 
+		[Tooltip("if this is true, the BumpIntensityMultiplier curve will be evaluated to apply a multiplier to the bump intensity")]
+		public bool ApplyBumpIntensityMultiplier = false;
+		/// the curve to map the bump's intensity on. x is the delta of the bump, y is the associated multiplier
+		[Tooltip("the curve to map the bump's intensity on. x is the normalized delta of the bump (from -1:-100% to 1:100%), y is the associated multiplier")]
+		[MMCondition("ApplyBumpIntensityMultiplier", true)]
+		public AnimationCurve BumpIntensityMultiplier = new AnimationCurve(new Keyframe(-1, 1), new Keyframe(1, 1));
 		/// whether or not the bar is bumping right now
-		public bool Bumping { get; protected set; }
+		public virtual bool Bumping { get; protected set; }
 
 		[MMInspectorGroup("Events", true, 16)] 
         
 		/// an event to trigger every time the bar bumps
 		[Tooltip("an event to trigger every time the bar bumps")]
 		public UnityEvent OnBump;
+		/// an event to trigger every time the bar bumps, with its bump intensity (based on BumpDeltaMultiplier) in parameter
+		[Tooltip("an event to trigger every time the bar bumps, with its bump intensity (based on BumpDeltaMultiplier) in parameter")]
+		public UnityEvent<float> OnBumpIntensity;
 		/// an event to trigger every time the bar starts decreasing
 		[Tooltip("an event to trigger every time the bar starts decreasing")]
 		public UnityEvent OnBarMovementDecreasingStart;
@@ -256,8 +264,8 @@ namespace MoreMountains.Tools
 		[Tooltip("the current progress of the bar, ideally read only")]
 		[Range(0f,1f)]
 		public float BarProgress;
-		/// the current progress of the bar, ideally read only
-		[Tooltip("the current progress of the bar, ideally read only")]
+		/// the value towards which the bar is currently interpolating, ideally read only
+		[Tooltip("the value towards which the bar is currently interpolating, ideally read only")]
 		[Range(0f,1f)]
 		public float BarTarget;
 		/// the current progress of the delayed bar increasing
@@ -456,7 +464,10 @@ namespace MoreMountains.Tools
 		/// </summary>
 		protected virtual void Start()
 		{
-			Initialization();
+			if (!_initialized)
+			{
+				Initialization();
+			}
 		}
 
 		protected virtual void OnEnable()
@@ -471,6 +482,7 @@ namespace MoreMountains.Tools
 
 		public virtual void Initialization()
 		{
+			BarTarget = -1f;
 			_isForegroundBarNotNull = ForegroundBar != null;
 			_isDelayedBarDecreasingNotNull = DelayedBarDecreasing != null;
 			_isDelayedBarIncreasingNotNull = DelayedBarIncreasing != null;
@@ -535,7 +547,7 @@ namespace MoreMountains.Tools
 		}
 
 		/// <summary>
-		/// Test method
+		/// Test method - increases the bar's current value by 10%
 		/// </summary>
 		public virtual void Plus10Percent()
 		{
@@ -545,11 +557,31 @@ namespace MoreMountains.Tools
 		}
         
 		/// <summary>
-		/// Test method
+		/// Test method - decreases the bar's current value by 10%
 		/// </summary>
 		public virtual void Minus10Percent()
 		{
 			float newProgress = BarTarget - 0.1f;
+			newProgress = Mathf.Clamp(newProgress, 0f, 1f);
+			UpdateBar01(newProgress);
+		}
+
+		/// <summary>
+		/// Test method - increases the bar's current value by 20%
+		/// </summary>
+		public virtual void Plus20Percent()
+		{
+			float newProgress = BarTarget + 0.2f;
+			newProgress = Mathf.Clamp(newProgress, 0f, 1f);
+			UpdateBar01(newProgress);
+		}
+        
+		/// <summary>
+		/// Test method - decreases the bar's current value by 20%
+		/// </summary>
+		public virtual void Minus20Percent()
+		{
+			float newProgress = BarTarget - 0.2f;
 			newProgress = Mathf.Clamp(newProgress, 0f, 1f);
 			UpdateBar01(newProgress);
 		}
@@ -825,6 +857,9 @@ namespace MoreMountains.Tools
 		/// </summary>
 		public virtual void Bump()
 		{
+			float delta = _newPercent - _percentLastTimeBarWasUpdated;
+			float intensityMultiplier = BumpIntensityMultiplier.Evaluate(delta);
+			
 			bool shouldBump = false;
 
 			if (!_initialized)
@@ -856,17 +891,18 @@ namespace MoreMountains.Tools
 			
 			if (this.gameObject.activeInHierarchy)
 			{
-				StartCoroutine(BumpCoroutine());
+				StartCoroutine(BumpCoroutine(intensityMultiplier));
 			}
 
 			OnBump?.Invoke();
+			OnBumpIntensity?.Invoke(ApplyBumpIntensityMultiplier ? intensityMultiplier : 1f);
 		}
 
 		/// <summary>
 		/// A coroutine that (usually quickly) changes the scale of the bar 
 		/// </summary>
 		/// <returns>The coroutine.</returns>
-		protected virtual IEnumerator BumpCoroutine()
+		protected virtual IEnumerator BumpCoroutine(float intensityMultiplier)
 		{
 			float journey = 0f;
 
@@ -876,7 +912,15 @@ namespace MoreMountains.Tools
 			{
 				journey = journey + _deltaTime;
 				float percent = Mathf.Clamp01(journey / BumpDuration);
+
 				float curvePercent = BumpScaleAnimationCurve.Evaluate(percent);
+
+				if (ApplyBumpIntensityMultiplier)
+				{
+					float multiplier = Mathf.Abs(1f - curvePercent) * intensityMultiplier;
+					curvePercent = 1 + multiplier;	
+				}
+
 				float colorCurvePercent = BumpColorAnimationCurve.Evaluate(percent);
 				this.transform.localScale = curvePercent * _initialScale;
 

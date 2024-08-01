@@ -64,15 +64,15 @@ namespace MoreMountains.Feedbacks
 		/// the minimum value we'll randomize our position with
 		[Tooltip("the minimum value we'll randomize our position with")]
 		[MMFCondition("RandomizePosition", true)]
-		public Vector3 RandomizedPositionMin = Vector3.zero;
+		public Vector3 RandomizedPositionMin = Vector3.zero; 
 		/// the maximum value we'll randomize our position with
 		[Tooltip("the maximum value we'll randomize our position with")]
 		[MMFCondition("RandomizePosition", true)]
 		public Vector3 RandomizedPositionMax = Vector3.one;
 
 		[MMFInspectorGroup("Parent", true, 47)]
-		/// if specified, the instantiated object (or the pool of objects) will be parented to this transform 
-		[Tooltip("if specified, the instantiated object (or the pool of objects) will be parented to this transform ")]
+		/// if specified, the instantiated object will be parented to this transform 
+		[Tooltip("if specified, the instantiated object will be parented to this transform ")]
 		public Transform ParentTransform;
 
 		[MMFInspectorGroup("Object Pool", true, 40)]
@@ -89,6 +89,10 @@ namespace MoreMountains.Feedbacks
 		[Tooltip("whether or not to create a new pool even if one already exists for that same prefab")]
 		[MMFCondition("CreateObjectPool", true)] 
 		public bool MutualizePools = false;
+		/// the transform the pool of objects will be parented to
+		[Tooltip("the transform the pool of objects will be parented to")]
+		[MMFCondition("CreateObjectPool", true)] 
+		public Transform PoolParentTransform;
 
 		protected MMMiniObjectPooler _objectPooler; 
 		protected GameObject _newGameObject;
@@ -116,13 +120,9 @@ namespace MoreMountains.Feedbacks
 				_objectPooler = objectPoolGo.AddComponent<MMMiniObjectPooler>();
 				_objectPooler.GameObjectToPool = GameObjectToInstantiate;
 				_objectPooler.PoolSize = ObjectPoolSize;
-				if (ParentTransform != null)
+				if (PoolParentTransform != null)
 				{
-					_objectPooler.transform.SetParent(ParentTransform);
-				}
-				else
-				{
-					_objectPooler.transform.SetParent(Owner.transform);
+					_objectPooler.transform.SetParent(PoolParentTransform);
 				}
 				_objectPooler.MutualizeWaitingPools = MutualizePools;
 				_objectPooler.FillObjectPool();
@@ -177,7 +177,7 @@ namespace MoreMountains.Feedbacks
 			{
 				_newGameObject.transform.localScale = GetScale();    
 			}
-			if (!CreateObjectPool && (ParentTransform != null))
+			if (ParentTransform != null)
 			{
 				_newGameObject.transform.SetParent(ParentTransform);
 			}

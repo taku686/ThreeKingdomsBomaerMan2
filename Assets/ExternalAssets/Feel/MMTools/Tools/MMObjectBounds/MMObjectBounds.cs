@@ -14,7 +14,7 @@ namespace MoreMountains.Tools
 		public WaysToDetermineBounds BoundsBasedOn;  
 
 
-		public Vector3 Size { get; set; }
+		public virtual Vector3 Size { get; set; }
 
 		/// <summary>
 		/// When this component is added we define its bounds.

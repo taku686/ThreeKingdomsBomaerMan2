@@ -107,7 +107,7 @@ namespace MoreMountains.Feedbacks
 			GrabInitialScale();
 		}
 
-		protected virtual void GrabInitialScale()
+		public virtual void GrabInitialScale()
 		{
 			switch (Mode)
 			{

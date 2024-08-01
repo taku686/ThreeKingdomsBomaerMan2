@@ -18,7 +18,7 @@ namespace MoreMountains.Tools
 		/// a radio receiver to update the value with
 		public MMRadioReceiver RadioReceiver;
 		/// the current level of this value item
-		public float Level { get { return _level;  } set { _level = value;  ValueText.text = value.ToString("F2"); } }
+		public virtual float Level { get { return _level;  } set { _level = value;  ValueText.text = value.ToString("F2"); } }
 
 		protected float _level;
 	}

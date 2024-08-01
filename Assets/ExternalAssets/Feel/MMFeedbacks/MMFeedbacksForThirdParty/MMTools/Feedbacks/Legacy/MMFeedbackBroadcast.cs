@@ -47,7 +47,7 @@ namespace MoreMountains.Feedbacks
 		[MMReadOnly]
 		public bool BroadcastInProgress = false;
 
-		public float ThisLevel { get; set; }
+		public virtual float ThisLevel { get; set; }
 		protected float _levelLastFrame;
 
 		/// <summary>

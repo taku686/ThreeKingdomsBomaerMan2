@@ -29,7 +29,7 @@ namespace MoreMountains.Tools
 		/// <summary>
 		/// The Key to use to save and load the file
 		/// </summary>
-		public string Key { get; set; } = "yourDefaultKey";
+		public virtual string Key { get; set; } = "yourDefaultKey";
 
 		protected string _saltText = "SaltTextGoesHere";
 

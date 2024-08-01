@@ -25,6 +25,8 @@ namespace MoreMountains.Feedbacks
 		public override string RequiresSetupText { get { return "This feedback requires that a TargetFloatController be set to be able to work properly. You can set one below."; } }
 		#endif
 		public override bool HasRandomness => true;
+		public override bool CanForceInitialValue => true;
+		public override bool ForceInitialValueDelayed => true;
 		public override bool HasAutomatedTargetAcquisition => true;
 		protected override void AutomateTargetAcquisition() => TargetFloatController = FindAutomatedTarget<FloatController>();
 

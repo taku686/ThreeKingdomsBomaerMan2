@@ -37,6 +37,7 @@ namespace MoreMountains.Feedbacks
 		#if MM_TEXTMESHPRO
 		public override bool HasAutomatedTargetAcquisition => true;
 		protected override void AutomateTargetAcquisition() => TargetTMPText = FindAutomatedTarget<TMP_Text>();
+		public override bool HasCustomInspectors => true;
 		
 		[MMFInspectorGroup("Target", true, 12, true)]
 		/// the TMP_Text component to control

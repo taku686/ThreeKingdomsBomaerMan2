@@ -1058,7 +1058,7 @@ namespace MoreMountains.Feedbacks
 
 		#region Events
 
-		protected void OnDisable()
+		protected virtual void OnDisable()
 		{
 			foreach (KeyValuePair<int, MMF_FeedbackInspector> inspector in MMF_FeedbackInspectors)
 			{
@@ -1067,38 +1067,38 @@ namespace MoreMountains.Feedbacks
 			EditorApplication.playModeStateChanged -= ModeChanged;
 		}
 
-		public void ModeChanged(PlayModeStateChange playModeState)
+		public virtual void ModeChanged(PlayModeStateChange playModeState)
 		{
 			switch (playModeState)
 			{
 				case PlayModeStateChange.ExitingPlayMode:
-					if (_keepPlayModeChanges.boolValue)
-					{
-						MMF_PlayerCopy.ShouldKeepChanges.Add(TargetMmfPlayer);
-						CopyAll();    
-					}
+					StoreRuntimeChanges();
 					break;
-                
+        
 				case PlayModeStateChange.EnteredEditMode:
-                    
-					if (MMF_PlayerCopy.ShouldKeepChanges.Contains(TargetMmfPlayer))
-					{
-						ReplaceAll();
-						if (MMF_PlayerConfiguration.Instance.AutoDisableKeepPlaymodeChanges)
-						{
-							serializedObject.Update();
-							_keepPlayModeChanges.boolValue = false;    
-							serializedObject.ApplyModifiedProperties();
-						}
-						MMF_PlayerCopy.ShouldKeepChanges.Remove(TargetMmfPlayer);
-					}
-					ForceRepaint();
-                    
+					ApplyRuntimeChanges();
 					break;
 			}
 		}
 
-		public void ForceRepaint()
+		protected virtual void StoreRuntimeChanges()
+		{
+			foreach (MMF_Player player in FindObjectsOfType<MMF_Player>().Where(p => p.KeepPlayModeChanges))
+			{
+				MMF_PlayerCopy.StoreRuntimeChanges(player);
+			}
+		}
+
+		protected virtual void ApplyRuntimeChanges()
+		{
+			foreach (MMF_Player player in FindObjectsOfType<MMF_Player>().Where(MMF_PlayerCopy.RuntimeChanges.ContainsKey))
+			{
+				MMF_PlayerCopy.ApplyRuntimeChanges(player);
+			}
+			ForceRepaint();
+		}
+
+		public virtual void ForceRepaint()
 		{
 			MMF_FeedbackInspectors.Clear();
 			Initialization();
@@ -1106,7 +1106,7 @@ namespace MoreMountains.Feedbacks
 			Repaint();
 		}
         
-		void Reset()
+		protected virtual void Reset()
 		{
 			ForceRepaint();
 		}

@@ -72,6 +72,13 @@ namespace MoreMountains.Feedbacks
 		[Tooltip("how to change the state on skip")]
 		[MMFCondition("SetStateOnSkip", true)]
 		public PossibleStates StateOnSkip = PossibleStates.Inactive;
+		/// whether or not we should alter the state of the target object when the player this feedback belongs to is done playing all its feedbacks
+		[Tooltip("whether or not we should alter the state of the target object when the player this feedback belongs to is done playing all its feedbacks")]
+		public bool SetStateOnPlayerComplete = false;
+		/// how to change the state on player complete
+		[Tooltip("how to change the state on player complete")]
+		[MMFCondition("SetStateOnPlayerComplete", true)]
+		public PossibleStates StateOnPlayerComplete = PossibleStates.Inactive;
 
 		protected bool _initialState;
 		protected List<bool> _initialStates;
@@ -155,6 +162,27 @@ namespace MoreMountains.Feedbacks
 				if (SetStateOnReset)
 				{
 					SetStatus(StateOnReset);
+				}
+			}
+		}
+		
+		/// <summary>
+		/// On PlayerComplete we change the state of our object if needed
+		/// </summary>
+		protected override void CustomPlayerComplete()
+		{
+			base.CustomPlayerComplete();
+
+			if (InCooldown)
+			{
+				return;
+			}
+
+			if (Active && FeedbackTypeAuthorized && (TargetGameObject != null))
+			{
+				if (SetStateOnPlayerComplete)
+				{
+					SetStatus(StateOnPlayerComplete);
 				}
 			}
 		}

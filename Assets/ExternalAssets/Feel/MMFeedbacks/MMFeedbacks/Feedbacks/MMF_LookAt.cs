@@ -237,13 +237,13 @@ namespace MoreMountains.Feedbacks
 					_lookAtPosition = TransformToRotate.position + LookAtDirection;
 					break;
 			}
-			
-			if (LockXAxis) { _lookAtPosition.x = TransformToRotate.position.x; }
-			if (LockYAxis) { _lookAtPosition.y = TransformToRotate.position.y; }
-			if (LockZAxis) { _lookAtPosition.z = TransformToRotate.position.z; }
 	            
 			_direction = _lookAtPosition - TransformToRotate.position;
 			_newRotation = Quaternion.LookRotation(_direction, _upwards);
+			
+			if (LockXAxis) { _newRotation.x = TransformToRotate.rotation.x; }
+			if (LockYAxis) { _newRotation.y = TransformToRotate.rotation.y; }
+			if (LockZAxis) { _newRotation.z = TransformToRotate.rotation.z; }
 			
 			TransformToRotate.transform.rotation = Quaternion.SlerpUnclamped(_initialDirectTargetTransformRotation, _newRotation, percent);
 		}

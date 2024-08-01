@@ -24,6 +24,8 @@ namespace MoreMountains.Feedbacks
 		public override bool HasChannel => true;
 		public override bool HasRandomness => true;
 		public override bool HasRange => true;
+		public override bool HasAutomatedTargetAcquisition => true;
+		protected override void AutomateTargetAcquisition() => TargetShaker = FindAutomatedTarget<MMPositionShaker>();
 
 		[MMFInspectorGroup("Optional Target", true, 33)]
 		/// a specific (and optional) shaker to target, regardless of its channel

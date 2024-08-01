@@ -115,10 +115,10 @@ namespace MoreMountains.Tools
 		[Tooltip("If you set this to true, you'll need to actually press the button for it to be triggered, otherwise a simple hover will trigger it (better for touch input).")]
 		public bool MouseMode = false;
 
-		public bool ReturnToInitialSpriteAutomatically { get; set; }
+		public virtual bool ReturnToInitialSpriteAutomatically { get; set; }
 
 		/// the current state of the button (off, down, pressed or up)
-		public ButtonStates CurrentState { get; protected set; }
+		public virtual ButtonStates CurrentState { get; protected set; }
 
 		public event System.Action<PointerEventData.FramePressState, PointerEventData> ButtonStateChange;
 

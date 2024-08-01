@@ -68,7 +68,7 @@ namespace MoreMountains.Tools
 		}
 
 		/// <summary>
-		/// Lets the persistency manager know whether or not the object should be saved 
+		/// Lets the persistence manager know whether or not the object should be saved 
 		/// </summary>
 		/// <returns></returns>
 		public virtual bool ShouldBeSaved()

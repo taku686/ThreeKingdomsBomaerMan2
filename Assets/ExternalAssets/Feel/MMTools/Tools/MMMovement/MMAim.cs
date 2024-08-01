@@ -34,9 +34,9 @@ namespace MoreMountains.Tools
 		[MMReadOnly]
 		public float CurrentAngle;
 
-		public Vector3 CurrentPosition { get; set; }
-		public Vector2 PrimaryMovement { get; set; }
-		public Vector2 SecondaryMovement { get; set; }
+		public virtual Vector3 CurrentPosition { get; set; }
+		public virtual Vector2 PrimaryMovement { get; set; }
+		public virtual Vector2 SecondaryMovement { get; set; }
 
 		protected float[] _possibleAngleValues;
 		protected Vector3 _currentAim = Vector3.zero;
