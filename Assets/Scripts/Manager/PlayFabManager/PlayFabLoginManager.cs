@@ -155,16 +155,11 @@ namespace Assets.Scripts.Common.PlayFab
 
             var loginDate = (loginDateTime + TimeSpan.FromHours(TimeDifference))?.Date;
             var lastLoginDate = (lastLoginDateTime + TimeSpan.FromHours(TimeDifference))?.Date;
-            if (loginDate != lastLoginDate)
-            {
-                var result = await _playFabShopManager.TryPurchaseItem(GameCommonData.LoginBonusNotificationItemKey,
-                    GameCommonData.CoinKey, 0, null);
-                return result;
-            }
+            if (loginDate == lastLoginDate) return true;
+            var result = await _playFabShopManager.TryPurchaseItem(GameCommonData.LoginBonusNotificationItemKey,
+                GameCommonData.CoinKey, 0, null);
+            return result;
 
-            var loginBonusNotificationItem =
-                await _userDataManager.GetItemInstance(GameCommonData.LoginBonusNotificationItemKey);
-            return loginBonusNotificationItem != null;
         }
     }
 }

@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class MapManager : MonoBehaviour
 {
-    private readonly Dictionary<Tuple<float, float>, Area> _map = new();
+    private readonly Dictionary<Tuple<float, float>, Area> map = new();
     private const float MaxX = 8;
     private const float MaxZ = 5;
     private const float MinX = -8;
@@ -30,9 +30,9 @@ public class MapManager : MonoBehaviour
 
     private void AddBlockArea()
     {
-        for (int i = -7; i < 8; i += 2)
+        for (var i = -7; i < 8; i += 2)
         {
-            for (int j = -4; j < 5; j += 2)
+            for (var j = -4; j < 5; j += 2)
             {
                 AddMap(Area.Block, i, j);
             }
@@ -52,7 +52,7 @@ public class MapManager : MonoBehaviour
             for (int j = (int)MinZ; j <= MaxZ; j++)
             {
                 var point = new Tuple<float, float>(i, j);
-                if (_map.ContainsKey(point))
+                if (map.ContainsKey(point))
                 {
                     continue;
                 }
@@ -70,52 +70,57 @@ public class MapManager : MonoBehaviour
         }
 
         var point = new Tuple<float, float>(x, z);
-        if (_map.ContainsKey(point))
+        if (map.ContainsKey(point))
         {
             if (area == Area.Explosion)
             {
-                if (_map[point] == Area.Block)
+                if (map[point] == Area.Block)
                 {
                     return;
                 }
             }
         }
 
-        _map[point] = area;
+        map[point] = area;
     }
 
     public void RemoveMap(float x, float z)
     {
         var point = new Tuple<float, float>(x, z);
-        if (_map[point] == Area.Block)
+        if (!map.ContainsKey(point))
         {
             return;
         }
 
-        _map[point] = Area.None;
+        if (map[point] == Area.Block)
+        {
+            return;
+        }
+
+        map[point] = Area.None;
     }
 
     public void ClearMap()
     {
-        _map.Clear();
+        map.Clear();
     }
 
     public Area GetArea(float x, float z)
     {
         var point = new Tuple<float, float>(x, z);
-        if (!_map.ContainsKey(point))
+        if (!map.ContainsKey(point))
         {
             return Area.Exception;
         }
 
-        return _map[point];
+        return map[point];
     }
 
     public Tuple<float, float> GetNearestNoneArea(Vector3 startPos)
     {
         var nearestPos = new Tuple<float, float>(0, 0);
         var nearestDis = float.MaxValue;
-        foreach (var point in _map.Where(x => x.Value == Area.None))
+        foreach (var point in map.Where(x => x.Value == Area.None))
         {
             var end = new Vector3(point.Key.Item1, startPos.y, point.Key.Item2);
             var dis = Vector3.Distance(startPos, end);

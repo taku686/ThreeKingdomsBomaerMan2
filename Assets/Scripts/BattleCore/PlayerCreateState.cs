@@ -40,8 +40,7 @@ namespace Manager.BattleManager
             private void CreatePlayer()
             {
                 var index = Owner._networkManager.GetPlayerNumber(PhotonNetwork.LocalPlayer.ActorNumber);
-                var characterData =
-                    Owner._networkManager.CurrentRoomCharacterDatum[PhotonNetwork.LocalPlayer.ActorNumber];
+                var characterData = Owner._networkManager.CurrentRoomCharacterDatum[PhotonNetwork.LocalPlayer.ActorNumber];
                 Owner._playerGenerator.GenerateCharacter(index, characterData);
             }
 
@@ -61,6 +60,7 @@ namespace Manager.BattleManager
 
             private void InitializePlayerComponent(GameObject player)
             {
+                _mapManager = Owner.mapManager;
                 var photonView = player.GetComponent<PhotonView>();
                 var playerId = photonView.OwnerActorNr;
                 var characterData = Owner._networkManager.GetCharacterData(playerId);
