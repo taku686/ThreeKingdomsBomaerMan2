@@ -4,6 +4,7 @@ using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Manager.NetworkManager;
+using UniRx;
 using UnityEngine;
 using State = StateMachine<UI.Title.TitleCore>.State;
 
@@ -13,20 +14,29 @@ namespace UI.Title
     {
         public class CharacterSelectState : State
         {
-            private readonly List<GameObject> _gridGroupLists = new();
-            private UserDataManager _userDataManager;
-            private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
-            private bool _isProcessing;
+            private readonly List<GameObject> gridGroupLists = new();
+            private UserDataManager userDataManager;
+            private PlayFabVirtualCurrencyManager playFabVirtualCurrencyManager;
+            private bool isProcessing;
+            private CancellationTokenSource cancellationTokenSource;
 
             protected override void OnEnter(State prevState)
             {
                 Initialize();
             }
 
+            protected override void OnExit(State nextState)
+            {
+                Cancel();
+            }
+
             private void Initialize()
             {
-                _userDataManager = Owner.userDataManager;
-                _playFabVirtualCurrencyManager = Owner.playFabVirtualCurrencyManager;
+                Owner.characterSelectView.ContentsTransform.anchoredPosition =
+                    new Vector2(Owner.characterSelectView.ContentsTransform.anchoredPosition.x, 0);
+                cancellationTokenSource = new CancellationTokenSource();
+                userDataManager = Owner.userDataManager;
+                playFabVirtualCurrencyManager = Owner.playFabVirtualCurrencyManager;
                 CreateUIContents();
                 InitializeButton();
                 Owner.SwitchUiObject(TitleCoreEvent.CharacterSelect, true);
@@ -34,26 +44,29 @@ namespace UI.Title
 
             private void InitializeButton()
             {
-                Owner.characterSelectView.BackButton.onClick.RemoveAllListeners();
-                Owner.characterSelectView.VirtualCurrencyAddPopup.AddButton.onClick.RemoveAllListeners();
-                Owner.characterSelectView.VirtualCurrencyAddPopup.CloseButton.onClick.RemoveAllListeners();
-                Owner.characterSelectView.VirtualCurrencyAddPopup.CancelButton.onClick.RemoveAllListeners();
-                Owner.characterSelectView.BackButton.onClick.AddListener(OnClickBack);
-                Owner.characterSelectView.VirtualCurrencyAddPopup.CancelButton.onClick.AddListener(
-                    OnClickCancelPurchase);
-                Owner.characterSelectView.VirtualCurrencyAddPopup.CloseButton.onClick.AddListener(OnClickClosePopup);
-                Owner.characterSelectView.VirtualCurrencyAddPopup.AddButton.onClick.AddListener(OnClickAddGem);
+                Owner.characterSelectView.BackButton.OnClickAsObservable()
+                    .Subscribe(_ => OnClickBack())
+                    .AddTo(cancellationTokenSource.Token);
+                Owner.characterSelectView.VirtualCurrencyAddPopup.CancelButton.OnClickAsObservable()
+                    .Subscribe(_ => OnClickCancelPurchase())
+                    .AddTo(cancellationTokenSource.Token);
+                Owner.characterSelectView.VirtualCurrencyAddPopup.CloseButton.OnClickAsObservable()
+                    .Subscribe(_ => OnClickClosePopup())
+                    .AddTo(cancellationTokenSource.Token);
+                Owner.characterSelectView.VirtualCurrencyAddPopup.AddButton.OnClickAsObservable()
+                    .Subscribe(_ => OnClickAddGem())
+                    .AddTo(cancellationTokenSource.Token);
             }
 
 
             private void CreateUIContents()
             {
-                foreach (var gridGroupList in _gridGroupLists)
+                foreach (var gridGroupList in gridGroupLists)
                 {
                     Destroy(gridGroupList);
                 }
 
-                _gridGroupLists.Clear();
+                gridGroupLists.Clear();
                 GameObject gridGroup = null;
                 for (int i = 0; i < Owner.characterDataManager.GetCharacterCount(); i++)
                 {
@@ -61,7 +74,7 @@ namespace UI.Title
                     {
                         gridGroup = Instantiate(Owner.characterSelectView.HorizontalGroupGameObject,
                             Owner.characterSelectView.ContentsTransform);
-                        _gridGroupLists.Add(gridGroup);
+                        gridGroupLists.Add(gridGroup);
                     }
 
                     if (gridGroup != null)
@@ -87,7 +100,7 @@ namespace UI.Title
             {
                 var grid = Instantiate(Owner.characterSelectView.Grid, parent);
                 var characterGrid = grid.GetComponentInChildren<CharacterGrid>();
-                var levelData = _userDataManager.GetCurrentLevelData(characterData.Id);
+                var levelData = userDataManager.GetCurrentLevelData(characterData.Id);
                 characterGrid.characterImage.sprite = characterData.SelfPortraitSprite;
                 characterGrid.backGroundImage.sprite = characterData.ColorSprite;
                 characterGrid.nameText.text = characterData.Name;
@@ -102,30 +115,34 @@ namespace UI.Title
                     .GetComponent<CharacterDisableGrid>();
                 disableGrid.characterImage.color = Color.black;
                 disableGrid.characterImage.sprite = characterData.SelfPortraitSprite;
-                disableGrid.purchaseButton.onClick.AddListener(() =>
-                    OnClickPurchaseButton(disableGrid.gameObject, characterData,
-                        disableGrid.GetCancellationTokenOnDestroy()));
+                disableGrid.purchaseButton.OnClickAsObservable()
+                    .Subscribe(_ =>
+                    {
+                        OnClickPurchaseButton(disableGrid.gameObject, characterData,
+                            disableGrid.GetCancellationTokenOnDestroy());
+                    })
+                    .AddTo(disableGrid.GetCancellationTokenOnDestroy());
             }
 
             private void OnClickCharacterGrid(CharacterData characterData, GameObject gridGameObject)
             {
-                if (_isProcessing)
+                if (isProcessing)
                 {
                     return;
                 }
 
-                _isProcessing = true;
+                isProcessing = true;
                 var result = Owner.CreateCharacter(characterData.Id);
                 if (!result)
                 {
-                    _isProcessing = false;
+                    isProcessing = false;
                     return;
                 }
 
                 Owner.uiAnimation.ClickScale(gridGameObject).OnComplete(() =>
                 {
                     Owner.stateMachine.Dispatch((int)TitleCoreEvent.CharacterDetail);
-                    _isProcessing = false;
+                    isProcessing = false;
                 }).SetLink(Owner.gameObject);
             }
 
@@ -140,33 +157,33 @@ namespace UI.Title
             private void OnClickPurchaseButton(GameObject disableGrid, CharacterData characterData,
                 CancellationToken token)
             {
-                if (_isProcessing)
+                if (isProcessing)
                 {
                     return;
                 }
 
-                _isProcessing = true;
+                isProcessing = true;
                 Owner.uiAnimation.ClickScale(disableGrid).OnComplete(() => UniTask.Void(async () =>
                 {
                     var user = Owner.userDataManager.GetUserData();
                     var characterPrice = GameCommonData.CharacterPrice;
-                    var gem = await _playFabVirtualCurrencyManager.GetGem();
+                    var gem = await playFabVirtualCurrencyManager.GetGem();
                     if (gem == GameCommonData.NetworkErrorCode)
                     {
-                        _isProcessing = false;
+                        isProcessing = false;
                         return;
                     }
 
                     if (gem < characterPrice)
                     {
                         Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject.SetActive(true);
-                        _isProcessing = false;
+                        isProcessing = false;
                         return;
                     }
 
                     if (user.Characters.Contains(characterData.Id))
                     {
-                        _isProcessing = false;
+                        isProcessing = false;
                         return;
                     }
 
@@ -178,14 +195,14 @@ namespace UI.Title
                     if (!isSuccessPurchase)
                     {
                         //todo 購入に失敗したときの処理
-                        _isProcessing = false;
+                        isProcessing = false;
                         return;
                     }
 
                     await Owner.SetGemText();
                     await Owner.SetRewardUI(1, characterData.SelfPortraitSprite);
                     CreateUIContents();
-                    _isProcessing = false;
+                    isProcessing = false;
                 })).SetLink(disableGrid.gameObject);
             }
 
@@ -211,6 +228,18 @@ namespace UI.Title
                 var popup = Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject;
                 Owner.uiAnimation.ClickScaleColor(addButton)
                     .OnComplete(() => { Owner.stateMachine.Dispatch((int)TitleCoreEvent.Shop); }).SetLink(popup);
+            }
+
+            private void Cancel()
+            {
+                if (cancellationTokenSource == null)
+                {
+                    return;
+                }
+
+                cancellationTokenSource.Cancel();
+                cancellationTokenSource.Dispose();
+                cancellationTokenSource = null;
             }
         }
     }

@@ -342,15 +342,15 @@ namespace UI.Title
             await asyncFunc?.Invoke().AttachExternalCancellation(token);
         }
 
-        private void Cancel(CancellationTokenSource cts)
+        private void Cancel(CancellationTokenSource cancellationTokenSource)
         {
-            if (cts == null)
+            if (cancellationTokenSource == null)
             {
                 return;
             }
 
-            cts.Cancel();
-            cts.Dispose();
+            cancellationTokenSource.Cancel();
+            cancellationTokenSource.Dispose();
         }
     }
 }

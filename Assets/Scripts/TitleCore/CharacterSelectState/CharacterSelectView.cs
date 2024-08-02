@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace UI.Title
@@ -14,7 +13,7 @@ namespace UI.Title
 
         [SerializeField] private GameObject gridDisable;
 
-        [SerializeField] private Transform contentsTransform;
+        [SerializeField] private RectTransform contentsTransform;
 
         [SerializeField] private VirtualCurrencyAddPopup virtualCurrencyAddPopup;
 
@@ -28,6 +27,6 @@ namespace UI.Title
 
         public GameObject GridDisable => gridDisable;
 
-        public Transform ContentsTransform => contentsTransform;
+        public RectTransform ContentsTransform => contentsTransform;
     }
 }

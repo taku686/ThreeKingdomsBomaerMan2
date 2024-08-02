@@ -35,8 +35,8 @@ namespace UI.Title
                 Owner.CreateCharacter(Owner.userDataManager.GetUserData().EquipCharacterId);
                 mainView.SetBackgroundEffect(true);
                 InitializeButton();
-                await InitializeText();
                 Owner.SwitchUiObject(TitleCoreEvent.Main, true);
+                await InitializeText();
             }
 
 
