@@ -63,12 +63,17 @@ namespace UI.Common
 
         public async UniTask Open(Transform target, float duration)
         {
-            await target.DOScale(1f, duration).SetEase(Ease.OutBounce);
+            await target
+                .DOScale(1f, duration)
+                .SetEase(Ease.OutBounce)
+                .ToUniTask()
+                .AttachExternalCancellation(target.gameObject.GetCancellationTokenOnDestroy());
         }
 
         public async UniTask Close(Transform target, float duration)
         {
-            await target.DOScale(0f, duration)
+            await target
+                .DOScale(0f, duration)
                 .SetEase(Ease.OutQuad)
                 .ToUniTask()
                 .AttachExternalCancellation(target.gameObject.GetCancellationTokenOnDestroy());

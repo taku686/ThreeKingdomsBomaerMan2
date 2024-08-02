@@ -24,6 +24,7 @@ namespace UI.Title
         [SerializeField] private Button missionButton;
         [SerializeField] private TextMeshProUGUI coinText;
         [SerializeField] private TextMeshProUGUI diamondText;
+        [SerializeField] private GameObject backgroundEffect;
         public GameObject CommonGameObject => commonGameObject;
         public GameObject LoginBonusGameObjet => loginBonusGameObjet;
         public Button SettingButton => settingButton;
@@ -42,5 +43,9 @@ namespace UI.Title
         public TextMeshProUGUI CoinText => coinText;
         public TextMeshProUGUI DiamondText => diamondText;
         public GameObject ShopGameObject => shopGameObject;
+        public void SetBackgroundEffect(bool isActive)
+        {
+            backgroundEffect.SetActive(isActive);
+        }
     }
 }

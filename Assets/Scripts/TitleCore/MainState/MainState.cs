@@ -17,10 +17,15 @@ namespace UI.Title
                 Initialize().Forget();
             }
 
+            protected override void OnExit(State nextState)
+            {
+                mainView.SetBackgroundEffect(false);
+            }
+
 
             protected override void OnUpdate()
             {
-             //   TransitionLoginBonus();
+                //   TransitionLoginBonus();
             }
 
             private async UniTaskVoid Initialize()
@@ -28,6 +33,7 @@ namespace UI.Title
                 playFabLoginManager = Owner.playFabLoginManager;
                 mainView = Owner.mainView;
                 Owner.CreateCharacter(Owner.userDataManager.GetUserData().EquipCharacterId);
+                mainView.SetBackgroundEffect(true);
                 InitializeButton();
                 await InitializeText();
                 Owner.SwitchUiObject(TitleCoreEvent.Main, true);

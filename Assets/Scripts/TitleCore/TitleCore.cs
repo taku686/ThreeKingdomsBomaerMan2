@@ -96,6 +96,7 @@ namespace UI.Title
         {
             cts = new CancellationTokenSource();
             fade.InitializeInSceneTransition(1, ProjectCommonData.Instance.isSceneTransition);
+            mainView.SetBackgroundEffect(false);
             commonView.Initialize();
             InitializeState();
             InitializeButton();
