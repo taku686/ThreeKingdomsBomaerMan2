@@ -10,7 +10,7 @@ namespace UI.Title
 {
     public partial class TitleCore
     {
-        public class LoginState : State
+        public class LoginState : StateMachine<TitleCore>.State
         {
             private CancellationTokenSource _cts;
             private PlayFabUserDataManager _playFabUserDataManager;
@@ -19,12 +19,12 @@ namespace UI.Title
             private UIAnimation _uiAnimation;
             private bool _isLoginProcessing;
 
-            protected override void OnEnter(State prevState)
+            protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
                 Initialize();
             }
 
-            protected override void OnLateExit(State nextState)
+            protected override void OnLateExit(StateMachine<TitleCore>.State nextState)
             {
                 Owner.Cancel(_cts);
             }
@@ -40,7 +40,7 @@ namespace UI.Title
                 InitializeButton();
                 InitializeObject();
                 InitializeTitleImage();
-                Owner.SwitchUiObject(TitleCoreEvent.Login, false);
+                Owner.SwitchUiObject(State.Login, false);
             }
 
             private void InitializeTitleImage()
@@ -98,7 +98,7 @@ namespace UI.Title
 
                 Owner.characterDataManager.Initialize(Owner.userDataManager, Owner.token);
                 Owner.mainManager.isInitialize = true;
-                Owner.stateMachine.Dispatch((int)TitleCoreEvent.Main);
+                Owner.stateMachine.Dispatch((int)State.Main);
                 _commonView.waitPopup.SetActive(false);
                 _isLoginProcessing = false;
             }
@@ -128,7 +128,7 @@ namespace UI.Title
                     Owner.characterDataManager.Initialize(Owner.userDataManager, Owner.token);
                     Owner.loginView.DisplayNameView.gameObject.SetActive(false);
                     Owner.mainManager.isInitialize = true;
-                    Owner.stateMachine.Dispatch((int)TitleCoreEvent.Main);
+                    Owner.stateMachine.Dispatch((int)State.Main);
                     _commonView.waitPopup.SetActive(false);
                     _isLoginProcessing = false;
                 }

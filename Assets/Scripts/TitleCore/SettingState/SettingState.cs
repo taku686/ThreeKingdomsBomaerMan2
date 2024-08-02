@@ -10,14 +10,14 @@ namespace UI.Title
 {
     public partial class TitleCore
     {
-        public class SettingState : State
+        public class SettingState : StateMachine<TitleCore>.State
         {
-            protected override void OnEnter(State prevState)
+            protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
                 Initialize();
             }
 
-            protected override void OnExit(State nextState)
+            protected override void OnExit(StateMachine<TitleCore>.State nextState)
             {
                 Owner.commonView.virtualCurrencyView.gameObject.SetActive(true);
             }
@@ -26,7 +26,7 @@ namespace UI.Title
             {
                 InitializeButton();
                 InitializeObject();
-                Owner.SwitchUiObject(TitleCoreEvent.Setting, false);
+                Owner.SwitchUiObject(State.Setting, false);
             }
 
             private void InitializeButton()
@@ -58,7 +58,7 @@ namespace UI.Title
             private void OnClickCloseSetting()
             {
                 Owner.uiAnimation.ClickScaleColor(Owner.settingView.SettingCloseButton.gameObject)
-                    .OnComplete(() => { Owner.stateMachine.Dispatch((int)TitleCoreEvent.Main); })
+                    .OnComplete(() => { Owner.stateMachine.Dispatch((int)State.Main); })
                     .SetLink(Owner.gameObject);
             }
 

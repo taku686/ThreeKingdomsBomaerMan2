@@ -15,7 +15,7 @@ namespace UI.Title
 {
     public partial class TitleCore
     {
-        public class CharacterDetailState : State
+        public class CharacterDetailState : StateMachine<TitleCore>.State
         {
             private const float MoveAmount = 50;
             private const int DefaultPage = 1;
@@ -37,12 +37,12 @@ namespace UI.Title
             private int pageCount;
             private bool isProcessing;
 
-            protected override void OnEnter(State prevState)
+            protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
                 Initialize();
             }
 
-            protected override void OnExit(State nextState)
+            protected override void OnExit(StateMachine<TitleCore>.State nextState)
             {
                 Cancel();
             }
@@ -66,7 +66,7 @@ namespace UI.Title
                 InitializeButton();
                 SetupUIContent();
                 InitializeUIAnimation();
-                Owner.SwitchUiObject(TitleCoreEvent.CharacterDetail, true);
+                Owner.SwitchUiObject(State.CharacterDetail, true);
                 isInitialize = true;
                 canQuestion = true;
                 await UniTask.Delay(TimeSpan.FromSeconds(1f));
@@ -184,7 +184,7 @@ namespace UI.Title
                 Owner.uiAnimation.ClickScaleColor(button).OnComplete(() =>
                 {
                     Owner.CreateCharacter(Owner.userDataManager.GetUserData().EquipCharacterId);
-                    Owner.stateMachine.Dispatch((int)TitleCoreEvent.CharacterSelect);
+                    Owner.stateMachine.Dispatch((int)State.CharacterSelect);
                 }).SetLink(button);
             }
 
@@ -197,7 +197,7 @@ namespace UI.Title
                     var result = await playFabUserDataManager.TryUpdateUserDataAsync(userData);
                     if (result)
                     {
-                        Owner.stateMachine.Dispatch((int)TitleCoreEvent.Main);
+                        Owner.stateMachine.Dispatch((int)State.Main);
                     }
                 })).SetLink(button);
             }
@@ -354,7 +354,7 @@ namespace UI.Title
                 var button = characterDetailView.VirtualCurrencyAddPopup.AddButton.gameObject;
                 Owner.uiAnimation.ClickScaleColor(button).OnComplete(() =>
                 {
-                    Owner.stateMachine.Dispatch((int)TitleCoreEvent.Shop);
+                    Owner.stateMachine.Dispatch((int)State.Shop);
                 }).SetLink(button);
             }
 

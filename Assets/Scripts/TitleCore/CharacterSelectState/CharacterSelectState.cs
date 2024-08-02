@@ -12,7 +12,7 @@ namespace UI.Title
 {
     public partial class TitleCore
     {
-        public class CharacterSelectState : State
+        public class CharacterSelectState : StateMachine<TitleCore>.State
         {
             private readonly List<GameObject> gridGroupLists = new();
             private UserDataManager userDataManager;
@@ -20,12 +20,12 @@ namespace UI.Title
             private bool isProcessing;
             private CancellationTokenSource cancellationTokenSource;
 
-            protected override void OnEnter(State prevState)
+            protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
                 Initialize();
             }
 
-            protected override void OnExit(State nextState)
+            protected override void OnExit(StateMachine<TitleCore>.State nextState)
             {
                 Cancel();
             }
@@ -38,7 +38,7 @@ namespace UI.Title
                 playFabVirtualCurrencyManager = Owner.playFabVirtualCurrencyManager;
                 CreateUIContents();
                 InitializeButton();
-                Owner.SwitchUiObject(TitleCoreEvent.CharacterSelect, true);
+                Owner.SwitchUiObject(State.CharacterSelect, true);
             }
 
             private void SetupUi()
@@ -157,7 +157,7 @@ namespace UI.Title
 
                 Owner.uiAnimation.ClickScale(gridGameObject).OnComplete(() =>
                 {
-                    Owner.stateMachine.Dispatch((int)TitleCoreEvent.CharacterDetail);
+                    Owner.stateMachine.Dispatch((int)State.CharacterDetail);
                     isProcessing = false;
                 }).SetLink(Owner.gameObject);
             }
@@ -166,7 +166,7 @@ namespace UI.Title
             {
                 Owner.uiAnimation.ClickScaleColor(Owner.characterSelectView.BackButton.gameObject).OnComplete(() =>
                 {
-                    Owner.stateMachine.Dispatch((int)TitleCoreEvent.Main);
+                    Owner.stateMachine.Dispatch((int)State.Main);
                 }).SetLink(Owner.gameObject);
             }
 
@@ -243,7 +243,7 @@ namespace UI.Title
                 var addButton = Owner.characterSelectView.VirtualCurrencyAddPopup.AddButton.gameObject;
                 var popup = Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject;
                 Owner.uiAnimation.ClickScaleColor(addButton)
-                    .OnComplete(() => { Owner.stateMachine.Dispatch((int)TitleCoreEvent.Shop); }).SetLink(popup);
+                    .OnComplete(() => { Owner.stateMachine.Dispatch((int)State.Shop); }).SetLink(popup);
             }
 
             private void Cancel()

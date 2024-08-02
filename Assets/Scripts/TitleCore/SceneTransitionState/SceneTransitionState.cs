@@ -6,21 +6,21 @@ namespace UI.Title
 {
     public partial class TitleCore
     {
-        public class SceneTransitionState : State
+        public class SceneTransitionState : StateMachine<TitleCore>.State
         {
-            protected override void OnEnter(State prevState)
+            protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
                 Initialize();
             }
 
-            protected override void OnExit(State nextState)
+            protected override void OnExit(StateMachine<TitleCore>.State nextState)
             {
             }
 
             private void Initialize()
             {
                 LoadScene();
-                Owner.SwitchUiObject(TitleCoreEvent.SceneTransition, false);
+                Owner.SwitchUiObject(State.SceneTransition, false);
             }
 
             private void LoadScene()

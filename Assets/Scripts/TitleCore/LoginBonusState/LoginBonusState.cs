@@ -12,7 +12,7 @@ namespace UI.Title
 {
     public partial class TitleCore
     {
-        public class LoginBonusState : State
+        public class LoginBonusState : StateMachine<TitleCore>.State
         {
             private UIAnimation _uiAnimation;
             private LoginBonusView _loginBonusView;
@@ -24,12 +24,12 @@ namespace UI.Title
             private const int Day4 = 3;
             private const int Day7 = 6;
 
-            protected override void OnEnter(State prevState)
+            protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
                 Initialize().Forget();
             }
 
-            protected override void OnExit(State nextState)
+            protected override void OnExit(StateMachine<TitleCore>.State nextState)
             {
                 Destroy(_focusObj);
             }
@@ -45,7 +45,7 @@ namespace UI.Title
                 InitializeButton();
                 await InitializeUIContent();
                 SetupLoginImage();
-                Owner.SwitchUiObject(TitleCoreEvent.LoginBonus, true);
+                Owner.SwitchUiObject(State.LoginBonus, true);
             }
 
             private void InitializeButton()
@@ -190,7 +190,7 @@ namespace UI.Title
                     await _uiAnimation.Close(panel, GameCommonData.CloseDuration)
                         .AttachExternalCancellation(panel.GetCancellationTokenOnDestroy());
                     panel.gameObject.SetActive(false);
-                    Owner.stateMachine.Dispatch((int)TitleCoreEvent.Main);
+                    Owner.stateMachine.Dispatch((int)State.Main);
                 })).SetLink(button);
             }
 

@@ -10,13 +10,13 @@ namespace UI.Title
 {
     public partial class TitleCore
     {
-        public class BattleReadyState : State
+        public class BattleReadyState : StateMachine<TitleCore>.State
         {
             private readonly Dictionary<int, GameObject> gridDictionary = new();
             private bool isInitialize;
             private UserDataManager userDataManager;
 
-            protected override void OnEnter(State prevState)
+            protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
                 Initialize();
             }
@@ -33,7 +33,7 @@ namespace UI.Title
                 InitializeButton();
                 InitializeSubscribe();
                 SetupEvent();
-                Owner.SwitchUiObject(TitleCoreEvent.ReadyBattle, false);
+                Owner.SwitchUiObject(State.ReadyBattle, false);
             }
 
             private void SetupEvent()
@@ -74,7 +74,7 @@ namespace UI.Title
                     PhotonNetwork.LeaveRoom();
                     Owner.DisableTitleGameObject();
                     Owner.mainView.MainGameObject.SetActive(true);
-                    Owner.stateMachine.Dispatch((int)TitleCoreEvent.Main);
+                    Owner.stateMachine.Dispatch((int)State.Main);
                 }).SetLink(Owner.gameObject);
             }
 
@@ -124,7 +124,7 @@ namespace UI.Title
 
                 PhotonNetwork.CurrentRoom.IsOpen = false;
                 PhotonNetwork.CurrentRoom.IsVisible = false;
-                Owner.stateMachine.Dispatch((int)TitleCoreEvent.SceneTransition);
+                Owner.stateMachine.Dispatch((int)State.SceneTransition);
             }
 
             private void OnClickSceneTransition()
@@ -136,7 +136,7 @@ namespace UI.Title
 
                 PhotonNetwork.CurrentRoom.IsOpen = false;
                 PhotonNetwork.CurrentRoom.IsVisible = false;
-                Owner.stateMachine.Dispatch((int)TitleCoreEvent.SceneTransition);
+                Owner.stateMachine.Dispatch((int)State.SceneTransition);
             }
 
 

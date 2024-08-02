@@ -16,7 +16,7 @@ namespace UI.Title
 {
     public partial class TitleCore
     {
-        public class MissionState : State
+        public class MissionState : StateMachine<TitleCore>.State
         {
             private const string CanGet = "Get";
             private const string InProgress = "In Progress";
@@ -35,12 +35,12 @@ namespace UI.Title
             private bool isProgress;
             private CancellationToken token;
 
-            protected override void OnEnter(State prevState)
+            protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
                 Initialize().Forget();
             }
 
-            protected override void OnExit(State nextState)
+            protected override void OnExit(StateMachine<TitleCore>.State nextState)
             {
             }
 
@@ -58,7 +58,7 @@ namespace UI.Title
                 token = missionView.GetCancellationTokenOnDestroy();
                 await GenerateMissionGrid();
                 InitializeButton();
-                Owner.SwitchUiObject(TitleCoreEvent.Mission, true);
+                Owner.SwitchUiObject(State.Mission, true);
             }
 
             private void InitializeButton()
@@ -141,7 +141,7 @@ namespace UI.Title
 
             private async UniTask OnClickBack()
             {
-                Owner.stateMachine.Dispatch((int)TitleCoreEvent.Main);
+                Owner.stateMachine.Dispatch((int)State.Main);
                 var button = missionView.backButton.gameObject;
                 await Owner.uiAnimation.ClickScaleColor(button).ToUniTask(cancellationToken: token);
             }

@@ -59,7 +59,7 @@ namespace UI.Title
         [SerializeField] private GameObject[] uiObjects;
 
 
-        private enum TitleCoreEvent
+        private enum State
         {
             Login,
             Main,
@@ -115,17 +115,17 @@ namespace UI.Title
                 stateMachine.Start<LoginState>();
             }
 
-            stateMachine.AddAnyTransition<MainState>((int)TitleCoreEvent.Main);
-            stateMachine.AddAnyTransition<ShopState>((int)TitleCoreEvent.Shop);
-            stateMachine.AddTransition<MainState, CharacterSelectState>((int)TitleCoreEvent.CharacterSelect);
-            stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)TitleCoreEvent.CharacterDetail);
-            stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)TitleCoreEvent.CharacterSelect);
-            stateMachine.AddTransition<MainState, BattleReadyState>((int)TitleCoreEvent.ReadyBattle);
-            stateMachine.AddTransition<BattleReadyState, SceneTransitionState>((int)TitleCoreEvent.SceneTransition);
-            stateMachine.AddTransition<LoginState, MainState>((int)TitleCoreEvent.Main);
-            stateMachine.AddTransition<MainState, SettingState>((int)TitleCoreEvent.Setting);
-            stateMachine.AddTransition<MainState, LoginBonusState>((int)TitleCoreEvent.LoginBonus);
-            stateMachine.AddTransition<MainState, MissionState>((int)TitleCoreEvent.Mission);
+            stateMachine.AddAnyTransition<MainState>((int)State.Main);
+            stateMachine.AddAnyTransition<ShopState>((int)State.Shop);
+            stateMachine.AddTransition<MainState, CharacterSelectState>((int)State.CharacterSelect);
+            stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)State.CharacterDetail);
+            stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)State.CharacterSelect);
+            stateMachine.AddTransition<MainState, BattleReadyState>((int)State.ReadyBattle);
+            stateMachine.AddTransition<BattleReadyState, SceneTransitionState>((int)State.SceneTransition);
+            stateMachine.AddTransition<LoginState, MainState>((int)State.Main);
+            stateMachine.AddTransition<MainState, SettingState>((int)State.Setting);
+            stateMachine.AddTransition<MainState, LoginBonusState>((int)State.LoginBonus);
+            stateMachine.AddTransition<MainState, MissionState>((int)State.Mission);
         }
 
         private void InitializeButton()
@@ -134,9 +134,9 @@ namespace UI.Title
             var coinAddButton = commonView.virtualCurrencyView.coinAddButton;
             var ticketAddButton = commonView.virtualCurrencyView.ticketAddButton;
             SetupRewardOkButton();
-            OnClickTransitionState(gemAddButton, TitleCoreEvent.Shop, cts.Token);
-            OnClickTransitionState(coinAddButton, TitleCoreEvent.Shop, cts.Token);
-            OnClickTransitionState(ticketAddButton, TitleCoreEvent.Shop, cts.Token);
+            OnClickTransitionState(gemAddButton, State.Shop, cts.Token);
+            OnClickTransitionState(coinAddButton, State.Shop, cts.Token);
+            OnClickTransitionState(ticketAddButton, State.Shop, cts.Token);
         }
 
 
@@ -196,7 +196,13 @@ namespace UI.Title
             return true;
         }
 
-        private async UniTaskVoid SwitchUiObject(TitleCoreEvent titleCoreEvent, bool isViewVirtualCurrencyUi, Action action = null)
+        private void DestroyCharacter()
+        {
+            Destroy(character);
+            Destroy(weaponEffect);
+        }
+
+        private async UniTaskVoid SwitchUiObject(State state, bool isViewVirtualCurrencyUi, Action action = null)
         {
             await TransitionAnimation(() =>
             {
@@ -207,7 +213,7 @@ namespace UI.Title
 
                 action?.Invoke();
                 commonView.virtualCurrencyView.gameObject.SetActive(isViewVirtualCurrencyUi);
-                uiObjects[(int)titleCoreEvent].SetActive(true);
+                uiObjects[(int)state].SetActive(true);
             });
         }
 
@@ -253,7 +259,7 @@ namespace UI.Title
             commonView.virtualCurrencyView.ticketText.text = ticket.ToString("D");
         }
 
-        private void OnClickTransitionState(Button button, TitleCoreEvent titleCoreEvent, CancellationToken token)
+        private void OnClickTransitionState(Button button, State state, CancellationToken token)
         {
             if (button == null)
             {
@@ -266,7 +272,7 @@ namespace UI.Title
                 .Subscribe(_ =>
                 {
                     uiAnimation.ClickScaleColor(button.gameObject)
-                        .OnComplete(() => { stateMachine.Dispatch((int)titleCoreEvent); })
+                        .OnComplete(() => { stateMachine.Dispatch((int)state); })
                         .SetLink(button.gameObject);
                 }).AddTo(token);
         }

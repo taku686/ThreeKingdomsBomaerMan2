@@ -11,7 +11,7 @@ namespace UI.Title
 {
     public partial class TitleCore
     {
-        public class ShopState : State
+        public class ShopState : StateMachine<TitleCore>.State
         {
             private const int AddRewardValue = 5;
             private UIAnimation _uiAnimation;
@@ -19,7 +19,7 @@ namespace UI.Title
             private ShopView _shopView;
             private Sprite _gemSprite;
 
-            protected override void OnEnter(State prevState)
+            protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
                 Initialize().Forget();
             }
@@ -35,7 +35,7 @@ namespace UI.Title
                 _shopView.PurchaseErrorView.errorInfoText.text = "";
                 var gemSprite = await Resources.LoadAsync<Sprite>(GameCommonData.VirtualCurrencySpritePath + "gem");
                 _gemSprite = (Sprite)gemSprite;
-                Owner.SwitchUiObject(TitleCoreEvent.Shop, true);
+                Owner.SwitchUiObject(State.Shop, true);
             }
 
             private void InitializeButton()
@@ -81,7 +81,7 @@ namespace UI.Title
                 var backButton = _shopView.BackButton.gameObject;
                 Owner.uiAnimation.ClickScaleColor(backButton).OnComplete(() =>
                 {
-                    Owner.stateMachine.Dispatch((int)TitleCoreEvent.Main);
+                    Owner.stateMachine.Dispatch((int)State.Main);
                 }).SetLink(backButton);
             }
 

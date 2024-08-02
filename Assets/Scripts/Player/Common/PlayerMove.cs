@@ -49,7 +49,7 @@ namespace Player.Common
         {
             characterController = gameObject.AddComponent<CharacterController>();
             characterController.center = new Vector3(0, 0.5f, 0);
-            characterController.radius = 0.1f;
+            characterController.radius = 0f;
             characterController.height = 0f;
             characterController.slopeLimit = 0;
             characterController.stepOffset = 0;
