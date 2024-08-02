@@ -442,16 +442,6 @@ namespace UI.Title
                 )).SetLink(button);
             }
 
-            private async UniTask OpenErrorView(string errorText)
-            {
-                var errorView = commonView.errorView;
-                var errorViewObj = commonView.errorView.gameObject;
-                commonView.errorView.errorInfoText.text = errorText;
-                errorView.transform.localScale = Vector3.zero;
-                errorViewObj.SetActive(true);
-                await uiAnimation.Open(errorView.transform, GameCommonData.OpenDuration);
-            }
-
             private async UniTask OpenErrorView()
             {
                 var errorView = commonView.errorView;
