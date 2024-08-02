@@ -121,6 +121,7 @@ namespace UI.Title
                 }
                 else
                 {
+                    characterDetailView.LevelText.text = LevelText + currentLevelData.Level;
                     characterDetailView.UpgradeButton.gameObject.SetActive(false);
                     characterDetailView.UpgradeInfoGameObject.gameObject.SetActive(false);
                 }
