@@ -289,21 +289,6 @@ namespace UI.Title
             await uiAnimation.Open(rewardView.transform, GameCommonData.OpenDuration);
         }
 
-        /*private void SetupButtonAsync(Button button, CancellationToken cancellationToken)
-        {
-            if (button == null)
-            {
-                Debug.LogError("ボタンが設定されていません。");
-                return;
-            }
-
-            button.OnClickAsObservable()
-                .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
-                .SelectMany(_ => OnClickButtonAnimation(button).ToObservable())
-                .Subscribe()
-                .AddTo(cancellationToken);
-        }*/
-
         private async UniTask OnClickButtonAnimation(Button button)
         {
             await uiAnimation.ClickScaleColor(button.gameObject).ToUniTask(cancellationToken: token);
