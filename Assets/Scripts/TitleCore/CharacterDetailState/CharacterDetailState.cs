@@ -113,16 +113,16 @@ namespace UI.Title
             {
                 if (currentLevelData.Level < GameCommonData.MaxCharacterLevel)
                 {
+                    characterDetailView.UpgradeButton.gameObject.SetActive(true);
+                    characterDetailView.UpgradeInfoGameObject.gameObject.SetActive(true);
                     characterDetailView.LevelText.text = LevelText + currentLevelData.Level;
                     characterDetailView.UpgradeInfoText.text = $"Lv{nextLevelData.Level} Upgrade";
                     characterDetailView.UpgradeText.text = nextLevelData.NeedCoin.ToString("D");
                 }
                 else
                 {
-                    characterDetailView.LevelText.text = LevelText + currentLevelData.Level;
-                    characterDetailView.UpgradeInfoText.text = "Max Level";
-                    characterDetailView.UpgradeText.text = "-";
-                    characterDetailView.UpgradeButton.interactable = false;
+                    characterDetailView.UpgradeButton.gameObject.SetActive(false);
+                    characterDetailView.UpgradeInfoGameObject.gameObject.SetActive(false);
                 }
             }
 
@@ -139,15 +139,18 @@ namespace UI.Title
                 commonView.errorView.okButton.onClick.RemoveAllListeners();
                 Owner.characterDetailView.BackButton.onClick.AddListener(OnClickBackButton);
                 Owner.characterDetailView.SelectButton.onClick.AddListener(OnClickSelectButton);
+                
                 Owner.characterDetailView.LeftArrowButton.OnClickAsObservable()
                     .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
                     .Subscribe(_ => OnClickLeftArrow()).AddTo(cts.Token);
+                
                 Owner.characterDetailView.RightArrowButton.OnClickAsObservable()
                     .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
                     .Subscribe(_ => OnClickRightArrow()).AddTo(cts.Token);
+                
                 characterDetailView.UpgradeButton.OnClickAsObservable()
-                    .ThrottleFirst(TimeSpan.FromSeconds(UpgradeButtonIntervalDuration))
                     .Subscribe(_ => OnClickUpgrade()).AddTo(cts.Token);
+                
                 characterDetailView.PurchaseErrorView.okButton.onClick.AddListener(OnClickClosePurchaseErrorView);
                 characterDetailView.VirtualCurrencyAddPopup.CancelButton.onClick.AddListener(() =>
                     OnClickCloseVirtualCurrencyAddView(characterDetailView.VirtualCurrencyAddPopup.CancelButton
@@ -276,14 +279,9 @@ namespace UI.Title
                 }
 
                 isProcessing = true;
+                characterDetailView.UpgradeButton.interactable = false;
                 var characterData = userDataManager.GetEquippedCharacterData();
                 var currentLevelData = userDataManager.GetCurrentLevelData(characterData.Id);
-                if (currentLevelData.Level >= GameCommonData.MaxCharacterLevel)
-                {
-                    isProcessing = false;
-                    return;
-                }
-
                 var button = characterDetailView.UpgradeButton.gameObject;
                 Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
@@ -291,6 +289,7 @@ namespace UI.Title
                     if (coin == GameCommonData.NetworkErrorCode)
                     {
                         isProcessing = false;
+                        characterDetailView.UpgradeButton.interactable = true;
                         return;
                     }
 
@@ -298,14 +297,9 @@ namespace UI.Title
                     var nextLevelData = userDataManager.GetNextLevelData(characterData.Id);
                     var virtualCurrencyAddView = characterDetailView.VirtualCurrencyAddPopup;
                     var purchaseErrorView = characterDetailView.PurchaseErrorView;
-                    if (currentLevelData.Level >= GameCommonData.MaxCharacterLevel)
-                    {
-                        isProcessing = false;
-                        return;
-                    }
-
                     if (coin < nextLevelData.NeedCoin)
                     {
+                        characterDetailView.UpgradeButton.interactable = true;
                         virtualCurrencyAddView.transform.localScale = Vector3.zero;
                         virtualCurrencyAddView.gameObject.SetActive(true);
                         await uiAnimation.Open(virtualCurrencyAddView.transform, GameCommonData.OpenDuration);
@@ -320,6 +314,7 @@ namespace UI.Title
                     {
                         purchaseErrorView.transform.localScale = Vector3.zero;
                         purchaseErrorView.gameObject.SetActive(true);
+                        characterDetailView.UpgradeButton.interactable = true;
                         await uiAnimation.Open(purchaseErrorView.transform, GameCommonData.OpenDuration);
                         isProcessing = false;
                         return;
@@ -336,6 +331,7 @@ namespace UI.Title
                     }
 
                     isProcessing = false;
+                    characterDetailView.UpgradeButton.interactable = true;
                 })).SetLink(button);
             }
 

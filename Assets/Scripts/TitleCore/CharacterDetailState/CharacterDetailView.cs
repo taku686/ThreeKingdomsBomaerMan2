@@ -18,6 +18,7 @@ namespace UI.Title
         [SerializeField] private Button upgradeButton;
         [SerializeField] private TextMeshProUGUI upgradeText;
         [SerializeField] private TextMeshProUGUI upgradeInfoText;
+        [SerializeField] private GameObject upgradeInfoGameObject;
         [SerializeField] private TextMeshProUGUI levelText;
         [SerializeField] private PurchaseErrorView purchaseErrorView;
         [SerializeField] private VirtualCurrencyAddPopup virtualCurrencyAddPopup;
@@ -29,6 +30,7 @@ namespace UI.Title
         public Button UpgradeButton => upgradeButton;
         public TextMeshProUGUI UpgradeText => upgradeText;
         public TextMeshProUGUI UpgradeInfoText => upgradeInfoText;
+        public GameObject UpgradeInfoGameObject => upgradeInfoGameObject;
         public TextMeshProUGUI LevelText => levelText;
         public SkillsView SkillsView => skillsView;
         public StatusView StatusView => statusView;

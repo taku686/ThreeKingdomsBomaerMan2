@@ -27,12 +27,11 @@ using UnityEngine.Serialization;
 
 public class FadeImage : UnityEngine.UI.Graphic, IFade
 {
-    private Texture _maskTexture;
-    private readonly Gradient _gradient = new();
+    private Texture maskTexture;
+    private readonly Gradient gradient = new();
     [SerializeField, Range(0, 1)] private float cutoutRange;
     [SerializeField] private List<Color> colorList = new();
     [SerializeField] private List<Texture> maskTextureList = new();
-    [SerializeField] private Material cutoutMaterial;
     private static readonly int Range1 = Shader.PropertyToID("_Range");
     private static readonly int Color1 = Shader.PropertyToID("_Color");
     private static readonly int MaskTex = Shader.PropertyToID("_MaskTex");
@@ -47,25 +46,25 @@ public class FadeImage : UnityEngine.UI.Graphic, IFade
         }
     }
 
-    public void UpdateMaskCutout(float range)
+    private void UpdateMaskCutout(float range)
     {
         enabled = true;
         material.SetFloat(Range1, 1 - range);
-        if (_gradient != null)
+        if (gradient != null)
         {
-            material.SetColor(Color1, _gradient.Evaluate(1 - range));
+            material.SetColor(Color1, gradient.Evaluate(1 - range));
         }
 
         if (range <= 0)
         {
-            this.enabled = false;
+            enabled = false;
         }
     }
 
-    public void UpdateMaskTexture(Texture texture)
+    private void UpdateMaskTexture(Texture texture)
     {
         material.SetTexture(MaskTex, texture);
-        material.SetColor(Color1, _gradient.Evaluate(0));
+        material.SetColor(Color1, gradient.Evaluate(0));
     }
 
     public void SetRandomColor()
@@ -84,7 +83,7 @@ public class FadeImage : UnityEngine.UI.Graphic, IFade
         alphaKey[0].time = 0.5f;
         alphaKey[1].alpha = 0.0f;
         alphaKey[1].time = 1.0f;
-        _gradient.SetKeys(colorKey, alphaKey);
+        gradient.SetKeys(colorKey, alphaKey);
     }
 
     public void SetColor(Color fadeInColor, Color fadeOutColor)
@@ -99,21 +98,21 @@ public class FadeImage : UnityEngine.UI.Graphic, IFade
         alphaKey[0].time = 0.5f;
         alphaKey[1].alpha = 0.0f;
         alphaKey[1].time = 1.0f;
-        _gradient.SetKeys(colorKey, alphaKey);
+        gradient.SetKeys(colorKey, alphaKey);
     }
 
     public void SetRandomMaskTexture()
     {
         var index = Random.Range(0, maskTextureList.Count);
-        _maskTexture = maskTextureList[index];
+        maskTexture = maskTextureList[index];
         ProjectCommonData.Instance.maskTextureIndex = index;
-        UpdateMaskTexture(_maskTexture);
+        UpdateMaskTexture(maskTexture);
     }
 
     public void SetMaskTexture(int index)
     {
-        _maskTexture = maskTextureList[index];
-        UpdateMaskTexture(_maskTexture);
+        maskTexture = maskTextureList[index];
+        UpdateMaskTexture(maskTexture);
     }
 
 #if UNITY_EDITOR
@@ -121,7 +120,7 @@ public class FadeImage : UnityEngine.UI.Graphic, IFade
     {
         base.OnValidate();
         UpdateMaskCutout(Range);
-        UpdateMaskTexture(_maskTexture);
+        UpdateMaskTexture(maskTexture);
     }
 #endif
 }

@@ -21,8 +21,10 @@ namespace UI.Battle
         {
             var endPosX = -greenGauge.rect.width * (1 - hpRate);
             var endPos = new Vector3(endPosX, 0, 0);
-            await greenGauge.DOLocalMove(endPos, GreenGaugeMoveDuration).SetLink(greenGauge.gameObject);
-            await redGauge.DOLocalMove(endPos, RedGaugeMoveDuration).SetLink(redGauge.gameObject);
+            await greenGauge.DOLocalMove(endPos, GreenGaugeMoveDuration).ToUniTask()
+                .AttachExternalCancellation(gameObject.GetCancellationTokenOnDestroy());
+            await redGauge.DOLocalMove(endPos, RedGaugeMoveDuration).ToUniTask()
+                .AttachExternalCancellation(gameObject.GetCancellationTokenOnDestroy());
         }
     }
 }
