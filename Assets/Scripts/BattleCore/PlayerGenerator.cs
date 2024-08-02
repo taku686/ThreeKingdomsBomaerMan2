@@ -10,17 +10,17 @@ namespace Manager.BattleManager
     {
         [SerializeField] private List<Transform> startPointList;
         [SerializeField] private Transform playerParent;
-        private GameObject _playerObj;
+        private GameObject playerObj;
         private const int PlayerNotification = 1;
         private const float PlayerSize = 0.8f;
 
         public void GenerateCharacter(int playerIndex, CharacterData characterData)
         {
             var spawnPoint = GetSpawnPoint(playerIndex);
-            _playerObj = PhotonNetwork.Instantiate(GameCommonData.CharacterPrefabPath + characterData.CharaObj,
+            playerObj = PhotonNetwork.Instantiate(GameCommonData.CharacterPrefabPath + characterData.CharaObj,
                 spawnPoint.position, spawnPoint.rotation);
-            _playerObj.transform.localScale *= PlayerSize;
-            _playerObj.transform.SetParent(playerParent);
+            playerObj.transform.localScale *= PlayerSize;
+            playerObj.transform.SetParent(playerParent);
             PlayerGenerateNotification();
         }
 

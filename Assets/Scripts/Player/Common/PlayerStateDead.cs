@@ -1,8 +1,8 @@
-﻿using State = StateMachine<Player.Common.PLayerCore>.State;
+﻿using State = StateMachine<Player.Common.PlayerCore>.State;
 
 namespace Player.Common
 {
-    public partial class PLayerCore
+    public partial class PlayerCore
     {
         public class PlayerStateDead : State
         {
@@ -13,7 +13,7 @@ namespace Player.Common
 
             private void Initialize()
             {
-                Owner._playerDead.BigJump(Owner.transform);
+                Owner.playerDead.BigJump(Owner.transform);
             }
         }
     }

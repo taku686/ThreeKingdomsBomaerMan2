@@ -7,12 +7,12 @@ namespace Player.Common
 {
     public class CharacterStatusManager : IDisposable
     {
-        private bool _isMine;
+        private readonly bool isMine;
         private const float HpRate = 1.8f;
         public int CurrentHp;
         public readonly int MaxHp;
         public readonly float Speed;
-        private readonly int _maxBombLimit;
+        private readonly int maxBombLimit;
         public int CurrentBombLimit;
         public readonly int DamageAmount;
         public readonly int FireRange;
@@ -23,20 +23,20 @@ namespace Player.Common
             MaxHp = (int)(characterData.Hp * HpRate);
             Speed = Mathf.Sqrt(characterData.Speed * 0.1f);
             CurrentBombLimit = 0;
-            _maxBombLimit = characterData.BombLimit;
+            maxBombLimit = characterData.BombLimit;
             DamageAmount = characterData.Attack;
             FireRange = characterData.FireRange;
-            _isMine = isMine;
+            this.isMine = isMine;
         }
 
         public bool CanPutBomb()
         {
-            return CurrentBombLimit <= _maxBombLimit;
+            return CurrentBombLimit <= maxBombLimit;
         }
 
         public void IncrementBombCount()
         {
-            if (!_isMine)
+            if (!isMine)
             {
                 return;
             }
@@ -46,7 +46,7 @@ namespace Player.Common
 
         public void DecrementBombCount()
         {
-            if (!_isMine || CurrentBombLimit <= 0)
+            if (!isMine || CurrentBombLimit <= 0)
             {
                 return;
             }

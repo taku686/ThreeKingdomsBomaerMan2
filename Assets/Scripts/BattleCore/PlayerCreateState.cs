@@ -84,7 +84,7 @@ namespace Manager.BattleManager
                 AddBoxCollider(player);
                 AddRigidbody(player);
                 Owner.cameraManager.Initialize(player.transform);
-                var playerCore = player.AddComponent<PLayerCore>();
+                var playerCore = player.AddComponent<PlayerCore>();
                 _userDataManager = Owner._userDataManager;
                 playerCore.Initialize(playerStatusManager, hpKey, characterData, _userDataManager);
             }

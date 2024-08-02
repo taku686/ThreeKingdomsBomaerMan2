@@ -5,18 +5,18 @@ using Cysharp.Threading.Tasks;
 using Photon.Pun;
 using UniRx;
 using UnityEngine;
-using State = StateMachine<Player.Common.PLayerCore>.State;
+using State = StateMachine<Player.Common.PlayerCore>.State;
 
 namespace Player.Common
 {
-    public partial class PLayerCore
+    public partial class PlayerCore
     {
         public class PlayerStateIdle : State
         {
-            private Transform _playerTransform;
-            private bool _isSetup;
-            private PlayerMove _playerMove;
-            private CancellationTokenSource _cancellationTokenSource;
+            private Transform playerTransform;
+            private bool isSetup;
+            private PlayerMove playerMove;
+            private CancellationTokenSource cancellationTokenSource;
 
             protected override void OnEnter(State prevState)
             {
@@ -31,84 +31,87 @@ namespace Player.Common
             {
                 base.OnExit(nextState);
                 Cancel();
-                _playerMove = null;
+                playerMove = null;
             }
 
             protected override void OnUpdate()
             {
-                if (_playerMove == null)
+                if (playerMove == null)
                 {
                     return;
                 }
-#if UNITY_EDITOR
+
+/*#if UNITY_EDITOR
                 var direction = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
 #elif UNITY_ANDROID
    var direction = new Vector3(UltimateJoystick.GetHorizontalAxis(GameCommonData.JoystickName), 0,
                     UltimateJoystick.GetVerticalAxis(GameCommonData.JoystickName));
-#endif
-
-                _playerMove.Move(direction).Forget();
+#endif*/
+                var direction = new Vector3(UltimateJoystick.GetHorizontalAxis(GameCommonData.JoystickName), 0,
+                    UltimateJoystick.GetVerticalAxis(GameCommonData.JoystickName));
+                playerMove.Move(direction);
             }
 
             private void InitializeComponent()
             {
-                _playerMove = Owner._playerMove;
+                playerMove = Owner.playerMove;
             }
 
             private void InitialiseIdleState()
             {
-                if (_isSetup)
+                if (isSetup)
                 {
                     return;
                 }
 
-                _playerTransform = Owner.transform;
-                Owner._inputManager.SetOnClickSkillOne(SkillOneIntervalTime, OnClickSkillOne,
+                playerTransform = Owner.transform;
+                Owner.inputManager.SetOnClickSkillOne(SkillOneIntervalTime, OnClickSkillOne,
                     Owner.GetCancellationTokenOnDestroy());
-                Owner._inputManager.SetOnClickSkillTwo(SkillTwoIntervalTime, OnClickSkillTwo,
+                Owner.inputManager.SetOnClickSkillTwo(SkillTwoIntervalTime, OnClickSkillTwo,
                     Owner.GetCancellationTokenOnDestroy());
-                _isSetup = true;
+                isSetup = true;
             }
 
             private void InitializeCancellationToken()
             {
-                _cancellationTokenSource ??= new CancellationTokenSource();
+                cancellationTokenSource ??= new CancellationTokenSource();
             }
 
             private void InitializeButton()
             {
-                Owner._inputManager.BombButton.OnClickAsObservable().Where(_ => Owner._characterStatusManager.CanPutBomb())
+                Owner.inputManager.BombButton.OnClickAsObservable()
+                    .Where(_ => Owner.characterStatusManager.CanPutBomb())
                     .Throttle(TimeSpan.FromSeconds(GameCommonData.InputBombInterval))
                     .Subscribe(
                         _ =>
                         {
-                            var playerId = Owner._photonView.ViewID;
+                            var playerId = Owner.photonView.ViewID;
                             var explosionTime = PhotonNetwork.ServerTimestamp +
                                                 GameCommonData.ThreeMilliSecondsBeforeExplosion;
-                            var photonView = Owner._photonView;
-                            var damageAmount = Owner._characterStatusManager.DamageAmount;
-                            var fireRange = Owner._characterStatusManager.FireRange;
-                            var boxCollider = Owner._boxCollider;
-                            Owner._putBomb.SetBomb(boxCollider, photonView, _playerTransform,
+                            var photonView = Owner.photonView;
+                            var damageAmount = Owner.characterStatusManager.DamageAmount;
+                            var fireRange = Owner.characterStatusManager.FireRange;
+                            var boxCollider = Owner.boxCollider;
+                            Owner.putBomb.SetBomb(boxCollider, photonView, playerTransform,
                                 (int)BombType.Normal, damageAmount, fireRange, explosionTime, playerId);
-                        }).AddTo(_cancellationTokenSource.Token);
+                        }).AddTo(cancellationTokenSource.Token);
             }
 
             private void OnClickSkillOne()
             {
-                Owner._stateMachine.Dispatch((int)PLayerState.Skill1);
+                Owner.stateMachine.Dispatch((int)PLayerState.Skill1);
             }
 
             private void OnClickSkillTwo()
             {
-                Owner._stateMachine.Dispatch((int)PLayerState.Skill2);
+                Owner.stateMachine.Dispatch((int)PLayerState.Skill2);
             }
 
             private void Cancel()
             {
-                _cancellationTokenSource?.Cancel();
-                _cancellationTokenSource?.Dispose();
-                _cancellationTokenSource = null;
+                cancellationTokenSource?.Cancel();
+                cancellationTokenSource?.Dispose();
+                cancellationTokenSource = null;
             }
         }
     }
