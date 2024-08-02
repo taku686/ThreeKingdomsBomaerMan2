@@ -218,17 +218,6 @@ namespace UI.Title
             await fade.FadeOut(GameCommonData.FadeOutTime);
         }
 
-        private async UniTask SceneTransitionAnimation(int loadSceneIndex)
-        {
-            await fade.FadeIn(GameCommonData.FadeOutTime, null, false);
-            await SceneManager.LoadSceneAsync(loadSceneIndex);
-        }
-
-        private void TransitionState(TitleCoreEvent gameCoreEvent)
-        {
-            stateMachine.Dispatch((int)gameCoreEvent);
-        }
-
         private void CheckMission(int actionId)
         {
             switch (actionId)
@@ -299,24 +288,6 @@ namespace UI.Title
             rewardView.transform.localScale = Vector3.zero;
             rewardView.gameObject.SetActive(true);
             await uiAnimation.Open(rewardView.transform, GameCommonData.OpenDuration);
-        }
-
-        private void SetupButton(Button button, Action action, CancellationToken token)
-        {
-            if (button == null)
-            {
-                Debug.LogError("ボタンが設定されていません。");
-                return;
-            }
-
-            button.OnClickAsObservable()
-                .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
-                .Subscribe(_ =>
-                {
-                    uiAnimation.ClickScaleColor(button.gameObject)
-                        .OnComplete(() => { action?.Invoke(); })
-                        .SetLink(button.gameObject);
-                }).AddTo(token);
         }
 
         private void SetupButtonAsync(Button button, Func<UniTask> asyncFunc, CancellationToken token)
