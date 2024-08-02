@@ -330,12 +330,15 @@ namespace UI.Title
 
             button.OnClickAsObservable()
                 .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
-                .Subscribe(_ =>
-                {
-                    uiAnimation.ClickScaleColor(button.gameObject)
-                        .OnComplete(() => UniTask.Void(async () => { await asyncFunc?.Invoke(); }))
-                        .SetLink(button.gameObject);
-                }).AddTo(token);
+                .SelectMany(_ => OnClickButtonAnimation(button, asyncFunc).ToObservable())
+                .Subscribe()
+                .AddTo(token);
+        }
+
+        private async UniTask OnClickButtonAnimation(Button button, Func<UniTask> asyncFunc)
+        {
+            await uiAnimation.ClickScaleColor(button.gameObject).ToUniTask(cancellationToken: token);
+            await asyncFunc?.Invoke().AttachExternalCancellation(token);
         }
 
         private void Cancel(CancellationTokenSource cts)
