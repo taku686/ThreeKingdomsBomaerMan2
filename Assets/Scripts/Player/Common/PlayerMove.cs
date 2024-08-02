@@ -51,8 +51,8 @@ namespace Player.Common
             characterController.center = new Vector3(0, 0.5f, 0);
             characterController.radius = 0f;
             characterController.height = 0f;
-            characterController.slopeLimit = 0;
             characterController.stepOffset = 0;
+            characterController.slopeLimit = 0;
         }
 
         public void Move(Vector3 inputValue)
