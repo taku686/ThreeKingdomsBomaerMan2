@@ -66,7 +66,7 @@ namespace UI.Title
                 InitializeButton();
                 SetupUIContent();
                 InitializeUIAnimation();
-                Owner.SwitchUiObject(State.CharacterDetail, true);
+                Owner.SwitchUiObject(State.CharacterDetail, true).Forget();
                 isInitialize = true;
                 canQuestion = true;
                 await UniTask.Delay(TimeSpan.FromSeconds(1f));
@@ -121,7 +121,8 @@ namespace UI.Title
                 {
                     characterDetailView.LevelText.text = LevelText + currentLevelData.Level;
                     characterDetailView.UpgradeInfoText.text = "Max Level";
-                    characterDetailView.UpgradeText.text = "  ∞  ";
+                    characterDetailView.UpgradeText.text = "-";
+                    characterDetailView.UpgradeButton.interactable = false;
                 }
             }
 

@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using Common.Data;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 using Photon.Pun;
@@ -14,13 +16,17 @@ namespace UI.Title
         {
             private readonly Dictionary<int, GameObject> gridDictionary = new();
             private bool isInitialize;
-            private UserDataManager userDataManager;
+            private CancellationTokenSource cts;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
                 Initialize();
             }
 
+            protected override void OnExit(StateMachine<TitleCore>.State nextState)
+            {
+                Cancel();
+            }
 
             protected override void OnUpdate()
             {
@@ -29,11 +35,11 @@ namespace UI.Title
 
             private void Initialize()
             {
-                userDataManager = Owner.userDataManager;
+                isInitialize = false;
+                SetupCancellationToken();
                 InitializeButton();
                 InitializeSubscribe();
                 SetupEvent();
-                Owner.SwitchUiObject(State.ReadyBattle, false);
             }
 
             private void SetupEvent()
@@ -51,14 +57,8 @@ namespace UI.Title
 
             private void InitializeSubscribe()
             {
-                if (isInitialize)
-                {
-                    return;
-                }
-
-                Owner.photonNetworkManager.JoinedRoom.Subscribe(OnJoinedRoom).AddTo(Owner.gameObject);
-                Owner.photonNetworkManager.LeftRoom.Subscribe(OnLeftRoom).AddTo(Owner.gameObject);
-                isInitialize = true;
+                Owner.photonNetworkManager.JoinedRoom.Subscribe(OnJoinedRoom).AddTo(cts.Token);
+                Owner.photonNetworkManager.LeftRoom.Subscribe(OnLeftRoom).AddTo(cts.Token);
             }
 
             private void OnClickBackButton()
@@ -72,8 +72,6 @@ namespace UI.Title
 
                     Owner.photonNetworkManager.LeftRoom.OnNext(PhotonNetwork.LocalPlayer.ActorNumber);
                     PhotonNetwork.LeaveRoom();
-                    Owner.DisableTitleGameObject();
-                    Owner.mainView.MainGameObject.SetActive(true);
                     Owner.stateMachine.Dispatch((int)State.Main);
                 }).SetLink(Owner.gameObject);
             }
@@ -84,17 +82,30 @@ namespace UI.Title
                 foreach (var player in players)
                 {
                     var index = player.ActorNumber;
-                    var characterData = Owner.photonNetworkManager.CurrentRoomCharacterDatum[index];
-                    var levelData = Owner.photonNetworkManager.GetCharacterLevelData(index);
-                    var grid = Instantiate(Owner.battleReadyView.BattleReadyGrid.gameObject,
-                        Owner.battleReadyView.GridParent);
-                    var battleReadyGrid = grid.GetComponent<BattleReadyGrid>();
-                    gridDictionary[index] = grid;
-                    battleReadyGrid.characterImage.sprite = characterData.SelfPortraitSprite;
-                    battleReadyGrid.backGroundImage.sprite = characterData.ColorSprite;
-                    battleReadyGrid.nameText.text = characterData.Name;
-                    battleReadyGrid.levelText.text = GameCommonData.LevelText + levelData.Level;
+                    CreateGrid(index);
                 }
+
+                if (isInitialize)
+                {
+                    return;
+                }
+
+                Owner.SwitchUiObject(State.ReadyBattle, false).Forget();
+                isInitialize = true;
+            }
+
+            private void CreateGrid(int index)
+            {
+                var characterData = Owner.photonNetworkManager.CurrentRoomCharacterDatum[index];
+                var levelData = Owner.photonNetworkManager.GetCharacterLevelData(index);
+                var grid = Instantiate(Owner.battleReadyView.BattleReadyGrid.gameObject,
+                    Owner.battleReadyView.GridParent);
+                var battleReadyGrid = grid.GetComponent<BattleReadyGrid>();
+                gridDictionary[index] = grid;
+                battleReadyGrid.characterImage.sprite = characterData.SelfPortraitSprite;
+                battleReadyGrid.backGroundImage.sprite = characterData.ColorSprite;
+                battleReadyGrid.nameText.text = characterData.Name;
+                battleReadyGrid.levelText.text = GameCommonData.LevelText + levelData.Level;
             }
 
             private void OnLeftRoom(int index)
@@ -106,7 +117,6 @@ namespace UI.Title
 
                 if (index == PhotonNetwork.LocalPlayer.ActorNumber)
                 {
-                    GridAllDestroy();
                     return;
                 }
 
@@ -148,6 +158,23 @@ namespace UI.Title
                 }
 
                 gridDictionary.Clear();
+            }
+
+            private void SetupCancellationToken()
+            {
+                cts = new CancellationTokenSource();
+            }
+
+            private void Cancel()
+            {
+                if (cts == null)
+                {
+                    return;
+                }
+
+                cts.Cancel();
+                cts.Dispose();
+                cts = null;
             }
         }
     }

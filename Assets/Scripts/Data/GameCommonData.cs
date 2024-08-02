@@ -82,7 +82,7 @@ namespace Common.Data
         public const int ExceptionCharacterId = 999;
         public const int NetworkErrorCode = Int32.MaxValue;
         public const int CharacterLimit = 40;
-        public const float FadeOutTime = 0.5f;
+        public const float FadeOutTime = 0.8f;
 
         public static CharacterColor GetCharacterColor(string color)
         {

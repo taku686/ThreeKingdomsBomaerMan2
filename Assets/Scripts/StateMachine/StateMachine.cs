@@ -48,7 +48,7 @@ public class StateMachine<TOwner>
         {
         }
 
-        protected async virtual UniTaskVoid OnAsyncEnter(State prevState)
+        private async UniTask OnAsyncEnter(State prevState)
         {
         }
 
@@ -82,6 +82,10 @@ public class StateMachine<TOwner>
         internal void Exit(State nextState)
         {
             OnExit(nextState);
+        }
+
+        internal async UniTask OnAsyncExit(State nextState)
+        {
         }
 
         /// <summary>
@@ -209,7 +213,7 @@ public class StateMachine<TOwner>
     {
         CurrentState = firstState;
         CurrentState.Enter(null);
-        CurrentState.AsyncEnter(null);
+        CurrentState.AsyncEnter(null).Forget();
     }
 
     /// <summary>
@@ -251,6 +255,7 @@ public class StateMachine<TOwner>
     private async UniTask Change(State nextState)
     {
         CurrentState.Exit(nextState);
+        await CurrentState.OnAsyncExit(nextState);
         nextState.Enter(CurrentState);
         await nextState.AsyncEnter(CurrentState);
         CurrentState.LateExit(nextState);

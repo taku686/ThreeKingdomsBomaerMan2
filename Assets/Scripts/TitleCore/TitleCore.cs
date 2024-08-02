@@ -195,13 +195,7 @@ namespace UI.Title
 
             return true;
         }
-
-        private void DestroyCharacter()
-        {
-            Destroy(character);
-            Destroy(weaponEffect);
-        }
-
+        
         private async UniTaskVoid SwitchUiObject(State state, bool isViewVirtualCurrencyUi, Action action = null)
         {
             await TransitionAnimation(() =>
