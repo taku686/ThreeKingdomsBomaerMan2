@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Threading;
 using Assets.Scripts.Common.Data;
 using Assets.Scripts.Common.PlayFab;
@@ -15,7 +14,6 @@ using UnityEngine;
 using Zenject;
 using Manager.DataManager;
 using UniRx;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 
@@ -78,6 +76,7 @@ namespace UI.Title
         private void Start()
         {
             token = this.GetCancellationTokenOnDestroy();
+            Application.targetFrameRate = 60;
             Initialize();
         }
 
@@ -195,7 +194,7 @@ namespace UI.Title
 
             return true;
         }
-        
+
         private async UniTaskVoid SwitchUiObject(State state, bool isViewVirtualCurrencyUi, Action action = null)
         {
             await TransitionAnimation(() =>
@@ -290,7 +289,7 @@ namespace UI.Title
             await uiAnimation.Open(rewardView.transform, GameCommonData.OpenDuration);
         }
 
-        private void SetupButtonAsync(Button button, Func<UniTask> asyncFunc, CancellationToken token)
+        /*private void SetupButtonAsync(Button button, CancellationToken cancellationToken)
         {
             if (button == null)
             {
@@ -300,15 +299,14 @@ namespace UI.Title
 
             button.OnClickAsObservable()
                 .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
-                .SelectMany(_ => OnClickButtonAnimation(button, asyncFunc).ToObservable())
+                .SelectMany(_ => OnClickButtonAnimation(button).ToObservable())
                 .Subscribe()
-                .AddTo(token);
-        }
+                .AddTo(cancellationToken);
+        }*/
 
-        private async UniTask OnClickButtonAnimation(Button button, Func<UniTask> asyncFunc)
+        private async UniTask OnClickButtonAnimation(Button button)
         {
             await uiAnimation.ClickScaleColor(button.gameObject).ToUniTask(cancellationToken: token);
-            await asyncFunc?.Invoke().AttachExternalCancellation(token);
         }
 
         private void Cancel(CancellationTokenSource cancellationTokenSource)
