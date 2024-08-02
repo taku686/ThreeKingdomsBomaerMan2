@@ -196,9 +196,9 @@ namespace UI.Title
             return true;
         }
 
-        private void SwitchUiObject(TitleCoreEvent titleCoreEvent, bool isViewVirtualCurrencyUi, Action action = null)
+        private async UniTaskVoid SwitchUiObject(TitleCoreEvent titleCoreEvent, bool isViewVirtualCurrencyUi, Action action = null)
         {
-            TransitionAnimation(() =>
+            await TransitionAnimation(() =>
             {
                 foreach (var ui in uiObjects)
                 {
@@ -211,19 +211,17 @@ namespace UI.Title
             });
         }
 
-        private void TransitionAnimation(Action action)
+        private async UniTask TransitionAnimation(Action action)
         {
-            fade.FadeIn(GameCommonData.FadeOutTime, () =>
-            {
-                action.Invoke();
-                fade.FadeOut(GameCommonData.FadeOutTime);
-            }, false);
+            await fade.FadeIn(GameCommonData.FadeOutTime, null, false);
+            action.Invoke();
+            await fade.FadeOut(GameCommonData.FadeOutTime);
         }
 
-        private void SceneTransitionAnimation(int loadSceneIndex)
+        private async UniTask SceneTransitionAnimation(int loadSceneIndex)
         {
-            fade.FadeIn(GameCommonData.FadeOutTime,
-                () => UniTask.Void(async () => { await SceneManager.LoadSceneAsync(loadSceneIndex); }), false);
+            await fade.FadeIn(GameCommonData.FadeOutTime, null, false);
+            await SceneManager.LoadSceneAsync(loadSceneIndex);
         }
 
         private void TransitionState(TitleCoreEvent gameCoreEvent)

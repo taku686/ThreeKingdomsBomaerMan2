@@ -32,14 +32,30 @@ namespace UI.Title
 
             private void Initialize()
             {
-                Owner.characterSelectView.ContentsTransform.anchoredPosition =
-                    new Vector2(Owner.characterSelectView.ContentsTransform.anchoredPosition.x, 0);
-                cancellationTokenSource = new CancellationTokenSource();
+                SetupUi();
+                SetupCancellationToken();
                 userDataManager = Owner.userDataManager;
                 playFabVirtualCurrencyManager = Owner.playFabVirtualCurrencyManager;
                 CreateUIContents();
                 InitializeButton();
                 Owner.SwitchUiObject(TitleCoreEvent.CharacterSelect, true);
+            }
+
+            private void SetupUi()
+            {
+                Owner.characterSelectView.ContentsTransform.anchoredPosition =
+                    new Vector2(Owner.characterSelectView.ContentsTransform.anchoredPosition.x, 0);
+            }
+
+            private void SetupCancellationToken()
+            {
+                if (cancellationTokenSource != null)
+                {
+                    return;
+                }
+
+                cancellationTokenSource = new CancellationTokenSource();
+                cancellationTokenSource.RegisterRaiseCancelOnDestroy(Owner);
             }
 
             private void InitializeButton()

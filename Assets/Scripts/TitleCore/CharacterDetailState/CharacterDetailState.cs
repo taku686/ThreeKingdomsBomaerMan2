@@ -69,7 +69,7 @@ namespace UI.Title
                 Owner.SwitchUiObject(TitleCoreEvent.CharacterDetail, true);
                 isInitialize = true;
                 canQuestion = true;
-                await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
+                await UniTask.Delay(TimeSpan.FromSeconds(1f));
                 InitializeAnimation();
             }
 
@@ -129,9 +129,6 @@ namespace UI.Title
             {
                 Owner.characterDetailView.BackButton.onClick.RemoveAllListeners();
                 Owner.characterDetailView.SelectButton.onClick.RemoveAllListeners();
-                Owner.characterDetailView.LeftArrowButton.onClick.RemoveAllListeners();
-                Owner.characterDetailView.RightArrowButton.onClick.RemoveAllListeners();
-                characterDetailView.UpgradeButton.onClick.RemoveAllListeners();
                 characterDetailView.PurchaseErrorView.okButton.onClick.RemoveAllListeners();
                 characterDetailView.VirtualCurrencyAddPopup.CancelButton.onClick.RemoveAllListeners();
                 characterDetailView.VirtualCurrencyAddPopup.CloseButton.onClick.RemoveAllListeners();

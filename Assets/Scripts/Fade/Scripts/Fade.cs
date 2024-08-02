@@ -22,43 +22,45 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 using UnityEngine;
-using System.Collections;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 
 public class Fade : MonoBehaviour
 {
-    private IFade _fade;
-    private float _cutoutRange;
+    private IFade fade;
+    private float cutoutRange;
+    private CancellationTokenSource cts;
 
     public void InitializeInSceneTransition(float range, bool isSceneTransition)
     {
-        _fade = GetComponent<IFade>();
+        cts = new CancellationTokenSource();
+        fade = GetComponent<IFade>();
         if (!isSceneTransition)
         {
-            _fade.SetRandomColor();
-            _fade.SetRandomMaskTexture();
+            fade.SetRandomColor();
+            fade.SetRandomMaskTexture();
         }
 
-        _cutoutRange = range;
-        _fade.Range = range;
-        _fade.SetColor(ProjectCommonData.Instance.fadeInColor, ProjectCommonData.Instance.fadeOutColor);
-        _fade.SetMaskTexture(ProjectCommonData.Instance.maskTextureIndex);
+        cutoutRange = range;
+        fade.Range = range;
+        fade.SetColor(ProjectCommonData.Instance.fadeInColor, ProjectCommonData.Instance.fadeOutColor);
+        fade.SetMaskTexture(ProjectCommonData.Instance.maskTextureIndex);
     }
 
 
-    IEnumerator FadeoutCoroutine(float time, System.Action action)
+    private async UniTask FadeoutAsync(float time, System.Action action, CancellationToken token)
     {
-        float endTime = Time.timeSinceLevelLoad + time * (_cutoutRange);
-        var endFrame = new WaitForEndOfFrame();
+        float endTime = Time.timeSinceLevelLoad + time * (cutoutRange);
 
         while (Time.timeSinceLevelLoad <= endTime)
         {
-            _cutoutRange = (endTime - Time.timeSinceLevelLoad) / time;
-            _fade.Range = _cutoutRange;
-            yield return endFrame;
+            cutoutRange = (endTime - Time.timeSinceLevelLoad) / time;
+            fade.Range = cutoutRange;
+            await UniTask.Yield(token);
         }
 
-        _cutoutRange = 0;
-        _fade.Range = _cutoutRange;
+        cutoutRange = 0;
+        fade.Range = cutoutRange;
 
         if (action != null)
         {
@@ -66,27 +68,25 @@ public class Fade : MonoBehaviour
         }
     }
 
-    IEnumerator FadeinCoroutine(float time, System.Action action, bool isTransition)
+    private async UniTask FadeinAsync(float time, System.Action action, bool isTransition, CancellationToken token)
     {
         if (!isTransition)
         {
-            _fade.SetRandomColor();
-            _fade.SetRandomMaskTexture();
+            fade.SetRandomColor();
+            fade.SetRandomMaskTexture();
         }
 
-        float endTime = Time.timeSinceLevelLoad + time * (1 - _cutoutRange);
-
-        var endFrame = new WaitForEndOfFrame();
+        float endTime = Time.timeSinceLevelLoad + time * (1 - cutoutRange);
 
         while (Time.timeSinceLevelLoad <= endTime)
         {
-            _cutoutRange = 1 - ((endTime - Time.timeSinceLevelLoad) / time);
-            _fade.Range = _cutoutRange;
-            yield return endFrame;
+            cutoutRange = 1 - ((endTime - Time.timeSinceLevelLoad) / time);
+            fade.Range = cutoutRange;
+            await UniTask.Yield(token);
         }
 
-        _cutoutRange = 1;
-        _fade.Range = _cutoutRange;
+        cutoutRange = 1;
+        fade.Range = cutoutRange;
 
         if (action != null)
         {
@@ -94,20 +94,28 @@ public class Fade : MonoBehaviour
         }
     }
 
-    public Coroutine FadeOut(float time, System.Action action = null)
+    public async UniTask FadeOut(float time, System.Action action = null)
     {
-        StopAllCoroutines();
-        return StartCoroutine(FadeoutCoroutine(time, action));
+        Cancel();
+        await FadeoutAsync(time, action, cts.Token);
     }
 
-    public Coroutine FadeIn(float time, System.Action action, bool isTransition)
+    public async UniTask FadeIn(float time, System.Action action, bool isTransition)
     {
-        StopAllCoroutines();
-        return StartCoroutine(FadeinCoroutine(time, action, isTransition));
+        Cancel();
+        await FadeinAsync(time, action, isTransition, cts.Token);
     }
 
-    public Coroutine FadeIn(float time, bool isInitialize)
+    private void Cancel()
     {
-        return FadeIn(time, null, isInitialize);
+        if (cts == null)
+        {
+            return;
+        }
+
+        cts.Cancel();
+        cts.Dispose();
+        cts = null;
+        cts = new CancellationTokenSource();
     }
 }
