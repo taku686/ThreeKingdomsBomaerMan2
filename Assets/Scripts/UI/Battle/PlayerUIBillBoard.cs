@@ -47,6 +47,7 @@ namespace UI.Battle
         // UIの位置を更新する
         private void OnUpdatePosition()
         {
+            if (_target == null) return;
             var cameraTransform = _targetCamera.transform;
 
             // カメラの向きベクトル

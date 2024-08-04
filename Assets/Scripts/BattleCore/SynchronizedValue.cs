@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using ExitGames.Client.Photon;
 using Manager.NetworkManager;
@@ -10,9 +9,9 @@ namespace Manager.BattleManager
 {
     public class SynchronizedValue : MonoBehaviourPunCallbacks
     {
-        private readonly Dictionary<string, ReactiveProperty<int>> _intSynchronizedValueDictionary = new();
+        private readonly Dictionary<string, ReactiveProperty<int>> intSynchronizedValueDictionary = new();
 
-        private readonly Dictionary<string, ReactiveProperty<float>> _floatSynchronizedValueDictionary = new();
+        private readonly Dictionary<string, ReactiveProperty<float>> floatSynchronizedValueDictionary = new();
 
         public static SynchronizedValue Instance;
 
@@ -32,12 +31,12 @@ namespace Manager.BattleManager
         {
             foreach (var prop in changedProps)
             {
-                if (_intSynchronizedValueDictionary.Count <= 0 && _floatSynchronizedValueDictionary.Count <= 0)
+                if (intSynchronizedValueDictionary.Count <= 0 && floatSynchronizedValueDictionary.Count <= 0)
                 {
                     return;
                 }
 
-                foreach (var keyValuePair in _intSynchronizedValueDictionary)
+                foreach (var keyValuePair in intSynchronizedValueDictionary)
                 {
                     if (keyValuePair.Key.Equals(prop.Key))
                     {
@@ -45,7 +44,7 @@ namespace Manager.BattleManager
                     }
                 }
 
-                foreach (var keyValuePair in _floatSynchronizedValueDictionary)
+                foreach (var keyValuePair in floatSynchronizedValueDictionary)
                 {
                     if (keyValuePair.Key.Equals(prop.Key))
                     {
@@ -57,76 +56,76 @@ namespace Manager.BattleManager
 
         public void Create(string key, int value)
         {
-            if (_intSynchronizedValueDictionary.ContainsKey(key))
+            if (intSynchronizedValueDictionary.ContainsKey(key))
             {
                 Debug.LogError("すでに生成されています。");
                 return;
             }
 
-            _intSynchronizedValueDictionary[key] = new ReactiveProperty<int>(value);
+            intSynchronizedValueDictionary[key] = new ReactiveProperty<int>(value);
         }
 
         public ReadOnlyReactiveProperty<int> GetIntValue(string key)
         {
-            if (!_intSynchronizedValueDictionary.ContainsKey(key))
+            if (!intSynchronizedValueDictionary.ContainsKey(key))
             {
                 Debug.LogError(key + "の値がありません");
                 return null;
             }
 
-            return _intSynchronizedValueDictionary[key].ToSequentialReadOnlyReactiveProperty();
+            return intSynchronizedValueDictionary[key].ToSequentialReadOnlyReactiveProperty();
         }
 
         public void SetValue(string key, int value)
         {
-            if (!_intSynchronizedValueDictionary.ContainsKey(key))
+            if (!intSynchronizedValueDictionary.ContainsKey(key))
             {
                 Debug.LogError(key + "の値がありません");
                 return;
             }
 
-            _intSynchronizedValueDictionary[key].Value = value;
+            intSynchronizedValueDictionary[key].Value = value;
             PhotonNetwork.LocalPlayer.SetPlayerValue(key, value);
         }
 
         public void Create(string key, float value)
         {
-            if (_floatSynchronizedValueDictionary.ContainsKey(key))
+            if (floatSynchronizedValueDictionary.ContainsKey(key))
             {
                 Debug.LogError("すでに生成されています。");
                 return;
             }
 
-            _floatSynchronizedValueDictionary[key] = new ReactiveProperty<float>(value);
+            floatSynchronizedValueDictionary[key] = new ReactiveProperty<float>(value);
         }
 
         public ReadOnlyReactiveProperty<float> GetFloatValue(string key)
         {
-            if (!_floatSynchronizedValueDictionary.ContainsKey(key))
+            if (!floatSynchronizedValueDictionary.ContainsKey(key))
             {
                 Debug.LogError(key + "の値がありません");
                 return null;
             }
 
-            return _floatSynchronizedValueDictionary[key].ToSequentialReadOnlyReactiveProperty();
+            return floatSynchronizedValueDictionary[key].ToSequentialReadOnlyReactiveProperty();
         }
 
         public void SetValue(string key, float value)
         {
-            if (!_floatSynchronizedValueDictionary.ContainsKey(key))
+            if (!floatSynchronizedValueDictionary.ContainsKey(key))
             {
                 Debug.LogError(key + "の値がありません");
                 return;
             }
 
-            _floatSynchronizedValueDictionary[key].Value = value;
+            floatSynchronizedValueDictionary[key].Value = value;
             PhotonNetwork.LocalPlayer.SetPlayerValue(key, value);
         }
 
         public void Destroy()
         {
-            _intSynchronizedValueDictionary.Clear();
-            _floatSynchronizedValueDictionary.Clear();
+            intSynchronizedValueDictionary.Clear();
+            floatSynchronizedValueDictionary.Clear();
         }
     }
 }

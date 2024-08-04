@@ -28,9 +28,11 @@ extern void XRSettings_get_renderViewportScaleInternal_mC9FFB83588F0865E76B78FB3
 extern void XRSettings_get_stereoRenderingMode_mD66918C11E2216B1F8FA76934F79D5F85BC303FC (void);
 // 0x00000008 System.Void UnityEngine.XR.XRSettings::get_eyeTextureDesc_Injected(UnityEngine.RenderTextureDescriptor&)
 extern void XRSettings_get_eyeTextureDesc_Injected_m2B01F9A50CE1E88530044A5D342C1AE151BA17B5 (void);
-// 0x00000009 System.Void UnityEngine.XR.XRDevice::InvokeDeviceLoaded(System.String)
+// 0x00000009 System.Void UnityEngine.XR.XRDevice::DisableAutoXRCameraTracking(UnityEngine.Camera,System.Boolean)
+extern void XRDevice_DisableAutoXRCameraTracking_m1243FCAD2AC9C4D5C2E551255A1B2BA266E12A52 (void);
+// 0x0000000A System.Void UnityEngine.XR.XRDevice::InvokeDeviceLoaded(System.String)
 extern void XRDevice_InvokeDeviceLoaded_mBE2198DE44A72E2F5059566C46B9907D82782790 (void);
-static Il2CppMethodPointer s_methodPointers[9] = 
+static Il2CppMethodPointer s_methodPointers[10] = 
 {
 	XRSettings_get_enabled_mC22ABF5BF7D835DAB861A1FA384DBB8904D15E70,
 	XRSettings_get_eyeTextureWidth_m3B18AF3F3382398E2A818B2B01AA1FE90FEB3AAF,
@@ -40,25 +42,27 @@ static Il2CppMethodPointer s_methodPointers[9] =
 	XRSettings_get_renderViewportScaleInternal_mC9FFB83588F0865E76B78FB334AE6AAF0FF2EC24,
 	XRSettings_get_stereoRenderingMode_mD66918C11E2216B1F8FA76934F79D5F85BC303FC,
 	XRSettings_get_eyeTextureDesc_Injected_m2B01F9A50CE1E88530044A5D342C1AE151BA17B5,
+	XRDevice_DisableAutoXRCameraTracking_m1243FCAD2AC9C4D5C2E551255A1B2BA266E12A52,
 	XRDevice_InvokeDeviceLoaded_mBE2198DE44A72E2F5059566C46B9907D82782790,
 };
-static const int32_t s_InvokerIndices[9] = 
+static const int32_t s_InvokerIndices[10] = 
 {
-	14752,
-	14768,
-	14768,
-	14789,
-	14796,
-	14796,
-	14768,
-	14583,
-	14592,
+	18431,
+	18459,
+	18459,
+	18489,
+	18499,
+	18499,
+	18459,
+	18186,
+	16926,
+	18223,
 };
 IL2CPP_EXTERN_C const Il2CppCodeGenModule g_UnityEngine_VRModule_CodeGenModule;
 const Il2CppCodeGenModule g_UnityEngine_VRModule_CodeGenModule = 
 {
 	"UnityEngine.VRModule.dll",
-	9,
+	10,
 	s_methodPointers,
 	0,
 	NULL,

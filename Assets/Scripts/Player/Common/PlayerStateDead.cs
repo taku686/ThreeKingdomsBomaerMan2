@@ -1,19 +1,25 @@
-﻿using State = StateMachine<Player.Common.PlayerCore>.State;
+﻿using Cysharp.Threading.Tasks;
+using Photon.Pun;
+using UniRx;
+using State = StateMachine<Player.Common.PlayerCore>.State;
 
 namespace Player.Common
 {
     public partial class PlayerCore
     {
-        public class PlayerStateDead : State
+        public class PlayerDeadState : State
         {
-            protected override void OnEnter(State prevState)
+            protected override async UniTask OnAsyncEnter(State prevState)
             {
-                Initialize();
+                await Initialize();
+                PhotonNetwork.LeaveRoom();
+                
+                Owner.deadSubject.OnNext(Unit.Default);
             }
 
-            private void Initialize()
+            private async UniTask Initialize()
             {
-                Owner.playerDead.BigJump(Owner.transform);
+                await Owner.playerDead.BigJump(Owner.transform);
             }
         }
     }

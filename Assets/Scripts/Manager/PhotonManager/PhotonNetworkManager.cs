@@ -14,29 +14,29 @@ namespace Manager.NetworkManager
 {
     public class PhotonNetworkManager : MonoBehaviourPunCallbacks
     {
-        [Inject] private CharacterDataManager _characterDataManager;
-        [Inject] private UserDataManager _userDataManager;
-        [Inject] private CharacterLevelDataManager _characterLevelDataManager;
-        private readonly Subject<Photon.Realtime.Player[]> _joinedRoom = new();
-        private readonly Subject<int> _leftRoom = new();
-        private readonly Dictionary<int, GameObject> _playerObjectDictionary = new();
-        private readonly Dictionary<int, CharacterData> _currentRoomCharacterDatum = new();
-        private readonly Dictionary<int, CharacterLevelData> _currentRoomCharacterLevelDatum = new();
-        private readonly Subject<Unit> _playerGenerateComplete = new();
-        private int _playerCount;
-        public Dictionary<int, CharacterData> CurrentRoomCharacterDatum => _currentRoomCharacterDatum;
-        public Dictionary<int, CharacterLevelData> CurrentRoomCharacterLevelDatum => _currentRoomCharacterLevelDatum;
-        public Dictionary<int, GameObject> PlayerObjectDictionary => _playerObjectDictionary;
-        public Subject<int> LeftRoom => _leftRoom;
-        public IObservable<Photon.Realtime.Player[]> JoinedRoom => _joinedRoom;
-        public IObservable<Unit> PlayerGenerateComplete => _playerGenerateComplete;
+        [Inject] private CharacterDataManager characterDataManager;
+        [Inject] private UserDataManager userDataManager;
+        [Inject] private CharacterLevelDataManager characterLevelDataManager;
+        private readonly Subject<Photon.Realtime.Player[]> joinedRoomSubject = new();
+        private readonly Subject<int> leftRoomSubject = new();
+        private readonly Subject<Unit> playerGenerateCompleteSubject = new();
+        private readonly Dictionary<int, GameObject> playerObjectDictionary = new();
+        private readonly Dictionary<int, CharacterData> currentRoomCharacterDatum = new();
+        private readonly Dictionary<int, CharacterLevelData> currentRoomCharacterLevelDatum = new();
+        private int playerCount;
+        public Dictionary<int, CharacterData> CurrentRoomCharacterDatum => currentRoomCharacterDatum;
+        public Dictionary<int, CharacterLevelData> CurrentRoomCharacterLevelDatum => currentRoomCharacterLevelDatum;
+        public Dictionary<int, GameObject> PlayerObjectDictionary => playerObjectDictionary;
+        public Subject<int> LeftRoomSubject => leftRoomSubject;
+        public IObservable<Photon.Realtime.Player[]> JoinedRoomSubject => joinedRoomSubject;
+        public IObservable<Unit> PlayerGenerateCompleteSubject => playerGenerateCompleteSubject;
 
         private void Awake()
         {
             CurrentRoomCharacterDatum.Clear();
             PhotonNetwork.UseRpcMonoBehaviourCache = true;
             PhotonNetwork.AutomaticallySyncScene = true;
-            _playerCount = 0;
+            playerCount = 0;
         }
 
         public void OnStartConnectNetwork()
@@ -66,8 +66,8 @@ namespace Manager.NetworkManager
         public override void OnJoinedRoom()
         {
             var index = PhotonNetwork.LocalPlayer.ActorNumber;
-            var characterId = _characterDataManager.GetUserEquipCharacterData().Id;
-            var characterLevel = _userDataManager.GetCurrentLevelData(characterId).Level;
+            var characterId = characterDataManager.GetUserEquipCharacterData().Id;
+            var characterLevel = userDataManager.GetCurrentLevelData(characterId).Level;
             PhotonNetwork.LocalPlayer.SetCharacterData(characterId);
             PhotonNetwork.LocalPlayer.SetCharacterLevel(characterLevel);
             PhotonNetwork.LocalPlayer.SetPlayerIndex(index);
@@ -75,14 +75,14 @@ namespace Manager.NetworkManager
 
         public override void OnLeftRoom()
         {
-            _currentRoomCharacterDatum.Clear();
-            _currentRoomCharacterLevelDatum.Clear();
+            currentRoomCharacterDatum.Clear();
+            currentRoomCharacterLevelDatum.Clear();
             PhotonNetwork.Disconnect();
         }
 
         public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
         {
-            _leftRoom.OnNext(otherPlayer.GetPlayerIndex());
+            leftRoomSubject.OnNext(otherPlayer.GetPlayerIndex());
         }
 
         public override void OnPlayerPropertiesUpdate(Photon.Realtime.Player targetPlayer, Hashtable changedProps)
@@ -96,8 +96,8 @@ namespace Manager.NetworkManager
 
                 if ((string)prop.Key == PlayerPropertiesExtensions.PlayerGenerateKey)
                 {
-                    _playerCount++;
-                    CheckPlayerGenerateComplete(_playerCount);
+                    playerCount++;
+                    CheckPlayerGenerateComplete(playerCount);
                 }
             }
         }
@@ -106,25 +106,16 @@ namespace Manager.NetworkManager
         {
             foreach (var player in players)
             {
-                /*if (player.IsLocal)
-                {
-                    _currentRoomCharacterList[player.ActorNumber] =
-                        _characterDataManager.GetCharacterData(_characterDataManager.GetUserEquipCharacterData().ID);
-                }
-                else
-                {
-                    _currentRoomCharacterList[player.ActorNumber] =
-                        _characterDataManager.GetCharacterData(player.GetCharacterId());
-                }*/
-                _currentRoomCharacterDatum[player.ActorNumber] =
-                    _characterDataManager.GetCharacterData(player.GetCharacterId());
-                _currentRoomCharacterLevelDatum[player.ActorNumber] =
-                    _characterLevelDataManager.GetCharacterLevelData(player.GetCharacterLevel());
+                currentRoomCharacterDatum[player.ActorNumber] =
+                    characterDataManager.GetCharacterData(player.GetCharacterId());
+                currentRoomCharacterLevelDatum[player.ActorNumber] =
+                    characterLevelDataManager.GetCharacterLevelData(player.GetCharacterLevel());
             }
 
-            _joinedRoom.OnNext(players);
+            joinedRoomSubject.OnNext(players);
         }
 
+        //todo debug機能後で消す
         private void OnGUI()
         {
             GUILayout.Label(PhotonNetwork.NetworkClientState.ToString());
@@ -133,7 +124,7 @@ namespace Manager.NetworkManager
         public int GetPlayerNumber(int index)
         {
             var count = 0;
-            foreach (var player in _currentRoomCharacterDatum.OrderBy(x => x.Key))
+            foreach (var player in currentRoomCharacterDatum.OrderBy(x => x.Key))
             {
                 count++;
                 if (player.Key == index)
@@ -154,7 +145,7 @@ namespace Manager.NetworkManager
 
         public CharacterData GetCharacterData(int playerId)
         {
-            if (!_currentRoomCharacterDatum.TryGetValue(playerId, out var value))
+            if (!currentRoomCharacterDatum.TryGetValue(playerId, out var value))
             {
                 Debug.LogError("キャラクター情報がありません");
                 return null;
@@ -166,30 +157,36 @@ namespace Manager.NetworkManager
 
         public CharacterLevelData GetCharacterLevelData(int playerId)
         {
-            if (!_currentRoomCharacterLevelDatum.ContainsKey(playerId))
+            if (!currentRoomCharacterLevelDatum.ContainsKey(playerId))
             {
                 Debug.LogError("キャラクター情報がありません");
                 return null;
             }
 
 
-            return _currentRoomCharacterLevelDatum[playerId];
+            return currentRoomCharacterLevelDatum[playerId];
         }
 
         public void SetPlayerObjDictionary(int playerId, GameObject playerObj)
         {
-            _playerObjectDictionary[playerId] = playerObj;
+            playerObjectDictionary[playerId] = playerObj;
         }
 
-        private void CheckPlayerGenerateComplete(int playerCount)
+        private void CheckPlayerGenerateComplete(int count)
         {
-            if (PhotonNetwork.CurrentRoom.PlayerCount > playerCount)
+            if (PhotonNetwork.CurrentRoom.PlayerCount > count)
             {
                 return;
             }
 
-            _playerCount = 0;
-            _playerGenerateComplete.OnNext(Unit.Default);
+            playerCount = 0;
+            playerGenerateCompleteSubject.OnNext(Unit.Default);
+        }
+
+        private void OnDestroy()
+        {
+            joinedRoomSubject.Dispose();
+            leftRoomSubject.Dispose();
         }
     }
 }

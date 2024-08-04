@@ -57,8 +57,8 @@ namespace UI.Title
 
             private void InitializeSubscribe()
             {
-                Owner.photonNetworkManager.JoinedRoom.Subscribe(OnJoinedRoom).AddTo(cts.Token);
-                Owner.photonNetworkManager.LeftRoom.Subscribe(OnLeftRoom).AddTo(cts.Token);
+                Owner.photonNetworkManager.JoinedRoomSubject.Subscribe(OnJoinedRoom).AddTo(cts.Token);
+                Owner.photonNetworkManager.LeftRoomSubject.Subscribe(OnLeftRoom).AddTo(cts.Token);
             }
 
             private void OnClickBackButton()
@@ -70,7 +70,7 @@ namespace UI.Title
                         return;
                     }
 
-                    Owner.photonNetworkManager.LeftRoom.OnNext(PhotonNetwork.LocalPlayer.ActorNumber);
+                    Owner.photonNetworkManager.LeftRoomSubject.OnNext(PhotonNetwork.LocalPlayer.ActorNumber);
                     PhotonNetwork.LeaveRoom();
                     Owner.stateMachine.Dispatch((int)State.Main);
                 }).SetLink(Owner.gameObject);

@@ -11,7 +11,7 @@ namespace Player.Common
 {
     public partial class PlayerCore
     {
-        public class PlayerStateIdle : State
+        public class PlayerIdleState : State
         {
             private Transform playerTransform;
             private bool isSetup;
@@ -40,13 +40,7 @@ namespace Player.Common
                 {
                     return;
                 }
-
-/*#if UNITY_EDITOR
-                var direction = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-#elif UNITY_ANDROID
-   var direction = new Vector3(UltimateJoystick.GetHorizontalAxis(GameCommonData.JoystickName), 0,
-                    UltimateJoystick.GetVerticalAxis(GameCommonData.JoystickName));
-#endif*/
+                
                 var direction = new Vector3(UltimateJoystick.GetHorizontalAxis(GameCommonData.JoystickName), 0,
                     UltimateJoystick.GetVerticalAxis(GameCommonData.JoystickName));
                 playerMove.Move(direction);
@@ -85,10 +79,10 @@ namespace Player.Common
                     .Subscribe(
                         _ =>
                         {
-                            var playerId = Owner.photonView.ViewID;
+                            var playerId = Owner.playerPhotonView.ViewID;
                             var explosionTime = PhotonNetwork.ServerTimestamp +
                                                 GameCommonData.ThreeMilliSecondsBeforeExplosion;
-                            var photonView = Owner.photonView;
+                            var photonView = Owner.playerPhotonView;
                             var damageAmount = Owner.characterStatusManager.DamageAmount;
                             var fireRange = Owner.characterStatusManager.FireRange;
                             var boxCollider = Owner.boxCollider;

@@ -38,7 +38,7 @@ public class StateMachine<TOwner>
 
         internal async UniTask AsyncEnter(State prevState)
         {
-            OnAsyncEnter(prevState).Forget();
+            await OnAsyncEnter(prevState);
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ public class StateMachine<TOwner>
         {
         }
 
-        private async UniTask OnAsyncEnter(State prevState)
+        protected virtual async UniTask OnAsyncEnter(State prevState)
         {
         }
 

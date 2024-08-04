@@ -1,62 +1,62 @@
 using Bomb;
 using Common.Data;
-using Cysharp.Threading.Tasks;
 using Manager.BattleManager.Camera;
 using Manager.BattleManager.Environment;
 using Manager.NetworkManager;
 using MoreMountains.Tools;
 using Photon.Pun;
+using Player.Common;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using Zenject;
 
 namespace Manager.BattleManager
 {
     public partial class BattleCore : MonoBehaviourPunCallbacks
     {
-        [Inject] private PhotonNetworkManager _networkManager;
-        [Inject] private PlayerGenerator _playerGenerator;
-        [Inject] private BombProvider _bombProvider;
-        [Inject] private UserDataManager _userDataManager;
-        [Inject] private MissionManager _missionManager;
+        [Inject] private PhotonNetworkManager networkManager;
+        [Inject] private PlayerGenerator playerGenerator;
+        [Inject] private BombProvider bombProvider;
+        [Inject] private UserDataManager userDataManager;
+        [Inject] private MissionManager missionManager;
         [SerializeField] private Transform playerUIParent;
         [SerializeField] private GameObject playerUI;
         [SerializeField] private CameraManager cameraManager;
         [SerializeField] private StageManager stageManager;
         [SerializeField] private MapManager mapManager;
-        private StateMachine<BattleCore> _stateMachine;
+        [SerializeField] private BattleStartView battleStartView;
+        [SerializeField] private BattleResultView battleResultView;
+        private StateMachine<BattleCore> stateMachine;
+        private PlayerCore playerCore;
 
-        private enum Event
+        private enum State
         {
-            EndSceneTransition,
             PlayerCreate,
-            Staging,
-            CountDown,
             BattleStart,
             InBattle,
-            BattleEnd,
             Result,
-            StartSceneTransition
         }
 
         // Start is called before the first frame update
         void Start()
         {
+            DisableUi();
             InitializeState();
             InitializeComponent();
         }
 
         private void Update()
         {
-            _stateMachine.Update();
+            stateMachine.Update();
         }
 
         private void InitializeState()
         {
-            _stateMachine = new StateMachine<BattleCore>(this);
-            _stateMachine.Start<EndSceneTransitionState>();
-            _stateMachine.AddTransition<EndSceneTransitionState, PlayerCreateState>((int)Event.PlayerCreate);
-            _stateMachine.AddTransition<PlayerCreateState, BattleStartState>((int)Event.BattleStart);
+            stateMachine = new StateMachine<BattleCore>(this);
+            stateMachine.Start<CreateStageState>();
+            stateMachine.AddTransition<CreateStageState, PlayerCreateState>((int)State.PlayerCreate);
+            stateMachine.AddTransition<PlayerCreateState, BattleStartState>((int)State.BattleStart);
+            stateMachine.AddTransition<BattleStartState, InBattleState>((int)State.InBattle);
+            stateMachine.AddTransition<InBattleState, BattleResultState>((int)State.Result);
         }
 
         private void InitializeComponent()
@@ -69,41 +69,27 @@ namespace Manager.BattleManager
             switch (actionId)
             {
                 case GameCommonData.LevelUpActionId:
-                    _missionManager.CheckMission(GameCommonData.LevelUpActionId);
+                    missionManager.CheckMission(GameCommonData.LevelUpActionId);
                     break;
                 case GameCommonData.BattleCountActionId:
-                    _missionManager.CheckMission(GameCommonData.BattleCountActionId);
+                    missionManager.CheckMission(GameCommonData.BattleCountActionId);
                     break;
                 case GameCommonData.CharacterBattleActionId:
-                    var characterId = _userDataManager.GetEquippedCharacterData().Id;
-                    _missionManager.CheckMission(GameCommonData.CharacterBattleActionId, characterId);
+                    var characterId = userDataManager.GetEquippedCharacterData().Id;
+                    missionManager.CheckMission(GameCommonData.CharacterBattleActionId, characterId);
                     break;
             }
         }
 
-
-        //todo デバッグ用後で消す
-        public void OnClickExit()
+        private void SetPlayerCore(PlayerCore player)
         {
-            SynchronizedValue.Instance.Destroy();
-            PhotonNetwork.Disconnect();
-            MMSceneLoadingManager.LoadScene(GameCommonData.TitleScene);
+            playerCore = player;
         }
 
-        //todo デバッグ用後で消す
-        public void OnReborn()
+        private void DisableUi()
         {
-            var players = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
-            foreach (var player in players)
-            {
-                var view = player.GetComponent<PhotonView>();
-                if (!view.IsMine)
-                {
-                    return;
-                }
-
-                player.transform.position = new Vector3(0, 0.5f, 0);
-            }
+            battleStartView.gameObject.SetActive(false);
+            battleResultView.gameObject.SetActive(false);
         }
     }
 }

@@ -11,7 +11,8 @@ namespace Manager.NetworkManager
         private const string CharacterLevelKey = "Lev";
         public const string PlayerIndexKey = "Index";
         public const string PlayerGenerateKey = "Gen";
-        private static readonly Hashtable PropsToSet = new Hashtable();
+        public const string AliveTimeKey = "Ali";
+        private static readonly Hashtable PropsToSet = new();
 
 
         public static int GetCharacterId(this Photon.Realtime.Player player)
@@ -26,19 +27,13 @@ namespace Manager.NetworkManager
 
         public static int GetPlayerIndex(this Photon.Realtime.Player player)
         {
-            return (player.CustomProperties[PlayerIndexKey] is int playerIndex) ? playerIndex : -1;
+            return player.CustomProperties[PlayerIndexKey] is int playerIndex ? playerIndex : -1;
         }
 
-        public static int GetPlayerGenerate(this Photon.Realtime.Player player)
+        public static float GetAliveTime(this Photon.Realtime.Player player)
         {
-            return (player.CustomProperties[PlayerGenerateKey] is int playerGenerate) ? playerGenerate : -1;
+            return player.CustomProperties[AliveTimeKey] is float aliveTime ? aliveTime : -1;
         }
-
-        public static object GetPlayerValue(this Photon.Realtime.Player player, string key)
-        {
-            return player.CustomProperties[key];
-        }
-
 
         public static void SetCharacterData(this Photon.Realtime.Player player, int characterId)
         {
@@ -69,6 +64,13 @@ namespace Manager.NetworkManager
         }
 
         public static void SetPlayerValue(this Photon.Realtime.Player player, string key, object value)
+        {
+            PropsToSet[key] = value;
+            player.SetCustomProperties(PropsToSet);
+            PropsToSet.Clear();
+        }
+
+        public static void SetAliveTime(this Photon.Realtime.Player player, string key, object value)
         {
             PropsToSet[key] = value;
             player.SetCustomProperties(PropsToSet);

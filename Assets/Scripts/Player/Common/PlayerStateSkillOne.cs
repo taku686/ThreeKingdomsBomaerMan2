@@ -1,15 +1,13 @@
-﻿using System;
-using Common.Data;
+﻿using Common.Data;
 using Cysharp.Threading.Tasks;
 using UniRx;
-using UnityEngine;
 using State = StateMachine<Player.Common.PlayerCore>.State;
 
 namespace Player.Common
 {
     public partial class PlayerCore
     {
-        public class PlayerStateSkillOne : State
+        public class PlayerSkillOneState : State
         {
             protected override void OnEnter(State prevState)
             {
