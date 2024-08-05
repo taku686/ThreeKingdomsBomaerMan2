@@ -10,25 +10,19 @@ namespace Manager.DataManager
 {
     public class CharacterDataManager : IDisposable
     {
-        [Inject] private MainManager _mainManager;
-        private UserDataManager _userDataManager;
-
+        [Inject] private MainManager mainManager;
+        private UserDataManager userDataManager;
         private static readonly Dictionary<int, CharacterData> CharacterDatum = new();
 
-        private CatalogItem _catalogItem;
-
-        public CatalogItem CatalogItem => _catalogItem;
-
-        public void Initialize(UserDataManager userDataManager, CancellationToken cancellationToken)
+        public void Initialize(UserDataManager dataManager, CancellationToken cancellationToken)
         {
-            if (_mainManager.isInitialize)
+            if (mainManager.isInitialize)
             {
                 return;
             }
 
-            _userDataManager = userDataManager;
+            userDataManager = dataManager;
         }
-
 
         public void SetCharacterData(CharacterData characterData)
         {
@@ -40,27 +34,15 @@ namespace Manager.DataManager
             return CharacterDatum[id];
         }
 
-        public CharacterData GetRandomCharacterData()
-        {
-            var index = Random.Range(0, CharacterDatum.Count);
-            return CharacterDatum[index];
-        }
-
-        public int GetCharacterCount()
+        public int GetAllCharacterAmount()
         {
             return CharacterDatum.Count;
         }
 
-        public CharacterData GetUserEquipCharacterData()
+        public CharacterData GetUserEquippedCharacterData()
         {
-            return GetCharacterData(_userDataManager.GetUserData().EquipCharacterId);
+            return GetCharacterData(userDataManager.GetUserData().EquipCharacterId);
         }
-
-        private int GetCharacterColorCount()
-        {
-            return Enum.GetValues(typeof(CharacterColor)).Length;
-        }
-
 
         public void Dispose()
         {

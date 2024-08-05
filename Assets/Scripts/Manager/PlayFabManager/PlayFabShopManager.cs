@@ -159,7 +159,7 @@ namespace Manager.NetworkManager
                 return false;
             }
 
-            var result2 = await _userDataManager.UpgradeCharacterLevel(characterId, level);
+            var result2 = _userDataManager.UpgradeCharacterLevel(characterId, level);
             return result2;
         }
 

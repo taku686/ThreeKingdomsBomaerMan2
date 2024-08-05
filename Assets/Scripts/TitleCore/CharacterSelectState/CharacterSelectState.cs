@@ -6,6 +6,7 @@ using DG.Tweening;
 using Manager.NetworkManager;
 using UniRx;
 using UnityEngine;
+using Zenject;
 using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
@@ -14,11 +15,14 @@ namespace UI.Title
     {
         public class CharacterSelectState : StateMachine<TitleCore>.State
         {
+            private CharacterSelectViewModelUseCase characterSelectViewModelUseCase;
+            private CharacterSelectView view;
             private readonly List<GameObject> gridGroupLists = new();
             private UserDataManager userDataManager;
             private PlayFabVirtualCurrencyManager playFabVirtualCurrencyManager;
             private bool isProcessing;
             private CancellationTokenSource cancellationTokenSource;
+            private readonly Subject<Unit> onChangeViewModel = new();
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -32,19 +36,15 @@ namespace UI.Title
 
             private void Initialize()
             {
-                SetupUi();
-                SetupCancellationToken();
+                view = Owner.characterSelectView;
                 userDataManager = Owner.userDataManager;
                 playFabVirtualCurrencyManager = Owner.playFabVirtualCurrencyManager;
+                characterSelectViewModelUseCase = Owner.characterSelectViewModelUseCase;
+                view.InitializeUiPosition();
+                SetupCancellationToken();
                 CreateUIContents();
-                InitializeButton();
-                Owner.SwitchUiObject(State.CharacterSelect, true);
-            }
-
-            private void SetupUi()
-            {
-                Owner.characterSelectView.ContentsTransform.anchoredPosition =
-                    new Vector2(Owner.characterSelectView.ContentsTransform.anchoredPosition.x, 0);
+                OnSubscribed();
+                Owner.SwitchUiObject(State.CharacterSelect, true).Forget();
             }
 
             private void SetupCancellationToken()
@@ -55,23 +55,29 @@ namespace UI.Title
                 }
 
                 cancellationTokenSource = new CancellationTokenSource();
-                cancellationTokenSource.RegisterRaiseCancelOnDestroy(Owner);
             }
 
-            private void InitializeButton()
+            private void OnSubscribed()
             {
-                Owner.characterSelectView.BackButton.OnClickAsObservable()
+                onChangeViewModel
+                    .Select(_ => characterSelectViewModelUseCase.InAsTask())
+                    .Subscribe(viewModel => view.ApplyViewModel(viewModel))
+                    .AddTo(cancellationTokenSource.Token);
+
+                view.OnClickBackButton
                     .Subscribe(_ => OnClickBack())
                     .AddTo(cancellationTokenSource.Token);
-                Owner.characterSelectView.VirtualCurrencyAddPopup.CancelButton.OnClickAsObservable()
+                view.VirtualCurrencyAddPopup.OnClickCancelButton
                     .Subscribe(_ => OnClickCancelPurchase())
                     .AddTo(cancellationTokenSource.Token);
-                Owner.characterSelectView.VirtualCurrencyAddPopup.CloseButton.OnClickAsObservable()
+                view.VirtualCurrencyAddPopup.OnClickCloseButton
                     .Subscribe(_ => OnClickClosePopup())
                     .AddTo(cancellationTokenSource.Token);
-                Owner.characterSelectView.VirtualCurrencyAddPopup.AddButton.OnClickAsObservable()
+                view.VirtualCurrencyAddPopup.OnClickAddButton
                     .Subscribe(_ => OnClickAddGem())
                     .AddTo(cancellationTokenSource.Token);
+
+                onChangeViewModel.OnNext(Unit.Default);
             }
 
 
@@ -84,7 +90,7 @@ namespace UI.Title
 
                 gridGroupLists.Clear();
                 GameObject gridGroup = null;
-                for (int i = 0; i < Owner.characterDataManager.GetCharacterCount(); i++)
+                for (int i = 0; i < Owner.characterDataManager.GetAllCharacterAmount(); i++)
                 {
                     if (i % 5 == 0)
                     {
@@ -102,7 +108,7 @@ namespace UI.Title
 
             private void SetupGrip(CharacterData characterData, Transform parent)
             {
-                if (Owner.userDataManager.IsGetCharacter(characterData.Id))
+                if (Owner.userDataManager.IsAvailableCharacter(characterData.Id))
                 {
                     CreateActiveGrid(characterData, parent);
                 }
@@ -218,6 +224,7 @@ namespace UI.Title
                     await Owner.SetGemText();
                     await Owner.SetRewardUI(1, characterData.SelfPortraitSprite);
                     CreateUIContents();
+                    onChangeViewModel.OnNext(Unit.Default);
                     isProcessing = false;
                 })).SetLink(disableGrid.gameObject);
             }

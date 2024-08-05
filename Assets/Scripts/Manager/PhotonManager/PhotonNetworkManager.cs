@@ -66,7 +66,7 @@ namespace Manager.NetworkManager
         public override void OnJoinedRoom()
         {
             var index = PhotonNetwork.LocalPlayer.ActorNumber;
-            var characterId = characterDataManager.GetUserEquipCharacterData().Id;
+            var characterId = characterDataManager.GetUserEquippedCharacterData().Id;
             var characterLevel = userDataManager.GetCurrentLevelData(characterId).Level;
             PhotonNetwork.LocalPlayer.SetCharacterData(characterId);
             PhotonNetwork.LocalPlayer.SetCharacterLevel(characterLevel);

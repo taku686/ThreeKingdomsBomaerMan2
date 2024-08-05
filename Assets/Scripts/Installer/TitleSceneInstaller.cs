@@ -3,6 +3,7 @@ using Common.Data;
 using Manager.NetworkManager;
 using Manager.PlayFabManager;
 using UI.Common;
+using UI.Title;
 using UnityEngine;
 using Zenject;
 
@@ -23,6 +24,12 @@ namespace Common.Installer
             Container.Bind<PlayFabVirtualCurrencyManager>().FromNew().AsCached();
             Container.Bind<PlayFabTitleDataManager>().FromNew().AsCached();
             Container.Bind<ChatGPTManager>().FromNew().AsCached();
+            InstallCharacterSelect();
+        }
+
+        private void InstallCharacterSelect()
+        {
+            Container.Bind<CharacterSelectViewModelUseCase>().FromNew().AsCached();
         }
     }
 }

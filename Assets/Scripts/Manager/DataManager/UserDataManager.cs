@@ -11,123 +11,107 @@ namespace Common.Data
 {
     public class UserDataManager : IDisposable
     {
-        private UserData _userData;
-        private CancellationTokenSource _cancellationTokenSource;
-        [Inject] private CharacterDataManager _characterDataManager;
-        [Inject] private CharacterLevelDataManager _characterLevelDataManager;
-        [Inject] private MissionDataManager _missionDataManager;
-        [Inject] private PlayFabUserDataManager _playFabUserDataManager;
+        private UserData userData;
+        private CancellationTokenSource cancellationTokenSource;
+        [Inject] private CharacterDataManager characterDataManager;
+        [Inject] private CharacterLevelDataManager characterLevelDataManager;
+        [Inject] private MissionDataManager missionDataManager;
+        [Inject] private PlayFabUserDataManager playFabUserDataManager;
 
-        public async UniTask Initialize(UserData userData)
+        public async UniTask Initialize(UserData data)
         {
-            _cancellationTokenSource = new CancellationTokenSource();
-            SetUserData(userData);
+            cancellationTokenSource = new CancellationTokenSource();
+            SetUserData(data);
             await AddMissionData();
         }
 
         public UserData GetUserData()
         {
-            return _userData;
+            return userData;
         }
 
-        public void SetUserData(UserData userData)
+        public void SetUserData(UserData data)
         {
-            _userData = userData;
+            userData = data;
         }
 
-        public async UniTask UpdateUserData(UserData userData)
+        public async UniTask UpdateUserData(UserData data)
         {
-            _userData = userData;
-            await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
-        }
-
-        public async UniTask<bool> AddCharacterData(int characterId)
-        {
-            if (_userData.Characters.Contains(characterId))
-            {
-                return false;
-            }
-
-            var userData = GetUserData();
-            userData.Characters.Add(characterId);
-            userData.CharacterLevels[characterId] = 0;
-            SetUserData(userData);
-            var result = await _playFabUserDataManager.TryUpdateUserDataAsync(userData)
-                .AttachExternalCancellation(_cancellationTokenSource.Token);
-            return result;
+            userData = data;
+            await playFabUserDataManager.TryUpdateUserDataAsync(userData);
         }
 
         public async UniTask<bool> SetLoginBonus(int index, LoginBonusStatus status)
         {
-            if (!_userData.LoginBonus.ContainsKey(index))
+            if (!userData.LoginBonus.ContainsKey(index))
             {
                 return false;
             }
 
-            var userData = GetUserData();
-            userData.LoginBonus[index] = (int)status;
-            SetUserData(userData);
-            var result = await _playFabUserDataManager.TryUpdateUserDataAsync(userData)
-                .AttachExternalCancellation(_cancellationTokenSource.Token);
+            var data = GetUserData();
+            data.LoginBonus[index] = (int)status;
+            SetUserData(data);
+            var result = await playFabUserDataManager.TryUpdateUserDataAsync(data)
+                .AttachExternalCancellation(cancellationTokenSource.Token);
             return result;
         }
 
         public async UniTask<bool> ResetLoginBonus()
         {
-            var userData = GetUserData();
-            for (int i = 0; i < _userData.LoginBonus.Count; i++)
+            var data = GetUserData();
+            for (var i = 0; i < userData.LoginBonus.Count; i++)
             {
-                _userData.LoginBonus[i] = (int)LoginBonusStatus.Disable;
+                userData.LoginBonus[i] = (int)LoginBonusStatus.Disable;
             }
 
-            SetUserData(userData);
-            var result = await _playFabUserDataManager.TryUpdateUserDataAsync(userData)
-                .AttachExternalCancellation(_cancellationTokenSource.Token);
+            SetUserData(data);
+            var result = await playFabUserDataManager.TryUpdateUserDataAsync(data)
+                .AttachExternalCancellation(cancellationTokenSource.Token);
             return result;
         }
 
         public LoginBonusStatus GetLoginBonusStatus(int index)
         {
-            var status = _userData.LoginBonus[index];
+            var status = userData.LoginBonus[index];
             return GameCommonData.GetLoginBonusStatus(status);
         }
 
         public CharacterData GetEquippedCharacterData()
         {
-            return _characterDataManager.GetCharacterData(_userData.EquipCharacterId);
+            return characterDataManager.GetCharacterData(userData.EquipCharacterId);
         }
 
         public CharacterLevelData GetCurrentLevelData(int characterId)
         {
-            var level = _userData.CharacterLevels[characterId];
-            return _characterLevelDataManager.GetCharacterLevelData(level);
+            var level = userData.CharacterLevels[characterId];
+            return characterLevelDataManager.GetCharacterLevelData(level);
         }
 
         public CharacterLevelData GetNextLevelData(int characterId)
         {
-            var level = _userData.CharacterLevels[characterId] + 1;
-            return _characterLevelDataManager.GetCharacterLevelData(level);
+            var level = userData.CharacterLevels[characterId] + 1;
+            return characterLevelDataManager.GetCharacterLevelData(level);
         }
 
-        public async UniTask<bool> UpgradeCharacterLevel(int characterId, int level)
+        public bool UpgradeCharacterLevel(int characterId, int level)
         {
-            if (!_userData.CharacterLevels.ContainsKey(characterId))
+            if (!userData.CharacterLevels.ContainsKey(characterId))
             {
                 return false;
             }
 
-            if (_userData.CharacterLevels[characterId] >= level)
+            if (userData.CharacterLevels[characterId] >= level)
             {
                 return false;
             }
 
-            _userData.CharacterLevels[characterId] = level;
+            userData.CharacterLevels[characterId] = level;
             return true;
         }
 
-        public void SetMissionData(int index, int progress)
+        private void SetMissionData(int index, int progress)
         {
-            if (_userData.MissionProgressDatum.ContainsKey(index))
+            if (userData.MissionProgressDatum.ContainsKey(index))
             {
                 return;
             }
@@ -137,87 +121,98 @@ namespace Common.Data
                 progress = GameCommonData.MaxMissionProgress;
             }
 
-            _userData.MissionProgressDatum[index] = progress;
+            userData.MissionProgressDatum[index] = progress;
         }
 
         public Dictionary<int, int> GetMissionProgressDatum()
         {
-            return _userData.MissionProgressDatum;
+            return userData.MissionProgressDatum;
         }
 
         public int GetMissionProgress(int missionId)
         {
-            if (!_userData.MissionProgressDatum.ContainsKey(missionId))
+            if (!userData.MissionProgressDatum.ContainsKey(missionId))
             {
                 return GameCommonData.ExceptionMissionProgress;
             }
 
-            return _userData.MissionProgressDatum[missionId];
+            return userData.MissionProgressDatum[missionId];
         }
 
         public void SetMissionProgress(int missionId, int missionProgress)
         {
-            if (!_userData.MissionProgressDatum.ContainsKey(missionId))
+            if (!userData.MissionProgressDatum.ContainsKey(missionId))
             {
                 return;
             }
 
-            _userData.MissionProgressDatum[missionId] = missionProgress;
+            userData.MissionProgressDatum[missionId] = missionProgress;
         }
 
         public async UniTask AddMissionData()
         {
-            if (_userData.MissionProgressDatum.Count >= GameCommonData.MaxMissionCount)
+            if (userData.MissionProgressDatum.Count >= GameCommonData.MaxMissionCount)
             {
                 return;
             }
 
-            var missionDatum = _missionDataManager.MissionDatum;
-            while (_userData.MissionProgressDatum.Count < GameCommonData.MaxMissionCount)
+            var missionDatum = missionDataManager.MissionDatum;
+            while (userData.MissionProgressDatum.Count < GameCommonData.MaxMissionCount)
             {
                 var index = Random.Range(0, missionDatum.Count);
                 var missionIndex = missionDatum[index].index;
                 SetMissionData(missionIndex, 0);
             }
 
-            await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
+            await playFabUserDataManager.TryUpdateUserDataAsync(userData);
         }
 
         public async UniTask RemoveMissionData(int missionId)
         {
-            if (!_userData.MissionProgressDatum.ContainsKey(missionId))
+            if (!userData.MissionProgressDatum.ContainsKey(missionId))
             {
                 return;
             }
 
-            _userData.MissionProgressDatum.Remove(missionId);
-            await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
+            userData.MissionProgressDatum.Remove(missionId);
+            await playFabUserDataManager.TryUpdateUserDataAsync(userData);
+        }
+        
+        public async UniTask<bool> AddCharacterData(int characterId)
+        {
+            if (userData.Characters.Contains(characterId))
+            {
+                return false;
+            }
+
+            var data = GetUserData();
+            data.Characters.Add(characterId);
+            data.CharacterLevels[characterId] = 0;
+            SetUserData(data);
+            var result = await playFabUserDataManager.TryUpdateUserDataAsync(data)
+                .AttachExternalCancellation(cancellationTokenSource.Token);
+            return result;
         }
 
-        public int GetCoin()
+        public bool IsAvailableCharacter(int characterId)
         {
-            return _userData.Coin;
+            return userData.Characters.Contains(characterId);
         }
 
-        public int GetGem()
+        public int GetAvailableCharacterAmount()
         {
-            return _userData.Gem;
-        }
-
-        public bool IsGetCharacter(int characterId)
-        {
-            return _userData.Characters.Contains(characterId);
+            return userData.Characters.Count;
         }
 
 
         public void Dispose()
         {
-            _userData?.Dispose();
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource?.Dispose();
-            _characterDataManager?.Dispose();
-            _characterLevelDataManager?.Dispose();
-            _playFabUserDataManager?.Dispose();
+            userData?.Dispose();
+            cancellationTokenSource.Cancel();
+            cancellationTokenSource?.Dispose();
+            characterDataManager?.Dispose();
+            characterLevelDataManager?.Dispose();
+            playFabUserDataManager?.Dispose();
         }
     }
 }

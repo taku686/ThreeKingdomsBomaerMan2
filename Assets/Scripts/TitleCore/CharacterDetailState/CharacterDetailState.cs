@@ -19,12 +19,10 @@ namespace UI.Title
         {
             private const float MoveAmount = 50;
             private const int DefaultPage = 1;
-            private const int UpgradeButtonIntervalDuration = 2;
             private const string LevelText = "LV <#94aed0><size=170%>";
             private CharacterDetailView characterDetailView;
             private CommonView commonView;
             private CharacterDataManager characterDataManager;
-            private CharacterLevelDataManager characterLevelDataManager;
             private PlayFabUserDataManager playFabUserDataManager;
             private PlayFabShopManager playFabShopManager;
             private PlayFabVirtualCurrencyManager playFabVirtualCurrencyManager;
@@ -51,7 +49,6 @@ namespace UI.Title
             {
                 SetupCancellationToken();
                 characterDataManager = Owner.characterDataManager;
-                characterLevelDataManager = Owner.characterLevelDataManager;
                 characterDetailView = Owner.characterDetailView;
                 commonView = Owner.commonView;
                 playFabUserDataManager = Owner.playFabUserDataManager;
@@ -131,35 +128,42 @@ namespace UI.Title
             {
                 Owner.characterDetailView.BackButton.onClick.RemoveAllListeners();
                 Owner.characterDetailView.SelectButton.onClick.RemoveAllListeners();
-                characterDetailView.PurchaseErrorView.okButton.onClick.RemoveAllListeners();
-                characterDetailView.VirtualCurrencyAddPopup.CancelButton.onClick.RemoveAllListeners();
-                characterDetailView.VirtualCurrencyAddPopup.CloseButton.onClick.RemoveAllListeners();
-                characterDetailView.VirtualCurrencyAddPopup.AddButton.onClick.RemoveAllListeners();
                 characterDetailView.QuestionView.sendButton.onClick.RemoveAllListeners();
                 characterDetailView.QuestionView.closeButton.onClick.RemoveAllListeners();
                 commonView.errorView.okButton.onClick.RemoveAllListeners();
-                Owner.characterDetailView.BackButton.onClick.AddListener(OnClickBackButton);
-                Owner.characterDetailView.SelectButton.onClick.AddListener(OnClickSelectButton);
                 
                 Owner.characterDetailView.LeftArrowButton.OnClickAsObservable()
                     .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
                     .Subscribe(_ => OnClickLeftArrow()).AddTo(cts.Token);
-                
+
                 Owner.characterDetailView.RightArrowButton.OnClickAsObservable()
                     .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
                     .Subscribe(_ => OnClickRightArrow()).AddTo(cts.Token);
-                
+
                 characterDetailView.UpgradeButton.OnClickAsObservable()
                     .Subscribe(_ => OnClickUpgrade()).AddTo(cts.Token);
                 
+                characterDetailView.VirtualCurrencyAddPopup.OnClickCancelButton
+                    .Subscribe(_ =>
+                    {
+                        OnClickCloseVirtualCurrencyAddView(characterDetailView.VirtualCurrencyAddPopup
+                            .CancelButton.gameObject);
+                    }).AddTo(cts.Token);
+
+                characterDetailView.VirtualCurrencyAddPopup.OnClickCloseButton
+                    .Subscribe(_ =>
+                    {
+                        OnClickCloseVirtualCurrencyAddView(characterDetailView.VirtualCurrencyAddPopup.CloseButton
+                            .gameObject);
+                    }).AddTo(cts.Token);
+
+                characterDetailView.VirtualCurrencyAddPopup.OnClickAddButton
+                    .Subscribe(_ => OnClickAddVirtualCurrency())
+                    .AddTo(cts.Token);
+                
+                Owner.characterDetailView.BackButton.onClick.AddListener(OnClickBackButton);
+                Owner.characterDetailView.SelectButton.onClick.AddListener(OnClickSelectButton);
                 characterDetailView.PurchaseErrorView.okButton.onClick.AddListener(OnClickClosePurchaseErrorView);
-                characterDetailView.VirtualCurrencyAddPopup.CancelButton.onClick.AddListener(() =>
-                    OnClickCloseVirtualCurrencyAddView(characterDetailView.VirtualCurrencyAddPopup.CancelButton
-                        .gameObject));
-                characterDetailView.VirtualCurrencyAddPopup.CloseButton.onClick.AddListener(() =>
-                    OnClickCloseVirtualCurrencyAddView(characterDetailView.VirtualCurrencyAddPopup.CloseButton
-                        .gameObject));
-                characterDetailView.VirtualCurrencyAddPopup.AddButton.onClick.AddListener(OnClickAddVirtualCurrency);
                 characterDetailView.QuestionView.sendButton.onClick.AddListener(OnClickSendQuestion);
                 characterDetailView.QuestionView.closeButton.onClick.AddListener(OnClickCloseComment);
                 commonView.errorView.okButton.onClick.AddListener(OnClickCloseErrorView);

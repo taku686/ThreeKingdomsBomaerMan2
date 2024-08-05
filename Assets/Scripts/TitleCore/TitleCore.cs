@@ -22,7 +22,6 @@ namespace UI.Title
     public partial class TitleCore : MonoBehaviourPunCallbacks
     {
         [Inject] private CharacterDataManager characterDataManager;
-        [Inject] private CharacterLevelDataManager characterLevelDataManager;
         [Inject] private UserDataManager userDataManager;
         [Inject] private MissionDataManager missionDataManager;
         [Inject] private UIAnimation uiAnimation;
@@ -36,6 +35,7 @@ namespace UI.Title
         [Inject] private CatalogDataManager catalogDataManager;
         [Inject] private MissionManager missionManager;
         [Inject] private ChatGPTManager chatGptManager;
+        [Inject] private CharacterSelectViewModelUseCase characterSelectViewModelUseCase;
         [SerializeField] private Fade fade;
         [SerializeField] private Transform characterCreatePosition;
         [SerializeField] private MainView mainView;

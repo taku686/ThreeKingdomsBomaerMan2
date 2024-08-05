@@ -60,7 +60,7 @@ namespace Enemy
 
         //todo あとでけす
 
-        private bool _joinedRoom;
+        private bool joinedRoom;
 
         private void DebugSetting()
         {
@@ -75,10 +75,9 @@ namespace Enemy
 
         public override void OnJoinedRoom()
         {
-            _joinedRoom = true;
+            joinedRoom = true;
         }
 
-//todo ここまで
         private void SetupBoxCollider()
         {
             _boxCollider = gameObject.AddComponent<BoxCollider>();
