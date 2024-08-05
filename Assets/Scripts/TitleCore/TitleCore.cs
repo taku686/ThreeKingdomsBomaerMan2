@@ -42,7 +42,6 @@ namespace UI.Title
         [SerializeField] private CharacterSelectView characterSelectView;
         [SerializeField] private CharacterDetailView characterDetailView;
         [SerializeField] private BattleReadyView battleReadyView;
-        [SerializeField] private SceneTransitionView sceneTransitionView;
         [SerializeField] private LoginView loginView;
         [SerializeField] private SettingView settingView;
         [SerializeField] private ShopView shopView;
@@ -65,7 +64,6 @@ namespace UI.Title
             CharacterDetail,
             Shop,
             ReadyBattle,
-            SceneTransition,
             Setting,
             LoginBonus,
             Mission,
@@ -120,7 +118,6 @@ namespace UI.Title
             stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)State.CharacterDetail);
             stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)State.CharacterSelect);
             stateMachine.AddTransition<MainState, BattleReadyState>((int)State.ReadyBattle);
-            stateMachine.AddTransition<BattleReadyState, SceneTransitionState>((int)State.SceneTransition);
             stateMachine.AddTransition<LoginState, MainState>((int)State.Main);
             stateMachine.AddTransition<MainState, SettingState>((int)State.Setting);
             stateMachine.AddTransition<MainState, LoginBonusState>((int)State.LoginBonus);

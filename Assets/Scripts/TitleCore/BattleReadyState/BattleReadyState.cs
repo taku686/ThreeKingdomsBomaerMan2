@@ -3,6 +3,7 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using MoreMountains.Tools;
 using UnityEngine;
 using Photon.Pun;
 using UniRx;
@@ -134,7 +135,8 @@ namespace UI.Title
 
                 PhotonNetwork.CurrentRoom.IsOpen = false;
                 PhotonNetwork.CurrentRoom.IsVisible = false;
-                Owner.stateMachine.Dispatch((int)State.SceneTransition);
+                //Owner.stateMachine.Dispatch((int)State.SceneTransition);
+                MMSceneLoadingManager.LoadScene(GameCommonData.BattleScene);
             }
 
             private void OnClickSceneTransition()
@@ -146,7 +148,8 @@ namespace UI.Title
 
                 PhotonNetwork.CurrentRoom.IsOpen = false;
                 PhotonNetwork.CurrentRoom.IsVisible = false;
-                Owner.stateMachine.Dispatch((int)State.SceneTransition);
+                //Owner.stateMachine.Dispatch((int)State.SceneTransition);
+                MMSceneLoadingManager.LoadScene(GameCommonData.BattleScene);
             }
 
 

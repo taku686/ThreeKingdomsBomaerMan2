@@ -80,6 +80,11 @@ public class Fade : MonoBehaviour
 
         while (Time.timeSinceLevelLoad <= endTime)
         {
+            if (fade == null)
+            {
+                return;
+            }
+
             cutoutRange = 1 - ((endTime - Time.timeSinceLevelLoad) / time);
             fade.Range = cutoutRange;
             await UniTask.Yield(token);

@@ -38,7 +38,7 @@ public class FadeImage : UnityEngine.UI.Graphic, IFade
 
     public float Range
     {
-        get { return cutoutRange; }
+        get => cutoutRange;
         set
         {
             cutoutRange = value;
@@ -115,12 +115,12 @@ public class FadeImage : UnityEngine.UI.Graphic, IFade
         UpdateMaskTexture(maskTexture);
     }
 
-#if UNITY_EDITOR
+/*#if UNITY_EDITOR
     protected override void OnValidate()
     {
         base.OnValidate();
         UpdateMaskCutout(Range);
         UpdateMaskTexture(maskTexture);
     }
-#endif
+#endif*/
 }
