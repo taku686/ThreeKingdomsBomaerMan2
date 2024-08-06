@@ -75,7 +75,7 @@ namespace Manager.BattleManager
                     missionManager.CheckMission(GameCommonData.BattleCountActionId);
                     break;
                 case GameCommonData.CharacterBattleActionId:
-                    var characterId = userDataManager.GetEquippedCharacterData().Id;
+                    var characterId = userDataManager.GetEquippedCharacterId();
                     missionManager.CheckMission(GameCommonData.CharacterBattleActionId, characterId);
                     break;
             }

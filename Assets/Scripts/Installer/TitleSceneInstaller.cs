@@ -30,7 +30,7 @@ namespace Common.Installer
 
         private void InstallCharacterSelect()
         {
-            Container.Bind<SortCharacterListUseCase>().AsCached();
+            Container.Bind<SortCharactersUseCase>().AsCached();
             Container.Bind<CharacterSelectViewModelUseCase>().AsCached();
             Container.Bind<CharacterSelectRepository>().AsCached();
         }

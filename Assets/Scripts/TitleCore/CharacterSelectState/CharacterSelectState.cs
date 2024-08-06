@@ -20,7 +20,8 @@ namespace UI.Title
             private CharacterSelectViewModelUseCase characterSelectViewModelUseCase;
             private CharacterSelectRepository characterSelectRepository;
             private PlayFabVirtualCurrencyManager playFabVirtualCurrencyManager;
-            private SortCharacterListUseCase sortCharacterListUseCase;
+            private SortCharactersUseCase sortCharactersUseCase;
+            private UserDataManager UserDataManager => Owner.userDataManager;
 
             private CancellationTokenSource cancellationTokenSource;
             private readonly Subject<Unit> onChangeViewModel = new();
@@ -42,7 +43,7 @@ namespace UI.Title
                 playFabVirtualCurrencyManager = Owner.playFabVirtualCurrencyManager;
                 characterSelectViewModelUseCase = Owner.characterSelectViewModelUseCase;
                 characterSelectRepository = Owner.characterSelectRepository;
-                sortCharacterListUseCase = Owner.sortCharacterListUseCase;
+                sortCharactersUseCase = Owner.sortCharactersUseCase;
 
                 view.InitializeUiPosition();
                 SetupCancellationToken();
@@ -115,7 +116,7 @@ namespace UI.Title
                 gridGroupLists.Clear();
                 GameObject gridGroup = null;
                 var index = 0;
-                var fixedCharacterDataArray = sortCharacterListUseCase.InAsTask(orderType);
+                var fixedCharacterDataArray = sortCharactersUseCase.InAsTask(orderType);
                 foreach (var fixedCharacterData in fixedCharacterDataArray)
                 {
                     if (index % 5 == 0)
@@ -133,7 +134,7 @@ namespace UI.Title
                     index++;
                 }
 
-                foreach (var characterData in Owner.userDataManager.GetNotAvailableCharacters())
+                foreach (var characterData in UserDataManager.GetNotAvailableCharacters())
                 {
                     if (index % 5 == 0)
                     {

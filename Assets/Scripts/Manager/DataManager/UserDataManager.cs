@@ -82,6 +82,11 @@ namespace Common.Data
         {
             return characterDataManager.GetCharacterData(userData.EquippedCharacterId);
         }
+        
+        public int GetEquippedCharacterId()
+        {
+            return characterDataManager.GetCharacterData(userData.EquippedCharacterId).Id;
+        }
 
         public CharacterLevelData GetCurrentLevelData(int characterId)
         {
@@ -205,23 +210,6 @@ namespace Common.Data
         {
             return userData.Characters
                 .Select(characterDataManager.GetCharacterData)
-                .ToArray();
-        }
-
-        public IReadOnlyCollection<CharacterData> GetAvailableCharactersByOrderType
-        (
-            CharacterSelectRepository.OrderType orderType)
-        {
-            if (orderType == CharacterSelectRepository.OrderType.Id)
-            {
-                return userData.Characters
-                    .Select(characterDataManager.GetCharacterData)
-                    .ToArray();
-            }
-
-            return userData.Characters
-                .Select(characterDataManager.GetCharacterData)
-                .OrderByDescending(data => TranslateOrderType(orderType, data))
                 .ToArray();
         }
 

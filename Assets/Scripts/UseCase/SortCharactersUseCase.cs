@@ -7,11 +7,11 @@ using UnityEngine;
 
 namespace UseCase
 {
-    public class SortCharacterListUseCase : IDisposable
+    public class SortCharactersUseCase : IDisposable
     {
         private readonly UserDataManager userDataManager;
 
-        public SortCharacterListUseCase
+        public SortCharactersUseCase
         (
             UserDataManager userDataManager
         )
@@ -27,7 +27,6 @@ namespace UseCase
             {
                 return characterDataArray.OrderBy(data => data.Id).ToArray();
             }
-
 
             foreach (var characterData in characterDataArray)
             {

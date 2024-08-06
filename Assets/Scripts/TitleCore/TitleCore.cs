@@ -38,7 +38,7 @@ namespace UI.Title
         [Inject] private ChatGPTManager chatGptManager;
         [Inject] private CharacterSelectViewModelUseCase characterSelectViewModelUseCase;
         [Inject] private CharacterSelectRepository characterSelectRepository;
-        [Inject] private SortCharacterListUseCase sortCharacterListUseCase;
+        [Inject] private SortCharactersUseCase sortCharactersUseCase;
         [SerializeField] private Fade fade;
         [SerializeField] private Transform characterCreatePosition;
         [SerializeField] private MainView mainView;
@@ -140,7 +140,6 @@ namespace UI.Title
 
         private bool CreateCharacter(int id)
         {
-            userDataManager.GetUserData().EquippedCharacterId = id;
             var preCharacter = equippedCharacter;
             var preWeaponEffect = weaponEffect;
             Destroy(preCharacter);
@@ -213,7 +212,7 @@ namespace UI.Title
                     missionManager.CheckMission(GameCommonData.BattleCountActionId);
                     break;
                 case GameCommonData.CharacterBattleActionId:
-                    var characterId = userDataManager.GetEquippedCharacterData().Id;
+                    var characterId = userDataManager.GetEquippedCharacterId();
                     missionManager.CheckMission(GameCommonData.CharacterBattleActionId, characterId);
                     break;
             }
