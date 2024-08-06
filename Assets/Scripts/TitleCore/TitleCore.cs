@@ -180,7 +180,7 @@ namespace UI.Title
             return true;
         }
 
-        private async UniTaskVoid SwitchUiObject(State state, bool isViewVirtualCurrencyUi, Action action = null)
+        private async UniTask SwitchUiObject(State state, bool isViewVirtualCurrencyUi, Action action = null)
         {
             await TransitionAnimation(() =>
             {

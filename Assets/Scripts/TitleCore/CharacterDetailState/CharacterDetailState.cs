@@ -71,10 +71,9 @@ namespace UI.Title
                 InitializeButton();
                 InitializeUIAnimation();
                 SetupUIContent();
-                Owner.SwitchUiObject(State.CharacterDetail, true).Forget();
                 isInitialize = true;
                 canQuestion = true;
-                await UniTask.Delay(TimeSpan.FromSeconds(1f));
+                await Owner.SwitchUiObject(State.CharacterDetail, true);
                 InitializeAnimation();
             }
 
