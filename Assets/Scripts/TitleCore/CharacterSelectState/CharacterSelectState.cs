@@ -182,13 +182,8 @@ namespace UI.Title
             private void OnClickCharacterGrid(CharacterData characterData, Button gridButton)
             {
                 gridButton.interactable = false;
-                var result = Owner.CreateCharacter(characterData.Id);
-                if (!result)
-                {
-                    gridButton.interactable = true;
-                    return;
-                }
-
+                Owner.CreateCharacter(characterData.Id);
+                characterSelectRepository.SetSelectedCharacterId(characterData.Id);
                 Owner.uiAnimation.ClickScale(gridButton.gameObject).OnComplete(() =>
                 {
                     Owner.stateMachine.Dispatch((int)State.CharacterDetail);

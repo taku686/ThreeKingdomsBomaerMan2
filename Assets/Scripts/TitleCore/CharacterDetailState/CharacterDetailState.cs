@@ -21,6 +21,7 @@ namespace UI.Title
             private const int DefaultPage = 1;
             private CharacterDetailView View => Owner.characterDetailView;
             private CommonView CommonView => Owner.commonView;
+            private CharacterSelectRepository CharacterSelectRepository => Owner.characterSelectRepository;
             private CharacterDataManager characterDataManager;
             private PlayFabUserDataManager playFabUserDataManager;
             private PlayFabShopManager playFabShopManager;
@@ -70,10 +71,10 @@ namespace UI.Title
 
             private void InitializeOrderIndex()
             {
-                var equippedCharacterId = userDataManager.GetEquippedCharacterId();
+                var selectedCharacterId = characterSelectRepository.GetSelectedCharacterId();
                 var orderType = characterSelectRepository.GetOrderType();
                 orderCharacters = SortCharactersUseCase.InAsTask(orderType).ToArray();
-                orderIndex = Array.FindIndex(orderCharacters, x => x.Id == equippedCharacterId);
+                orderIndex = Array.FindIndex(orderCharacters, x => x.Id == selectedCharacterId);
             }
 
             private void SetupUIContent()

@@ -7,6 +7,7 @@ namespace UI.Title
     {
         private OrderType orderType;
         private const string OrderTypeKey = "OrderType";
+        private int selectedCharacterId;
 
         public enum OrderType
         {
@@ -31,6 +32,16 @@ namespace UI.Title
             var type = PlayerPrefs.GetInt(OrderTypeKey, 0);
             orderType = (OrderType)type;
             return orderType;
+        }
+
+        public void SetSelectedCharacterId(int id)
+        {
+            selectedCharacterId = id;
+        }
+
+        public int GetSelectedCharacterId()
+        {
+            return selectedCharacterId;
         }
 
         public void Dispose()

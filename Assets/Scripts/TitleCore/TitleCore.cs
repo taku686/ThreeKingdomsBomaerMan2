@@ -138,7 +138,7 @@ namespace UI.Title
             OnClickTransitionState(ticketAddButton, State.Shop, cts.Token);
         }
 
-        private bool CreateCharacter(int id)
+        private void CreateCharacter(int id)
         {
             var preCharacter = equippedCharacter;
             var preWeaponEffect = weaponEffect;
@@ -148,7 +148,6 @@ namespace UI.Title
             if (createCharacterData.CharacterObject == null || createCharacterData.WeaponEffectObj == null)
             {
                 Debug.LogError(id);
-                return false;
             }
 
             equippedCharacter = Instantiate(createCharacterData.CharacterObject,
@@ -157,7 +156,7 @@ namespace UI.Title
             var currentCharacterLevel = userDataManager.GetCurrentLevelData(id);
             if (currentCharacterLevel.Level < GameCommonData.MaxCharacterLevel)
             {
-                return true;
+                return;
             }
 
             var weapons = GameObject.FindGameObjectsWithTag(GameCommonData.WeaponTag);
@@ -175,8 +174,6 @@ namespace UI.Title
                 effect.Color = GameCommonData.GetWeaponColor(id);
                 effect.UpdateMeshEffect(weapon);
             }
-
-            return true;
         }
 
         private async UniTask SwitchUiObject(State state, bool isViewVirtualCurrencyUi, Action action = null)
