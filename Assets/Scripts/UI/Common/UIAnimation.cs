@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using TMPro;
@@ -7,7 +8,7 @@ using UnityEngine.UI;
 
 namespace UI.Common
 {
-    public class UIAnimation
+    public class UIAnimation : IDisposable
     {
         private const float Duration = 0.1f;
 
@@ -88,6 +89,11 @@ namespace UI.Common
                 .SetRelative(true)
                 .SetLoops(-1, LoopType.Restart)
                 .SetLink(target.gameObject);
+        }
+
+        public void Dispose()
+        {
+            // TODO release managed resources here
         }
     }
 }

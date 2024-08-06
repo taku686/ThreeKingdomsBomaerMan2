@@ -1,5 +1,6 @@
 ﻿using System;
 using TMPro;
+using UI.Common;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,24 +16,24 @@ namespace UI.Title
         [SerializeField] private RectTransform contentsTransform;
         [SerializeField] private VirtualCurrencyAddPopup virtualCurrencyAddPopup;
         [SerializeField] private TextMeshProUGUI characterAmountText;
+        [SerializeField] private ToggleView toggleView;
 
         public VirtualCurrencyAddPopup VirtualCurrencyAddPopup => virtualCurrencyAddPopup;
         public Button BackButton => backButton;
-        public IObservable<Unit> OnClickBackButton => backButton.OnClickAsObservable();
-
+        public IObservable<Unit> ClickBackButton => backButton.OnClickAsObservable();
         public GameObject HorizontalGroupGameObject => horizontalGroupGameObject;
-
         public GameObject Grid => grid;
-
         public GameObject GridDisable => gridDisable;
-
         public RectTransform ContentsTransform => contentsTransform;
+        public ToggleElement[] ToggleElements => toggleView.ToggleElements;
 
         public void ApplyViewModel(ViewModel viewModel)
         {
             var availableAmount = viewModel.AvailableAmount;
             var totalAmount = viewModel.TotalAmount;
+            var orderType = viewModel.OrderType;
             SetCharacterAmount(availableAmount, totalAmount);
+            ApplyToggleView(orderType);
         }
 
         private void SetCharacterAmount(int availableAmount, int totalAmount)
@@ -45,19 +46,28 @@ namespace UI.Title
             contentsTransform.anchoredPosition = new Vector2(contentsTransform.anchoredPosition.x, 0);
         }
 
+        public void ApplyToggleView(CharacterSelectRepository.OrderType orderType)
+        {
+            toggleView.ApplyView(orderType);
+        }
+
         public class ViewModel
         {
             public int AvailableAmount { get; }
             public int TotalAmount { get; }
+            public CharacterSelectRepository.OrderType OrderType { get; }
+
 
             public ViewModel
             (
                 int availableAmount,
-                int totalAmount
+                int totalAmount,
+                CharacterSelectRepository.OrderType orderType
             )
             {
                 AvailableAmount = availableAmount;
                 TotalAmount = totalAmount;
+                OrderType = orderType;
             }
         }
     }

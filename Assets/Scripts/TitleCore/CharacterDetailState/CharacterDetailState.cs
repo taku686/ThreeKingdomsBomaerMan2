@@ -28,12 +28,16 @@ namespace UI.Title
             private PlayFabVirtualCurrencyManager playFabVirtualCurrencyManager;
             private UserDataManager userDataManager;
             private ChatGPTManager chatGptManager;
-            private CancellationTokenSource cts;
+            private CharacterSelectRepository characterSelectRepository;
             private UIAnimation uiAnimation;
+
+
+            private CancellationTokenSource cts;
             private bool isInitialize;
             private bool canQuestion;
-            private int pageCount;
+            private int index;
             private bool isProcessing;
+            private CharacterData[] orderCharacters;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -57,12 +61,16 @@ namespace UI.Title
                 userDataManager = Owner.userDataManager;
                 chatGptManager = Owner.chatGptManager;
                 uiAnimation = Owner.uiAnimation;
+                characterSelectRepository = Owner.characterSelectRepository;
+
                 characterDetailView.PurchaseErrorView.gameObject.SetActive(false);
                 characterDetailView.VirtualCurrencyAddPopup.gameObject.SetActive(false);
                 characterDetailView.QuestionView.commentObj.SetActive(false);
+
+                InitializeIndex();
                 InitializeButton();
-                SetupUIContent();
                 InitializeUIAnimation();
+                SetupUIContent();
                 Owner.SwitchUiObject(State.CharacterDetail, true).Forget();
                 isInitialize = true;
                 canQuestion = true;
@@ -70,12 +78,20 @@ namespace UI.Title
                 InitializeAnimation();
             }
 
+            private void InitializeIndex()
+            {
+                var equippedCharacterId = userDataManager.GetUserData().EquippedCharacterId;
+                var type = characterSelectRepository.GetOrderType();
+                orderCharacters = userDataManager.GetAvailableCharactersByOrderType(type).ToArray();
+                index = Array.FindIndex(orderCharacters, x => x.Id == equippedCharacterId);
+            }
+
             private void SetupUIContent()
             {
-                var equippedCharacterDataId = userDataManager.GetUserData().EquipCharacterId;
-                var characterData = characterDataManager.GetCharacterData(equippedCharacterDataId);
-                var currentLevelData = userDataManager.GetCurrentLevelData(equippedCharacterDataId);
-                var nextLevelData = userDataManager.GetNextLevelData(equippedCharacterDataId);
+                var candidateCharacterId = orderCharacters[index].Id;
+                var characterData = characterDataManager.GetCharacterData(candidateCharacterId);
+                var currentLevelData = userDataManager.GetCurrentLevelData(candidateCharacterId);
+                var nextLevelData = userDataManager.GetNextLevelData(candidateCharacterId);
                 SetStatusView(characterData, currentLevelData);
                 SetSkillView(characterData, currentLevelData);
                 SetLevelView(currentLevelData, nextLevelData);
@@ -131,7 +147,13 @@ namespace UI.Title
                 characterDetailView.QuestionView.sendButton.onClick.RemoveAllListeners();
                 characterDetailView.QuestionView.closeButton.onClick.RemoveAllListeners();
                 commonView.errorView.okButton.onClick.RemoveAllListeners();
-                
+                Owner.characterDetailView.BackButton.onClick.AddListener(OnClickBackButton);
+                Owner.characterDetailView.SelectButton.onClick.AddListener(OnClickSelectButton);
+                characterDetailView.PurchaseErrorView.okButton.onClick.AddListener(OnClickClosePurchaseErrorView);
+                characterDetailView.QuestionView.sendButton.onClick.AddListener(OnClickSendQuestion);
+                characterDetailView.QuestionView.closeButton.onClick.AddListener(OnClickCloseComment);
+                commonView.errorView.okButton.onClick.AddListener(OnClickCloseErrorView);
+
                 Owner.characterDetailView.LeftArrowButton.OnClickAsObservable()
                     .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
                     .Subscribe(_ => OnClickLeftArrow()).AddTo(cts.Token);
@@ -142,7 +164,7 @@ namespace UI.Title
 
                 characterDetailView.UpgradeButton.OnClickAsObservable()
                     .Subscribe(_ => OnClickUpgrade()).AddTo(cts.Token);
-                
+
                 characterDetailView.VirtualCurrencyAddPopup.OnClickCancelButton
                     .Subscribe(_ =>
                     {
@@ -160,13 +182,6 @@ namespace UI.Title
                 characterDetailView.VirtualCurrencyAddPopup.OnClickAddButton
                     .Subscribe(_ => OnClickAddVirtualCurrency())
                     .AddTo(cts.Token);
-                
-                Owner.characterDetailView.BackButton.onClick.AddListener(OnClickBackButton);
-                Owner.characterDetailView.SelectButton.onClick.AddListener(OnClickSelectButton);
-                characterDetailView.PurchaseErrorView.okButton.onClick.AddListener(OnClickClosePurchaseErrorView);
-                characterDetailView.QuestionView.sendButton.onClick.AddListener(OnClickSendQuestion);
-                characterDetailView.QuestionView.closeButton.onClick.AddListener(OnClickCloseComment);
-                commonView.errorView.okButton.onClick.AddListener(OnClickCloseErrorView);
             }
 
             private void InitializeUIAnimation()
@@ -192,23 +207,9 @@ namespace UI.Title
                 var button = characterDetailView.BackButton.gameObject;
                 Owner.uiAnimation.ClickScaleColor(button).OnComplete(() =>
                 {
-                    Owner.CreateCharacter(Owner.userDataManager.GetUserData().EquipCharacterId);
+                    Owner.CreateCharacter(Owner.userDataManager.GetUserData().EquippedCharacterId);
                     Owner.stateMachine.Dispatch((int)State.CharacterSelect);
                 }).SetLink(button);
-            }
-
-            private void OnClickSelectButton()
-            {
-                var button = characterDetailView.SelectButton.gameObject;
-                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
-                {
-                    var userData = userDataManager.GetUserData();
-                    var result = await playFabUserDataManager.TryUpdateUserDataAsync(userData);
-                    if (result)
-                    {
-                        Owner.stateMachine.Dispatch((int)State.Main);
-                    }
-                })).SetLink(button);
             }
 
             private void OnClickRightArrow()
@@ -222,22 +223,14 @@ namespace UI.Title
                         return;
                     }
 
-                    CharacterData nextCharacterData = null;
-                    var orderCharacters = userData.Characters.OrderBy(x => x).ToList();
-                    var characterData = userDataManager.GetEquippedCharacterData();
-                    foreach (var characterIndex in orderCharacters)
+                    index++;
+                    if (index >= orderCharacters.Length)
                     {
-                        if (characterData.Id < characterIndex)
-                        {
-                            nextCharacterData = characterDataManager.GetCharacterData(characterIndex);
-                            break;
-                        }
+                        index = 0;
                     }
 
-                    nextCharacterData ??= characterDataManager.GetCharacterData(orderCharacters.First());
-                    userData.EquipCharacterId = nextCharacterData.Id;
-                    userDataManager.SetUserData(userData);
-                    CreateCharacter(nextCharacterData);
+                    var candidateCharacter = orderCharacters[index];
+                    CreateCharacter(candidateCharacter);
                     SetupUIContent();
                     InitializeAnimation();
                 }).SetLink(button);
@@ -245,35 +238,44 @@ namespace UI.Title
 
             private void OnClickLeftArrow()
             {
-                var button = characterDetailView.LeftArrowButton.gameObject;
-                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() =>
+                var button = characterDetailView.LeftArrowButton;
+                button.interactable = false;
+                Owner.uiAnimation.ClickScaleColor(button.gameObject).OnComplete(() =>
                 {
                     var userData = userDataManager.GetUserData();
                     if (userData.Characters.Count <= 1)
                     {
+                        button.interactable = true;
                         return;
                     }
 
-                    CharacterData prevCharacterData = null;
-                    var characterData = userDataManager.GetEquippedCharacterData();
-                    var orderCharacters = userData.Characters.OrderByDescending(x => x).ToList();
-
-                    foreach (var characterIndex in orderCharacters)
+                    index--;
+                    if (index < 0)
                     {
-                        if (characterData.Id > characterIndex)
-                        {
-                            prevCharacterData = characterDataManager.GetCharacterData(characterIndex);
-                            break;
-                        }
+                        index = orderCharacters.Length - 1;
                     }
 
-                    prevCharacterData ??= characterDataManager.GetCharacterData(orderCharacters.First());
-                    userData.EquipCharacterId = prevCharacterData.Id;
-                    userDataManager.SetUserData(userData);
-                    CreateCharacter(prevCharacterData);
+                    var candidateCharacter = orderCharacters[index];
+                    CreateCharacter(candidateCharacter);
                     SetupUIContent();
                     InitializeAnimation();
-                }).SetLink(button);
+                    button.interactable = true;
+                }).SetLink(button.gameObject);
+            }
+
+            private void OnClickSelectButton()
+            {
+                var button = characterDetailView.SelectButton.gameObject;
+                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                {
+                    var userData = userDataManager.GetUserData();
+                    userData.EquippedCharacterId = orderCharacters[index].Id;
+                    var result = await playFabUserDataManager.TryUpdateUserDataAsync(userData);
+                    if (result)
+                    {
+                        Owner.stateMachine.Dispatch((int)State.Main);
+                    }
+                })).SetLink(button);
             }
 
             private void OnClickUpgrade()
@@ -286,7 +288,6 @@ namespace UI.Title
                 isProcessing = true;
                 characterDetailView.UpgradeButton.interactable = false;
                 var characterData = userDataManager.GetEquippedCharacterData();
-                var currentLevelData = userDataManager.GetCurrentLevelData(characterData.Id);
                 var button = characterDetailView.UpgradeButton.gameObject;
                 Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
@@ -392,7 +393,6 @@ namespace UI.Title
                         {
                             commonView.waitPopup.SetActive(false);
                             canQuestion = true;
-                            var errorInfo = $"{GameCommonData.CharacterLimit}文字以内で質問してください。";
                             await OpenErrorView();
                             return;
                         }
@@ -461,7 +461,7 @@ namespace UI.Title
 
             private void InitializeAnimation()
             {
-                Owner.character.GetComponent<Animator>().SetTrigger(GameCommonData.ActiveHashKey);
+                Owner.equippedCharacter.GetComponent<Animator>().SetTrigger(GameCommonData.ActiveHashKey);
             }
 
             private int GetModifiedStatus(CharacterLevelData currentLevelData, int value)

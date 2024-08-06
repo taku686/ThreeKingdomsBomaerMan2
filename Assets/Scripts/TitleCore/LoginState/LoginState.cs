@@ -61,13 +61,13 @@ namespace UI.Title
                     .SelectMany(_ => OnClickRetry().ToObservable())
                     .Subscribe()
                     .AddTo(cts.Token);
-                
+
                 loginView.LoginButton.OnClickAsObservable()
                     .SelectMany(_ => Owner.OnClickButtonAnimation(loginView.LoginButton).ToObservable())
                     .SelectMany(_ => OnClickLogin().ToObservable())
                     .Subscribe()
                     .AddTo(cts.Token);
-                
+
                 loginView.DisplayNameView.OkButton.OnClickAsObservable()
                     .SelectMany(_ => Owner.OnClickButtonAnimation(loginView.DisplayNameView.OkButton).ToObservable())
                     .SelectMany(_ => OnClickDisplayName().ToObservable())
@@ -103,7 +103,7 @@ namespace UI.Title
                     return;
                 }
 
-                Owner.characterDataManager.Initialize(Owner.userDataManager, Owner.token);
+                Owner.characterDataManager.Initialize(Owner.userDataManager);
                 Owner.mainManager.isInitialize = true;
                 Owner.stateMachine.Dispatch((int)State.Main);
                 commonView.waitPopup.SetActive(false);
@@ -127,7 +127,7 @@ namespace UI.Title
                 var createSuccess = await Owner.playFabLoginManager.CreateUserData();
                 if (createSuccess)
                 {
-                    Owner.characterDataManager.Initialize(Owner.userDataManager, Owner.token);
+                    Owner.characterDataManager.Initialize(Owner.userDataManager);
                     Owner.loginView.DisplayNameView.gameObject.SetActive(false);
                     Owner.mainManager.isInitialize = true;
                     Owner.stateMachine.Dispatch((int)State.Main);

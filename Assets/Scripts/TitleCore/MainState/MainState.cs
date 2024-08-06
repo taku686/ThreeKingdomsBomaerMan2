@@ -32,7 +32,7 @@ namespace UI.Title
             {
                 playFabLoginManager = Owner.playFabLoginManager;
                 mainView = Owner.mainView;
-                Owner.CreateCharacter(Owner.userDataManager.GetUserData().EquipCharacterId);
+                Owner.CreateCharacter(Owner.userDataManager.GetUserData().EquippedCharacterId);
                 mainView.SetBackgroundEffect(true);
                 InitializeButton();
                 Owner.SwitchUiObject(State.Main, true).Forget();

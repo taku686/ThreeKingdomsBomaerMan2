@@ -9,6 +9,8 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: UI-Fade-Cutout
   m_Shader: {fileID: 4800000, guid: d5b17613b5d88c2478da53bc9634bb9d, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 5
@@ -17,6 +19,7 @@ Material:
   m_CustomRenderQueue: 3000
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -25,7 +28,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MaskTex:
-        m_Texture: {fileID: 2800000, guid: 587899809c81ce342954b400397fb7e9, type: 3}
+        m_Texture: {fileID: 2800000, guid: c2de6a7d73548974fa209468f71bd83f, type: 3}
         m_Scale: {x: 3, y: 3}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
@@ -38,5 +41,5 @@ Material:
     - _StencilReadMask: 255
     - _StencilWriteMask: 255
     m_Colors:
-    - _Color: {r: 0.15098792, g: 0.8207547, b: 0.7587208, a: 0}
+    - _Color: {r: 0.7735849, g: 0.527711, b: 0.24448201, a: 0}
   m_BuildTextureStacks: []

@@ -314,6 +314,11 @@ namespace Manager.NetworkManager
             throw new NotImplementedException();
         }
 
+        public void OnInitializeFailed(InitializationFailureReason error, string message)
+        {
+            throw new NotImplementedException();
+        }
+
         public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs purchaseEvent)
         {
             if (!_isInitialized)

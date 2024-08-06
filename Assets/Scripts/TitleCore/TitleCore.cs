@@ -15,6 +15,7 @@ using Zenject;
 using Manager.DataManager;
 using UniRx;
 using UnityEngine.UI;
+using UseCase;
 
 
 namespace UI.Title
@@ -36,6 +37,8 @@ namespace UI.Title
         [Inject] private MissionManager missionManager;
         [Inject] private ChatGPTManager chatGptManager;
         [Inject] private CharacterSelectViewModelUseCase characterSelectViewModelUseCase;
+        [Inject] private CharacterSelectRepository characterSelectRepository;
+        [Inject] private SortCharacterListUseCase sortCharacterListUseCase;
         [SerializeField] private Fade fade;
         [SerializeField] private Transform characterCreatePosition;
         [SerializeField] private MainView mainView;
@@ -48,7 +51,7 @@ namespace UI.Title
         [SerializeField] private LoginBonusView loginBonusView;
         [SerializeField] private MissionView missionView;
         [SerializeField] private CommonView commonView;
-        private GameObject character;
+        private GameObject equippedCharacter;
         private GameObject weaponEffect;
         private StateMachine<TitleCore> stateMachine;
         private CancellationToken token;
@@ -135,25 +138,10 @@ namespace UI.Title
             OnClickTransitionState(ticketAddButton, State.Shop, cts.Token);
         }
 
-
-        private void DisableTitleGameObject()
-        {
-            mainView.MainGameObject.SetActive(false);
-            mainView.CharacterListGameObject.SetActive(false);
-            mainView.CharacterDetailGameObject.SetActive(false);
-            mainView.BattleReadyGameObject.SetActive(false);
-            mainView.SceneTransitionGameObject.SetActive(false);
-            mainView.LoginGameObject.SetActive(false);
-            mainView.SettingGameObject.SetActive(false);
-            mainView.ShopGameObject.SetActive(false);
-            mainView.LoginBonusGameObjet.SetActive(false);
-            mainView.MissionGameObject.SetActive(false);
-        }
-
         private bool CreateCharacter(int id)
         {
-            userDataManager.GetUserData().EquipCharacterId = id;
-            var preCharacter = character;
+            userDataManager.GetUserData().EquippedCharacterId = id;
+            var preCharacter = equippedCharacter;
             var preWeaponEffect = weaponEffect;
             Destroy(preCharacter);
             Destroy(preWeaponEffect);
@@ -164,7 +152,7 @@ namespace UI.Title
                 return false;
             }
 
-            character = Instantiate(createCharacterData.CharacterObject,
+            equippedCharacter = Instantiate(createCharacterData.CharacterObject,
                 characterCreatePosition.position,
                 characterCreatePosition.rotation, characterCreatePosition);
             var currentCharacterLevel = userDataManager.GetCurrentLevelData(id);

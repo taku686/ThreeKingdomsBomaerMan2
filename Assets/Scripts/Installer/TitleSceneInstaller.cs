@@ -5,6 +5,7 @@ using Manager.PlayFabManager;
 using UI.Common;
 using UI.Title;
 using UnityEngine;
+using UseCase;
 using Zenject;
 
 namespace Common.Installer
@@ -29,7 +30,9 @@ namespace Common.Installer
 
         private void InstallCharacterSelect()
         {
-            Container.Bind<CharacterSelectViewModelUseCase>().FromNew().AsCached();
+            Container.Bind<SortCharacterListUseCase>().AsCached();
+            Container.Bind<CharacterSelectViewModelUseCase>().AsCached();
+            Container.Bind<CharacterSelectRepository>().AsCached();
         }
     }
 }

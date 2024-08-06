@@ -6,7 +6,7 @@ namespace Common.Data
     public class UserData : IDisposable
     {
         public Gender Gender;
-        public int EquipCharacterId;
+        public int EquippedCharacterId;
         public int Level;
         public string Name;
         public bool IsTutorial;
@@ -21,7 +21,7 @@ namespace Common.Data
         public void SetUserData(UserData userData)
         {
             Gender = userData.Gender;
-            EquipCharacterId = userData.EquipCharacterId;
+            EquippedCharacterId = userData.EquippedCharacterId;
             Level = userData.Level;
             Name = userData.Name;
             IsTutorial = userData.IsTutorial;
@@ -40,7 +40,7 @@ namespace Common.Data
         {
             var user = this;
             user.Gender = Gender.Male;
-            user.EquipCharacterId = 0;
+            user.EquippedCharacterId = 0;
             user.Level = 1;
             user.Name = "";
             user.IsTutorial = false;

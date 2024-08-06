@@ -14,7 +14,7 @@ namespace Manager.DataManager
         private UserDataManager userDataManager;
         private static readonly Dictionary<int, CharacterData> CharacterDatum = new();
 
-        public void Initialize(UserDataManager dataManager, CancellationToken cancellationToken)
+        public void Initialize(UserDataManager dataManager)
         {
             if (mainManager.isInitialize)
             {
@@ -34,6 +34,11 @@ namespace Manager.DataManager
             return CharacterDatum[id];
         }
 
+        public IReadOnlyCollection<CharacterData> GetAllCharacterData()
+        {
+            return CharacterDatum.Values;
+        }
+
         public int GetAllCharacterAmount()
         {
             return CharacterDatum.Count;
@@ -41,7 +46,7 @@ namespace Manager.DataManager
 
         public CharacterData GetUserEquippedCharacterData()
         {
-            return GetCharacterData(userDataManager.GetUserData().EquipCharacterId);
+            return GetCharacterData(userDataManager.GetUserData().EquippedCharacterId);
         }
 
         public void Dispose()
