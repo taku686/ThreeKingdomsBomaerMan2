@@ -3,7 +3,6 @@ using Common.Data;
 using Manager.BattleManager.Camera;
 using Manager.BattleManager.Environment;
 using Manager.NetworkManager;
-using MoreMountains.Tools;
 using Photon.Pun;
 using Player.Common;
 using UnityEngine;
@@ -25,6 +24,7 @@ namespace Manager.BattleManager
         [SerializeField] private MapManager mapManager;
         [SerializeField] private BattleStartView battleStartView;
         [SerializeField] private BattleResultView battleResultView;
+        [SerializeField] private InBattleView inBattleView;
         private StateMachine<BattleCore> stateMachine;
         private PlayerCore playerCore;
 
@@ -40,6 +40,7 @@ namespace Manager.BattleManager
         void Start()
         {
             DisableUi();
+            InitializeUi();
             InitializeState();
             InitializeComponent();
         }
@@ -47,6 +48,11 @@ namespace Manager.BattleManager
         private void Update()
         {
             stateMachine.Update();
+        }
+
+        private void InitializeUi()
+        {
+            inBattleView.UpdateTime(GameCommonData.BattleTime);
         }
 
         private void InitializeState()
@@ -88,7 +94,7 @@ namespace Manager.BattleManager
 
         private void DisableUi()
         {
-            battleStartView.gameObject.SetActive(false);
+            battleStartView.gameObject.SetActive(true);
             battleResultView.gameObject.SetActive(false);
         }
     }

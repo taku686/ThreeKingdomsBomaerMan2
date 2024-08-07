@@ -1,8 +1,9 @@
 ﻿using System.Threading;
+using Common.Data;
 using Cysharp.Threading.Tasks;
+using Photon.Pun;
 using Player.Common;
 using UniRx;
-using UnityEngine;
 using State = StateMachine<Manager.BattleManager.BattleCore>.State;
 
 namespace Manager.BattleManager
@@ -11,9 +12,10 @@ namespace Manager.BattleManager
     {
         public class InBattleState : StateMachine<BattleCore>.State
         {
-            //todo カウントダウンの時間の処理
+            private InBattleView View => Owner.inBattleView;
             private PlayerCore playerCore;
             private CancellationTokenSource cts;
+            private int startTime;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
             {
@@ -30,12 +32,22 @@ namespace Manager.BattleManager
             {
                 cts = new CancellationTokenSource();
                 playerCore = Owner.playerCore;
+                startTime = PhotonNetwork.ServerTimestamp;
             }
 
             private void OnSubscribe()
             {
                 playerCore.DeadObservable
                     .Subscribe(_ => { Owner.stateMachine.Dispatch((int)State.Result); })
+                    .AddTo(cts.Token);
+
+                Observable.EveryUpdate()
+                    .Subscribe(_ =>
+                    {
+                        var time = GameCommonData.BattleTime -
+                                   (unchecked(PhotonNetwork.ServerTimestamp - startTime) / 1000);
+                        View.UpdateTime(time);
+                    })
                     .AddTo(cts.Token);
             }
 

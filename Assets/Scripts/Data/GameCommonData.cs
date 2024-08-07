@@ -7,8 +7,6 @@ namespace Common.Data
     public static class GameCommonData
     {
         public const int CharacterPrice = 200;
-        public const float MoveThreshold = 0.6f;
-        public const float RotateThreshold = 0.01f;
         public const float TurnDuration = 0.3f;
         public const float InputBombInterval = 0.05f;
         public const string TitleID = "92AF5";
@@ -23,17 +21,12 @@ namespace Common.Data
         public const string ExplosionLayer = "Explosion";
         public const string BombLayer = "Bomb";
         public const string UserKey = "User";
-        public const string VirtualCurrencyKey = "vc";
-        public const string PriceKey = "price";
         public const string GemKey = "MS";
         public const string CoinKey = "CO";
         public const string TicketKey = "TK";
         public const string GachaShopKey = "GachaStore";
-        public const string MainShopKey = "MainShop";
         public const string ConsumableClassKey = "Consumable";
-        public const string BundleClassKey = "Bundle";
         public const string CharacterClassKey = "Character";
-        public const string LevelClassKey = "Level";
         public const string LoginBonusClassKey = "Consumable";
         public const string CharacterGachaItemKey = "bundle01";
         public const string ThousandCoinItemKey = "coin1000";
@@ -79,10 +72,10 @@ namespace Common.Data
         public const int LevelUpActionId = 1;
         public const int CharacterBattleActionId = 2;
         public const int ExceptionMissionProgress = 999;
-        public const int ExceptionCharacterId = 999;
         public const int NetworkErrorCode = Int32.MaxValue;
         public const int CharacterLimit = 40;
         public const float FadeOutTime = 0.8f;
+        public const int BattleTime = 180;
 
         public static CharacterColor GetCharacterColor(string color)
         {
