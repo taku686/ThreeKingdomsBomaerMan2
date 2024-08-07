@@ -6,12 +6,7 @@ public class ProjectCommonData : MonoBehaviour
     public Color fadeOutColor;
     public Color fadeInColor;
     public int maskTextureIndex;
-    public bool isInitialize;
     public bool isSceneTransition;
-    public bool isResultScene;
-    public bool isNewRecord;
-    public int score;
-    public int selectGameIndex;
 
     private void Awake()
     {
