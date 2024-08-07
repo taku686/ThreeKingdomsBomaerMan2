@@ -18,7 +18,8 @@ namespace UI.Title
             Attack,
             Speed,
             Bomb,
-            Fire
+            Fire,
+            WeaponType
         }
 
         public void SetOrderType(OrderType type)

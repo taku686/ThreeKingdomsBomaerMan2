@@ -10,7 +10,7 @@ namespace UI.Title
         public class MainState : StateMachine<TitleCore>.State
         {
             private PlayFabLoginManager playFabLoginManager;
-            private MainView mainView;
+            private Main main;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -19,7 +19,7 @@ namespace UI.Title
 
             protected override void OnExit(StateMachine<TitleCore>.State nextState)
             {
-                mainView.SetBackgroundEffect(false);
+                main.SetBackgroundEffect(false);
             }
 
 
@@ -31,9 +31,9 @@ namespace UI.Title
             private async UniTaskVoid Initialize()
             {
                 playFabLoginManager = Owner.playFabLoginManager;
-                mainView = Owner.mainView;
+                main = Owner.main;
                 Owner.CreateCharacter(Owner.userDataManager.GetUserData().EquippedCharacterId);
-                mainView.SetBackgroundEffect(true);
+                main.SetBackgroundEffect(true);
                 InitializeButton();
                 Owner.SwitchUiObject(State.Main, true).Forget();
                 await InitializeText();
@@ -42,16 +42,16 @@ namespace UI.Title
 
             private void InitializeButton()
             {
-                Owner.mainView.CharacterSelectButton.onClick.RemoveAllListeners();
-                Owner.mainView.BattleReadyButton.onClick.RemoveAllListeners();
-                Owner.mainView.SettingButton.onClick.RemoveAllListeners();
-                Owner.mainView.ShopButton.onClick.RemoveAllListeners();
-                mainView.MissionButton.onClick.RemoveAllListeners();
-                Owner.mainView.CharacterSelectButton.onClick.AddListener(OnClickCharacterSelect);
-                Owner.mainView.BattleReadyButton.onClick.AddListener(OnClickBattleReady);
-                Owner.mainView.SettingButton.onClick.AddListener(OnClickSetting);
-                Owner.mainView.ShopButton.onClick.AddListener(OnClickShop);
-                mainView.MissionButton.onClick.AddListener(OnClickMission);
+                Owner.main.CharacterSelectButton.onClick.RemoveAllListeners();
+                Owner.main.BattleReadyButton.onClick.RemoveAllListeners();
+                Owner.main.SettingButton.onClick.RemoveAllListeners();
+                Owner.main.ShopButton.onClick.RemoveAllListeners();
+                main.MissionButton.onClick.RemoveAllListeners();
+                Owner.main.CharacterSelectButton.onClick.AddListener(OnClickCharacterSelect);
+                Owner.main.BattleReadyButton.onClick.AddListener(OnClickBattleReady);
+                Owner.main.SettingButton.onClick.AddListener(OnClickSetting);
+                Owner.main.ShopButton.onClick.AddListener(OnClickShop);
+                main.MissionButton.onClick.AddListener(OnClickMission);
             }
 
             private async UniTask InitializeText()
@@ -77,35 +77,35 @@ namespace UI.Title
 
             private void OnClickCharacterSelect()
             {
-                Owner.uiAnimation.ClickScaleColor(Owner.mainView.CharacterSelectButton.gameObject)
+                Owner.uiAnimation.ClickScaleColor(Owner.main.CharacterSelectButton.gameObject)
                     .OnComplete(() => { Owner.stateMachine.Dispatch((int)State.CharacterSelect); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickBattleReady()
             {
-                Owner.uiAnimation.ClickScaleColor(Owner.mainView.BattleReadyButton.gameObject)
-                    .OnComplete(() => { Owner.stateMachine.Dispatch((int)State.ReadyBattle); })
+                Owner.uiAnimation.ClickScaleColor(Owner.main.BattleReadyButton.gameObject)
+                    .OnComplete(() => { Owner.stateMachine.Dispatch((int)State.BattleReady); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickSetting()
             {
-                Owner.uiAnimation.ClickScaleColor(Owner.mainView.SettingButton.gameObject)
+                Owner.uiAnimation.ClickScaleColor(Owner.main.SettingButton.gameObject)
                     .OnComplete(() => { Owner.stateMachine.Dispatch((int)State.Setting); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickShop()
             {
-                Owner.uiAnimation.ClickScaleColor(Owner.mainView.ShopButton.gameObject)
+                Owner.uiAnimation.ClickScaleColor(Owner.main.ShopButton.gameObject)
                     .OnComplete(() => { Owner.stateMachine.Dispatch((int)State.Shop); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickMission()
             {
-                Owner.uiAnimation.ClickScaleColor(mainView.MissionButton.gameObject)
+                Owner.uiAnimation.ClickScaleColor(main.MissionButton.gameObject)
                     .OnComplete(() => { Owner.stateMachine.Dispatch((int)State.Mission); })
                     .SetLink(Owner.gameObject);
             }

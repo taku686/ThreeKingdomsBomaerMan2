@@ -14,6 +14,7 @@ using UnityEngine;
 using Zenject;
 using Manager.DataManager;
 using UniRx;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using UseCase;
 
@@ -41,32 +42,51 @@ namespace UI.Title
         [Inject] private SortCharactersUseCase sortCharactersUseCase;
         [SerializeField] private Fade fade;
         [SerializeField] private Transform characterCreatePosition;
-        [SerializeField] private MainView mainView;
-        [SerializeField] private CharacterSelectView characterSelectView;
-        [SerializeField] private CharacterDetailView characterDetailView;
-        [SerializeField] private BattleReadyView battleReadyView;
-        [SerializeField] private LoginView loginView;
-        [SerializeField] private SettingView settingView;
-        [SerializeField] private ShopView shopView;
-        [SerializeField] private LoginBonusView loginBonusView;
-        [SerializeField] private MissionView missionView;
+
+        [FormerlySerializedAs("mainView")] [SerializeField]
+        private Main main;
+
+        [FormerlySerializedAs("characterSelectView")] [SerializeField]
+        private CharacterSelect characterSelect;
+
+        [FormerlySerializedAs("characterDetailView")] [SerializeField]
+        private CharacterDetail characterDetail;
+
+        [FormerlySerializedAs("battleReadyView")] [SerializeField]
+        private BattleReady battleReady;
+
+        [FormerlySerializedAs("loginView")] [SerializeField]
+        private Login login;
+
+        [FormerlySerializedAs("settingView")] [SerializeField]
+        private Setting setting;
+
+        [FormerlySerializedAs("shopView")] [SerializeField]
+        private Shop shop;
+
+        [FormerlySerializedAs("loginBonusView")] [SerializeField]
+        private LoginBonus loginBonus;
+
+        [FormerlySerializedAs("missionView")] [SerializeField]
+        private Mission mission;
+
         [SerializeField] private CommonView commonView;
         private GameObject equippedCharacter;
         private GameObject weaponEffect;
         private StateMachine<TitleCore> stateMachine;
         private CancellationToken token;
         private CancellationTokenSource cts;
-        [SerializeField] private GameObject[] uiObjects;
+        [SerializeField] private ViewBase[] views;
 
 
-        private enum State
+        public enum State
         {
             Login,
             Main,
             CharacterSelect,
             CharacterDetail,
             Shop,
-            ReadyBattle,
+            BattleReady,
             Setting,
             LoginBonus,
             Mission,
@@ -96,7 +116,7 @@ namespace UI.Title
         {
             cts = new CancellationTokenSource();
             fade.InitializeInSceneTransition(1, ProjectCommonData.Instance.isSceneTransition);
-            mainView.SetBackgroundEffect(false);
+            main.SetBackgroundEffect(false);
             commonView.Initialize();
             InitializeState();
             InitializeButton();
@@ -120,7 +140,7 @@ namespace UI.Title
             stateMachine.AddTransition<MainState, CharacterSelectState>((int)State.CharacterSelect);
             stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)State.CharacterDetail);
             stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)State.CharacterSelect);
-            stateMachine.AddTransition<MainState, BattleReadyState>((int)State.ReadyBattle);
+            stateMachine.AddTransition<MainState, BattleReadyState>((int)State.BattleReady);
             stateMachine.AddTransition<LoginState, MainState>((int)State.Main);
             stateMachine.AddTransition<MainState, SettingState>((int)State.Setting);
             stateMachine.AddTransition<MainState, LoginBonusState>((int)State.LoginBonus);
@@ -166,8 +186,8 @@ namespace UI.Title
                 var particleSystems = effectObj.GetComponentsInChildren<ParticleSystem>();
                 foreach (var system in particleSystems)
                 {
-                    var main = system.main;
-                    main.startColor = GameCommonData.GetWeaponColor(id);
+                    var systemMain = system.main;
+                    systemMain.startColor = GameCommonData.GetWeaponColor(id);
                 }
 
                 var effect = effectObj.GetComponentInChildren<PSMeshRendererUpdater>();
@@ -180,14 +200,13 @@ namespace UI.Title
         {
             await TransitionAnimation(() =>
             {
-                foreach (var ui in uiObjects)
+                foreach (var view in views)
                 {
-                    ui.SetActive(false);
+                    view.gameObject.SetActive(view.State == state);
                 }
 
                 action?.Invoke();
                 commonView.virtualCurrencyView.gameObject.SetActive(isViewVirtualCurrencyUi);
-                uiObjects[(int)state].SetActive(true);
             });
         }
 
@@ -233,7 +252,7 @@ namespace UI.Title
             commonView.virtualCurrencyView.ticketText.text = ticket.ToString("D");
         }
 
-        private void OnClickTransitionState(Button button, State state, CancellationToken token)
+        private void OnClickTransitionState(Button button, State state, CancellationToken cancellationToken)
         {
             if (button == null)
             {
@@ -242,13 +261,18 @@ namespace UI.Title
             }
 
             button.OnClickAsObservable()
-                .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
                 .Subscribe(_ =>
                 {
+                    button.interactable = false;
                     uiAnimation.ClickScaleColor(button.gameObject)
-                        .OnComplete(() => { stateMachine.Dispatch((int)state); })
+                        .OnComplete(() =>
+                        {
+                            stateMachine.Dispatch((int)state);
+                            button.interactable = true;
+                        })
                         .SetLink(button.gameObject);
-                }).AddTo(token);
+                })
+                .AddTo(cancellationToken);
         }
 
         private void SetupRewardOkButton()

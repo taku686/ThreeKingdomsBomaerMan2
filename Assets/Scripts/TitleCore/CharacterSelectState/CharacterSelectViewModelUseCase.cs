@@ -24,12 +24,12 @@ namespace UI.Title
             this.characterSelectRepository = characterSelectRepository;
         }
 
-        public CharacterSelectView.ViewModel InAsTask()
+        public CharacterSelect.ViewModel InAsTask()
         {
             var availableAmount = userDataManager.GetAvailableCharacterAmount();
             var totalAmount = characterDataManager.GetAllCharacterAmount();
             var orderType = characterSelectRepository.GetOrderType();
-            return new CharacterSelectView.ViewModel
+            return new CharacterSelect.ViewModel
             (
                 availableAmount,
                 totalAmount,

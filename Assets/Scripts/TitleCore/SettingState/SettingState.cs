@@ -31,83 +31,83 @@ namespace UI.Title
 
             private void InitializeButton()
             {
-                Owner.settingView.BackToSignUpButton.onClick.RemoveAllListeners();
-                Owner.settingView.SettingCloseButton.onClick.RemoveAllListeners();
-                Owner.settingView.SignUpCloseButton.onClick.RemoveAllListeners();
-                Owner.settingView.SignInCloseButton.onClick.RemoveAllListeners();
-                Owner.settingView.AccountRegisterButton.onClick.RemoveAllListeners();
-                Owner.settingView.AlreadySignInButton.onClick.RemoveAllListeners();
-                Owner.settingView.SignInButton.onClick.RemoveAllListeners();
-                Owner.settingView.SignUpButton.onClick.RemoveAllListeners();
-                Owner.settingView.BackToSignUpButton.onClick.AddListener(OnClickBackToSignUpButton);
-                Owner.settingView.SettingCloseButton.onClick.AddListener(OnClickCloseSetting);
-                Owner.settingView.SignUpCloseButton.onClick.AddListener(OnClickCloseSignUp);
-                Owner.settingView.SignInCloseButton.onClick.AddListener(OnClickCloseSignIn);
-                Owner.settingView.AccountRegisterButton.onClick.AddListener(OnClickAccountButton);
-                Owner.settingView.AlreadySignInButton.onClick.AddListener(OnClickAlreadySignInButton);
-                Owner.settingView.SignInButton.onClick.AddListener(OnClickLogin);
-                Owner.settingView.SignUpButton.onClick.AddListener(OnClickSetEmail);
+                Owner.setting.BackToSignUpButton.onClick.RemoveAllListeners();
+                Owner.setting.SettingCloseButton.onClick.RemoveAllListeners();
+                Owner.setting.SignUpCloseButton.onClick.RemoveAllListeners();
+                Owner.setting.SignInCloseButton.onClick.RemoveAllListeners();
+                Owner.setting.AccountRegisterButton.onClick.RemoveAllListeners();
+                Owner.setting.AlreadySignInButton.onClick.RemoveAllListeners();
+                Owner.setting.SignInButton.onClick.RemoveAllListeners();
+                Owner.setting.SignUpButton.onClick.RemoveAllListeners();
+                Owner.setting.BackToSignUpButton.onClick.AddListener(OnClickBackToSignUpButton);
+                Owner.setting.SettingCloseButton.onClick.AddListener(OnClickCloseSetting);
+                Owner.setting.SignUpCloseButton.onClick.AddListener(OnClickCloseSignUp);
+                Owner.setting.SignInCloseButton.onClick.AddListener(OnClickCloseSignIn);
+                Owner.setting.AccountRegisterButton.onClick.AddListener(OnClickAccountButton);
+                Owner.setting.AlreadySignInButton.onClick.AddListener(OnClickAlreadySignInButton);
+                Owner.setting.SignInButton.onClick.AddListener(OnClickLogin);
+                Owner.setting.SignUpButton.onClick.AddListener(OnClickSetEmail);
             }
 
             private void InitializeObject()
             {
-                Owner.settingView.SignUpGameObject.SetActive(false);
-                Owner.settingView.SignInGameObject.SetActive(false);
+                Owner.setting.SignUpGameObject.SetActive(false);
+                Owner.setting.SignInGameObject.SetActive(false);
             }
 
             private void OnClickCloseSetting()
             {
-                Owner.uiAnimation.ClickScaleColor(Owner.settingView.SettingCloseButton.gameObject)
+                Owner.uiAnimation.ClickScaleColor(Owner.setting.SettingCloseButton.gameObject)
                     .OnComplete(() => { Owner.stateMachine.Dispatch((int)State.Main); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickCloseSignUp()
             {
-                Owner.uiAnimation.ClickScaleColor(Owner.settingView.SignUpCloseButton.gameObject)
-                    .OnComplete(() => { Owner.settingView.SignUpGameObject.SetActive(false); })
+                Owner.uiAnimation.ClickScaleColor(Owner.setting.SignUpCloseButton.gameObject)
+                    .OnComplete(() => { Owner.setting.SignUpGameObject.SetActive(false); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickCloseSignIn()
             {
-                Owner.uiAnimation.ClickScaleColor(Owner.settingView.SignInCloseButton.gameObject)
-                    .OnComplete(() => { Owner.settingView.SignInGameObject.SetActive(false); })
+                Owner.uiAnimation.ClickScaleColor(Owner.setting.SignInCloseButton.gameObject)
+                    .OnComplete(() => { Owner.setting.SignInGameObject.SetActive(false); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickBackToSignUpButton()
             {
-                Owner.uiAnimation.ClickScaleColor(Owner.settingView.BackToSignUpButton.gameObject)
+                Owner.uiAnimation.ClickScaleColor(Owner.setting.BackToSignUpButton.gameObject)
                     .OnComplete(() =>
                     {
-                        Owner.settingView.SignInGameObject.SetActive(false);
-                        Owner.settingView.SignUpGameObject.SetActive(true);
+                        Owner.setting.SignInGameObject.SetActive(false);
+                        Owner.setting.SignUpGameObject.SetActive(true);
                     })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickAccountButton()
             {
-                Owner.uiAnimation.ClickScaleColor(Owner.settingView.AccountRegisterButton.gameObject)
-                    .OnComplete(() => { Owner.settingView.SignUpGameObject.SetActive(true); })
+                Owner.uiAnimation.ClickScaleColor(Owner.setting.AccountRegisterButton.gameObject)
+                    .OnComplete(() => { Owner.setting.SignUpGameObject.SetActive(true); })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickAlreadySignInButton()
             {
-                Owner.uiAnimation.ClickScaleColor(Owner.settingView.AlreadySignInButton.gameObject)
+                Owner.uiAnimation.ClickScaleColor(Owner.setting.AlreadySignInButton.gameObject)
                     .OnComplete(() =>
                     {
-                        Owner.settingView.SignInGameObject.SetActive(true);
-                        Owner.settingView.SignUpGameObject.SetActive(false);
+                        Owner.setting.SignInGameObject.SetActive(true);
+                        Owner.setting.SignUpGameObject.SetActive(false);
                     })
                     .SetLink(Owner.gameObject);
             }
 
             private void OnClickSetEmail()
             {
-                Owner.uiAnimation.ClickScaleColor(Owner.settingView.SignUpButton.gameObject)
+                Owner.uiAnimation.ClickScaleColor(Owner.setting.SignUpButton.gameObject)
                     .OnComplete(async () =>
                     {
                         await SetEmailAndPasswordAsync().AttachExternalCancellation(Owner.token);
@@ -117,7 +117,7 @@ namespace UI.Title
 
             private void OnClickLogin()
             {
-                Owner.uiAnimation.ClickScaleColor(Owner.settingView.SignInButton.gameObject)
+                Owner.uiAnimation.ClickScaleColor(Owner.setting.SignInButton.gameObject)
                     .OnComplete(async () =>
                     {
                         await LoginEmailAndPasswordAsync().AttachExternalCancellation(Owner.token);
@@ -131,8 +131,8 @@ namespace UI.Title
                 var request = new AddUsernamePasswordRequest
                 {
                     Username = customID,
-                    Email = Owner.settingView.SignInUserNameInputField.text,
-                    Password = Owner.settingView.SignInPasswordInputField.text
+                    Email = Owner.setting.SignInUserNameInputField.text,
+                    Password = Owner.setting.SignInPasswordInputField.text
                 };
 
                 var response = await PlayFabClientAPI.AddUsernamePasswordAsync(request);
@@ -164,8 +164,8 @@ namespace UI.Title
             {
                 var request = new LoginWithEmailAddressRequest
                 {
-                    Email = Owner.settingView.SignUpEmailInputField.text,
-                    Password = Owner.settingView.SignUpPasswordInputField.text,
+                    Email = Owner.setting.SignUpEmailInputField.text,
+                    Password = Owner.setting.SignUpPasswordInputField.text,
                     InfoRequestParameters = new GetPlayerCombinedInfoRequestParams
                     {
                         GetUserAccountInfo = true,

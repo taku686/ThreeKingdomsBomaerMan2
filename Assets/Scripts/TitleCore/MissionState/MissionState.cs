@@ -25,8 +25,8 @@ namespace UI.Title
             private UserDataManager userDataManager;
             private CatalogDataManager catalogDataManager;
             private PlayFabShopManager playFabShopManager;
-            private MainView mainView;
-            private MissionView missionView;
+            private Main main;
+            private Mission mission;
             private CommonView commonView;
             private UIAnimation uiAnimation;
             private Sprite coinSprite;
@@ -51,11 +51,11 @@ namespace UI.Title
                 userDataManager = Owner.userDataManager;
                 catalogDataManager = Owner.catalogDataManager;
                 playFabShopManager = Owner.playFabShopManager;
-                mainView = Owner.mainView;
-                missionView = Owner.missionView;
+                main = Owner.main;
+                mission = Owner.mission;
                 commonView = Owner.commonView;
                 uiAnimation = Owner.uiAnimation;
-                token = missionView.GetCancellationTokenOnDestroy();
+                token = mission.GetCancellationTokenOnDestroy();
                 await GenerateMissionGrid();
                 InitializeButton();
                 Owner.SwitchUiObject(State.Mission, true);
@@ -63,8 +63,8 @@ namespace UI.Title
 
             private void InitializeButton()
             {
-                missionView.backButton.onClick.RemoveAllListeners();
-                missionView.backButton.OnClickAsObservable()
+                mission.backButton.onClick.RemoveAllListeners();
+                mission.backButton.OnClickAsObservable()
                     .Take(1)
                     .SelectMany(_ => OnClickBack().ToObservable())
                     .Subscribe()
@@ -83,7 +83,7 @@ namespace UI.Title
                 {
                     var missionData = missionDataManager.GetMissionData(data.Key);
                     var rewardData = catalogDataManager.GetAddVirtualCurrencyItemData(missionData.rewardId);
-                    var missionGrid = Instantiate(missionView.missionGrid, missionView.gridParent);
+                    var missionGrid = Instantiate(mission.missionGrid, mission.gridParent);
                     var progressValue =
                         (int)(data.Value / (float)missionData.count * GameCommonData.MaxMissionProgress);
                     progressValue = progressValue >= GameCommonData.MaxMissionProgress
@@ -142,7 +142,7 @@ namespace UI.Title
             private async UniTask OnClickBack()
             {
                 Owner.stateMachine.Dispatch((int)State.Main);
-                var button = missionView.backButton.gameObject;
+                var button = mission.backButton.gameObject;
                 await Owner.uiAnimation.ClickScaleColor(button).ToUniTask(cancellationToken: token);
             }
 

@@ -19,7 +19,7 @@ namespace UI.Title
         public class CharacterDetailState : StateMachine<TitleCore>.State
         {
             private const int DefaultPage = 1;
-            private CharacterDetailView View => Owner.characterDetailView;
+            private CharacterDetail View => Owner.characterDetail;
             private CommonView CommonView => Owner.commonView;
             private CharacterSelectRepository CharacterSelectRepository => Owner.characterSelectRepository;
             private CharacterDataManager characterDataManager;
@@ -89,23 +89,23 @@ namespace UI.Title
 
             private void InitializeButton()
             {
-                Owner.characterDetailView.BackButton.onClick.RemoveAllListeners();
-                Owner.characterDetailView.SelectButton.onClick.RemoveAllListeners();
+                Owner.characterDetail.BackButton.onClick.RemoveAllListeners();
+                Owner.characterDetail.SelectButton.onClick.RemoveAllListeners();
                 View.QuestionView.sendButton.onClick.RemoveAllListeners();
                 View.QuestionView.closeButton.onClick.RemoveAllListeners();
                 CommonView.errorView.okButton.onClick.RemoveAllListeners();
-                Owner.characterDetailView.BackButton.onClick.AddListener(OnClickBackButton);
-                Owner.characterDetailView.SelectButton.onClick.AddListener(OnClickDecideButton);
+                Owner.characterDetail.BackButton.onClick.AddListener(OnClickBackButton);
+                Owner.characterDetail.SelectButton.onClick.AddListener(OnClickDecideButton);
                 View.PurchaseErrorView.okButton.onClick.AddListener(OnClickClosePurchaseErrorView);
                 View.QuestionView.sendButton.onClick.AddListener(OnClickSendQuestion);
                 View.QuestionView.closeButton.onClick.AddListener(OnClickCloseComment);
                 CommonView.errorView.okButton.onClick.AddListener(OnClickCloseErrorView);
 
-                Owner.characterDetailView.LeftArrowButton.OnClickAsObservable()
+                Owner.characterDetail.LeftArrowButton.OnClickAsObservable()
                     .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
                     .Subscribe(_ => OnClickLeftArrow()).AddTo(cts.Token);
 
-                Owner.characterDetailView.RightArrowButton.OnClickAsObservable()
+                Owner.characterDetail.RightArrowButton.OnClickAsObservable()
                     .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
                     .Subscribe(_ => OnClickRightArrow()).AddTo(cts.Token);
 
