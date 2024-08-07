@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 using Manager.DataManager;
 using Manager.NetworkManager;
 using UI.Title;
+using UnityEngine;
 using Zenject;
 using Random = UnityEngine.Random;
 
@@ -104,11 +105,13 @@ namespace Common.Data
         {
             if (!userData.CharacterLevels.ContainsKey(characterId))
             {
+                Debug.LogError("characterId is not found.");
                 return false;
             }
 
             if (userData.CharacterLevels[characterId] >= level)
             {
+                Debug.LogError("level is not enough.");
                 return false;
             }
 

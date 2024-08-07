@@ -155,7 +155,7 @@ namespace Manager.NetworkManager
             if (result.Error != null)
             {
                 purchaseErrorView.errorInfoText.text = result.Error.ErrorMessage;
-                Debug.Log(result.Error.GenerateErrorReport());
+                Debug.LogError(result.Error.GenerateErrorReport());
                 return false;
             }
 

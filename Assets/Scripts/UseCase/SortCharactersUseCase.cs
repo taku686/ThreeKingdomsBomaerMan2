@@ -22,42 +22,37 @@ namespace UseCase
         public IReadOnlyCollection<CharacterData> InAsTask(CharacterSelectRepository.OrderType orderType)
         {
             var result = new List<CharacterData>();
-            var characterDataArray = userDataManager.GetAvailableCharacters().ToArray();
+            var characterDatum = userDataManager.GetAvailableCharacters();
             if (orderType == CharacterSelectRepository.OrderType.Id)
             {
-                return characterDataArray.OrderBy(data => data.Id).ToArray();
+                return characterDatum.OrderBy(data => data.Id).ToArray();
             }
 
-            foreach (var characterData in characterDataArray)
+            foreach (var characterData in characterDatum)
             {
                 var level = userDataManager.GetCurrentLevelData(characterData.Id);
-                switch (orderType)
+                var hp = Mathf.RoundToInt(level.StatusRate * characterData.Hp);
+                var attack = Mathf.RoundToInt(level.StatusRate * characterData.Attack);
+                var speed = Mathf.RoundToInt(level.StatusRate * characterData.Speed);
+                var bomb = Mathf.RoundToInt(level.StatusRate * characterData.BombLimit);
+                var fire = Mathf.RoundToInt(level.StatusRate * characterData.FireRange);
+                var newCharacterData = new CharacterData()
                 {
-                    case CharacterSelectRepository.OrderType.Level:
-                        characterData.Level = level.Level;
-                        break;
-                    case CharacterSelectRepository.OrderType.Hp:
-                        characterData.Hp = Mathf.FloorToInt(level.StatusRate * characterData.Hp);
-                        break;
-                    case CharacterSelectRepository.OrderType.Attack:
-                        characterData.Attack = Mathf.FloorToInt(level.StatusRate * characterData.Attack);
-                        break;
-                    case CharacterSelectRepository.OrderType.Speed:
-                        characterData.Speed = Mathf.FloorToInt(level.StatusRate * characterData.Speed);
-                        break;
-                    case CharacterSelectRepository.OrderType.Bomb:
-                        characterData.BombLimit = Mathf.FloorToInt(level.StatusRate * characterData.BombLimit);
-                        break;
-                    case CharacterSelectRepository.OrderType.Fire:
-                        characterData.FireRange = Mathf.FloorToInt(level.StatusRate * characterData.FireRange);
-                        break;
-                    case CharacterSelectRepository.OrderType.Type:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(orderType), orderType, null);
-                }
-
-                result.Add(characterData);
+                    Id = characterData.Id,
+                    Level = level.Level,
+                    Hp = hp,
+                    Attack = attack,
+                    Speed = speed,
+                    BombLimit = bomb,
+                    FireRange = fire,
+                    Name = characterData.Name,
+                    SelfPortraitSprite = characterData.SelfPortraitSprite,
+                    ColorSprite = characterData.ColorSprite,
+                    SkillOneSprite = characterData.SkillOneSprite,
+                    SkillTwoSprite = characterData.SkillTwoSprite,
+                    WeaponEffectObj = characterData.WeaponEffectObj
+                };
+                result.Add(newCharacterData);
             }
 
             return result

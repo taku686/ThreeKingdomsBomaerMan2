@@ -34,7 +34,7 @@ namespace UI.Title
 
             private CancellationTokenSource cts;
             private bool canQuestion;
-            private int orderIndex;
+            private int candidateIndex;
             private bool isProcessing;
             private CharacterData[] orderCharacters;
 
@@ -74,12 +74,12 @@ namespace UI.Title
                 var selectedCharacterId = characterSelectRepository.GetSelectedCharacterId();
                 var orderType = characterSelectRepository.GetOrderType();
                 orderCharacters = SortCharactersUseCase.InAsTask(orderType).ToArray();
-                orderIndex = Array.FindIndex(orderCharacters, x => x.Id == selectedCharacterId);
+                candidateIndex = Array.FindIndex(orderCharacters, x => x.Id == selectedCharacterId);
             }
 
             private void SetupUIContent()
             {
-                var candidateCharacterId = orderCharacters[orderIndex].Id;
+                var candidateCharacterId = orderCharacters[candidateIndex].Id;
                 var characterData = characterDataManager.GetCharacterData(candidateCharacterId);
                 var currentLevelData = userDataManager.GetCurrentLevelData(candidateCharacterId);
                 var nextLevelData = userDataManager.GetNextLevelData(candidateCharacterId);
@@ -95,7 +95,7 @@ namespace UI.Title
                 View.QuestionView.closeButton.onClick.RemoveAllListeners();
                 CommonView.errorView.okButton.onClick.RemoveAllListeners();
                 Owner.characterDetailView.BackButton.onClick.AddListener(OnClickBackButton);
-                Owner.characterDetailView.SelectButton.onClick.AddListener(OnClickSelectButton);
+                Owner.characterDetailView.SelectButton.onClick.AddListener(OnClickDecideButton);
                 View.PurchaseErrorView.okButton.onClick.AddListener(OnClickClosePurchaseErrorView);
                 View.QuestionView.sendButton.onClick.AddListener(OnClickSendQuestion);
                 View.QuestionView.closeButton.onClick.AddListener(OnClickCloseComment);
@@ -151,13 +151,13 @@ namespace UI.Title
                         return;
                     }
 
-                    orderIndex++;
-                    if (orderIndex >= orderCharacters.Length)
+                    candidateIndex++;
+                    if (candidateIndex >= orderCharacters.Length)
                     {
-                        orderIndex = 0;
+                        candidateIndex = 0;
                     }
 
-                    var candidateCharacter = orderCharacters[orderIndex];
+                    var candidateCharacter = orderCharacters[candidateIndex];
                     CreateCharacter(candidateCharacter);
                     SetupUIContent();
                     InitializeAnimation();
@@ -177,13 +177,13 @@ namespace UI.Title
                         return;
                     }
 
-                    orderIndex--;
-                    if (orderIndex < 0)
+                    candidateIndex--;
+                    if (candidateIndex < 0)
                     {
-                        orderIndex = orderCharacters.Length - 1;
+                        candidateIndex = orderCharacters.Length - 1;
                     }
 
-                    var candidateCharacter = orderCharacters[orderIndex];
+                    var candidateCharacter = orderCharacters[candidateIndex];
                     CreateCharacter(candidateCharacter);
                     SetupUIContent();
                     InitializeAnimation();
@@ -191,13 +191,13 @@ namespace UI.Title
                 }).SetLink(button.gameObject);
             }
 
-            private void OnClickSelectButton()
+            private void OnClickDecideButton()
             {
                 var button = View.SelectButton.gameObject;
                 Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     var userData = userDataManager.GetUserData();
-                    userData.EquippedCharacterId = orderCharacters[orderIndex].Id;
+                    userData.EquippedCharacterId = orderCharacters[candidateIndex].Id;
                     var result = await playFabUserDataManager.TryUpdateUserDataAsync(userData);
                     if (result)
                     {
@@ -215,7 +215,7 @@ namespace UI.Title
 
                 isProcessing = true;
                 View.UpgradeButton.interactable = false;
-                var characterData = userDataManager.GetEquippedCharacterData();
+                var selectedCharacterData = orderCharacters[candidateIndex];
                 var button = View.UpgradeButton.gameObject;
                 Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
@@ -228,11 +228,12 @@ namespace UI.Title
                     }
 
 
-                    var nextLevelData = userDataManager.GetNextLevelData(characterData.Id);
+                    var nextLevelData = userDataManager.GetNextLevelData(selectedCharacterData.Id);
                     var virtualCurrencyAddView = View.VirtualCurrencyAddPopup;
                     var purchaseErrorView = View.PurchaseErrorView;
                     if (coin < nextLevelData.NeedCoin)
                     {
+                        Debug.LogError("コイン足りない");
                         View.UpgradeButton.interactable = true;
                         virtualCurrencyAddView.transform.localScale = Vector3.zero;
                         virtualCurrencyAddView.gameObject.SetActive(true);
@@ -242,10 +243,11 @@ namespace UI.Title
                     }
 
                     var result = await playFabShopManager.TryPurchaseLevelUpItem(nextLevelData.Level,
-                        GameCommonData.CoinKey, nextLevelData.NeedCoin, characterData.Id, purchaseErrorView);
+                        GameCommonData.CoinKey, nextLevelData.NeedCoin, selectedCharacterData.Id, purchaseErrorView);
 
                     if (!result)
                     {
+                        Debug.LogError("購入処理エラー");
                         purchaseErrorView.transform.localScale = Vector3.zero;
                         purchaseErrorView.gameObject.SetActive(true);
                         View.UpgradeButton.interactable = true;
@@ -261,7 +263,7 @@ namespace UI.Title
                     SetupUIContent();
                     if (nextLevelData.Level == GameCommonData.MaxCharacterLevel)
                     {
-                        CreateCharacter(characterData);
+                        CreateCharacter(selectedCharacterData);
                     }
 
                     isProcessing = false;
