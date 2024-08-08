@@ -16,9 +16,9 @@ namespace Common.Data
     {
         private UserData userData;
         private CancellationTokenSource cancellationTokenSource;
-        [Inject] private CharacterDataManager characterDataManager;
-        [Inject] private CharacterLevelDataManager characterLevelDataManager;
-        [Inject] private MissionDataManager missionDataManager;
+        [Inject] private CharacterDataRepository characterDataRepository;
+        [Inject] private CharacterLevelDataRepository characterLevelDataRepository;
+        [Inject] private MissionDataRepository missionDataRepository;
         [Inject] private PlayFabUserDataManager playFabUserDataManager;
 
         public async UniTask Initialize(UserData data)
@@ -81,24 +81,24 @@ namespace Common.Data
 
         public CharacterData GetEquippedCharacterData()
         {
-            return characterDataManager.GetCharacterData(userData.EquippedCharacterId);
+            return characterDataRepository.GetCharacterData(userData.EquippedCharacterId);
         }
         
         public int GetEquippedCharacterId()
         {
-            return characterDataManager.GetCharacterData(userData.EquippedCharacterId).Id;
+            return characterDataRepository.GetCharacterData(userData.EquippedCharacterId).Id;
         }
 
         public CharacterLevelData GetCurrentLevelData(int characterId)
         {
             var level = userData.CharacterLevels[characterId];
-            return characterLevelDataManager.GetCharacterLevelData(level);
+            return characterLevelDataRepository.GetCharacterLevelData(level);
         }
 
         public CharacterLevelData GetNextLevelData(int characterId)
         {
             var level = userData.CharacterLevels[characterId] + 1;
-            return characterLevelDataManager.GetCharacterLevelData(level);
+            return characterLevelDataRepository.GetCharacterLevelData(level);
         }
 
         public bool UpgradeCharacterLevel(int characterId, int level)
@@ -166,7 +166,7 @@ namespace Common.Data
                 return;
             }
 
-            var missionDatum = missionDataManager.MissionDatum;
+            var missionDatum = missionDataRepository.MissionDatum;
             while (userData.MissionProgressDatum.Count < GameCommonData.MaxMissionCount)
             {
                 var index = Random.Range(0, missionDatum.Count);
@@ -212,13 +212,13 @@ namespace Common.Data
         public IReadOnlyCollection<CharacterData> GetAvailableCharacters()
         {
             return userData.Characters
-                .Select(characterDataManager.GetCharacterData)
+                .Select(characterDataRepository.GetCharacterData)
                 .ToArray();
         }
 
         public IReadOnlyCollection<CharacterData> GetNotAvailableCharacters()
         {
-            return characterDataManager.GetAllCharacterData()
+            return characterDataRepository.GetAllCharacterData()
                 .Where(data => !userData.Characters.Contains(data.Id))
                 .ToList();
         }
@@ -243,8 +243,8 @@ namespace Common.Data
             userData?.Dispose();
             cancellationTokenSource.Cancel();
             cancellationTokenSource?.Dispose();
-            characterDataManager?.Dispose();
-            characterLevelDataManager?.Dispose();
+            characterDataRepository?.Dispose();
+            characterLevelDataRepository?.Dispose();
             playFabUserDataManager?.Dispose();
         }
     }

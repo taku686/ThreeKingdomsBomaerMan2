@@ -14,9 +14,8 @@ namespace Assets.Scripts.Common.ResourceManager
 {
     public class PlayFabCatalogManager : IDisposable
     {
-        [Inject] private readonly CatalogDataManager _catalogDataManager;
-        private readonly CancellationTokenSource _cancellationTokenSource = new();
-        private CancellationTokenSource _cts;
+        [Inject] private readonly CatalogDataManager catalogDataManager;
+        private readonly CancellationTokenSource cancellationTokenSource = new();
         private static readonly int ModifiedValue = 10;
 
         public async UniTask Initialize()
@@ -51,7 +50,7 @@ namespace Assets.Scripts.Common.ResourceManager
             }
 
             var catalogItemList = response.Result.Catalog;
-            _catalogDataManager.SetCatalogItemList(catalogItemList);
+            catalogDataManager.SetCatalogItemList(catalogItemList);
             return catalogItemList;
         }
 
@@ -77,7 +76,7 @@ namespace Assets.Scripts.Common.ResourceManager
                 Hp = customData.Hp,
                 CharaColor = customData.CharaColor
             };
-            _catalogDataManager.SetCharacter(customData.Id, characterData);
+            catalogDataManager.SetCharacter(customData.Id, characterData);
         }
 
         private void SetAddVirtualCurrencyItemData(CatalogItem item)
@@ -99,7 +98,7 @@ namespace Assets.Scripts.Common.ResourceManager
                 price = customData.price,
                 Name = item.ItemId
             };
-            _catalogDataManager.SetAddVirtualCurrencyData(addVirtualCurrencyItemData);
+            catalogDataManager.SetAddVirtualCurrencyData(addVirtualCurrencyItemData);
         }
 
         private void SetLoginBonusItemData(CatalogItem item)
@@ -121,14 +120,14 @@ namespace Assets.Scripts.Common.ResourceManager
                 price = customData.price,
                 Name = item.ItemId
             };
-            _catalogDataManager.SetLoginBonusItemData(addVirtualCurrencyItemData);
+            catalogDataManager.SetLoginBonusItemData(addVirtualCurrencyItemData);
         }
 
         public void Dispose()
         {
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource.Dispose();
-            _catalogDataManager.Dispose();
+            cancellationTokenSource.Cancel();
+            cancellationTokenSource.Dispose();
+            catalogDataManager.Dispose();
         }
     }
 }

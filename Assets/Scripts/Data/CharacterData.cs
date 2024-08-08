@@ -5,18 +5,18 @@ namespace Common.Data
 {
     public class CharacterData : IDisposable
     {
-        private string _charaObj;
+        private string charaObj;
         public GameObject CharacterObject;
-        private int _team;
-        private int _level;
-        private string _name;
-        private int _id;
-        private int _speed;
-        private int _bombLimit;
-        private int _attack;
-        private int _fireRange;
-        private int _hp;
-        private string _charaColor;
+        private int team;
+        private int level;
+        private string name;
+        private int id;
+        private int speed;
+        private int bombLimit;
+        private int attack;
+        private int fireRange;
+        private int hp;
+        private string charaColor;
         public string Character;
         public int SkillOneId;
         public int SkillTwoId;
@@ -29,69 +29,69 @@ namespace Common.Data
 
         public string CharaObj
         {
-            get => _charaObj;
-            set => _charaObj = value;
+            get => charaObj;
+            set => charaObj = value;
         }
 
         public int Team
         {
-            get => _team;
-            set => _team = value;
+            get => team;
+            set => team = value;
         }
 
         public int Level
         {
-            get => _level;
-            set => _level = value;
+            get => level;
+            set => level = value;
         }
 
         public string Name
         {
-            get => _name;
-            set => _name = value;
+            get => name;
+            set => name = value;
         }
 
         public int Id
         {
-            get => _id;
-            set => _id = value;
+            get => id;
+            set => id = value;
         }
 
         public int Speed
         {
-            get => _speed;
-            set => _speed = value;
+            get => speed;
+            set => speed = value;
         }
 
         public int BombLimit
         {
-            get => _bombLimit;
-            set => _bombLimit = value;
+            get => bombLimit;
+            set => bombLimit = value;
         }
 
         public int Attack
         {
-            get => _attack;
-            set => _attack = value;
+            get => attack;
+            set => attack = value;
         }
 
         public int FireRange
         {
-            get => _fireRange;
-            set => _fireRange = value;
+            get => fireRange;
+            set => fireRange = value;
         }
 
         public int Hp
         {
-            get => _hp;
-            set => _hp = value;
+            get => hp;
+            set => hp = value;
         }
 
 
         public string CharaColor
         {
-            get => _charaColor;
-            set => _charaColor = value;
+            get => charaColor;
+            set => charaColor = value;
         }
 
         public void Dispose()

@@ -20,7 +20,7 @@ namespace Assets.Scripts.Common.PlayFab
         private const int OneDay = 1;
         private const int TimeDifference = 9;
         [Inject] private UserDataManager _userDataManager;
-        [Inject] private CharacterDataManager _characterDataManager;
+        [Inject] private CharacterDataRepository characterDataRepository;
         [Inject] private PlayFabCatalogManager _playFabCatalogManager;
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private PlayFabShopManager _playFabShopManager;
@@ -110,7 +110,7 @@ namespace Assets.Scripts.Common.PlayFab
 
         public async UniTask<bool> CreateUserData()
         {
-            var characterData = _characterDataManager.GetCharacterData(DefaultCharacterIndex);
+            var characterData = characterDataRepository.GetCharacterData(DefaultCharacterIndex);
             var userData = new UserData().Create(characterData);
             var virtualCurrency = _loginResponse.Result.InfoResultPayload.UserVirtualCurrency;
             userData.Coin = virtualCurrency[GameCommonData.CoinKey];

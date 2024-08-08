@@ -12,15 +12,15 @@ namespace Manager.PlayFabManager
 {
     public class PlayFabTitleDataManager : IDisposable
     {
-        private const int ModifiedValue = 10;
-        [Inject] private CharacterDataManager _characterDataManager;
-        [Inject] private CharacterLevelDataManager _characterLevelDataManager;
-        [Inject] private MissionDataManager _missionDataManager;
-        private CancellationTokenSource _cancellationTokenSource;
+        private const int FixedValue = 10;
+        [Inject] private CharacterDataRepository characterDataRepository;
+        [Inject] private CharacterLevelDataRepository characterLevelDataRepository;
+        [Inject] private MissionDataRepository missionDataRepository;
+        private CancellationTokenSource cancellationTokenSource;
 
         public void Initialize()
         {
-            _cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource = new CancellationTokenSource();
         }
 
         public async UniTask SetTitleData(Dictionary<string, string> titleDatum)
@@ -44,20 +44,20 @@ namespace Manager.PlayFabManager
             foreach (var characterData in characterDatum)
             {
                 characterData.CharacterObject = await LoadGameObject(GameCommonData.CharacterPrefabPath,
-                    characterData.CharaObj, _cancellationTokenSource.Token);
+                    characterData.CharaObj, cancellationTokenSource.Token);
                 characterData.SelfPortraitSprite =
-                    await LoadCharacterSprite(characterData.Id, _cancellationTokenSource.Token);
+                    await LoadCharacterSprite(characterData.Id, cancellationTokenSource.Token);
                 characterData.ColorSprite =
-                    await LoadCharacterColor(characterData.CharaColor, _cancellationTokenSource.Token);
+                    await LoadCharacterColor(characterData.CharaColor, cancellationTokenSource.Token);
                 characterData.SkillOneSprite =
-                    await LoadSkillSprite(characterData.Id, characterData.SkillOneId, _cancellationTokenSource.Token);
+                    await LoadSkillSprite(characterData.Id, characterData.SkillOneId, cancellationTokenSource.Token);
                 characterData.SkillTwoSprite =
-                    await LoadSkillSprite(characterData.Id, characterData.SkillTwoId, _cancellationTokenSource.Token);
+                    await LoadSkillSprite(characterData.Id, characterData.SkillTwoId, cancellationTokenSource.Token);
                 characterData.WeaponEffectObj =
-                    await LoadWeaponEffect(characterData.WeaponEffectId, _cancellationTokenSource.Token);
-                characterData.BombLimit /= ModifiedValue;
-                characterData.FireRange /= ModifiedValue;
-                _characterDataManager.SetCharacterData(characterData);
+                    await LoadWeaponEffect(characterData.WeaponEffectId, cancellationTokenSource.Token);
+                characterData.BombLimit /= FixedValue;
+                characterData.FireRange /= FixedValue;
+                characterDataRepository.SetCharacterData(characterData);
             }
         }
 
@@ -65,7 +65,7 @@ namespace Manager.PlayFabManager
         {
             foreach (var characterLevelMasterData in characterLevelMasterDatum)
             {
-                _characterLevelDataManager.SetCharacterLevelData(characterLevelMasterData);
+                characterLevelDataRepository.SetCharacterLevelData(characterLevelMasterData);
             }
         }
 
@@ -73,7 +73,7 @@ namespace Manager.PlayFabManager
         {
             foreach (var missionData in missionDatum)
             {
-                _missionDataManager.AddMissionData(missionData);
+                missionDataRepository.AddMissionData(missionData);
             }
         }
 
@@ -121,8 +121,8 @@ namespace Manager.PlayFabManager
 
         public void Dispose()
         {
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource?.Dispose();
+            cancellationTokenSource.Cancel();
+            cancellationTokenSource?.Dispose();
         }
     }
 }

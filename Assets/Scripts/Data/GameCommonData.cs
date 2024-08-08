@@ -256,4 +256,35 @@ namespace Common.Data
         Received,
         Exception
     }
+
+    public enum WeaponType
+    {
+        Spear,
+        Hammer,
+        Sword,
+        Knife,
+        Fan,
+        Bow,
+        Shield,
+        Axe
+    }
+
+    public enum AttributeType
+    {
+        Fire = 0,
+        Water = 1,
+        Wind = 2,
+        Earth = 3,
+        Light = 4,
+        Dark = 5,
+        Poison = 6,
+        None = 100
+    }
+
+    public enum SkillType
+    {
+        Status,
+        Normal,
+        Special
+    }
 }

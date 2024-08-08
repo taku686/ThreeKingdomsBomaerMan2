@@ -13,8 +13,8 @@ using UI.Title.ShopState;
 using UnityEngine;
 using Zenject;
 using Manager.DataManager;
+using TitleCore.LoginBonusState;
 using UniRx;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 using UseCase;
 
@@ -23,9 +23,9 @@ namespace UI.Title
 {
     public partial class TitleCore : MonoBehaviourPunCallbacks
     {
-        [Inject] private CharacterDataManager characterDataManager;
+        [Inject] private CharacterDataRepository characterDataRepository;
         [Inject] private UserDataManager userDataManager;
-        [Inject] private MissionDataManager missionDataManager;
+        [Inject] private MissionDataRepository missionDataRepository;
         [Inject] private UIAnimation uiAnimation;
         [Inject] private PhotonNetworkManager photonNetworkManager;
         [Inject] private MainManager mainManager;
@@ -40,37 +40,21 @@ namespace UI.Title
         [Inject] private CharacterSelectViewModelUseCase characterSelectViewModelUseCase;
         [Inject] private CharacterSelectRepository characterSelectRepository;
         [Inject] private SortCharactersUseCase sortCharactersUseCase;
+
         [SerializeField] private Fade fade;
         [SerializeField] private Transform characterCreatePosition;
-
-        [FormerlySerializedAs("mainView")] [SerializeField]
-        private Main main;
-
-        [FormerlySerializedAs("characterSelectView")] [SerializeField]
-        private CharacterSelect characterSelect;
-
-        [FormerlySerializedAs("characterDetailView")] [SerializeField]
-        private CharacterDetail characterDetail;
-
-        [FormerlySerializedAs("battleReadyView")] [SerializeField]
-        private BattleReady battleReady;
-
-        [FormerlySerializedAs("loginView")] [SerializeField]
-        private Login login;
-
-        [FormerlySerializedAs("settingView")] [SerializeField]
-        private Setting setting;
-
-        [FormerlySerializedAs("shopView")] [SerializeField]
-        private Shop shop;
-
-        [FormerlySerializedAs("loginBonusView")] [SerializeField]
-        private LoginBonus loginBonus;
-
-        [FormerlySerializedAs("missionView")] [SerializeField]
-        private Mission mission;
-
+        [SerializeField] private MainView mainView;
+        [SerializeField] private CharacterSelectView characterSelectView;
+        [SerializeField] private CharacterDetailView characterDetailView;
+        [SerializeField] private BattleReadyView battleReadyView;
+        [SerializeField] private LoginView loginView;
+        [SerializeField] private SettingView settingView;
+        [SerializeField] private ShopView shopView;
+        [SerializeField] private LoginBonusView loginBonusView;
+        [SerializeField] private MissionView missionView;
         [SerializeField] private CommonView commonView;
+        [SerializeField] private InventoryView inventoryView;
+
         private GameObject equippedCharacter;
         private GameObject weaponEffect;
         private StateMachine<TitleCore> stateMachine;
@@ -91,6 +75,7 @@ namespace UI.Title
             LoginBonus,
             Mission,
             SelectBattleMode,
+            Inventory
         }
 
 
@@ -116,7 +101,7 @@ namespace UI.Title
         {
             cts = new CancellationTokenSource();
             fade.InitializeInSceneTransition(1, ProjectCommonData.Instance.isSceneTransition);
-            main.SetBackgroundEffect(false);
+            mainView.SetBackgroundEffect(false);
             commonView.Initialize();
             InitializeState();
             InitializeButton();
@@ -164,7 +149,7 @@ namespace UI.Title
             var preWeaponEffect = weaponEffect;
             Destroy(preCharacter);
             Destroy(preWeaponEffect);
-            var createCharacterData = characterDataManager.GetCharacterData(id);
+            var createCharacterData = characterDataRepository.GetCharacterData(id);
             if (createCharacterData.CharacterObject == null || createCharacterData.WeaponEffectObj == null)
             {
                 Debug.LogError(id);

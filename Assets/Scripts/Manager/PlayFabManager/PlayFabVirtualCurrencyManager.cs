@@ -12,7 +12,7 @@ namespace Manager.NetworkManager
     public class PlayFabVirtualCurrencyManager : IDisposable
     {
         [Inject] private UserDataManager _userDataManager;
-        [Inject] private CharacterDataManager _characterDataManager;
+        [Inject] private CharacterDataRepository characterDataRepository;
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
 
         public async UniTask SetVirtualCurrency()
@@ -138,7 +138,7 @@ namespace Manager.NetworkManager
                 if (item.ItemClass.Equals(GameCommonData.CharacterClassKey))
                 {
                     var index = int.Parse(item.ItemId);
-                    user.Characters.Add(_characterDataManager.GetCharacterData(index).Id);
+                    user.Characters.Add(characterDataRepository.GetCharacterData(index).Id);
                 }
             }
 

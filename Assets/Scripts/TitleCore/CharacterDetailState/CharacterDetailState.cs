@@ -19,10 +19,10 @@ namespace UI.Title
         public class CharacterDetailState : StateMachine<TitleCore>.State
         {
             private const int DefaultPage = 1;
-            private CharacterDetail View => Owner.characterDetail;
+            private CharacterDetailView View => Owner.characterDetailView;
             private CommonView CommonView => Owner.commonView;
             private CharacterSelectRepository CharacterSelectRepository => Owner.characterSelectRepository;
-            private CharacterDataManager characterDataManager;
+            private CharacterDataRepository characterDataRepository;
             private PlayFabUserDataManager playFabUserDataManager;
             private PlayFabShopManager playFabShopManager;
             private PlayFabVirtualCurrencyManager playFabVirtualCurrencyManager;
@@ -51,7 +51,7 @@ namespace UI.Title
             private async void Initialize()
             {
                 SetupCancellationToken();
-                characterDataManager = Owner.characterDataManager;
+                characterDataRepository = Owner.characterDataRepository;
                 playFabUserDataManager = Owner.playFabUserDataManager;
                 playFabShopManager = Owner.playFabShopManager;
                 playFabVirtualCurrencyManager = Owner.playFabVirtualCurrencyManager;
@@ -80,7 +80,7 @@ namespace UI.Title
             private void SetupUIContent()
             {
                 var candidateCharacterId = orderCharacters[candidateIndex].Id;
-                var characterData = characterDataManager.GetCharacterData(candidateCharacterId);
+                var characterData = characterDataRepository.GetCharacterData(candidateCharacterId);
                 var currentLevelData = userDataManager.GetCurrentLevelData(candidateCharacterId);
                 var nextLevelData = userDataManager.GetNextLevelData(candidateCharacterId);
                 View.ApplyViewModel(characterData, currentLevelData, nextLevelData);
@@ -89,23 +89,23 @@ namespace UI.Title
 
             private void InitializeButton()
             {
-                Owner.characterDetail.BackButton.onClick.RemoveAllListeners();
-                Owner.characterDetail.SelectButton.onClick.RemoveAllListeners();
+                Owner.characterDetailView.BackButton.onClick.RemoveAllListeners();
+                Owner.characterDetailView.SelectButton.onClick.RemoveAllListeners();
                 View.QuestionView.sendButton.onClick.RemoveAllListeners();
                 View.QuestionView.closeButton.onClick.RemoveAllListeners();
                 CommonView.errorView.okButton.onClick.RemoveAllListeners();
-                Owner.characterDetail.BackButton.onClick.AddListener(OnClickBackButton);
-                Owner.characterDetail.SelectButton.onClick.AddListener(OnClickDecideButton);
+                Owner.characterDetailView.BackButton.onClick.AddListener(OnClickBackButton);
+                Owner.characterDetailView.SelectButton.onClick.AddListener(OnClickDecideButton);
                 View.PurchaseErrorView.okButton.onClick.AddListener(OnClickClosePurchaseErrorView);
                 View.QuestionView.sendButton.onClick.AddListener(OnClickSendQuestion);
                 View.QuestionView.closeButton.onClick.AddListener(OnClickCloseComment);
                 CommonView.errorView.okButton.onClick.AddListener(OnClickCloseErrorView);
 
-                Owner.characterDetail.LeftArrowButton.OnClickAsObservable()
+                Owner.characterDetailView.LeftArrowButton.OnClickAsObservable()
                     .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
                     .Subscribe(_ => OnClickLeftArrow()).AddTo(cts.Token);
 
-                Owner.characterDetail.RightArrowButton.OnClickAsObservable()
+                Owner.characterDetailView.RightArrowButton.OnClickAsObservable()
                     .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
                     .Subscribe(_ => OnClickRightArrow()).AddTo(cts.Token);
 

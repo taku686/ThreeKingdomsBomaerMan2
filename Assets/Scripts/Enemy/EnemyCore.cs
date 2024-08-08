@@ -11,7 +11,7 @@ namespace Enemy
 {
     public partial class EnemyCore : MonoBehaviourPunCallbacks
     {
-        [Inject] private CharacterDataManager _characterDataManager;
+        [Inject] private CharacterDataRepository characterDataRepository;
         [SerializeField] private BombProvider bombProvider;
         [SerializeField] private MapManager mapManager;
         private BoxCollider _boxCollider;
@@ -88,7 +88,7 @@ namespace Enemy
 
         private void SetupCharacterStatusManager()
         {
-            var characterData = _characterDataManager.DebugGetCharacterData();
+            var characterData = characterDataRepository.DebugGetCharacterData();
             _characterStatusManager = new CharacterStatusManager(characterData, PhotonNetwork.IsMasterClient);
         }
 

@@ -21,12 +21,12 @@ namespace UI.Title
             private const string CanGet = "Get";
             private const string InProgress = "In Progress";
             private const string ProgressBarText = " <#b3bedb>/ 100";
-            private MissionDataManager missionDataManager;
+            private MissionDataRepository missionDataRepository;
             private UserDataManager userDataManager;
             private CatalogDataManager catalogDataManager;
             private PlayFabShopManager playFabShopManager;
-            private Main main;
-            private Mission mission;
+            private MainView mainView;
+            private MissionView missionView;
             private CommonView commonView;
             private UIAnimation uiAnimation;
             private Sprite coinSprite;
@@ -47,15 +47,15 @@ namespace UI.Title
 
             private async UniTask Initialize()
             {
-                missionDataManager = Owner.missionDataManager;
+                missionDataRepository = Owner.missionDataRepository;
                 userDataManager = Owner.userDataManager;
                 catalogDataManager = Owner.catalogDataManager;
                 playFabShopManager = Owner.playFabShopManager;
-                main = Owner.main;
-                mission = Owner.mission;
+                mainView = Owner.mainView;
+                missionView = Owner.missionView;
                 commonView = Owner.commonView;
                 uiAnimation = Owner.uiAnimation;
-                token = mission.GetCancellationTokenOnDestroy();
+                token = missionView.GetCancellationTokenOnDestroy();
                 await GenerateMissionGrid();
                 InitializeButton();
                 Owner.SwitchUiObject(State.Mission, true);
@@ -63,8 +63,8 @@ namespace UI.Title
 
             private void InitializeButton()
             {
-                mission.backButton.onClick.RemoveAllListeners();
-                mission.backButton.OnClickAsObservable()
+                missionView.backButton.onClick.RemoveAllListeners();
+                missionView.backButton.OnClickAsObservable()
                     .Take(1)
                     .SelectMany(_ => OnClickBack().ToObservable())
                     .Subscribe()
@@ -81,9 +81,9 @@ namespace UI.Title
                 var missionProgressDatum = userDataManager.GetMissionProgressDatum();
                 foreach (var data in missionProgressDatum)
                 {
-                    var missionData = missionDataManager.GetMissionData(data.Key);
+                    var missionData = missionDataRepository.GetMissionData(data.Key);
                     var rewardData = catalogDataManager.GetAddVirtualCurrencyItemData(missionData.rewardId);
-                    var missionGrid = Instantiate(mission.missionGrid, mission.gridParent);
+                    var missionGrid = Instantiate(missionView.missionGrid, missionView.gridParent);
                     var progressValue =
                         (int)(data.Value / (float)missionData.count * GameCommonData.MaxMissionProgress);
                     progressValue = progressValue >= GameCommonData.MaxMissionProgress
@@ -142,7 +142,7 @@ namespace UI.Title
             private async UniTask OnClickBack()
             {
                 Owner.stateMachine.Dispatch((int)State.Main);
-                var button = mission.backButton.gameObject;
+                var button = missionView.backButton.gameObject;
                 await Owner.uiAnimation.ClickScaleColor(button).ToUniTask(cancellationToken: token);
             }
 

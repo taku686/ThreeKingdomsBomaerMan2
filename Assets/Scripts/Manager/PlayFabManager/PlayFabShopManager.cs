@@ -27,7 +27,7 @@ namespace Manager.NetworkManager
         private CancellationTokenSource _cancellationTokenSource;
         [Inject] private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
-        [Inject] private CharacterDataManager _characterDataManager;
+        [Inject] private CharacterDataRepository characterDataRepository;
         [Inject] private UserDataManager _userDataManager;
         [Inject] private CatalogDataManager _catalogDataManager;
 
@@ -89,7 +89,7 @@ namespace Manager.NetworkManager
                 if (item.ItemClass.Equals(GameCommonData.CharacterClassKey))
                 {
                     var index = int.Parse(item.ItemId);
-                    var characterData = _characterDataManager.GetCharacterData(index);
+                    var characterData = characterDataRepository.GetCharacterData(index);
                     rewardView.rewardImage.sprite = characterData.SelfPortraitSprite;
                     await _userDataManager.AddCharacterData(index);
                 }

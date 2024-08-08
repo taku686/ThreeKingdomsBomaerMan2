@@ -14,9 +14,9 @@ namespace Manager.NetworkManager
 {
     public class PhotonNetworkManager : MonoBehaviourPunCallbacks
     {
-        [Inject] private CharacterDataManager characterDataManager;
+        [Inject] private CharacterDataRepository characterDataRepository;
         [Inject] private UserDataManager userDataManager;
-        [Inject] private CharacterLevelDataManager characterLevelDataManager;
+        [Inject] private CharacterLevelDataRepository characterLevelDataRepository;
         private readonly Subject<Photon.Realtime.Player[]> joinedRoomSubject = new();
         private readonly Subject<int> leftRoomSubject = new();
         private readonly Subject<Unit> playerGenerateCompleteSubject = new();
@@ -66,7 +66,7 @@ namespace Manager.NetworkManager
         public override void OnJoinedRoom()
         {
             var index = PhotonNetwork.LocalPlayer.ActorNumber;
-            var characterId = characterDataManager.GetUserEquippedCharacterData().Id;
+            var characterId = characterDataRepository.GetUserEquippedCharacterData().Id;
             var characterLevel = userDataManager.GetCurrentLevelData(characterId).Level;
             PhotonNetwork.LocalPlayer.SetCharacterData(characterId);
             PhotonNetwork.LocalPlayer.SetCharacterLevel(characterLevel);
@@ -107,9 +107,9 @@ namespace Manager.NetworkManager
             foreach (var player in players)
             {
                 currentRoomCharacterDatum[player.ActorNumber] =
-                    characterDataManager.GetCharacterData(player.GetCharacterId());
+                    characterDataRepository.GetCharacterData(player.GetCharacterId());
                 currentRoomCharacterLevelDatum[player.ActorNumber] =
-                    characterLevelDataManager.GetCharacterLevelData(player.GetCharacterLevel());
+                    characterLevelDataRepository.GetCharacterLevelData(player.GetCharacterLevel());
             }
 
             joinedRoomSubject.OnNext(players);

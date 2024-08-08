@@ -16,7 +16,7 @@ namespace UI.Title
     {
         public class CharacterSelectState : StateMachine<TitleCore>.State
         {
-            private CharacterSelect view;
+            private CharacterSelectView view;
             private CharacterSelectViewModelUseCase characterSelectViewModelUseCase;
             private CharacterSelectRepository characterSelectRepository;
             private PlayFabVirtualCurrencyManager playFabVirtualCurrencyManager;
@@ -39,7 +39,7 @@ namespace UI.Title
 
             private void Initialize()
             {
-                view = Owner.characterSelect;
+                view = Owner.characterSelectView;
                 playFabVirtualCurrencyManager = Owner.playFabVirtualCurrencyManager;
                 characterSelectViewModelUseCase = Owner.characterSelectViewModelUseCase;
                 characterSelectRepository = Owner.characterSelectRepository;
@@ -121,8 +121,8 @@ namespace UI.Title
                 {
                     if (index % 5 == 0)
                     {
-                        gridGroup = Instantiate(Owner.characterSelect.HorizontalGroupGameObject,
-                            Owner.characterSelect.ContentsTransform);
+                        gridGroup = Instantiate(Owner.characterSelectView.HorizontalGroupGameObject,
+                            Owner.characterSelectView.ContentsTransform);
                         gridGroupLists.Add(gridGroup);
                     }
 
@@ -138,8 +138,8 @@ namespace UI.Title
                 {
                     if (index % 5 == 0)
                     {
-                        gridGroup = Instantiate(Owner.characterSelect.HorizontalGroupGameObject,
-                            Owner.characterSelect.ContentsTransform);
+                        gridGroup = Instantiate(Owner.characterSelectView.HorizontalGroupGameObject,
+                            Owner.characterSelectView.ContentsTransform);
                         gridGroupLists.Add(gridGroup);
                     }
 
@@ -155,7 +155,7 @@ namespace UI.Title
             private void CreateActiveGrid(CharacterData fixedCharacterData, Transform parent,
                 CharacterSelectRepository.OrderType orderType)
             {
-                var grid = Instantiate(Owner.characterSelect.Grid, parent);
+                var grid = Instantiate(Owner.characterSelectView.Grid, parent);
                 var characterGrid = grid.GetComponentInChildren<CharacterGridView>();
                 characterGrid.ApplyStatusGridViews(orderType, fixedCharacterData);
                 characterGrid.gridButton.onClick.AddListener(() =>
@@ -166,7 +166,7 @@ namespace UI.Title
 
             private void CreateDisableGrid(CharacterData characterData, Transform parent)
             {
-                var disableGrid = Instantiate(Owner.characterSelect.GridDisable, parent)
+                var disableGrid = Instantiate(Owner.characterSelectView.GridDisable, parent)
                     .GetComponent<CharacterDisableGrid>();
                 disableGrid.characterImage.color = Color.black;
                 disableGrid.characterImage.sprite = characterData.SelfPortraitSprite;
@@ -193,7 +193,7 @@ namespace UI.Title
 
             private void OnClickBack()
             {
-                Owner.uiAnimation.ClickScaleColor(Owner.characterSelect.BackButton.gameObject).OnComplete(() =>
+                Owner.uiAnimation.ClickScaleColor(Owner.characterSelectView.BackButton.gameObject).OnComplete(() =>
                 {
                     Owner.stateMachine.Dispatch((int)State.Main);
                 }).SetLink(Owner.gameObject);
@@ -216,7 +216,7 @@ namespace UI.Title
 
                     if (gem < characterPrice)
                     {
-                        Owner.characterSelect.VirtualCurrencyAddPopup.gameObject.SetActive(true);
+                        Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject.SetActive(true);
                         disableGrid.interactable = true;
                         return;
                     }
@@ -248,24 +248,24 @@ namespace UI.Title
 
             private void OnClickClosePopup()
             {
-                var closeButton = Owner.characterSelect.VirtualCurrencyAddPopup.CloseButton.gameObject;
-                var popup = Owner.characterSelect.VirtualCurrencyAddPopup.gameObject;
+                var closeButton = Owner.characterSelectView.VirtualCurrencyAddPopup.CloseButton.gameObject;
+                var popup = Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject;
                 Owner.uiAnimation.ClickScaleColor(closeButton).OnComplete(() => { popup.SetActive(false); })
                     .SetLink(popup);
             }
 
             private void OnClickCancelPurchase()
             {
-                var cancelButton = Owner.characterSelect.VirtualCurrencyAddPopup.CancelButton.gameObject;
-                var popup = Owner.characterSelect.VirtualCurrencyAddPopup.gameObject;
+                var cancelButton = Owner.characterSelectView.VirtualCurrencyAddPopup.CancelButton.gameObject;
+                var popup = Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject;
                 Owner.uiAnimation.ClickScaleColor(cancelButton).OnComplete(() => { popup.SetActive(false); })
                     .SetLink(popup);
             }
 
             private void OnClickAddGem()
             {
-                var addButton = Owner.characterSelect.VirtualCurrencyAddPopup.AddButton.gameObject;
-                var popup = Owner.characterSelect.VirtualCurrencyAddPopup.gameObject;
+                var addButton = Owner.characterSelectView.VirtualCurrencyAddPopup.AddButton.gameObject;
+                var popup = Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject;
                 Owner.uiAnimation.ClickScaleColor(addButton)
                     .OnComplete(() => { Owner.stateMachine.Dispatch((int)State.Shop); }).SetLink(popup);
             }
