@@ -13,51 +13,81 @@ namespace Manager.PlayFabManager
     public class PlayFabTitleDataManager : IDisposable
     {
         private const int FixedValue = 10;
+        private const string CharacterMasterKey = "CharacterMaster";
+        private const string CharacterLevelMasterKey = "CharacterLevelMaster";
+        private const string MissionMasterKey = "MissionMaster";
+        private const string SkillMasterKey = "SkillMaster";
         [Inject] private CharacterDataRepository characterDataRepository;
         [Inject] private CharacterLevelDataRepository characterLevelDataRepository;
         [Inject] private MissionDataRepository missionDataRepository;
-        private CancellationTokenSource cancellationTokenSource;
+        [Inject] private SkillDataRepository skillDataRepository;
+        private CancellationTokenSource cts;
 
         public void Initialize()
         {
-            cancellationTokenSource = new CancellationTokenSource();
+            cts = new CancellationTokenSource();
         }
 
         public async UniTask SetTitleData(Dictionary<string, string> titleDatum)
         {
             var characterDatum =
-                JsonConvert.DeserializeObject<CharacterData[]>
-                    (titleDatum[GameCommonData.CharacterMasterKey]);
+                JsonConvert.DeserializeObject<CharacterData[]>(titleDatum[CharacterMasterKey]);
             var characterLevelDatum =
-                JsonConvert.DeserializeObject<CharacterLevelData[]>
-                    (titleDatum[GameCommonData.CharacterLevelMasterKey]);
+                JsonConvert.DeserializeObject<CharacterLevelData[]>(titleDatum[CharacterLevelMasterKey]);
             var missionDatum =
-                JsonConvert.DeserializeObject<MissionData[]>
-                    (titleDatum[GameCommonData.MissionMasterKey]);
+                JsonConvert.DeserializeObject<MissionData[]>(titleDatum[MissionMasterKey]);
+            var skillDatum =
+                JsonConvert.DeserializeObject<SkillData[]>(titleDatum[SkillMasterKey]);
             await SetCharacterData(characterDatum);
             SetCharacterLevelData(characterLevelDatum);
             SetMissionData(missionDatum);
+            await SetSkillData(skillDatum);
         }
 
         private async UniTask SetCharacterData(CharacterData[] characterDatum)
         {
             foreach (var characterData in characterDatum)
             {
-                characterData.CharacterObject = await LoadGameObject(GameCommonData.CharacterPrefabPath,
-                    characterData.CharaObj, cancellationTokenSource.Token);
+                characterData.CharacterObject =
+                    await LoadGameObject(GameCommonData.CharacterPrefabPath, characterData.CharaObj, cts.Token);
                 characterData.SelfPortraitSprite =
-                    await LoadCharacterSprite(characterData.Id, cancellationTokenSource.Token);
+                    await LoadCharacterSprite(characterData.Id, cts.Token);
                 characterData.ColorSprite =
-                    await LoadCharacterColor(characterData.CharaColor, cancellationTokenSource.Token);
+                    await LoadCharacterColor(characterData.CharaColor, cts.Token);
                 characterData.SkillOneSprite =
-                    await LoadSkillSprite(characterData.Id, characterData.SkillOneId, cancellationTokenSource.Token);
+                    await LoadSkillSprite(characterData.Id, characterData.SkillOneId, cts.Token);
                 characterData.SkillTwoSprite =
-                    await LoadSkillSprite(characterData.Id, characterData.SkillTwoId, cancellationTokenSource.Token);
+                    await LoadSkillSprite(characterData.Id, characterData.SkillTwoId, cts.Token);
                 characterData.WeaponEffectObj =
-                    await LoadWeaponEffect(characterData.WeaponEffectId, cancellationTokenSource.Token);
+                    await LoadWeaponEffect(characterData.WeaponEffectId, cts.Token);
                 characterData.BombLimit /= FixedValue;
                 characterData.FireRange /= FixedValue;
                 characterDataRepository.SetCharacterData(characterData);
+            }
+        }
+
+        private async UniTask SetSkillData(SkillData[] skillDatum)
+        {
+            foreach (var skillData in skillDatum)
+            {
+                var id = skillData.ID;
+                var explanation = skillData.Explanation;
+                var name = skillData.Name;
+                var icon = await LoadSkillSprite(skillData.IconID, cts.Token);
+                var skillType = skillData.SkillTypeInt;
+                var attributeType = skillData.AttributeTypeInt;
+                var newSkillData = new SkillData
+                (
+                    id,
+                    explanation,
+                    name,
+                    icon,
+                    skillType,
+                    null,
+                    attributeType
+                );
+
+                skillDataRepository.AddSkillData(newSkillData);
             }
         }
 
@@ -104,6 +134,14 @@ namespace Manager.PlayFabManager
             return (Sprite)response;
         }
 
+        private async UniTask<Sprite> LoadSkillSprite(int skillId, CancellationToken token)
+        {
+            var response = await Resources
+                .LoadAsync<Sprite>(GameCommonData.SkillSpritePath + skillId)
+                .WithCancellation(token);
+            return (Sprite)response;
+        }
+
         private async UniTask<Sprite> LoadCharacterColor(string charaColor, CancellationToken token)
         {
             var colorIndex = (int)GameCommonData.GetCharacterColor(charaColor);
@@ -121,8 +159,8 @@ namespace Manager.PlayFabManager
 
         public void Dispose()
         {
-            cancellationTokenSource.Cancel();
-            cancellationTokenSource?.Dispose();
+            cts.Cancel();
+            cts?.Dispose();
         }
     }
 }

@@ -18,6 +18,7 @@ namespace UI.Title
             private readonly Dictionary<int, GameObject> gridDictionary = new();
             private bool isInitialize;
             private CancellationTokenSource cts;
+            private BattleReadyView View => (BattleReadyView)Owner.GetView(State.BattleReady);
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -50,10 +51,10 @@ namespace UI.Title
 
             private void InitializeButton()
             {
-                Owner.battleReadyView.BackButton.onClick.RemoveAllListeners();
-                Owner.battleReadyView.BattleStartButton.onClick.RemoveAllListeners();
-                Owner.battleReadyView.BackButton.onClick.AddListener(OnClickBackButton);
-                Owner.battleReadyView.BattleStartButton.onClick.AddListener(OnClickSceneTransition);
+                View.BackButton.onClick.RemoveAllListeners();
+                View.BattleStartButton.onClick.RemoveAllListeners();
+                View.BackButton.onClick.AddListener(OnClickBackButton);
+                View.BattleStartButton.onClick.AddListener(OnClickSceneTransition);
             }
 
             private void InitializeSubscribe()
@@ -64,7 +65,7 @@ namespace UI.Title
 
             private void OnClickBackButton()
             {
-                Owner.uiAnimation.ClickScaleColor(Owner.battleReadyView.BackButton.gameObject).OnComplete(() =>
+                Owner.uiAnimation.ClickScaleColor(View.BackButton.gameObject).OnComplete(() =>
                 {
                     if (!PhotonNetwork.InRoom)
                     {
@@ -99,8 +100,7 @@ namespace UI.Title
             {
                 var characterData = Owner.photonNetworkManager.CurrentRoomCharacterDatum[index];
                 var levelData = Owner.photonNetworkManager.GetCharacterLevelData(index);
-                var grid = Instantiate(Owner.battleReadyView.BattleReadyGrid.gameObject,
-                    Owner.battleReadyView.GridParent);
+                var grid = Instantiate(View.BattleReadyGrid.gameObject, View.GridParent);
                 var battleReadyGrid = grid.GetComponent<BattleReadyGrid>();
                 gridDictionary[index] = grid;
                 battleReadyGrid.characterImage.sprite = characterData.SelfPortraitSprite;

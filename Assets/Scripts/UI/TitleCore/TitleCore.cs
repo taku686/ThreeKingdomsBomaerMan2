@@ -9,12 +9,11 @@ using Manager;
 using Manager.NetworkManager;
 using Photon.Pun;
 using UI.Common;
-using UI.Title.ShopState;
 using UnityEngine;
 using Zenject;
 using Manager.DataManager;
-using TitleCore.LoginBonusState;
 using UniRx;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using UseCase;
 
@@ -43,17 +42,7 @@ namespace UI.Title
 
         [SerializeField] private Fade fade;
         [SerializeField] private Transform characterCreatePosition;
-        [SerializeField] private MainView mainView;
-        [SerializeField] private CharacterSelectView characterSelectView;
-        [SerializeField] private CharacterDetailView characterDetailView;
-        [SerializeField] private BattleReadyView battleReadyView;
-        [SerializeField] private LoginView loginView;
-        [SerializeField] private SettingView settingView;
-        [SerializeField] private ShopView shopView;
-        [SerializeField] private LoginBonusView loginBonusView;
-        [SerializeField] private MissionView missionView;
         [SerializeField] private CommonView commonView;
-        [SerializeField] private InventoryView inventoryView;
 
         private GameObject equippedCharacter;
         private GameObject weaponEffect;
@@ -101,7 +90,8 @@ namespace UI.Title
         {
             cts = new CancellationTokenSource();
             fade.InitializeInSceneTransition(1, ProjectCommonData.Instance.isSceneTransition);
-            mainView.SetBackgroundEffect(false);
+            var view = (MainView)GetView(State.Main);
+            view.SetBackgroundEffect(false);
             commonView.Initialize();
             InitializeState();
             InitializeButton();
@@ -179,6 +169,19 @@ namespace UI.Title
                 effect.Color = GameCommonData.GetWeaponColor(id);
                 effect.UpdateMeshEffect(weapon);
             }
+        }
+
+        private ViewBase GetView(State state)
+        {
+            foreach (var view in views)
+            {
+                if (view.State == state)
+                {
+                    return view;
+                }
+            }
+
+            return null;
         }
 
         private async UniTask SwitchUiObject(State state, bool isViewVirtualCurrencyUi, Action action = null)

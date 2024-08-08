@@ -16,7 +16,7 @@ namespace UI.Title
     {
         public class CharacterSelectState : StateMachine<TitleCore>.State
         {
-            private CharacterSelectView view;
+            private CharacterSelectView View => (CharacterSelectView)Owner.GetView(State.CharacterSelect);
             private CharacterSelectViewModelUseCase characterSelectViewModelUseCase;
             private CharacterSelectRepository characterSelectRepository;
             private PlayFabVirtualCurrencyManager playFabVirtualCurrencyManager;
@@ -39,13 +39,12 @@ namespace UI.Title
 
             private void Initialize()
             {
-                view = Owner.characterSelectView;
                 playFabVirtualCurrencyManager = Owner.playFabVirtualCurrencyManager;
                 characterSelectViewModelUseCase = Owner.characterSelectViewModelUseCase;
                 characterSelectRepository = Owner.characterSelectRepository;
                 sortCharactersUseCase = Owner.sortCharactersUseCase;
 
-                view.InitializeUiPosition();
+                View.InitializeUiPosition();
                 SetupCancellationToken();
                 OnSubscribed();
                 Owner.SwitchUiObject(State.CharacterSelect, true).Forget();
@@ -69,21 +68,21 @@ namespace UI.Title
                     .Select(_ => characterSelectViewModelUseCase.InAsTask())
                     .Subscribe(viewModel =>
                     {
-                        view.ApplyViewModel(viewModel);
+                        View.ApplyViewModel(viewModel);
                         CreateUIContents(viewModel.OrderType);
                     })
                     .AddTo(cancellationTokenSource.Token);
 
-                view.ClickBackButton
+                View.ClickBackButton
                     .Subscribe(_ => OnClickBack())
                     .AddTo(cancellationTokenSource.Token);
-                view.VirtualCurrencyAddPopup.OnClickCancelButton
+                View.VirtualCurrencyAddPopup.OnClickCancelButton
                     .Subscribe(_ => OnClickCancelPurchase())
                     .AddTo(cancellationTokenSource.Token);
-                view.VirtualCurrencyAddPopup.OnClickCloseButton
+                View.VirtualCurrencyAddPopup.OnClickCloseButton
                     .Subscribe(_ => OnClickClosePopup())
                     .AddTo(cancellationTokenSource.Token);
-                view.VirtualCurrencyAddPopup.OnClickAddButton
+                View.VirtualCurrencyAddPopup.OnClickAddButton
                     .Subscribe(_ => OnClickAddGem())
                     .AddTo(cancellationTokenSource.Token);
 
@@ -92,12 +91,12 @@ namespace UI.Title
 
             private void SubscribeToggleView()
             {
-                foreach (var element in view.ToggleElements)
+                foreach (var element in View.ToggleElements)
                 {
                     element.ClickOffButtonObservable
                         .Subscribe(type =>
                         {
-                            view.ApplyToggleView(type);
+                            View.ApplyToggleView(type);
                             characterSelectRepository.SetOrderType(type);
                             CreateUIContents(type);
                         })
@@ -121,8 +120,8 @@ namespace UI.Title
                 {
                     if (index % 5 == 0)
                     {
-                        gridGroup = Instantiate(Owner.characterSelectView.HorizontalGroupGameObject,
-                            Owner.characterSelectView.ContentsTransform);
+                        gridGroup = Instantiate(View.HorizontalGroupGameObject,
+                            View.ContentsTransform);
                         gridGroupLists.Add(gridGroup);
                     }
 
@@ -138,8 +137,7 @@ namespace UI.Title
                 {
                     if (index % 5 == 0)
                     {
-                        gridGroup = Instantiate(Owner.characterSelectView.HorizontalGroupGameObject,
-                            Owner.characterSelectView.ContentsTransform);
+                        gridGroup = Instantiate(View.HorizontalGroupGameObject, View.ContentsTransform);
                         gridGroupLists.Add(gridGroup);
                     }
 
@@ -155,7 +153,7 @@ namespace UI.Title
             private void CreateActiveGrid(CharacterData fixedCharacterData, Transform parent,
                 CharacterSelectRepository.OrderType orderType)
             {
-                var grid = Instantiate(Owner.characterSelectView.Grid, parent);
+                var grid = Instantiate(View.Grid, parent);
                 var characterGrid = grid.GetComponentInChildren<CharacterGridView>();
                 characterGrid.ApplyStatusGridViews(orderType, fixedCharacterData);
                 characterGrid.gridButton.onClick.AddListener(() =>
@@ -166,8 +164,7 @@ namespace UI.Title
 
             private void CreateDisableGrid(CharacterData characterData, Transform parent)
             {
-                var disableGrid = Instantiate(Owner.characterSelectView.GridDisable, parent)
-                    .GetComponent<CharacterDisableGrid>();
+                var disableGrid = Instantiate(View.GridDisable, parent).GetComponent<CharacterDisableGrid>();
                 disableGrid.characterImage.color = Color.black;
                 disableGrid.characterImage.sprite = characterData.SelfPortraitSprite;
                 disableGrid.purchaseButton.OnClickAsObservable()
@@ -193,7 +190,7 @@ namespace UI.Title
 
             private void OnClickBack()
             {
-                Owner.uiAnimation.ClickScaleColor(Owner.characterSelectView.BackButton.gameObject).OnComplete(() =>
+                Owner.uiAnimation.ClickScaleColor(View.BackButton.gameObject).OnComplete(() =>
                 {
                     Owner.stateMachine.Dispatch((int)State.Main);
                 }).SetLink(Owner.gameObject);
@@ -216,7 +213,7 @@ namespace UI.Title
 
                     if (gem < characterPrice)
                     {
-                        Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject.SetActive(true);
+                        View.VirtualCurrencyAddPopup.gameObject.SetActive(true);
                         disableGrid.interactable = true;
                         return;
                     }
@@ -248,24 +245,24 @@ namespace UI.Title
 
             private void OnClickClosePopup()
             {
-                var closeButton = Owner.characterSelectView.VirtualCurrencyAddPopup.CloseButton.gameObject;
-                var popup = Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject;
+                var closeButton = View.VirtualCurrencyAddPopup.CloseButton.gameObject;
+                var popup = View.VirtualCurrencyAddPopup.gameObject;
                 Owner.uiAnimation.ClickScaleColor(closeButton).OnComplete(() => { popup.SetActive(false); })
                     .SetLink(popup);
             }
 
             private void OnClickCancelPurchase()
             {
-                var cancelButton = Owner.characterSelectView.VirtualCurrencyAddPopup.CancelButton.gameObject;
-                var popup = Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject;
+                var cancelButton = View.VirtualCurrencyAddPopup.CancelButton.gameObject;
+                var popup = View.VirtualCurrencyAddPopup.gameObject;
                 Owner.uiAnimation.ClickScaleColor(cancelButton).OnComplete(() => { popup.SetActive(false); })
                     .SetLink(popup);
             }
 
             private void OnClickAddGem()
             {
-                var addButton = Owner.characterSelectView.VirtualCurrencyAddPopup.AddButton.gameObject;
-                var popup = Owner.characterSelectView.VirtualCurrencyAddPopup.gameObject;
+                var addButton = View.VirtualCurrencyAddPopup.AddButton.gameObject;
+                var popup = View.VirtualCurrencyAddPopup.gameObject;
                 Owner.uiAnimation.ClickScaleColor(addButton)
                     .OnComplete(() => { Owner.stateMachine.Dispatch((int)State.Shop); }).SetLink(popup);
             }

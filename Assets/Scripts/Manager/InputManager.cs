@@ -12,42 +12,40 @@ namespace Manager
 {
     public class InputManager : MonoBehaviour
     {
-        private InputView _inputView;
+        private InputView inputView;
         private const float MaxFillAmount = 1;
         private const float MinFillAmount = 0;
-        private PhotonView _photonView;
-        private CancellationToken _token;
-        private Button _bombButton;
-        private Image _skillOneIntervalImage;
-        private Image _skillTwoIntervalImage;
-        private float _timerSkillOne;
-        private float _timerSkillTwo;
-        private CharacterData _characterData;
-        public Button BombButton => _bombButton;
+        private PhotonView photonView;
+        private Button bombButton;
+        private Image skillOneIntervalImage;
+        private Image skillTwoIntervalImage;
+        private float timerSkillOne;
+        private float timerSkillTwo;
+        private CharacterData characterData;
+        public Button BombButton => bombButton;
 
 
-        public void Initialize(PhotonView photonView, float skillOneIntervalTime, float skillTwoIntervalTime,
-            CharacterData characterData, UserDataManager userDataManager)
+        public void Initialize(PhotonView view, float skillOneIntervalTime, float skillTwoIntervalTime,
+            CharacterData data, UserDataManager userDataManager)
         {
-            _token = this.GetCancellationTokenOnDestroy();
-            _photonView = photonView;
-            _inputView = FindObjectOfType<InputView>();
-            _bombButton = _inputView.bombButton;
-            if (!_photonView.IsMine)
+            photonView = view;
+            inputView = FindObjectOfType<InputView>();
+            bombButton = inputView.bombButton;
+            if (!photonView.IsMine)
             {
                 return;
             }
 
-            var currentLevelData = userDataManager.GetCurrentLevelData(characterData.Id);
-            _skillOneIntervalImage = _inputView.skillOneIntervalImage;
-            _skillTwoIntervalImage = _inputView.skillTwoIntervalImage;
-            _characterData = characterData;
+            var currentLevelData = userDataManager.GetCurrentLevelData(data.Id);
+            skillOneIntervalImage = inputView.skillOneIntervalImage;
+            skillTwoIntervalImage = inputView.skillTwoIntervalImage;
+            characterData = data;
             SetupSkillUI(skillOneIntervalTime, skillTwoIntervalTime, currentLevelData);
         }
 
         public void SetOnClickSkillOne(float intervalTime, Action action, CancellationToken token)
         {
-            _inputView.skillOneButton.OnClickAsObservable().ThrottleFirst(TimeSpan.FromSeconds(intervalTime)).Subscribe(
+            inputView.skillOneButton.OnClickAsObservable().ThrottleFirst(TimeSpan.FromSeconds(intervalTime)).Subscribe(
                 _ =>
                 {
                     ResetSkillOneIntervalImage();
@@ -57,7 +55,7 @@ namespace Manager
 
         public void SetOnClickSkillTwo(float intervalTime, Action action, CancellationToken token)
         {
-            _inputView.skillTwoButton.OnClickAsObservable().ThrottleFirst(TimeSpan.FromSeconds(intervalTime))
+            inputView.skillTwoButton.OnClickAsObservable().ThrottleFirst(TimeSpan.FromSeconds(intervalTime))
                 .Subscribe(_ =>
                 {
                     ResetSkillTwoIntervalImage();
@@ -67,45 +65,41 @@ namespace Manager
 
         private void ResetSkillOneIntervalImage()
         {
-            _timerSkillOne = 0;
-            _skillOneIntervalImage.fillAmount = MinFillAmount;
+            timerSkillOne = 0;
+            skillOneIntervalImage.fillAmount = MinFillAmount;
         }
 
         private void ResetSkillTwoIntervalImage()
         {
-            _timerSkillTwo = 0;
-            _skillTwoIntervalImage.fillAmount = MinFillAmount;
+            timerSkillTwo = 0;
+            skillTwoIntervalImage.fillAmount = MinFillAmount;
         }
 
         private void SetupSkillUI(float skillOneInterval, float skillTwoInterval, CharacterLevelData levelData)
         {
-            _inputView.skillOneButton.gameObject.SetActive(levelData.IsSkillOneActive);
-            _inputView.skillTwoButton.gameObject.SetActive(levelData.IsSkillTwoActive);
-            _timerSkillOne = skillOneInterval;
-            _timerSkillTwo = skillTwoInterval;
-            _skillOneIntervalImage.fillAmount = MaxFillAmount;
-            _skillTwoIntervalImage.fillAmount = MaxFillAmount;
-            _inputView.skillOneImage.sprite = _characterData.SkillOneSprite;
-            _inputView.skillTwoImage.sprite = _characterData.SkillTwoSprite;
+            inputView.skillOneButton.gameObject.SetActive(levelData.IsSkillOneActive);
+            inputView.skillTwoButton.gameObject.SetActive(levelData.IsSkillTwoActive);
+            timerSkillOne = skillOneInterval;
+            timerSkillTwo = skillTwoInterval;
+            skillOneIntervalImage.fillAmount = MaxFillAmount;
+            skillTwoIntervalImage.fillAmount = MaxFillAmount;
+            inputView.skillOneImage.sprite = characterData.SkillOneSprite;
+            inputView.skillTwoImage.sprite = characterData.SkillTwoSprite;
         }
 
         public void UpdateSkillUI(float skillOneInterval, float skillTwoInterval)
         {
-            if (_timerSkillOne < skillOneInterval)
+            if (timerSkillOne < skillOneInterval)
             {
-                _timerSkillOne += Time.deltaTime;
-                _skillOneIntervalImage.fillAmount = _timerSkillOne / skillOneInterval;
+                timerSkillOne += Time.deltaTime;
+                skillOneIntervalImage.fillAmount = timerSkillOne / skillOneInterval;
             }
 
-            if (_timerSkillTwo < skillTwoInterval)
+            if (timerSkillTwo < skillTwoInterval)
             {
-                _timerSkillTwo += Time.deltaTime;
-                _skillTwoIntervalImage.fillAmount = _timerSkillTwo / skillTwoInterval;
+                timerSkillTwo += Time.deltaTime;
+                skillTwoIntervalImage.fillAmount = timerSkillTwo / skillTwoInterval;
             }
-        }
-
-        private void OnDestroy()
-        {
         }
     }
 }

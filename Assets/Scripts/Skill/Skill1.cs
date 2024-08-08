@@ -8,11 +8,6 @@ public class Skill1 : SkillBase
     private const int AttackRange = 3;
     public List<GameObject> colliderObjs = new();
 
-    public override void Initialize(GameObject effect, Transform playerTransform)
-    {
-        base.Initialize(effect, playerTransform);
-    }
-
     public override void SkillActivation()
     {
         var dir = GameCommonData.GetPlayerDirection(PlayerTransform.rotation.y);
@@ -37,16 +32,6 @@ public class Skill1 : SkillBase
                 colliderObjs.Add(CreateColliderObj(createPos));
             }
         }
-    }
-
-    public void DestroyEffectObj()
-    {
-        foreach (var effect in colliderObjs)
-        {
-            Destroy(effect);
-        }
-
-        colliderObjs.Clear();
     }
 
     private GameObject CreateColliderObj(Vector3 createPos)

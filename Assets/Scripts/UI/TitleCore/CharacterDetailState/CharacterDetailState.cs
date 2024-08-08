@@ -19,9 +19,8 @@ namespace UI.Title
         public class CharacterDetailState : StateMachine<TitleCore>.State
         {
             private const int DefaultPage = 1;
-            private CharacterDetailView View => Owner.characterDetailView;
+            private CharacterDetailView View => (CharacterDetailView)Owner.GetView(State.CharacterDetail);
             private CommonView CommonView => Owner.commonView;
-            private CharacterSelectRepository CharacterSelectRepository => Owner.characterSelectRepository;
             private CharacterDataRepository characterDataRepository;
             private PlayFabUserDataManager playFabUserDataManager;
             private PlayFabShopManager playFabShopManager;
@@ -33,9 +32,7 @@ namespace UI.Title
             private SortCharactersUseCase SortCharactersUseCase => Owner.sortCharactersUseCase;
 
             private CancellationTokenSource cts;
-            private bool canQuestion;
             private int candidateIndex;
-            private bool isProcessing;
             private CharacterData[] orderCharacters;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
@@ -64,7 +61,6 @@ namespace UI.Title
                 InitializeButton();
 
                 SetupUIContent();
-                canQuestion = true;
                 await Owner.SwitchUiObject(State.CharacterDetail, true);
                 InitializeAnimation();
             }
@@ -89,42 +85,59 @@ namespace UI.Title
 
             private void InitializeButton()
             {
-                Owner.characterDetailView.BackButton.onClick.RemoveAllListeners();
-                Owner.characterDetailView.SelectButton.onClick.RemoveAllListeners();
                 View.QuestionView.sendButton.onClick.RemoveAllListeners();
                 View.QuestionView.closeButton.onClick.RemoveAllListeners();
                 CommonView.errorView.okButton.onClick.RemoveAllListeners();
-                Owner.characterDetailView.BackButton.onClick.AddListener(OnClickBackButton);
-                Owner.characterDetailView.SelectButton.onClick.AddListener(OnClickDecideButton);
-                View.PurchaseErrorView.okButton.onClick.AddListener(OnClickClosePurchaseErrorView);
-                View.QuestionView.sendButton.onClick.AddListener(OnClickSendQuestion);
                 View.QuestionView.closeButton.onClick.AddListener(OnClickCloseComment);
                 CommonView.errorView.okButton.onClick.AddListener(OnClickCloseErrorView);
 
-                Owner.characterDetailView.LeftArrowButton.OnClickAsObservable()
-                    .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
-                    .Subscribe(_ => OnClickLeftArrow()).AddTo(cts.Token);
+                View.PurchaseErrorView.okButton.OnClickAsObservable()
+                    .SelectMany(_ => OnClickClosePurchaseErrorView().ToObservable())
+                    .Subscribe()
+                    .AddTo(cts.Token);
 
-                Owner.characterDetailView.RightArrowButton.OnClickAsObservable()
-                    .ThrottleFirst(TimeSpan.FromSeconds(GameCommonData.ClickIntervalDuration))
-                    .Subscribe(_ => OnClickRightArrow()).AddTo(cts.Token);
+                View.QuestionView.sendButton.OnClickAsObservable()
+                    .SelectMany(_ => OnClickSendQuestion().ToObservable())
+                    .Subscribe()
+                    .AddTo(cts.Token);
+
+                View.BackButton.OnClickAsObservable()
+                    .Subscribe(_ => OnClickBackButton())
+                    .AddTo(cts.Token);
+
+                View.SelectButton.OnClickAsObservable()
+                    .SelectMany(_ => OnClickDecideButton().ToObservable())
+                    .Subscribe()
+                    .AddTo(cts.Token);
+
+                View.LeftArrowButton.OnClickAsObservable()
+                    .Subscribe(_ => OnClickLeftArrow())
+                    .AddTo(cts.Token);
+
+                View.RightArrowButton.OnClickAsObservable()
+                    .Subscribe(_ => OnClickRightArrow())
+                    .AddTo(cts.Token);
 
                 View.UpgradeButton.OnClickAsObservable()
-                    .Subscribe(_ => OnClickUpgrade()).AddTo(cts.Token);
+                    .SelectMany(_ => OnClickUpgrade().ToObservable())
+                    .Subscribe()
+                    .AddTo(cts.Token);
 
                 View.VirtualCurrencyAddPopup.OnClickCancelButton
                     .Subscribe(_ =>
                     {
                         OnClickCloseVirtualCurrencyAddView(View.VirtualCurrencyAddPopup
                             .CancelButton.gameObject);
-                    }).AddTo(cts.Token);
+                    })
+                    .AddTo(cts.Token);
 
                 View.VirtualCurrencyAddPopup.OnClickCloseButton
                     .Subscribe(_ =>
                     {
                         OnClickCloseVirtualCurrencyAddView(View.VirtualCurrencyAddPopup.CloseButton
                             .gameObject);
-                    }).AddTo(cts.Token);
+                    })
+                    .AddTo(cts.Token);
 
                 View.VirtualCurrencyAddPopup.OnClickAddButton
                     .Subscribe(_ => OnClickAddVirtualCurrency())
@@ -133,11 +146,7 @@ namespace UI.Title
 
             private void OnClickBackButton()
             {
-                var buttonObject = View.BackButton.gameObject;
-                Owner.uiAnimation.ClickScaleColor(buttonObject).OnComplete(() =>
-                {
-                    Owner.stateMachine.Dispatch((int)State.CharacterSelect);
-                }).SetLink(buttonObject);
+                Owner.stateMachine.Dispatch((int)State.CharacterSelect);
             }
 
             private void OnClickRightArrow()
@@ -191,84 +200,69 @@ namespace UI.Title
                 }).SetLink(button.gameObject);
             }
 
-            private void OnClickDecideButton()
+            private async UniTask OnClickDecideButton()
             {
-                var button = View.SelectButton.gameObject;
-                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                View.SelectButton.interactable = false;
+                var userData = userDataManager.GetUserData();
+                userData.EquippedCharacterId = orderCharacters[candidateIndex].Id;
+                var result = await playFabUserDataManager.TryUpdateUserDataAsync(userData);
+                if (result)
                 {
-                    var userData = userDataManager.GetUserData();
-                    userData.EquippedCharacterId = orderCharacters[candidateIndex].Id;
-                    var result = await playFabUserDataManager.TryUpdateUserDataAsync(userData);
-                    if (result)
-                    {
-                        Owner.stateMachine.Dispatch((int)State.Main);
-                    }
-                })).SetLink(button);
+                    Owner.stateMachine.Dispatch((int)State.Main);
+                }
+
+                View.SelectButton.interactable = true;
             }
 
-            private void OnClickUpgrade()
+            private async UniTask OnClickUpgrade()
             {
-                if (isProcessing)
+                View.UpgradeButton.interactable = false;
+                var selectedCharacterData = orderCharacters[candidateIndex];
+                var coin = await playFabVirtualCurrencyManager.GetCoin();
+                if (coin == GameCommonData.NetworkErrorCode)
                 {
+                    View.UpgradeButton.interactable = true;
                     return;
                 }
 
-                isProcessing = true;
-                View.UpgradeButton.interactable = false;
-                var selectedCharacterData = orderCharacters[candidateIndex];
-                var button = View.UpgradeButton.gameObject;
-                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+
+                var nextLevelData = userDataManager.GetNextLevelData(selectedCharacterData.Id);
+                var virtualCurrencyAddView = View.VirtualCurrencyAddPopup;
+                var purchaseErrorView = View.PurchaseErrorView;
+                if (coin < nextLevelData.NeedCoin)
                 {
-                    var coin = await playFabVirtualCurrencyManager.GetCoin();
-                    if (coin == GameCommonData.NetworkErrorCode)
-                    {
-                        isProcessing = false;
-                        View.UpgradeButton.interactable = true;
-                        return;
-                    }
-
-
-                    var nextLevelData = userDataManager.GetNextLevelData(selectedCharacterData.Id);
-                    var virtualCurrencyAddView = View.VirtualCurrencyAddPopup;
-                    var purchaseErrorView = View.PurchaseErrorView;
-                    if (coin < nextLevelData.NeedCoin)
-                    {
-                        Debug.LogError("コイン足りない");
-                        View.UpgradeButton.interactable = true;
-                        virtualCurrencyAddView.transform.localScale = Vector3.zero;
-                        virtualCurrencyAddView.gameObject.SetActive(true);
-                        await uiAnimation.Open(virtualCurrencyAddView.transform, GameCommonData.OpenDuration);
-                        isProcessing = false;
-                        return;
-                    }
-
-                    var result = await playFabShopManager.TryPurchaseLevelUpItem(nextLevelData.Level,
-                        GameCommonData.CoinKey, nextLevelData.NeedCoin, selectedCharacterData.Id, purchaseErrorView);
-
-                    if (!result)
-                    {
-                        Debug.LogError("購入処理エラー");
-                        purchaseErrorView.transform.localScale = Vector3.zero;
-                        purchaseErrorView.gameObject.SetActive(true);
-                        View.UpgradeButton.interactable = true;
-                        await uiAnimation.Open(purchaseErrorView.transform, GameCommonData.OpenDuration);
-                        isProcessing = false;
-                        return;
-                    }
-
-                    Owner.CheckMission(GameCommonData.LevelUpActionId);
-                    var userData = userDataManager.GetUserData();
-                    await userDataManager.UpdateUserData(userData);
-                    await Owner.SetCoinText();
-                    SetupUIContent();
-                    if (nextLevelData.Level == GameCommonData.MaxCharacterLevel)
-                    {
-                        CreateCharacter(selectedCharacterData);
-                    }
-
-                    isProcessing = false;
+                    Debug.LogError("コイン足りない");
                     View.UpgradeButton.interactable = true;
-                })).SetLink(button);
+                    virtualCurrencyAddView.transform.localScale = Vector3.zero;
+                    virtualCurrencyAddView.gameObject.SetActive(true);
+                    await uiAnimation.Open(virtualCurrencyAddView.transform, GameCommonData.OpenDuration);
+                    return;
+                }
+
+                var result = await playFabShopManager.TryPurchaseLevelUpItem(nextLevelData.Level,
+                    GameCommonData.CoinKey, nextLevelData.NeedCoin, selectedCharacterData.Id, purchaseErrorView);
+
+                if (!result)
+                {
+                    Debug.LogError("購入処理エラー");
+                    purchaseErrorView.transform.localScale = Vector3.zero;
+                    purchaseErrorView.gameObject.SetActive(true);
+                    View.UpgradeButton.interactable = true;
+                    await uiAnimation.Open(purchaseErrorView.transform, GameCommonData.OpenDuration);
+                    return;
+                }
+
+                Owner.CheckMission(GameCommonData.LevelUpActionId);
+                var userData = userDataManager.GetUserData();
+                await userDataManager.UpdateUserData(userData);
+                await Owner.SetCoinText();
+                SetupUIContent();
+                if (nextLevelData.Level == GameCommonData.MaxCharacterLevel)
+                {
+                    CreateCharacter(selectedCharacterData);
+                }
+
+                View.UpgradeButton.interactable = true;
             }
 
             private void OnClickCloseVirtualCurrencyAddView(GameObject button)
@@ -291,63 +285,47 @@ namespace UI.Title
                 }).SetLink(button);
             }
 
-            private void OnClickClosePurchaseErrorView()
+            private async UniTask OnClickClosePurchaseErrorView()
             {
-                var button = View.PurchaseErrorView.okButton.gameObject;
-                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
-                    {
-                        var purchaseErrorView = View.PurchaseErrorView;
-                        await uiAnimation.Close(purchaseErrorView.transform, GameCommonData.CloseDuration);
-                        purchaseErrorView.gameObject.SetActive(false);
-                    }
-                )).SetLink(button);
+                var purchaseErrorView = View.PurchaseErrorView;
+                await uiAnimation.Close(purchaseErrorView.transform, GameCommonData.CloseDuration);
+                purchaseErrorView.gameObject.SetActive(false);
             }
 
-            private void OnClickSendQuestion()
+            private async UniTask OnClickSendQuestion()
             {
-                if (!canQuestion)
+                View.QuestionView.sendButton.interactable = false;
+                CommonView.waitPopup.SetActive(true);
+                var question = View.QuestionView.questionField.text;
+                var commentTransform = View.QuestionView.commentObj.transform;
+                var commentText = View.QuestionView.commentText;
+                var errorText = CommonView.errorView.errorInfoText;
+                if (question.Length > GameCommonData.CharacterLimit)
                 {
+                    CommonView.waitPopup.SetActive(false);
+                    View.QuestionView.sendButton.interactable = true;
+                    await OpenErrorView();
                     return;
                 }
 
-                CommonView.waitPopup.SetActive(true);
-                canQuestion = false;
-                var button = View.QuestionView.sendButton.gameObject;
-                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
-                    {
-                        var question = View.QuestionView.questionField.text;
-                        var commentTransform = View.QuestionView.commentObj.transform;
-                        var commentText = View.QuestionView.commentText;
-                        var errorText = CommonView.errorView.errorInfoText;
-                        if (question.Length > GameCommonData.CharacterLimit)
-                        {
-                            CommonView.waitPopup.SetActive(false);
-                            canQuestion = true;
-                            await OpenErrorView();
-                            return;
-                        }
+                var result = await playFabShopManager.TryPurchaseItem(GameCommonData.QuestionItemKey,
+                    GameCommonData.TicketKey, 1, errorText);
+                if (!result)
+                {
+                    CommonView.waitPopup.SetActive(false);
+                    View.QuestionView.sendButton.interactable = true;
+                    await OpenErrorView();
+                    return;
+                }
 
-                        var result = await playFabShopManager.TryPurchaseItem(GameCommonData.QuestionItemKey,
-                            GameCommonData.TicketKey, 1, errorText);
-                        if (!result)
-                        {
-                            CommonView.waitPopup.SetActive(false);
-                            canQuestion = true;
-                            await OpenErrorView();
-                            return;
-                        }
-
-                        await chatGptManager.Request(question, commentText);
-                        CommonView.waitPopup.SetActive(false);
-                        await Owner.SetTicketText();
-                        commentText.pageToDisplay = DefaultPage;
-                        commentTransform.localScale = Vector3.zero;
-                        commentTransform.gameObject.SetActive(true);
-                        await uiAnimation.Open(commentTransform, GameCommonData.OpenDuration);
-
-                        canQuestion = true;
-                    }
-                )).SetLink(button);
+                await chatGptManager.Request(question, commentText);
+                CommonView.waitPopup.SetActive(false);
+                await Owner.SetTicketText();
+                commentText.pageToDisplay = DefaultPage;
+                commentTransform.localScale = Vector3.zero;
+                commentTransform.gameObject.SetActive(true);
+                await uiAnimation.Open(commentTransform, GameCommonData.OpenDuration);
+                View.QuestionView.sendButton.interactable = true;
             }
 
             private void OnClickCloseComment()

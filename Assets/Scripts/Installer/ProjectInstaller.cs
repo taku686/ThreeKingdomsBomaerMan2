@@ -17,16 +17,17 @@ namespace Common.Installer
 
         public override void InstallBindings()
         {
-            Container.Bind<CharacterDataRepository>().FromNew().AsSingle();
-            Container.Bind<CatalogDataManager>().FromNew().AsSingle();
-            Container.Bind<CharacterLevelDataRepository>().FromNew().AsSingle();
-            Container.Bind<MissionDataRepository>().FromNew().AsCached();
+            Container.Bind<CharacterDataRepository>().AsSingle();
+            Container.Bind<CatalogDataManager>().AsSingle();
+            Container.Bind<CharacterLevelDataRepository>().AsSingle();
+            Container.Bind<MissionDataRepository>().AsCached();
             Container.Bind<PhotonNetworkManager>().FromComponentInNewPrefab(photonNetworkGameObject).AsSingle();
             Container.Bind<MainManager>().FromComponentsInNewPrefab(mainManagerGameObject).AsSingle();
-            Container.Bind<UserDataManager>().FromNew().AsSingle();
-            Container.Bind<MissionManager>().FromNew().AsSingle();
-            Container.Bind<PlayFabCatalogManager>().FromNew().AsCached();
-            Container.Bind<PlayFabUserDataManager>().FromNew().AsCached();
+            Container.Bind<UserDataManager>().AsSingle();
+            Container.Bind<MissionManager>().AsSingle();
+            Container.Bind<PlayFabCatalogManager>().AsCached();
+            Container.Bind<PlayFabUserDataManager>().AsCached();
+            Container.Bind<SkillDataRepository>().AsCached();
         }
     }
 }

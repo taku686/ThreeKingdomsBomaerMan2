@@ -13,7 +13,7 @@ namespace UI.Title
         {
             private CancellationTokenSource cts;
             private PlayFabUserDataManager playFabUserDataManager;
-            private LoginView loginView;
+            private LoginView View => (LoginView)Owner.GetView(State.Login);
             private CommonView commonView;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
@@ -30,7 +30,6 @@ namespace UI.Title
             {
                 cts = new CancellationTokenSource();
                 playFabUserDataManager = Owner.playFabUserDataManager;
-                loginView = Owner.loginView;
                 commonView = Owner.commonView;
 
                 InitializeButton();
@@ -41,8 +40,8 @@ namespace UI.Title
 
             private void InitializeTitleImage()
             {
-                var sprites = loginView.TitleSprites;
-                var backgroundImage = loginView.BackgroundImage;
+                var sprites = View.TitleSprites;
+                var backgroundImage = View.BackgroundImage;
                 var index = Random.Range(0, sprites.Count);
                 var titleSprite = sprites[index];
                 backgroundImage.sprite = titleSprite;
@@ -50,26 +49,26 @@ namespace UI.Title
 
             private void InitializeObject()
             {
-                Owner.loginView.ErrorGameObject.SetActive(false);
-                Owner.loginView.DisplayNameView.gameObject.SetActive(false);
+                View.ErrorGameObject.SetActive(false);
+                View.DisplayNameView.gameObject.SetActive(false);
             }
 
             private void InitializeButton()
             {
-                loginView.RetryButton.OnClickAsObservable()
-                    .SelectMany(_ => Owner.OnClickButtonAnimation(loginView.RetryButton).ToObservable())
+                View.RetryButton.OnClickAsObservable()
+                    .SelectMany(_ => Owner.OnClickButtonAnimation(View.RetryButton).ToObservable())
                     .SelectMany(_ => OnClickRetry().ToObservable())
                     .Subscribe()
                     .AddTo(cts.Token);
 
-                loginView.LoginButton.OnClickAsObservable()
-                    .SelectMany(_ => Owner.OnClickButtonAnimation(loginView.LoginButton).ToObservable())
+                View.LoginButton.OnClickAsObservable()
+                    .SelectMany(_ => Owner.OnClickButtonAnimation(View.LoginButton).ToObservable())
                     .SelectMany(_ => OnClickLogin().ToObservable())
                     .Subscribe()
                     .AddTo(cts.Token);
 
-                loginView.DisplayNameView.OkButton.OnClickAsObservable()
-                    .SelectMany(_ => Owner.OnClickButtonAnimation(loginView.DisplayNameView.OkButton).ToObservable())
+                View.DisplayNameView.OkButton.OnClickAsObservable()
+                    .SelectMany(_ => Owner.OnClickButtonAnimation(View.DisplayNameView.OkButton).ToObservable())
                     .SelectMany(_ => OnClickDisplayName().ToObservable())
                     .Subscribe()
                     .AddTo(cts.Token);
@@ -77,58 +76,56 @@ namespace UI.Title
 
             private async UniTask OnClickLogin()
             {
-                loginView.LoginButton.interactable = false;
+                View.LoginButton.interactable = false;
                 await Login().AttachExternalCancellation(cts.Token);
             }
 
             private async UniTask OnClickRetry()
             {
-                loginView.RetryButton.interactable = false;
-                Owner.loginView.ErrorGameObject.SetActive(false);
+                View.RetryButton.interactable = false;
+                View.ErrorGameObject.SetActive(false);
                 await Login().AttachExternalCancellation(cts.Token);
             }
 
             private async UniTask Login()
             {
                 commonView.waitPopup.SetActive(true);
-                Owner.playFabLoginManager.Initialize(Owner.loginView.DisplayNameView, Owner.loginView.ErrorGameObject);
+                Owner.playFabLoginManager.Initialize(View.DisplayNameView, View.ErrorGameObject);
                 var result = await Owner.playFabLoginManager.Login()
                     .AttachExternalCancellation(cts.Token);
 
                 if (!result)
                 {
                     commonView.waitPopup.SetActive(false);
-                    loginView.RetryButton.interactable = true;
-                    loginView.LoginButton.interactable = true;
+                    View.RetryButton.interactable = true;
+                    View.LoginButton.interactable = true;
                     return;
                 }
 
-                //Owner.characterDataRepository.Initialize(Owner.userDataManager);
                 Owner.mainManager.isInitialize = true;
                 Owner.stateMachine.Dispatch((int)State.Main);
                 commonView.waitPopup.SetActive(false);
-                loginView.RetryButton.interactable = true;
+                View.RetryButton.interactable = true;
             }
 
             private async UniTask OnClickDisplayName()
             {
-                loginView.DisplayNameView.OkButton.interactable = false;
+                View.DisplayNameView.OkButton.interactable = false;
                 commonView.waitPopup.SetActive(true);
-                var displayName = Owner.loginView.DisplayNameView.InputField.text;
-                var errorText = loginView.DisplayNameView.ErrorText;
+                var displayName = View.DisplayNameView.InputField.text;
+                var errorText = View.DisplayNameView.ErrorText;
                 var success = await playFabUserDataManager.UpdateUserDisplayName(displayName, errorText);
                 if (!success)
                 {
                     commonView.waitPopup.SetActive(false);
-                    loginView.DisplayNameView.OkButton.interactable = true;
+                    View.DisplayNameView.OkButton.interactable = true;
                     return;
                 }
 
                 var createSuccess = await Owner.playFabLoginManager.CreateUserData();
                 if (createSuccess)
                 {
-                    //Owner.characterDataRepository.Initialize(Owner.userDataManager);
-                    Owner.loginView.DisplayNameView.gameObject.SetActive(false);
+                    View.DisplayNameView.gameObject.SetActive(false);
                     Owner.mainManager.isInitialize = true;
                     Owner.stateMachine.Dispatch((int)State.Main);
                     commonView.waitPopup.SetActive(false);

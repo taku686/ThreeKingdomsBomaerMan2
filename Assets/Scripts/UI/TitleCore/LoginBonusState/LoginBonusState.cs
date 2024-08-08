@@ -1,5 +1,4 @@
 using System;
-using Assets.Scripts.Common.PlayFab;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
@@ -15,13 +14,12 @@ namespace UI.Title
     {
         public class LoginBonusState : StateMachine<TitleCore>.State
         {
-            private UIAnimation _uiAnimation;
-            private LoginBonusView loginBonusView;
-            private MainView mainView;
-            private UserDataManager _userDataManager;
-            private PlayFabLoginManager _playFabLoginManager;
-            private PlayFabShopManager _playaFabShopManager;
-            private GameObject _focusObj;
+            private UIAnimation uiAnimation;
+            private LoginBonusView View => (LoginBonusView)Owner.GetView(State.LoginBonus);
+            private MainView MainView => (MainView)Owner.GetView(State.Main);
+            private UserDataManager userDataManager;
+            private PlayFabShopManager playaFabShopManager;
+            private GameObject focusObj;
             private const int Day4 = 3;
             private const int Day7 = 6;
 
@@ -32,30 +30,27 @@ namespace UI.Title
 
             protected override void OnExit(StateMachine<TitleCore>.State nextState)
             {
-                Destroy(_focusObj);
+                Destroy(focusObj);
             }
 
             private async UniTask Initialize()
             {
-                _uiAnimation = Owner.uiAnimation;
-                loginBonusView = Owner.loginBonusView;
-                mainView = Owner.mainView;
-                _userDataManager = Owner.userDataManager;
-                _playFabLoginManager = Owner.playFabLoginManager;
-                _playaFabShopManager = Owner.playFabShopManager;
+                uiAnimation = Owner.uiAnimation;
+                userDataManager = Owner.userDataManager;
+                playaFabShopManager = Owner.playFabShopManager;
                 InitializeButton();
                 await InitializeUIContent();
                 SetupLoginImage();
-                Owner.SwitchUiObject(State.LoginBonus, true);
+                Owner.SwitchUiObject(State.LoginBonus, true).Forget();
             }
 
             private void InitializeButton()
             {
-                var buttons = loginBonusView.buttons;
+                var buttons = View.buttons;
                 for (int i = 0; i < buttons.Length; i++)
                 {
                     var index = i;
-                    if (_userDataManager.GetLoginBonusStatus(index) != LoginBonusStatus.CanReceive)
+                    if (userDataManager.GetLoginBonusStatus(index) != LoginBonusStatus.CanReceive)
                     {
                         continue;
                     }
@@ -64,16 +59,16 @@ namespace UI.Title
                     buttons[i].onClick.AddListener(() => OnClickRewardButton(index));
                 }
 
-                loginBonusView.closeButton.onClick.RemoveAllListeners();
-                loginBonusView.rewardGetView.okButton.onClick.RemoveAllListeners();
-                loginBonusView.closeButton.onClick.AddListener(OnClickClosePanel);
-                loginBonusView.rewardGetView.okButton.onClick.AddListener(OnClickCloseRewardView);
+                View.closeButton.onClick.RemoveAllListeners();
+                View.rewardGetView.okButton.onClick.RemoveAllListeners();
+                View.closeButton.onClick.AddListener(OnClickClosePanel);
+                View.rewardGetView.okButton.onClick.AddListener(OnClickCloseRewardView);
             }
 
             private async UniTask InitializeUIContent()
             {
-                loginBonusView.purchaseErrorView.gameObject.SetActive(false);
-                loginBonusView.rewardGetView.gameObject.SetActive(false);
+                View.purchaseErrorView.gameObject.SetActive(false);
+                View.rewardGetView.gameObject.SetActive(false);
                 await Owner.SetCoinText();
                 await Owner.SetGemText();
             }
@@ -81,7 +76,7 @@ namespace UI.Title
 
             private void SetupLoginImage()
             {
-                var userData = _userDataManager.GetUserData();
+                var userData = userDataManager.GetUserData();
                 foreach (var login in userData.LoginBonus)
                 {
                     if (GameCommonData.GetLoginBonusStatus(login.Value) != LoginBonusStatus.Received)
@@ -89,7 +84,7 @@ namespace UI.Title
                         continue;
                     }
 
-                    loginBonusView.clearImages[login.Key].gameObject.SetActive(true);
+                    View.clearImages[login.Key].gameObject.SetActive(true);
                 }
 
                 var dayOfWeek = DateTime.Today.DayOfWeek;
@@ -121,23 +116,23 @@ namespace UI.Title
 
             private void GenerateFocusObj(int index)
             {
-                var parent = loginBonusView.buttons[index].transform;
-                _focusObj = Instantiate(loginBonusView.focusObj, parent);
+                var parent = View.buttons[index].transform;
+                focusObj = Instantiate(View.focusObj, parent);
             }
 
             private void OnClickRewardButton(int index)
             {
-                var button = loginBonusView.buttons[index].gameObject;
+                var button = View.buttons[index].gameObject;
                 Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     //todo　購入処理
                     if (index is Day4 or Day7)
                     {
                         var day = index + 1;
-                        var errorText = loginBonusView.purchaseErrorView.errorInfoText;
-                        var rewardView = loginBonusView.rewardGetView;
-                        var rewardViewObj = loginBonusView.rewardGetView.gameObject;
-                        var itemGetResult = await _playaFabShopManager.TryPurchaseGacha(
+                        var errorText = View.purchaseErrorView.errorInfoText;
+                        var rewardView = View.rewardGetView;
+                        var rewardViewObj = View.rewardGetView.gameObject;
+                        var itemGetResult = await playaFabShopManager.TryPurchaseGacha(
                             GameCommonData.LoginBonusItemKey + day, GameCommonData.CoinKey, 0,
                             GameCommonData.GachaShopKey, rewardView, errorText);
                         if (!itemGetResult)
@@ -147,17 +142,17 @@ namespace UI.Title
 
                         rewardViewObj.transform.localScale = Vector3.zero;
                         rewardViewObj.SetActive(true);
-                        await _uiAnimation.Open(rewardViewObj.transform, GameCommonData.OpenDuration)
+                        await uiAnimation.Open(rewardViewObj.transform, GameCommonData.OpenDuration)
                             .AttachExternalCancellation(rewardViewObj.GetCancellationTokenOnDestroy());
                     }
                     else
                     {
                         var day = index + 1;
-                        var errorText = loginBonusView.purchaseErrorView.errorInfoText;
-                        var rewardView = loginBonusView.rewardGetView;
-                        var rewardViewObj = loginBonusView.rewardGetView.gameObject;
+                        var errorText = View.purchaseErrorView.errorInfoText;
+                        var rewardView = View.rewardGetView;
+                        var rewardViewObj = View.rewardGetView.gameObject;
                         var itemGetResult =
-                            await _playaFabShopManager.TryPurchaseLoginBonusItem(day, GameCommonData.CoinKey, 0,
+                            await playaFabShopManager.TryPurchaseLoginBonusItem(day, GameCommonData.CoinKey, 0,
                                 rewardView, errorText);
                         if (!itemGetResult)
                         {
@@ -166,11 +161,11 @@ namespace UI.Title
 
                         rewardViewObj.transform.localScale = Vector3.zero;
                         rewardViewObj.SetActive(true);
-                        await _uiAnimation.Open(rewardViewObj.transform, GameCommonData.OpenDuration)
+                        await uiAnimation.Open(rewardViewObj.transform, GameCommonData.OpenDuration)
                             .AttachExternalCancellation(rewardViewObj.GetCancellationTokenOnDestroy());
                     }
 
-                    var result = await _userDataManager.SetLoginBonus(index, LoginBonusStatus.Received);
+                    var result = await userDataManager.SetLoginBonus(index, LoginBonusStatus.Received);
                     if (!result)
                     {
                         return;
@@ -184,11 +179,11 @@ namespace UI.Title
 
             private void OnClickClosePanel()
             {
-                var button = loginBonusView.closeButton.gameObject;
+                var button = View.closeButton.gameObject;
                 Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
-                    var panel = mainView.LoginBonusGameObjet.transform;
-                    await _uiAnimation.Close(panel, GameCommonData.CloseDuration)
+                    var panel = MainView.LoginBonusGameObjet.transform;
+                    await uiAnimation.Close(panel, GameCommonData.CloseDuration)
                         .AttachExternalCancellation(panel.GetCancellationTokenOnDestroy());
                     panel.gameObject.SetActive(false);
                     Owner.stateMachine.Dispatch((int)State.Main);
@@ -197,12 +192,13 @@ namespace UI.Title
 
             private void OnClickCloseRewardView()
             {
-                var button = loginBonusView.rewardGetView.okButton.gameObject;
+                var button = View.rewardGetView.okButton.gameObject;
                 Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
-                    var panel = loginBonusView.rewardGetView.transform;
-                    await _uiAnimation.Close(panel, GameCommonData.CloseDuration)
-                        .AttachExternalCancellation(panel.GetCancellationTokenOnDestroy());;
+                    var panel = View.rewardGetView.transform;
+                    await uiAnimation.Close(panel, GameCommonData.CloseDuration)
+                        .AttachExternalCancellation(panel.GetCancellationTokenOnDestroy());
+                    ;
                     panel.gameObject.SetActive(false);
                 })).SetLink(button);
             }

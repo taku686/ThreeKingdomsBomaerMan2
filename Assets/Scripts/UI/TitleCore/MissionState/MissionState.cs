@@ -6,8 +6,6 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Manager.DataManager;
 using Manager.NetworkManager;
-using ModestTree;
-using UI.Common;
 using UniRx;
 using UnityEngine;
 using State = StateMachine<UI.Title.TitleCore>.State;
@@ -25,10 +23,8 @@ namespace UI.Title
             private UserDataManager userDataManager;
             private CatalogDataManager catalogDataManager;
             private PlayFabShopManager playFabShopManager;
-            private MainView mainView;
-            private MissionView missionView;
+            private MissionView View => (MissionView)Owner.GetView(State.Mission);
             private CommonView commonView;
-            private UIAnimation uiAnimation;
             private Sprite coinSprite;
             private Sprite gemSprite;
             private readonly Dictionary<int, MissionGrid> missionGrids = new();
@@ -51,20 +47,17 @@ namespace UI.Title
                 userDataManager = Owner.userDataManager;
                 catalogDataManager = Owner.catalogDataManager;
                 playFabShopManager = Owner.playFabShopManager;
-                mainView = Owner.mainView;
-                missionView = Owner.missionView;
                 commonView = Owner.commonView;
-                uiAnimation = Owner.uiAnimation;
-                token = missionView.GetCancellationTokenOnDestroy();
+                token = View.GetCancellationTokenOnDestroy();
                 await GenerateMissionGrid();
                 InitializeButton();
-                Owner.SwitchUiObject(State.Mission, true);
+                Owner.SwitchUiObject(State.Mission, true).Forget();
             }
 
             private void InitializeButton()
             {
-                missionView.backButton.onClick.RemoveAllListeners();
-                missionView.backButton.OnClickAsObservable()
+                View.backButton.onClick.RemoveAllListeners();
+                View.backButton.OnClickAsObservable()
                     .Take(1)
                     .SelectMany(_ => OnClickBack().ToObservable())
                     .Subscribe()
@@ -74,16 +67,14 @@ namespace UI.Title
             private async UniTask GenerateMissionGrid()
             {
                 DestroyMissionGrids();
-                var coinSprite = await Resources.LoadAsync<Sprite>(GameCommonData.VirtualCurrencySpritePath + "coin");
-                this.coinSprite = (Sprite)coinSprite;
-                var gemSprite = await Resources.LoadAsync<Sprite>(GameCommonData.VirtualCurrencySpritePath + "gem");
-                this.gemSprite = (Sprite)gemSprite;
+                coinSprite = (Sprite)await Resources.LoadAsync<Sprite>(GameCommonData.VirtualCurrencySpritePath + "coin");
+                gemSprite = (Sprite)await Resources.LoadAsync<Sprite>(GameCommonData.VirtualCurrencySpritePath + "gem");
                 var missionProgressDatum = userDataManager.GetMissionProgressDatum();
                 foreach (var data in missionProgressDatum)
                 {
                     var missionData = missionDataRepository.GetMissionData(data.Key);
                     var rewardData = catalogDataManager.GetAddVirtualCurrencyItemData(missionData.rewardId);
-                    var missionGrid = Instantiate(missionView.missionGrid, missionView.gridParent);
+                    var missionGrid = Instantiate(View.missionGrid, View.gridParent);
                     var progressValue =
                         (int)(data.Value / (float)missionData.count * GameCommonData.MaxMissionProgress);
                     progressValue = progressValue >= GameCommonData.MaxMissionProgress
@@ -105,7 +96,7 @@ namespace UI.Title
                     }
 
                     missionGrid.rewardText.text = rewardData.price.ToString("D");
-                    missionGrid.rewardImage.sprite = rewardData.vc == GameCommonData.CoinKey ? this.coinSprite : this.gemSprite;
+                    missionGrid.rewardImage.sprite = rewardData.vc == GameCommonData.CoinKey ? coinSprite : gemSprite;
                 }
             }
 
@@ -142,7 +133,7 @@ namespace UI.Title
             private async UniTask OnClickBack()
             {
                 Owner.stateMachine.Dispatch((int)State.Main);
-                var button = missionView.backButton.gameObject;
+                var button = View.backButton.gameObject;
                 await Owner.uiAnimation.ClickScaleColor(button).ToUniTask(cancellationToken: token);
             }
 
