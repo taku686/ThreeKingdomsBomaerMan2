@@ -13,28 +13,12 @@ namespace Common.Data
         public int Gem;
         public int Coin;
         public int Ticket;
-        public List<int> Characters = new();
+        public readonly List<int> Characters = new();
         public readonly Dictionary<int, int> CharacterLevels = new();
         public readonly Dictionary<int, int> LoginBonus = new();
+        public readonly Dictionary<int, int> PossessedWeapons = new();
+        public readonly Dictionary<int, int> EquippedWeapons = new();
         public Dictionary<int, int> MissionProgressDatum = new();
-
-        public void SetUserData(UserData userData)
-        {
-            Gender = userData.Gender;
-            EquippedCharacterId = userData.EquippedCharacterId;
-            Level = userData.Level;
-            Name = userData.Name;
-            IsTutorial = userData.IsTutorial;
-            Characters = userData.Characters;
-            Gem = userData.Gem;
-            Coin = userData.Coin;
-            Ticket = userData.Ticket;
-        }
-
-        public UserData GetUserData()
-        {
-            return this;
-        }
 
         public UserData Create(CharacterData characterData)
         {
@@ -49,6 +33,7 @@ namespace Common.Data
             user.Coin = 0;
             user.Ticket = 0;
             user.CharacterLevels[0] = 0;
+            user.PossessedWeapons[1] = 0;
             for (int i = 0; i < 7; i++)
             {
                 user.LoginBonus[i] = (int)LoginBonusStatus.Disable;

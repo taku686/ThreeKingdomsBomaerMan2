@@ -18,7 +18,7 @@ namespace Manager.BattleManager
             private static readonly Vector3 ColliderSize = new(0.4f, 0.6f, 0.4f);
             private static readonly float MaxRate = 1f;
             private CharacterStatusManager characterStatusManager;
-            private UserDataManager userDataManager;
+            private UserDataRepository userDataRepository;
             private MapManager mapManager;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
@@ -81,8 +81,8 @@ namespace Manager.BattleManager
                 Owner.cameraManager.Initialize(player.transform);
                 var playerCore = player.AddComponent<PlayerCore>();
                 Owner.SetPlayerCore(playerCore);
-                userDataManager = Owner.userDataManager;
-                playerCore.Initialize(playerStatusManager, hpKey, characterData, userDataManager);
+                userDataRepository = Owner.userDataRepository;
+                playerCore.Initialize(playerStatusManager, hpKey, characterData, userDataRepository);
             }
 
             private void AddBoxCollider(GameObject player)

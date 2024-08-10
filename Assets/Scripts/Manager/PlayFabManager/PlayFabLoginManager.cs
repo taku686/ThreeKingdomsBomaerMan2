@@ -19,8 +19,8 @@ namespace Assets.Scripts.Common.PlayFab
         private const int DefaultCharacterIndex = 0;
         private const int OneDay = 1;
         private const int TimeDifference = 9;
-        [Inject] private UserDataManager _userDataManager;
-        [Inject] private CharacterDataRepository characterDataRepository;
+        [Inject] private UserDataRepository userDataRepository;
+        [Inject] private CharacterMasterDataRepository characterMasterDataRepository;
         [Inject] private PlayFabCatalogManager _playFabCatalogManager;
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private PlayFabShopManager _playFabShopManager;
@@ -93,7 +93,7 @@ namespace Assets.Scripts.Common.PlayFab
             {
                 user.Coin = virtualCurrency[GameCommonData.CoinKey];
                 user.Gem = virtualCurrency[GameCommonData.GemKey];
-                await _userDataManager.Initialize(user);
+                await userDataRepository.Initialize(user);
                 _missionManager.Initialize();
                 if (response.Result.LastLoginTime != null)
                 {
@@ -110,7 +110,7 @@ namespace Assets.Scripts.Common.PlayFab
 
         public async UniTask<bool> CreateUserData()
         {
-            var characterData = characterDataRepository.GetCharacterData(DefaultCharacterIndex);
+            var characterData = characterMasterDataRepository.GetCharacterData(DefaultCharacterIndex);
             var userData = new UserData().Create(characterData);
             var virtualCurrency = _loginResponse.Result.InfoResultPayload.UserVirtualCurrency;
             userData.Coin = virtualCurrency[GameCommonData.CoinKey];
@@ -133,7 +133,7 @@ namespace Assets.Scripts.Common.PlayFab
             haveLoginBonus = daySubtraction.Days >= OneDay;
             if (dayOfWeek == DayOfWeek.Sunday)
             {
-                await _userDataManager.ResetLoginBonus();
+                await userDataRepository.ResetLoginBonus();
             }
 
             if (!haveLoginBonus)
@@ -141,7 +141,7 @@ namespace Assets.Scripts.Common.PlayFab
                 return;
             }
 
-            await _userDataManager.SetLoginBonus((int)dayOfWeek, LoginBonusStatus.CanReceive);
+            await userDataRepository.SetLoginBonus((int)dayOfWeek, LoginBonusStatus.CanReceive);
         }
 
         private async UniTask<bool> HaveLoginBonus(LoginResult loginResult)

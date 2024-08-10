@@ -27,9 +27,9 @@ namespace Manager.NetworkManager
         private CancellationTokenSource _cancellationTokenSource;
         [Inject] private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
-        [Inject] private CharacterDataRepository characterDataRepository;
-        [Inject] private UserDataManager _userDataManager;
-        [Inject] private CatalogDataManager _catalogDataManager;
+        [Inject] private CharacterMasterDataRepository characterMasterDataRepository;
+        [Inject] private UserDataRepository userDataRepository;
+        [Inject] private CatalogDataRepository catalogDataRepository;
 
         public async UniTask InitializePurchasing()
         {
@@ -43,7 +43,7 @@ namespace Manager.NetworkManager
             var options = new InitializationOptions();
             await UnityServices.InitializeAsync(options);
             _builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
-            foreach (var catalogItem in _catalogDataManager.GetCatalogItems().FindAll(x =>
+            foreach (var catalogItem in catalogDataRepository.GetCatalogItems().FindAll(x =>
                          x.ItemClass == GameCommonData.ConsumableClassKey))
             {
                 _builder.AddProduct(catalogItem.ItemId, ProductType.Consumable);
@@ -89,14 +89,14 @@ namespace Manager.NetworkManager
                 if (item.ItemClass.Equals(GameCommonData.CharacterClassKey))
                 {
                     var index = int.Parse(item.ItemId);
-                    var characterData = characterDataRepository.GetCharacterData(index);
+                    var characterData = characterMasterDataRepository.GetCharacterData(index);
                     rewardView.rewardImage.sprite = characterData.SelfPortraitSprite;
-                    await _userDataManager.AddCharacterData(index);
+                    await userDataRepository.AddCharacterData(index);
                 }
 
                 if (item.ItemClass.Equals(GameCommonData.LoginBonusClassKey))
                 {
-                    var loginBonusItemData = _catalogDataManager.GetAddVirtualCurrencyItemData(item.ItemId);
+                    var loginBonusItemData = catalogDataRepository.GetAddVirtualCurrencyItemData(item.ItemId);
                     if (loginBonusItemData == null)
                     {
                         return false;
@@ -138,7 +138,7 @@ namespace Manager.NetworkManager
             }
 
             await _playFabVirtualCurrencyManager.SetVirtualCurrency();
-            var result2 = await _userDataManager.AddCharacterData(characterId);
+            var result2 = await userDataRepository.AddCharacterData(characterId);
             return result2;
         }
 
@@ -159,7 +159,7 @@ namespace Manager.NetworkManager
                 return false;
             }
 
-            var result2 = _userDataManager.UpgradeCharacterLevel(characterId, level);
+            var result2 = userDataRepository.UpgradeCharacterLevel(characterId, level);
             return result2;
         }
 
@@ -184,7 +184,7 @@ namespace Manager.NetworkManager
             {
                 if (item.ItemClass.Equals(GameCommonData.LoginBonusClassKey))
                 {
-                    var loginBonusItemData = _catalogDataManager.GetAddVirtualCurrencyItemData(item.ItemId);
+                    var loginBonusItemData = catalogDataRepository.GetAddVirtualCurrencyItemData(item.ItemId);
                     if (loginBonusItemData == null)
                     {
                         return false;
@@ -291,7 +291,7 @@ namespace Manager.NetworkManager
                 return;
             }
 
-            var itemData = _catalogDataManager.GetAddVirtualCurrencyItemDatum()
+            var itemData = catalogDataRepository.GetAddVirtualCurrencyItemDatum()
                 .FirstOrDefault(x => x.Name == _itemName);
             if (itemData == null)
             {

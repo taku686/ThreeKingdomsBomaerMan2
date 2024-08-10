@@ -15,7 +15,7 @@ namespace Manager.BattleManager
         [Inject] private PhotonNetworkManager networkManager;
         [Inject] private PlayerGenerator playerGenerator;
         [Inject] private BombProvider bombProvider;
-        [Inject] private UserDataManager userDataManager;
+        [Inject] private UserDataRepository userDataRepository;
         [Inject] private MissionManager missionManager;
         [SerializeField] private Transform playerUIParent;
         [SerializeField] private GameObject playerUI;
@@ -81,7 +81,7 @@ namespace Manager.BattleManager
                     missionManager.CheckMission(GameCommonData.BattleCountActionId);
                     break;
                 case GameCommonData.CharacterBattleActionId:
-                    var characterId = userDataManager.GetEquippedCharacterId();
+                    var characterId = userDataRepository.GetEquippedCharacterId();
                     missionManager.CheckMission(GameCommonData.CharacterBattleActionId, characterId);
                     break;
             }

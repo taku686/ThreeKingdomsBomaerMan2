@@ -17,7 +17,7 @@ namespace UI.Title
             private UIAnimation uiAnimation;
             private LoginBonusView View => (LoginBonusView)Owner.GetView(State.LoginBonus);
             private MainView MainView => (MainView)Owner.GetView(State.Main);
-            private UserDataManager userDataManager;
+            private UserDataRepository userDataRepository;
             private PlayFabShopManager playaFabShopManager;
             private GameObject focusObj;
             private const int Day4 = 3;
@@ -36,7 +36,7 @@ namespace UI.Title
             private async UniTask Initialize()
             {
                 uiAnimation = Owner.uiAnimation;
-                userDataManager = Owner.userDataManager;
+                userDataRepository = Owner.userDataRepository;
                 playaFabShopManager = Owner.playFabShopManager;
                 InitializeButton();
                 await InitializeUIContent();
@@ -50,7 +50,7 @@ namespace UI.Title
                 for (int i = 0; i < buttons.Length; i++)
                 {
                     var index = i;
-                    if (userDataManager.GetLoginBonusStatus(index) != LoginBonusStatus.CanReceive)
+                    if (userDataRepository.GetLoginBonusStatus(index) != LoginBonusStatus.CanReceive)
                     {
                         continue;
                     }
@@ -76,7 +76,7 @@ namespace UI.Title
 
             private void SetupLoginImage()
             {
-                var userData = userDataManager.GetUserData();
+                var userData = userDataRepository.GetUserData();
                 foreach (var login in userData.LoginBonus)
                 {
                     if (GameCommonData.GetLoginBonusStatus(login.Value) != LoginBonusStatus.Received)
@@ -165,7 +165,7 @@ namespace UI.Title
                             .AttachExternalCancellation(rewardViewObj.GetCancellationTokenOnDestroy());
                     }
 
-                    var result = await userDataManager.SetLoginBonus(index, LoginBonusStatus.Received);
+                    var result = await userDataRepository.SetLoginBonus(index, LoginBonusStatus.Received);
                     if (!result)
                     {
                         return;

@@ -21,7 +21,7 @@ namespace UI.Title
             private CharacterSelectRepository characterSelectRepository;
             private PlayFabVirtualCurrencyManager playFabVirtualCurrencyManager;
             private SortCharactersUseCase sortCharactersUseCase;
-            private UserDataManager UserDataManager => Owner.userDataManager;
+            private UserDataRepository UserDataRepository => Owner.userDataRepository;
 
             private CancellationTokenSource cancellationTokenSource;
             private readonly Subject<Unit> onChangeViewModel = new();
@@ -133,7 +133,7 @@ namespace UI.Title
                     index++;
                 }
 
-                foreach (var characterData in UserDataManager.GetNotAvailableCharacters())
+                foreach (var characterData in UserDataRepository.GetNotAvailableCharacters())
                 {
                     if (index % 5 == 0)
                     {
@@ -202,7 +202,7 @@ namespace UI.Title
                 disableGrid.interactable = false;
                 Owner.uiAnimation.ClickScale(disableGrid.gameObject).OnComplete(() => UniTask.Void(async () =>
                 {
-                    var user = Owner.userDataManager.GetUserData();
+                    var user = Owner.userDataRepository.GetUserData();
                     var characterPrice = GameCommonData.CharacterPrice;
                     var gem = await playFabVirtualCurrencyManager.GetGem();
                     if (gem == GameCommonData.NetworkErrorCode)

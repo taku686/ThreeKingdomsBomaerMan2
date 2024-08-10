@@ -1,5 +1,4 @@
 using System;
-using System.Threading;
 using UnityEngine;
 
 namespace Common.Data
@@ -38,7 +37,6 @@ namespace Common.Data
         public const string LoginBonusNotificationItemKey = "LoginBonusNotification";
         public const string LevelItemKey = "level";
         public const string LoginBonusItemKey = "day";
-        public const string QuestionItemKey = "Question";
         public static readonly int SkillOneHashKey = Animator.StringToHash("Attack");
         public static readonly int SkillTwoHashKey = Animator.StringToHash("Passive");
         public static readonly int ActiveHashKey = Animator.StringToHash("Active");
@@ -53,13 +51,14 @@ namespace Common.Data
         public const string WeaponEffectPrefabPath = "Prefabs/WeaponEffect/Effect";
         public const string StagePrefabPath = "Prefabs/Stage/";
         public const string SkillSpritePath = "Sprites/Skill/";
+        public const string WeaponSpritePath = "Sprites/Weapon/";
+        public const string WeaponPrefabPath = "Prefabs/Weapon/";
         public const string VirtualCurrencySpritePath = "Sprites/VirtualCurrency/";
         public const string LevelText = "Lv.";
         public const string TitleScene = "Title";
         public const string BattleScene = "Battle";
         public const float CloseDuration = 0.5f;
         public const float OpenDuration = 1.0f;
-        public const float ClickIntervalDuration = 0.2f;
         public const int ThreeMilliSecondsBeforeExplosion = 3000;
         public const int MaxCharacterLevel = 10;
         public const int MinCharacterLevel = 0;
@@ -70,7 +69,6 @@ namespace Common.Data
         public const int CharacterBattleActionId = 2;
         public const int ExceptionMissionProgress = 999;
         public const int NetworkErrorCode = Int32.MaxValue;
-        public const int CharacterLimit = 40;
         public const float FadeOutTime = 0.8f;
         public const int BattleTime = 180;
 
@@ -256,14 +254,14 @@ namespace Common.Data
 
     public enum WeaponType
     {
-        Spear,
-        Hammer,
-        Sword,
-        Knife,
-        Fan,
-        Bow,
-        Shield,
-        Axe
+        Spear = 0,
+        Hammer = 1,
+        Sword = 2,
+        Knife = 3,
+        Fan = 4,
+        Bow = 5,
+        Shield = 6,
+        Axe = 72
     }
 
     public enum AttributeType

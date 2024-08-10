@@ -6,12 +6,12 @@ using UnityEngine;
 public class MissionBase : IDisposable
 {
     private readonly MissionData _missionData;
-    private readonly UserDataManager _userDataManager;
+    private readonly UserDataRepository userDataRepository;
 
-    protected MissionBase(MissionData missionData, UserDataManager userDataManager)
+    protected MissionBase(MissionData missionData, UserDataRepository userDataRepository)
     {
         _missionData = missionData;
-        _userDataManager = userDataManager;
+        this.userDataRepository = userDataRepository;
     }
 
     public int GetActionId()
@@ -46,7 +46,7 @@ public class MissionBase : IDisposable
 
     private void IncreaseMissionProgress()
     {
-        var missionProgress = _userDataManager.GetMissionProgress(_missionData.index);
+        var missionProgress = userDataRepository.GetMissionProgress(_missionData.index);
         if (missionProgress == GameCommonData.ExceptionMissionProgress)
         {
             Debug.Log(missionProgress);
@@ -54,7 +54,7 @@ public class MissionBase : IDisposable
         }
 
         missionProgress += 1;
-        _userDataManager.SetMissionProgress(_missionData.index, missionProgress);
+        userDataRepository.SetMissionProgress(_missionData.index, missionProgress);
     }
 
 

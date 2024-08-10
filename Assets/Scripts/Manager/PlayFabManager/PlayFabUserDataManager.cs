@@ -13,7 +13,7 @@ namespace Manager.NetworkManager
 {
     public class PlayFabUserDataManager : IDisposable
     {
-        [Inject] private UserDataManager _userDataManager;
+        [Inject] private UserDataRepository userDataRepository;
 
         /// <summary>
         /// playerデータの更新
@@ -64,7 +64,7 @@ namespace Manager.NetworkManager
                 return null;
             }
 
-            _userDataManager.SetUserData(user);
+            userDataRepository.SetUserData(user);
             return user;
         }
 

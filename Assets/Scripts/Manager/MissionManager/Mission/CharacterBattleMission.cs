@@ -2,8 +2,8 @@ using Common.Data;
 
 public class CharacterBattleMission : MissionBase
 {
-    public CharacterBattleMission(MissionData missionData, UserDataManager userDataManager) : base(missionData,
-        userDataManager)
+    public CharacterBattleMission(MissionData missionData, UserDataRepository userDataRepository) : base(missionData,
+        userDataRepository)
     {
     }
 }

@@ -7,27 +7,27 @@ namespace UI.Title
 {
     public class CharacterSelectViewModelUseCase : IDisposable
     {
-        private readonly UserDataManager userDataManager;
-        private readonly CharacterDataRepository characterDataRepository;
+        private readonly UserDataRepository userDataRepository;
+        private readonly CharacterMasterDataRepository characterMasterDataRepository;
         private readonly CharacterSelectRepository characterSelectRepository;
 
         [Inject]
         public CharacterSelectViewModelUseCase
         (
-            UserDataManager userDataManager,
-            CharacterDataRepository characterDataRepository,
+            UserDataRepository userDataRepository,
+            CharacterMasterDataRepository characterMasterDataRepository,
             CharacterSelectRepository characterSelectRepository
         )
         {
-            this.userDataManager = userDataManager;
-            this.characterDataRepository = characterDataRepository;
+            this.userDataRepository = userDataRepository;
+            this.characterMasterDataRepository = characterMasterDataRepository;
             this.characterSelectRepository = characterSelectRepository;
         }
 
         public CharacterSelectView.ViewModel InAsTask()
         {
-            var availableAmount = userDataManager.GetAvailableCharacterAmount();
-            var totalAmount = characterDataRepository.GetAllCharacterAmount();
+            var availableAmount = userDataRepository.GetAvailableCharacterAmount();
+            var totalAmount = characterMasterDataRepository.GetAllCharacterAmount();
             var orderType = characterSelectRepository.GetOrderType();
             return new CharacterSelectView.ViewModel
             (

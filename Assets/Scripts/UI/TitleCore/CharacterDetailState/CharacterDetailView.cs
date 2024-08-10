@@ -24,10 +24,9 @@ namespace UI.Title
         [SerializeField] private TextMeshProUGUI levelText;
         [SerializeField] private PurchaseErrorView purchaseErrorView;
         [SerializeField] private VirtualCurrencyAddPopup virtualCurrencyAddPopup;
-        [SerializeField] private QuestionView questionView;
+        [SerializeField] private Button inventoryButton;
         private bool isInitialized;
         private const float MoveAmount = 50;
-        public QuestionView QuestionView => questionView;
         public VirtualCurrencyAddPopup VirtualCurrencyAddPopup => virtualCurrencyAddPopup;
         public PurchaseErrorView PurchaseErrorView => purchaseErrorView;
         public Button UpgradeButton => upgradeButton;
@@ -35,6 +34,7 @@ namespace UI.Title
         public Button SelectButton => selectButton;
         public Button LeftArrowButton => leftArrowButton;
         public Button RightArrowButton => rightArrowButton;
+        public Button InventoryButton => inventoryButton;
 
         public void ApplyViewModel(CharacterData characterData, CharacterLevelData currentLevelData,
             CharacterLevelData nextLevelData)
@@ -44,7 +44,6 @@ namespace UI.Title
             SetLevelView(currentLevelData, nextLevelData);
             purchaseErrorView.gameObject.SetActive(false);
             virtualCurrencyAddPopup.gameObject.SetActive(false);
-            questionView.commentObj.SetActive(false);
             InitializeArrowAnimation();
         }
 

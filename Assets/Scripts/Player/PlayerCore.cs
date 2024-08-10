@@ -55,21 +55,21 @@ namespace Player.Common
 
 
         public void Initialize(CharacterStatusManager manager, string key, CharacterData data,
-            UserDataManager userDataManager)
+            UserDataRepository userDataRepository)
         {
             characterData = data;
             hpKey = key;
             characterStatusManager = manager;
-            InitializeComponent(characterData, userDataManager);
+            InitializeComponent(characterData, userDataRepository);
             InitializeState();
         }
 
-        private void InitializeComponent(CharacterData data, UserDataManager userDataManager)
+        private void InitializeComponent(CharacterData data, UserDataRepository userDataRepository)
         {
             playerPhotonView = GetComponent<PhotonView>();
             inputManager = gameObject.AddComponent<InputManager>();
             inputManager.Initialize(playerPhotonView, SkillOneIntervalTime, SkillTwoIntervalTime, data,
-                userDataManager);
+                userDataRepository);
             putBomb = GetComponent<PutBomb>();
             animator = GetComponent<Animator>();
             animatorTrigger = animator.GetBehaviour<ObservableStateMachineTrigger>();

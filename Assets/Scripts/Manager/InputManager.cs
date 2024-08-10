@@ -26,7 +26,7 @@ namespace Manager
 
 
         public void Initialize(PhotonView view, float skillOneIntervalTime, float skillTwoIntervalTime,
-            CharacterData data, UserDataManager userDataManager)
+            CharacterData data, UserDataRepository userDataRepository)
         {
             photonView = view;
             inputView = FindObjectOfType<InputView>();
@@ -36,7 +36,7 @@ namespace Manager
                 return;
             }
 
-            var currentLevelData = userDataManager.GetCurrentLevelData(data.Id);
+            var currentLevelData = userDataRepository.GetCurrentLevelData(data.Id);
             skillOneIntervalImage = inputView.skillOneIntervalImage;
             skillTwoIntervalImage = inputView.skillTwoIntervalImage;
             characterData = data;

@@ -30,7 +30,7 @@ namespace UI.Title
             private async UniTaskVoid Initialize()
             {
                 playFabLoginManager = Owner.playFabLoginManager;
-                Owner.CreateCharacter(Owner.userDataManager.GetUserData().EquippedCharacterId);
+                Owner.CreateCharacter(Owner.userDataRepository.GetUserData().EquippedCharacterId);
                 View.SetBackgroundEffect(true);
                 InitializeButton();
                 Owner.SwitchUiObject(State.Main, true).Forget();

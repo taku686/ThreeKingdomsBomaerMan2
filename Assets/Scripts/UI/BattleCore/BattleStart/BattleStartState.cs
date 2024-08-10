@@ -11,7 +11,7 @@ namespace Manager.BattleManager
     {
         public class BattleStartState : StateMachine<BattleCore>.State
         {
-            private UserDataManager userDataManager;
+            private UserDataRepository userDataRepository;
             private BattleStartView battleStartView;
             private CancellationTokenSource cts;
 
@@ -30,7 +30,7 @@ namespace Manager.BattleManager
             private void Initialize()
             {
                 cts = new CancellationTokenSource();
-                userDataManager = Owner.userDataManager;
+                userDataRepository = Owner.userDataRepository;
                 battleStartView = Owner.battleStartView;
                 battleStartView.gameObject.SetActive(true);
                 battleStartView.Initialize();
@@ -41,8 +41,8 @@ namespace Manager.BattleManager
             {
                 Owner.CheckMission(GameCommonData.CharacterBattleActionId);
                 Owner.CheckMission(GameCommonData.BattleCountActionId);
-                var userData = userDataManager.GetUserData();
-                await userDataManager.UpdateUserData(userData);
+                var userData = userDataRepository.GetUserData();
+                await userDataRepository.UpdateUserData(userData);
             }
 
             private void OnSubscribe()

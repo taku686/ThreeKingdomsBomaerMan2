@@ -26,6 +26,7 @@ namespace Common.Installer
             Container.Bind<PlayFabTitleDataManager>().FromNew().AsCached();
             Container.Bind<ChatGPTManager>().FromNew().AsCached();
             InstallCharacterSelect();
+            InstallInventory();
         }
 
         private void InstallCharacterSelect()
@@ -33,6 +34,11 @@ namespace Common.Installer
             Container.Bind<SortCharactersUseCase>().AsCached();
             Container.Bind<CharacterSelectViewModelUseCase>().AsCached();
             Container.Bind<CharacterSelectRepository>().AsCached();
+        }
+
+        private void InstallInventory()
+        {
+            Container.Bind<InventoryViewModelUseCase>().AsCached();
         }
     }
 }

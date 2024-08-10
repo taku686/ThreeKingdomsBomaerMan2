@@ -9,20 +9,20 @@ namespace UseCase
 {
     public class SortCharactersUseCase : IDisposable
     {
-        private readonly UserDataManager userDataManager;
+        private readonly UserDataRepository userDataRepository;
 
         public SortCharactersUseCase
         (
-            UserDataManager userDataManager
+            UserDataRepository userDataRepository
         )
         {
-            this.userDataManager = userDataManager;
+            this.userDataRepository = userDataRepository;
         }
 
         public IReadOnlyCollection<CharacterData> InAsTask(CharacterSelectRepository.OrderType orderType)
         {
             var result = new List<CharacterData>();
-            var characterDatum = userDataManager.GetAvailableCharacters();
+            var characterDatum = userDataRepository.GetAvailableCharacters();
             if (orderType == CharacterSelectRepository.OrderType.Id)
             {
                 return characterDatum.OrderBy(data => data.Id).ToArray();
@@ -30,7 +30,7 @@ namespace UseCase
 
             foreach (var characterData in characterDatum)
             {
-                var level = userDataManager.GetCurrentLevelData(characterData.Id);
+                var level = userDataRepository.GetCurrentLevelData(characterData.Id);
                 var hp = Mathf.RoundToInt(level.StatusRate * characterData.Hp);
                 var attack = Mathf.RoundToInt(level.StatusRate * characterData.Attack);
                 var speed = Mathf.RoundToInt(level.StatusRate * characterData.Speed);

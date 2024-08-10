@@ -4,6 +4,7 @@ using Common.Data;
 using Manager;
 using Manager.DataManager;
 using Manager.NetworkManager;
+using Repository;
 using UnityEngine;
 using Zenject;
 
@@ -17,17 +18,18 @@ namespace Common.Installer
 
         public override void InstallBindings()
         {
-            Container.Bind<CharacterDataRepository>().AsSingle();
-            Container.Bind<CatalogDataManager>().AsSingle();
-            Container.Bind<CharacterLevelDataRepository>().AsSingle();
+            Container.Bind<CharacterMasterDataRepository>().AsSingle();
+            Container.Bind<CatalogDataRepository>().AsSingle();
+            Container.Bind<CharacterLevelMasterDataRepository>().AsSingle();
             Container.Bind<MissionDataRepository>().AsCached();
             Container.Bind<PhotonNetworkManager>().FromComponentInNewPrefab(photonNetworkGameObject).AsSingle();
             Container.Bind<MainManager>().FromComponentsInNewPrefab(mainManagerGameObject).AsSingle();
-            Container.Bind<UserDataManager>().AsSingle();
+            Container.Bind<UserDataRepository>().AsSingle();
             Container.Bind<MissionManager>().AsSingle();
             Container.Bind<PlayFabCatalogManager>().AsCached();
             Container.Bind<PlayFabUserDataManager>().AsCached();
             Container.Bind<SkillDataRepository>().AsCached();
+            Container.Bind<WeaponMasterDataRepository>().AsCached();
         }
     }
 }

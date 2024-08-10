@@ -7,16 +7,16 @@ using Zenject;
 
 public class MissionManager : IDisposable
 {
-    [Inject] private UserDataManager _userDataManager;
+    [Inject] private UserDataRepository userDataRepository;
     [Inject] private MissionDataRepository missionDataRepository;
     private readonly List<MissionBase> _missionBases = new();
 
     public void Initialize()
     {
-        foreach (var mission in _userDataManager.GetMissionProgressDatum())
+        foreach (var mission in userDataRepository.GetMissionProgressDatum())
         {
             var missionData = missionDataRepository.GetMissionData(mission.Key);
-            var missionBase = GenerateMissionBase(missionData, _userDataManager);
+            var missionBase = GenerateMissionBase(missionData, userDataRepository);
             _missionBases.Add(missionBase);
         }
     }
@@ -47,16 +47,16 @@ public class MissionManager : IDisposable
         }
     }
 
-    private MissionBase GenerateMissionBase(MissionData missionData, UserDataManager userDataManager)
+    private MissionBase GenerateMissionBase(MissionData missionData, UserDataRepository userDataRepository)
     {
         switch (missionData.action)
         {
             case GameCommonData.LevelUpActionId:
-                return new LevelUpMission(missionData, userDataManager);
+                return new LevelUpMission(missionData, userDataRepository);
             case GameCommonData.BattleCountActionId:
-                return new BattleCountMission(missionData, userDataManager);
+                return new BattleCountMission(missionData, userDataRepository);
             case GameCommonData.CharacterBattleActionId:
-                return new CharacterBattleMission(missionData, userDataManager);
+                return new CharacterBattleMission(missionData, userDataRepository);
             default:
                 return null;
         }

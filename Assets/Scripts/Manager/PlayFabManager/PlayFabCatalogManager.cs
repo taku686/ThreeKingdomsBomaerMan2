@@ -14,7 +14,7 @@ namespace Assets.Scripts.Common.ResourceManager
 {
     public class PlayFabCatalogManager : IDisposable
     {
-        [Inject] private readonly CatalogDataManager catalogDataManager;
+        [Inject] private readonly CatalogDataRepository catalogDataRepository;
         private readonly CancellationTokenSource cancellationTokenSource = new();
         private static readonly int ModifiedValue = 10;
 
@@ -50,7 +50,7 @@ namespace Assets.Scripts.Common.ResourceManager
             }
 
             var catalogItemList = response.Result.Catalog;
-            catalogDataManager.SetCatalogItemList(catalogItemList);
+            catalogDataRepository.SetCatalogItemList(catalogItemList);
             return catalogItemList;
         }
 
@@ -76,7 +76,7 @@ namespace Assets.Scripts.Common.ResourceManager
                 Hp = customData.Hp,
                 CharaColor = customData.CharaColor
             };
-            catalogDataManager.SetCharacter(customData.Id, characterData);
+            catalogDataRepository.SetCharacter(characterData);
         }
 
         private void SetAddVirtualCurrencyItemData(CatalogItem item)
@@ -98,7 +98,7 @@ namespace Assets.Scripts.Common.ResourceManager
                 price = customData.price,
                 Name = item.ItemId
             };
-            catalogDataManager.SetAddVirtualCurrencyData(addVirtualCurrencyItemData);
+            catalogDataRepository.SetAddVirtualCurrencyData(addVirtualCurrencyItemData);
         }
 
         private void SetLoginBonusItemData(CatalogItem item)
@@ -120,14 +120,14 @@ namespace Assets.Scripts.Common.ResourceManager
                 price = customData.price,
                 Name = item.ItemId
             };
-            catalogDataManager.SetLoginBonusItemData(addVirtualCurrencyItemData);
+            catalogDataRepository.SetLoginBonusItemData(addVirtualCurrencyItemData);
         }
 
         public void Dispose()
         {
             cancellationTokenSource.Cancel();
             cancellationTokenSource.Dispose();
-            catalogDataManager.Dispose();
+            catalogDataRepository.Dispose();
         }
     }
 }

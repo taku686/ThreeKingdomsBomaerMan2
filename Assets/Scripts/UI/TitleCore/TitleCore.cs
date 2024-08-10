@@ -12,8 +12,8 @@ using UI.Common;
 using UnityEngine;
 using Zenject;
 using Manager.DataManager;
+using Repository;
 using UniRx;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 using UseCase;
 
@@ -22,10 +22,20 @@ namespace UI.Title
 {
     public partial class TitleCore : MonoBehaviourPunCallbacks
     {
-        [Inject] private CharacterDataRepository characterDataRepository;
-        [Inject] private UserDataManager userDataManager;
+        //Repository
+        [Inject] private CharacterMasterDataRepository characterMasterDataRepository;
+        [Inject] private UserDataRepository userDataRepository;
         [Inject] private MissionDataRepository missionDataRepository;
-        [Inject] private UIAnimation uiAnimation;
+        [Inject] private CatalogDataRepository catalogDataRepository;
+        [Inject] private CharacterSelectRepository characterSelectRepository;
+        [Inject] private WeaponMasterDataRepository weaponMasterDataRepository;
+
+        //UseCase
+        [Inject] private CharacterSelectViewModelUseCase characterSelectViewModelUseCase;
+        [Inject] private SortCharactersUseCase sortCharactersUseCase;
+        [Inject] private InventoryViewModelUseCase inventoryViewModelUseCase;
+
+        //Manager
         [Inject] private PhotonNetworkManager photonNetworkManager;
         [Inject] private MainManager mainManager;
         [Inject] private PlayFabLoginManager playFabLoginManager;
@@ -33,15 +43,15 @@ namespace UI.Title
         [Inject] private PlayFabShopManager playFabShopManager;
         [Inject] private PlayFabAdsManager playFabAdsManager;
         [Inject] private PlayFabVirtualCurrencyManager playFabVirtualCurrencyManager;
-        [Inject] private CatalogDataManager catalogDataManager;
         [Inject] private MissionManager missionManager;
         [Inject] private ChatGPTManager chatGptManager;
-        [Inject] private CharacterSelectViewModelUseCase characterSelectViewModelUseCase;
-        [Inject] private CharacterSelectRepository characterSelectRepository;
-        [Inject] private SortCharactersUseCase sortCharactersUseCase;
+
+        //UI
+        [Inject] private UIAnimation uiAnimation;
 
         [SerializeField] private Fade fade;
         [SerializeField] private Transform characterCreatePosition;
+        [SerializeField] private ViewBase[] views;
         [SerializeField] private CommonView commonView;
 
         private GameObject equippedCharacter;
@@ -49,7 +59,6 @@ namespace UI.Title
         private StateMachine<TitleCore> stateMachine;
         private CancellationToken token;
         private CancellationTokenSource cts;
-        [SerializeField] private ViewBase[] views;
 
 
         public enum State
@@ -115,6 +124,8 @@ namespace UI.Title
             stateMachine.AddTransition<MainState, CharacterSelectState>((int)State.CharacterSelect);
             stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)State.CharacterDetail);
             stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)State.CharacterSelect);
+            stateMachine.AddTransition<CharacterDetailState, InventoryState>((int)State.Inventory);
+            stateMachine.AddTransition<InventoryState, CharacterDetailState>((int)State.CharacterDetail);
             stateMachine.AddTransition<MainState, BattleReadyState>((int)State.BattleReady);
             stateMachine.AddTransition<LoginState, MainState>((int)State.Main);
             stateMachine.AddTransition<MainState, SettingState>((int)State.Setting);
@@ -139,7 +150,7 @@ namespace UI.Title
             var preWeaponEffect = weaponEffect;
             Destroy(preCharacter);
             Destroy(preWeaponEffect);
-            var createCharacterData = characterDataRepository.GetCharacterData(id);
+            var createCharacterData = characterMasterDataRepository.GetCharacterData(id);
             if (createCharacterData.CharacterObject == null || createCharacterData.WeaponEffectObj == null)
             {
                 Debug.LogError(id);
@@ -148,7 +159,7 @@ namespace UI.Title
             equippedCharacter = Instantiate(createCharacterData.CharacterObject,
                 characterCreatePosition.position,
                 characterCreatePosition.rotation, characterCreatePosition);
-            var currentCharacterLevel = userDataManager.GetCurrentLevelData(id);
+            var currentCharacterLevel = userDataRepository.GetCurrentLevelData(id);
             if (currentCharacterLevel.Level < GameCommonData.MaxCharacterLevel)
             {
                 return;
@@ -216,7 +227,7 @@ namespace UI.Title
                     missionManager.CheckMission(GameCommonData.BattleCountActionId);
                     break;
                 case GameCommonData.CharacterBattleActionId:
-                    var characterId = userDataManager.GetEquippedCharacterId();
+                    var characterId = userDataRepository.GetEquippedCharacterId();
                     missionManager.CheckMission(GameCommonData.CharacterBattleActionId, characterId);
                     break;
             }

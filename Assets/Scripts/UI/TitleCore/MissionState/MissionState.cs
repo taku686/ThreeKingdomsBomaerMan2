@@ -20,8 +20,8 @@ namespace UI.Title
             private const string InProgress = "In Progress";
             private const string ProgressBarText = " <#b3bedb>/ 100";
             private MissionDataRepository missionDataRepository;
-            private UserDataManager userDataManager;
-            private CatalogDataManager catalogDataManager;
+            private UserDataRepository userDataRepository;
+            private CatalogDataRepository catalogDataRepository;
             private PlayFabShopManager playFabShopManager;
             private MissionView View => (MissionView)Owner.GetView(State.Mission);
             private CommonView commonView;
@@ -44,8 +44,8 @@ namespace UI.Title
             private async UniTask Initialize()
             {
                 missionDataRepository = Owner.missionDataRepository;
-                userDataManager = Owner.userDataManager;
-                catalogDataManager = Owner.catalogDataManager;
+                userDataRepository = Owner.userDataRepository;
+                catalogDataRepository = Owner.catalogDataRepository;
                 playFabShopManager = Owner.playFabShopManager;
                 commonView = Owner.commonView;
                 token = View.GetCancellationTokenOnDestroy();
@@ -69,11 +69,11 @@ namespace UI.Title
                 DestroyMissionGrids();
                 coinSprite = (Sprite)await Resources.LoadAsync<Sprite>(GameCommonData.VirtualCurrencySpritePath + "coin");
                 gemSprite = (Sprite)await Resources.LoadAsync<Sprite>(GameCommonData.VirtualCurrencySpritePath + "gem");
-                var missionProgressDatum = userDataManager.GetMissionProgressDatum();
+                var missionProgressDatum = userDataRepository.GetMissionProgressDatum();
                 foreach (var data in missionProgressDatum)
                 {
                     var missionData = missionDataRepository.GetMissionData(data.Key);
-                    var rewardData = catalogDataManager.GetAddVirtualCurrencyItemData(missionData.rewardId);
+                    var rewardData = catalogDataRepository.GetAddVirtualCurrencyItemData(missionData.rewardId);
                     var missionGrid = Instantiate(View.missionGrid, View.gridParent);
                     var progressValue =
                         (int)(data.Value / (float)missionData.count * GameCommonData.MaxMissionProgress);
@@ -111,7 +111,7 @@ namespace UI.Title
                 Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     var errorText = commonView.purchaseErrorView.errorInfoText;
-                    var rewardData = catalogDataManager.GetAddVirtualCurrencyItemData(missionData.rewardId);
+                    var rewardData = catalogDataRepository.GetAddVirtualCurrencyItemData(missionData.rewardId);
                     await playFabShopManager.TryPurchaseItem(missionData.rewardId, GameCommonData.CoinKey, 0,
                         errorText);
                     if (rewardData == null)
@@ -146,12 +146,12 @@ namespace UI.Title
 
                 Destroy(missionGrids[missionId].gameObject);
                 missionGrids.Remove(missionId);
-                await userDataManager.RemoveMissionData(missionId);
+                await userDataRepository.RemoveMissionData(missionId);
             }
 
             private async UniTask AddMission()
             {
-                await userDataManager.AddMissionData();
+                await userDataRepository.AddMissionData();
                 await GenerateMissionGrid();
             }
 

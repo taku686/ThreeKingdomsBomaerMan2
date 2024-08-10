@@ -14,9 +14,9 @@ namespace Manager.NetworkManager
 {
     public class PhotonNetworkManager : MonoBehaviourPunCallbacks
     {
-        [Inject] private CharacterDataRepository characterDataRepository;
-        [Inject] private UserDataManager userDataManager;
-        [Inject] private CharacterLevelDataRepository characterLevelDataRepository;
+        [Inject] private CharacterMasterDataRepository characterMasterDataRepository;
+        [Inject] private UserDataRepository userDataRepository;
+        [Inject] private CharacterLevelMasterDataRepository characterLevelMasterDataRepository;
         private readonly Subject<Photon.Realtime.Player[]> joinedRoomSubject = new();
         private readonly Subject<int> leftRoomSubject = new();
         private readonly Subject<Unit> playerGenerateCompleteSubject = new();
@@ -66,8 +66,8 @@ namespace Manager.NetworkManager
         public override void OnJoinedRoom()
         {
             var index = PhotonNetwork.LocalPlayer.ActorNumber;
-            var characterId = characterDataRepository.GetUserEquippedCharacterData().Id;
-            var characterLevel = userDataManager.GetCurrentLevelData(characterId).Level;
+            var characterId = characterMasterDataRepository.GetUserEquippedCharacterData().Id;
+            var characterLevel = userDataRepository.GetCurrentLevelData(characterId).Level;
             PhotonNetwork.LocalPlayer.SetCharacterData(characterId);
             PhotonNetwork.LocalPlayer.SetCharacterLevel(characterLevel);
             PhotonNetwork.LocalPlayer.SetPlayerIndex(index);
@@ -107,9 +107,9 @@ namespace Manager.NetworkManager
             foreach (var player in players)
             {
                 currentRoomCharacterDatum[player.ActorNumber] =
-                    characterDataRepository.GetCharacterData(player.GetCharacterId());
+                    characterMasterDataRepository.GetCharacterData(player.GetCharacterId());
                 currentRoomCharacterLevelDatum[player.ActorNumber] =
-                    characterLevelDataRepository.GetCharacterLevelData(player.GetCharacterLevel());
+                    characterLevelMasterDataRepository.GetCharacterLevelData(player.GetCharacterLevel());
             }
 
             joinedRoomSubject.OnNext(players);
