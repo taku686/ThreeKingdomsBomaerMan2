@@ -11,8 +11,8 @@ public class WeaponGridView : MonoBehaviour
     [SerializeField] private TextMeshProUGUI countText;
     [SerializeField] private Button button;
     private int weaponId;
-    private readonly Subject<int> onClickSubject = new();
-    public IObservable<int> OnClick => onClickSubject;
+    private readonly Subject<int> onClickObservableSubject = new();
+    public IObservable<int> OnClickObservable => onClickObservableSubject;
 
     public void ApplyViewModel(Sprite icon, int count, int id)
     {
@@ -26,7 +26,7 @@ public class WeaponGridView : MonoBehaviour
     private void OnClickButton()
     {
         button.OnClickAsObservable()
-            .Subscribe(_ => { onClickSubject.OnNext(weaponId); })
+            .Subscribe(_ => { onClickObservableSubject.OnNext(weaponId); })
             .AddTo(gameObject.GetCancellationTokenOnDestroy());
     }
 }

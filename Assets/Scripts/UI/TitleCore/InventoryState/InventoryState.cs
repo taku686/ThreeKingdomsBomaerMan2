@@ -47,12 +47,17 @@ namespace UI.Title
 
                 onChangeSubject
                     .Select(_ => InventoryViewModelUseCase.InAsTask())
-                    .Subscribe(viewModel => View.ApplyViewModel(viewModel))
+                    .Subscribe(viewModel =>
+                    {
+                        View.ApplyViewModel(viewModel);
+                    })
                     .AddTo(cts.Token);
 
+                onChangeSubject.OnNext(Unit.Default);
+                
                 foreach (var gridView in View.WeaponGridViews)
                 {
-                    gridView.OnClick
+                    gridView.OnClickObservable
                         .Subscribe(weaponId =>
                         {
                             selectedWeaponId = weaponId;
@@ -61,8 +66,6 @@ namespace UI.Title
                         })
                         .AddTo(cts.Token);
                 }
-
-                onChangeSubject.OnNext(Unit.Default);
             }
 
 

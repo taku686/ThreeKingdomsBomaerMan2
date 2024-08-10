@@ -29,8 +29,6 @@ public class InventoryView : ViewBase
             var weaponMasterData = weaponData.Key;
             var possessedAmount = weaponData.Value;
             weaponGridView.ApplyViewModel(weaponMasterData.WeaponIcon, possessedAmount, weaponMasterData.Id);
-            weaponGridView.OnClick
-                .Subscribe(weaponId => { }).AddTo(weaponGridView.GetCancellationTokenOnDestroy());
             weaponGridViews.Add(weaponGridView);
         }
 
