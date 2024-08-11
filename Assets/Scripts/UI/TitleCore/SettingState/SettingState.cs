@@ -1,10 +1,11 @@
-﻿using Common;
+﻿using System.Threading;
+using Common;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using PlayFab;
 using PlayFab.ClientModels;
+using UniRx;
 using UnityEngine;
-using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
 {
@@ -13,6 +14,7 @@ namespace UI.Title
         public class SettingState : StateMachine<TitleCore>.State
         {
             private SettingView View => (SettingView)Owner.GetView(State.Setting);
+            private CancellationTokenSource cts;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -21,11 +23,12 @@ namespace UI.Title
 
             protected override void OnExit(StateMachine<TitleCore>.State nextState)
             {
-                Owner.commonView.virtualCurrencyView.gameObject.SetActive(true);
+                Cancel();
             }
 
             private void Initialize()
             {
+                cts = new CancellationTokenSource();
                 InitializeButton();
                 InitializeObject();
                 Owner.SwitchUiObject(State.Setting, false).Forget();
@@ -39,16 +42,23 @@ namespace UI.Title
                 View.SignInCloseButton.onClick.RemoveAllListeners();
                 View.AccountRegisterButton.onClick.RemoveAllListeners();
                 View.AlreadySignInButton.onClick.RemoveAllListeners();
-                View.SignInButton.onClick.RemoveAllListeners();
-                View.SignUpButton.onClick.RemoveAllListeners();
+                
                 View.BackToSignUpButton.onClick.AddListener(OnClickBackToSignUpButton);
                 View.SettingCloseButton.onClick.AddListener(OnClickCloseSetting);
                 View.SignUpCloseButton.onClick.AddListener(OnClickCloseSignUp);
                 View.SignInCloseButton.onClick.AddListener(OnClickCloseSignIn);
                 View.AccountRegisterButton.onClick.AddListener(OnClickAccountButton);
                 View.AlreadySignInButton.onClick.AddListener(OnClickAlreadySignInButton);
-                View.SignInButton.onClick.AddListener(OnClickLogin);
-                View.SignUpButton.onClick.AddListener(OnClickSetEmail);
+
+                View.SignInButton.OnClickAsObservable()
+                    .SelectMany(_ => OnClickLogin().ToObservable())
+                    .Subscribe()
+                    .AddTo(cts.Token);
+
+                View.SignUpButton.OnClickAsObservable()
+                    .SelectMany(_ => OnClickSetEmail().ToObservable())
+                    .Subscribe()
+                    .AddTo(cts.Token);
             }
 
             private void InitializeObject()
@@ -107,24 +117,14 @@ namespace UI.Title
                     .SetLink(Owner.gameObject);
             }
 
-            private void OnClickSetEmail()
+            private async UniTask OnClickSetEmail()
             {
-                Owner.uiAnimation.ClickScaleColor(View.SignUpButton.gameObject)
-                    .OnComplete(async () =>
-                    {
-                        await SetEmailAndPasswordAsync().AttachExternalCancellation(Owner.token);
-                    })
-                    .SetLink(Owner.gameObject);
+                await SetEmailAndPasswordAsync();
             }
 
-            private void OnClickLogin()
+            private async UniTask OnClickLogin()
             {
-                Owner.uiAnimation.ClickScaleColor(View.SignInButton.gameObject)
-                    .OnComplete(async () =>
-                    {
-                        await LoginEmailAndPasswordAsync().AttachExternalCancellation(Owner.token);
-                    })
-                    .SetLink(Owner.gameObject);
+                await LoginEmailAndPasswordAsync().AttachExternalCancellation(cts.Token);
             }
 
             private async UniTask SetEmailAndPasswordAsync()
@@ -195,22 +195,13 @@ namespace UI.Title
                 PlayerPrefsManager.UserID = response.Result.InfoResultPayload.AccountInfo.CustomIdInfo.CustomId;
                 PlayerPrefsManager.IsLoginEmailAddress = true;
             }
-        }
 
-        //ToDo 後で消す
-        private string GetEmail()
-        {
-            var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            var resultString = "";
-            // 処理はデバッグようなのである程度適当に。重複しなければ良い
-            for (int i = 0; i < 8; i++)
+            private void Cancel()
             {
-                resultString += characters[Random.Range(0, characters.Length)];
+                cts.Cancel();
+                cts.Dispose();
+                cts = null;
             }
-
-            // メールアドレスのフォーマットは必要なので、最後にドメインをつける
-            resultString += "@gmail.com";
-            return resultString;
         }
     }
 }

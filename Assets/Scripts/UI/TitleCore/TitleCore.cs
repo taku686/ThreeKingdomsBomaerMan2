@@ -57,7 +57,6 @@ namespace UI.Title
         private GameObject equippedCharacter;
         private GameObject weaponEffect;
         private StateMachine<TitleCore> stateMachine;
-        private CancellationToken token;
         private CancellationTokenSource cts;
 
 
@@ -79,7 +78,6 @@ namespace UI.Title
 
         private void Start()
         {
-            token = this.GetCancellationTokenOnDestroy();
             Application.targetFrameRate = 60;
             Initialize();
         }
@@ -295,7 +293,7 @@ namespace UI.Title
 
         private async UniTask OnClickButtonAnimation(Button button)
         {
-            await uiAnimation.ClickScaleColor(button.gameObject).ToUniTask(cancellationToken: token);
+            await uiAnimation.ClickScaleColor(button.gameObject).ToUniTask();
         }
 
         private void Cancel(CancellationTokenSource cancellationTokenSource)
