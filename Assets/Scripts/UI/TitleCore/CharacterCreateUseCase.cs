@@ -10,27 +10,27 @@ namespace Repository
     {
         private readonly Transform characterGenerateTransform;
         private readonly CharacterMasterDataRepository characterMasterDataRepository;
-        private readonly CharacterLevelMasterDataRepository characterLevelMasterDataRepository;
         private readonly UserDataRepository userDataRepository;
-        private GameObject characterObject;
+        private readonly CharacterObjectRepository characterObjectRepository;
 
         public CharacterCreateUseCase
         (
             Transform characterGenerateTransform,
             CharacterMasterDataRepository characterMasterDataRepository,
-            CharacterLevelMasterDataRepository characterLevelMasterDataRepository,
-            UserDataRepository userDataRepository
+            UserDataRepository userDataRepository,
+            CharacterObjectRepository characterObjectRepository
         )
         {
             this.characterGenerateTransform = characterGenerateTransform;
             this.characterMasterDataRepository = characterMasterDataRepository;
-            this.characterLevelMasterDataRepository = characterLevelMasterDataRepository;
             this.userDataRepository = userDataRepository;
+            this.characterObjectRepository = characterObjectRepository;
         }
 
 
         public void CreateCharacter(int characterId)
         {
+            var characterObject = characterObjectRepository.GetCharacterObject();
             if (characterObject != null)
             {
                 Object.Destroy(characterObject);
@@ -41,16 +41,26 @@ namespace Repository
             {
                 Debug.LogError(characterId + " is not found");
             }
+            
+            CreateCharacter(createCharacterData);
+            CreateWeaponEffect(createCharacterData);
+        }
 
-            characterObject = Object.Instantiate
+        private void CreateCharacter(CharacterData createCharacterData)
+        {
+            var characterObject = Object.Instantiate
             (
                 createCharacterData.CharacterObject,
                 characterGenerateTransform.position,
                 characterGenerateTransform.rotation,
                 characterGenerateTransform
             );
+            characterObjectRepository.SetCharacterObject(characterObject);
+        }
 
-            var currentCharacterLevel = userDataRepository.GetCurrentLevelData(characterId);
+        private void CreateWeaponEffect(CharacterData createCharacterData)
+        {
+            var currentCharacterLevel = userDataRepository.GetCurrentLevelData(createCharacterData.Id);
             if (currentCharacterLevel.Level < GameCommonData.MaxCharacterLevel)
             {
                 return;
@@ -64,23 +74,13 @@ namespace Repository
                 foreach (var system in particleSystems)
                 {
                     var systemMain = system.main;
-                    systemMain.startColor = GameCommonData.GetWeaponColor(characterId);
+                    systemMain.startColor = GameCommonData.GetWeaponColor(createCharacterData.Id);
                 }
 
                 var effect = effectObj.GetComponentInChildren<PSMeshRendererUpdater>();
-                effect.Color = GameCommonData.GetWeaponColor(characterId);
+                effect.Color = GameCommonData.GetWeaponColor(createCharacterData.Id);
                 effect.UpdateMeshEffect(weapon);
             }
-        }
-
-        public GameObject GetCharacterObject()
-        {
-            if (characterObject == null)
-            {
-                Debug.LogError("Character object is null.");
-            }
-
-            return characterObject;
         }
 
         public void Dispose()

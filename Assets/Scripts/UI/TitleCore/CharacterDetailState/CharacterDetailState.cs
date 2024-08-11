@@ -21,6 +21,7 @@ namespace UI.Title
             private CharacterDetailView View => (CharacterDetailView)Owner.GetView(State.CharacterDetail);
             private CommonView CommonView => Owner.commonView;
             private CharacterCreateUseCase CharacterCreateUseCase => Owner.characterCreateUseCase;
+            private CharacterObjectRepository CharacterObjectRepository => Owner.characterObjectRepository;
             private CharacterMasterDataRepository characterMasterDataRepository;
             private PlayFabUserDataManager playFabUserDataManager;
             private PlayFabShopManager playFabShopManager;
@@ -311,7 +312,7 @@ namespace UI.Title
 
             private void InitializeAnimation()
             {
-                var character = CharacterCreateUseCase.GetCharacterObject();
+                var character = CharacterObjectRepository.GetCharacterObject();
                 character.GetComponent<Animator>().SetTrigger(GameCommonData.ActiveHashKey);
             }
 

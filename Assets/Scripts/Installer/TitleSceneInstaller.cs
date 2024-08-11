@@ -28,6 +28,7 @@ namespace Common.Installer
             Container.Bind<PlayFabTitleDataManager>().AsCached();
             Container.Bind<ChatGPTManager>().AsCached();
             Container.Bind<CharacterCreateUseCase>().AsCached().WithArguments(characterGenerateParent);
+            Container.Bind<CharacterObjectRepository>().AsCached();
             InstallCharacterSelect();
             InstallInventory();
         }
