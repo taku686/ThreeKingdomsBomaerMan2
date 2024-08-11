@@ -1,7 +1,8 @@
 ﻿using Assets.Scripts.Common.PlayFab;
+using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using State = StateMachine<UI.Title.TitleCore>.State;
+using Repository;
 
 namespace UI.Title
 {
@@ -9,8 +10,10 @@ namespace UI.Title
     {
         public class MainState : StateMachine<TitleCore>.State
         {
-            private PlayFabLoginManager playFabLoginManager;
+            private PlayFabLoginManager PlayFabLoginManager => Owner.playFabLoginManager;
             private MainView View => (MainView)Owner.GetView(State.Main);
+            private CharacterCreateUseCase CharacterCreateUseCase => Owner.characterCreateUseCase;
+            private UserDataRepository UserDataRepository => Owner.userDataRepository;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -29,8 +32,8 @@ namespace UI.Title
 
             private async UniTaskVoid Initialize()
             {
-                playFabLoginManager = Owner.playFabLoginManager;
-                Owner.CreateCharacter(Owner.userDataRepository.GetUserData().EquippedCharacterId);
+                var characterId = UserDataRepository.GetEquippedCharacterId();
+                CharacterCreateUseCase.CreateCharacter(characterId);
                 View.SetBackgroundEffect(true);
                 InitializeButton();
                 Owner.SwitchUiObject(State.Main, true).Forget();
@@ -63,12 +66,12 @@ namespace UI.Title
             //todo 後で使う
             private void TransitionLoginBonus()
             {
-                if (!playFabLoginManager.haveLoginBonus)
+                if (!PlayFabLoginManager.haveLoginBonus)
                 {
                     return;
                 }
 
-                playFabLoginManager.haveLoginBonus = false;
+                PlayFabLoginManager.haveLoginBonus = false;
                 Owner.stateMachine.Dispatch((int)State.LoginBonus);
             }
 

@@ -34,6 +34,7 @@ namespace UI.Title
         [Inject] private CharacterSelectViewModelUseCase characterSelectViewModelUseCase;
         [Inject] private SortCharactersUseCase sortCharactersUseCase;
         [Inject] private InventoryViewModelUseCase inventoryViewModelUseCase;
+        [Inject] private CharacterCreateUseCase characterCreateUseCase;
 
         //Manager
         [Inject] private PhotonNetworkManager photonNetworkManager;
@@ -54,8 +55,6 @@ namespace UI.Title
         [SerializeField] private ViewBase[] views;
         [SerializeField] private CommonView commonView;
 
-        private GameObject equippedCharacter;
-        private GameObject weaponEffect;
         private StateMachine<TitleCore> stateMachine;
         private CancellationTokenSource cts;
 
@@ -142,44 +141,6 @@ namespace UI.Title
             OnClickTransitionState(ticketAddButton, State.Shop, cts.Token);
         }
 
-        private void CreateCharacter(int id)
-        {
-            var preCharacter = equippedCharacter;
-            var preWeaponEffect = weaponEffect;
-            Destroy(preCharacter);
-            Destroy(preWeaponEffect);
-            var createCharacterData = characterMasterDataRepository.GetCharacterData(id);
-            if (createCharacterData.CharacterObject == null || createCharacterData.WeaponEffectObj == null)
-            {
-                Debug.LogError(id);
-            }
-
-            equippedCharacter = Instantiate(createCharacterData.CharacterObject,
-                characterCreatePosition.position,
-                characterCreatePosition.rotation, characterCreatePosition);
-            var currentCharacterLevel = userDataRepository.GetCurrentLevelData(id);
-            if (currentCharacterLevel.Level < GameCommonData.MaxCharacterLevel)
-            {
-                return;
-            }
-
-            var weapons = GameObject.FindGameObjectsWithTag(GameCommonData.WeaponTag);
-            foreach (var weapon in weapons)
-            {
-                var effectObj = Instantiate(createCharacterData.WeaponEffectObj, weapon.transform);
-                var particleSystems = effectObj.GetComponentsInChildren<ParticleSystem>();
-                foreach (var system in particleSystems)
-                {
-                    var systemMain = system.main;
-                    systemMain.startColor = GameCommonData.GetWeaponColor(id);
-                }
-
-                var effect = effectObj.GetComponentInChildren<PSMeshRendererUpdater>();
-                effect.Color = GameCommonData.GetWeaponColor(id);
-                effect.UpdateMeshEffect(weapon);
-            }
-        }
-
         private ViewBase GetView(State state)
         {
             foreach (var view in views)
@@ -195,7 +156,7 @@ namespace UI.Title
 
         private async UniTask SwitchUiObject(State state, bool isViewVirtualCurrencyUi, Action action = null)
         {
-            await TransitionAnimation(() =>
+            await TransitionUiAnimation(() =>
             {
                 foreach (var view in views)
                 {
@@ -207,7 +168,7 @@ namespace UI.Title
             });
         }
 
-        private async UniTask TransitionAnimation(Action action)
+        private async UniTask TransitionUiAnimation(Action action)
         {
             await fade.FadeIn(GameCommonData.FadeOutTime, null, false);
             action.Invoke();

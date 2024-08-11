@@ -6,11 +6,11 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Manager.DataManager;
 using Manager.NetworkManager;
+using Repository;
 using UI.Common;
 using UniRx;
 using UnityEngine;
 using UseCase;
-using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
 {
@@ -20,6 +20,7 @@ namespace UI.Title
         {
             private CharacterDetailView View => (CharacterDetailView)Owner.GetView(State.CharacterDetail);
             private CommonView CommonView => Owner.commonView;
+            private CharacterCreateUseCase CharacterCreateUseCase => Owner.characterCreateUseCase;
             private CharacterMasterDataRepository characterMasterDataRepository;
             private PlayFabUserDataManager playFabUserDataManager;
             private PlayFabShopManager playFabShopManager;
@@ -55,7 +56,7 @@ namespace UI.Title
                 chatGptManager = Owner.chatGptManager;
                 uiAnimation = Owner.uiAnimation;
                 characterSelectRepository = Owner.characterSelectRepository;
-                
+
                 InitializeOrderIndex();
                 InitializeButton();
 
@@ -305,12 +306,13 @@ namespace UI.Title
 
             private void CreateCharacter(CharacterData characterData)
             {
-                Owner.CreateCharacter(characterData.Id);
+                CharacterCreateUseCase.CreateCharacter(characterData.Id);
             }
 
             private void InitializeAnimation()
             {
-                Owner.equippedCharacter.GetComponent<Animator>().SetTrigger(GameCommonData.ActiveHashKey);
+                var character = CharacterCreateUseCase.GetCharacterObject();
+                character.GetComponent<Animator>().SetTrigger(GameCommonData.ActiveHashKey);
             }
 
             private void SetupCancellationToken()

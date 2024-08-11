@@ -4,11 +4,11 @@ using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Manager.NetworkManager;
+using Repository;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 using UseCase;
-using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
 {
@@ -17,6 +17,7 @@ namespace UI.Title
         public class CharacterSelectState : StateMachine<TitleCore>.State
         {
             private CharacterSelectView View => (CharacterSelectView)Owner.GetView(State.CharacterSelect);
+            private CharacterCreateUseCase CharacterCreateUseCase => Owner.characterCreateUseCase;
             private CharacterSelectViewModelUseCase characterSelectViewModelUseCase;
             private CharacterSelectRepository characterSelectRepository;
             private PlayFabVirtualCurrencyManager playFabVirtualCurrencyManager;
@@ -179,7 +180,7 @@ namespace UI.Title
             private void OnClickCharacterGrid(CharacterData characterData, Button gridButton)
             {
                 gridButton.interactable = false;
-                Owner.CreateCharacter(characterData.Id);
+                CharacterCreateUseCase.CreateCharacter(characterData.Id);
                 characterSelectRepository.SetSelectedCharacterId(characterData.Id);
                 Owner.uiAnimation.ClickScale(gridButton.gameObject).OnComplete(() =>
                 {

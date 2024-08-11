@@ -2,6 +2,7 @@
 using Common.Data;
 using Manager.NetworkManager;
 using Manager.PlayFabManager;
+using Repository;
 using UI.Common;
 using UI.Title;
 using UnityEngine;
@@ -13,18 +14,20 @@ namespace Common.Installer
     public class TitleSceneInstaller : MonoInstaller<BattleSceneInstaller>
     {
         [SerializeField] private GameObject playFabManagerGameObject;
+        [SerializeField] private Transform characterGenerateParent;
 
 
         public override void InstallBindings()
         {
             Container.Bind<PlayFabLoginManager>().FromComponentOn(playFabManagerGameObject).AsCached();
-            Container.Bind<UIAnimation>().FromNew().AsCached();
-            Container.Bind<UserData>().FromNew().AsCached();
-            Container.Bind<PlayFabShopManager>().FromNew().AsCached();
-            Container.Bind<PlayFabAdsManager>().FromNew().AsCached();
-            Container.Bind<PlayFabVirtualCurrencyManager>().FromNew().AsCached();
-            Container.Bind<PlayFabTitleDataManager>().FromNew().AsCached();
-            Container.Bind<ChatGPTManager>().FromNew().AsCached();
+            Container.Bind<UIAnimation>().AsCached();
+            Container.Bind<UserData>().AsCached();
+            Container.Bind<PlayFabShopManager>().AsCached();
+            Container.Bind<PlayFabAdsManager>().AsCached();
+            Container.Bind<PlayFabVirtualCurrencyManager>().AsCached();
+            Container.Bind<PlayFabTitleDataManager>().AsCached();
+            Container.Bind<ChatGPTManager>().AsCached();
+            Container.Bind<CharacterCreateUseCase>().AsCached().WithArguments(characterGenerateParent);
             InstallCharacterSelect();
             InstallInventory();
         }
