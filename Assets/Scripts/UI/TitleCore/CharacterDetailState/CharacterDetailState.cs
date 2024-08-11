@@ -55,9 +55,6 @@ namespace UI.Title
                 chatGptManager = Owner.chatGptManager;
                 uiAnimation = Owner.uiAnimation;
                 characterSelectRepository = Owner.characterSelectRepository;
-
-                //todo 後で消す
-                userDataRepository.DebugSetWeapon().Forget();
                 
                 InitializeOrderIndex();
                 InitializeButton();
@@ -148,8 +145,8 @@ namespace UI.Title
 
             private void OnClickRightArrow()
             {
-                var buttonObject = View.RightArrowButton.gameObject;
-                Owner.uiAnimation.ClickScaleColor(buttonObject).OnComplete(() =>
+                var button = View.RightArrowButton;
+                Owner.uiAnimation.ClickScaleColor(button.gameObject).OnComplete(() =>
                 {
                     var userData = userDataRepository.GetUserData();
                     if (userData.Characters.Count <= 1)
@@ -164,10 +161,12 @@ namespace UI.Title
                     }
 
                     var candidateCharacter = orderCharacters[candidateIndex];
+                    characterSelectRepository.SetSelectedCharacterId(candidateCharacter.Id);
                     CreateCharacter(candidateCharacter);
                     SetupUIContent();
                     InitializeAnimation();
-                }).SetLink(buttonObject);
+                    button.interactable = true;
+                }).SetLink(button.gameObject);
             }
 
             private void OnClickLeftArrow()
@@ -190,6 +189,7 @@ namespace UI.Title
                     }
 
                     var candidateCharacter = orderCharacters[candidateIndex];
+                    characterSelectRepository.SetSelectedCharacterId(candidateCharacter.Id);
                     CreateCharacter(candidateCharacter);
                     SetupUIContent();
                     InitializeAnimation();

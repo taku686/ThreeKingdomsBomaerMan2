@@ -1,5 +1,9 @@
-﻿using Common.Data;
+﻿using System;
+using Common.Data;
+using Cysharp.Threading.Tasks;
 using TMPro;
+using UniRx;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,7 +17,8 @@ namespace UI.Title
         [SerializeField] private SkillGridView specialSkillGridView;
         [SerializeField] private Button equipButton;
         [SerializeField] private Button sellButton;
-
+        [SerializeField] private Transform weaponObjectParent;
+        private GameObject weaponObject;
         public Button EquipButton => equipButton;
         public Button SellButton => sellButton;
 
@@ -26,6 +31,38 @@ namespace UI.Title
             statusSkillGridView.ApplyViewModel(statusSkillViewModel);
             normalSkillGridView.ApplyViewModel(normalSkillViewModel);
             specialSkillGridView.ApplyViewModel(specialSkillViewModel);
+            Destroy(weaponObject);
+            weaponObject = Instantiate(viewModel.WeaponObject, weaponObjectParent);
+            FixedTransform(viewModel.WeaponType);
+            Observable.EveryUpdate()
+                .Subscribe(_ => weaponObject.transform.Rotate(Vector3.up, 0.1f))
+                .AddTo(weaponObject.GetCancellationTokenOnDestroy());
+        }
+        
+        private void FixedTransform(WeaponType weaponType)
+        {
+            switch (weaponType)
+            {
+                case WeaponType.Spear:
+                    weaponObject.transform.localPosition = new Vector3(0, 0, 0);
+                    weaponObject.transform.localRotation = quaternion.Euler(0, 0, 0);
+                    break;
+                case WeaponType.Sword:
+                    weaponObject.transform.localPosition = new Vector3(0, 0.73f, 0);
+                    weaponObject.transform.localRotation = quaternion.Euler(0, 0, 0);
+                    weaponObject.transform.localScale = new Vector3(20f, 20f, 20f);
+                    break;
+                case WeaponType.Bow:
+                    weaponObject.transform.localPosition = new Vector3(0, 0, 0);
+                    weaponObject.transform.localRotation = quaternion.Euler(0, 0, 0);
+                    weaponObject.transform.localScale = new Vector3(15f, 15f, 15f);
+                    break;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            Destroy(weaponObject);
         }
 
         private SkillGridView.ViewModel TranslateSkillDataToViewModel(SkillMasterData skillMasterData)
@@ -40,6 +77,8 @@ namespace UI.Title
             public SkillMasterData StatusSkillMasterData { get; }
             public SkillMasterData NormalSkillMasterData { get; }
             public SkillMasterData SpecialSkillMasterData { get; }
+            public GameObject WeaponObject { get; }
+            public WeaponType WeaponType { get; }
 
             public ViewModel
             (
@@ -47,7 +86,9 @@ namespace UI.Title
                 string name,
                 SkillMasterData statusSkillMasterData,
                 SkillMasterData normalSkillMasterData,
-                SkillMasterData specialSkillMasterData
+                SkillMasterData specialSkillMasterData,
+                GameObject weaponObject,
+                WeaponType weaponType
             )
             {
                 Icon = icon;
@@ -55,6 +96,8 @@ namespace UI.Title
                 StatusSkillMasterData = statusSkillMasterData;
                 NormalSkillMasterData = normalSkillMasterData;
                 SpecialSkillMasterData = specialSkillMasterData;
+                WeaponObject = weaponObject;
+                WeaponType = weaponType;
             }
         }
     }

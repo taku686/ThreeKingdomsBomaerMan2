@@ -1,29 +1,32 @@
 ﻿using System;
 using Common.Data;
+using Repository;
 
 namespace UI.Title
 {
     public class InventoryViewModelUseCase : IDisposable
     {
         private readonly UserDataRepository userDataRepository;
+        private readonly WeaponMasterDataRepository weaponMasterDataRepository;
 
         public InventoryViewModelUseCase
         (
-            UserDataRepository userDataRepository
+            UserDataRepository userDataRepository,
+            WeaponMasterDataRepository weaponMasterDataRepository
         )
         {
             this.userDataRepository = userDataRepository;
+            this.weaponMasterDataRepository = weaponMasterDataRepository;
         }
 
-        public InventoryView.ViewModel InAsTask()
+        public InventoryView.ViewModel InAsTask(int selectedWeaponId)
         {
             var weaponDatum = userDataRepository.GetAllPossessedWeaponDatum();
-            var equippedCharacterId = userDataRepository.GetEquippedCharacterId();
-            var equippedWeaponData = userDataRepository.GetEquippedWeaponData(equippedCharacterId);
+            var weaponMasterData = weaponMasterDataRepository.GetWeaponData(selectedWeaponId);
             return new InventoryView.ViewModel
             (
                 weaponDatum,
-                equippedWeaponData
+                weaponMasterData
             );
         }
 

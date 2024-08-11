@@ -189,6 +189,7 @@ namespace Common.Data
             var data = GetUserData();
             data.Characters.Add(characterId);
             data.CharacterLevels[characterId] = 0;
+            data.EquippedWeapons[characterId] = 0;
             SetUserData(data);
             var result = await playFabUserDataManager.TryUpdateUserDataAsync(data)
                 .AttachExternalCancellation(cancellationTokenSource.Token);
@@ -229,27 +230,9 @@ namespace Common.Data
             await playFabUserDataManager.TryUpdateUserDataAsync(data);
         }
 
-        //todo 後で消す
-        public async UniTask DebugSetWeapon()
-        {
-            var data = GetUserData();
-            foreach (var characterId in data.Characters)
-            {
-                data.EquippedWeapons[characterId] = 0;
-            }
-
-            foreach (var weaponData in weaponMasterDataRepository.GetAllWeaponData())
-            {
-                data.PossessedWeapons[weaponData.Id] = 1;
-            }
-
-            SetUserData(data);
-            await playFabUserDataManager.TryUpdateUserDataAsync(data);
-        }
-
         public int GetEquippedWeaponId(int selectedCharacterId)
         {
-            return userData.EquippedWeapons.GetValueOrDefault(selectedCharacterId, 0);
+            return userData.EquippedWeapons[selectedCharacterId];
         }
 
         public WeaponMasterData GetEquippedWeaponData(int selectedCharacterId)

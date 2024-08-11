@@ -3,6 +3,7 @@ using Common.Data;
 using Cysharp.Threading.Tasks;
 using Repository;
 using UniRx;
+using UnityEngine;
 
 namespace UI.Title
 {
@@ -16,9 +17,8 @@ namespace UI.Title
             private UserDataRepository UserDataRepository => Owner.userDataRepository;
             private WeaponMasterDataRepository WeaponMasterDataRepository => Owner.weaponMasterDataRepository;
 
-            private int selectedWeaponId;
             private CancellationTokenSource cts;
-            private readonly Subject<int> onChangeSelectedWeaponSubject = new();
+            private Subject<int> onChangeSelectedWeaponSubject;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -27,11 +27,13 @@ namespace UI.Title
 
             protected override void OnExit(StateMachine<TitleCore>.State nextState)
             {
+                onChangeSelectedWeaponSubject.Dispose();
                 Cancel();
             }
 
             private void Initialize()
             {
+                onChangeSelectedWeaponSubject = new Subject<int>();
                 cts = new CancellationTokenSource();
                 OnSubscribed();
                 Owner.SwitchUiObject(State.Inventory, true).Forget();
@@ -44,29 +46,30 @@ namespace UI.Title
                     .AddTo(cts.Token);
 
                 onChangeSelectedWeaponSubject
-                    .Select(weaponId => (selectedWeaponId: weaponId, viewModel: InventoryViewModelUseCase.InAsTask()))
-                    .Subscribe(tuple =>
+                    .Select(weaponId => InventoryViewModelUseCase.InAsTask(weaponId))
+                    .Subscribe(viewModel =>
                     {
-                        View.ApplyViewModel(tuple.viewModel, tuple.selectedWeaponId);
+                        View.ApplyViewModel(viewModel);
                         foreach (var gridView in View.WeaponGridViews)
                         {
                             gridView.OnClickObservable
-                                .Subscribe(weaponId =>
-                                {
-                                    onChangeSelectedWeaponSubject.OnNext(weaponId);
-                                    var selectedWeaponMasterData = WeaponMasterDataRepository.GetWeaponData(weaponId);
-                                    View.ApplyWeaponDetailViewModel(selectedWeaponMasterData);
-                                })
+                                .Subscribe(weaponId => onChangeSelectedWeaponSubject.OnNext(weaponId))
                                 .AddTo(gridView.GetCancellationTokenOnDestroy());
                         }
                     })
                     .AddTo(cts.Token);
 
+                View.EquipButton.OnClickAsObservable()
+                    .WithLatestFrom(onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
+                    .Select(selectedWeaponId => (selectedWeaponId, selectedCharacterId: CharacterSelectRepository.GetSelectedCharacterId()))
+                    .SelectMany(tuple => UserDataRepository.SetEquippedWeapon(tuple.selectedCharacterId, tuple.selectedWeaponId).ToObservable())
+                    .Subscribe(_ => { stateMachine.Dispatch((int)State.CharacterDetail); })
+                    .AddTo(cts.Token);
+
                 var selectedCharacterId = CharacterSelectRepository.GetSelectedCharacterId();
-                selectedWeaponId = UserDataRepository.GetEquippedWeaponId(selectedCharacterId);
+                var selectedWeaponId = UserDataRepository.GetEquippedWeaponId(selectedCharacterId);
                 onChangeSelectedWeaponSubject.OnNext(selectedWeaponId);
             }
-
 
             private void Cancel()
             {
