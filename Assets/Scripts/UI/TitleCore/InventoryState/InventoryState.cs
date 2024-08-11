@@ -18,7 +18,7 @@ namespace UI.Title
 
             private int selectedWeaponId;
             private CancellationTokenSource cts;
-            private readonly Subject<Unit> onChangeSubject = new();
+            private readonly Subject<int> onChangeSelectedWeaponSubject = new();
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -33,8 +33,6 @@ namespace UI.Title
             private void Initialize()
             {
                 cts = new CancellationTokenSource();
-                var selectedCharacterId = CharacterSelectRepository.GetSelectedCharacterId();
-                selectedWeaponId = UserDataRepository.GetEquippedWeaponId(selectedCharacterId);
                 OnSubscribed();
                 Owner.SwitchUiObject(State.Inventory, true).Forget();
             }
@@ -45,27 +43,28 @@ namespace UI.Title
                     .Subscribe(_ => StateMachine.Dispatch((int)State.CharacterDetail))
                     .AddTo(cts.Token);
 
-                onChangeSubject
-                    .Select(_ => InventoryViewModelUseCase.InAsTask())
-                    .Subscribe(viewModel =>
+                onChangeSelectedWeaponSubject
+                    .Select(weaponId => (selectedWeaponId: weaponId, viewModel: InventoryViewModelUseCase.InAsTask()))
+                    .Subscribe(tuple =>
                     {
-                        View.ApplyViewModel(viewModel);
+                        View.ApplyViewModel(tuple.viewModel, tuple.selectedWeaponId);
+                        foreach (var gridView in View.WeaponGridViews)
+                        {
+                            gridView.OnClickObservable
+                                .Subscribe(weaponId =>
+                                {
+                                    onChangeSelectedWeaponSubject.OnNext(weaponId);
+                                    var selectedWeaponMasterData = WeaponMasterDataRepository.GetWeaponData(weaponId);
+                                    View.ApplyWeaponDetailViewModel(selectedWeaponMasterData);
+                                })
+                                .AddTo(gridView.GetCancellationTokenOnDestroy());
+                        }
                     })
                     .AddTo(cts.Token);
 
-                onChangeSubject.OnNext(Unit.Default);
-                
-                foreach (var gridView in View.WeaponGridViews)
-                {
-                    gridView.OnClickObservable
-                        .Subscribe(weaponId =>
-                        {
-                            selectedWeaponId = weaponId;
-                            var selectedWeaponMasterData = WeaponMasterDataRepository.GetWeaponData(weaponId);
-                            View.ApplyWeaponDetailViewModel(selectedWeaponMasterData);
-                        })
-                        .AddTo(cts.Token);
-                }
+                var selectedCharacterId = CharacterSelectRepository.GetSelectedCharacterId();
+                selectedWeaponId = UserDataRepository.GetEquippedWeaponId(selectedCharacterId);
+                onChangeSelectedWeaponSubject.OnNext(selectedWeaponId);
             }
 
 

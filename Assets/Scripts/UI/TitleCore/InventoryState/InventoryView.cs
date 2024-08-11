@@ -22,8 +22,13 @@ public class InventoryView : ViewBase
     public Button SellButton => weaponDetailView.SellButton;
     public IReadOnlyCollection<WeaponGridView> WeaponGridViews => weaponGridViews;
 
-    public void ApplyViewModel(ViewModel viewModel)
+    public void ApplyViewModel(ViewModel viewModel, int selectedWeaponId)
     {
+        foreach (var weaponGridView in weaponGridViews)
+        {
+            Destroy(weaponGridView.gameObject);
+        }
+
         weaponGridViews.Clear();
 
         foreach (var weaponData in viewModel.PossessedWeaponDatum)
@@ -31,11 +36,25 @@ public class InventoryView : ViewBase
             var weaponGridView = Instantiate(weaponGridViewPrefab, weaponGridParent);
             var weaponMasterData = weaponData.Key;
             var possessedAmount = weaponData.Value;
-            weaponGridView.ApplyViewModel(weaponMasterData.WeaponIcon, possessedAmount, weaponMasterData.Id);
+            var weaponGridViewModel =
+                TranslateWeaponDataToViewModel(weaponMasterData, possessedAmount, selectedWeaponId);
+            weaponGridView.ApplyViewModel(weaponGridViewModel);
             weaponGridViews.Add(weaponGridView);
         }
 
         ApplyWeaponDetailViewModel(viewModel.EquippedWeaponMasterData);
+    }
+
+    private WeaponGridView.ViewModel TranslateWeaponDataToViewModel(WeaponMasterData weaponMasterData,
+        int possessedAmount, int selectedWeaponId)
+    {
+        return new WeaponGridView.ViewModel
+        (
+            weaponMasterData.WeaponIcon,
+            possessedAmount,
+            weaponMasterData.Id,
+            selectedWeaponId
+        );
     }
 
     public void ApplyWeaponDetailViewModel(WeaponMasterData weaponMasterData)
