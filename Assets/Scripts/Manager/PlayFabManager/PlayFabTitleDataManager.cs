@@ -105,7 +105,7 @@ namespace Manager.PlayFabManager
                 var id = weaponData.Id;
                 var weaponType = (WeaponType)weaponData.WeaponTypeInt;
                 var attributeType = (AttributeType)weaponData.AttributeTypeInt;
-                var weaponObject = await LoadWeaponGameObject(id, weaponType, cts.Token);
+                var weaponObject = await LoadWeaponGameObject(id, cts.Token);
                 var weaponIcon = await LoadWeaponSprite(id, cts.Token);
                 var statusSkillData = skillDataRepository.GetSkillData(weaponData.StatusSkillId);
                 var normalSkillData = skillDataRepository.GetSkillData(weaponData.NormalSkillId);
@@ -158,11 +158,10 @@ namespace Manager.PlayFabManager
             return (GameObject)resource;
         }
 
-        private async UniTask<GameObject> LoadWeaponGameObject(int weaponId, WeaponType weaponType,
-            CancellationToken token)
+        private async UniTask<GameObject> LoadWeaponGameObject(int weaponId, CancellationToken token)
         {
             var response = await Resources
-                .LoadAsync<GameObject>(GameCommonData.WeaponPrefabPath + weaponType + "/" + weaponId)
+                .LoadAsync<GameObject>(GameCommonData.WeaponPrefabPath + weaponId)
                 .WithCancellation(token);
             return (GameObject)response;
         }

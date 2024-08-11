@@ -7,20 +7,18 @@ namespace UI.Title
 {
     public class WeaponDetailView : MonoBehaviour
     {
-        [SerializeField] private Image weaponIcon;
         [SerializeField] private TextMeshProUGUI weaponName;
         [SerializeField] private SkillGridView statusSkillGridView;
         [SerializeField] private SkillGridView normalSkillGridView;
         [SerializeField] private SkillGridView specialSkillGridView;
         [SerializeField] private Button equipButton;
         [SerializeField] private Button sellButton;
-        
+
         public Button EquipButton => equipButton;
         public Button SellButton => sellButton;
 
         public void ApplyViewModel(ViewModel viewModel)
         {
-            weaponIcon.sprite = viewModel.Icon;
             weaponName.text = viewModel.Name;
             var statusSkillViewModel = TranslateSkillDataToViewModel(viewModel.StatusSkillMasterData);
             var normalSkillViewModel = TranslateSkillDataToViewModel(viewModel.NormalSkillMasterData);
@@ -32,7 +30,7 @@ namespace UI.Title
 
         private SkillGridView.ViewModel TranslateSkillDataToViewModel(SkillMasterData skillMasterData)
         {
-            return new SkillGridView.ViewModel(skillMasterData.Icon, skillMasterData.Name, skillMasterData.Explanation);
+            return new SkillGridView.ViewModel(skillMasterData.Icon, skillMasterData.Name);
         }
 
         public class ViewModel
