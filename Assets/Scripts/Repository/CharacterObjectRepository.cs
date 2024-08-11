@@ -9,11 +9,6 @@ namespace Repository
 
         public GameObject GetCharacterObject()
         {
-            if (characterObject == null)
-            {
-                Debug.LogError("Character object is null.");
-            }
-
             return characterObject;
         }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Common.Data;
 using Manager.DataManager;
 using UnityEngine;
@@ -12,19 +13,22 @@ namespace Repository
         private readonly CharacterMasterDataRepository characterMasterDataRepository;
         private readonly UserDataRepository userDataRepository;
         private readonly CharacterObjectRepository characterObjectRepository;
+        private readonly WeaponMasterDataRepository weaponMasterDataRepository;
 
         public CharacterCreateUseCase
         (
             Transform characterGenerateTransform,
             CharacterMasterDataRepository characterMasterDataRepository,
             UserDataRepository userDataRepository,
-            CharacterObjectRepository characterObjectRepository
+            CharacterObjectRepository characterObjectRepository,
+            WeaponMasterDataRepository weaponMasterDataRepository
         )
         {
             this.characterGenerateTransform = characterGenerateTransform;
             this.characterMasterDataRepository = characterMasterDataRepository;
             this.userDataRepository = userDataRepository;
             this.characterObjectRepository = characterObjectRepository;
+            this.weaponMasterDataRepository = weaponMasterDataRepository;
         }
 
 
@@ -41,8 +45,9 @@ namespace Repository
             {
                 Debug.LogError(characterId + " is not found");
             }
-            
+
             CreateCharacter(createCharacterData);
+            CreateWeapon(createCharacterData);
             CreateWeaponEffect(createCharacterData);
         }
 
@@ -56,6 +61,21 @@ namespace Repository
                 characterGenerateTransform
             );
             characterObjectRepository.SetCharacterObject(characterObject);
+        }
+
+        private void CreateWeapon(CharacterData characterData)
+        {
+            var weaponData = userDataRepository.GetEquippedWeaponData(characterData.Id);
+            var weaponObjects = GameObject.FindGameObjectsWithTag(GameCommonData.WeaponTag);
+            foreach (var weaponObject in weaponObjects)
+            {
+                var weaponParent = weaponObject.transform.parent;
+                var position = weaponObject.transform.position;
+                var rotation = weaponObject.transform.rotation;
+                var weapon = Object.Instantiate(weaponData.WeaponObject, position, rotation, weaponParent);
+                weapon.tag = GameCommonData.WeaponTag;
+                Object.Destroy(weaponObject);
+            }
         }
 
         private void CreateWeaponEffect(CharacterData createCharacterData)
