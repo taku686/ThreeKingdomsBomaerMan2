@@ -38,7 +38,7 @@ namespace UI.Title
                 .Subscribe(_ => weaponObject.transform.Rotate(Vector3.up, 0.1f))
                 .AddTo(weaponObject.GetCancellationTokenOnDestroy());
         }
-        
+
         private void FixedTransform(WeaponType weaponType)
         {
             switch (weaponType)
@@ -50,12 +50,12 @@ namespace UI.Title
                 case WeaponType.Sword:
                     weaponObject.transform.localPosition = new Vector3(0, 0.73f, 0);
                     weaponObject.transform.localRotation = quaternion.Euler(0, 0, 0);
-                    weaponObject.transform.localScale = new Vector3(20f, 20f, 20f);
+                    weaponObject.transform.localScale = new Vector3(2, 2, 2);
                     break;
                 case WeaponType.Bow:
                     weaponObject.transform.localPosition = new Vector3(0, 0, 0);
                     weaponObject.transform.localRotation = quaternion.Euler(0, 0, 0);
-                    weaponObject.transform.localScale = new Vector3(15f, 15f, 15f);
+                    weaponObject.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
                     break;
             }
         }

@@ -34,7 +34,7 @@ namespace UI.Title
 
             private CancellationTokenSource cts;
             private int candidateIndex;
-            private CharacterData[] orderCharacters;
+            private CharacterData[] sortedCharacters;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -58,7 +58,7 @@ namespace UI.Title
                 uiAnimation = Owner.uiAnimation;
                 characterSelectRepository = Owner.characterSelectRepository;
 
-                InitializeOrderIndex();
+                InitializeCharacter();
                 InitializeButton();
 
                 SetupUIContent();
@@ -66,17 +66,19 @@ namespace UI.Title
                 InitializeAnimation();
             }
 
-            private void InitializeOrderIndex()
+            private void InitializeCharacter()
             {
                 var selectedCharacterId = characterSelectRepository.GetSelectedCharacterId();
                 var orderType = characterSelectRepository.GetOrderType();
-                orderCharacters = SortCharactersUseCase.InAsTask(orderType).ToArray();
-                candidateIndex = Array.FindIndex(orderCharacters, x => x.Id == selectedCharacterId);
+                sortedCharacters = SortCharactersUseCase.InAsTask(orderType).ToArray();
+                candidateIndex = Array.FindIndex(sortedCharacters, x => x.Id == selectedCharacterId);
+                var selectedCharacter = sortedCharacters[candidateIndex];
+                CreateCharacter(selectedCharacter);
             }
 
             private void SetupUIContent()
             {
-                var candidateCharacterId = orderCharacters[candidateIndex].Id;
+                var candidateCharacterId = sortedCharacters[candidateIndex].Id;
                 var characterData = characterMasterDataRepository.GetCharacterData(candidateCharacterId);
                 var currentLevelData = userDataRepository.GetCurrentLevelData(candidateCharacterId);
                 var nextLevelData = userDataRepository.GetNextLevelData(candidateCharacterId);
@@ -157,12 +159,12 @@ namespace UI.Title
                     }
 
                     candidateIndex++;
-                    if (candidateIndex >= orderCharacters.Length)
+                    if (candidateIndex >= sortedCharacters.Length)
                     {
                         candidateIndex = 0;
                     }
 
-                    var candidateCharacter = orderCharacters[candidateIndex];
+                    var candidateCharacter = sortedCharacters[candidateIndex];
                     characterSelectRepository.SetSelectedCharacterId(candidateCharacter.Id);
                     CreateCharacter(candidateCharacter);
                     SetupUIContent();
@@ -187,10 +189,10 @@ namespace UI.Title
                     candidateIndex--;
                     if (candidateIndex < 0)
                     {
-                        candidateIndex = orderCharacters.Length - 1;
+                        candidateIndex = sortedCharacters.Length - 1;
                     }
 
-                    var candidateCharacter = orderCharacters[candidateIndex];
+                    var candidateCharacter = sortedCharacters[candidateIndex];
                     characterSelectRepository.SetSelectedCharacterId(candidateCharacter.Id);
                     CreateCharacter(candidateCharacter);
                     SetupUIContent();
@@ -203,7 +205,7 @@ namespace UI.Title
             {
                 View.SelectButton.interactable = false;
                 var userData = userDataRepository.GetUserData();
-                userData.EquippedCharacterId = orderCharacters[candidateIndex].Id;
+                userData.EquippedCharacterId = sortedCharacters[candidateIndex].Id;
                 var result = await playFabUserDataManager.TryUpdateUserDataAsync(userData);
                 if (result)
                 {
@@ -216,7 +218,7 @@ namespace UI.Title
             private async UniTask OnClickUpgrade()
             {
                 View.UpgradeButton.interactable = false;
-                var selectedCharacterData = orderCharacters[candidateIndex];
+                var selectedCharacterData = sortedCharacters[candidateIndex];
                 var coin = await playFabVirtualCurrencyManager.GetCoin();
                 if (coin == GameCommonData.NetworkErrorCode)
                 {
