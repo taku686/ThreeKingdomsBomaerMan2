@@ -34,17 +34,7 @@ namespace UI.Title
 
                 InitializeButton();
                 InitializeObject();
-                InitializeTitleImage();
                 Owner.SwitchUiObject(State.Login, false).Forget();
-            }
-
-            private void InitializeTitleImage()
-            {
-                var sprites = View.TitleSprites;
-                var backgroundImage = View.BackgroundImage;
-                var index = Random.Range(0, sprites.Count);
-                var titleSprite = sprites[index];
-                backgroundImage.sprite = titleSprite;
             }
 
             private void InitializeObject()
