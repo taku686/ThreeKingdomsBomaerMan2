@@ -1,5 +1,4 @@
-﻿using System;
-using Common.Data;
+﻿using Common.Data;
 using Cysharp.Threading.Tasks;
 using TMPro;
 using UniRx;
@@ -44,7 +43,7 @@ namespace UI.Title
             switch (weaponType)
             {
                 case WeaponType.Spear:
-                    weaponObject.transform.localPosition = new Vector3(0, 0, 0);
+                    weaponObject.transform.localPosition = new Vector3(0, 0.39f, 0);
                     weaponObject.transform.localRotation = quaternion.Euler(0, 0, 0);
                     break;
                 case WeaponType.Sword:

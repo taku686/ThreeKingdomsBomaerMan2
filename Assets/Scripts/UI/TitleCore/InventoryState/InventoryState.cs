@@ -15,7 +15,6 @@ namespace UI.Title
             private InventoryViewModelUseCase InventoryViewModelUseCase => Owner.inventoryViewModelUseCase;
             private CharacterSelectRepository CharacterSelectRepository => Owner.characterSelectRepository;
             private UserDataRepository UserDataRepository => Owner.userDataRepository;
-            private WeaponMasterDataRepository WeaponMasterDataRepository => Owner.weaponMasterDataRepository;
 
             private CancellationTokenSource cts;
             private Subject<int> onChangeSelectedWeaponSubject;
