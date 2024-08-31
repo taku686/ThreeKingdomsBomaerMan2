@@ -55,7 +55,6 @@ Shader "UI/Fade Cutout"
             #pragma fragment frag
 
             #include "UnityCG.cginc"
-            #include "UnityUI.cginc"
 
 
             struct appdata_t
