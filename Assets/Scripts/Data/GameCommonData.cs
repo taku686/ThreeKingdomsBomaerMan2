@@ -72,6 +72,7 @@ namespace Common.Data
         public const int NetworkErrorCode = Int32.MaxValue;
         public const float FadeOutTime = 0.8f;
         public const int BattleTime = 180;
+        public const int DefaultWeaponId = 71;
 
         public static CharacterColor GetCharacterColor(string color)
         {

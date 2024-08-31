@@ -52,7 +52,8 @@ namespace Repository
 
             characterObject = CreateCharacter(createCharacterData);
             CreateWeapon(createCharacterData, characterObject);
-            CreateWeaponEffect(createCharacterData, characterObject);
+            //todo androidでエフェクトの表示がおかしくなるためコメントアウト
+            //CreateWeaponEffect(createCharacterData, characterObject);
         }
 
         private GameObject CreateCharacter(CharacterData createCharacterData)

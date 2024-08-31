@@ -190,7 +190,7 @@ namespace Common.Data
             var data = GetUserData();
             data.Characters.Add(characterId);
             data.CharacterLevels[characterId] = 0;
-            data.EquippedWeapons[characterId] = 0;
+            data.EquippedWeapons[characterId] = GameCommonData.DefaultWeaponId;
             SetUserData(data);
             var result = await playFabUserDataManager.TryUpdateUserDataAsync(data)
                 .AttachExternalCancellation(cancellationTokenSource.Token);

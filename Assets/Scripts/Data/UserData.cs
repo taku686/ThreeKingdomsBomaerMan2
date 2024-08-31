@@ -33,7 +33,8 @@ namespace Common.Data
             user.Coin = 0;
             user.Ticket = 0;
             user.CharacterLevels[0] = 0;
-            user.PossessedWeapons[1] = 0;
+            user.PossessedWeapons[GameCommonData.DefaultWeaponId] = 1;
+            user.EquippedWeapons[0] = GameCommonData.DefaultWeaponId;
             for (int i = 0; i < 7; i++)
             {
                 user.LoginBonus[i] = (int)LoginBonusStatus.Disable;
