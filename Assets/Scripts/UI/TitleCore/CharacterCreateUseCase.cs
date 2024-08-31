@@ -13,22 +13,26 @@ namespace Repository
         private readonly CharacterMasterDataRepository characterMasterDataRepository;
         private readonly UserDataRepository userDataRepository;
         private readonly CharacterObjectRepository characterObjectRepository;
-        private readonly WeaponMasterDataRepository weaponMasterDataRepository;
+        private readonly Vector3 bowPosition = new(-0.029f, 0.02f, -0.001f);
+        private readonly Vector3 weaponPosition = new(-0.061f, 0.026f, 0.003f);
+        private readonly Vector3 bowRightRotation = new(-87.91f, 204.73f, -24.69f);
+        private readonly Vector3 bowLeftRotation = new(87.91f, -204.73f, -24.69f);
+        private readonly Vector3 weaponRightRotation = new(36.033f, -92.88f, 84.68f);
+        private readonly Vector3 weaponLeftRotation = new(-36.033f, 92.88f, 84.68f);
+        
 
         public CharacterCreateUseCase
         (
             Transform characterGenerateTransform,
             CharacterMasterDataRepository characterMasterDataRepository,
             UserDataRepository userDataRepository,
-            CharacterObjectRepository characterObjectRepository,
-            WeaponMasterDataRepository weaponMasterDataRepository
+            CharacterObjectRepository characterObjectRepository
         )
         {
             this.characterGenerateTransform = characterGenerateTransform;
             this.characterMasterDataRepository = characterMasterDataRepository;
             this.userDataRepository = userDataRepository;
             this.characterObjectRepository = characterObjectRepository;
-            this.weaponMasterDataRepository = weaponMasterDataRepository;
         }
 
 
@@ -73,15 +77,34 @@ namespace Repository
             }
 
             var weaponData = userDataRepository.GetEquippedWeaponData(characterData.Id);
-            var weaponParents = characterObject.GetComponentsInChildren<WeaponParentObject>();
-            foreach (var weaponParent in weaponParents)
+            var weaponRightParent = characterObject.GetComponentInChildren<WeaponRightParentObject>();
+            var weaponLeftParent = characterObject.GetComponentInChildren<WeaponLeftParentObject>();
+            if (weaponLeftParent != null)
             {
-                var currentWeapon = Object.Instantiate(weaponData.WeaponObject, weaponParent.transform);
-                currentWeapon.transform.localPosition = Vector3.zero;
-                currentWeapon.transform.localRotation = quaternion.Euler(0, 0, 0);
-                currentWeapon.tag = GameCommonData.WeaponTag;
-                currentWeapon.AddComponent<WeaponObject>();
+                weaponLeftParent.transform.localPosition =
+                    weaponData.WeaponType == WeaponType.Bow ? bowPosition : weaponPosition;
+                weaponLeftParent.transform.localEulerAngles =
+                    weaponData.WeaponType == WeaponType.Bow ? bowLeftRotation : weaponLeftRotation;
+                InstantiateWeapon(weaponData, weaponLeftParent.transform);
             }
+
+            if (weaponRightParent != null)
+            {
+                weaponRightParent.transform.localPosition =
+                    weaponData.WeaponType == WeaponType.Bow ? bowPosition : weaponPosition;
+                weaponRightParent.transform.localEulerAngles =
+                    weaponData.WeaponType == WeaponType.Bow ? bowRightRotation : weaponRightRotation;
+                InstantiateWeapon(weaponData, weaponRightParent.transform);
+            }
+        }
+
+        private void InstantiateWeapon(WeaponMasterData weaponMasterData, Transform weaponParent)
+        {
+            var currentWeapon = Object.Instantiate(weaponMasterData.WeaponObject, weaponParent.transform);
+            currentWeapon.transform.localPosition = Vector3.zero;
+            currentWeapon.transform.localRotation = quaternion.Euler(0, 0, 0);
+            currentWeapon.tag = GameCommonData.WeaponTag;
+            currentWeapon.AddComponent<WeaponObject>();
         }
 
         private void CreateWeaponEffect(CharacterData createCharacterData, GameObject characterObject)

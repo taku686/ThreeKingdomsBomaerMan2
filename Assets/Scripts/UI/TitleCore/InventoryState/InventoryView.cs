@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Common.Data;
 using UI.Title;
 using UnityEngine;
@@ -25,13 +26,17 @@ public class InventoryView : ViewBase
         }
 
         weaponGridViews.Clear();
-
-        foreach (var keyValuePair in viewModel.PossessedWeaponDatum)
+        var possessedWeaponDatum =
+            viewModel.PossessedWeaponDatum
+                .OrderBy(data => data.Key.WeaponType)
+                .ThenBy(data => data.Key.Id);
+        foreach (var keyValuePair in possessedWeaponDatum)
         {
             var weaponGridView = Instantiate(weaponGridViewPrefab, weaponGridParent);
             var weaponMasterData = keyValuePair.Key;
             var possessedAmount = keyValuePair.Value;
-            var weaponGridViewModel = TranslateWeaponDataToViewModel(weaponMasterData, possessedAmount, viewModel.WeaponMasterData.Id);
+            var weaponGridViewModel =
+                TranslateWeaponDataToViewModel(weaponMasterData, possessedAmount, viewModel.WeaponMasterData.Id);
             weaponGridView.ApplyViewModel(weaponGridViewModel);
             weaponGridViews.Add(weaponGridView);
         }

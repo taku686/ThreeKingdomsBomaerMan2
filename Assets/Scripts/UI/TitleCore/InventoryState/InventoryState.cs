@@ -1,9 +1,7 @@
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
-using Repository;
 using UniRx;
-using UnityEngine;
 
 namespace UI.Title
 {
@@ -60,8 +58,11 @@ namespace UI.Title
 
                 View.EquipButton.OnClickAsObservable()
                     .WithLatestFrom(onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
-                    .Select(selectedWeaponId => (selectedWeaponId, selectedCharacterId: CharacterSelectRepository.GetSelectedCharacterId()))
-                    .SelectMany(tuple => UserDataRepository.SetEquippedWeapon(tuple.selectedCharacterId, tuple.selectedWeaponId).ToObservable())
+                    .Select(selectedWeaponId => (selectedWeaponId,
+                        selectedCharacterId: CharacterSelectRepository.GetSelectedCharacterId()))
+                    .SelectMany(tuple =>
+                        UserDataRepository.SetEquippedWeapon(tuple.selectedCharacterId, tuple.selectedWeaponId)
+                            .ToObservable())
                     .Subscribe(_ => { stateMachine.Dispatch((int)State.CharacterDetail); })
                     .AddTo(cts.Token);
 

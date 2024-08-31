@@ -23,7 +23,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class FadeImage : UnityEngine.UI.Graphic, IFade
 {
