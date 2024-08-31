@@ -16,6 +16,7 @@ namespace Common.Data
         public const string BombEffectTag = "BombEffect";
         public const string BreakingWallTag = "BreakingWall";
         public const string WeaponTag = "Weapon";
+        public const string WeaponParentTag = "WeaponParent";
         public const string ObstacleLayer = "Obstacles";
         public const string ExplosionLayer = "Explosion";
         public const string BombLayer = "Bomb";

@@ -1,6 +1,7 @@
 ﻿using System;
 using Common.Data;
 using Manager.DataManager;
+using Unity.Mathematics;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -45,12 +46,12 @@ namespace Repository
                 Debug.LogError(characterId + " is not found");
             }
 
-            CreateCharacter(createCharacterData);
-            CreateWeapon(createCharacterData);
-            //CreateWeaponEffect(createCharacterData);
+            characterObject = CreateCharacter(createCharacterData);
+            CreateWeapon(createCharacterData, characterObject);
+            CreateWeaponEffect(createCharacterData, characterObject);
         }
 
-        private void CreateCharacter(CharacterData createCharacterData)
+        private GameObject CreateCharacter(CharacterData createCharacterData)
         {
             var characterObject = Object.Instantiate
             (
@@ -60,29 +61,30 @@ namespace Repository
                 characterGenerateTransform
             );
             characterObjectRepository.SetCharacterObject(characterObject);
+            return characterObject;
         }
 
-        private void CreateWeapon(CharacterData characterData)
+        private void CreateWeapon(CharacterData characterData, GameObject characterObject)
         {
-            var weaponData = userDataRepository.GetEquippedWeaponData(characterData.Id);
-            var weaponObjects = GameObject.FindGameObjectsWithTag(GameCommonData.WeaponTag);
-            foreach (var prevWeapon in weaponObjects)
+            var weaponObjects = characterObject.GetComponentsInChildren<WeaponObject>();
+            foreach (var weaponObject in weaponObjects)
             {
-                var weaponParent = prevWeapon.transform.parent;
-                var currentWeapon = Object.Instantiate(weaponData.WeaponObject, weaponParent);
-                FixedTransform(prevWeapon, currentWeapon);
+                Object.Destroy(weaponObject.gameObject);
+            }
+
+            var weaponData = userDataRepository.GetEquippedWeaponData(characterData.Id);
+            var weaponParents = characterObject.GetComponentsInChildren<WeaponParentObject>();
+            foreach (var weaponParent in weaponParents)
+            {
+                var currentWeapon = Object.Instantiate(weaponData.WeaponObject, weaponParent.transform);
+                currentWeapon.transform.localPosition = Vector3.zero;
+                currentWeapon.transform.localRotation = quaternion.Euler(0, 0, 0);
                 currentWeapon.tag = GameCommonData.WeaponTag;
-                Object.Destroy(prevWeapon);
+                currentWeapon.AddComponent<WeaponObject>();
             }
         }
 
-        private void FixedTransform(GameObject prevWeapon, GameObject currentWeapon)
-        {
-            currentWeapon.transform.localPosition = prevWeapon.transform.localPosition;
-            currentWeapon.transform.localRotation = prevWeapon.transform.localRotation;
-        }
-
-        private void CreateWeaponEffect(CharacterData createCharacterData)
+        private void CreateWeaponEffect(CharacterData createCharacterData, GameObject characterObject)
         {
             var currentCharacterLevel = userDataRepository.GetCurrentLevelData(createCharacterData.Id);
             if (currentCharacterLevel.Level < GameCommonData.MaxCharacterLevel)
@@ -90,8 +92,8 @@ namespace Repository
                 return;
             }
 
-            var weapons = GameObject.FindGameObjectsWithTag(GameCommonData.WeaponTag);
-            foreach (var weapon in weapons)
+            var weaponObjects = characterObject.GetComponentsInChildren<WeaponObject>();
+            foreach (var weapon in weaponObjects)
             {
                 var effectObj = Object.Instantiate(createCharacterData.WeaponEffectObj, weapon.transform);
                 var particleSystems = effectObj.GetComponentsInChildren<ParticleSystem>();
@@ -103,7 +105,7 @@ namespace Repository
 
                 var effect = effectObj.GetComponentInChildren<PSMeshRendererUpdater>();
                 effect.Color = GameCommonData.GetWeaponColor(createCharacterData.Id);
-                effect.UpdateMeshEffect(weapon);
+                effect.UpdateMeshEffect(weapon.gameObject);
             }
         }
 

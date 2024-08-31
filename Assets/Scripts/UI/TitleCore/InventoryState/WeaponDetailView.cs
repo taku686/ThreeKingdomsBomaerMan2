@@ -47,9 +47,9 @@ namespace UI.Title
                     weaponObject.transform.localRotation = quaternion.Euler(0, 0, 0);
                     break;
                 case WeaponType.Sword:
-                    weaponObject.transform.localPosition = new Vector3(0, 0.73f, 0);
+                    weaponObject.transform.localPosition = new Vector3(0, 0.83f, 0);
                     weaponObject.transform.localRotation = quaternion.Euler(0, 0, 0);
-                    weaponObject.transform.localScale = new Vector3(2, 2, 2);
+                    weaponObject.transform.localScale = new Vector3(1.6f, 1.6f, 1.6f);
                     break;
                 case WeaponType.Bow:
                     weaponObject.transform.localPosition = new Vector3(0, 0, 0);
