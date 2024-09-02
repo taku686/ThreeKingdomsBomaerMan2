@@ -86,7 +86,7 @@ namespace Repository
                     weaponData.WeaponType == WeaponType.Bow ? bowPosition : weaponPosition;
                 weaponLeftParent.transform.localEulerAngles =
                     weaponData.WeaponType == WeaponType.Bow ? bowLeftRotation : weaponLeftRotation;
-                InstantiateWeapon(weaponData, weaponLeftParent.transform, characterId);
+                InstantiateWeapon(weaponData, weaponLeftParent.transform, characterId, false);
             }
 
             if (weaponRightParent != null)
@@ -99,26 +99,28 @@ namespace Repository
             }
         }
 
-        private void InstantiateWeapon(WeaponMasterData weaponMasterData, Transform weaponParent, int characterId)
+        private void InstantiateWeapon(WeaponMasterData weaponMasterData, Transform weaponParent, int characterId,
+            bool isRight = true)
         {
             var currentWeapon = Object.Instantiate(weaponMasterData.WeaponObject, weaponParent.transform);
             currentWeapon.transform.localPosition = Vector3.zero;
             currentWeapon.transform.localRotation = quaternion.Euler(0, 0, 0);
-            currentWeapon.transform.localScale = FixedScale(weaponMasterData.WeaponType, characterId);
+            currentWeapon.transform.localScale =
+                FixedScale(weaponMasterData.WeaponType, characterId, weaponMasterData.Scale, isRight);
             currentWeapon.tag = GameCommonData.WeaponTag;
             currentWeapon.AddComponent<WeaponObject>();
         }
 
-        private Vector3 FixedScale(WeaponType weaponType, int characterId)
+        private Vector3 FixedScale(WeaponType weaponType, int characterId, float scale, bool isRight)
         {
             switch (weaponType)
             {
                 case WeaponType.Shield:
-                    return characterId == KakouenId ? new Vector3(1, -1, -1) : new Vector3(1, -1, 1);
+                    return (characterId == KakouenId || !isRight) ? new Vector3(1, -1, -1) : new Vector3(1, -1, 1);
                 case WeaponType.Bow:
-                    return new Vector3(-1, 1, 1);
+                    return new Vector3(1, 1, 1) * scale;
                 default:
-                    return new Vector3(-1, -1, -1);
+                    return new Vector3(1, 1, 1) * scale;
             }
         }
 
