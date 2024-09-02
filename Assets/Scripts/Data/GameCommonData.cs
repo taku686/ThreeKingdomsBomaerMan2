@@ -263,7 +263,8 @@ namespace Common.Data
         Fan = 4,
         Bow = 5,
         Shield = 6,
-        Axe = 7
+        Axe = 7,
+        Staff = 8,
     }
 
     public enum AttributeType

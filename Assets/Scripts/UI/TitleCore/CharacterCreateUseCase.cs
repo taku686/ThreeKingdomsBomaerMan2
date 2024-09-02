@@ -19,7 +19,7 @@ namespace Repository
         private readonly Vector3 bowLeftRotation = new(87.91f, -204.73f, -24.69f);
         private readonly Vector3 weaponRightRotation = new(36.033f, -92.88f, 84.68f);
         private readonly Vector3 weaponLeftRotation = new(-36.033f, 92.88f, 84.68f);
-        
+        private const int KakouenId = 15;
 
         public CharacterCreateUseCase
         (
@@ -51,7 +51,7 @@ namespace Repository
             }
 
             characterObject = CreateCharacter(createCharacterData);
-            CreateWeapon(createCharacterData, characterObject);
+            CreateWeapon(createCharacterData, characterObject, characterId);
             //todo androidでエフェクトの表示がおかしくなるためコメントアウト
             //CreateWeaponEffect(createCharacterData, characterObject);
         }
@@ -69,7 +69,7 @@ namespace Repository
             return characterObject;
         }
 
-        private void CreateWeapon(CharacterData characterData, GameObject characterObject)
+        private void CreateWeapon(CharacterData characterData, GameObject characterObject, int characterId)
         {
             var weaponObjects = characterObject.GetComponentsInChildren<WeaponObject>();
             foreach (var weaponObject in weaponObjects)
@@ -86,7 +86,7 @@ namespace Repository
                     weaponData.WeaponType == WeaponType.Bow ? bowPosition : weaponPosition;
                 weaponLeftParent.transform.localEulerAngles =
                     weaponData.WeaponType == WeaponType.Bow ? bowLeftRotation : weaponLeftRotation;
-                InstantiateWeapon(weaponData, weaponLeftParent.transform);
+                InstantiateWeapon(weaponData, weaponLeftParent.transform, characterId);
             }
 
             if (weaponRightParent != null)
@@ -95,17 +95,31 @@ namespace Repository
                     weaponData.WeaponType == WeaponType.Bow ? bowPosition : weaponPosition;
                 weaponRightParent.transform.localEulerAngles =
                     weaponData.WeaponType == WeaponType.Bow ? bowRightRotation : weaponRightRotation;
-                InstantiateWeapon(weaponData, weaponRightParent.transform);
+                InstantiateWeapon(weaponData, weaponRightParent.transform, characterId);
             }
         }
 
-        private void InstantiateWeapon(WeaponMasterData weaponMasterData, Transform weaponParent)
+        private void InstantiateWeapon(WeaponMasterData weaponMasterData, Transform weaponParent, int characterId)
         {
             var currentWeapon = Object.Instantiate(weaponMasterData.WeaponObject, weaponParent.transform);
             currentWeapon.transform.localPosition = Vector3.zero;
             currentWeapon.transform.localRotation = quaternion.Euler(0, 0, 0);
+            currentWeapon.transform.localScale = FixedScale(weaponMasterData.WeaponType, characterId);
             currentWeapon.tag = GameCommonData.WeaponTag;
             currentWeapon.AddComponent<WeaponObject>();
+        }
+
+        private Vector3 FixedScale(WeaponType weaponType, int characterId)
+        {
+            switch (weaponType)
+            {
+                case WeaponType.Shield:
+                    return characterId == KakouenId ? new Vector3(1, -1, -1) : new Vector3(1, -1, 1);
+                case WeaponType.Bow:
+                    return new Vector3(-1, 1, 1);
+                default:
+                    return new Vector3(-1, -1, -1);
+            }
         }
 
         private void CreateWeaponEffect(CharacterData createCharacterData, GameObject characterObject)

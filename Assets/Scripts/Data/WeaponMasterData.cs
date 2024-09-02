@@ -13,6 +13,7 @@ namespace Common.Data
         public SkillMasterData NormalSkillMasterData { get; }
         public int SpecialSkillId { get; set; }
         public SkillMasterData SpecialSkillMasterData { get; }
+        public float Scale { get; set; }
         public GameObject WeaponObject { get; }
         public GameObject WeaponEffectObj { get; }
         public Sprite WeaponIcon { get; }
@@ -32,7 +33,8 @@ namespace Common.Data
             AttributeType attributeType,
             SkillMasterData normalSkillMasterData,
             SkillMasterData statusSkillMasterData,
-            SkillMasterData specialSkillMasterData)
+            SkillMasterData specialSkillMasterData,
+            float scale)
         {
             Name = name;
             Id = id;
@@ -44,6 +46,7 @@ namespace Common.Data
             NormalSkillMasterData = normalSkillMasterData;
             StatusSkillMasterData = statusSkillMasterData;
             SpecialSkillMasterData = specialSkillMasterData;
+            Scale = scale;
         }
 
         public void Dispose()

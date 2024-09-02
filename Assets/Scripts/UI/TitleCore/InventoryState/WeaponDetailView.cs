@@ -32,24 +32,25 @@ namespace UI.Title
             specialSkillGridView.ApplyViewModel(specialSkillViewModel);
             Destroy(weaponObject);
             weaponObject = Instantiate(viewModel.WeaponObject, weaponObjectParent);
-            FixedTransform(viewModel.WeaponType);
+            FixedTransform(viewModel.WeaponType, viewModel.Scale);
             Observable.EveryUpdate()
                 .Subscribe(_ => weaponObject.transform.Rotate(Vector3.up, 0.1f))
                 .AddTo(weaponObject.GetCancellationTokenOnDestroy());
         }
 
-        private void FixedTransform(WeaponType weaponType)
+        private void FixedTransform(WeaponType weaponType, float scale)
         {
             switch (weaponType)
             {
                 case WeaponType.Spear:
                     weaponObject.transform.localPosition = new Vector3(0, 0.39f, 0);
                     weaponObject.transform.localRotation = quaternion.Euler(0, 0, 0);
+                    weaponObject.transform.localScale *= scale;
                     break;
                 case WeaponType.Sword:
                     weaponObject.transform.localPosition = new Vector3(0, 0.83f, 0);
                     weaponObject.transform.localRotation = quaternion.Euler(0, 0, 0);
-                    weaponObject.transform.localScale = new Vector3(1.6f, 1.6f, 1.6f);
+                    weaponObject.transform.localScale = new Vector3(1.6f, 1.6f, 1.6f) * scale;
                     break;
                 case WeaponType.Bow:
                     weaponObject.transform.localPosition = new Vector3(0, 0, 0);
@@ -78,6 +79,8 @@ namespace UI.Title
             public SkillMasterData SpecialSkillMasterData { get; }
             public GameObject WeaponObject { get; }
             public WeaponType WeaponType { get; }
+            public float Scale { get; }
+
 
             public ViewModel
             (
@@ -87,7 +90,8 @@ namespace UI.Title
                 SkillMasterData normalSkillMasterData,
                 SkillMasterData specialSkillMasterData,
                 GameObject weaponObject,
-                WeaponType weaponType
+                WeaponType weaponType,
+                float scale
             )
             {
                 Icon = icon;
@@ -97,6 +101,7 @@ namespace UI.Title
                 SpecialSkillMasterData = specialSkillMasterData;
                 WeaponObject = weaponObject;
                 WeaponType = weaponType;
+                Scale = scale;
             }
         }
     }

@@ -110,7 +110,7 @@ namespace Manager.PlayFabManager
                 var statusSkillData = skillDataRepository.GetSkillData(weaponData.StatusSkillId);
                 var normalSkillData = skillDataRepository.GetSkillData(weaponData.NormalSkillId);
                 var specialSkillData = skillDataRepository.GetSkillData(weaponData.SpecialSkillId);
-
+                var scale = weaponData.Scale;
                 var newWeaponData = new WeaponMasterData
                 (
                     name,
@@ -122,7 +122,8 @@ namespace Manager.PlayFabManager
                     attributeType,
                     normalSkillData,
                     statusSkillData,
-                    specialSkillData
+                    specialSkillData,
+                    scale
                 );
 
                 weaponMasterDataRepository.AddWeaponData(newWeaponData);

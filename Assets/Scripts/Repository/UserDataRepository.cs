@@ -242,6 +242,14 @@ namespace Common.Data
             return weaponMasterDataRepository.GetWeaponData(weaponId);
         }
 
+        public void AddWeaponData(int weaponId)
+        {
+            if (!userData.PossessedWeapons.TryAdd(weaponId, 1))
+            {
+                userData.PossessedWeapons[weaponId]++;
+            }
+        }
+
         public void Dispose()
         {
             userData?.Dispose();
@@ -250,6 +258,18 @@ namespace Common.Data
             characterMasterDataRepository?.Dispose();
             characterLevelMasterDataRepository?.Dispose();
             playFabUserDataManager?.Dispose();
+        }
+
+        //todo デバッグ用後で消す
+        public async UniTask AddAllWeapon()
+        {
+            var weaponData = weaponMasterDataRepository.GetAllWeaponData();
+            foreach (var data in weaponData)
+            {
+                AddWeaponData(data.Id);
+            }
+
+            await UpdateUserData(userData);
         }
     }
 }

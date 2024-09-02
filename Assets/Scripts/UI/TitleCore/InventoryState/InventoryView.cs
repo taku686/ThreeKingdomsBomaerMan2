@@ -76,7 +76,8 @@ public class InventoryView : ViewBase
             weaponMasterData.NormalSkillMasterData,
             weaponMasterData.SpecialSkillMasterData,
             weaponMasterData.WeaponObject,
-            weaponMasterData.WeaponType
+            weaponMasterData.WeaponType,
+            weaponMasterData.Scale
         );
     }
 
