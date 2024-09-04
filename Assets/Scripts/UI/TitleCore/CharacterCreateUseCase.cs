@@ -2,7 +2,9 @@
 using Common.Data;
 using Manager.DataManager;
 using Unity.Mathematics;
+using UnityEditor.Animations;
 using UnityEngine;
+using Zenject;
 using Object = UnityEngine.Object;
 
 namespace Repository
@@ -19,22 +21,56 @@ namespace Repository
         private readonly Vector3 bowLeftRotation = new(87.91f, -204.73f, -24.69f);
         private readonly Vector3 weaponRightRotation = new(36.033f, -92.88f, 84.68f);
         private readonly Vector3 weaponLeftRotation = new(-36.033f, 92.88f, 84.68f);
-        private const int KakouenId = 15;
+        private readonly AnimationChangeUseCase idleMotionChangeUseCase;
+        private readonly AnimationChangeUseCase performanceMotionChangeUseCase;
+        private AnimatorController animatorController;
 
+        [Inject]
         public CharacterCreateUseCase
         (
             Transform characterGenerateTransform,
             CharacterMasterDataRepository characterMasterDataRepository,
             UserDataRepository userDataRepository,
-            CharacterObjectRepository characterObjectRepository
+            CharacterObjectRepository characterObjectRepository,
+            AnimatorController animatorController,
+            MotionRepository motionRepository,
+            AnimationChangeUseCase.Factory animationChangeUseCaseFactory
         )
         {
             this.characterGenerateTransform = characterGenerateTransform;
             this.characterMasterDataRepository = characterMasterDataRepository;
             this.userDataRepository = userDataRepository;
             this.characterObjectRepository = characterObjectRepository;
+            this.animatorController = animatorController;
+            var idleMotions = motionRepository.GetAllIdleMotions();
+            var performanceMotions = motionRepository.GetAllPerformanceMotions();
+            idleMotionChangeUseCase = animationChangeUseCaseFactory.Create
+            (
+                idleMotions[0],
+                idleMotions[1],
+                idleMotions[2],
+                idleMotions[3],
+                idleMotions[4],
+                idleMotions[5],
+                idleMotions[6],
+                idleMotions[7],
+                idleMotions[8],
+                GameCommonData.IdleTag
+            );
+            performanceMotionChangeUseCase = animationChangeUseCaseFactory.Create
+            (
+                performanceMotions[0],
+                performanceMotions[1],
+                performanceMotions[2],
+                performanceMotions[3],
+                performanceMotions[4],
+                performanceMotions[5],
+                performanceMotions[6],
+                performanceMotions[7],
+                performanceMotions[8],
+                GameCommonData.PerformanceTag
+            );
         }
-
 
         public void CreateCharacter(int characterId)
         {
@@ -50,8 +86,10 @@ namespace Repository
                 Debug.LogError(characterId + " is not found");
             }
 
+            var weaponData = userDataRepository.GetEquippedWeaponData(characterId);
             characterObject = CreateCharacter(createCharacterData);
-            CreateWeapon(createCharacterData, characterObject, characterId);
+            CreateWeapon(characterObject, characterId, weaponData);
+            ChangeAnimation(characterObject, weaponData.WeaponType);
             //todo androidでエフェクトの表示がおかしくなるためコメントアウト
             //CreateWeaponEffect(createCharacterData, characterObject);
         }
@@ -69,7 +107,12 @@ namespace Repository
             return characterObject;
         }
 
-        private void CreateWeapon(CharacterData characterData, GameObject characterObject, int characterId)
+        private void CreateWeapon
+        (
+            GameObject characterObject,
+            int characterId,
+            WeaponMasterData weaponData
+        )
         {
             var weaponObjects = characterObject.GetComponentsInChildren<WeaponObject>();
             foreach (var weaponObject in weaponObjects)
@@ -77,16 +120,15 @@ namespace Repository
                 Object.Destroy(weaponObject.gameObject);
             }
 
-            var weaponData = userDataRepository.GetEquippedWeaponData(characterData.Id);
             var weaponRightParent = characterObject.GetComponentInChildren<WeaponRightParentObject>();
             var weaponLeftParent = characterObject.GetComponentInChildren<WeaponLeftParentObject>();
-            if (IsLeftHand(weaponData.WeaponType, weaponData.IsBothHands))
+            if (IsLeftHand(weaponData.WeaponType))
             {
                 weaponLeftParent.transform.localPosition =
                     weaponData.WeaponType == WeaponType.Bow ? bowPosition : weaponPosition;
                 weaponLeftParent.transform.localEulerAngles =
                     weaponData.WeaponType == WeaponType.Bow ? bowLeftRotation : weaponLeftRotation;
-                InstantiateWeapon(weaponData, weaponLeftParent.transform, characterId, false);
+                InstantiateWeapon(weaponData, weaponLeftParent.transform);
             }
 
             if (IsRightHand(weaponData.WeaponType))
@@ -95,40 +137,52 @@ namespace Repository
                     weaponData.WeaponType == WeaponType.Bow ? bowPosition : weaponPosition;
                 weaponRightParent.transform.localEulerAngles =
                     weaponData.WeaponType == WeaponType.Bow ? bowRightRotation : weaponRightRotation;
-                InstantiateWeapon(weaponData, weaponRightParent.transform, characterId);
+                InstantiateWeapon(weaponData, weaponRightParent.transform);
             }
+        }
+
+        private void ChangeAnimation(GameObject characterObject, WeaponType weaponType)
+        {
+            var animator = characterObject.GetComponent<Animator>();
+            if (animator == null)
+            {
+                return;
+            }
+
+            animatorController = idleMotionChangeUseCase.ChangeMotion(animatorController, weaponType);
+            animatorController = performanceMotionChangeUseCase.ChangeMotion(animatorController, weaponType);
+            animator.runtimeAnimatorController = animatorController;
         }
 
         private bool IsRightHand(WeaponType weaponType)
         {
-            return weaponType != WeaponType.Bow ;
+            return weaponType != WeaponType.Bow && weaponType != WeaponType.Shield;
         }
 
-        private bool IsLeftHand(WeaponType weaponType, bool isBothHands)
+        private bool IsLeftHand(WeaponType weaponType)
         {
-            return weaponType == WeaponType.Bow || isBothHands;
+            return weaponType == WeaponType.Bow || weaponType == WeaponType.Knife || weaponType == WeaponType.Shield;
         }
 
-        private void InstantiateWeapon(WeaponMasterData weaponMasterData, Transform weaponParent, int characterId,
-            bool isRight = true)
+        private void InstantiateWeapon(WeaponMasterData weaponMasterData, Transform weaponParent)
         {
             var currentWeapon = Object.Instantiate(weaponMasterData.WeaponObject, weaponParent.transform);
             currentWeapon.transform.localPosition = Vector3.zero;
             currentWeapon.transform.localRotation = quaternion.Euler(0, 0, 0);
             currentWeapon.transform.localScale =
-                FixedScale(weaponMasterData.WeaponType, characterId, weaponMasterData.Scale, isRight);
+                FixedScale(weaponMasterData.WeaponType, weaponMasterData.Scale);
             currentWeapon.tag = GameCommonData.WeaponTag;
             currentWeapon.AddComponent<WeaponObject>();
         }
 
-        private Vector3 FixedScale(WeaponType weaponType, int characterId, float scale, bool isRight)
+        private Vector3 FixedScale(WeaponType weaponType, float scale)
         {
             switch (weaponType)
             {
-                case WeaponType.Shield:
-                    return (characterId == KakouenId || !isRight) ? new Vector3(1, -1, -1) : new Vector3(1, -1, 1);
                 case WeaponType.Bow:
                     return new Vector3(1, 1, 1) * scale;
+                case WeaponType.Shield:
+                    return new Vector3(1, -1, 1);
                 default:
                     return new Vector3(1, 1, 1) * scale;
             }

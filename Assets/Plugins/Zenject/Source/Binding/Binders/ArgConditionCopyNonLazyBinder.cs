@@ -21,7 +21,8 @@ namespace Zenject
             return this;
         }
 
-        public InstantiateCallbackConditionCopyNonLazyBinder WithArguments<TParam1, TParam2>(TParam1 param1, TParam2 param2)
+        public InstantiateCallbackConditionCopyNonLazyBinder WithArguments<TParam1, TParam2>(TParam1 param1,
+            TParam2 param2)
         {
             BindInfo.Arguments.Clear();
             BindInfo.Arguments.Add(InjectUtil.CreateTypePair(param1));
@@ -62,7 +63,8 @@ namespace Zenject
             return this;
         }
 
-        public InstantiateCallbackConditionCopyNonLazyBinder WithArguments<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6>(
+        public InstantiateCallbackConditionCopyNonLazyBinder WithArguments<TParam1, TParam2, TParam3, TParam4, TParam5,
+            TParam6>(
             TParam1 param1, TParam2 param2, TParam3 param3, TParam4 param4, TParam5 param5, TParam6 param6)
         {
             BindInfo.Arguments.Clear();
@@ -72,6 +74,24 @@ namespace Zenject
             BindInfo.Arguments.Add(InjectUtil.CreateTypePair(param4));
             BindInfo.Arguments.Add(InjectUtil.CreateTypePair(param5));
             BindInfo.Arguments.Add(InjectUtil.CreateTypePair(param6));
+            return this;
+        }
+
+        public InstantiateCallbackConditionCopyNonLazyBinder WithArguments<TParam1, TParam2, TParam3, TParam4, TParam5,
+            TParam6, TParam7, TParam8, TParam9>(
+            TParam1 param1, TParam2 param2, TParam3 param3, TParam4 param4, TParam5 param5, TParam6 param6,
+            TParam7 param7, TParam8 param8, TParam9 param9)
+        {
+            BindInfo.Arguments.Clear();
+            BindInfo.Arguments.Add(InjectUtil.CreateTypePair(param1));
+            BindInfo.Arguments.Add(InjectUtil.CreateTypePair(param2));
+            BindInfo.Arguments.Add(InjectUtil.CreateTypePair(param3));
+            BindInfo.Arguments.Add(InjectUtil.CreateTypePair(param4));
+            BindInfo.Arguments.Add(InjectUtil.CreateTypePair(param5));
+            BindInfo.Arguments.Add(InjectUtil.CreateTypePair(param6));
+            BindInfo.Arguments.Add(InjectUtil.CreateTypePair(param7));
+            BindInfo.Arguments.Add(InjectUtil.CreateTypePair(param8));
+            BindInfo.Arguments.Add(InjectUtil.CreateTypePair(param9));
             return this;
         }
 
@@ -89,6 +109,7 @@ namespace Zenject
                 BindInfo.Arguments.Add(
                     new TypeValuePair(arg.GetType(), arg));
             }
+
             return this;
         }
 
@@ -100,6 +121,7 @@ namespace Zenject
             {
                 BindInfo.Arguments.Add(arg);
             }
+
             return this;
         }
     }

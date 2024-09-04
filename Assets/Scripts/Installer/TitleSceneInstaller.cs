@@ -1,10 +1,12 @@
-﻿using Assets.Scripts.Common.PlayFab;
+﻿using System.Collections.Generic;
+using Assets.Scripts.Common.PlayFab;
 using Common.Data;
 using Manager.NetworkManager;
 using Manager.PlayFabManager;
 using Repository;
 using UI.Common;
 using UI.Title;
+using UnityEditor.Animations;
 using UnityEngine;
 using UseCase;
 using Zenject;
@@ -15,7 +17,8 @@ namespace Common.Installer
     {
         [SerializeField] private GameObject playFabManagerGameObject;
         [SerializeField] private Transform characterGenerateParent;
-
+        [SerializeField] private AnimatorController animatorController;
+        [SerializeField] private MotionRepository motionRepository;
 
         public override void InstallBindings()
         {
@@ -27,10 +30,13 @@ namespace Common.Installer
             Container.Bind<PlayFabVirtualCurrencyManager>().AsCached();
             Container.Bind<PlayFabTitleDataManager>().AsCached();
             Container.Bind<ChatGPTManager>().AsCached();
-            Container.Bind<CharacterCreateUseCase>().AsCached().WithArguments(characterGenerateParent);
+            Container.Bind<CharacterCreateUseCase>().AsCached()
+                .WithArguments(characterGenerateParent, animatorController);
             Container.Bind<CharacterObjectRepository>().AsCached();
+            Container.Bind<MotionRepository>().FromComponentOn(motionRepository.gameObject).AsCached();
             InstallCharacterSelect();
             InstallInventory();
+            InstallCharacterDetail();
         }
 
         private void InstallCharacterSelect()
@@ -38,6 +44,25 @@ namespace Common.Installer
             Container.Bind<SortCharactersUseCase>().AsCached();
             Container.Bind<CharacterSelectViewModelUseCase>().AsCached();
             Container.Bind<CharacterSelectRepository>().AsCached();
+        }
+
+        private void InstallCharacterDetail()
+        {
+            Container.BindFactory<
+                    IReadOnlyCollection<Motion>,
+                    IReadOnlyCollection<Motion>,
+                    IReadOnlyCollection<Motion>,
+                    IReadOnlyCollection<Motion>,
+                    IReadOnlyCollection<Motion>,
+                    IReadOnlyCollection<Motion>,
+                    IReadOnlyCollection<Motion>,
+                    IReadOnlyCollection<Motion>,
+                    IReadOnlyCollection<Motion>,
+                    string,
+                    AnimationChangeUseCase,
+                    AnimationChangeUseCase.Factory
+                >()
+                .AsCached();
         }
 
         private void InstallInventory()

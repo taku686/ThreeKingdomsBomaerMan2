@@ -315,7 +315,7 @@ namespace UI.Title
             private void InitializeAnimation()
             {
                 var character = CharacterObjectRepository.GetCharacterObject();
-                character.GetComponent<Animator>().SetTrigger(GameCommonData.ActiveHashKey);
+                character.GetComponent<Animator>().SetTrigger(GameCommonData.PerformanceHashKey);
             }
 
             private void SetupCancellationToken()

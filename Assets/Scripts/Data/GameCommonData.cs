@@ -16,7 +16,10 @@ namespace Common.Data
         public const string BombEffectTag = "BombEffect";
         public const string BreakingWallTag = "BreakingWall";
         public const string WeaponTag = "Weapon";
-        public const string WeaponParentTag = "WeaponParent";
+        public const string IdleTag = "Idle";
+        public const string AttackTag = "Attack";
+        public const string PerformanceTag = "Performance";
+        public const string PassiveTag = "Passive";
         public const string ObstacleLayer = "Obstacles";
         public const string ExplosionLayer = "Explosion";
         public const string BombLayer = "Bomb";
@@ -41,6 +44,7 @@ namespace Common.Data
         public static readonly int SkillOneHashKey = Animator.StringToHash("Attack");
         public static readonly int SkillTwoHashKey = Animator.StringToHash("Passive");
         public static readonly int ActiveHashKey = Animator.StringToHash("Active");
+        public static readonly int PerformanceHashKey = Animator.StringToHash("Performance");
         public const string SkillOneKey = "Base Layer.Attack";
         public const string SkillTwoKey = "Base Layer.Passive";
         public const string GameID = "5089859";
@@ -104,7 +108,6 @@ namespace Common.Data
                 case -90:
                     return Vector3.left;
                 case 90:
-                    return Vector3.right;
                     return Vector3.right;
                 default:
                     return Vector3.zero;
@@ -253,7 +256,7 @@ namespace Common.Data
         Received,
         Exception
     }
-
+    
     public enum WeaponType
     {
         Spear = 0,

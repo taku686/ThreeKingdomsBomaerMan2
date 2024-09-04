@@ -1,0 +1,140 @@
+fileFormatVersion: 2
+guid: 57e3db0607250cf47af5d5923b5908e3
+timeCreated: 1439370979
+licenseType: Pro
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: Blood_Line_01_Mes
+    100002: Blood_Line_01_Mes003
+    100004: Blood_Line_01_Mes004
+    100006: Blood_Line_01_Mes005
+    100008: Blood_Line_01_Mes006
+    100010: Blood_Line_01_Mes007
+    100012: Blood_Line_01_Mes008
+    100014: Blood_Line_01_Mes009
+    100016: Blood_Line_01_Mes010
+    100018: Blood_Line_01_Mes011
+    100020: Blood_Line_01_Mes012
+    100022: Blood_Line_01_Mes013
+    100024: p1
+    100026: p2
+    100028: p3
+    100030: //RootNode
+    400000: Blood_Line_01_Mes
+    400002: Blood_Line_01_Mes003
+    400004: Blood_Line_01_Mes004
+    400006: Blood_Line_01_Mes005
+    400008: Blood_Line_01_Mes006
+    400010: Blood_Line_01_Mes007
+    400012: Blood_Line_01_Mes008
+    400014: Blood_Line_01_Mes009
+    400016: Blood_Line_01_Mes010
+    400018: Blood_Line_01_Mes011
+    400020: Blood_Line_01_Mes012
+    400022: Blood_Line_01_Mes013
+    400024: p1
+    400026: p2
+    400028: p3
+    400030: //RootNode
+    2300000: Blood_Line_01_Mes
+    2300002: Blood_Line_01_Mes003
+    2300004: Blood_Line_01_Mes004
+    2300006: Blood_Line_01_Mes005
+    2300008: Blood_Line_01_Mes006
+    2300010: Blood_Line_01_Mes007
+    2300012: Blood_Line_01_Mes008
+    2300014: Blood_Line_01_Mes009
+    2300016: Blood_Line_01_Mes010
+    2300018: Blood_Line_01_Mes011
+    2300020: Blood_Line_01_Mes012
+    2300022: Blood_Line_01_Mes013
+    3300000: Blood_Line_01_Mes
+    3300002: Blood_Line_01_Mes003
+    3300004: Blood_Line_01_Mes004
+    3300006: Blood_Line_01_Mes005
+    3300008: Blood_Line_01_Mes006
+    3300010: Blood_Line_01_Mes007
+    3300012: Blood_Line_01_Mes008
+    3300014: Blood_Line_01_Mes009
+    3300016: Blood_Line_01_Mes010
+    3300018: Blood_Line_01_Mes011
+    3300020: Blood_Line_01_Mes012
+    3300022: Blood_Line_01_Mes013
+    4300000: Blood_Line_01_Mes007
+    4300002: Blood_Line_01_Mes008
+    4300004: Blood_Line_01_Mes009
+    4300006: Blood_Line_01_Mes006
+    4300008: Blood_Line_01_Mes011
+    4300010: Blood_Line_01_Mes012
+    4300012: Blood_Line_01_Mes013
+    4300014: Blood_Line_01_Mes010
+    4300016: Blood_Line_01_Mes003
+    4300018: Blood_Line_01_Mes004
+    4300020: Blood_Line_01_Mes005
+    4300022: Blood_Line_01_Mes
+    11100000: //RootNode
+  materials:
+    importMaterials: 0
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleRotations: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 2
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 3
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 4
+  importAnimation: 0
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 1
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
