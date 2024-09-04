@@ -80,7 +80,7 @@ namespace Repository
             var weaponData = userDataRepository.GetEquippedWeaponData(characterData.Id);
             var weaponRightParent = characterObject.GetComponentInChildren<WeaponRightParentObject>();
             var weaponLeftParent = characterObject.GetComponentInChildren<WeaponLeftParentObject>();
-            if (weaponLeftParent != null)
+            if (IsLeftHand(weaponData.WeaponType, weaponData.IsBothHands))
             {
                 weaponLeftParent.transform.localPosition =
                     weaponData.WeaponType == WeaponType.Bow ? bowPosition : weaponPosition;
@@ -89,7 +89,7 @@ namespace Repository
                 InstantiateWeapon(weaponData, weaponLeftParent.transform, characterId, false);
             }
 
-            if (weaponRightParent != null)
+            if (IsRightHand(weaponData.WeaponType))
             {
                 weaponRightParent.transform.localPosition =
                     weaponData.WeaponType == WeaponType.Bow ? bowPosition : weaponPosition;
@@ -97,6 +97,16 @@ namespace Repository
                     weaponData.WeaponType == WeaponType.Bow ? bowRightRotation : weaponRightRotation;
                 InstantiateWeapon(weaponData, weaponRightParent.transform, characterId);
             }
+        }
+
+        private bool IsRightHand(WeaponType weaponType)
+        {
+            return weaponType != WeaponType.Bow ;
+        }
+
+        private bool IsLeftHand(WeaponType weaponType, bool isBothHands)
+        {
+            return weaponType == WeaponType.Bow || isBothHands;
         }
 
         private void InstantiateWeapon(WeaponMasterData weaponMasterData, Transform weaponParent, int characterId,

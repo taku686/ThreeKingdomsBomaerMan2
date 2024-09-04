@@ -14,6 +14,7 @@ namespace Common.Data
         public int SpecialSkillId { get; set; }
         public SkillMasterData SpecialSkillMasterData { get; }
         public float Scale { get; set; }
+        public bool IsBothHands { get; set; }
         public GameObject WeaponObject { get; }
         public GameObject WeaponEffectObj { get; }
         public Sprite WeaponIcon { get; }
@@ -34,7 +35,8 @@ namespace Common.Data
             SkillMasterData normalSkillMasterData,
             SkillMasterData statusSkillMasterData,
             SkillMasterData specialSkillMasterData,
-            float scale)
+            float scale,
+            bool isBothHands)
         {
             Name = name;
             Id = id;
@@ -47,6 +49,7 @@ namespace Common.Data
             StatusSkillMasterData = statusSkillMasterData;
             SpecialSkillMasterData = specialSkillMasterData;
             Scale = scale;
+            IsBothHands = isBothHands;
         }
 
         public void Dispose()
