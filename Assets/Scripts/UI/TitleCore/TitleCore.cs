@@ -36,6 +36,7 @@ namespace UI.Title
         [Inject] private SortCharactersUseCase sortCharactersUseCase;
         [Inject] private InventoryViewModelUseCase inventoryViewModelUseCase;
         [Inject] private CharacterCreateUseCase characterCreateUseCase;
+        [Inject] private AnimationPlayBackUseCase animationPlayBackUseCase;
 
         //Manager
         [Inject] private PhotonNetworkManager photonNetworkManager;

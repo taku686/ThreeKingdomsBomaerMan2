@@ -10,7 +10,7 @@ using Repository;
 using UI.Common;
 using UniRx;
 using UnityEngine;
-using UseCase;
+using UseCase;  
 
 namespace UI.Title
 {
@@ -22,6 +22,7 @@ namespace UI.Title
             private CommonView CommonView => Owner.commonView;
             private CharacterCreateUseCase CharacterCreateUseCase => Owner.characterCreateUseCase;
             private CharacterObjectRepository CharacterObjectRepository => Owner.characterObjectRepository;
+            private AnimationPlayBackUseCase AnimationPlayBackUseCase => Owner.animationPlayBackUseCase;
             private CharacterMasterDataRepository characterMasterDataRepository;
             private PlayFabUserDataManager playFabUserDataManager;
             private PlayFabShopManager playFabShopManager;
@@ -315,7 +316,9 @@ namespace UI.Title
             private void InitializeAnimation()
             {
                 var character = CharacterObjectRepository.GetCharacterObject();
-                character.GetComponent<Animator>().SetTrigger(GameCommonData.PerformanceHashKey);
+                var animator = character.GetComponent<Animator>();
+                AnimationPlayBackUseCase.RandomPlayBack(animator, AnimationStateType.Performance);
+                AnimationPlayBackUseCase.RandomPlayBack(animator, AnimationStateType.Idle);
             }
 
             private void SetupCancellationToken()
