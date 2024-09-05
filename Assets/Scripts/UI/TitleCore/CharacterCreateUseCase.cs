@@ -21,8 +21,6 @@ namespace Repository
         private readonly Vector3 bowLeftRotation = new(87.91f, -204.73f, -24.69f);
         private readonly Vector3 weaponRightRotation = new(36.033f, -92.88f, 84.68f);
         private readonly Vector3 weaponLeftRotation = new(-36.033f, 92.88f, 84.68f);
-        private readonly AnimationChangeUseCase idleMotionChangeUseCase;
-        private readonly AnimationChangeUseCase performanceMotionChangeUseCase;
 
         [Inject]
         public CharacterCreateUseCase
@@ -31,8 +29,6 @@ namespace Repository
             CharacterMasterDataRepository characterMasterDataRepository,
             UserDataRepository userDataRepository,
             CharacterObjectRepository characterObjectRepository,
-            MotionRepository motionRepository,
-            AnimationChangeUseCase.Factory animationChangeUseCaseFactory,
             AnimatorControllerRepository animatorControllerRepository
         )
         {
@@ -41,34 +37,6 @@ namespace Repository
             this.userDataRepository = userDataRepository;
             this.characterObjectRepository = characterObjectRepository;
             this.animatorControllerRepository = animatorControllerRepository;
-            var idleMotions = motionRepository.GetAllIdleMotions();
-            var performanceMotions = motionRepository.GetAllPerformanceMotions();
-            idleMotionChangeUseCase = animationChangeUseCaseFactory.Create
-            (
-                idleMotions[0],
-                idleMotions[1],
-                idleMotions[2],
-                idleMotions[3],
-                idleMotions[4],
-                idleMotions[5],
-                idleMotions[6],
-                idleMotions[7],
-                idleMotions[8],
-                GameCommonData.IdleTag
-            );
-            performanceMotionChangeUseCase = animationChangeUseCaseFactory.Create
-            (
-                performanceMotions[0],
-                performanceMotions[1],
-                performanceMotions[2],
-                performanceMotions[3],
-                performanceMotions[4],
-                performanceMotions[5],
-                performanceMotions[6],
-                performanceMotions[7],
-                performanceMotions[8],
-                GameCommonData.PerformanceTag
-            );
         }
 
         public void CreateCharacter(int characterId)
