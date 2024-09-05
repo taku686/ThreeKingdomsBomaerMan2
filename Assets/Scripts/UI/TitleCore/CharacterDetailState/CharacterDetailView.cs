@@ -36,11 +36,14 @@ namespace UI.Title
         public Button RightArrowButton => rightArrowButton;
         public Button InventoryButton => inventoryButton;
 
-        public void ApplyViewModel(CharacterData characterData, CharacterLevelData currentLevelData,
-            CharacterLevelData nextLevelData)
+        public void ApplyViewModel(ViewModel viewModel)
         {
+            var characterData = viewModel.CharacterData;
+            var currentLevelData = viewModel.CurrentLevelData;
+            var nextLevelData = viewModel.NextLevelData;
+            var skillsViewModel = viewModel.SkillsViewModel;
             SetStatusView(characterData, currentLevelData);
-            SetSkillView(characterData, currentLevelData);
+            ApplySkillsViewModel(skillsViewModel);
             SetLevelView(currentLevelData, nextLevelData);
             purchaseErrorView.gameObject.SetActive(false);
             virtualCurrencyAddPopup.gameObject.SetActive(false);
@@ -62,12 +65,9 @@ namespace UI.Title
                 GetFixedStatus(currentLevelData, characterData.FireRange).ToString();
         }
 
-        private void SetSkillView(CharacterData characterData, CharacterLevelData currentLevelData)
+        private void ApplySkillsViewModel(SkillsView.ViewModel viewModel)
         {
-            skillsView.skillOneImage.sprite = characterData.SkillOneSprite;
-            skillsView.skillTwoImage.sprite = characterData.SkillTwoSprite;
-            skillsView.skillOneLockImage.enabled = !currentLevelData.IsSkillOneActive;
-            skillsView.skillTwoLockImage.enabled = !currentLevelData.IsSkillTwoActive;
+            skillsView.ApplyViewModel(viewModel);
         }
 
         private void SetLevelView(CharacterLevelData currentLevelData, CharacterLevelData nextLevelData)
@@ -110,6 +110,29 @@ namespace UI.Title
             rightArrowTransform
                 .DOLocalMove(new Vector3(rightPosition.x - MoveAmount, rightPosition.y, rightPosition.z), 1f)
                 .SetLoops(-1, LoopType.Yoyo).SetLink(rightArrowTransform.gameObject);
+        }
+
+
+        public class ViewModel
+        {
+            public CharacterData CharacterData { get; }
+            public CharacterLevelData CurrentLevelData { get; }
+            public CharacterLevelData NextLevelData { get; }
+            public SkillsView.ViewModel SkillsViewModel { get; }
+
+            public ViewModel
+            (
+                CharacterData characterData,
+                CharacterLevelData currentLevelData,
+                CharacterLevelData nextLevelData,
+                SkillsView.ViewModel skillsViewModel
+            )
+            {
+                CharacterData = characterData;
+                CurrentLevelData = currentLevelData;
+                NextLevelData = nextLevelData;
+                SkillsViewModel = skillsViewModel;
+            }
         }
     }
 }

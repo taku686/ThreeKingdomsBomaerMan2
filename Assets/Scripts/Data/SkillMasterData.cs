@@ -8,7 +8,7 @@ namespace Common.Data
         public int Id { get; }
         public string Explanation { get; }
         public string Name { get; }
-        public Sprite Icon { get; }
+        public Sprite Sprite { get; }
         public int IconID { get; set; }
         public GameObject SkillEffectObj { get; }
         
@@ -23,7 +23,7 @@ namespace Common.Data
             int id,
             string explanation,
             string name,
-            Sprite icon,
+            Sprite sprite,
             int skillType,
             GameObject skillEffectObj,
             int attributeType
@@ -32,7 +32,7 @@ namespace Common.Data
             Id = id;
             Explanation = explanation;
             Name = name;
-            Icon = icon;
+            Sprite = sprite;
             SkillType = (SkillType)skillType;
             SkillEffectObj = skillEffectObj;
             AttributeType = (AttributeType)attributeType;

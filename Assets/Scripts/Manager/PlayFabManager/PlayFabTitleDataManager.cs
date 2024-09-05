@@ -79,7 +79,7 @@ namespace Manager.PlayFabManager
                 var id = skillData.Id;
                 var explanation = skillData.Explanation;
                 var name = skillData.Name;
-                var icon = await LoadSkillSprite(skillData.IconID, cts.Token);
+                var sprite = await LoadSkillSprite(skillData.IconID, cts.Token);
                 var skillType = skillData.SkillTypeInt;
                 var attributeType = skillData.AttributeTypeInt;
                 var newSkillData = new SkillMasterData
@@ -87,7 +87,7 @@ namespace Manager.PlayFabManager
                     id,
                     explanation,
                     name,
-                    icon,
+                    sprite,
                     skillType,
                     null,
                     attributeType

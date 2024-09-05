@@ -16,7 +16,7 @@ namespace Common.Installer
     {
         [SerializeField] private GameObject playFabManagerGameObject;
         [SerializeField] private Transform characterGenerateParent;
-        [SerializeField] private AnimatorControllerRepository animatorControllerRepository;
+        [SerializeField] private GameObject animatorControllerRepository;
 
         public override void InstallBindings()
         {
@@ -28,11 +28,9 @@ namespace Common.Installer
             Container.Bind<PlayFabVirtualCurrencyManager>().AsCached();
             Container.Bind<PlayFabTitleDataManager>().AsCached();
             Container.Bind<ChatGPTManager>().AsCached();
-            Container.Bind<CharacterCreateUseCase>().AsCached()
-                .WithArguments(characterGenerateParent);
+            Container.Bind<CharacterCreateUseCase>().AsCached().WithArguments(characterGenerateParent);
             Container.Bind<CharacterObjectRepository>().AsCached();
-            Container.Bind<AnimatorControllerRepository>()
-                .FromComponentOn(animatorControllerRepository.gameObject).AsCached();
+            Container.Bind<AnimatorControllerRepository>().FromComponentOn(animatorControllerRepository).AsCached();
 
             InstallCharacterSelect();
             InstallInventory();
@@ -48,6 +46,7 @@ namespace Common.Installer
 
         private void InstallCharacterDetail()
         {
+            Container.Bind<CharacterDetailViewModelUseCase>().AsCached();
             Container.Bind<AnimationPlayBackUseCase>().AsCached();
         }
 
