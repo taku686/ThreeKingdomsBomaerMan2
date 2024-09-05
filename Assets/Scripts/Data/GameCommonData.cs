@@ -256,7 +256,7 @@ namespace Common.Data
         Received,
         Exception
     }
-    
+
     public enum WeaponType
     {
         Spear = 0,
@@ -287,5 +287,13 @@ namespace Common.Data
         Status,
         Normal,
         Special
+    }
+
+    public enum AnimationStateType
+    {
+        Idle,
+        Performance,
+        Skill1,
+        Skill2
     }
 }

@@ -2,7 +2,6 @@
 using Common.Data;
 using Manager.DataManager;
 using Unity.Mathematics;
-using UnityEditor.Animations;
 using UnityEngine;
 using Zenject;
 using Object = UnityEngine.Object;
@@ -15,6 +14,7 @@ namespace Repository
         private readonly CharacterMasterDataRepository characterMasterDataRepository;
         private readonly UserDataRepository userDataRepository;
         private readonly CharacterObjectRepository characterObjectRepository;
+        private readonly AnimatorControllerRepository animatorControllerRepository;
         private readonly Vector3 bowPosition = new(-0.029f, 0.02f, -0.001f);
         private readonly Vector3 weaponPosition = new(-0.061f, 0.026f, 0.003f);
         private readonly Vector3 bowRightRotation = new(-87.91f, 204.73f, -24.69f);
@@ -23,7 +23,6 @@ namespace Repository
         private readonly Vector3 weaponLeftRotation = new(-36.033f, 92.88f, 84.68f);
         private readonly AnimationChangeUseCase idleMotionChangeUseCase;
         private readonly AnimationChangeUseCase performanceMotionChangeUseCase;
-        private RuntimeAnimatorController animatorController;
 
         [Inject]
         public CharacterCreateUseCase
@@ -32,16 +31,16 @@ namespace Repository
             CharacterMasterDataRepository characterMasterDataRepository,
             UserDataRepository userDataRepository,
             CharacterObjectRepository characterObjectRepository,
-            RuntimeAnimatorController animatorController,
             MotionRepository motionRepository,
-            AnimationChangeUseCase.Factory animationChangeUseCaseFactory
+            AnimationChangeUseCase.Factory animationChangeUseCaseFactory,
+            AnimatorControllerRepository animatorControllerRepository
         )
         {
             this.characterGenerateTransform = characterGenerateTransform;
             this.characterMasterDataRepository = characterMasterDataRepository;
             this.userDataRepository = userDataRepository;
             this.characterObjectRepository = characterObjectRepository;
-            this.animatorController = animatorController;
+            this.animatorControllerRepository = animatorControllerRepository;
             var idleMotions = motionRepository.GetAllIdleMotions();
             var performanceMotions = motionRepository.GetAllPerformanceMotions();
             idleMotionChangeUseCase = animationChangeUseCaseFactory.Create
@@ -89,7 +88,7 @@ namespace Repository
             var weaponData = userDataRepository.GetEquippedWeaponData(characterId);
             characterObject = CreateCharacter(createCharacterData);
             CreateWeapon(characterObject, characterId, weaponData);
-            ChangeAnimation(characterObject, weaponData.WeaponType);
+            ChangeAnimatorController(characterObject, weaponData.WeaponType);
             //todo androidでエフェクトの表示がおかしくなるためコメントアウト
             //CreateWeaponEffect(createCharacterData, characterObject);
         }
@@ -141,20 +140,6 @@ namespace Repository
             }
         }
 
-        private void ChangeAnimation(GameObject characterObject, WeaponType weaponType)
-        {
-            var animator = characterObject.GetComponent<Animator>();
-            if (animator == null)
-            {
-                return;
-            }
-
-            Debug.Log(animator.parameters[0].type);
-            /*animatorController = idleMotionChangeUseCase.ChangeMotion(animatorController, weaponType);
-            animatorController = performanceMotionChangeUseCase.ChangeMotion(animatorController, weaponType);*/
-            animator.runtimeAnimatorController = animatorController;
-        }
-
         private bool IsRightHand(WeaponType weaponType)
         {
             return weaponType != WeaponType.Bow && weaponType != WeaponType.Shield;
@@ -186,6 +171,45 @@ namespace Repository
                     return new Vector3(1, -1, 1);
                 default:
                     return new Vector3(1, 1, 1) * scale;
+            }
+        }
+
+        private void ChangeAnimatorController(GameObject characterObject, WeaponType weaponType)
+        {
+            var animator = characterObject.GetComponent<Animator>();
+            if (animator == null)
+            {
+                return;
+            }
+
+            animator.runtimeAnimatorController = GetAnimatorController(weaponType);
+        }
+
+        private RuntimeAnimatorController GetAnimatorController(WeaponType weaponType)
+        {
+            var animatorControllers = animatorControllerRepository.GetAllAnimatorControllers();
+            switch (weaponType)
+            {
+                case WeaponType.Spear:
+                    return animatorControllers[0];
+                case WeaponType.Hammer:
+                    return animatorControllers[1];
+                case WeaponType.Sword:
+                    return animatorControllers[2];
+                case WeaponType.Knife:
+                    return animatorControllers[3];
+                case WeaponType.Fan:
+                    return animatorControllers[4];
+                case WeaponType.Bow:
+                    return animatorControllers[5];
+                case WeaponType.Shield:
+                    return animatorControllers[6];
+                case WeaponType.Axe:
+                    return animatorControllers[7];
+                case WeaponType.Staff:
+                    return animatorControllers[8];
+                default:
+                    return null;
             }
         }
 
