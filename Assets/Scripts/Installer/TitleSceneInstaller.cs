@@ -6,7 +6,6 @@ using Manager.PlayFabManager;
 using Repository;
 using UI.Common;
 using UI.Title;
-using UnityEditor.Animations;
 using UnityEngine;
 using UseCase;
 using Zenject;
@@ -17,7 +16,7 @@ namespace Common.Installer
     {
         [SerializeField] private GameObject playFabManagerGameObject;
         [SerializeField] private Transform characterGenerateParent;
-        [SerializeField] private AnimatorController animatorController;
+        [SerializeField] private RuntimeAnimatorController animatorController;
         [SerializeField] private MotionRepository motionRepository;
 
         public override void InstallBindings()

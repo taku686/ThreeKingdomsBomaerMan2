@@ -18,7 +18,7 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: animatorController
+  m_Name: spearAnimation
   serializedVersion: 5
   m_AnimatorParameters:
   - m_Name: speedh
@@ -221,7 +221,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 2b818beb68da4e4448675e04639af2f0, type: 3}
+  m_Motion: {fileID: 7400000, guid: 6fe133276a75a6e40a97c5d406034ea3, type: 3}
   m_Tag: Idle
   m_SpeedParameter: speedh
   m_MirrorParameter: 
@@ -616,7 +616,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 6e75e6b2317d68242b03f3cda6799e62, type: 3}
+  m_Motion: {fileID: 7400000, guid: 83a47a28da2df444eb43ffb7c7f359a4, type: 3}
   m_Tag: Performance
   m_SpeedParameter: 
   m_MirrorParameter: 

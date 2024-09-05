@@ -23,7 +23,7 @@ namespace Repository
         private readonly Vector3 weaponLeftRotation = new(-36.033f, 92.88f, 84.68f);
         private readonly AnimationChangeUseCase idleMotionChangeUseCase;
         private readonly AnimationChangeUseCase performanceMotionChangeUseCase;
-        private AnimatorController animatorController;
+        private RuntimeAnimatorController animatorController;
 
         [Inject]
         public CharacterCreateUseCase
@@ -32,7 +32,7 @@ namespace Repository
             CharacterMasterDataRepository characterMasterDataRepository,
             UserDataRepository userDataRepository,
             CharacterObjectRepository characterObjectRepository,
-            AnimatorController animatorController,
+            RuntimeAnimatorController animatorController,
             MotionRepository motionRepository,
             AnimationChangeUseCase.Factory animationChangeUseCaseFactory
         )
@@ -149,8 +149,9 @@ namespace Repository
                 return;
             }
 
-            animatorController = idleMotionChangeUseCase.ChangeMotion(animatorController, weaponType);
-            animatorController = performanceMotionChangeUseCase.ChangeMotion(animatorController, weaponType);
+            Debug.Log(animator.parameters[0].type);
+            /*animatorController = idleMotionChangeUseCase.ChangeMotion(animatorController, weaponType);
+            animatorController = performanceMotionChangeUseCase.ChangeMotion(animatorController, weaponType);*/
             animator.runtimeAnimatorController = animatorController;
         }
 

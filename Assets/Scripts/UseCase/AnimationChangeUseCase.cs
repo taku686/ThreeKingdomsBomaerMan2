@@ -47,8 +47,9 @@ public class AnimationChangeUseCase : IDisposable
         this.tagName = tagName;
     }
 
-    public AnimatorController ChangeMotion(AnimatorController animatorController, WeaponType equippedWeaponType)
+    public RuntimeAnimatorController ChangeMotion(AnimatorController animatorController, WeaponType equippedWeaponType)
     {
+        
         animatorController.layers[0].stateMachine.states
             .First(state => state.state.tag == tagName).state.motion = GetCandidateMotion(equippedWeaponType);
         return animatorController;
