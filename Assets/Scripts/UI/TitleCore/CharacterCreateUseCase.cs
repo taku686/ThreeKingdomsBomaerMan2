@@ -55,7 +55,7 @@ namespace Repository
 
             var weaponData = userDataRepository.GetEquippedWeaponData(characterId);
             characterObject = CreateCharacter(createCharacterData);
-            CreateWeapon(characterObject, characterId, weaponData);
+            CreateWeapon(characterObject, weaponData);
             ChangeAnimatorController(characterObject, weaponData.WeaponType);
             //todo androidでエフェクトの表示がおかしくなるためコメントアウト
             //CreateWeaponEffect(createCharacterData, characterObject);
@@ -77,7 +77,6 @@ namespace Repository
         private void CreateWeapon
         (
             GameObject characterObject,
-            int characterId,
             WeaponMasterData weaponData
         )
         {

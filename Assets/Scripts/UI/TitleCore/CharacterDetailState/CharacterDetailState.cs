@@ -23,10 +23,8 @@ namespace UI.Title
             private CharacterCreateUseCase CharacterCreateUseCase => Owner.characterCreateUseCase;
             private CharacterObjectRepository CharacterObjectRepository => Owner.characterObjectRepository;
             private AnimationPlayBackUseCase AnimationPlayBackUseCase => Owner.animationPlayBackUseCase;
-
             private CharacterDetailViewModelUseCase CharacterDetailViewModelUseCase =>
                 Owner.characterDetailViewModelUseCase;
-
             private SortCharactersUseCase SortCharactersUseCase => Owner.sortCharactersUseCase;
             private PlayFabUserDataManager playFabUserDataManager;
             private PlayFabShopManager playFabShopManager;

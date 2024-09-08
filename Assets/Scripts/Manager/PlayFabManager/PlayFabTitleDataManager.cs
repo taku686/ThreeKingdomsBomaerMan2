@@ -80,8 +80,11 @@ namespace Manager.PlayFabManager
                 var explanation = skillData.Explanation;
                 var name = skillData.Name;
                 var sprite = await LoadSkillSprite(skillData.IconID, cts.Token);
-                var skillType = skillData.SkillTypeInt;
-                var attributeType = skillData.AttributeTypeInt;
+                var skillType = (SkillType)skillData.SkillTypeInt;
+                var attributeType = (AttributeType)skillData.AttributeTypeInt;
+                var skillEffectType =
+                    (SkillEffectType)Enum.Parse(typeof(SkillEffectType), skillData.SkillEffectTypeString);
+                var amount = skillData.Amount;
                 var newSkillData = new SkillMasterData
                 (
                     id,
@@ -90,7 +93,9 @@ namespace Manager.PlayFabManager
                     sprite,
                     skillType,
                     null,
-                    attributeType
+                    attributeType,
+                    skillEffectType,
+                    amount
                 );
 
                 skillDataRepository.AddSkillData(newSkillData);

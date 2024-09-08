@@ -296,7 +296,70 @@ namespace Common.Data
     {
         Idle,
         Performance,
-        Skill1,
-        Skill2
+        Normal,
+        Special
+    }
+
+    public enum StatusType
+    {
+        Hp = 0,
+        Attack = 1,
+        Speed = 2,
+        BombLimit = 3,
+        FireRange = 4,
+    }
+
+    public enum SkillEffectType
+    {
+        Hp = 0,
+        Attack = 1,
+        Speed = 2,
+        BombLimit = 3,
+        FireRange = 4,
+        Heal = 5,
+        ContinuousHeal = 6,
+        Barrier = 7,
+        Debuff = 8,
+        Buff = 9,
+        SlowTime = 10,
+        ProhibitedSkill = 11,
+        Paralysis = 12,
+        Confusion = 13,
+        Illusion = 14,
+        Jump = 15,
+        Dash = 16,
+        SlipThrough = 17,
+        WallDestruction = 18,
+        Teleport = 19,
+        Kick = 20,
+        Transparent = 21,
+        Clairvoyance = 22,
+        LinerArrangement = 23,
+        CircleArrangement = 24,
+        ArrowArrangement = 25,
+        Meteor = 26,
+        BombDestruction = 27,
+        BombBlowOff = 28,
+        EnemyBlowOff = 29,
+        BlastReflection = 30,
+        SkillBarrier = 31,
+        Frozen = 32,
+        RewardCoin = 33,
+        RewardGem = 34,
+        PenetrationBomb = 35,
+        DiffusionBomb = 36,
+        FullPowerBomb = 37,
+        ParalysisBomb = 38,
+        ConfusionBomb = 39,
+        PoisonBomb = 40,
+        IceBomb = 41,
+        GoldenBomb = 42,
+        ChaseBomb = 43,
+        RotateBomb = 44,
+        GenerateWall = 45,
+        CantMoveTrap = 46,
+        PoisonTrap = 47,
+        GenerateBombAlly = 48,
+        None = 999
     }
 }

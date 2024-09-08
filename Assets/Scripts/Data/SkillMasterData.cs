@@ -11,12 +11,15 @@ namespace Common.Data
         public Sprite Sprite { get; }
         public int IconID { get; set; }
         public GameObject SkillEffectObj { get; }
-        
+        public SkillEffectType SkillEffectType { get; }
+        public float Amount { get; set; }
+
         public int SkillEffectObjID { get; set; }
         public SkillType SkillType { get; }
         public int SkillTypeInt { get; set; }
         public AttributeType AttributeType { get; }
         public int AttributeTypeInt { get; set; }
+        public string SkillEffectTypeString { get; set; }
 
         public SkillMasterData
         (
@@ -24,18 +27,22 @@ namespace Common.Data
             string explanation,
             string name,
             Sprite sprite,
-            int skillType,
+            SkillType skillType,
             GameObject skillEffectObj,
-            int attributeType
+            AttributeType attributeType,
+            SkillEffectType skillEffectType,
+            float amount
         )
         {
             Id = id;
             Explanation = explanation;
             Name = name;
             Sprite = sprite;
-            SkillType = (SkillType)skillType;
+            SkillType = skillType;
             SkillEffectObj = skillEffectObj;
-            AttributeType = (AttributeType)attributeType;
+            SkillEffectType = skillEffectType;
+            Amount = amount;
+            AttributeType = attributeType;
         }
 
         public void Dispose()

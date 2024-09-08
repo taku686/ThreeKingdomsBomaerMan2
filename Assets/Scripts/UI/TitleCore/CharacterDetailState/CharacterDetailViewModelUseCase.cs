@@ -3,25 +3,26 @@ using Common.Data;
 using Manager.DataManager;
 using Repository;
 using UI.Title;
+using UnityEngine;
 using Zenject;
 
 public class CharacterDetailViewModelUseCase : IDisposable
 {
     private readonly UserDataRepository userDataRepository;
     private readonly CharacterMasterDataRepository characterMasterDataRepository;
-    private readonly WeaponMasterDataRepository weaponMasterDataRepository;
+    private readonly StatusSkillUseCase statusSkillUseCase;
 
     [Inject]
     public CharacterDetailViewModelUseCase
     (
         UserDataRepository userDataRepository,
         CharacterMasterDataRepository characterMasterDataRepository,
-        WeaponMasterDataRepository weaponMasterDataRepository
+        StatusSkillUseCase statusSkillUseCase
     )
     {
         this.userDataRepository = userDataRepository;
         this.characterMasterDataRepository = characterMasterDataRepository;
-        this.weaponMasterDataRepository = weaponMasterDataRepository;
+        this.statusSkillUseCase = statusSkillUseCase;
     }
 
     public CharacterDetailView.ViewModel InAsTask(int characterId)
@@ -30,13 +31,14 @@ public class CharacterDetailViewModelUseCase : IDisposable
         var currentLevelData = userDataRepository.GetCurrentLevelData(characterId);
         var nextLevelData = userDataRepository.GetNextLevelData(characterId);
         var skillsViewModel = CreateSkillsViewModel(characterId, currentLevelData.Level);
-
+        var weaponData = userDataRepository.GetEquippedWeaponData(characterId);
         return new CharacterDetailView.ViewModel
         (
             characterData,
             currentLevelData,
             nextLevelData,
-            skillsViewModel
+            skillsViewModel,
+            weaponData
         );
     }
 
@@ -59,6 +61,5 @@ public class CharacterDetailViewModelUseCase : IDisposable
 
     public void Dispose()
     {
-        // TODO マネージリソースをここで解放します
     }
 }
