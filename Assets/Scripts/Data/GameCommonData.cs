@@ -386,6 +386,7 @@ namespace Common.Data
         BlackHole = 72,
         Summon = 73,
         Fear = 74,
+        GodPower = 75,
         None = 999
     }
 }

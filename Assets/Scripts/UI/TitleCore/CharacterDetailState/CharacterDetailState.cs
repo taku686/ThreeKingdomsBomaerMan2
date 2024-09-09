@@ -23,13 +23,15 @@ namespace UI.Title
             private CharacterCreateUseCase CharacterCreateUseCase => Owner.characterCreateUseCase;
             private CharacterObjectRepository CharacterObjectRepository => Owner.characterObjectRepository;
             private AnimationPlayBackUseCase AnimationPlayBackUseCase => Owner.animationPlayBackUseCase;
+
             private CharacterDetailViewModelUseCase CharacterDetailViewModelUseCase =>
                 Owner.characterDetailViewModelUseCase;
+
+            private UserDataRepository UserDataRepository => Owner.userDataRepository;
             private SortCharactersUseCase SortCharactersUseCase => Owner.sortCharactersUseCase;
             private PlayFabUserDataManager playFabUserDataManager;
             private PlayFabShopManager playFabShopManager;
             private PlayFabVirtualCurrencyManager playFabVirtualCurrencyManager;
-            private UserDataRepository userDataRepository;
             private CharacterSelectRepository characterSelectRepository;
             private UIAnimation uiAnimation;
 
@@ -54,10 +56,8 @@ namespace UI.Title
                 playFabUserDataManager = Owner.playFabUserDataManager;
                 playFabShopManager = Owner.playFabShopManager;
                 playFabVirtualCurrencyManager = Owner.playFabVirtualCurrencyManager;
-                userDataRepository = Owner.userDataRepository;
                 uiAnimation = Owner.uiAnimation;
                 characterSelectRepository = Owner.characterSelectRepository;
-
                 GenerateCharacter();
                 OnSubscribe();
                 await Owner.SwitchUiObject(State.CharacterDetail, true);
@@ -149,7 +149,7 @@ namespace UI.Title
                 var button = View.RightArrowButton;
                 Owner.uiAnimation.ClickScaleColor(button.gameObject).OnComplete(() =>
                 {
-                    var userData = userDataRepository.GetUserData();
+                    var userData = UserDataRepository.GetUserData();
                     if (userData.Characters.Count <= 1)
                     {
                         return;
@@ -176,7 +176,7 @@ namespace UI.Title
                 button.interactable = false;
                 Owner.uiAnimation.ClickScaleColor(button.gameObject).OnComplete(() =>
                 {
-                    var userData = userDataRepository.GetUserData();
+                    var userData = UserDataRepository.GetUserData();
                     if (userData.Characters.Count <= 1)
                     {
                         button.interactable = true;
@@ -201,7 +201,7 @@ namespace UI.Title
             private async UniTask OnClickDecideButton()
             {
                 View.SelectButton.interactable = false;
-                var userData = userDataRepository.GetUserData();
+                var userData = UserDataRepository.GetUserData();
                 userData.EquippedCharacterId = sortedCharacters[candidateIndex].Id;
                 var result = await playFabUserDataManager.TryUpdateUserDataAsync(userData);
                 if (result)
@@ -224,7 +224,7 @@ namespace UI.Title
                 }
 
 
-                var nextLevelData = userDataRepository.GetNextLevelData(selectedCharacterData.Id);
+                var nextLevelData = UserDataRepository.GetNextLevelData(selectedCharacterData.Id);
                 var virtualCurrencyAddView = View.VirtualCurrencyAddPopup;
                 var purchaseErrorView = View.PurchaseErrorView;
                 if (coin < nextLevelData.NeedCoin)
@@ -251,8 +251,8 @@ namespace UI.Title
                 }
 
                 Owner.CheckMission(GameCommonData.LevelUpActionId);
-                var userData = userDataRepository.GetUserData();
-                await userDataRepository.UpdateUserData(userData);
+                var userData = UserDataRepository.GetUserData();
+                await UserDataRepository.UpdateUserData(userData);
                 await Owner.SetCoinText();
                 onChangeViewModel.OnNext(selectedCharacterData.Id);
                 if (nextLevelData.Level == GameCommonData.MaxCharacterLevel)

@@ -117,6 +117,7 @@ namespace Manager.PlayFabManager
                 var specialSkillData = skillDataRepository.GetSkillData(weaponData.SpecialSkillId);
                 var scale = weaponData.Scale;
                 var isBothHands = weaponData.IsBothHands;
+                var rare = weaponData.Rare;
                 var newWeaponData = new WeaponMasterData
                 (
                     name,
@@ -130,7 +131,8 @@ namespace Manager.PlayFabManager
                     statusSkillData,
                     specialSkillData,
                     scale,
-                    isBothHands
+                    isBothHands,
+                    rare
                 );
 
                 weaponMasterDataRepository.AddWeaponData(newWeaponData);
