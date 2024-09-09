@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Assets.Scripts.Common.PlayFab;
+﻿using Assets.Scripts.Common.PlayFab;
 using Common.Data;
 using Manager.NetworkManager;
 using Manager.PlayFabManager;
