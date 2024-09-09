@@ -13,6 +13,8 @@ namespace Common.Data
         public GameObject SkillEffectObj { get; }
         public SkillEffectType SkillEffectType { get; }
         public float Amount { get; set; }
+        public float Range { get; }
+        public float Interval { get; }
 
         public int SkillEffectObjID { get; set; }
         public SkillType SkillType { get; }
@@ -31,7 +33,9 @@ namespace Common.Data
             GameObject skillEffectObj,
             AttributeType attributeType,
             SkillEffectType skillEffectType,
-            float amount
+            float amount,
+            float range,
+            float interval
         )
         {
             Id = id;
@@ -42,6 +46,8 @@ namespace Common.Data
             SkillEffectObj = skillEffectObj;
             SkillEffectType = skillEffectType;
             Amount = amount;
+            Range = range;
+            Interval = interval;
             AttributeType = attributeType;
         }
 

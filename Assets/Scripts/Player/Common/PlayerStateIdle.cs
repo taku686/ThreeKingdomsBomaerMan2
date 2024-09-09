@@ -40,7 +40,7 @@ namespace Player.Common
                 {
                     return;
                 }
-                
+
                 var direction = new Vector3(UltimateJoystick.GetHorizontalAxis(GameCommonData.JoystickName), 0,
                     UltimateJoystick.GetVerticalAxis(GameCommonData.JoystickName));
                 playerMove.Move(direction);
@@ -59,10 +59,8 @@ namespace Player.Common
                 }
 
                 playerTransform = Owner.transform;
-                Owner.inputManager.SetOnClickSkillOne(SkillOneIntervalTime, OnClickSkillOne,
-                    Owner.GetCancellationTokenOnDestroy());
-                Owner.inputManager.SetOnClickSkillTwo(SkillTwoIntervalTime, OnClickSkillTwo,
-                    Owner.GetCancellationTokenOnDestroy());
+                Owner.inputManager.OnClickNormalSkill(OnClickNormalSkill, Owner.GetCancellationTokenOnDestroy());
+                Owner.inputManager.OnClickSpecialSkill(OnClickSpecialSkill, Owner.GetCancellationTokenOnDestroy());
                 isSetup = true;
             }
 
@@ -80,23 +78,32 @@ namespace Player.Common
                         _ =>
                         {
                             var playerId = Owner.playerPhotonView.ViewID;
-                            var explosionTime = PhotonNetwork.ServerTimestamp +
-                                                GameCommonData.ThreeMilliSecondsBeforeExplosion;
+                            var explosionTime =
+                                PhotonNetwork.ServerTimestamp + GameCommonData.ThreeMilliSecondsBeforeExplosion;
                             var photonView = Owner.playerPhotonView;
                             var damageAmount = Owner.characterStatusManager.DamageAmount;
                             var fireRange = Owner.characterStatusManager.FireRange;
                             var boxCollider = Owner.boxCollider;
-                            Owner.putBomb.SetBomb(boxCollider, photonView, playerTransform,
-                                (int)BombType.Normal, damageAmount, fireRange, explosionTime, playerId);
+                            Owner.putBomb.SetBomb
+                            (
+                                boxCollider,
+                                photonView,
+                                playerTransform,
+                                (int)BombType.Normal,
+                                damageAmount,
+                                fireRange,
+                                explosionTime,
+                                playerId
+                            );
                         }).AddTo(cancellationTokenSource.Token);
             }
 
-            private void OnClickSkillOne()
+            private void OnClickNormalSkill()
             {
                 Owner.stateMachine.Dispatch((int)PLayerState.NormalSkill);
             }
 
-            private void OnClickSkillTwo()
+            private void OnClickSpecialSkill()
             {
                 Owner.stateMachine.Dispatch((int)PLayerState.SpecialSkill);
             }

@@ -19,18 +19,18 @@ namespace Manager
         private const float MinFillAmount = 0;
         private PhotonView photonView;
         private Button bombButton;
-        private Image skillOneIntervalImage;
-        private Image skillTwoIntervalImage;
-        private float timerSkillOne;
-        private float timerSkillTwo;
+        private Image normalSkillIntervalImage;
+        private Image specialSkillIntervalImage;
+        private float timerNormalSkill;
+        private float timerSpecialSkill;
+        private float normalSkillInterval;
+        private float specialSkillInterval;
         public Button BombButton => bombButton;
 
 
         public void Initialize
         (
             PhotonView view,
-            float skillOneIntervalTime,
-            float skillTwoIntervalTime,
             UserData userData,
             LevelMasterDataRepository levelMasterDataRepository,
             WeaponMasterDataRepository weaponMasterDataRepository
@@ -49,24 +49,28 @@ namespace Manager
             var level = userData.CharacterLevels[characterId];
             var currentLevelData = levelMasterDataRepository.GetLevelMasterData(level);
             var weaponData = weaponMasterDataRepository.GetWeaponData(weaponId);
-            skillOneIntervalImage = inputView.normalSkillIntervalImage;
-            skillTwoIntervalImage = inputView.specialSkillIntervalImage;
-            SetupSkillUI(skillOneIntervalTime, skillTwoIntervalTime, currentLevelData, weaponData);
+            normalSkillIntervalImage = inputView.normalSkillIntervalImage;
+            specialSkillIntervalImage = inputView.specialSkillIntervalImage;
+            SetupSkillUI(currentLevelData, weaponData);
         }
 
-        public void SetOnClickSkillOne(float intervalTime, Action action, CancellationToken token)
+        public void OnClickNormalSkill(Action action, CancellationToken token)
         {
-            inputView.skillOneButton.OnClickAsObservable().ThrottleFirst(TimeSpan.FromSeconds(intervalTime)).Subscribe(
-                _ =>
+            inputView.normalSkillButton
+                .OnClickAsObservable()
+                .ThrottleFirst(TimeSpan.FromSeconds(normalSkillInterval))
+                .Subscribe(_ =>
                 {
                     ResetSkillOneIntervalImage();
                     action.Invoke();
                 }).AddTo(token);
         }
 
-        public void SetOnClickSkillTwo(float intervalTime, Action action, CancellationToken token)
+        public void OnClickSpecialSkill(Action action, CancellationToken token)
         {
-            inputView.skillTwoButton.OnClickAsObservable().ThrottleFirst(TimeSpan.FromSeconds(intervalTime))
+            inputView.specialSkillButton
+                .OnClickAsObservable()
+                .ThrottleFirst(TimeSpan.FromSeconds(specialSkillInterval))
                 .Subscribe(_ =>
                 {
                     ResetSkillTwoIntervalImage();
@@ -76,46 +80,48 @@ namespace Manager
 
         private void ResetSkillOneIntervalImage()
         {
-            timerSkillOne = 0;
-            skillOneIntervalImage.fillAmount = MinFillAmount;
+            timerNormalSkill = 0;
+            normalSkillIntervalImage.fillAmount = MinFillAmount;
         }
 
         private void ResetSkillTwoIntervalImage()
         {
-            timerSkillTwo = 0;
-            skillTwoIntervalImage.fillAmount = MinFillAmount;
+            timerSpecialSkill = 0;
+            specialSkillIntervalImage.fillAmount = MinFillAmount;
         }
 
         private void SetupSkillUI
         (
-            float skillOneInterval,
-            float skillTwoInterval,
             LevelMasterData levelMasterData,
             WeaponMasterData weaponData
         )
         {
-            inputView.skillOneButton.gameObject.SetActive(levelMasterData.IsSkillOneActive);
-            inputView.skillTwoButton.gameObject.SetActive(levelMasterData.IsSkillTwoActive);
-            timerSkillOne = skillOneInterval;
-            timerSkillTwo = skillTwoInterval;
-            skillOneIntervalImage.fillAmount = MaxFillAmount;
-            skillTwoIntervalImage.fillAmount = MaxFillAmount;
+            inputView.normalSkillButton.gameObject.SetActive(levelMasterData.IsSkillOneActive);
+            inputView.specialSkillButton.gameObject.SetActive(levelMasterData.IsSkillTwoActive);
+            var normalSkill = weaponData.NormalSkillMasterData.Interval;
+            var specialSkill = weaponData.SpecialSkillMasterData.Interval;
+            normalSkillInterval = normalSkill;
+            specialSkillInterval = specialSkill;
+            timerNormalSkill = normalSkill;
+            timerSpecialSkill = specialSkill;
+            normalSkillIntervalImage.fillAmount = MaxFillAmount;
+            specialSkillIntervalImage.fillAmount = MaxFillAmount;
             inputView.normalSkillImage.sprite = weaponData.NormalSkillMasterData.Sprite;
             inputView.specialSkillImage.sprite = weaponData.SpecialSkillMasterData.Sprite;
         }
 
-        public void UpdateSkillUI(float skillOneInterval, float skillTwoInterval)
+        public void UpdateSkillUI()
         {
-            if (timerSkillOne < skillOneInterval)
+            if (timerNormalSkill < normalSkillInterval)
             {
-                timerSkillOne += Time.deltaTime;
-                skillOneIntervalImage.fillAmount = timerSkillOne / skillOneInterval;
+                timerNormalSkill += Time.deltaTime;
+                normalSkillIntervalImage.fillAmount = timerNormalSkill / normalSkillInterval;
             }
 
-            if (timerSkillTwo < skillTwoInterval)
+            if (timerSpecialSkill < specialSkillInterval)
             {
-                timerSkillTwo += Time.deltaTime;
-                skillTwoIntervalImage.fillAmount = timerSkillTwo / skillTwoInterval;
+                timerSpecialSkill += Time.deltaTime;
+                specialSkillIntervalImage.fillAmount = timerSpecialSkill / specialSkillInterval;
             }
         }
     }

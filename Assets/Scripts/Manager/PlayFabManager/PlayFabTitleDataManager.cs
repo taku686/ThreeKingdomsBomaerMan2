@@ -79,6 +79,8 @@ namespace Manager.PlayFabManager
                 var skillEffectType =
                     (SkillEffectType)Enum.Parse(typeof(SkillEffectType), skillData.SkillEffectTypeString);
                 var amount = skillData.Amount;
+                var range = skillData.Range;
+                var interval = skillData.Interval;
                 var newSkillData = new SkillMasterData
                 (
                     id,
@@ -89,7 +91,9 @@ namespace Manager.PlayFabManager
                     null,
                     attributeType,
                     skillEffectType,
-                    amount
+                    amount,
+                    range,
+                    interval
                 );
 
                 skillDataRepository.AddSkillData(newSkillData);

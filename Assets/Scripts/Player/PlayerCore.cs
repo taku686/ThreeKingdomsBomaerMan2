@@ -41,10 +41,6 @@ namespace Player.Common
         private readonly Subject<Unit> deadSubject = new();
         private StateMachine<PlayerCore> stateMachine;
 
-        //Todo 仮の値
-        private const float SkillOneIntervalTime = 3f;
-        private const float SkillTwoIntervalTime = 5f;
-
         private enum PLayerState
         {
             Idle,
@@ -83,8 +79,6 @@ namespace Player.Common
             inputManager.Initialize
             (
                 playerPhotonView,
-                SkillOneIntervalTime,
-                SkillTwoIntervalTime,
                 userData,
                 levelMasterDataRepository,
                 weaponMasterDataRepository
@@ -118,7 +112,7 @@ namespace Player.Common
             }
 
             stateMachine.Update();
-            inputManager.UpdateSkillUI(SkillOneIntervalTime, SkillTwoIntervalTime);
+            inputManager.UpdateSkillUI();
             OnInvincible();
         }
 
