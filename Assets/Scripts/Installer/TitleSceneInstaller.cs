@@ -53,6 +53,7 @@ namespace Common.Installer
         private void InstallInventory()
         {
             Container.Bind<InventoryViewModelUseCase>().AsCached();
+            Container.Bind<SkillDetailViewModelUseCase>().AsCached();
         }
     }
 }

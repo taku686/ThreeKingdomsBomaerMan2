@@ -4,7 +4,6 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using Manager.DataManager;
 using Manager.NetworkManager;
 using Repository;
 using UI.Common;
@@ -147,11 +146,13 @@ namespace UI.Title
             private void OnClickRightArrow()
             {
                 var button = View.RightArrowButton;
+                button.interactable = false;
                 Owner.uiAnimation.ClickScaleColor(button.gameObject).OnComplete(() =>
                 {
                     var userData = UserDataRepository.GetUserData();
                     if (userData.Characters.Count <= 1)
                     {
+                        button.interactable = true;
                         return;
                     }
 

@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Common.Data;
 using UI.Title;
+using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,14 +13,42 @@ public class InventoryView : ViewBase
     [SerializeField] private WeaponGridView weaponGridViewPrefab;
     [SerializeField] private WeaponDetailView weaponDetailView;
     [SerializeField] private Transform weaponGridParent;
+    [SerializeField] private SkillDetailView skillDetailView;
 
     private readonly List<WeaponGridView> weaponGridViews = new();
     public Button BackButton => backButton;
     public Button EquipButton => weaponDetailView.EquipButton;
     public Button SellButton => weaponDetailView.SellButton;
+
+    public IObservable<Unit> OnClickBackButtonAsObservable()
+    {
+        return skillDetailView.OnClickCloseButtonAsObservable();
+    }
+
+    public IObservable<Unit> OnClickStatusSkillDetailButtonAsObservable()
+    {
+        return weaponDetailView.OnClickStatusSkillDetailButtonAsObservable();
+    }
+
+    public IObservable<Unit> OnClickNormalSkillDetailButtonAsObservable()
+    {
+        return weaponDetailView.OnClickNormalSkillDetailButtonAsObservable();
+    }
+
+    public IObservable<Unit> OnClickSpecialSkillDetailButtonAsObservable()
+    {
+        return weaponDetailView.OnClickSpecialSkillDetailButtonAsObservable();
+    }
+
     public IReadOnlyCollection<WeaponGridView> WeaponGridViews => weaponGridViews;
 
     public void ApplyViewModel(ViewModel viewModel)
+    {
+        GenerateWeaponGridViews(viewModel);
+        ApplyWeaponDetailViewModel(viewModel.WeaponMasterData);
+    }
+
+    private void GenerateWeaponGridViews(ViewModel viewModel)
     {
         foreach (var weaponGridView in weaponGridViews)
         {
@@ -40,8 +70,11 @@ public class InventoryView : ViewBase
             weaponGridView.ApplyViewModel(weaponGridViewModel);
             weaponGridViews.Add(weaponGridView);
         }
+    }
 
-        ApplyWeaponDetailViewModel(viewModel.WeaponMasterData);
+    public void ApplySkillDetailViewModel(SkillDetailView.ViewModel viewModel)
+    {
+        skillDetailView.ApplyViewModel(viewModel);
     }
 
     private WeaponGridView.ViewModel TranslateWeaponDataToViewModel
@@ -79,6 +112,11 @@ public class InventoryView : ViewBase
             weaponMasterData.WeaponType,
             weaponMasterData.Scale
         );
+    }
+
+    public void CloseSkillDetailView()
+    {
+        skillDetailView.Close();
     }
 
     private void OnDestroy()

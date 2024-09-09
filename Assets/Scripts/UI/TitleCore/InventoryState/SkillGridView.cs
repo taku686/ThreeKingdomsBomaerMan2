@@ -1,4 +1,6 @@
-﻿using TMPro;
+﻿using System;
+using TMPro;
+using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,6 +16,11 @@ namespace UI.Title
         {
             iconImage.sprite = viewModel.Icon;
             skillName.text = viewModel.Name;
+        }
+        
+        public IObservable<Unit> OnClickDetailButtonAsObservable()
+        {
+            return detailButton.OnClickAsObservable();
         }
 
         public class ViewModel

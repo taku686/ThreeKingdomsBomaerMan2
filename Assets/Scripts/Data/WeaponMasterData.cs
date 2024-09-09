@@ -56,6 +56,17 @@ namespace Common.Data
             Rare = rare;
         }
 
+        public SkillMasterData GetSkillData(SkillType skillType)
+        {
+            return skillType switch
+            {
+                SkillType.Status => StatusSkillMasterData,
+                SkillType.Normal => NormalSkillMasterData,
+                SkillType.Special => SpecialSkillMasterData,
+                _ => null
+            };
+        }
+
         public void Dispose()
         {
             // TODO release managed resources here
