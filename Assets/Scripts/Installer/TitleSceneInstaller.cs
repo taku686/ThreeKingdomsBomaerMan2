@@ -16,8 +16,7 @@ namespace Common.Installer
     {
         [SerializeField] private GameObject playFabManagerGameObject;
         [SerializeField] private Transform characterGenerateParent;
-        [SerializeField] private RuntimeAnimatorController animatorController;
-        [SerializeField] private MotionRepository motionRepository;
+        [SerializeField] private GameObject animatorControllerRepository;
 
         public override void InstallBindings()
         {
@@ -29,10 +28,10 @@ namespace Common.Installer
             Container.Bind<PlayFabVirtualCurrencyManager>().AsCached();
             Container.Bind<PlayFabTitleDataManager>().AsCached();
             Container.Bind<ChatGPTManager>().AsCached();
-            Container.Bind<CharacterCreateUseCase>().AsCached()
-                .WithArguments(characterGenerateParent, animatorController);
+            Container.Bind<CharacterCreateUseCase>().AsCached().WithArguments(characterGenerateParent);
             Container.Bind<CharacterObjectRepository>().AsCached();
-            Container.Bind<MotionRepository>().FromComponentOn(motionRepository.gameObject).AsCached();
+            Container.Bind<AnimatorControllerRepository>().FromComponentOn(animatorControllerRepository).AsCached();
+
             InstallCharacterSelect();
             InstallInventory();
             InstallCharacterDetail();
@@ -47,26 +46,14 @@ namespace Common.Installer
 
         private void InstallCharacterDetail()
         {
-            Container.BindFactory<
-                    IReadOnlyCollection<Motion>,
-                    IReadOnlyCollection<Motion>,
-                    IReadOnlyCollection<Motion>,
-                    IReadOnlyCollection<Motion>,
-                    IReadOnlyCollection<Motion>,
-                    IReadOnlyCollection<Motion>,
-                    IReadOnlyCollection<Motion>,
-                    IReadOnlyCollection<Motion>,
-                    IReadOnlyCollection<Motion>,
-                    string,
-                    AnimationChangeUseCase,
-                    AnimationChangeUseCase.Factory
-                >()
-                .AsCached();
+            Container.Bind<CharacterDetailViewModelUseCase>().AsCached();
+            Container.Bind<AnimationPlayBackUseCase>().AsCached();
         }
 
         private void InstallInventory()
         {
             Container.Bind<InventoryViewModelUseCase>().AsCached();
+            Container.Bind<SkillDetailViewModelUseCase>().AsCached();
         }
     }
 }

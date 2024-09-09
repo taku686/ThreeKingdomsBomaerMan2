@@ -28,7 +28,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MaskTex:
-        m_Texture: {fileID: 2800000, guid: 241fb5fca0e8de64983b8e89c2df83eb, type: 3}
+        m_Texture: {fileID: 2800000, guid: d89969ccdcdadd14dbb59f7b2b979e35, type: 3}
         m_Scale: {x: 3, y: 3}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
@@ -41,5 +41,5 @@ Material:
     - _StencilReadMask: 255
     - _StencilWriteMask: 255
     m_Colors:
-    - _Color: {r: 0.16353685, g: 0.37697968, b: 0.7075472, a: 0}
+    - _Color: {r: 0.5968282, g: 0.24350303, b: 0.9056604, a: 0}
   m_BuildTextureStacks: []

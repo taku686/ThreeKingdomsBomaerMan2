@@ -77,6 +77,9 @@ namespace Common.Data
         public const float FadeOutTime = 0.8f;
         public const int BattleTime = 180;
         public const int DefaultWeaponId = 71;
+        public const int StatusSkillReleaseLevel = 3;
+        public const int NormalSkillReleaseLevel = 7;
+        public const int SpecialSkillReleaseLevel = 10;
 
         public static CharacterColor GetCharacterColor(string color)
         {
@@ -256,7 +259,7 @@ namespace Common.Data
         Received,
         Exception
     }
-    
+
     public enum WeaponType
     {
         Spear = 0,
@@ -287,5 +290,103 @@ namespace Common.Data
         Status,
         Normal,
         Special
+    }
+
+    public enum AnimationStateType
+    {
+        Idle,
+        Performance,
+        Normal,
+        Special
+    }
+
+    public enum StatusType
+    {
+        Hp = 0,
+        Attack = 1,
+        Speed = 2,
+        BombLimit = 3,
+        FireRange = 4,
+    }
+
+    public enum SkillEffectType
+    {
+        Hp = 0,
+        Attack = 1,
+        Speed = 2,
+        BombLimit = 3,
+        FireRange = 4,
+        Heal = 5,
+        ContinuousHeal = 6,
+        Barrier = 7,
+        PerfectBarrier = 8,
+        Reborn = 9,
+        SlowTime = 10,
+        ProhibitedSkill = 11,
+        Paralysis = 12,
+        Confusion = 13,
+        Illusion = 14,
+        Jump = 15,
+        Dash = 16,
+        WallThrough = 17,
+        WallDestruction = 18,
+        Teleport = 19,
+        Kick = 20,
+        Transparent = 21,
+        Clairvoyance = 22,
+        LinerArrangement = 23,
+        CircleArrangement = 24,
+        ArrowArrangement = 25,
+        Meteor = 26,
+        BombDestruction = 27,
+        BombBlowOff = 28,
+        EnemyBlowOff = 29,
+        BlastReflection = 30,
+        SkillBarrier = 31,
+        Frozen = 32,
+        RewardCoin = 33,
+        RewardGem = 34,
+        PenetrationBomb = 35,
+        DiffusionBomb = 36,
+        FullPowerBomb = 37,
+        ParalysisBomb = 38,
+        ConfusionBomb = 39,
+        PoisonBomb = 40,
+        IceBomb = 41,
+        GoldenBomb = 42,
+        ChaseBomb = 43,
+        RotateBomb = 44,
+        GenerateWall = 45,
+        CantMoveTrap = 46,
+        PoisonTrap = 47,
+        GenerateBombAlly = 48,
+        BombDestructionShot = 49,
+        BombBlowOffShot = 50,
+        EnemyBlowOffShot = 51,
+        AllStatusBuff = 52,
+        HpBuff = 53,
+        AttackBuff = 54,
+        SpeedBuff = 55,
+        BombLimitBuff = 56,
+        FireRangeBuff = 57,
+        AllStatusDebuff = 58,
+        HpDebuff = 59,
+        AttackDebuff = 60,
+        SpeedDebuff = 61,
+        BombLimitDebuff = 62,
+        FireRangeDebuff = 63,
+        PoisonShot = 64,
+        IceShot = 65,
+        ParalysisShot = 66,
+        ConfusionShot = 67,
+        Poison = 68,
+        RandomDebuff = 69,
+        FastMove = 70,
+        BombThrough = 71,
+        BlackHole = 72,
+        Summon = 73,
+        Fear = 74,
+        GodPower = 75,
+        None = 999
     }
 }

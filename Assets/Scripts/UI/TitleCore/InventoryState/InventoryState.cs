@@ -13,6 +13,7 @@ namespace UI.Title
             private InventoryViewModelUseCase InventoryViewModelUseCase => Owner.inventoryViewModelUseCase;
             private CharacterSelectRepository CharacterSelectRepository => Owner.characterSelectRepository;
             private UserDataRepository UserDataRepository => Owner.userDataRepository;
+            private SkillDetailViewModelUseCase SkillDetailViewModelUseCase => Owner.skillDetailViewModelUseCase;
 
             private CancellationTokenSource cts;
             private Subject<int> onChangeSelectedWeaponSubject;
@@ -64,6 +65,28 @@ namespace UI.Title
                         UserDataRepository.SetEquippedWeapon(tuple.selectedCharacterId, tuple.selectedWeaponId)
                             .ToObservable())
                     .Subscribe(_ => { stateMachine.Dispatch((int)State.CharacterDetail); })
+                    .AddTo(cts.Token);
+
+                View.OnClickStatusSkillDetailButtonAsObservable()
+                    .WithLatestFrom(onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
+                    .Select(weaponId => SkillDetailViewModelUseCase.InAsTask(weaponId, SkillType.Status))
+                    .Subscribe(viewModel => View.ApplySkillDetailViewModel(viewModel))
+                    .AddTo(cts.Token);
+
+                View.OnClickNormalSkillDetailButtonAsObservable()
+                    .WithLatestFrom(onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
+                    .Select(weaponId => SkillDetailViewModelUseCase.InAsTask(weaponId, SkillType.Normal))
+                    .Subscribe(viewModel => View.ApplySkillDetailViewModel(viewModel))
+                    .AddTo(cts.Token);
+
+                View.OnClickSpecialSkillDetailButtonAsObservable()
+                    .WithLatestFrom(onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
+                    .Select(weaponId => SkillDetailViewModelUseCase.InAsTask(weaponId, SkillType.Special))
+                    .Subscribe(viewModel => View.ApplySkillDetailViewModel(viewModel))
+                    .AddTo(cts.Token);
+
+                View.OnClickBackButtonAsObservable()
+                    .Subscribe(_ => View.CloseSkillDetailView())
                     .AddTo(cts.Token);
 
                 var selectedCharacterId = CharacterSelectRepository.GetSelectedCharacterId();

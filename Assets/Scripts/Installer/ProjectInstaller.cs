@@ -30,6 +30,7 @@ namespace Common.Installer
             Container.Bind<PlayFabUserDataManager>().AsCached();
             Container.Bind<SkillDataRepository>().AsCached();
             Container.Bind<WeaponMasterDataRepository>().AsCached();
+            Container.Bind<StatusSkillUseCase>().AsCached();
         }
     }
 }

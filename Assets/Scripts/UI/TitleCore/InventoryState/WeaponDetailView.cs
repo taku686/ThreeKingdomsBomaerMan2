@@ -1,4 +1,5 @@
-﻿using Common.Data;
+﻿using System;
+using Common.Data;
 using Cysharp.Threading.Tasks;
 using TMPro;
 using UniRx;
@@ -20,6 +21,21 @@ namespace UI.Title
         private GameObject weaponObject;
         public Button EquipButton => equipButton;
         public Button SellButton => sellButton;
+
+        public IObservable<Unit> OnClickStatusSkillDetailButtonAsObservable()
+        {
+            return statusSkillGridView.OnClickDetailButtonAsObservable();
+        }
+
+        public IObservable<Unit> OnClickNormalSkillDetailButtonAsObservable()
+        {
+            return normalSkillGridView.OnClickDetailButtonAsObservable();
+        }
+
+        public IObservable<Unit> OnClickSpecialSkillDetailButtonAsObservable()
+        {
+            return specialSkillGridView.OnClickDetailButtonAsObservable();
+        }
 
         public void ApplyViewModel(ViewModel viewModel)
         {
@@ -67,7 +83,7 @@ namespace UI.Title
 
         private SkillGridView.ViewModel TranslateSkillDataToViewModel(SkillMasterData skillMasterData)
         {
-            return new SkillGridView.ViewModel(skillMasterData.Icon, skillMasterData.Name);
+            return new SkillGridView.ViewModel(skillMasterData.Sprite, skillMasterData.Name);
         }
 
         public class ViewModel

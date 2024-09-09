@@ -79,18 +79,23 @@ namespace Manager.PlayFabManager
                 var id = skillData.Id;
                 var explanation = skillData.Explanation;
                 var name = skillData.Name;
-                var icon = await LoadSkillSprite(skillData.IconID, cts.Token);
-                var skillType = skillData.SkillTypeInt;
-                var attributeType = skillData.AttributeTypeInt;
+                var sprite = await LoadSkillSprite(skillData.IconID, cts.Token);
+                var skillType = (SkillType)skillData.SkillTypeInt;
+                var attributeType = (AttributeType)skillData.AttributeTypeInt;
+                var skillEffectType =
+                    (SkillEffectType)Enum.Parse(typeof(SkillEffectType), skillData.SkillEffectTypeString);
+                var amount = skillData.Amount;
                 var newSkillData = new SkillMasterData
                 (
                     id,
                     explanation,
                     name,
-                    icon,
+                    sprite,
                     skillType,
                     null,
-                    attributeType
+                    attributeType,
+                    skillEffectType,
+                    amount
                 );
 
                 skillDataRepository.AddSkillData(newSkillData);
@@ -112,6 +117,7 @@ namespace Manager.PlayFabManager
                 var specialSkillData = skillDataRepository.GetSkillData(weaponData.SpecialSkillId);
                 var scale = weaponData.Scale;
                 var isBothHands = weaponData.IsBothHands;
+                var rare = weaponData.Rare;
                 var newWeaponData = new WeaponMasterData
                 (
                     name,
@@ -125,7 +131,8 @@ namespace Manager.PlayFabManager
                     statusSkillData,
                     specialSkillData,
                     scale,
-                    isBothHands
+                    isBothHands,
+                    rare
                 );
 
                 weaponMasterDataRepository.AddWeaponData(newWeaponData);

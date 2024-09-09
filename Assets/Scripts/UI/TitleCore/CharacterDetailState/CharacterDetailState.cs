@@ -4,7 +4,6 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using Manager.DataManager;
 using Manager.NetworkManager;
 using Repository;
 using UI.Common;
@@ -22,23 +21,27 @@ namespace UI.Title
             private CommonView CommonView => Owner.commonView;
             private CharacterCreateUseCase CharacterCreateUseCase => Owner.characterCreateUseCase;
             private CharacterObjectRepository CharacterObjectRepository => Owner.characterObjectRepository;
-            private CharacterMasterDataRepository characterMasterDataRepository;
+            private AnimationPlayBackUseCase AnimationPlayBackUseCase => Owner.animationPlayBackUseCase;
+
+            private CharacterDetailViewModelUseCase CharacterDetailViewModelUseCase =>
+                Owner.characterDetailViewModelUseCase;
+
+            private UserDataRepository UserDataRepository => Owner.userDataRepository;
+            private SortCharactersUseCase SortCharactersUseCase => Owner.sortCharactersUseCase;
             private PlayFabUserDataManager playFabUserDataManager;
             private PlayFabShopManager playFabShopManager;
             private PlayFabVirtualCurrencyManager playFabVirtualCurrencyManager;
-            private UserDataRepository userDataRepository;
-            private ChatGPTManager chatGptManager;
             private CharacterSelectRepository characterSelectRepository;
             private UIAnimation uiAnimation;
-            private SortCharactersUseCase SortCharactersUseCase => Owner.sortCharactersUseCase;
 
             private CancellationTokenSource cts;
             private int candidateIndex;
             private CharacterData[] sortedCharacters;
+            private readonly Subject<int> onChangeViewModel = new();
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
-                Initialize();
+                Initialize().Forget();
             }
 
             protected override void OnExit(StateMachine<TitleCore>.State nextState)
@@ -46,50 +49,26 @@ namespace UI.Title
                 Cancel();
             }
 
-            private async void Initialize()
+            private async UniTask Initialize()
             {
                 SetupCancellationToken();
-                characterMasterDataRepository = Owner.characterMasterDataRepository;
                 playFabUserDataManager = Owner.playFabUserDataManager;
                 playFabShopManager = Owner.playFabShopManager;
                 playFabVirtualCurrencyManager = Owner.playFabVirtualCurrencyManager;
-                userDataRepository = Owner.userDataRepository;
-                chatGptManager = Owner.chatGptManager;
                 uiAnimation = Owner.uiAnimation;
                 characterSelectRepository = Owner.characterSelectRepository;
-
-                InitializeCharacter();
-                InitializeButton();
-
-                SetupUIContent();
+                GenerateCharacter();
+                OnSubscribe();
                 await Owner.SwitchUiObject(State.CharacterDetail, true);
-                InitializeAnimation();
+                PlayBackAnimation();
             }
 
-            private void InitializeCharacter()
+            private void OnSubscribe()
             {
-                var selectedCharacterId = characterSelectRepository.GetSelectedCharacterId();
-                var orderType = characterSelectRepository.GetOrderType();
-                sortedCharacters = SortCharactersUseCase.InAsTask(orderType).ToArray();
-                candidateIndex = Array.FindIndex(sortedCharacters, x => x.Id == selectedCharacterId);
-                var selectedCharacter = sortedCharacters[candidateIndex];
-                CreateCharacter(selectedCharacter);
-            }
-
-            private void SetupUIContent()
-            {
-                var candidateCharacterId = sortedCharacters[candidateIndex].Id;
-                var characterData = characterMasterDataRepository.GetCharacterData(candidateCharacterId);
-                var currentLevelData = userDataRepository.GetCurrentLevelData(candidateCharacterId);
-                var nextLevelData = userDataRepository.GetNextLevelData(candidateCharacterId);
-                View.ApplyViewModel(characterData, currentLevelData, nextLevelData);
-                chatGptManager.SetupCharacter(characterData.Name, characterData.Character);
-            }
-
-            private void InitializeButton()
-            {
-                CommonView.errorView.okButton.onClick.RemoveAllListeners();
-                CommonView.errorView.okButton.onClick.AddListener(OnClickCloseErrorView);
+                onChangeViewModel
+                    .Select(characterId => CharacterDetailViewModelUseCase.InAsTask(characterId))
+                    .Subscribe(viewModel => View.ApplyViewModel(viewModel))
+                    .AddTo(cts.Token);
 
                 View.PurchaseErrorView.okButton.OnClickAsObservable()
                     .SelectMany(_ => OnClickClosePurchaseErrorView().ToObservable())
@@ -140,6 +119,23 @@ namespace UI.Title
                 View.InventoryButton.OnClickAsObservable()
                     .Subscribe(_ => stateMachine.Dispatch((int)State.Inventory))
                     .AddTo(cts.Token);
+
+                CommonView.errorView.okButton.OnClickAsObservable()
+                    .Subscribe(_ => OnClickCloseErrorView())
+                    .AddTo(cts.Token);
+
+                var candidateCharacterId = sortedCharacters[candidateIndex].Id;
+                onChangeViewModel.OnNext(candidateCharacterId);
+            }
+
+            private void GenerateCharacter()
+            {
+                var selectedCharacterId = characterSelectRepository.GetSelectedCharacterId();
+                var orderType = characterSelectRepository.GetOrderType();
+                sortedCharacters = SortCharactersUseCase.InAsTask(orderType).ToArray();
+                candidateIndex = Array.FindIndex(sortedCharacters, x => x.Id == selectedCharacterId);
+                var selectedCharacter = sortedCharacters[candidateIndex];
+                CreateCharacter(selectedCharacter);
             }
 
             private void OnClickBackButton()
@@ -150,11 +146,13 @@ namespace UI.Title
             private void OnClickRightArrow()
             {
                 var button = View.RightArrowButton;
+                button.interactable = false;
                 Owner.uiAnimation.ClickScaleColor(button.gameObject).OnComplete(() =>
                 {
-                    var userData = userDataRepository.GetUserData();
+                    var userData = UserDataRepository.GetUserData();
                     if (userData.Characters.Count <= 1)
                     {
+                        button.interactable = true;
                         return;
                     }
 
@@ -167,8 +165,8 @@ namespace UI.Title
                     var candidateCharacter = sortedCharacters[candidateIndex];
                     characterSelectRepository.SetSelectedCharacterId(candidateCharacter.Id);
                     CreateCharacter(candidateCharacter);
-                    SetupUIContent();
-                    InitializeAnimation();
+                    onChangeViewModel.OnNext(candidateCharacter.Id);
+                    PlayBackAnimation();
                     button.interactable = true;
                 }).SetLink(button.gameObject);
             }
@@ -179,7 +177,7 @@ namespace UI.Title
                 button.interactable = false;
                 Owner.uiAnimation.ClickScaleColor(button.gameObject).OnComplete(() =>
                 {
-                    var userData = userDataRepository.GetUserData();
+                    var userData = UserDataRepository.GetUserData();
                     if (userData.Characters.Count <= 1)
                     {
                         button.interactable = true;
@@ -195,8 +193,8 @@ namespace UI.Title
                     var candidateCharacter = sortedCharacters[candidateIndex];
                     characterSelectRepository.SetSelectedCharacterId(candidateCharacter.Id);
                     CreateCharacter(candidateCharacter);
-                    SetupUIContent();
-                    InitializeAnimation();
+                    onChangeViewModel.OnNext(candidateCharacter.Id);
+                    PlayBackAnimation();
                     button.interactable = true;
                 }).SetLink(button.gameObject);
             }
@@ -204,7 +202,7 @@ namespace UI.Title
             private async UniTask OnClickDecideButton()
             {
                 View.SelectButton.interactable = false;
-                var userData = userDataRepository.GetUserData();
+                var userData = UserDataRepository.GetUserData();
                 userData.EquippedCharacterId = sortedCharacters[candidateIndex].Id;
                 var result = await playFabUserDataManager.TryUpdateUserDataAsync(userData);
                 if (result)
@@ -227,7 +225,7 @@ namespace UI.Title
                 }
 
 
-                var nextLevelData = userDataRepository.GetNextLevelData(selectedCharacterData.Id);
+                var nextLevelData = UserDataRepository.GetNextLevelData(selectedCharacterData.Id);
                 var virtualCurrencyAddView = View.VirtualCurrencyAddPopup;
                 var purchaseErrorView = View.PurchaseErrorView;
                 if (coin < nextLevelData.NeedCoin)
@@ -254,10 +252,10 @@ namespace UI.Title
                 }
 
                 Owner.CheckMission(GameCommonData.LevelUpActionId);
-                var userData = userDataRepository.GetUserData();
-                await userDataRepository.UpdateUserData(userData);
+                var userData = UserDataRepository.GetUserData();
+                await UserDataRepository.UpdateUserData(userData);
                 await Owner.SetCoinText();
-                SetupUIContent();
+                onChangeViewModel.OnNext(selectedCharacterData.Id);
                 if (nextLevelData.Level == GameCommonData.MaxCharacterLevel)
                 {
                     CreateCharacter(selectedCharacterData);
@@ -312,10 +310,12 @@ namespace UI.Title
                 CharacterCreateUseCase.CreateCharacter(characterData.Id);
             }
 
-            private void InitializeAnimation()
+            private void PlayBackAnimation()
             {
                 var character = CharacterObjectRepository.GetCharacterObject();
-                character.GetComponent<Animator>().SetTrigger(GameCommonData.PerformanceHashKey);
+                var animator = character.GetComponent<Animator>();
+                AnimationPlayBackUseCase.RandomPlayBack(animator, AnimationStateType.Performance);
+                AnimationPlayBackUseCase.RandomPlayBack(animator, AnimationStateType.Idle);
             }
 
             private void SetupCancellationToken()
