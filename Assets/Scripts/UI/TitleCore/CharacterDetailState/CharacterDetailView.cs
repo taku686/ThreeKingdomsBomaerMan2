@@ -41,8 +41,8 @@ namespace UI.Title
         public void ApplyViewModel(ViewModel viewModel)
         {
             var characterData = viewModel.CharacterData;
-            var currentLevelData = viewModel.CurrentLevelData;
-            var nextLevelData = viewModel.NextLevelData;
+            var currentLevelData = viewModel.CurrentLevelMasterData;
+            var nextLevelData = viewModel.NextLevelMasterData;
             var skillsViewModel = viewModel.SkillsViewModel;
             var weaponMasterData = viewModel.WeaponMasterData;
             SetStatusView(characterData, currentLevelData, weaponMasterData);
@@ -56,22 +56,22 @@ namespace UI.Title
         private void SetStatusView
         (
             CharacterData characterData,
-            CharacterLevelData currentLevelData,
+            LevelMasterData currentLevelMasterData,
             WeaponMasterData weaponMasterData
         )
         {
             nameText.text = characterData.Name;
             var statusSkillId = weaponMasterData.StatusSkillMasterData.Id;
             statusView.HpText.text =
-                GetFixedStatus(currentLevelData, characterData, statusSkillId, StatusType.Hp);
+                GetFixedStatus(currentLevelMasterData, characterData, statusSkillId, StatusType.Hp);
             statusView.DamageText.text =
-                GetFixedStatus(currentLevelData, characterData, statusSkillId, StatusType.Attack);
+                GetFixedStatus(currentLevelMasterData, characterData, statusSkillId, StatusType.Attack);
             statusView.SpeedText.text =
-                GetFixedStatus(currentLevelData, characterData, statusSkillId, StatusType.Speed);
+                GetFixedStatus(currentLevelMasterData, characterData, statusSkillId, StatusType.Speed);
             statusView.BombLimitText.text =
-                GetFixedStatus(currentLevelData, characterData, statusSkillId, StatusType.BombLimit);
+                GetFixedStatus(currentLevelMasterData, characterData, statusSkillId, StatusType.BombLimit);
             statusView.FireRangeText.text =
-                GetFixedStatus(currentLevelData, characterData, statusSkillId, StatusType.FireRange);
+                GetFixedStatus(currentLevelMasterData, characterData, statusSkillId, StatusType.FireRange);
         }
 
         private void ApplySkillsViewModel(SkillsView.ViewModel viewModel)
@@ -79,19 +79,19 @@ namespace UI.Title
             skillsView.ApplyViewModel(viewModel);
         }
 
-        private void SetLevelView(CharacterLevelData currentLevelData, CharacterLevelData nextLevelData)
+        private void SetLevelView(LevelMasterData currentLevelMasterData, LevelMasterData nextLevelMasterData)
         {
-            if (currentLevelData.Level < GameCommonData.MaxCharacterLevel)
+            if (currentLevelMasterData.Level < GameCommonData.MaxCharacterLevel)
             {
                 upgradeButton.gameObject.SetActive(true);
                 upgradeInfoGameObject.gameObject.SetActive(true);
-                levelText.text = "LV <#94aed0><size=170%>" + currentLevelData.Level;
-                upgradeInfoText.text = $"Lv{nextLevelData.Level} Upgrade";
-                upgradeText.text = nextLevelData.NeedCoin.ToString("D");
+                levelText.text = "LV <#94aed0><size=170%>" + currentLevelMasterData.Level;
+                upgradeInfoText.text = $"Lv{nextLevelMasterData.Level} Upgrade";
+                upgradeText.text = nextLevelMasterData.NeedCoin.ToString("D");
             }
             else
             {
-                levelText.text = "LV <#94aed0><size=170%>" + currentLevelData.Level;
+                levelText.text = "LV <#94aed0><size=170%>" + currentLevelMasterData.Level;
                 upgradeButton.gameObject.SetActive(false);
                 upgradeInfoGameObject.gameObject.SetActive(false);
             }
@@ -99,14 +99,14 @@ namespace UI.Title
 
         private string GetFixedStatus
         (
-            CharacterLevelData currentLevelData,
+            LevelMasterData currentLevelMasterData,
             CharacterData characterData,
             int skillId,
             StatusType statusType
         )
         {
             var value = GetStatus(characterData, statusType);
-            var fixedValue = Mathf.FloorToInt(currentLevelData.StatusRate * value);
+            var fixedValue = Mathf.FloorToInt(currentLevelMasterData.StatusRate * value);
             var statusAddValue = statusSkillUseCase.ApplyStatusSkill(characterData.Id, skillId, fixedValue, statusType);
             var increaseValue = statusAddValue - fixedValue;
             if (increaseValue == 0)
@@ -159,23 +159,23 @@ namespace UI.Title
         public class ViewModel
         {
             public CharacterData CharacterData { get; }
-            public CharacterLevelData CurrentLevelData { get; }
-            public CharacterLevelData NextLevelData { get; }
+            public LevelMasterData CurrentLevelMasterData { get; }
+            public LevelMasterData NextLevelMasterData { get; }
             public SkillsView.ViewModel SkillsViewModel { get; }
             public WeaponMasterData WeaponMasterData { get; }
 
             public ViewModel
             (
                 CharacterData characterData,
-                CharacterLevelData currentLevelData,
-                CharacterLevelData nextLevelData,
+                LevelMasterData currentLevelMasterData,
+                LevelMasterData nextLevelMasterData,
                 SkillsView.ViewModel skillsViewModel,
                 WeaponMasterData weaponMasterData
             )
             {
                 CharacterData = characterData;
-                CurrentLevelData = currentLevelData;
-                NextLevelData = nextLevelData;
+                CurrentLevelMasterData = currentLevelMasterData;
+                NextLevelMasterData = nextLevelMasterData;
                 SkillsViewModel = skillsViewModel;
                 WeaponMasterData = weaponMasterData;
             }

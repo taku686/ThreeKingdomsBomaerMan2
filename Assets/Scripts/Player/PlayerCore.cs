@@ -6,7 +6,9 @@ using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager;
 using Manager.BattleManager;
+using Manager.DataManager;
 using Photon.Pun;
+using Repository;
 using UI.Battle;
 using UniRx;
 using UniRx.Triggers;
@@ -18,8 +20,8 @@ namespace Player.Common
     {
         private InputManager inputManager;
         private PlayerMove playerMove;
+
         private PutBomb putBomb;
-        private CharacterData characterData;
         private PhotonView playerPhotonView;
         private Animator animator;
         private PlayerDead playerDead;
@@ -47,29 +49,46 @@ namespace Player.Common
         {
             Idle,
             Dead,
-            Skill1,
-            Skill2,
+            NormalSkill,
+            SpecialSkill,
         }
 
         public IObservable<Unit> DeadObservable => deadSubject;
 
 
-        public void Initialize(CharacterStatusManager manager, string key, CharacterData data,
-            UserDataRepository userDataRepository)
+        public void Initialize
+        (
+            CharacterStatusManager manager,
+            string key,
+            UserData userData,
+            LevelMasterDataRepository levelMasterDataRepository,
+            WeaponMasterDataRepository weaponMasterDataRepository
+        )
         {
-            characterData = data;
             hpKey = key;
             characterStatusManager = manager;
-            InitializeComponent(characterData, userDataRepository);
+            InitializeComponent(userData, levelMasterDataRepository, weaponMasterDataRepository);
             InitializeState();
         }
 
-        private void InitializeComponent(CharacterData data, UserDataRepository userDataRepository)
+        private void InitializeComponent
+        (
+            UserData userData,
+            LevelMasterDataRepository levelMasterDataRepository,
+            WeaponMasterDataRepository weaponMasterDataRepository
+        )
         {
             playerPhotonView = GetComponent<PhotonView>();
             inputManager = gameObject.AddComponent<InputManager>();
-            inputManager.Initialize(playerPhotonView, SkillOneIntervalTime, SkillTwoIntervalTime, data,
-                userDataRepository);
+            inputManager.Initialize
+            (
+                playerPhotonView,
+                SkillOneIntervalTime,
+                SkillTwoIntervalTime,
+                userData,
+                levelMasterDataRepository,
+                weaponMasterDataRepository
+            );
             putBomb = GetComponent<PutBomb>();
             animator = GetComponent<Animator>();
             animatorTrigger = animator.GetBehaviour<ObservableStateMachineTrigger>();
@@ -87,8 +106,8 @@ namespace Player.Common
             stateMachine.Start<PlayerIdleState>();
             stateMachine.AddAnyTransition<PlayerDeadState>((int)PLayerState.Dead);
             stateMachine.AddAnyTransition<PlayerIdleState>((int)PLayerState.Idle);
-            stateMachine.AddTransition<PlayerIdleState, PlayerSkillOneState>((int)PLayerState.Skill1);
-            stateMachine.AddTransition<PlayerIdleState, PlayerSkillTwoState>((int)PLayerState.Skill2);
+            stateMachine.AddTransition<PlayerIdleState, PlayerSkillOneState>((int)PLayerState.NormalSkill);
+            stateMachine.AddTransition<PlayerIdleState, PlayerSkillTwoState>((int)PLayerState.SpecialSkill);
         }
 
         private void Update()

@@ -2,9 +2,11 @@ using Bomb;
 using Common.Data;
 using Manager.BattleManager.Camera;
 using Manager.BattleManager.Environment;
+using Manager.DataManager;
 using Manager.NetworkManager;
 using Photon.Pun;
 using Player.Common;
+using Repository;
 using UnityEngine;
 using Zenject;
 
@@ -17,6 +19,9 @@ namespace Manager.BattleManager
         [Inject] private BombProvider bombProvider;
         [Inject] private UserDataRepository userDataRepository;
         [Inject] private MissionManager missionManager;
+        [Inject] private CharacterMasterDataRepository characterMasterDataRepository;
+        [Inject] private LevelMasterDataRepository levelMasterDataRepository;
+        [Inject] private WeaponMasterDataRepository weaponMasterDataRepository;
         [SerializeField] private Transform playerUIParent;
         [SerializeField] private GameObject playerUI;
         [SerializeField] private CameraManager cameraManager;

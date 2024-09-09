@@ -18,7 +18,7 @@ namespace Common.Data
         private UserData userData;
         private CancellationTokenSource cancellationTokenSource;
         [Inject] private CharacterMasterDataRepository characterMasterDataRepository;
-        [Inject] private CharacterLevelMasterDataRepository characterLevelMasterDataRepository;
+        [Inject] private LevelMasterDataRepository levelMasterDataRepository;
         [Inject] private MissionDataRepository missionDataRepository;
         [Inject] private PlayFabUserDataManager playFabUserDataManager;
         [Inject] private WeaponMasterDataRepository weaponMasterDataRepository;
@@ -86,16 +86,21 @@ namespace Common.Data
             return characterMasterDataRepository.GetCharacterData(userData.EquippedCharacterId).Id;
         }
 
-        public CharacterLevelData GetCurrentLevelData(int characterId)
+        public CharacterData GetEquippedCharacterData()
         {
-            var level = userData.CharacterLevels[characterId];
-            return characterLevelMasterDataRepository.GetCharacterLevelData(level);
+            return characterMasterDataRepository.GetCharacterData(userData.EquippedCharacterId);
         }
 
-        public CharacterLevelData GetNextLevelData(int characterId)
+        public LevelMasterData GetCurrentLevelData(int characterId)
+        {
+            var level = userData.CharacterLevels[characterId];
+            return levelMasterDataRepository.GetLevelMasterData(level);
+        }
+
+        public LevelMasterData GetNextLevelData(int characterId)
         {
             var level = userData.CharacterLevels[characterId] + 1;
-            return characterLevelMasterDataRepository.GetCharacterLevelData(level);
+            return levelMasterDataRepository.GetLevelMasterData(level);
         }
 
         public bool UpgradeCharacterLevel(int characterId, int level)
@@ -227,6 +232,7 @@ namespace Common.Data
         {
             var data = GetUserData();
             data.EquippedWeapons[selectedCharacterId] = weaponId;
+            
             SetUserData(data);
             await playFabUserDataManager.TryUpdateUserDataAsync(data);
         }
@@ -256,7 +262,7 @@ namespace Common.Data
             cancellationTokenSource.Cancel();
             cancellationTokenSource?.Dispose();
             characterMasterDataRepository?.Dispose();
-            characterLevelMasterDataRepository?.Dispose();
+            levelMasterDataRepository?.Dispose();
             playFabUserDataManager?.Dispose();
         }
 

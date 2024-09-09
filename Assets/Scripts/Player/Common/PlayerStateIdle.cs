@@ -93,12 +93,12 @@ namespace Player.Common
 
             private void OnClickSkillOne()
             {
-                Owner.stateMachine.Dispatch((int)PLayerState.Skill1);
+                Owner.stateMachine.Dispatch((int)PLayerState.NormalSkill);
             }
 
             private void OnClickSkillTwo()
             {
-                Owner.stateMachine.Dispatch((int)PLayerState.Skill2);
+                Owner.stateMachine.Dispatch((int)PLayerState.SpecialSkill);
             }
 
             private void Cancel()

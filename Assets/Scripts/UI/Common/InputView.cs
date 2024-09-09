@@ -8,9 +8,9 @@ namespace UI.Common
         public Button bombButton;
         public Button skillOneButton;
         public Button skillTwoButton;
-        public Image skillOneIntervalImage;
-        public Image skillTwoIntervalImage;
-        public Image skillOneImage;
-        public Image skillTwoImage;
+        public Image normalSkillIntervalImage;
+        public Image specialSkillIntervalImage;
+        public Image normalSkillImage;
+        public Image specialSkillImage;
     }
 }

@@ -48,11 +48,6 @@ namespace Repository
             }
 
             var createCharacterData = characterMasterDataRepository.GetCharacterData(characterId);
-            if (createCharacterData.CharacterObject == null || createCharacterData.WeaponEffectObj == null)
-            {
-                Debug.LogError(characterId + " is not found");
-            }
-
             var weaponData = userDataRepository.GetEquippedWeaponData(characterId);
             characterObject = CreateCharacter(createCharacterData);
             CreateWeapon(characterObject, weaponData);

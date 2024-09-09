@@ -1,6 +1,6 @@
 using System;
 
-public class CharacterLevelData : IDisposable
+public class LevelMasterData : IDisposable
 {
     public int Level;
     public float StatusRate;

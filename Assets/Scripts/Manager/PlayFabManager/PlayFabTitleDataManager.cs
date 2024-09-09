@@ -20,7 +20,7 @@ namespace Manager.PlayFabManager
         private const string SkillMasterKey = "SkillMaster";
         private const string WeaponMasterKey = "WeaponMaster";
         [Inject] private CharacterMasterDataRepository characterMasterDataRepository;
-        [Inject] private CharacterLevelMasterDataRepository characterLevelMasterDataRepository;
+        [Inject] private LevelMasterDataRepository levelMasterDataRepository;
         [Inject] private MissionDataRepository missionDataRepository;
         [Inject] private SkillDataRepository skillDataRepository;
         [Inject] private WeaponMasterDataRepository weaponMasterDataRepository;
@@ -36,7 +36,7 @@ namespace Manager.PlayFabManager
             var characterDatum =
                 JsonConvert.DeserializeObject<CharacterData[]>(titleDatum[CharacterMasterKey]);
             var characterLevelDatum =
-                JsonConvert.DeserializeObject<CharacterLevelData[]>(titleDatum[CharacterLevelMasterKey]);
+                JsonConvert.DeserializeObject<LevelMasterData[]>(titleDatum[CharacterLevelMasterKey]);
             var missionDatum =
                 JsonConvert.DeserializeObject<MissionData[]>(titleDatum[MissionMasterKey]);
             var skillDatum =
@@ -60,12 +60,6 @@ namespace Manager.PlayFabManager
                     await LoadCharacterSprite(characterData.Id, cts.Token);
                 characterData.ColorSprite =
                     await LoadCharacterColor(characterData.CharaColor, cts.Token);
-                characterData.SkillOneSprite =
-                    await LoadSkillSprite(characterData.Id, characterData.SkillOneId, cts.Token);
-                characterData.SkillTwoSprite =
-                    await LoadSkillSprite(characterData.Id, characterData.SkillTwoId, cts.Token);
-                characterData.WeaponEffectObj =
-                    await LoadWeaponEffect(characterData.WeaponEffectId, cts.Token);
                 characterData.BombLimit /= FixedValue;
                 characterData.FireRange /= FixedValue;
                 characterMasterDataRepository.SetCharacterData(characterData);
@@ -139,11 +133,11 @@ namespace Manager.PlayFabManager
             }
         }
 
-        private void SetCharacterLevelData(CharacterLevelData[] characterLevelMasterDatum)
+        private void SetCharacterLevelData(LevelMasterData[] characterLevelMasterDatum)
         {
             foreach (var characterLevelMasterData in characterLevelMasterDatum)
             {
-                characterLevelMasterDataRepository.SetCharacterLevelData(characterLevelMasterData);
+                levelMasterDataRepository.SetCharacterLevelData(characterLevelMasterData);
             }
         }
 

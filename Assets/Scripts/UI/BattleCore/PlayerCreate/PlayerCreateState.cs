@@ -1,12 +1,12 @@
-﻿using System.Linq;
-using Common.Data;
+﻿using Common.Data;
 using Cysharp.Threading.Tasks;
+using Manager.DataManager;
 using Photon.Pun;
 using Player.Common;
+using Repository;
 using UI.Battle;
 using UniRx;
 using UnityEngine;
-using State = StateMachine<Manager.BattleManager.BattleCore>.State;
 
 namespace Manager.BattleManager
 {
@@ -17,8 +17,10 @@ namespace Manager.BattleManager
             private static readonly Vector3 ColliderCenter = new(0, 0.6f, 0);
             private static readonly Vector3 ColliderSize = new(0.4f, 0.6f, 0.4f);
             private static readonly float MaxRate = 1f;
+            private CharacterMasterDataRepository CharacterMasterDataRepository => Owner.characterMasterDataRepository;
+            private LevelMasterDataRepository LevelMasterDataRepository => Owner.levelMasterDataRepository;
+            private WeaponMasterDataRepository WeaponMasterDataRepository => Owner.weaponMasterDataRepository;
             private CharacterStatusManager characterStatusManager;
-            private UserDataRepository userDataRepository;
             private MapManager mapManager;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
@@ -35,7 +37,8 @@ namespace Manager.BattleManager
             private void CreatePlayer()
             {
                 var index = Owner.networkManager.GetPlayerNumber(PhotonNetwork.LocalPlayer.ActorNumber);
-                var characterData = Owner.networkManager.CurrentRoomCharacterDatum[PhotonNetwork.LocalPlayer.ActorNumber];
+                var userData = Owner.networkManager.CurrentRoomUserDatum[PhotonNetwork.LocalPlayer.ActorNumber];
+                var characterData = CharacterMasterDataRepository.GetCharacterData(userData.EquippedCharacterId);
                 Owner.playerGenerator.GenerateCharacter(index, characterData);
             }
 
@@ -58,8 +61,8 @@ namespace Manager.BattleManager
                 mapManager = Owner.mapManager;
                 var photonView = player.GetComponent<PhotonView>();
                 var playerId = photonView.OwnerActorNr;
-                var characterData = Owner.networkManager.GetCharacterData(playerId);
-                var characterLevelData = Owner.networkManager.GetCharacterLevelData(playerId);
+                var userData = Owner.networkManager.GetUserData(playerId);
+                var characterData = CharacterMasterDataRepository.GetCharacterData(userData.EquippedCharacterId);
                 var playerStatusManager = new CharacterStatusManager(characterData, photonView.IsMine);
                 var playerPutBomb = player.AddComponent<PutBomb>();
                 playerPutBomb.Initialize(Owner.bombProvider, playerStatusManager, mapManager);
@@ -68,7 +71,6 @@ namespace Manager.BattleManager
                 playerBillBoardUI.Initialize(player.transform);
                 var hpKey = playerId + "Hp";
                 SynchronizedValue.Instance.Create(hpKey, MaxRate);
-                CreateWeaponEffect(player, characterLevelData.Level, characterData);
                 var playerStatusUI = playerUI.GetComponent<PlayerStatusUI>();
                 playerStatusUI.Initialize(SynchronizedValue.Instance.GetFloatValue(hpKey));
                 if (!photonView.IsMine)
@@ -81,8 +83,13 @@ namespace Manager.BattleManager
                 Owner.cameraManager.Initialize(player.transform);
                 var playerCore = player.AddComponent<PlayerCore>();
                 Owner.SetPlayerCore(playerCore);
-                userDataRepository = Owner.userDataRepository;
-                playerCore.Initialize(playerStatusManager, hpKey, characterData, userDataRepository);
+
+                playerCore.Initialize(
+                    playerStatusManager,
+                    hpKey,
+                    userData,
+                    LevelMasterDataRepository,
+                    WeaponMasterDataRepository);
             }
 
             private void AddBoxCollider(GameObject player)
@@ -100,7 +107,7 @@ namespace Manager.BattleManager
                 rigid.constraints = RigidbodyConstraints.FreezeAll;
             }
 
-            private void CreateWeaponEffect(GameObject player, int characterLevel, CharacterData characterData)
+            /*private void CreateWeaponEffect(GameObject player, int characterLevel, CharacterData characterData)
             {
                 if (characterLevel < GameCommonData.MaxCharacterLevel)
                 {
@@ -125,7 +132,7 @@ namespace Manager.BattleManager
                     effect.Color = GameCommonData.GetWeaponColor(characterData.Id);
                     effect.UpdateMeshEffect(weapon);
                 }
-            }
+            }*/
         }
     }
 }

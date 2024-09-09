@@ -3,6 +3,7 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Manager.DataManager;
 using MoreMountains.Tools;
 using UnityEngine;
 using Photon.Pun;
@@ -19,6 +20,7 @@ namespace UI.Title
             private bool isInitialize;
             private CancellationTokenSource cts;
             private BattleReadyView View => (BattleReadyView)Owner.GetView(State.BattleReady);
+            private CharacterMasterDataRepository CharacterMasterDataRepository => Owner.characterMasterDataRepository;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -98,7 +100,9 @@ namespace UI.Title
 
             private void CreateGrid(int index)
             {
-                var characterData = Owner.photonNetworkManager.CurrentRoomCharacterDatum[index];
+                var userData = Owner.photonNetworkManager.GetUserData(index);
+                var characterId = userData.EquippedCharacterId;
+                var characterData = CharacterMasterDataRepository.GetCharacterData(characterId);
                 var levelData = Owner.photonNetworkManager.GetCharacterLevelData(index);
                 var grid = Instantiate(View.BattleReadyGrid.gameObject, View.GridParent);
                 var battleReadyGrid = grid.GetComponent<BattleReadyGrid>();

@@ -17,14 +17,8 @@ namespace Common.Data
         private int fireRange;
         private int hp;
         private string charaColor;
-        public string Character;
-        public int SkillOneId;
-        public int SkillTwoId;
-        public int WeaponEffectId;
         public Sprite SelfPortraitSprite;
         public Sprite ColorSprite;
-        public Sprite SkillOneSprite;
-        public Sprite SkillTwoSprite;
         public GameObject WeaponEffectObj;
 
         public string CharaObj
