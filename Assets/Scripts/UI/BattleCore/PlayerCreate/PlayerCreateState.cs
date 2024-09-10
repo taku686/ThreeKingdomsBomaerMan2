@@ -1,6 +1,7 @@
 ﻿using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.DataManager;
+using Manager.NetworkManager;
 using Photon.Pun;
 using Player.Common;
 using Repository;
@@ -17,11 +18,9 @@ namespace Manager.BattleManager
             private static readonly Vector3 ColliderCenter = new(0, 0.6f, 0);
             private static readonly Vector3 ColliderSize = new(0.4f, 0.6f, 0.4f);
             private static readonly float MaxRate = 1f;
-            private CharacterMasterDataRepository CharacterMasterDataRepository => Owner.characterMasterDataRepository;
-            private LevelMasterDataRepository LevelMasterDataRepository => Owner.levelMasterDataRepository;
-            private WeaponMasterDataRepository WeaponMasterDataRepository => Owner.weaponMasterDataRepository;
             private CharacterStatusManager characterStatusManager;
             private MapManager mapManager;
+            private PhotonNetworkManager PhotonNetworkManager => Owner.photonNetworkManager;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
             {
@@ -36,15 +35,14 @@ namespace Manager.BattleManager
 
             private void CreatePlayer()
             {
-                var index = Owner.networkManager.GetPlayerNumber(PhotonNetwork.LocalPlayer.ActorNumber);
-                var userData = Owner.networkManager.CurrentRoomUserDatum[PhotonNetwork.LocalPlayer.ActorNumber];
-                var characterData = CharacterMasterDataRepository.GetCharacterData(userData.EquippedCharacterId);
+                var index = PhotonNetwork.LocalPlayer.ActorNumber;
+                var characterData = PhotonNetworkManager.GetCharacterData(index);
                 Owner.playerGenerator.GenerateCharacter(index, characterData);
             }
 
             private void SetPlayerGenerateCompleteSubscribe()
             {
-                Owner.networkManager.PlayerGenerateCompleteSubject.Subscribe(_ =>
+                PhotonNetworkManager.PlayerGenerateCompleteSubject.Subscribe(_ =>
                 {
                     var players = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
                     foreach (var player in players)
@@ -61,8 +59,7 @@ namespace Manager.BattleManager
                 mapManager = Owner.mapManager;
                 var photonView = player.GetComponent<PhotonView>();
                 var playerId = photonView.OwnerActorNr;
-                var userData = Owner.networkManager.GetUserData(playerId);
-                var characterData = CharacterMasterDataRepository.GetCharacterData(userData.EquippedCharacterId);
+                var characterData = PhotonNetworkManager.GetCharacterData(playerId);
                 var playerStatusManager = new CharacterStatusManager(characterData, photonView.IsMine);
                 var playerPutBomb = player.AddComponent<PutBomb>();
                 playerPutBomb.Initialize(Owner.bombProvider, playerStatusManager, mapManager);
@@ -83,13 +80,7 @@ namespace Manager.BattleManager
                 Owner.cameraManager.Initialize(player.transform);
                 var playerCore = player.AddComponent<PlayerCore>();
                 Owner.SetPlayerCore(playerCore);
-
-                playerCore.Initialize(
-                    playerStatusManager,
-                    hpKey,
-                    userData,
-                    LevelMasterDataRepository,
-                    WeaponMasterDataRepository);
+                playerCore.Initialize(playerStatusManager, PhotonNetworkManager, hpKey);
             }
 
             private void AddBoxCollider(GameObject player)

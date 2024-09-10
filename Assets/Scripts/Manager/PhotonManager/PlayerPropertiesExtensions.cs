@@ -1,28 +1,30 @@
-﻿using Common.Data;
-using UnityEngine;
-using ExitGames.Client.Photon;
-using Photon.Realtime;
+﻿using ExitGames.Client.Photon;
 
 namespace Manager.NetworkManager
 {
     public static class PlayerPropertiesExtensions
     {
         private const string CharacterDataKey = "Cha";
+        private const string WeaponDataKey = "Wea";
         private const string CharacterLevelKey = "Lev";
         public const string PlayerIndexKey = "Index";
         public const string PlayerGenerateKey = "Gen";
-        public const string AliveTimeKey = "Ali";
         private static readonly Hashtable PropsToSet = new();
 
 
         public static int GetCharacterId(this Photon.Realtime.Player player)
         {
-            return (player.CustomProperties[CharacterDataKey] is int characterId) ? characterId : -1;
+            return player.CustomProperties[CharacterDataKey] is int characterId ? characterId : -1;
+        }
+
+        public static int GetWeaponId(this Photon.Realtime.Player player)
+        {
+            return player.CustomProperties[WeaponDataKey] is int weaponId ? weaponId : -1;
         }
 
         public static int GetCharacterLevel(this Photon.Realtime.Player player)
         {
-            return (player.CustomProperties[CharacterLevelKey] is int level) ? level : -1;
+            return player.CustomProperties[CharacterLevelKey] is int level ? level : -1;
         }
 
         public static int GetPlayerIndex(this Photon.Realtime.Player player)
@@ -30,14 +32,16 @@ namespace Manager.NetworkManager
             return player.CustomProperties[PlayerIndexKey] is int playerIndex ? playerIndex : -1;
         }
 
-        public static float GetAliveTime(this Photon.Realtime.Player player)
-        {
-            return player.CustomProperties[AliveTimeKey] is float aliveTime ? aliveTime : -1;
-        }
-
         public static void SetCharacterData(this Photon.Realtime.Player player, int characterId)
         {
             PropsToSet[CharacterDataKey] = characterId;
+            player.SetCustomProperties(PropsToSet);
+            PropsToSet.Clear();
+        }
+
+        public static void SetWeaponData(this Photon.Realtime.Player player, int weaponId)
+        {
+            PropsToSet[WeaponDataKey] = weaponId;
             player.SetCustomProperties(PropsToSet);
             PropsToSet.Clear();
         }
@@ -64,13 +68,6 @@ namespace Manager.NetworkManager
         }
 
         public static void SetPlayerValue(this Photon.Realtime.Player player, string key, object value)
-        {
-            PropsToSet[key] = value;
-            player.SetCustomProperties(PropsToSet);
-            PropsToSet.Clear();
-        }
-
-        public static void SetAliveTime(this Photon.Realtime.Player player, string key, object value)
         {
             PropsToSet[key] = value;
             player.SetCustomProperties(PropsToSet);

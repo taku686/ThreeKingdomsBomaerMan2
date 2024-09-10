@@ -6,6 +6,7 @@ using ExitGames.Client.Photon;
 using Manager.DataManager;
 using Photon.Pun;
 using Photon.Realtime;
+using Repository;
 using UniRx;
 using UnityEngine;
 using Zenject;
@@ -17,23 +18,24 @@ namespace Manager.NetworkManager
         [Inject] private CharacterMasterDataRepository characterMasterDataRepository;
         [Inject] private UserDataRepository userDataRepository;
         [Inject] private LevelMasterDataRepository levelMasterDataRepository;
+        [Inject] private WeaponMasterDataRepository weaponMasterDataRepository;
         private readonly Subject<Photon.Realtime.Player[]> joinedRoomSubject = new();
         private readonly Subject<int> leftRoomSubject = new();
         private readonly Subject<Unit> playerGenerateCompleteSubject = new();
-        private readonly Dictionary<int, UserData> currentRoomUserDatum = new();
-        private readonly Dictionary<int, LevelMasterData> currentRoomCharacterLevelDatum = new();
+        private readonly Dictionary<int, CharacterData> currentRoomCharacterDatum = new();
+        private readonly Dictionary<int, WeaponMasterData> currentRoomWeaponDatum = new();
+        private readonly Dictionary<int, LevelMasterData> currentRoomLevelDatum = new();
         private int playerCount;
 
-        public Dictionary<int, UserData> CurrentRoomUserDatum => currentRoomUserDatum;
-
-        public Dictionary<int, LevelMasterData> CurrentRoomCharacterLevelDatum => currentRoomCharacterLevelDatum;
         public Subject<int> LeftRoomSubject => leftRoomSubject;
         public IObservable<Photon.Realtime.Player[]> JoinedRoomSubject => joinedRoomSubject;
         public IObservable<Unit> PlayerGenerateCompleteSubject => playerGenerateCompleteSubject;
 
         private void Awake()
         {
-            CurrentRoomUserDatum.Clear();
+            currentRoomCharacterDatum.Clear();
+            currentRoomLevelDatum.Clear();
+            currentRoomWeaponDatum.Clear();
             PhotonNetwork.UseRpcMonoBehaviourCache = true;
             PhotonNetwork.AutomaticallySyncScene = true;
             playerCount = 0;
@@ -54,7 +56,7 @@ namespace Manager.NetworkManager
 
         public override void OnJoinRandomFailed(short returnCode, string message)
         {
-            PhotonNetwork.CreateRoom(null, new RoomOptions()
+            PhotonNetwork.CreateRoom(null, new RoomOptions
             {
                 MaxPlayers = 4,
                 IsOpen = true,
@@ -68,15 +70,18 @@ namespace Manager.NetworkManager
             var index = PhotonNetwork.LocalPlayer.ActorNumber;
             var characterId = characterMasterDataRepository.GetUserEquippedCharacterData().Id;
             var characterLevel = userDataRepository.GetCurrentLevelData(characterId).Level;
+            var weaponId = userDataRepository.GetEquippedWeaponData(characterId).Id;
             PhotonNetwork.LocalPlayer.SetCharacterData(characterId);
             PhotonNetwork.LocalPlayer.SetCharacterLevel(characterLevel);
-            PhotonNetwork.LocalPlayer.SetPlayerIndex(index);
+            PhotonNetwork.LocalPlayer.SetWeaponData(weaponId);
+            PhotonNetwork.LocalPlayer.SetPlayerIndex(index); //indexを参照にデータを取得するため最後に値を入れないといけない
         }
 
         public override void OnLeftRoom()
         {
-            currentRoomUserDatum.Clear();
-            currentRoomCharacterLevelDatum.Clear();
+            currentRoomCharacterDatum.Clear();
+            currentRoomLevelDatum.Clear();
+            currentRoomWeaponDatum.Clear();
             PhotonNetwork.Disconnect();
         }
 
@@ -106,64 +111,49 @@ namespace Manager.NetworkManager
         {
             foreach (var player in players)
             {
-                currentRoomUserDatum[player.ActorNumber] = userDataRepository.GetUserData();
-                currentRoomCharacterLevelDatum[player.ActorNumber] =
+                currentRoomCharacterDatum[player.ActorNumber] =
+                    characterMasterDataRepository.GetCharacterData(player.GetCharacterId());
+                currentRoomLevelDatum[player.ActorNumber] =
                     levelMasterDataRepository.GetLevelMasterData(player.GetCharacterLevel());
+                currentRoomWeaponDatum[player.ActorNumber] =
+                    weaponMasterDataRepository.GetWeaponData(player.GetWeaponId());
             }
 
             joinedRoomSubject.OnNext(players);
         }
 
-        //todo debug機能後で消す
-        private void OnGUI()
+        public CharacterData GetCharacterData(int playerId)
         {
-            GUILayout.Label(PhotonNetwork.NetworkClientState.ToString());
-        }
-
-        public int GetPlayerNumber(int index)
-        {
-            var count = 0;
-            foreach (var player in currentRoomUserDatum.OrderBy(x => x.Key))
-            {
-                count++;
-                if (player.Key == index)
-                {
-                    return count switch
-                    {
-                        1 => (int)PlayerIndex.Player1,
-                        2 => (int)PlayerIndex.Player2,
-                        3 => (int)PlayerIndex.Player3,
-                        4 => (int)PlayerIndex.Player4,
-                        _ => -1
-                    };
-                }
-            }
-
-            return -1;
-        }
-
-        public UserData GetUserData(int playerId)
-        {
-            if (!currentRoomUserDatum.TryGetValue(playerId, out var value))
+            if (!currentRoomCharacterDatum.TryGetValue(playerId, out var value))
             {
                 Debug.LogError("キャラクター情報がありません");
                 return null;
             }
-
 
             return value;
         }
 
-        public LevelMasterData GetCharacterLevelData(int playerId)
+        public WeaponMasterData GetWeaponData(int playerId)
         {
-            if (!currentRoomCharacterLevelDatum.ContainsKey(playerId))
+            if (!currentRoomWeaponDatum.TryGetValue(playerId, out var value))
             {
                 Debug.LogError("キャラクター情報がありません");
                 return null;
             }
 
+            Debug.Log(value.Id);
+            return value;
+        }
 
-            return currentRoomCharacterLevelDatum[playerId];
+        public LevelMasterData GetLevelMasterData(int playerId)
+        {
+            if (!currentRoomLevelDatum.TryGetValue(playerId, out var data))
+            {
+                Debug.LogError("キャラクター情報がありません");
+                return null;
+            }
+
+            return data;
         }
 
         private void CheckPlayerGenerateComplete(int count)

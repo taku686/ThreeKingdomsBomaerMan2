@@ -3,12 +3,14 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.DataManager;
+using Manager.NetworkManager;
 using Photon.Pun;
 using Repository;
 using UI.Common;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 namespace Manager
 {
@@ -28,13 +30,7 @@ namespace Manager
         public Button BombButton => bombButton;
 
 
-        public void Initialize
-        (
-            PhotonView view,
-            UserData userData,
-            LevelMasterDataRepository levelMasterDataRepository,
-            WeaponMasterDataRepository weaponMasterDataRepository
-        )
+        public void Initialize(PhotonView view, PhotonNetworkManager photonNetworkManager)
         {
             photonView = view;
             inputView = FindObjectOfType<InputView>();
@@ -44,11 +40,9 @@ namespace Manager
                 return;
             }
 
-            var characterId = userData.EquippedCharacterId;
-            var weaponId = userData.EquippedWeapons[characterId];
-            var level = userData.CharacterLevels[characterId];
-            var currentLevelData = levelMasterDataRepository.GetLevelMasterData(level);
-            var weaponData = weaponMasterDataRepository.GetWeaponData(weaponId);
+            var actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
+            var weaponData = photonNetworkManager.GetWeaponData(actorNumber);
+            var currentLevelData = photonNetworkManager.GetLevelMasterData(actorNumber);
             normalSkillIntervalImage = inputView.normalSkillIntervalImage;
             specialSkillIntervalImage = inputView.specialSkillIntervalImage;
             SetupSkillUI(currentLevelData, weaponData);

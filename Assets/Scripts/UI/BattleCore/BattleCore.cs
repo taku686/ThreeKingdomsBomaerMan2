@@ -14,7 +14,7 @@ namespace Manager.BattleManager
 {
     public partial class BattleCore : MonoBehaviourPunCallbacks
     {
-        [Inject] private PhotonNetworkManager networkManager;
+        [Inject] private PhotonNetworkManager photonNetworkManager;
         [Inject] private PlayerGenerator playerGenerator;
         [Inject] private BombProvider bombProvider;
         [Inject] private UserDataRepository userDataRepository;

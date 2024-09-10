@@ -7,6 +7,7 @@ using Cysharp.Threading.Tasks;
 using Manager;
 using Manager.BattleManager;
 using Manager.DataManager;
+using Manager.NetworkManager;
 using Photon.Pun;
 using Repository;
 using UI.Battle;
@@ -52,37 +53,19 @@ namespace Player.Common
         public IObservable<Unit> DeadObservable => deadSubject;
 
 
-        public void Initialize
-        (
-            CharacterStatusManager manager,
-            string key,
-            UserData userData,
-            LevelMasterDataRepository levelMasterDataRepository,
-            WeaponMasterDataRepository weaponMasterDataRepository
-        )
+        public void Initialize(CharacterStatusManager manager, PhotonNetworkManager photonNetworkManager, string key)
         {
             hpKey = key;
             characterStatusManager = manager;
-            InitializeComponent(userData, levelMasterDataRepository, weaponMasterDataRepository);
+            InitializeComponent(photonNetworkManager);
             InitializeState();
         }
 
-        private void InitializeComponent
-        (
-            UserData userData,
-            LevelMasterDataRepository levelMasterDataRepository,
-            WeaponMasterDataRepository weaponMasterDataRepository
-        )
+        private void InitializeComponent(PhotonNetworkManager photonNetworkManager)
         {
             playerPhotonView = GetComponent<PhotonView>();
             inputManager = gameObject.AddComponent<InputManager>();
-            inputManager.Initialize
-            (
-                playerPhotonView,
-                userData,
-                levelMasterDataRepository,
-                weaponMasterDataRepository
-            );
+            inputManager.Initialize(playerPhotonView, photonNetworkManager);
             putBomb = GetComponent<PutBomb>();
             animator = GetComponent<Animator>();
             animatorTrigger = animator.GetBehaviour<ObservableStateMachineTrigger>();

@@ -3,12 +3,10 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using Manager.DataManager;
 using MoreMountains.Tools;
 using UnityEngine;
 using Photon.Pun;
 using UniRx;
-using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
 {
@@ -20,7 +18,6 @@ namespace UI.Title
             private bool isInitialize;
             private CancellationTokenSource cts;
             private BattleReadyView View => (BattleReadyView)Owner.GetView(State.BattleReady);
-            private CharacterMasterDataRepository CharacterMasterDataRepository => Owner.characterMasterDataRepository;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -100,10 +97,8 @@ namespace UI.Title
 
             private void CreateGrid(int index)
             {
-                var userData = Owner.photonNetworkManager.GetUserData(index);
-                var characterId = userData.EquippedCharacterId;
-                var characterData = CharacterMasterDataRepository.GetCharacterData(characterId);
-                var levelData = Owner.photonNetworkManager.GetCharacterLevelData(index);
+                var characterData = Owner.photonNetworkManager.GetCharacterData(index);
+                var levelData = Owner.photonNetworkManager.GetLevelMasterData(index);
                 var grid = Instantiate(View.BattleReadyGrid.gameObject, View.GridParent);
                 var battleReadyGrid = grid.GetComponent<BattleReadyGrid>();
                 gridDictionary[index] = grid;
@@ -131,15 +126,17 @@ namespace UI.Title
 
             private void SceneTransition()
             {
-                if (!PhotonNetwork.IsMasterClient ||
-                    PhotonNetwork.CurrentRoom.PlayerCount < PhotonNetwork.CurrentRoom.MaxPlayers)
+                if
+                (
+                    !PhotonNetwork.IsMasterClient ||
+                    PhotonNetwork.CurrentRoom.PlayerCount < PhotonNetwork.CurrentRoom.MaxPlayers
+                )
                 {
                     return;
                 }
 
                 PhotonNetwork.CurrentRoom.IsOpen = false;
                 PhotonNetwork.CurrentRoom.IsVisible = false;
-                //Owner.stateMachine.Dispatch((int)State.SceneTransition);
                 MMSceneLoadingManager.LoadScene(GameCommonData.BattleScene);
             }
 
@@ -152,7 +149,6 @@ namespace UI.Title
 
                 PhotonNetwork.CurrentRoom.IsOpen = false;
                 PhotonNetwork.CurrentRoom.IsVisible = false;
-                //Owner.stateMachine.Dispatch((int)State.SceneTransition);
                 MMSceneLoadingManager.LoadScene(GameCommonData.BattleScene);
             }
 
