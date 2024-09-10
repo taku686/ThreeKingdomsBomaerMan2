@@ -2,15 +2,12 @@
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
-using Manager.DataManager;
 using Manager.NetworkManager;
 using Photon.Pun;
-using Repository;
 using UI.Common;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
-using Zenject;
 
 namespace Manager
 {
