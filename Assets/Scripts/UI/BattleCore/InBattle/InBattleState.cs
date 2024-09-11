@@ -44,8 +44,8 @@ namespace Manager.BattleManager
                 Observable.EveryUpdate()
                     .Subscribe(_ =>
                     {
-                        var time = GameCommonData.BattleTime -
-                                   (unchecked(PhotonNetwork.ServerTimestamp - startTime) / 1000);
+                        var time =
+                            GameCommonData.BattleTime - unchecked(PhotonNetwork.ServerTimestamp - startTime) / 1000;
                         View.UpdateTime(time);
                     })
                     .AddTo(cts.Token);

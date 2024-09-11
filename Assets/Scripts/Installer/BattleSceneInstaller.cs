@@ -19,6 +19,7 @@ namespace Common.Installer
             Container.Bind<BombProvider>().FromComponentOn(bombProviderGameObject).AsCached();
             Container.Bind<InputView>().FromComponentOn(buttonsGameObject).AsCached();
             Container.Bind<WeaponCreateInBattleUseCase>().AsCached();
+            Container.Bind<StatusViewModelUseCase>().AsCached();
         }
     }
 }

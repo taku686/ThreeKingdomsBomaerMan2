@@ -10,19 +10,16 @@ public class CharacterDetailViewModelUseCase : IDisposable
 {
     private readonly UserDataRepository userDataRepository;
     private readonly CharacterMasterDataRepository characterMasterDataRepository;
-    private readonly StatusSkillUseCase statusSkillUseCase;
 
     [Inject]
     public CharacterDetailViewModelUseCase
     (
         UserDataRepository userDataRepository,
-        CharacterMasterDataRepository characterMasterDataRepository,
-        StatusSkillUseCase statusSkillUseCase
+        CharacterMasterDataRepository characterMasterDataRepository
     )
     {
         this.userDataRepository = userDataRepository;
         this.characterMasterDataRepository = characterMasterDataRepository;
-        this.statusSkillUseCase = statusSkillUseCase;
     }
 
     public CharacterDetailView.ViewModel InAsTask(int characterId)

@@ -31,7 +31,7 @@ namespace Manager.BattleManager
 
         private Transform GetSpawnPoint(int index)
         {
-            return startPointList[index];
+            return startPointList[index - 1];
         }
 
         private void PlayerGenerateNotification()

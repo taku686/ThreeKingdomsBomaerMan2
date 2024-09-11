@@ -45,7 +45,7 @@ namespace UI.Title
             var nextLevelData = viewModel.NextLevelMasterData;
             var skillsViewModel = viewModel.SkillsViewModel;
             var weaponMasterData = viewModel.WeaponMasterData;
-            SetStatusView(characterData, currentLevelData, weaponMasterData);
+            SetStatusView(characterData, weaponMasterData);
             ApplySkillsViewModel(skillsViewModel);
             SetLevelView(currentLevelData, nextLevelData);
             purchaseErrorView.gameObject.SetActive(false);
@@ -56,22 +56,21 @@ namespace UI.Title
         private void SetStatusView
         (
             CharacterData characterData,
-            LevelMasterData currentLevelMasterData,
             WeaponMasterData weaponMasterData
         )
         {
             nameText.text = characterData.Name;
             var statusSkillId = weaponMasterData.StatusSkillMasterData.Id;
             statusView.HpText.text =
-                GetFixedStatus(currentLevelMasterData, characterData, statusSkillId, StatusType.Hp);
+                GetFixedStatus(characterData, statusSkillId, StatusType.Hp);
             statusView.DamageText.text =
-                GetFixedStatus(currentLevelMasterData, characterData, statusSkillId, StatusType.Attack);
+                GetFixedStatus(characterData, statusSkillId, StatusType.Attack);
             statusView.SpeedText.text =
-                GetFixedStatus(currentLevelMasterData, characterData, statusSkillId, StatusType.Speed);
+                GetFixedStatus(characterData, statusSkillId, StatusType.Speed);
             statusView.BombLimitText.text =
-                GetFixedStatus(currentLevelMasterData, characterData, statusSkillId, StatusType.BombLimit);
+                GetFixedStatus(characterData, statusSkillId, StatusType.BombLimit);
             statusView.FireRangeText.text =
-                GetFixedStatus(currentLevelMasterData, characterData, statusSkillId, StatusType.FireRange);
+                GetFixedStatus(characterData, statusSkillId, StatusType.FireRange);
         }
 
         private void ApplySkillsViewModel(SkillsView.ViewModel viewModel)
@@ -99,15 +98,13 @@ namespace UI.Title
 
         private string GetFixedStatus
         (
-            LevelMasterData currentLevelMasterData,
             CharacterData characterData,
             int skillId,
             StatusType statusType
         )
         {
-            var value = GetStatus(characterData, statusType);
-            var fixedValue = Mathf.FloorToInt(currentLevelMasterData.StatusRate * value);
-            var statusAddValue = statusSkillUseCase.ApplyStatusSkill(characterData.Id, skillId, fixedValue, statusType);
+            var fixedValue = statusSkillUseCase.ApplyLevelStatus(characterData.Id, statusType);
+            var statusAddValue = statusSkillUseCase.ApplyStatusSkill(characterData.Id, skillId, statusType);
             var increaseValue = statusAddValue - fixedValue;
             if (increaseValue == 0)
             {
@@ -115,25 +112,6 @@ namespace UI.Title
             }
 
             return statusAddValue + $"<#ff0000>+{increaseValue}<size=170%>";
-        }
-
-        private int GetStatus(CharacterData characterData, StatusType statusType)
-        {
-            switch (statusType)
-            {
-                case StatusType.Hp:
-                    return characterData.Hp;
-                case StatusType.Attack:
-                    return characterData.Attack;
-                case StatusType.Speed:
-                    return characterData.Speed;
-                case StatusType.FireRange:
-                    return characterData.FireRange;
-                case StatusType.BombLimit:
-                    return characterData.BombLimit;
-                default:
-                    return 0;
-            }
         }
 
         private void InitializeArrowAnimation()
@@ -148,11 +126,14 @@ namespace UI.Title
             var rightArrowTransform = rightArrowRect;
             var leftPosition = leftArrowTransform.anchoredPosition3D;
             var rightPosition = rightArrowTransform.anchoredPosition3D;
-            leftArrowTransform.DOLocalMove(new Vector3(leftPosition.x + MoveAmount, leftPosition.y, leftPosition.z),
-                1f).SetLoops(-1, LoopType.Yoyo).SetLink(leftArrowTransform.gameObject);
+            leftArrowTransform
+                .DOLocalMove(new Vector3(leftPosition.x + MoveAmount, leftPosition.y, leftPosition.z), 1f)
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetLink(leftArrowTransform.gameObject);
             rightArrowTransform
                 .DOLocalMove(new Vector3(rightPosition.x - MoveAmount, rightPosition.y, rightPosition.z), 1f)
-                .SetLoops(-1, LoopType.Yoyo).SetLink(rightArrowTransform.gameObject);
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetLink(rightArrowTransform.gameObject);
         }
 
 

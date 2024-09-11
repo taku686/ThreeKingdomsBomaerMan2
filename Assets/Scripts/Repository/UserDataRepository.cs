@@ -232,7 +232,7 @@ namespace Common.Data
         {
             var data = GetUserData();
             data.EquippedWeapons[selectedCharacterId] = weaponId;
-            
+
             SetUserData(data);
             await playFabUserDataManager.TryUpdateUserDataAsync(data);
         }
