@@ -1,10 +1,10 @@
-﻿using Common.Data;
+﻿using Bomb;
+using Common.Data;
 using Cysharp.Threading.Tasks;
-using Manager.DataManager;
+using Manager.BattleManager.Camera;
 using Manager.NetworkManager;
 using Photon.Pun;
 using Player.Common;
-using Repository;
 using UI.Battle;
 using UniRx;
 using UnityEngine;
@@ -18,9 +18,14 @@ namespace Manager.BattleManager
             private static readonly Vector3 ColliderCenter = new(0, 0.6f, 0);
             private static readonly Vector3 ColliderSize = new(0.4f, 0.6f, 0.4f);
             private static readonly float MaxRate = 1f;
-            private CharacterStatusManager characterStatusManager;
-            private MapManager mapManager;
             private PhotonNetworkManager PhotonNetworkManager => Owner.photonNetworkManager;
+            private PlayerGeneratorUseCase PlayerGeneratorUseCase => Owner.playerGeneratorUseCase;
+            private MapManager MapManager => Owner.mapManager;
+            private CameraManager CameraManager => Owner.cameraManager;
+            private StateMachine<BattleCore> StateMachineClone => Owner.stateMachine;
+            private BombProvider BombProvider => Owner.bombProvider;
+            private AnimatorControllerRepository AnimatorControllerRepository => Owner.animatorControllerRepository;
+            private WeaponCreateInBattleUseCase WeaponCreateInBattleUseCase => Owner.weaponCreateInBattleUseCase;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
             {
@@ -37,7 +42,7 @@ namespace Manager.BattleManager
             {
                 var index = PhotonNetwork.LocalPlayer.ActorNumber;
                 var characterData = PhotonNetworkManager.GetCharacterData(index);
-                Owner.playerGenerator.GenerateCharacter(index, characterData);
+                PlayerGeneratorUseCase.GenerateCharacter(index, characterData);
             }
 
             private void SetPlayerGenerateCompleteSubscribe()
@@ -50,26 +55,23 @@ namespace Manager.BattleManager
                         InitializePlayerComponent(player);
                     }
 
-                    Owner.stateMachine.Dispatch((int)State.BattleStart);
+                    StateMachineClone.Dispatch((int)State.BattleStart);
                 }).AddTo(Owner.GetCancellationTokenOnDestroy());
             }
 
             private void InitializePlayerComponent(GameObject player)
             {
-                mapManager = Owner.mapManager;
                 var photonView = player.GetComponent<PhotonView>();
+                var playerPutBomb = player.AddComponent<PutBomb>();
                 var playerId = photonView.OwnerActorNr;
                 var characterData = PhotonNetworkManager.GetCharacterData(playerId);
+                var weaponData = PhotonNetworkManager.GetWeaponData(playerId);
+                var weaponType = weaponData.WeaponType;
                 var playerStatusManager = new CharacterStatusManager(characterData, photonView.IsMine);
-                var playerPutBomb = player.AddComponent<PutBomb>();
-                playerPutBomb.Initialize(Owner.bombProvider, playerStatusManager, mapManager);
-                var playerUI = Instantiate(Owner.playerUI, Owner.playerUIParent);
-                var playerBillBoardUI = playerUI.GetComponentInChildren<PlayerUIBillBoard>();
-                playerBillBoardUI.Initialize(player.transform);
-                var hpKey = playerId + "Hp";
-                SynchronizedValue.Instance.Create(hpKey, MaxRate);
-                var playerStatusUI = playerUI.GetComponent<PlayerStatusUI>();
-                playerStatusUI.Initialize(SynchronizedValue.Instance.GetFloatValue(hpKey));
+                playerPutBomb.Initialize(BombProvider, playerStatusManager, MapManager);
+                SetPlayerUI(player, playerId, out var hpKey);
+                SetAnimatorController(player, weaponType);
+                WeaponCreateInBattleUseCase.CreateWeapon(player, weaponData, photonView);
                 if (!photonView.IsMine)
                 {
                     return;
@@ -77,10 +79,27 @@ namespace Manager.BattleManager
 
                 AddBoxCollider(player);
                 AddRigidbody(player);
-                Owner.cameraManager.Initialize(player.transform);
+                CameraManager.Initialize(player.transform);
                 var playerCore = player.AddComponent<PlayerCore>();
                 Owner.SetPlayerCore(playerCore);
                 playerCore.Initialize(playerStatusManager, PhotonNetworkManager, hpKey);
+            }
+
+            private void SetPlayerUI(GameObject player, int playerId, out string hpKey)
+            {
+                var playerUI = Instantiate(Owner.playerUI, Owner.playerUIParent);
+                var playerBillBoardUI = playerUI.GetComponentInChildren<PlayerUIBillBoard>();
+                playerBillBoardUI.Initialize(player.transform);
+                hpKey = playerId + "Hp";
+                SynchronizedValue.Instance.Create(hpKey, MaxRate);
+                var playerStatusUI = playerUI.GetComponent<PlayerStatusUI>();
+                playerStatusUI.Initialize(SynchronizedValue.Instance.GetFloatValue(hpKey));
+            }
+
+            private void SetAnimatorController(GameObject player, WeaponType weaponType)
+            {
+                var animator = player.GetComponent<Animator>();
+                animator.runtimeAnimatorController = AnimatorControllerRepository.GetAnimatorController(weaponType);
             }
 
             private void AddBoxCollider(GameObject player)
@@ -97,33 +116,6 @@ namespace Manager.BattleManager
                 rigid.useGravity = false;
                 rigid.constraints = RigidbodyConstraints.FreezeAll;
             }
-
-            /*private void CreateWeaponEffect(GameObject player, int characterLevel, CharacterData characterData)
-            {
-                if (characterLevel < GameCommonData.MaxCharacterLevel)
-                {
-                    return;
-                }
-
-                var weapons = player.GetComponentsInChildren<Transform>()
-                    .Where(x => x.CompareTag(GameCommonData.WeaponTag)).Select(x => x.gameObject);
-                foreach (var weapon in weapons)
-                {
-                    var effectObj = Instantiate(characterData.WeaponEffectObj, weapon.transform);
-                    var particleSystems = effectObj.GetComponentsInChildren<ParticleSystem>();
-                    foreach (var system in particleSystems)
-                    {
-                        var systemCollision = system.collision;
-                        var inheritVelocity = system.inheritVelocity;
-                        systemCollision.enabled = false;
-                        inheritVelocity.enabled = false;
-                    }
-
-                    var effect = effectObj.GetComponentInChildren<PSMeshRendererUpdater>();
-                    effect.Color = GameCommonData.GetWeaponColor(characterData.Id);
-                    effect.UpdateMeshEffect(weapon);
-                }
-            }*/
         }
     }
 }

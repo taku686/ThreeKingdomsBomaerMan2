@@ -2,11 +2,9 @@ using Bomb;
 using Common.Data;
 using Manager.BattleManager.Camera;
 using Manager.BattleManager.Environment;
-using Manager.DataManager;
 using Manager.NetworkManager;
 using Photon.Pun;
 using Player.Common;
-using Repository;
 using UnityEngine;
 using Zenject;
 
@@ -14,22 +12,31 @@ namespace Manager.BattleManager
 {
     public partial class BattleCore : MonoBehaviourPunCallbacks
     {
-        [Inject] private PhotonNetworkManager photonNetworkManager;
-        [Inject] private PlayerGenerator playerGenerator;
-        [Inject] private BombProvider bombProvider;
+        //Repository
         [Inject] private UserDataRepository userDataRepository;
+        [SerializeField] private AnimatorControllerRepository animatorControllerRepository;
+
+        //UseCase
+        [Inject] private PlayerGeneratorUseCase playerGeneratorUseCase;
+        [Inject] private WeaponCreateInBattleUseCase weaponCreateInBattleUseCase;
+
+        //Manager
+        [Inject] private PhotonNetworkManager photonNetworkManager;
         [Inject] private MissionManager missionManager;
-        [Inject] private CharacterMasterDataRepository characterMasterDataRepository;
-        [Inject] private LevelMasterDataRepository levelMasterDataRepository;
-        [Inject] private WeaponMasterDataRepository weaponMasterDataRepository;
-        [SerializeField] private Transform playerUIParent;
-        [SerializeField] private GameObject playerUI;
         [SerializeField] private CameraManager cameraManager;
         [SerializeField] private StageManager stageManager;
         [SerializeField] private MapManager mapManager;
+
+        //UI
         [SerializeField] private BattleStartView battleStartView;
         [SerializeField] private BattleResultView battleResultView;
         [SerializeField] private InBattleView inBattleView;
+
+        //Other
+        [Inject] private BombProvider bombProvider;
+        [SerializeField] private Transform playerUIParent;
+        [SerializeField] private GameObject playerUI;
+
         private StateMachine<BattleCore> stateMachine;
         private PlayerCore playerCore;
 

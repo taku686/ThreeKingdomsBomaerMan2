@@ -2,11 +2,12 @@ using System.Collections.Generic;
 using Common.Data;
 using Manager.NetworkManager;
 using Photon.Pun;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Manager.BattleManager
 {
-    public class PlayerGenerator : MonoBehaviour
+    public class PlayerGeneratorUseCase : MonoBehaviour
     {
         [SerializeField] private List<Transform> startPointList;
         [SerializeField] private Transform playerParent;
@@ -17,8 +18,12 @@ namespace Manager.BattleManager
         public void GenerateCharacter(int playerIndex, CharacterData characterData)
         {
             var spawnPoint = GetSpawnPoint(playerIndex);
-            playerObj = PhotonNetwork.Instantiate(GameCommonData.CharacterPrefabPath + characterData.CharaObj,
-                spawnPoint.position, spawnPoint.rotation);
+            playerObj = PhotonNetwork.Instantiate
+            (
+                GameCommonData.CharacterPrefabPath + characterData.CharaObj,
+                spawnPoint.position,
+                spawnPoint.rotation
+            );
             playerObj.transform.localScale *= PlayerSize;
             playerObj.transform.SetParent(playerParent);
             PlayerGenerateNotification();

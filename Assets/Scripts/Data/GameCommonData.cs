@@ -41,12 +41,12 @@ namespace Common.Data
         public const string LoginBonusNotificationItemKey = "LoginBonusNotification";
         public const string LevelItemKey = "level";
         public const string LoginBonusItemKey = "day";
-        public static readonly int SkillOneHashKey = Animator.StringToHash("Attack");
-        public static readonly int SkillTwoHashKey = Animator.StringToHash("Passive");
+        public static readonly int NormalHashKey = Animator.StringToHash("Normal");
+        public static readonly int SpecialHashKey = Animator.StringToHash("Special");
         public static readonly int ActiveHashKey = Animator.StringToHash("Active");
         public static readonly int PerformanceHashKey = Animator.StringToHash("Performance");
-        public const string SkillOneKey = "Base Layer.Attack";
-        public const string SkillTwoKey = "Base Layer.Passive";
+        public const string NormalKey = "Base Layer.Normal";
+        public const string SpecialKey = "Base Layer.Special";
         public const string GameID = "5089859";
         public const string RewardAdsKey = "ca-app-pub-3759795642939239/2878540700";
         public const string PlacementName = "testReward";

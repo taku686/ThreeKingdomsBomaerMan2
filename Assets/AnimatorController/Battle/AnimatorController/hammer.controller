@@ -6,7 +6,7 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: staff
+  m_Name: hammer
   serializedVersion: 5
   m_AnimatorParameters:
   - m_Name: speedh
@@ -14,25 +14,25 @@ AnimatorController:
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 0}
+    m_Controller: {fileID: 9100000}
   - m_Name: speedv
     m_Type: 1
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 0}
+    m_Controller: {fileID: 9100000}
   - m_Name: Normal
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 0}
+    m_Controller: {fileID: 9100000}
   - m_Name: Special
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 0}
+    m_Controller: {fileID: 9100000}
   m_AnimatorLayers:
   - serializedVersion: 5
     m_Name: Base Layer
@@ -55,7 +55,7 @@ BlendTree:
   m_Name: Blend Tree
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 8cc2d9986c7b72b40b1f1b9f155c230d, type: 2}
+    m_Motion: {fileID: 7400000, guid: edb3a29074ee8a04887d7672100e605e, type: 2}
     m_Threshold: -1
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
@@ -63,7 +63,7 @@ BlendTree:
     m_DirectBlendParameter: Blend
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: c13a35ac2dda3f944b26112439627061, type: 2}
+    m_Motion: {fileID: 7400000, guid: 4d849ed3d0020354cbb3b4aa826cf8eb, type: 2}
     m_Threshold: 0
     m_Position: {x: -0.01, y: -1.04}
     m_TimeScale: -1
@@ -71,7 +71,7 @@ BlendTree:
     m_DirectBlendParameter: Blend
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: c13a35ac2dda3f944b26112439627061, type: 2}
+    m_Motion: {fileID: 7400000, guid: 4d849ed3d0020354cbb3b4aa826cf8eb, type: 2}
     m_Threshold: 0
     m_Position: {x: 0, y: 0.25}
     m_TimeScale: 1
@@ -79,7 +79,7 @@ BlendTree:
     m_DirectBlendParameter: Blend
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: c13a35ac2dda3f944b26112439627061, type: 2}
+    m_Motion: {fileID: 7400000, guid: 4d849ed3d0020354cbb3b4aa826cf8eb, type: 2}
     m_Threshold: 1
     m_Position: {x: 0, y: 1}
     m_TimeScale: 1
@@ -87,7 +87,7 @@ BlendTree:
     m_DirectBlendParameter: Blend
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: c13a35ac2dda3f944b26112439627061, type: 2}
+    m_Motion: {fileID: 7400000, guid: 4d849ed3d0020354cbb3b4aa826cf8eb, type: 2}
     m_Threshold: 2
     m_Position: {x: 1, y: 0}
     m_TimeScale: 1
@@ -95,7 +95,7 @@ BlendTree:
     m_DirectBlendParameter: Blend
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: c13a35ac2dda3f944b26112439627061, type: 2}
+    m_Motion: {fileID: 7400000, guid: 4d849ed3d0020354cbb3b4aa826cf8eb, type: 2}
     m_Threshold: 3
     m_Position: {x: -1, y: 0}
     m_TimeScale: 1
@@ -234,7 +234,8 @@ AnimatorStateMachine:
   m_StateMachineTransitions:
   - first: {fileID: 0}
     second: []
-  m_StateMachineBehaviours: []
+  m_StateMachineBehaviours:
+  - {fileID: 5051068127916821509}
   m_AnyStatePosition: {x: 1140, y: -168, z: 0}
   m_EntryPosition: {x: 1176, y: -600, z: 0}
   m_ExitPosition: {x: 1176, y: -72, z: 0}
@@ -493,7 +494,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 6fbeec59b0af4b343b5c07c0cf2cc469, type: 3}
+  m_Motion: {fileID: 7400000, guid: 490dd43d2ef784d428f2572794db051b, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -520,9 +521,21 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: dc6f5934135a5594d89c53829c8190dd, type: 3}
+  m_Motion: {fileID: 7400000, guid: 5af152cb0d5194d46b3faa3a5f0a789e, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
+--- !u!114 &5051068127916821509
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e29959e46c7ea7409560769cde085ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

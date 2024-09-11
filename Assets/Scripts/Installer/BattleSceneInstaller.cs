@@ -15,9 +15,10 @@ namespace Common.Installer
         public override void InstallBindings()
         {
             //Manager
-            Container.Bind<PlayerGenerator>().FromComponentOn(playerManagerGameObject).AsCached();
+            Container.Bind<PlayerGeneratorUseCase>().FromComponentOn(playerManagerGameObject).AsCached();
             Container.Bind<BombProvider>().FromComponentOn(bombProviderGameObject).AsCached();
             Container.Bind<InputView>().FromComponentOn(buttonsGameObject).AsCached();
+            Container.Bind<WeaponCreateInBattleUseCase>().AsCached();
         }
     }
 }

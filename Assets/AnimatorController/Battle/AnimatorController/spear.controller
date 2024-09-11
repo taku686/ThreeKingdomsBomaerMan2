@@ -1,12 +1,24 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-5763686832047132119
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e29959e46c7ea7409560769cde085ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!91 &9100000
 AnimatorController:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: knife
+  m_Name: spear
   serializedVersion: 5
   m_AnimatorParameters:
   - m_Name: speedh
@@ -55,7 +67,7 @@ BlendTree:
   m_Name: Blend Tree
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: dda783605f0911547a0ab8e1784c52cd, type: 2}
+    m_Motion: {fileID: 7400000, guid: 8539370b42cfce443b390ec203aa6976, type: 2}
     m_Threshold: -1
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
@@ -63,7 +75,7 @@ BlendTree:
     m_DirectBlendParameter: Blend
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 94d0fdf338d02be479945e6689f94b42, type: 2}
+    m_Motion: {fileID: 7400000, guid: bfbee395d7da4e44aab6628726b66bad, type: 2}
     m_Threshold: 0
     m_Position: {x: -0.01, y: -1.04}
     m_TimeScale: -1
@@ -71,7 +83,7 @@ BlendTree:
     m_DirectBlendParameter: Blend
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 94d0fdf338d02be479945e6689f94b42, type: 2}
+    m_Motion: {fileID: 7400000, guid: bfbee395d7da4e44aab6628726b66bad, type: 2}
     m_Threshold: 0
     m_Position: {x: 0, y: 0.25}
     m_TimeScale: 1
@@ -79,7 +91,7 @@ BlendTree:
     m_DirectBlendParameter: Blend
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 94d0fdf338d02be479945e6689f94b42, type: 2}
+    m_Motion: {fileID: 7400000, guid: bfbee395d7da4e44aab6628726b66bad, type: 2}
     m_Threshold: 1
     m_Position: {x: 0, y: 1}
     m_TimeScale: 1
@@ -87,7 +99,7 @@ BlendTree:
     m_DirectBlendParameter: Blend
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 94d0fdf338d02be479945e6689f94b42, type: 2}
+    m_Motion: {fileID: 7400000, guid: bfbee395d7da4e44aab6628726b66bad, type: 2}
     m_Threshold: 2
     m_Position: {x: 1, y: 0}
     m_TimeScale: 1
@@ -95,7 +107,7 @@ BlendTree:
     m_DirectBlendParameter: Blend
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 94d0fdf338d02be479945e6689f94b42, type: 2}
+    m_Motion: {fileID: 7400000, guid: bfbee395d7da4e44aab6628726b66bad, type: 2}
     m_Threshold: 3
     m_Position: {x: -1, y: 0}
     m_TimeScale: 1
@@ -219,7 +231,7 @@ AnimatorStateMachine:
   m_ChildStates:
   - serializedVersion: 1
     m_State: {fileID: 110271092}
-    m_Position: {x: 1152, y: -516, z: 0}
+    m_Position: {x: 1150, y: -520, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1102697382788578918}
     m_Position: {x: 1310, y: -340, z: 0}
@@ -234,7 +246,8 @@ AnimatorStateMachine:
   m_StateMachineTransitions:
   - first: {fileID: 0}
     second: []
-  m_StateMachineBehaviours: []
+  m_StateMachineBehaviours:
+  - {fileID: -5763686832047132119}
   m_AnyStatePosition: {x: 1140, y: -168, z: 0}
   m_EntryPosition: {x: 1176, y: -600, z: 0}
   m_ExitPosition: {x: 1176, y: -72, z: 0}
@@ -493,7 +506,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 9977094ae1a9aa140a8481927813c455, type: 2}
+  m_Motion: {fileID: 7400000, guid: 70b8860ce2a2ee146ba03d50198eca3d, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -520,7 +533,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 28e067ebeecb62349ab0ddc1e61b6781, type: 2}
+  m_Motion: {fileID: 7400000, guid: 775a229ea1f2c2543985c694bc514d60, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 

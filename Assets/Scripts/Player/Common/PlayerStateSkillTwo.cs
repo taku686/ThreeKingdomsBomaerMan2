@@ -17,9 +17,9 @@ namespace Player.Common
 
             private void PlayAnimation()
             {
-                Owner.animator.SetTrigger(GameCommonData.SkillTwoHashKey);
+                Owner.animator.SetTrigger(GameCommonData.SpecialHashKey);
                 Owner.animatorTrigger.OnStateExitAsObservable()
-                    .Where(info => info.StateInfo.IsName(GameCommonData.SkillTwoKey)).Take(1).Subscribe(onStateInfo =>
+                    .Where(info => info.StateInfo.IsName(GameCommonData.SpecialKey)).Take(1).Subscribe(onStateInfo =>
                     {
                         Owner.stateMachine.Dispatch((int)PLayerState.Idle);
                     }).AddTo(Owner.GetCancellationTokenOnDestroy());

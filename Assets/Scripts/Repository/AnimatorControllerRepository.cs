@@ -1,3 +1,4 @@
+using Common.Data;
 using UnityEngine;
 
 public class AnimatorControllerRepository : MonoBehaviour
@@ -12,19 +13,31 @@ public class AnimatorControllerRepository : MonoBehaviour
     [SerializeField] private RuntimeAnimatorController axeAnimatorController;
     [SerializeField] private RuntimeAnimatorController staffAnimatorController;
 
-    public RuntimeAnimatorController[] GetAllAnimatorControllers()
+    public RuntimeAnimatorController GetAnimatorController(WeaponType weaponType)
     {
-        return new[]
+        switch (weaponType)
         {
-            spearAnimatorController,
-            hammerAnimatorController,
-            swordAnimatorController,
-            knifeAnimatorController,
-            fanAnimatorController,
-            bowAnimatorController,
-            shieldAnimatorController,
-            axeAnimatorController,
-            staffAnimatorController
-        };
+            case WeaponType.Spear:
+                return spearAnimatorController;
+            case WeaponType.Hammer:
+                return hammerAnimatorController;
+            case WeaponType.Sword:
+                return swordAnimatorController;
+            case WeaponType.Knife:
+                return knifeAnimatorController;
+            case WeaponType.Fan:
+                return fanAnimatorController;
+            case WeaponType.Bow:
+                return bowAnimatorController;
+            case WeaponType.Shield:
+                return shieldAnimatorController;
+            case WeaponType.Axe:
+                return axeAnimatorController;
+            case WeaponType.Staff:
+                return staffAnimatorController;
+            default:
+                return null;
+        }
+        
     }
 }

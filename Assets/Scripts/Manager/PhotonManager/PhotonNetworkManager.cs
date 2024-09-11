@@ -139,8 +139,7 @@ namespace Manager.NetworkManager
                 Debug.LogError("キャラクター情報がありません");
                 return null;
             }
-
-            Debug.Log(value.Id);
+            
             return value;
         }
 

@@ -144,35 +144,7 @@ namespace Repository
                 return;
             }
 
-            animator.runtimeAnimatorController = GetAnimatorController(weaponType);
-        }
-
-        private RuntimeAnimatorController GetAnimatorController(WeaponType weaponType)
-        {
-            var animatorControllers = animatorControllerRepository.GetAllAnimatorControllers();
-            switch (weaponType)
-            {
-                case WeaponType.Spear:
-                    return animatorControllers[0];
-                case WeaponType.Hammer:
-                    return animatorControllers[1];
-                case WeaponType.Sword:
-                    return animatorControllers[2];
-                case WeaponType.Knife:
-                    return animatorControllers[3];
-                case WeaponType.Fan:
-                    return animatorControllers[4];
-                case WeaponType.Bow:
-                    return animatorControllers[5];
-                case WeaponType.Shield:
-                    return animatorControllers[6];
-                case WeaponType.Axe:
-                    return animatorControllers[7];
-                case WeaponType.Staff:
-                    return animatorControllers[8];
-                default:
-                    return null;
-            }
+            animator.runtimeAnimatorController = animatorControllerRepository.GetAnimatorController(weaponType);
         }
 
         private void CreateWeaponEffect(CharacterData createCharacterData, GameObject characterObject)

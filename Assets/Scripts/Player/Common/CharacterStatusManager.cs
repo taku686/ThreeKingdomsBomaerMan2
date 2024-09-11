@@ -24,7 +24,7 @@ namespace Player.Common
             CurrentBombLimit = 0;
             maxBombLimit = characterData.BombLimit;
             DamageAmount = characterData.Attack;
-            FireRange = characterData.FireRange;
+            FireRange = Mathf.RoundToInt(characterData.FireRange / 2f);
             this.isMine = isMine;
         }
 
