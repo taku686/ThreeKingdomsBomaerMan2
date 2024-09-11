@@ -112,7 +112,7 @@ namespace DG.DOTweenEditor
 #endif
         };
 
-#if true // TK2D_MARKER
+#if false // TK2D_MARKER
         static readonly Dictionary<DOTweenAnimation.AnimationType, Type[]> _Tk2dAnimationTypeToComponent = new Dictionary<DOTweenAnimation.AnimationType, Type[]>() {
             { DOTweenAnimation.AnimationType.Scale, new[] { typeof(tk2dBaseSprite), typeof(tk2dTextMesh) } },
             { DOTweenAnimation.AnimationType.Color, new[] { typeof(tk2dBaseSprite), typeof(tk2dTextMesh) } },
@@ -138,7 +138,7 @@ namespace DG.DOTweenEditor
             "FillAmount",
             "Text",
 #endif
-#if true // TK2D_MARKER
+#if false // TK2D_MARKER
             "Text",
 #endif
 #if true // TEXTMESHPRO_MARKER
@@ -601,7 +601,7 @@ namespace DG.DOTweenEditor
 
             Component srcTarget;
             // First check for external plugins
-#if true // TK2D_MARKER
+#if false // TK2D_MARKER
             if (_Tk2dAnimationTypeToComponent.ContainsKey(_src.animationType)) {
                 foreach (Type t in _Tk2dAnimationTypeToComponent[_src.animationType]) {
                     srcTarget = targetGO.GetComponent(t);
