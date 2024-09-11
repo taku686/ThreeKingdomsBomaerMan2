@@ -1,6 +1,4 @@
-﻿using State = StateMachine<Manager.BattleManager.BattleCore>.State;
-
-namespace Manager.BattleManager
+﻿namespace Manager.BattleManager
 {
     public partial class BattleCore
     {
@@ -18,7 +16,6 @@ namespace Manager.BattleManager
 
             private void OnInitialize()
             {
-                Owner.stageManager.SetupBreakingBlocks();
             }
         }
     }

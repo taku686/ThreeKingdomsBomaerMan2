@@ -58,10 +58,6 @@ namespace Manager.BattleManager.Environment
                 breakingWallObj.AddComponent<BreakingWall>();
                 breakingWallObj.tag = GameCommonData.BreakingWallTag;
                 count++;
-
-
-                /*var breakingWallObj = Instantiate(breakingBlocks[0], createPos, breakingBlocks[0].transform.rotation,
-                    parentTransform);*/
             }
         }
     }
