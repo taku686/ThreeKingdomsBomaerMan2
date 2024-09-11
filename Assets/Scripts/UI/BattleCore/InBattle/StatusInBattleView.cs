@@ -15,7 +15,7 @@ public class StatusInBattleView : MonoBehaviour
         attackStatusGridView.SetValueText(viewModel.Attack);
         speedStatusGridView.SetValueText(viewModel.Speed);
         bombLimitStatusGridView.SetValueText(viewModel.BombLimit);
-        firePowerStatusGridView.SetValueText(viewModel.FirePower);
+        firePowerStatusGridView.SetValueText(viewModel.FireRange);
     }
 
     public void ApplyBuffState(StatusType statusType, int value)
@@ -68,7 +68,7 @@ public class StatusInBattleView : MonoBehaviour
         public int Attack { get; }
         public int Speed { get; }
         public int BombLimit { get; }
-        public int FirePower { get; }
+        public int FireRange { get; }
 
         public ViewModel
         (
@@ -76,14 +76,14 @@ public class StatusInBattleView : MonoBehaviour
             int attack,
             int speed,
             int bombLimit,
-            int firePower
+            int fireRange
         )
         {
             Hp = hp;
             Attack = attack;
             Speed = speed;
             BombLimit = bombLimit;
-            FirePower = firePower;
+            FireRange = fireRange;
         }
     }
 }
