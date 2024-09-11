@@ -91,6 +91,7 @@ namespace UI.Title
                     return;
                 }
 
+                View.BattleStartButton.interactable = PhotonNetwork.IsMasterClient;
                 Owner.SwitchUiObject(State.BattleReady, false).Forget();
                 isInitialize = true;
             }
@@ -122,6 +123,7 @@ namespace UI.Title
 
                 Destroy(grid);
                 gridDictionary.Remove(index);
+                View.BattleStartButton.interactable = PhotonNetwork.IsMasterClient;
             }
 
             private void SceneTransition()
