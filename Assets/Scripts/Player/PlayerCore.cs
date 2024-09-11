@@ -1,16 +1,12 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using Bomb;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager;
 using Manager.BattleManager;
-using Manager.DataManager;
 using Manager.NetworkManager;
 using Photon.Pun;
-using Repository;
-using UI.Battle;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
@@ -152,6 +148,11 @@ namespace Player.Common
             }
 
             await UniTask.Delay(TimeSpan.FromSeconds(InvincibleDuration), cancellationToken: cancellationToken);
+            if (playerRenderer == null)
+            {
+                return;
+            }
+
             isDamage = false;
             playerRenderer.enabled = true;
         }
