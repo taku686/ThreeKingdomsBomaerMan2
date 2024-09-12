@@ -15,13 +15,12 @@ namespace Player.Common
 {
     public partial class PlayerCore : MonoBehaviourPunCallbacks
     {
+        private PhotonNetworkManager photonNetworkManager;
         private InputManager inputManager;
         private PlayerMove playerMove;
-
         private PutBomb putBomb;
-        private PhotonView playerPhotonView;
+
         private Animator animator;
-        private PlayerDead playerDead;
         private ObservableStateMachineTrigger observableStateMachineTrigger;
         private CharacterStatusManager characterStatusManager;
         private const int DeadHp = 0;
@@ -49,23 +48,27 @@ namespace Player.Common
         public IObservable<Unit> DeadObservable => deadSubject;
 
 
-        public void Initialize(CharacterStatusManager manager, PhotonNetworkManager photonNetworkManager, string key)
+        public void Initialize
+        (
+            CharacterStatusManager manager,
+            PhotonNetworkManager networkManager,
+            string key
+        )
         {
             hpKey = key;
             characterStatusManager = manager;
-            InitializeComponent(photonNetworkManager);
+            photonNetworkManager = networkManager;
+            InitializeComponent();
             InitializeState();
         }
 
-        private void InitializeComponent(PhotonNetworkManager photonNetworkManager)
+        private void InitializeComponent()
         {
-            playerPhotonView = GetComponent<PhotonView>();
             inputManager = gameObject.AddComponent<InputManager>();
-            inputManager.Initialize(playerPhotonView, photonNetworkManager);
+            inputManager.Initialize(photonView, photonNetworkManager);
             putBomb = GetComponent<PutBomb>();
             animator = GetComponent<Animator>();
             observableStateMachineTrigger = animator.GetBehaviour<ObservableStateMachineTrigger>();
-            playerDead = gameObject.AddComponent<PlayerDead>();
             playerMove = gameObject.AddComponent<PlayerMove>();
             playerMove.Initialize(characterStatusManager.Speed);
             playerRenderer = GetComponentInChildren<Renderer>();
@@ -85,7 +88,7 @@ namespace Player.Common
 
         private void Update()
         {
-            if (!playerPhotonView.IsMine)
+            if (!photonView.IsMine)
             {
                 return;
             }
@@ -144,7 +147,7 @@ namespace Player.Common
             SynchronizedValue.Instance.SetValue(hpKey, hpRate);
             if (characterStatusManager.CurrentHp <= DeadHp)
             {
-                Dead(explosion).Forget();
+                Dead().Forget();
                 return;
             }
 
@@ -158,10 +161,9 @@ namespace Player.Common
             playerRenderer.enabled = true;
         }
 
-        private async UniTask Dead(Explosion explosion)
+        private async UniTask Dead()
         {
             await UniTask.Delay(500, cancellationToken: cancellationToken);
-            playerDead.OnTouchExplosion(explosion);
             stateMachine.Dispatch((int)PLayerState.Dead);
         }
 

@@ -13,6 +13,7 @@ namespace Player.Common
     {
         public class PlayerIdleState : State
         {
+            private PhotonView PhotonView => Owner.photonView;
             private Transform playerTransform;
             private bool isSetup;
             private PlayerMove playerMove;
@@ -77,17 +78,16 @@ namespace Player.Common
                     .Subscribe(
                         _ =>
                         {
-                            var playerId = Owner.playerPhotonView.ViewID;
+                            var playerId = PhotonView.ViewID;
                             var explosionTime =
                                 PhotonNetwork.ServerTimestamp + GameCommonData.ThreeMilliSecondsBeforeExplosion;
-                            var photonView = Owner.playerPhotonView;
                             var damageAmount = Owner.characterStatusManager.DamageAmount;
                             var fireRange = Owner.characterStatusManager.FireRange;
                             var boxCollider = Owner.boxCollider;
                             Owner.putBomb.SetBomb
                             (
                                 boxCollider,
-                                photonView,
+                                PhotonView,
                                 playerTransform,
                                 (int)BombType.Normal,
                                 damageAmount,

@@ -12,10 +12,10 @@ namespace Player.Common
             protected override void OnEnter(State prevState)
             {
                 base.OnEnter(prevState);
-                PlayAnimation();
+                PlayBackAnimation();
             }
 
-            private void PlayAnimation()
+            private void PlayBackAnimation()
             {
                 Owner.animator.SetTrigger(GameCommonData.SpecialHashKey);
                 Owner.observableStateMachineTrigger.OnStateExitAsObservable()

@@ -19,7 +19,7 @@ namespace Player.Common
             private void PlayBackAnimation()
             {
                 Owner.animator.SetTrigger(GameCommonData.DeadHashKey);
-                Owner.observableStateMachineTrigger.OnStateEnterAsObservable()
+                Owner.observableStateMachineTrigger.OnStateExitAsObservable()
                     .Where(info => info.StateInfo.IsName(GameCommonData.DeadKey))
                     .Take(1)
                     .SelectMany(_ => Dead().ToObservable())
