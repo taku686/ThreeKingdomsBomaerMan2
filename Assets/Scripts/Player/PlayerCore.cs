@@ -97,7 +97,7 @@ namespace Player.Common
 
         private void OnTriggerEnter(Collider other)
         {
-            OnDamage(other.gameObject);
+            OnDamage(other.gameObject).Forget();
         }
 
 
@@ -130,7 +130,7 @@ namespace Player.Common
             isInvincible = false;
         }
 
-        private async void OnDamage(GameObject other)
+        private async UniTaskVoid OnDamage(GameObject other)
         {
             if (!other.CompareTag(GameCommonData.BombEffectTag) || isDamage)
             {
@@ -144,7 +144,8 @@ namespace Player.Common
             SynchronizedValue.Instance.SetValue(hpKey, hpRate);
             if (characterStatusManager.CurrentHp <= DeadHp)
             {
-                Dead(explosion);
+                Dead(explosion).Forget();
+                return;
             }
 
             await UniTask.Delay(TimeSpan.FromSeconds(InvincibleDuration), cancellationToken: cancellationToken);
@@ -157,8 +158,9 @@ namespace Player.Common
             playerRenderer.enabled = true;
         }
 
-        private void Dead(Explosion explosion)
+        private async UniTask Dead(Explosion explosion)
         {
+            await UniTask.Delay(500, cancellationToken: cancellationToken);
             playerDead.OnTouchExplosion(explosion);
             stateMachine.Dispatch((int)PLayerState.Dead);
         }

@@ -2,6 +2,7 @@
 using Cysharp.Threading.Tasks;
 using Photon.Pun;
 using UniRx;
+using UnityEngine;
 using State = StateMachine<Player.Common.PlayerCore>.State;
 
 namespace Player.Common
@@ -18,12 +19,19 @@ namespace Player.Common
             private void PlayBackAnimation()
             {
                 Owner.animator.SetTrigger(GameCommonData.DeadHashKey);
-                Owner.observableStateMachineTrigger.OnStateExitAsObservable()
-                    .Where(info => info.StateInfo.IsName(GameCommonData.DeadKey)).Take(1).Subscribe(onStateInfo =>
-                    {
-                        PhotonNetwork.LeaveRoom();
-                        Owner.deadSubject.OnNext(Unit.Default);
-                    }).AddTo(Owner.GetCancellationTokenOnDestroy());
+                Owner.observableStateMachineTrigger.OnStateEnterAsObservable()
+                    .Where(info => info.StateInfo.IsName(GameCommonData.DeadKey))
+                    .Take(1)
+                    .SelectMany(_ => Dead().ToObservable())
+                    .Subscribe()
+                    .AddTo(Owner.GetCancellationTokenOnDestroy());
+            }
+
+            private async UniTask Dead()
+            {
+                await UniTask.Delay(2000);
+                PhotonNetwork.LeaveRoom();
+                Owner.deadSubject.OnNext(Unit.Default);
             }
         }
     }
