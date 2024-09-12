@@ -7,7 +7,7 @@ namespace Player.Common
 {
     public partial class PlayerCore
     {
-        public class PlayerSkillOneState : State
+        public class PlayerNormalSkillState : State
         {
             protected override void OnEnter(State prevState)
             {
@@ -18,7 +18,7 @@ namespace Player.Common
             private void PlayAnimation()
             {
                 Owner.animator.SetTrigger(GameCommonData.NormalHashKey);
-                Owner.animatorTrigger.OnStateExitAsObservable().Where(info =>
+                Owner.observableStateMachineTrigger.OnStateExitAsObservable().Where(info =>
                     info.StateInfo.IsName(GameCommonData.NormalKey)).Take(1).Subscribe(onStateInfo =>
                 {
                     Owner.stateMachine.Dispatch((int)PLayerState.Idle);

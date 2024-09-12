@@ -1,4 +1,5 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using Common.Data;
+using Cysharp.Threading.Tasks;
 using Photon.Pun;
 using UniRx;
 using State = StateMachine<Player.Common.PlayerCore>.State;
@@ -9,17 +10,20 @@ namespace Player.Common
     {
         public class PlayerDeadState : State
         {
-            protected override async UniTask OnAsyncEnter(State prevState)
+            protected override void OnEnter(State prevState)
             {
-                await Initialize();
-                PhotonNetwork.LeaveRoom();
-                
-                Owner.deadSubject.OnNext(Unit.Default);
+                PlayBackAnimation();
             }
 
-            private async UniTask Initialize()
+            private void PlayBackAnimation()
             {
-                await Owner.playerDead.BigJump(Owner.transform);
+                Owner.animator.SetTrigger(GameCommonData.DeadHashKey);
+                Owner.observableStateMachineTrigger.OnStateExitAsObservable()
+                    .Where(info => info.StateInfo.IsName(GameCommonData.DeadKey)).Take(1).Subscribe(onStateInfo =>
+                    {
+                        PhotonNetwork.LeaveRoom();
+                        Owner.deadSubject.OnNext(Unit.Default);
+                    }).AddTo(Owner.GetCancellationTokenOnDestroy());
             }
         }
     }

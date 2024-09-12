@@ -31,6 +31,7 @@ namespace Common.Installer
             Container.Bind<SkillDataRepository>().AsCached();
             Container.Bind<WeaponMasterDataRepository>().AsCached();
             Container.Bind<StatusSkillUseCase>().AsCached();
+            Container.Bind<NormalSkillStatusChangeUseCase>().AsCached();
         }
     }
 }

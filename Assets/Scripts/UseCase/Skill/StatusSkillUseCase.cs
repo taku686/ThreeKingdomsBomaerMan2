@@ -2,6 +2,7 @@ using System;
 using Common.Data;
 using Manager.DataManager;
 using UnityEngine;
+using Zenject;
 
 public class StatusSkillUseCase : IDisposable
 {
@@ -9,6 +10,7 @@ public class StatusSkillUseCase : IDisposable
     private readonly UserDataRepository userDataRepository;
     private readonly CharacterMasterDataRepository characterMasterDataRepository;
 
+    [Inject]
     public StatusSkillUseCase
     (
         SkillDataRepository skillDataRepository,

@@ -22,7 +22,7 @@ namespace Player.Common
         private PhotonView playerPhotonView;
         private Animator animator;
         private PlayerDead playerDead;
-        private ObservableStateMachineTrigger animatorTrigger;
+        private ObservableStateMachineTrigger observableStateMachineTrigger;
         private CharacterStatusManager characterStatusManager;
         private const int DeadHp = 0;
         private const int InvincibleDuration = 2;
@@ -64,7 +64,7 @@ namespace Player.Common
             inputManager.Initialize(playerPhotonView, photonNetworkManager);
             putBomb = GetComponent<PutBomb>();
             animator = GetComponent<Animator>();
-            animatorTrigger = animator.GetBehaviour<ObservableStateMachineTrigger>();
+            observableStateMachineTrigger = animator.GetBehaviour<ObservableStateMachineTrigger>();
             playerDead = gameObject.AddComponent<PlayerDead>();
             playerMove = gameObject.AddComponent<PlayerMove>();
             playerMove.Initialize(characterStatusManager.Speed);
@@ -79,8 +79,8 @@ namespace Player.Common
             stateMachine.Start<PlayerIdleState>();
             stateMachine.AddAnyTransition<PlayerDeadState>((int)PLayerState.Dead);
             stateMachine.AddAnyTransition<PlayerIdleState>((int)PLayerState.Idle);
-            stateMachine.AddTransition<PlayerIdleState, PlayerSkillOneState>((int)PLayerState.NormalSkill);
-            stateMachine.AddTransition<PlayerIdleState, PlayerSkillTwoState>((int)PLayerState.SpecialSkill);
+            stateMachine.AddTransition<PlayerIdleState, PlayerNormalSkillState>((int)PLayerState.NormalSkill);
+            stateMachine.AddTransition<PlayerIdleState, PlayerSpecialSkillState>((int)PLayerState.SpecialSkill);
         }
 
         private void Update()
