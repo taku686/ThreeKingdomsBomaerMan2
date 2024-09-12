@@ -2,7 +2,6 @@
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.BattleManager.Camera;
-using Manager.DataManager;
 using Manager.NetworkManager;
 using Photon.Pun;
 using Player.Common;
@@ -65,6 +64,7 @@ namespace Manager.BattleManager
             private void InitializePlayerComponent(GameObject player)
             {
                 var photonView = player.GetComponent<PhotonView>();
+                var photonAnimator = player.GetComponent<PhotonAnimatorView>();
                 var playerPutBomb = player.AddComponent<PutBomb>();
                 var playerId = photonView.OwnerActorNr;
                 var characterData = PhotonNetworkManager.GetCharacterData(playerId);
@@ -73,7 +73,7 @@ namespace Manager.BattleManager
                 var playerStatusManager = new CharacterStatusManager(characterData, photonView.IsMine);
                 playerPutBomb.Initialize(BombProvider, playerStatusManager, MapManager);
                 SetPlayerUI(player, playerId, out var hpKey);
-                SetAnimatorController(player, weaponType);
+                SetAnimatorController(player, weaponType, photonAnimator);
                 GenerateEffectActivator(player, playerId);
                 WeaponCreateInBattleUseCase.CreateWeapon(player, weaponData, photonView);
                 if (!photonView.IsMine)
@@ -109,10 +109,69 @@ namespace Manager.BattleManager
                 playerStatusUI.Initialize(SynchronizedValue.Instance.GetFloatValue(hpKey));
             }
 
-            private void SetAnimatorController(GameObject player, WeaponType weaponType)
+            private void SetAnimatorController
+            (
+                GameObject player,
+                WeaponType weaponType,
+                PhotonAnimatorView photonAnimatorView
+            )
             {
                 var animator = player.GetComponent<Animator>();
                 animator.runtimeAnimatorController = AnimatorControllerRepository.GetAnimatorController(weaponType);
+                photonAnimatorView.SetParameterSynchronized
+                (
+                    GameCommonData.SpeedhParameterName,
+                    PhotonAnimatorView.ParameterType.Float,
+                    PhotonAnimatorView.SynchronizeType.Continuous
+                );
+                photonAnimatorView.SetParameterSynchronized
+                (
+                    GameCommonData.SpeedvParameterName,
+                    PhotonAnimatorView.ParameterType.Float,
+                    PhotonAnimatorView.SynchronizeType.Continuous
+                );
+                photonAnimatorView.SetParameterSynchronized
+                (
+                    GameCommonData.NormalParameterName,
+                    PhotonAnimatorView.ParameterType.Trigger,
+                    PhotonAnimatorView.SynchronizeType.Discrete
+                );
+                photonAnimatorView.SetParameterSynchronized
+                (
+                    GameCommonData.SpecialParameterName,
+                    PhotonAnimatorView.ParameterType.Trigger,
+                    PhotonAnimatorView.SynchronizeType.Discrete
+                );
+                photonAnimatorView.SetParameterSynchronized
+                (
+                    GameCommonData.KickParameterName,
+                    PhotonAnimatorView.ParameterType.Trigger,
+                    PhotonAnimatorView.SynchronizeType.Discrete
+                );
+                photonAnimatorView.SetParameterSynchronized
+                (
+                    GameCommonData.JumpParameterName,
+                    PhotonAnimatorView.ParameterType.Trigger,
+                    PhotonAnimatorView.SynchronizeType.Discrete
+                );
+                photonAnimatorView.SetParameterSynchronized
+                (
+                    GameCommonData.DashParameterName,
+                    PhotonAnimatorView.ParameterType.Trigger,
+                    PhotonAnimatorView.SynchronizeType.Discrete
+                );
+                photonAnimatorView.SetParameterSynchronized
+                (
+                    GameCommonData.BuffParameterName,
+                    PhotonAnimatorView.ParameterType.Trigger,
+                    PhotonAnimatorView.SynchronizeType.Discrete
+                );
+                photonAnimatorView.SetParameterSynchronized
+                (
+                    GameCommonData.DeadParameterName,
+                    PhotonAnimatorView.ParameterType.Trigger,
+                    PhotonAnimatorView.SynchronizeType.Discrete
+                );
             }
 
             private void AddBoxCollider(GameObject player)

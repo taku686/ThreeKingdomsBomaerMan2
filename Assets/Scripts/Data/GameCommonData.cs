@@ -52,6 +52,15 @@ namespace Common.Data
         public const string DashKey = "Base Layer.Dash";
         public const string BuffKey = "Base Layer.Buff";
         public const string DeadKey = "Base Layer.Dead";
+        public const string SpeedhParameterName = "speedh";
+        public const string SpeedvParameterName = "speedv";
+        public const string NormalParameterName = "Normal";
+        public const string SpecialParameterName = "Special";
+        public const string KickParameterName = "Kick";
+        public const string JumpParameterName = "Jump";
+        public const string DashParameterName = "Dash";
+        public const string BuffParameterName = "Buff";
+        public const string DeadParameterName = "Dead";
         public const string GameID = "5089859";
         public const string RewardAdsKey = "ca-app-pub-3759795642939239/2878540700";
         public const string PlacementName = "testReward";
