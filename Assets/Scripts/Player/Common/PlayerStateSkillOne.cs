@@ -20,6 +20,7 @@ namespace Player.Common
                 var weaponData = PhotonNetworkManager.GetWeaponData(index);
                 var skillData = weaponData.NormalSkillMasterData;
                 ActivateSkill(skillData.SkillEffectType);
+                PhotonNetwork.LocalPlayer.SetSkillData(skillData.Id);
             }
 
             private void PlayBackAnimation(int hashKey, string key)

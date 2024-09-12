@@ -19,7 +19,6 @@ namespace Player.Common
         private InputManager inputManager;
         private PlayerMove playerMove;
         private PutBomb putBomb;
-
         private Animator animator;
         private ObservableStateMachineTrigger observableStateMachineTrigger;
         private CharacterStatusManager characterStatusManager;

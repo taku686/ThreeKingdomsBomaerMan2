@@ -4,7 +4,7 @@ using Common.Data;
 
 namespace Manager.DataManager
 {
-    public class SkillDataRepository : IDisposable
+    public class SkillMasterDataRepository : IDisposable
     {
         private readonly List<SkillMasterData> skillDatum = new();
 

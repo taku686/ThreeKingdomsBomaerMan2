@@ -22,7 +22,7 @@ namespace Manager.PlayFabManager
         [Inject] private CharacterMasterDataRepository characterMasterDataRepository;
         [Inject] private LevelMasterDataRepository levelMasterDataRepository;
         [Inject] private MissionDataRepository missionDataRepository;
-        [Inject] private SkillDataRepository skillDataRepository;
+        [Inject] private SkillMasterDataRepository skillMasterDataRepository;
         [Inject] private WeaponMasterDataRepository weaponMasterDataRepository;
         private CancellationTokenSource cts;
 
@@ -81,6 +81,7 @@ namespace Manager.PlayFabManager
                 var amount = skillData.Amount;
                 var range = skillData.Range;
                 var interval = skillData.Interval;
+                var effectTime = skillData.EffectTime;
                 var newSkillData = new SkillMasterData
                 (
                     id,
@@ -88,15 +89,15 @@ namespace Manager.PlayFabManager
                     name,
                     sprite,
                     skillType,
-                    null,
                     attributeType,
                     skillEffectType,
                     amount,
                     range,
-                    interval
+                    interval,
+                    effectTime
                 );
 
-                skillDataRepository.AddSkillData(newSkillData);
+                skillMasterDataRepository.AddSkillData(newSkillData);
             }
         }
 
@@ -110,9 +111,9 @@ namespace Manager.PlayFabManager
                 var attributeType = (AttributeType)weaponData.AttributeTypeInt;
                 var weaponObject = await LoadWeaponGameObject(id, cts.Token);
                 var weaponIcon = await LoadWeaponSprite(id, cts.Token);
-                var statusSkillData = skillDataRepository.GetSkillData(weaponData.StatusSkillId);
-                var normalSkillData = skillDataRepository.GetSkillData(weaponData.NormalSkillId);
-                var specialSkillData = skillDataRepository.GetSkillData(weaponData.SpecialSkillId);
+                var statusSkillData = skillMasterDataRepository.GetSkillData(weaponData.StatusSkillId);
+                var normalSkillData = skillMasterDataRepository.GetSkillData(weaponData.NormalSkillId);
+                var specialSkillData = skillMasterDataRepository.GetSkillData(weaponData.SpecialSkillId);
                 var scale = weaponData.Scale;
                 var isBothHands = weaponData.IsBothHands;
                 var rare = weaponData.Rare;

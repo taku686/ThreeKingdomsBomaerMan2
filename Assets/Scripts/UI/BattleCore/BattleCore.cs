@@ -2,6 +2,7 @@ using Bomb;
 using Common.Data;
 using Manager.BattleManager.Camera;
 using Manager.BattleManager.Environment;
+using Manager.DataManager;
 using Manager.NetworkManager;
 using Photon.Pun;
 using Player.Common;
@@ -14,6 +15,7 @@ namespace Manager.BattleManager
     {
         //Repository
         [Inject] private UserDataRepository userDataRepository;
+        [Inject] private SkillMasterDataRepository skillMasterDataRepository;
         [SerializeField] private AnimatorControllerRepository animatorControllerRepository;
 
         //UseCase
@@ -37,6 +39,7 @@ namespace Manager.BattleManager
         [Inject] private BombProvider bombProvider;
         [SerializeField] private Transform playerUIParent;
         [SerializeField] private GameObject playerUI;
+        [SerializeField] private EffectActivateUseCase effectActivator;
 
         private StateMachine<BattleCore> stateMachine;
         private PlayerCore playerCore;

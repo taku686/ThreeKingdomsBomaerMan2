@@ -6,19 +6,19 @@ using Zenject;
 
 public class NormalSkillStatusChangeUseCase : IDisposable
 {
-    private readonly SkillDataRepository skillDataRepository;
+    private readonly SkillMasterDataRepository skillMasterDataRepository;
     private readonly UserDataRepository userDataRepository;
     private readonly CharacterMasterDataRepository characterMasterDataRepository;
 
     [Inject]
     public NormalSkillStatusChangeUseCase
     (
-        SkillDataRepository skillDataRepository,
+        SkillMasterDataRepository skillMasterDataRepository,
         UserDataRepository userDataRepository,
         CharacterMasterDataRepository characterMasterDataRepository
     )
     {
-        this.skillDataRepository = skillDataRepository;
+        this.skillMasterDataRepository = skillMasterDataRepository;
         this.userDataRepository = userDataRepository;
         this.characterMasterDataRepository = characterMasterDataRepository;
     }
@@ -34,7 +34,7 @@ public class NormalSkillStatusChangeUseCase : IDisposable
             return fixedValue;
         }
 
-        var skillData = skillDataRepository.GetSkillData(skillId);
+        var skillData = skillMasterDataRepository.GetSkillData(skillId);
         return skillData.SkillEffectType switch
         {
             SkillEffectType.Hp when statusType == StatusType.Hp => fixedValue + (int)skillData.Amount,

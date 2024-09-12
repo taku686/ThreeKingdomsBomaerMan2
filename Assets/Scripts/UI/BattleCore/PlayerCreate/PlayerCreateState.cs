@@ -2,11 +2,13 @@
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.BattleManager.Camera;
+using Manager.DataManager;
 using Manager.NetworkManager;
 using Photon.Pun;
 using Player.Common;
 using UI.Battle;
 using UniRx;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Manager.BattleManager
@@ -26,6 +28,7 @@ namespace Manager.BattleManager
             private BombProvider BombProvider => Owner.bombProvider;
             private AnimatorControllerRepository AnimatorControllerRepository => Owner.animatorControllerRepository;
             private WeaponCreateInBattleUseCase WeaponCreateInBattleUseCase => Owner.weaponCreateInBattleUseCase;
+            private EffectActivateUseCase EffectActivateUseCase => Owner.effectActivator;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
             {
@@ -71,6 +74,7 @@ namespace Manager.BattleManager
                 playerPutBomb.Initialize(BombProvider, playerStatusManager, MapManager);
                 SetPlayerUI(player, playerId, out var hpKey);
                 SetAnimatorController(player, weaponType);
+                GenerateEffectActivator(player, playerId);
                 WeaponCreateInBattleUseCase.CreateWeapon(player, weaponData, photonView);
                 if (!photonView.IsMine)
                 {
@@ -83,6 +87,15 @@ namespace Manager.BattleManager
                 var playerCore = player.AddComponent<PlayerCore>();
                 Owner.SetPlayerCore(playerCore);
                 playerCore.Initialize(playerStatusManager, PhotonNetworkManager, hpKey);
+            }
+
+            private void GenerateEffectActivator(GameObject playerObj, int playerId)
+            {
+                var effect = Instantiate(EffectActivateUseCase, playerObj.transform);
+                effect.transform.localPosition = new Vector3(0, 0, 0);
+                effect.transform.localRotation = quaternion.identity;
+                var subject = PhotonNetworkManager.ActivateSkillSubject;
+                effect.Initialize(subject, playerId);
             }
 
             private void SetPlayerUI(GameObject player, int playerId, out string hpKey)
