@@ -13,7 +13,15 @@ public class EffectActivateUseCase : MonoBehaviour
     [SerializeField] private ParticleSystem speedEffect;
     [SerializeField] private ParticleSystem bombLimitEffect;
     [SerializeField] private ParticleSystem fireRangeEffect;
+    [SerializeField] private ParticleSystem allStatusBuffEffect;
     [SerializeField] private ParticleSystem godPowerEffect;
+    [SerializeField] private ParticleSystem barrierEffect;
+    [SerializeField] private ParticleSystem skillBarrierEffect;
+    [SerializeField] private ParticleSystem perfectBarrierEffect;
+    [SerializeField] private ParticleSystem blastReflectionEffect;
+    [SerializeField] private ParticleSystem debuffEffect;
+    [SerializeField] private ParticleSystem prohibitedSkillEffect;
+    [SerializeField] private ParticleSystem slowTimeEffect;
 
     //AbnormalState
     [SerializeField] private ParticleSystem poisonEffect;
@@ -62,6 +70,48 @@ public class EffectActivateUseCase : MonoBehaviour
                 break;
             case SkillEffectType.FireRangeBuff:
                 PlayEffect(fireRangeEffect, skillMasterData.EffectTime).Forget();
+                break;
+            case SkillEffectType.AllStatusBuff:
+                PlayEffect(allStatusBuffEffect, skillMasterData.EffectTime).Forget();
+                break;
+            case SkillEffectType.GodPower:
+                PlayEffect(godPowerEffect, skillMasterData.EffectTime).Forget();
+                break;
+            case SkillEffectType.Barrier:
+                PlayEffect(barrierEffect, skillMasterData.EffectTime).Forget();
+                break;
+            case SkillEffectType.SkillBarrier:
+                PlayEffect(skillBarrierEffect, skillMasterData.EffectTime).Forget();
+                break;
+            case SkillEffectType.PerfectBarrier:
+                PlayEffect(perfectBarrierEffect, skillMasterData.EffectTime).Forget();
+                break;
+            case SkillEffectType.BlastReflection:
+                PlayEffect(blastReflectionEffect, skillMasterData.EffectTime).Forget();
+                break;
+            case SkillEffectType.HpDebuff:
+                PlayEffect(debuffEffect, skillMasterData.EffectTime).Forget();
+                break;
+            case SkillEffectType.AttackDebuff:
+                PlayEffect(debuffEffect, skillMasterData.EffectTime).Forget();
+                break;
+            case SkillEffectType.SpeedDebuff:
+                PlayEffect(debuffEffect, skillMasterData.EffectTime).Forget();
+                break;
+            case SkillEffectType.BombLimitDebuff:
+                PlayEffect(debuffEffect, skillMasterData.EffectTime).Forget();
+                break;
+            case SkillEffectType.FireRangeDebuff:
+                PlayEffect(debuffEffect, skillMasterData.EffectTime).Forget();
+                break;
+            case SkillEffectType.RandomDebuff:
+                PlayEffect(debuffEffect, skillMasterData.EffectTime).Forget();
+                break;
+            case SkillEffectType.ProhibitedSkill:
+                PlayEffect(prohibitedSkillEffect, skillMasterData.EffectTime).Forget();
+                break;
+            case SkillEffectType.SlowTime:
+                PlayEffect(slowTimeEffect, skillMasterData.EffectTime).Forget();
                 break;
         }
     }

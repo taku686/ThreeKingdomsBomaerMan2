@@ -27,7 +27,7 @@ namespace Player.Common
             {
                 Owner.animator.SetTrigger(hashKey);
                 Owner.observableStateMachineTrigger.OnStateExitAsObservable().Where(info =>
-                    info.StateInfo.IsName(key)).Take(1).Subscribe(onStateInfo =>
+                    info.StateInfo.IsName(key)).Take(1).Subscribe(_ =>
                 {
                     Owner.stateMachine.Dispatch((int)PLayerState.Idle);
                 }).AddTo(Owner.GetCancellationTokenOnDestroy());
