@@ -322,6 +322,17 @@ namespace Common.Data
         BombLimit = 3,
         FireRange = 4,
     }
+    
+    public enum AbnormalStatusType
+    {
+        Paralysis = 0,
+        Confusion = 1,
+        Illusion = 2,
+        Frozen = 3,
+        Poison = 4,
+        Fear = 5,
+        None = 999
+    }
 
     public enum SkillEffectType
     {
