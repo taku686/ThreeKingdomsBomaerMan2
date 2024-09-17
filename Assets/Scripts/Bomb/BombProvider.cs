@@ -14,9 +14,9 @@ namespace Bomb
         private BombObjectPoolBase _penetrationBombProvider;
         private BombObjectPoolBase _dangerBombProvider;
 
-        public void Initialize(CharacterStatusManager characterStatusManager)
+        public void Initialize(TranslateStatusForBattleUseCase translateStatusForBattleUseCase)
         {
-            _normalBombProvider = bombObjectPoolProvider.GetNormalBombPool(characterStatusManager);
+            _normalBombProvider = bombObjectPoolProvider.GetNormalBombPool(translateStatusForBattleUseCase);
         }
 
         public BombBase GetBomb(int bombType, int damageAmount, int fireRange, int explosionTime, int playerId)

@@ -21,7 +21,8 @@ namespace Manager.BattleManager
         //UseCase
         [Inject] private PlayerGeneratorUseCase playerGeneratorUseCase;
         [Inject] private WeaponCreateInBattleUseCase weaponCreateInBattleUseCase;
-        [Inject] private StatusViewModelUseCase statusViewModelUseCase;
+        [Inject] private StatusInBattleViewModelUseCase statusInBattleViewModelUseCase;
+        [Inject] private ApplyStatusSkillUseCase applyStatusSkillUseCase;
 
         //Manager
         [Inject] private PhotonNetworkManager photonNetworkManager;
@@ -74,7 +75,7 @@ namespace Manager.BattleManager
 
         private void InitializeStateUi()
         {
-            var viewModel = statusViewModelUseCase.InAsTask();
+            var viewModel = statusInBattleViewModelUseCase.InAsTask();
             inBattleView.ApplyStatusViewModel(viewModel);
         }
 

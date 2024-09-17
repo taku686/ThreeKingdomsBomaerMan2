@@ -73,7 +73,7 @@ namespace Player.Common
             private void InitializeButton()
             {
                 Owner.inputManager.BombButton.OnClickAsObservable()
-                    .Where(_ => Owner.characterStatusManager.CanPutBomb())
+                    .Where(_ => Owner.translateStatusForBattleUseCase.CanPutBomb())
                     .Throttle(TimeSpan.FromSeconds(GameCommonData.InputBombInterval))
                     .Subscribe(
                         _ =>
@@ -81,8 +81,8 @@ namespace Player.Common
                             var playerId = PhotonView.ViewID;
                             var explosionTime =
                                 PhotonNetwork.ServerTimestamp + GameCommonData.ThreeMilliSecondsBeforeExplosion;
-                            var damageAmount = Owner.characterStatusManager.DamageAmount;
-                            var fireRange = Owner.characterStatusManager.FireRange;
+                            var damageAmount = Owner.translateStatusForBattleUseCase.Attack;
+                            var fireRange = Owner.translateStatusForBattleUseCase.FireRange;
                             var boxCollider = Owner.boxCollider;
                             Owner.putBomb.SetBomb
                             (

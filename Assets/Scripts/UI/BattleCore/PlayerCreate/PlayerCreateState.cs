@@ -28,6 +28,7 @@ namespace Manager.BattleManager
             private AnimatorControllerRepository AnimatorControllerRepository => Owner.animatorControllerRepository;
             private WeaponCreateInBattleUseCase WeaponCreateInBattleUseCase => Owner.weaponCreateInBattleUseCase;
             private EffectActivateUseCase EffectActivateUseCase => Owner.effectActivator;
+            private ApplyStatusSkillUseCase ApplyStatusSkillUseCase => Owner.applyStatusSkillUseCase;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
             {
@@ -70,7 +71,7 @@ namespace Manager.BattleManager
                 var characterData = PhotonNetworkManager.GetCharacterData(playerId);
                 var weaponData = PhotonNetworkManager.GetWeaponData(playerId);
                 var weaponType = weaponData.WeaponType;
-                var playerStatusManager = new CharacterStatusManager(characterData, photonView.IsMine);
+                InitializeStatus(out var playerStatusManager, characterData, weaponData, photonView.IsMine);
                 playerPutBomb.Initialize(BombProvider, playerStatusManager, MapManager);
                 SetPlayerUI(player, playerId, out var hpKey);
                 SetAnimatorController(player, weaponType, photonAnimator);
@@ -86,7 +87,41 @@ namespace Manager.BattleManager
                 CameraManager.Initialize(player.transform);
                 var playerCore = player.AddComponent<PlayerCore>();
                 Owner.SetPlayerCore(playerCore);
-                playerCore.Initialize(playerStatusManager, PhotonNetworkManager, hpKey);
+                playerCore.Initialize
+                (
+                    playerStatusManager,
+                    PhotonNetworkManager,
+                    ApplyStatusSkillUseCase,
+                    hpKey
+                );
+            }
+
+            private void InitializeStatus
+            (
+                out TranslateStatusForBattleUseCase playerStatusForBattleUseCase,
+                CharacterData characterData,
+                WeaponMasterData weaponData,
+                bool isMine
+            )
+            {
+                var statusSkillData = weaponData.StatusSkillMasterData;
+                var characterId = characterData.Id;
+                var skillId = statusSkillData.Id;
+                var hp = ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Hp);
+                var speed = ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Speed);
+                var attack = ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Attack);
+                var fireRange = ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.FireRange);
+                var bombLimit = ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.BombLimit);
+
+                playerStatusForBattleUseCase = new TranslateStatusForBattleUseCase
+                (
+                    hp,
+                    speed,
+                    bombLimit,
+                    attack,
+                    fireRange,
+                    isMine
+                );
             }
 
             private void GenerateEffectActivator(GameObject playerObj, int playerId)

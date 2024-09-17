@@ -18,24 +18,24 @@ public class StatusInBattleView : MonoBehaviour
         firePowerStatusGridView.SetValueText(viewModel.FireRange);
     }
 
-    public void ApplyBuffState(StatusType statusType, int value)
+    public void ApplyBuffState(StatusType statusType, int value, bool isBuff, bool isDebuff)
     {
         switch (statusType)
         {
             case StatusType.Hp:
-                hpStatusGridView.SetBuffState(true, value);
+                hpStatusGridView.SetBuffState(isBuff, isDebuff, value);
                 break;
             case StatusType.Attack:
-                attackStatusGridView.SetBuffState(true, value);
+                attackStatusGridView.SetBuffState(isBuff, isDebuff, value);
                 break;
             case StatusType.Speed:
-                speedStatusGridView.SetBuffState(true, value);
+                speedStatusGridView.SetBuffState(isBuff, isDebuff, value);
                 break;
             case StatusType.BombLimit:
-                bombLimitStatusGridView.SetBuffState(true, value);
+                bombLimitStatusGridView.SetBuffState(isBuff, isDebuff, value);
                 break;
             case StatusType.FireRange:
-                firePowerStatusGridView.SetBuffState(true, value);
+                firePowerStatusGridView.SetBuffState(isBuff, isDebuff, value);
                 break;
         }
     }
