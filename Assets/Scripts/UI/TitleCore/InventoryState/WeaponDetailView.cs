@@ -19,6 +19,7 @@ namespace UI.Title
         [SerializeField] private Button sellButton;
         [SerializeField] private Transform weaponObjectParent;
         private GameObject weaponObject;
+        private bool isInitialized;
         public Button EquipButton => equipButton;
         public Button SellButton => sellButton;
 
@@ -49,9 +50,15 @@ namespace UI.Title
             Destroy(weaponObject);
             weaponObject = Instantiate(viewModel.WeaponObject, weaponObjectParent);
             FixedTransform(viewModel.WeaponType, viewModel.Scale);
+            if (isInitialized)
+            {
+                return;
+            }
+
             Observable.EveryUpdate()
                 .Subscribe(_ => weaponObject.transform.Rotate(Vector3.up, 0.1f))
-                .AddTo(weaponObject.GetCancellationTokenOnDestroy());
+                .AddTo(gameObject.GetCancellationTokenOnDestroy());
+            isInitialized = true;
         }
 
         private void FixedTransform(WeaponType weaponType, float scale)
@@ -59,19 +66,37 @@ namespace UI.Title
             switch (weaponType)
             {
                 case WeaponType.Spear:
-                    weaponObject.transform.localPosition = new Vector3(0, 0.39f, 0);
-                    weaponObject.transform.localRotation = quaternion.Euler(0, 0, 0);
+                    weaponObject.transform.localPosition = new Vector3(0, -0.67f, 0);
+                    weaponObject.transform.localEulerAngles = new Vector3(180, 0, 0);
                     weaponObject.transform.localScale *= scale;
                     break;
+                case WeaponType.Hammer:
+                    weaponObject.transform.localPosition = new Vector3(0, -0.26f, 0);
+                    break;
                 case WeaponType.Sword:
-                    weaponObject.transform.localPosition = new Vector3(0, 0.83f, 0);
-                    weaponObject.transform.localRotation = quaternion.Euler(0, 0, 0);
+                    weaponObject.transform.localPosition = new Vector3(0, -0.7f, 0);
+                    weaponObject.transform.localEulerAngles = new Vector3(180, 0, 0);
                     weaponObject.transform.localScale = new Vector3(1.6f, 1.6f, 1.6f) * scale;
+                    break;
+                case WeaponType.Knife:
+                    weaponObject.transform.localPosition = new Vector3(0, -0.16f, -1.32f);
+                    weaponObject.transform.localEulerAngles = new Vector3(0, 0, 0);
+                    weaponObject.transform.localScale = Vector3.one;
                     break;
                 case WeaponType.Bow:
                     weaponObject.transform.localPosition = new Vector3(0, 0, 0);
                     weaponObject.transform.localRotation = quaternion.Euler(0, 0, 0);
                     weaponObject.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+                    break;
+                case WeaponType.Shield:
+                    weaponObject.transform.localPosition = new Vector3(0, -0.08f, -0.47f);
+                    weaponObject.transform.localRotation = quaternion.Euler(0, 0, 0);
+                    weaponObject.transform.localScale = Vector3.one;
+                    break;
+                case WeaponType.Axe:
+                    weaponObject.transform.localPosition = new Vector3(0, -0.3f, -0.73f);
+                    weaponObject.transform.localRotation = quaternion.Euler(0, 0, 0);
+                    weaponObject.transform.localScale = Vector3.one;
                     break;
             }
         }
