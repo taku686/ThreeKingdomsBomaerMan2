@@ -1,8 +1,10 @@
+using System;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Manager;
+using UniRx;
 using UnityEngine;
 
 namespace Player.Common
@@ -26,7 +28,11 @@ namespace Player.Common
         private Vector3 currentDestination;
         private CharacterController characterController;
 
-        public void Initialize(float moveSpeed)
+        public void Initialize
+        (
+            IObservable<(StatusType statusType, float value)> speedBuffObservable,
+            float moveSpeed
+        )
         {
             cts = new CancellationTokenSource();
             blockingLayer = LayerMask.GetMask(GameCommonData.ObstacleLayer) |
@@ -42,6 +48,10 @@ namespace Player.Common
 
             this.animator = (Animator)animator;
             animationManager = new AnimationManager(this.animator);
+            speedBuffObservable
+                .Where(tuple => tuple.statusType == StatusType.Speed)
+                .Subscribe(tuple => { this.moveSpeed = tuple.value; })
+                .AddTo(this);
             SetupCharacterController();
         }
 
@@ -57,7 +67,7 @@ namespace Player.Common
 
         public void Move(Vector3 inputValue)
         {
-            if (inputValue.x == 0 && inputValue.z == 0)
+            if (inputValue is { x: 0, z: 0 })
             {
                 animationManager.Move(Direction.None);
                 return;

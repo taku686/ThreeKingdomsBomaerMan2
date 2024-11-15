@@ -15,7 +15,7 @@ namespace Enemy
         [SerializeField] private BombProvider bombProvider;
         [SerializeField] private MapManager mapManager;
         private BoxCollider _boxCollider;
-        private CharacterStatusManager _characterStatusManager;
+        private TranslateStatusForBattleUseCase translateStatusForBattleUseCase;
         private PhotonView _photonView;
         private PutBomb _putBomb;
         private StateMachine<EnemyCore> _stateMachine;
@@ -89,13 +89,13 @@ namespace Enemy
         private void SetupCharacterStatusManager()
         {
             var characterData = characterMasterDataRepository.DebugGetCharacterData();
-            _characterStatusManager = new CharacterStatusManager(characterData, PhotonNetwork.IsMasterClient);
+         //   _characterStatusManager = new CharacterStatusManager(characterData, PhotonNetwork.IsMasterClient);
         }
 
         private void SetupPutBomb()
         {
             _putBomb = gameObject.AddComponent<PutBomb>();
-            _putBomb.Initialize(bombProvider, _characterStatusManager, mapManager);
+            _putBomb.Initialize(bombProvider, translateStatusForBattleUseCase, mapManager);
         }
 
         private void InitializeState()

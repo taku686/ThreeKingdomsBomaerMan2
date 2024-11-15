@@ -7,6 +7,7 @@ using Photon.Pun;
 using Player.Common;
 using UI.Battle;
 using UniRx;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Manager.BattleManager
@@ -26,6 +27,8 @@ namespace Manager.BattleManager
             private BombProvider BombProvider => Owner.bombProvider;
             private AnimatorControllerRepository AnimatorControllerRepository => Owner.animatorControllerRepository;
             private WeaponCreateInBattleUseCase WeaponCreateInBattleUseCase => Owner.weaponCreateInBattleUseCase;
+            private EffectActivateUseCase EffectActivateUseCase => Owner.effectActivator;
+            private ApplyStatusSkillUseCase ApplyStatusSkillUseCase => Owner.applyStatusSkillUseCase;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
             {
@@ -62,15 +65,17 @@ namespace Manager.BattleManager
             private void InitializePlayerComponent(GameObject player)
             {
                 var photonView = player.GetComponent<PhotonView>();
+                var photonAnimator = player.GetComponent<PhotonAnimatorView>();
                 var playerPutBomb = player.AddComponent<PutBomb>();
                 var playerId = photonView.OwnerActorNr;
                 var characterData = PhotonNetworkManager.GetCharacterData(playerId);
                 var weaponData = PhotonNetworkManager.GetWeaponData(playerId);
                 var weaponType = weaponData.WeaponType;
-                var playerStatusManager = new CharacterStatusManager(characterData, photonView.IsMine);
+                InitializeStatus(out var playerStatusManager, characterData, weaponData, photonView.IsMine);
                 playerPutBomb.Initialize(BombProvider, playerStatusManager, MapManager);
                 SetPlayerUI(player, playerId, out var hpKey);
-                SetAnimatorController(player, weaponType);
+                SetAnimatorController(player, weaponType, photonAnimator);
+                GenerateEffectActivator(player, playerId);
                 WeaponCreateInBattleUseCase.CreateWeapon(player, weaponData, photonView);
                 if (!photonView.IsMine)
                 {
@@ -82,7 +87,50 @@ namespace Manager.BattleManager
                 CameraManager.Initialize(player.transform);
                 var playerCore = player.AddComponent<PlayerCore>();
                 Owner.SetPlayerCore(playerCore);
-                playerCore.Initialize(playerStatusManager, PhotonNetworkManager, hpKey);
+                playerCore.Initialize
+                (
+                    playerStatusManager,
+                    PhotonNetworkManager,
+                    ApplyStatusSkillUseCase,
+                    hpKey
+                );
+            }
+
+            private void InitializeStatus
+            (
+                out TranslateStatusForBattleUseCase playerStatusForBattleUseCase,
+                CharacterData characterData,
+                WeaponMasterData weaponData,
+                bool isMine
+            )
+            {
+                var statusSkillData = weaponData.StatusSkillMasterData;
+                var characterId = characterData.Id;
+                var skillId = statusSkillData.Id;
+                var hp = ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Hp);
+                var speed = ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Speed);
+                var attack = ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Attack);
+                var fireRange = ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.FireRange);
+                var bombLimit = ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.BombLimit);
+
+                playerStatusForBattleUseCase = new TranslateStatusForBattleUseCase
+                (
+                    hp,
+                    speed,
+                    bombLimit,
+                    attack,
+                    fireRange,
+                    isMine
+                );
+            }
+
+            private void GenerateEffectActivator(GameObject playerObj, int playerId)
+            {
+                var effect = Instantiate(EffectActivateUseCase, playerObj.transform);
+                effect.transform.localPosition = new Vector3(0, 0, 0);
+                effect.transform.localRotation = quaternion.identity;
+                var subject = PhotonNetworkManager.ActivateSkillSubject;
+                effect.Initialize(subject, playerId);
             }
 
             private void SetPlayerUI(GameObject player, int playerId, out string hpKey)
@@ -96,10 +144,69 @@ namespace Manager.BattleManager
                 playerStatusUI.Initialize(SynchronizedValue.Instance.GetFloatValue(hpKey));
             }
 
-            private void SetAnimatorController(GameObject player, WeaponType weaponType)
+            private void SetAnimatorController
+            (
+                GameObject player,
+                WeaponType weaponType,
+                PhotonAnimatorView photonAnimatorView
+            )
             {
                 var animator = player.GetComponent<Animator>();
                 animator.runtimeAnimatorController = AnimatorControllerRepository.GetAnimatorController(weaponType);
+                photonAnimatorView.SetParameterSynchronized
+                (
+                    GameCommonData.SpeedhParameterName,
+                    PhotonAnimatorView.ParameterType.Float,
+                    PhotonAnimatorView.SynchronizeType.Continuous
+                );
+                photonAnimatorView.SetParameterSynchronized
+                (
+                    GameCommonData.SpeedvParameterName,
+                    PhotonAnimatorView.ParameterType.Float,
+                    PhotonAnimatorView.SynchronizeType.Continuous
+                );
+                photonAnimatorView.SetParameterSynchronized
+                (
+                    GameCommonData.NormalParameterName,
+                    PhotonAnimatorView.ParameterType.Trigger,
+                    PhotonAnimatorView.SynchronizeType.Discrete
+                );
+                photonAnimatorView.SetParameterSynchronized
+                (
+                    GameCommonData.SpecialParameterName,
+                    PhotonAnimatorView.ParameterType.Trigger,
+                    PhotonAnimatorView.SynchronizeType.Discrete
+                );
+                photonAnimatorView.SetParameterSynchronized
+                (
+                    GameCommonData.KickParameterName,
+                    PhotonAnimatorView.ParameterType.Trigger,
+                    PhotonAnimatorView.SynchronizeType.Discrete
+                );
+                photonAnimatorView.SetParameterSynchronized
+                (
+                    GameCommonData.JumpParameterName,
+                    PhotonAnimatorView.ParameterType.Trigger,
+                    PhotonAnimatorView.SynchronizeType.Discrete
+                );
+                photonAnimatorView.SetParameterSynchronized
+                (
+                    GameCommonData.DashParameterName,
+                    PhotonAnimatorView.ParameterType.Trigger,
+                    PhotonAnimatorView.SynchronizeType.Discrete
+                );
+                photonAnimatorView.SetParameterSynchronized
+                (
+                    GameCommonData.BuffParameterName,
+                    PhotonAnimatorView.ParameterType.Trigger,
+                    PhotonAnimatorView.SynchronizeType.Discrete
+                );
+                photonAnimatorView.SetParameterSynchronized
+                (
+                    GameCommonData.DeadParameterName,
+                    PhotonAnimatorView.ParameterType.Trigger,
+                    PhotonAnimatorView.SynchronizeType.Discrete
+                );
             }
 
             private void AddBoxCollider(GameObject player)

@@ -2,6 +2,7 @@ using Bomb;
 using Common.Data;
 using Manager.BattleManager.Camera;
 using Manager.BattleManager.Environment;
+using Manager.DataManager;
 using Manager.NetworkManager;
 using Photon.Pun;
 using Player.Common;
@@ -14,12 +15,14 @@ namespace Manager.BattleManager
     {
         //Repository
         [Inject] private UserDataRepository userDataRepository;
+        [Inject] private SkillMasterDataRepository skillMasterDataRepository;
         [SerializeField] private AnimatorControllerRepository animatorControllerRepository;
 
         //UseCase
         [Inject] private PlayerGeneratorUseCase playerGeneratorUseCase;
         [Inject] private WeaponCreateInBattleUseCase weaponCreateInBattleUseCase;
-        [Inject] private StatusViewModelUseCase statusViewModelUseCase;
+        [Inject] private StatusInBattleViewModelUseCase statusInBattleViewModelUseCase;
+        [Inject] private ApplyStatusSkillUseCase applyStatusSkillUseCase;
 
         //Manager
         [Inject] private PhotonNetworkManager photonNetworkManager;
@@ -37,6 +40,7 @@ namespace Manager.BattleManager
         [Inject] private BombProvider bombProvider;
         [SerializeField] private Transform playerUIParent;
         [SerializeField] private GameObject playerUI;
+        [SerializeField] private EffectActivateUseCase effectActivator;
 
         private StateMachine<BattleCore> stateMachine;
         private PlayerCore playerCore;
@@ -71,7 +75,7 @@ namespace Manager.BattleManager
 
         private void InitializeStateUi()
         {
-            var viewModel = statusViewModelUseCase.InAsTask();
+            var viewModel = statusInBattleViewModelUseCase.InAsTask();
             inBattleView.ApplyStatusViewModel(viewModel);
         }
 
