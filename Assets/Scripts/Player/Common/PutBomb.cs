@@ -12,12 +12,12 @@ namespace Player.Common
         private const float RayDistance = 1f;
         private const float ModifiedValue = 2f;
 
-        public void Initialize(BombProvider bombProvider, CharacterStatusManager characterStatusManager,
+        public void Initialize(BombProvider bombProvider, TranslateStatusForBattleUseCase translateStatusForBattleUseCase,
             MapManager mapManager)
         {
             _mapManager = mapManager;
             _bombProvider = bombProvider;
-            _bombProvider.Initialize(characterStatusManager);
+            _bombProvider.Initialize(translateStatusForBattleUseCase);
         }
 
 

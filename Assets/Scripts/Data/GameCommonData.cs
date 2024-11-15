@@ -16,13 +16,10 @@ namespace Common.Data
         public const string BombEffectTag = "BombEffect";
         public const string BreakingWallTag = "BreakingWall";
         public const string WeaponTag = "Weapon";
-        public const string IdleTag = "Idle";
-        public const string AttackTag = "Attack";
-        public const string PerformanceTag = "Performance";
-        public const string PassiveTag = "Passive";
         public const string ObstacleLayer = "Obstacles";
         public const string ExplosionLayer = "Explosion";
         public const string BombLayer = "Bomb";
+        public const string PlayerLayer = "Player";
         public const string UserKey = "User";
         public const string GemKey = "MS";
         public const string CoinKey = "CO";
@@ -43,10 +40,28 @@ namespace Common.Data
         public const string LoginBonusItemKey = "day";
         public static readonly int NormalHashKey = Animator.StringToHash("Normal");
         public static readonly int SpecialHashKey = Animator.StringToHash("Special");
-        public static readonly int ActiveHashKey = Animator.StringToHash("Active");
+        public static readonly int KickHashKey = Animator.StringToHash("Kick");
+        public static readonly int JumpHashKey = Animator.StringToHash("Jump");
+        public static readonly int DashHashKey = Animator.StringToHash("Dash");
+        public static readonly int BuffHashKey = Animator.StringToHash("Buff");
+        public static readonly int DeadHashKey = Animator.StringToHash("Dead");
         public static readonly int PerformanceHashKey = Animator.StringToHash("Performance");
         public const string NormalKey = "Base Layer.Normal";
         public const string SpecialKey = "Base Layer.Special";
+        public const string KickKey = "Base Layer.Kick";
+        public const string JumpKey = "Base Layer.Jump";
+        public const string DashKey = "Base Layer.Dash";
+        public const string BuffKey = "Base Layer.Buff";
+        public const string DeadKey = "Base Layer.Dead";
+        public const string SpeedhParameterName = "speedh";
+        public const string SpeedvParameterName = "speedv";
+        public const string NormalParameterName = "Normal";
+        public const string SpecialParameterName = "Special";
+        public const string KickParameterName = "Kick";
+        public const string JumpParameterName = "Jump";
+        public const string DashParameterName = "Dash";
+        public const string BuffParameterName = "Buff";
+        public const string DeadParameterName = "Dead";
         public const string GameID = "5089859";
         public const string RewardAdsKey = "ca-app-pub-3759795642939239/2878540700";
         public const string PlacementName = "testReward";
@@ -307,6 +322,17 @@ namespace Common.Data
         Speed = 2,
         BombLimit = 3,
         FireRange = 4,
+    }
+    
+    public enum AbnormalStatusType
+    {
+        Paralysis = 0,
+        Confusion = 1,
+        Illusion = 2,
+        Frozen = 3,
+        Poison = 4,
+        Fear = 5,
+        None = 999
     }
 
     public enum SkillEffectType

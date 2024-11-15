@@ -1,8 +1,10 @@
+using System;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Manager;
+using UniRx;
 using UnityEngine;
 
 namespace Player.Common
@@ -26,7 +28,11 @@ namespace Player.Common
         private Vector3 currentDestination;
         private CharacterController characterController;
 
-        public void Initialize(float moveSpeed)
+        public void Initialize
+        (
+            IObservable<(StatusType statusType, float value)> speedBuffObservable,
+            float moveSpeed
+        )
         {
             cts = new CancellationTokenSource();
             blockingLayer = LayerMask.GetMask(GameCommonData.ObstacleLayer) |
@@ -42,6 +48,10 @@ namespace Player.Common
 
             this.animator = (Animator)animator;
             animationManager = new AnimationManager(this.animator);
+            speedBuffObservable
+                .Where(tuple => tuple.statusType == StatusType.Speed)
+                .Subscribe(tuple => { this.moveSpeed = tuple.value; })
+                .AddTo(this);
             SetupCharacterController();
         }
 
@@ -57,9 +67,16 @@ namespace Player.Common
 
         public void Move(Vector3 inputValue)
         {
-            if (inputValue.x == 0 && inputValue.z == 0)
+            if (inputValue is { x: 0, z: 0 })
             {
                 animationManager.Move(Direction.None);
+                return;
+            }
+
+            if (IsObstacleOnLine(playerTransform.position, inputValue))
+            {
+                transform.localRotation = Quaternion.LookRotation(inputValue);
+                animationManager.Move(GetDirection(inputValue));
                 return;
             }
 
@@ -73,7 +90,7 @@ namespace Player.Common
             inputValue *= 0.5f;
             if (isMoving)
             {
-                if (IsObstacle(playerTransform.position, currentDestination, out var hit))
+                if (IsObstacleOnSphere(playerTransform.position, currentDestination, out var hit))
                 {
                     Stop();
                 }
@@ -93,7 +110,7 @@ namespace Player.Common
             inputValue = ModifiedInputValue(inputValue, goDir);
             var playerPos = playerTransform.position;
             var destination = GetDestination(playerPos, inputValue);
-            var isObstacle = IsObstacle(playerPos, destination, out var obstacle);
+            var isObstacle = IsObstacleOnSphere(playerPos, destination, out var obstacle);
             var modifiedDestination =
                 ModifiedDestination(goDir, prevDirection, destination, playerPos, out Direction modifiedDir);
             currentDestination = modifiedDestination;
@@ -111,7 +128,7 @@ namespace Player.Common
                 return;
             }
 
-            isObstacle = IsObstacle(playerPos, modifiedDestination, out obstacle);
+            isObstacle = IsObstacleOnSphere(playerPos, modifiedDestination, out obstacle);
             if (!isObstacle)
             {
                 Rotate(modifiedDir, playerTransform).Forget();
@@ -243,11 +260,17 @@ namespace Player.Common
             this.currentDirection = currentDirection;
         }
 
-        private bool IsObstacle(Vector3 start, Vector3 end, out RaycastHit obstacle)
+        private bool IsObstacleOnSphere(Vector3 start, Vector3 end, out RaycastHit obstacle)
         {
             start = new Vector3(start.x, 0.5f, start.z);
             end = new Vector3(end.x, 0.5f, end.z);
             return Physics.SphereCast(start, Radius, end - start, out obstacle, RayDistance, blockingLayer);
+        }
+
+        private bool IsObstacleOnLine(Vector3 start, Vector3 inputValue)
+        {
+            var end = start + inputValue;
+            return Physics.Linecast(start, end, blockingLayer);
         }
 
         private async UniTask Movement(Vector3 start, Vector3 end)

@@ -16,11 +16,13 @@ namespace Repository
         private readonly CharacterObjectRepository characterObjectRepository;
         private readonly AnimatorControllerRepository animatorControllerRepository;
         private readonly Vector3 bowPosition = new(-0.029f, 0.02f, -0.001f);
-        private readonly Vector3 weaponPosition = new(-0.061f, 0.026f, 0.003f);
+        private readonly Vector3 knifePosition = new(-0.0332f, 0.0284f, -0.0129f);
+        private readonly Vector3 othersPosition = new(-0.061f, 0.026f, 0.003f);
         private readonly Vector3 bowRightRotation = new(-87.91f, 204.73f, -24.69f);
         private readonly Vector3 bowLeftRotation = new(87.91f, -204.73f, -24.69f);
-        private readonly Vector3 weaponRightRotation = new(36.033f, -92.88f, 84.68f);
-        private readonly Vector3 weaponLeftRotation = new(-36.033f, 92.88f, 84.68f);
+        private readonly Vector3 knifeLeftRotation = new(53.571f, 294.535f, -253.946f);
+        private readonly Vector3 othersRightRotation = new(-90.574f, -421.51f, -292.623f);
+        private readonly Vector3 othersLeftRotation = new(-36.033f, 92.88f, 84.68f);
 
         [Inject]
         public CharacterCreateUseCase
@@ -78,6 +80,10 @@ namespace Repository
             var weaponObjects = characterObject.GetComponentsInChildren<WeaponObject>();
             foreach (var weaponObject in weaponObjects)
             {
+                if(weaponObject.gameObject == null)
+                {
+                    continue;
+                }
                 Object.Destroy(weaponObject.gameObject);
             }
 
@@ -85,19 +91,36 @@ namespace Repository
             var weaponLeftParent = characterObject.GetComponentInChildren<WeaponLeftParentObject>();
             if (IsLeftHand(weaponData.WeaponType))
             {
-                weaponLeftParent.transform.localPosition =
-                    weaponData.WeaponType == WeaponType.Bow ? bowPosition : weaponPosition;
-                weaponLeftParent.transform.localEulerAngles =
-                    weaponData.WeaponType == WeaponType.Bow ? bowLeftRotation : weaponLeftRotation;
+                if (WeaponType.Bow == weaponData.WeaponType)
+                {
+                    weaponLeftParent.transform.localPosition = bowPosition;
+                    weaponLeftParent.transform.localEulerAngles = bowLeftRotation;
+                }
+                else if (WeaponType.Knife == weaponData.WeaponType)
+                {
+                    weaponLeftParent.transform.localPosition = knifePosition;
+                    weaponLeftParent.transform.localEulerAngles = knifeLeftRotation;
+                }
+                else
+                {
+                    weaponLeftParent.transform.localPosition = othersPosition;
+                    weaponLeftParent.transform.localEulerAngles = othersLeftRotation;
+                }
                 InstantiateWeapon(weaponData, weaponLeftParent.transform);
             }
 
             if (IsRightHand(weaponData.WeaponType))
             {
-                weaponRightParent.transform.localPosition =
-                    weaponData.WeaponType == WeaponType.Bow ? bowPosition : weaponPosition;
-                weaponRightParent.transform.localEulerAngles =
-                    weaponData.WeaponType == WeaponType.Bow ? bowRightRotation : weaponRightRotation;
+                if(WeaponType.Bow == weaponData.WeaponType)
+                {
+                    weaponRightParent.transform.localPosition = bowPosition;
+                    weaponRightParent.transform.localEulerAngles = bowRightRotation;
+                }
+                else
+                {
+                    weaponRightParent.transform.localPosition = othersPosition;
+                    weaponRightParent.transform.localEulerAngles = othersRightRotation;
+                }
                 InstantiateWeapon(weaponData, weaponRightParent.transform);
             }
         }

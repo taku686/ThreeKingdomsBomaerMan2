@@ -26,6 +26,7 @@ namespace Manager.BattleManager
             );
             playerObj.transform.localScale *= PlayerSize;
             playerObj.transform.SetParent(playerParent);
+
             PlayerGenerateNotification();
         }
 
