@@ -157,12 +157,12 @@ namespace Player.Common
 
             isDamage = true;
             await UniTask.Delay(TimeSpan.FromSeconds(InvincibleDuration), cancellationToken: cancellationToken);
+            isDamage = false;
             if (playerRenderer == null)
             {
                 return;
             }
 
-            isDamage = false;
             playerRenderer.enabled = true;
         }
 
