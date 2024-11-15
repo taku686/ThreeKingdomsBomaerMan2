@@ -28,9 +28,10 @@ namespace Common.Installer
             Container.Bind<MissionManager>().AsSingle();
             Container.Bind<PlayFabCatalogManager>().AsCached();
             Container.Bind<PlayFabUserDataManager>().AsCached();
-            Container.Bind<SkillDataRepository>().AsCached();
+            Container.Bind<SkillMasterDataRepository>().AsCached();
             Container.Bind<WeaponMasterDataRepository>().AsCached();
-            Container.Bind<StatusSkillUseCase>().AsCached();
+            Container.Bind<ApplyStatusSkillUseCase>().AsCached();
+            Container.Bind<NormalSkillStatusChangeUseCase>().AsCached();
         }
     }
 }

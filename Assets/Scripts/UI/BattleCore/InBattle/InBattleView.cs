@@ -1,3 +1,4 @@
+using Common.Data;
 using TMPro;
 using UnityEngine;
 
@@ -9,6 +10,11 @@ public class InBattleView : MonoBehaviour
     public void ApplyStatusViewModel(StatusInBattleView.ViewModel viewModel)
     {
         statusInBattleView.ApplyViewModel(viewModel);
+    }
+    
+    public void ApplyBuffState(StatusType statusType, int value,bool isBuff,bool isDebuff)
+    {
+        statusInBattleView.ApplyBuffState(statusType, value, isBuff,isDebuff);
     }
 
     public void UpdateTime(int time)

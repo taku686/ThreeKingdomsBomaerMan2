@@ -13,6 +13,7 @@ namespace Player.Common
     {
         public class PlayerIdleState : State
         {
+            private PhotonView PhotonView => Owner.photonView;
             private Transform playerTransform;
             private bool isSetup;
             private PlayerMove playerMove;
@@ -72,22 +73,21 @@ namespace Player.Common
             private void InitializeButton()
             {
                 Owner.inputManager.BombButton.OnClickAsObservable()
-                    .Where(_ => Owner.characterStatusManager.CanPutBomb())
+                    .Where(_ => Owner.translateStatusForBattleUseCase.CanPutBomb())
                     .Throttle(TimeSpan.FromSeconds(GameCommonData.InputBombInterval))
                     .Subscribe(
                         _ =>
                         {
-                            var playerId = Owner.playerPhotonView.ViewID;
+                            var playerId = PhotonView.ViewID;
                             var explosionTime =
                                 PhotonNetwork.ServerTimestamp + GameCommonData.ThreeMilliSecondsBeforeExplosion;
-                            var photonView = Owner.playerPhotonView;
-                            var damageAmount = Owner.characterStatusManager.DamageAmount;
-                            var fireRange = Owner.characterStatusManager.FireRange;
+                            var damageAmount = Owner.translateStatusForBattleUseCase.Attack;
+                            var fireRange = Owner.translateStatusForBattleUseCase.FireRange;
                             var boxCollider = Owner.boxCollider;
                             Owner.putBomb.SetBomb
                             (
                                 boxCollider,
-                                photonView,
+                                PhotonView,
                                 playerTransform,
                                 (int)BombType.Normal,
                                 damageAmount,

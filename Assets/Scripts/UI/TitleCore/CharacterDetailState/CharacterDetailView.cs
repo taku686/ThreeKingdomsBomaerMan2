@@ -26,7 +26,7 @@ namespace UI.Title
         [SerializeField] private PurchaseErrorView purchaseErrorView;
         [SerializeField] private VirtualCurrencyAddPopup virtualCurrencyAddPopup;
         [SerializeField] private Button inventoryButton;
-        [Inject] private StatusSkillUseCase statusSkillUseCase;
+        [Inject] private ApplyStatusSkillUseCase applyStatusSkillUseCase;
         private bool isInitialized;
         private const float MoveAmount = 50;
         public VirtualCurrencyAddPopup VirtualCurrencyAddPopup => virtualCurrencyAddPopup;
@@ -103,8 +103,8 @@ namespace UI.Title
             StatusType statusType
         )
         {
-            var fixedValue = statusSkillUseCase.ApplyLevelStatus(characterData.Id, statusType);
-            var statusAddValue = statusSkillUseCase.ApplyStatusSkill(characterData.Id, skillId, statusType);
+            var fixedValue = applyStatusSkillUseCase.ApplyLevelStatus(characterData.Id, statusType);
+            var statusAddValue = applyStatusSkillUseCase.ApplyStatusSkill(characterData.Id, skillId, statusType);
             var increaseValue = statusAddValue - fixedValue;
             if (increaseValue == 0)
             {

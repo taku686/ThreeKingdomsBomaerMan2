@@ -4,7 +4,7 @@ using Cysharp.Threading.Tasks;
 using Photon.Pun;
 using Player.Common;
 using UniRx;
-using State = StateMachine<Manager.BattleManager.BattleCore>.State;
+using UnityEngine;
 
 namespace Manager.BattleManager
 {
@@ -13,7 +13,7 @@ namespace Manager.BattleManager
         public class InBattleState : StateMachine<BattleCore>.State
         {
             private InBattleView View => Owner.inBattleView;
-            private PlayerCore playerCore;
+            private PlayerCore PlayerCore => Owner.playerCore;
             private CancellationTokenSource cts;
             private int startTime;
 
@@ -31,14 +31,21 @@ namespace Manager.BattleManager
             private void Initialize()
             {
                 cts = new CancellationTokenSource();
-                playerCore = Owner.playerCore;
                 startTime = PhotonNetwork.ServerTimestamp;
             }
 
             private void OnSubscribe()
             {
-                playerCore.DeadObservable
+                PlayerCore.DeadObservable
                     .Subscribe(_ => { Owner.stateMachine.Dispatch((int)State.Result); })
+                    .AddTo(cts.Token);
+
+                PlayerCore.StatusBuffUiObservable
+                    .Subscribe(tuple =>
+                    {
+                        Debug.Log("StatusBuffUiObservable");
+                        View.ApplyBuffState(tuple.statusType, tuple.speed, tuple.isBuff, tuple.isDebuff);
+                    })
                     .AddTo(cts.Token);
 
                 Observable.EveryUpdate()

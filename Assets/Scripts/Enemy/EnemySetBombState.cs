@@ -12,7 +12,7 @@ namespace Enemy
         {
             private StateMachine<EnemyCore> _stateMachine;
             private PhotonView _photonView;
-            private CharacterStatusManager _characterStatusManager;
+            private TranslateStatusForBattleUseCase translateStatusForBattleUseCase;
             private MapManager _mapManager;
             private BoxCollider _boxCollider;
             private PutBomb _putBomb;
@@ -36,7 +36,7 @@ namespace Enemy
                 _isPutBomb = false;
                 _stateMachine = Owner._stateMachine;
                 _photonView = Owner._photonView;
-                _characterStatusManager = Owner._characterStatusManager;
+                translateStatusForBattleUseCase = Owner.translateStatusForBattleUseCase;
                 _boxCollider = Owner._boxCollider;
                 _putBomb = Owner._putBomb;
                 PutBomb();
@@ -48,8 +48,8 @@ namespace Enemy
                 var playerId = _photonView.ViewID;
                 var explosionTime = PhotonNetwork.ServerTimestamp + GameCommonData.ThreeMilliSecondsBeforeExplosion;
                 var photonView = _photonView;
-                var damageAmount = _characterStatusManager.DamageAmount;
-                var fireRange = _characterStatusManager.FireRange;
+                var damageAmount = translateStatusForBattleUseCase.Attack;
+                var fireRange = translateStatusForBattleUseCase.FireRange;
                 var boxCollider = _boxCollider;
                 _putBomb.SetBomb(boxCollider, photonView, Owner.transform,
                     (int)BombType.Normal, damageAmount, fireRange, explosionTime, playerId);

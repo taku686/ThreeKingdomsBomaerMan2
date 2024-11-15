@@ -1,5 +1,4 @@
-﻿using Common.Data;
-using Player.Common;
+﻿using Player.Common;
 using UniRx.Toolkit;
 using UnityEngine;
 
@@ -9,18 +8,18 @@ namespace Bomb
     {
         protected ObjectPool<BombBase> Pool;
         private readonly BombBase _bombBase;
-        private readonly CharacterStatusManager _characterStatusManager;
+        private readonly TranslateStatusForBattleUseCase translateStatusForBattleUseCase;
         private MapManager _mapManager;
         private readonly Transform _bombParent;
         private static readonly Vector3 ColliderCenter = new Vector3(0, 0.5f, 0);
         private static readonly Vector3 ColliderScale = new Vector3(0.7f, 1, 0.7f);
 
-        protected BombObjectPoolBase(BombBase bombBase, Transform parent, CharacterStatusManager characterStatusManager,
+        protected BombObjectPoolBase(BombBase bombBase, Transform parent, TranslateStatusForBattleUseCase translateStatusForBattleUseCase,
             MapManager mapManager)
         {
             _bombBase = bombBase;
             _bombParent = parent;
-            _characterStatusManager = characterStatusManager;
+            this.translateStatusForBattleUseCase = translateStatusForBattleUseCase;
             _mapManager = mapManager;
         }
 
@@ -36,7 +35,7 @@ namespace Bomb
 
         protected override void OnBeforeRent(BombBase instance)
         {
-            _characterStatusManager.IncrementBombCount();
+            translateStatusForBattleUseCase.IncrementBombCount();
             base.OnBeforeRent(instance);
         }
 
@@ -52,7 +51,7 @@ namespace Bomb
                 _mapManager.RemoveMap(position.x, position.z - i);
             }
 
-            _characterStatusManager.DecrementBombCount();
+            translateStatusForBattleUseCase.DecrementBombCount();
             base.OnBeforeReturn(instance);
         }
 

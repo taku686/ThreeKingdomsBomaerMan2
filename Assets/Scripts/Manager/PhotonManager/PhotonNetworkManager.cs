@@ -18,9 +18,11 @@ namespace Manager.NetworkManager
         [Inject] private UserDataRepository userDataRepository;
         [Inject] private LevelMasterDataRepository levelMasterDataRepository;
         [Inject] private WeaponMasterDataRepository weaponMasterDataRepository;
+        [Inject] private SkillMasterDataRepository skillMasterDataRepository;
         private readonly Subject<Photon.Realtime.Player[]> joinedRoomSubject = new();
         private readonly Subject<int> leftRoomSubject = new();
         private readonly Subject<Unit> playerGenerateCompleteSubject = new();
+        private readonly Subject<(int, SkillMasterData)> activateSkillSubject = new();
         private readonly Dictionary<int, CharacterData> currentRoomCharacterDatum = new();
         private readonly Dictionary<int, WeaponMasterData> currentRoomWeaponDatum = new();
         private readonly Dictionary<int, LevelMasterData> currentRoomLevelDatum = new();
@@ -29,6 +31,7 @@ namespace Manager.NetworkManager
         public Subject<int> LeftRoomSubject => leftRoomSubject;
         public IObservable<Photon.Realtime.Player[]> JoinedRoomSubject => joinedRoomSubject;
         public IObservable<Unit> PlayerGenerateCompleteSubject => playerGenerateCompleteSubject;
+        public IObservable<(int, SkillMasterData)> ActivateSkillSubject => activateSkillSubject;
 
         private void Awake()
         {
@@ -103,6 +106,13 @@ namespace Manager.NetworkManager
                     playerCount++;
                     CheckPlayerGenerateComplete(playerCount);
                 }
+
+                if ((string)prop.Key == PlayerPropertiesExtensions.SkillDataKey)
+                {
+                    var skillId = targetPlayer.GetSkillId();
+                    var skillData = skillMasterDataRepository.GetSkillData(skillId);
+                    activateSkillSubject.OnNext((targetPlayer.ActorNumber, skillData));
+                }
             }
         }
 
@@ -139,7 +149,7 @@ namespace Manager.NetworkManager
                 Debug.LogError("キャラクター情報がありません");
                 return null;
             }
-            
+
             return value;
         }
 
