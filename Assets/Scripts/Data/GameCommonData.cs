@@ -19,6 +19,7 @@ namespace Common.Data
         public const string ObstacleLayer = "Obstacles";
         public const string ExplosionLayer = "Explosion";
         public const string BombLayer = "Bomb";
+        public const string PlayerLayer = "Player";
         public const string UserKey = "User";
         public const string GemKey = "MS";
         public const string CoinKey = "CO";

@@ -71,6 +71,8 @@ namespace Manager.BattleManager
                 var characterData = PhotonNetworkManager.GetCharacterData(playerId);
                 var weaponData = PhotonNetworkManager.GetWeaponData(playerId);
                 var weaponType = weaponData.WeaponType;
+                player.tag = GameCommonData.PlayerTag;
+                player.layer = LayerMask.NameToLayer(GameCommonData.PlayerLayer);
                 InitializeStatus(out var playerStatusManager, characterData, weaponData, photonView.IsMine);
                 playerPutBomb.Initialize(BombProvider, playerStatusManager, MapManager);
                 SetPlayerUI(player, playerId, out var hpKey);
