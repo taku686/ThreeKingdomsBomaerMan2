@@ -14,17 +14,14 @@ public class ConfirmPopup : PopupBase
     [SerializeField] private TextMeshProUGUI _okText;
     [SerializeField] private TextMeshProUGUI _cancelText;
 
-    public IObservable<AsyncUnit> OnClickOk => _okButton.OnClickAsObservable()
-        .SelectMany(_ => Close().ToObservable());
-
-    public IObservable<AsyncUnit> OnClickCancel => _cancelButton.OnClickAsObservable()
-        .SelectMany(_ => Close().ToObservable());
-
-
-    public UniTask<PopupBase> Open(ViewModel viewModel)
+    public async UniTask Open(ViewModel viewModel, Action okAction = null, Action cancelAction = null)
     {
         ApplyViewModel(viewModel);
-        return base.Open(viewModel);
+        _okButton.OnClickAsObservable().Take(1).SelectMany(_ => Close().ToObservable())
+            .Subscribe(_ => okAction?.Invoke()).AddTo(gameObject.GetCancellationTokenOnDestroy());
+        _cancelButton.OnClickAsObservable().Take(1).SelectMany(_ => Close().ToObservable())
+            .Subscribe(_ => cancelAction?.Invoke()).AddTo(gameObject.GetCancellationTokenOnDestroy());
+        await base.Open(viewModel);
     }
 
     private void ApplyViewModel(ViewModel viewModel)
@@ -50,6 +47,8 @@ public class ConfirmPopup : PopupBase
             CancelText = cancelText;
         }
     }
-    
-    public class Factory : PlaceholderFactory<ViewModel, ConfirmPopup> { }
+
+    public class Factory : PlaceholderFactory<ConfirmPopup>
+    {
+    }
 }

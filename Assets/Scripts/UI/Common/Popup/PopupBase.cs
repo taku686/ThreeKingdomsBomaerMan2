@@ -8,16 +8,16 @@ public abstract class PopupBase : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _titleText;
     [SerializeField] private TextMeshProUGUI _explanationText;
-    [Inject] private Transform _parent;
+    [Inject] private BlockingGameObject _blockingImageObject;
     private const float Duration = 0.2f;
 
-    public virtual async UniTask<PopupBase> Open(ViewModel viewModel)
+    public virtual async UniTask Open(ViewModel viewModel)
     {
+        _blockingImageObject.gameObject.SetActive(true);
         ApplyViewModel(viewModel);
         transform.localScale = Vector3.zero;
         await transform.DOScale(Vector3.one, Duration).SetEase(Ease.OutBack)
             .ToUniTask(cancellationToken: this.GetCancellationTokenOnDestroy());
-        return this;
     }
 
     public virtual async UniTask Close()
@@ -25,6 +25,7 @@ public abstract class PopupBase : MonoBehaviour
         await transform.DOScale(Vector3.zero, Duration).SetEase(Ease.InBack)
             .ToUniTask(cancellationToken: this.GetCancellationTokenOnDestroy());
         Destroy(gameObject);
+        _blockingImageObject.gameObject.SetActive(false);
     }
 
     private void ApplyViewModel(ViewModel viewModel)
@@ -40,8 +41,8 @@ public abstract class PopupBase : MonoBehaviour
 
         protected ViewModel
         (
-             string titleText,
-             string explanationText
+            string titleText,
+            string explanationText
         )
         {
             Title = titleText;
