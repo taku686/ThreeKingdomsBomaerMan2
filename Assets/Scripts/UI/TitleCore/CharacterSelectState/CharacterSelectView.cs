@@ -17,6 +17,7 @@ namespace UI.Title
         [SerializeField] private VirtualCurrencyAddPopup virtualCurrencyAddPopup;
         [SerializeField] private TextMeshProUGUI characterAmountText;
         [SerializeField] private ToggleView toggleView;
+        
 
         public VirtualCurrencyAddPopup VirtualCurrencyAddPopup => virtualCurrencyAddPopup;
         public Button BackButton => backButton;
