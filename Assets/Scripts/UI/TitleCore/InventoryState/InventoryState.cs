@@ -10,10 +10,10 @@ namespace UI.Title
         public class InventoryState : StateMachine<TitleCore>.State
         {
             private InventoryView View => (InventoryView)Owner.GetView(State.Inventory);
-            private InventoryViewModelUseCase InventoryViewModelUseCase => Owner.inventoryViewModelUseCase;
-            private CharacterSelectRepository CharacterSelectRepository => Owner.characterSelectRepository;
-            private UserDataRepository UserDataRepository => Owner.userDataRepository;
-            private SkillDetailViewModelUseCase SkillDetailViewModelUseCase => Owner.skillDetailViewModelUseCase;
+            private InventoryViewModelUseCase InventoryViewModelUseCase => Owner._inventoryViewModelUseCase;
+            private CharacterSelectRepository CharacterSelectRepository => Owner._characterSelectRepository;
+            private UserDataRepository UserDataRepository => Owner._userDataRepository;
+            private SkillDetailViewModelUseCase SkillDetailViewModelUseCase => Owner._skillDetailViewModelUseCase;
 
             private CancellationTokenSource cts;
             private Subject<int> onChangeSelectedWeaponSubject;

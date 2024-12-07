@@ -35,9 +35,9 @@ namespace UI.Title
 
             private async UniTask Initialize()
             {
-                uiAnimation = Owner.uiAnimation;
-                userDataRepository = Owner.userDataRepository;
-                playaFabShopManager = Owner.playFabShopManager;
+                uiAnimation = Owner._uiAnimation;
+                userDataRepository = Owner._userDataRepository;
+                playaFabShopManager = Owner._playFabShopManager;
                 InitializeButton();
                 await InitializeUIContent();
                 SetupLoginImage();
@@ -123,7 +123,7 @@ namespace UI.Title
             private void OnClickRewardButton(int index)
             {
                 var button = View.buttons[index].gameObject;
-                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     //todo　購入処理
                     if (index is Day4 or Day7)
@@ -180,20 +180,20 @@ namespace UI.Title
             private void OnClickClosePanel()
             {
                 var button = View.closeButton.gameObject;
-                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     var panel = MainView.LoginBonusGameObjet.transform;
                     await uiAnimation.Close(panel, GameCommonData.CloseDuration)
                         .AttachExternalCancellation(panel.GetCancellationTokenOnDestroy());
                     panel.gameObject.SetActive(false);
-                    Owner.stateMachine.Dispatch((int)State.Main);
+                    Owner._stateMachine.Dispatch((int)State.Main);
                 })).SetLink(button);
             }
 
             private void OnClickCloseRewardView()
             {
                 var button = View.rewardGetView.okButton.gameObject;
-                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     var panel = View.rewardGetView.transform;
                     await uiAnimation.Close(panel, GameCommonData.CloseDuration)

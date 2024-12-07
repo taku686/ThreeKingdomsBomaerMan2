@@ -25,7 +25,7 @@ namespace UI.Title
 
             private async UniTaskVoid Initialize()
             {
-                uiAnimation = Owner.uiAnimation;
+                uiAnimation = Owner._uiAnimation;
                 InitializeButton();
                 View.RewardGetView.gameObject.SetActive(false);
                 View.PurchaseErrorView.gameObject.SetActive(false);
@@ -75,17 +75,17 @@ namespace UI.Title
             private void OnCLickBack()
             {
                 var backButton = View.BackButton.gameObject;
-                Owner.uiAnimation.ClickScaleColor(backButton).OnComplete(() =>
+                Owner._uiAnimation.ClickScaleColor(backButton).OnComplete(() =>
                 {
-                    Owner.stateMachine.Dispatch((int)State.Main);
+                    Owner._stateMachine.Dispatch((int)State.Main);
                 }).SetLink(backButton);
             }
 
             private void OnClickBuyItem(string itemKey, GameObject button)
             {
-                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
-                    await Owner.playFabShopManager.TryPurchaseItemByRealMoney(itemKey);
+                    await Owner._playFabShopManager.TryPurchaseItemByRealMoney(itemKey);
                     await SetVirtualCurrencyText();
                 })).SetLink(button);
             }
@@ -93,10 +93,10 @@ namespace UI.Title
             private void OnClickAds()
             {
                 var button = View.AdsButton.gameObject;
-                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     var result =
-                        await Owner.playFabAdsManager.GetAdPlacementAsync(Owner.GetCancellationTokenOnDestroy());
+                        await Owner._playFabAdsManager.GetAdPlacementAsync(Owner.GetCancellationTokenOnDestroy());
                     if (!result)
                     {
                         return;
@@ -114,9 +114,9 @@ namespace UI.Title
                 var rewardView = View.RewardGetView;
                 var errorView = View.PurchaseErrorView.transform;
                 var errorInfoText = View.PurchaseErrorView.errorInfoText;
-                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
-                    var isSucceed = await Owner.playFabShopManager.TryPurchaseGacha(
+                    var isSucceed = await Owner._playFabShopManager.TryPurchaseGacha(
                         GameCommonData.CharacterGachaItemKey, GameCommonData.GemKey, 100, GameCommonData.GachaShopKey,
                         rewardView, errorInfoText);
                     if (isSucceed)
@@ -138,7 +138,7 @@ namespace UI.Title
             private void OnClickCloseRewardView()
             {
                 var button = View.RewardGetView.okButton.gameObject;
-                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     var rewardView = View.RewardGetView.transform;
                     await uiAnimation.Close(rewardView, GameCommonData.CloseDuration);
@@ -149,7 +149,7 @@ namespace UI.Title
             private void OnClickCloseErrorView()
             {
                 var button = View.PurchaseErrorView.okButton.gameObject;
-                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     var errorView = View.PurchaseErrorView.transform;
                     await uiAnimation.Close(errorView, GameCommonData.CloseDuration);
