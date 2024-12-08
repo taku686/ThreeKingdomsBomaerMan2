@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using TMPro;
@@ -30,14 +31,21 @@ public abstract class PopupBase : MonoBehaviour
 
     private void ApplyViewModel(ViewModel viewModel)
     {
-        _titleText.text = viewModel.Title;
-        _explanationText.text = viewModel.Explanation;
+        if (_titleText != null)
+        {
+            _titleText.text = viewModel._Title;
+        }
+
+        if (_explanationText != null)
+        {
+            _explanationText.text = viewModel._Explanation;
+        }
     }
 
-    public class ViewModel
+    public class ViewModel : IDisposable
     {
-        public string Title { get; }
-        public string Explanation { get; }
+        public string _Title { get; }
+        public string _Explanation { get; }
 
         protected ViewModel
         (
@@ -45,8 +53,12 @@ public abstract class PopupBase : MonoBehaviour
             string explanationText
         )
         {
-            Title = titleText;
-            Explanation = explanationText;
+            _Title = titleText;
+            _Explanation = explanationText;
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

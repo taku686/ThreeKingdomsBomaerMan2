@@ -10,30 +10,38 @@ public class ConfirmPopup : PopupBase
 {
     [SerializeField] private Button _okButton;
     [SerializeField] private Button _cancelButton;
-
     [SerializeField] private TextMeshProUGUI _okText;
     [SerializeField] private TextMeshProUGUI _cancelText;
 
-    public async UniTask Open(ViewModel viewModel, Action okAction = null, Action cancelAction = null)
+    private IObservable<bool> _onClickCancel;
+    private IObservable<bool> _onClickOk;
+    public IObservable<bool> _OnClickButton => _onClickOk.Merge(_onClickCancel);
+
+    public async UniTask Open(ViewModel viewModel)
     {
         ApplyViewModel(viewModel);
-        _okButton.OnClickAsObservable().Take(1).SelectMany(_ => Close().ToObservable())
-            .Subscribe(_ => okAction?.Invoke()).AddTo(gameObject.GetCancellationTokenOnDestroy());
-        _cancelButton.OnClickAsObservable().Take(1).SelectMany(_ => Close().ToObservable())
-            .Subscribe(_ => cancelAction?.Invoke()).AddTo(gameObject.GetCancellationTokenOnDestroy());
+        _onClickOk = _okButton
+            .OnClickAsObservable()
+            .SelectMany(_ => Close().ToObservable())
+            .Select(_ => true);
+
+        _onClickCancel = _cancelButton
+            .OnClickAsObservable()
+            .SelectMany(_ => Close().ToObservable())
+            .Select(_ => false);
         await base.Open(viewModel);
     }
 
     private void ApplyViewModel(ViewModel viewModel)
     {
-        _okText.text = viewModel.OkText;
-        _cancelText.text = viewModel.CancelText;
+        _okText.text = viewModel._OkText;
+        _cancelText.text = viewModel._CancelText;
     }
 
     public class ViewModel : PopupBase.ViewModel
     {
-        public string OkText { get; }
-        public string CancelText { get; }
+        public string _OkText { get; }
+        public string _CancelText { get; }
 
         public ViewModel
         (
@@ -43,8 +51,8 @@ public class ConfirmPopup : PopupBase
             string cancelText
         ) : base(titleText, explanationText)
         {
-            OkText = okText;
-            CancelText = cancelText;
+            _OkText = okText;
+            _CancelText = cancelText;
         }
     }
 
