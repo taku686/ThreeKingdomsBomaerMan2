@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
@@ -18,27 +19,18 @@ namespace UI.Title
         {
             private CharacterSelectView _View => (CharacterSelectView)Owner.GetView(State.CharacterSelect);
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
-
-            private CharacterSelectViewModelUseCase _CharacterSelectViewModelUseCase =>
-                Owner._characterSelectViewModelUseCase;
-
+            private CharacterSelectViewModelUseCase _CharacterSelectViewModelUseCase => Owner._characterSelectViewModelUseCase;
             private CharacterSelectRepository _CharacterSelectRepository => Owner._characterSelectRepository;
-
-            private PlayFabVirtualCurrencyManager _PlayFabVirtualCurrencyManager =>
-                Owner._playFabVirtualCurrencyManager;
-
+            private PlayFabVirtualCurrencyManager _PlayFabVirtualCurrencyManager => Owner._playFabVirtualCurrencyManager;
             private SortCharactersUseCase _SortCharactersUseCase => Owner._sortCharactersUseCase;
             private UserDataRepository _UserDataRepository => Owner._userDataRepository;
             private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
+            private StateMachine<TitleCore> _StateMachine => Owner._stateMachine;
 
             private CancellationTokenSource _cancellationTokenSource;
             private readonly Subject<Unit> _onChangeViewModel = new();
             private readonly List<GameObject> _gridGroupLists = new();
 
-            private const string AddGemPopupTile = "ジェムの数が足りません";
-            private const string AddGemPopupExplanation = "ジェムの数が足りません。\nジェムを追加しますか？";
-            private const string AddGemPopupOk = "追加";
-            private const string AddGemPopupCancel = "キャンセル";
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -154,24 +146,83 @@ namespace UI.Title
                 var grid = Instantiate(_View._Grid, parent);
                 var characterGrid = grid.GetComponentInChildren<CharacterGridView>();
                 characterGrid.ApplyStatusGridViews(orderType, fixedCharacterData);
-                characterGrid.gridButton.onClick.AddListener(() =>
-                {
-                    OnClickCharacterGrid(fixedCharacterData, characterGrid.gridButton);
-                });
+                characterGrid.gridButton.onClick.AddListener(() => { OnClickCharacterGrid(fixedCharacterData, characterGrid.gridButton); });
             }
 
             private void CreateDisableGrid(CharacterData characterData, Transform parent)
             {
                 var disableGrid = Instantiate(_View._GridDisable, parent).GetComponent<CharacterDisableGrid>();
-                disableGrid.characterImage.color = Color.black;
-                disableGrid.characterImage.sprite = characterData.SelfPortraitSprite;
-                disableGrid.purchaseButton.OnClickAsObservable()
-                    .Subscribe(_ =>
-                    {
-                        OnClickPurchaseButton(disableGrid.purchaseButton, characterData,
-                            disableGrid.GetCancellationTokenOnDestroy());
-                    })
+                disableGrid.ApplyView(characterData.Id, characterData.SelfPortraitSprite);
+
+                var haveEnoughGem = disableGrid._OnClickPurchaseButton
+                    .SelectMany(tuple => HaveEnoughGem(tuple).ToObservable())
+                    .Publish();
+
+                haveEnoughGem
+                    .Where(purchasedCharacterData => purchasedCharacterData.haveEnoughGem == false)
+                    .SelectMany(_ => _PopupGenerateUseCase.GenerateConfirmPopup
+                    (GameCommonData.Terms.AddGemPopupTile,
+                        GameCommonData.Terms.AddGemPopupExplanation,
+                        GameCommonData.Terms.AddGemPopupOk,
+                        GameCommonData.Terms.AddGemPopupCancel
+                    ))
+                    .Where(isOk => isOk)
+                    .Subscribe(_ => _StateMachine.Dispatch((int)State.Shop))
                     .AddTo(disableGrid.GetCancellationTokenOnDestroy());
+
+                haveEnoughGem
+                    .Where(purchasedCharacterData => purchasedCharacterData.haveEnoughGem)
+                    .SelectMany(purchasedCharacterData => _PopupGenerateUseCase.GenerateConfirmPopup
+                    (
+                        GameCommonData.Terms.PurchaseCharacterPopupTitle,
+                        GameCommonData.Terms.PurchaseCharacterPopupExplanation,
+                        GameCommonData.Terms.PurchaseCharacterPopupOk,
+                        GameCommonData.Terms.PurchaseCharacterPopupCancel
+                    ).Select(isOk => (isOk, purchasedCharacterData)))
+                    .Where(tuple => tuple.isOk)
+                    .SelectMany(tuple => PurchaseCharacter(tuple.purchasedCharacterData.characterData).ToObservable())
+                    .Subscribe()
+                    .AddTo(disableGrid.GetCancellationTokenOnDestroy());
+
+                haveEnoughGem.Connect().AddTo(disableGrid.GetCancellationTokenOnDestroy());
+            }
+
+            private async UniTask<(bool haveEnoughGem, (int characterId, Sprite characterSprite) characterData)> HaveEnoughGem(
+                (int, Sprite) characterData)
+            {
+                var user = Owner._userDataRepository.GetUserData();
+                var gem = await _PlayFabVirtualCurrencyManager.GetGem();
+                const int characterPrice = GameCommonData.CharacterPrice;
+                if (gem == GameCommonData.NetworkErrorCode)
+                {
+                    return (false, characterData);
+                }
+
+                if (user.Characters.Contains(characterData.Item1))
+                {
+                    return (false, characterData);
+                }
+
+                return gem >= characterPrice ? (true, tuple: characterData) : (false, tuple: characterData);
+            }
+
+            private async UniTask PurchaseCharacter((int characterId, Sprite characterSprite) characterData)
+            {
+                var characterPrice = GameCommonData.CharacterPrice;
+                var virtualCurrencyKey = GameCommonData.GemKey;
+                var price = characterPrice;
+                var isSuccessPurchase = await Owner._playFabShopManager
+                    .TryPurchaseCharacter(characterData.characterId, virtualCurrencyKey, price)
+                    .AttachExternalCancellation(_cancellationTokenSource.Token);
+                if (!isSuccessPurchase)
+                {
+                    //todo 購入に失敗したときの処理
+                    return;
+                }
+
+                await Owner.SetGemText();
+                await Owner.SetRewardUI(1, characterData.characterSprite);
+                _onChangeViewModel.OnNext(Unit.Default);
             }
 
             private void OnClickCharacterGrid(CharacterData characterData, Button gridButton)
@@ -188,63 +239,8 @@ namespace UI.Title
 
             private void OnClickBack()
             {
-                Owner._uiAnimation.ClickScaleColor(_View._BackButton.gameObject).OnComplete(() =>
-                {
-                    Owner._stateMachine.Dispatch((int)State.Main);
-                }).SetLink(Owner.gameObject);
-            }
-
-            private void OnClickPurchaseButton(Button disableGrid, CharacterData characterData,
-                CancellationToken token)
-            {
-                disableGrid.interactable = false;
-                Owner._uiAnimation.ClickScale(disableGrid.gameObject).OnComplete(() => UniTask.Void(async () =>
-                {
-                    var user = Owner._userDataRepository.GetUserData();
-                    var characterPrice = GameCommonData.CharacterPrice;
-                    var gem = await _PlayFabVirtualCurrencyManager.GetGem();
-                    if (gem == GameCommonData.NetworkErrorCode)
-                    {
-                        disableGrid.interactable = true;
-                        return;
-                    }
-
-                    if (gem < characterPrice)
-                    {
-                        await _PopupGenerateUseCase.GenerateConfirmPopup
-                        (AddGemPopupTile,
-                            AddGemPopupExplanation,
-                            AddGemPopupOk,
-                            AddGemPopupCancel,
-                            okAction: () => { Owner._stateMachine.Dispatch((int)State.Shop); }
-                        );
-                        disableGrid.interactable = true;
-                        return;
-                    }
-
-                    if (user.Characters.Contains(characterData.Id))
-                    {
-                        disableGrid.interactable = true;
-                        return;
-                    }
-
-                    var virtualCurrencyKey = GameCommonData.GemKey;
-                    var price = characterPrice;
-                    var isSuccessPurchase = await Owner._playFabShopManager
-                        .TryPurchaseCharacter(characterData.Id, virtualCurrencyKey, price)
-                        .AttachExternalCancellation(token);
-                    if (!isSuccessPurchase)
-                    {
-                        //todo 購入に失敗したときの処理
-                        disableGrid.interactable = true;
-                        return;
-                    }
-
-                    await Owner.SetGemText();
-                    await Owner.SetRewardUI(1, characterData.SelfPortraitSprite);
-                    _onChangeViewModel.OnNext(Unit.Default);
-                    disableGrid.interactable = true;
-                })).SetLink(disableGrid.gameObject);
+                Owner._uiAnimation.ClickScaleColor(_View._BackButton.gameObject).OnComplete(() => { Owner._stateMachine.Dispatch((int)State.Main); })
+                    .SetLink(Owner.gameObject);
             }
 
             private void Cancel()
