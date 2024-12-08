@@ -17,15 +17,16 @@ namespace UI.Title
         [SerializeField] private VirtualCurrencyAddPopup virtualCurrencyAddPopup;
         [SerializeField] private TextMeshProUGUI characterAmountText;
         [SerializeField] private ToggleView toggleView;
+        
 
-        public VirtualCurrencyAddPopup VirtualCurrencyAddPopup => virtualCurrencyAddPopup;
-        public Button BackButton => backButton;
-        public IObservable<Unit> ClickBackButton => backButton.OnClickAsObservable();
-        public GameObject HorizontalGroupGameObject => horizontalGroupGameObject;
-        public GameObject Grid => grid;
-        public GameObject GridDisable => gridDisable;
-        public RectTransform ContentsTransform => contentsTransform;
-        public ToggleElement[] ToggleElements => toggleView.ToggleElements;
+        //public VirtualCurrencyAddPopup VirtualCurrencyAddPopup => virtualCurrencyAddPopup;
+        public Button _BackButton => backButton;
+        public IObservable<Unit> _ClickBackButton => backButton.OnClickAsObservable();
+        public GameObject _HorizontalGroupGameObject => horizontalGroupGameObject;
+        public GameObject _Grid => grid;
+        public GameObject _GridDisable => gridDisable;
+        public RectTransform _ContentsTransform => contentsTransform;
+        public ToggleElement[] _ToggleElements => toggleView.ToggleElements;
 
         public void ApplyViewModel(ViewModel viewModel)
         {

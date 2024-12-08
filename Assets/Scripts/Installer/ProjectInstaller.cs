@@ -13,8 +13,9 @@ namespace Common.Installer
     public class ProjectInstaller : MonoInstaller
 
     {
-        [SerializeField] private GameObject photonNetworkGameObject;
-        [SerializeField] private GameObject mainManagerGameObject;
+        [SerializeField] private GameObject _photonNetworkGameObject;
+        [SerializeField] private GameObject _mainManagerGameObject;
+
 
         public override void InstallBindings()
         {
@@ -22,8 +23,8 @@ namespace Common.Installer
             Container.Bind<CatalogDataRepository>().AsSingle();
             Container.Bind<LevelMasterDataRepository>().AsSingle();
             Container.Bind<MissionDataRepository>().AsCached();
-            Container.Bind<PhotonNetworkManager>().FromComponentInNewPrefab(photonNetworkGameObject).AsSingle();
-            Container.Bind<MainManager>().FromComponentsInNewPrefab(mainManagerGameObject).AsSingle();
+            Container.Bind<PhotonNetworkManager>().FromComponentInNewPrefab(_photonNetworkGameObject).AsSingle();
+            Container.Bind<MainManager>().FromComponentsInNewPrefab(_mainManagerGameObject).AsSingle();
             Container.Bind<UserDataRepository>().AsSingle();
             Container.Bind<MissionManager>().AsSingle();
             Container.Bind<PlayFabCatalogManager>().AsCached();

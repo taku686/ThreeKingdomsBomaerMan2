@@ -16,17 +16,29 @@ namespace UI.Title
     {
         public class CharacterSelectState : StateMachine<TitleCore>.State
         {
-            private CharacterSelectView View => (CharacterSelectView)Owner.GetView(State.CharacterSelect);
-            private CharacterCreateUseCase CharacterCreateUseCase => Owner.characterCreateUseCase;
-            private CharacterSelectViewModelUseCase characterSelectViewModelUseCase;
-            private CharacterSelectRepository characterSelectRepository;
-            private PlayFabVirtualCurrencyManager playFabVirtualCurrencyManager;
-            private SortCharactersUseCase sortCharactersUseCase;
-            private UserDataRepository UserDataRepository => Owner.userDataRepository;
+            private CharacterSelectView _View => (CharacterSelectView)Owner.GetView(State.CharacterSelect);
+            private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
 
-            private CancellationTokenSource cancellationTokenSource;
-            private readonly Subject<Unit> onChangeViewModel = new();
-            private readonly List<GameObject> gridGroupLists = new();
+            private CharacterSelectViewModelUseCase _CharacterSelectViewModelUseCase =>
+                Owner._characterSelectViewModelUseCase;
+
+            private CharacterSelectRepository _CharacterSelectRepository => Owner._characterSelectRepository;
+
+            private PlayFabVirtualCurrencyManager _PlayFabVirtualCurrencyManager =>
+                Owner._playFabVirtualCurrencyManager;
+
+            private SortCharactersUseCase _SortCharactersUseCase => Owner._sortCharactersUseCase;
+            private UserDataRepository _UserDataRepository => Owner._userDataRepository;
+            private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
+
+            private CancellationTokenSource _cancellationTokenSource;
+            private readonly Subject<Unit> _onChangeViewModel = new();
+            private readonly List<GameObject> _gridGroupLists = new();
+
+            private const string AddGemPopupTile = "ジェムの数が足りません";
+            private const string AddGemPopupExplanation = "ジェムの数が足りません。\nジェムを追加しますか？";
+            private const string AddGemPopupOk = "追加";
+            private const string AddGemPopupCancel = "キャンセル";
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -40,12 +52,7 @@ namespace UI.Title
 
             private void Initialize()
             {
-                playFabVirtualCurrencyManager = Owner.playFabVirtualCurrencyManager;
-                characterSelectViewModelUseCase = Owner.characterSelectViewModelUseCase;
-                characterSelectRepository = Owner.characterSelectRepository;
-                sortCharactersUseCase = Owner.sortCharactersUseCase;
-
-                View.InitializeUiPosition();
+                _View.InitializeUiPosition();
                 SetupCancellationToken();
                 OnSubscribed();
                 Owner.SwitchUiObject(State.CharacterSelect, true).Forget();
@@ -53,77 +60,67 @@ namespace UI.Title
 
             private void SetupCancellationToken()
             {
-                if (cancellationTokenSource != null)
+                if (_cancellationTokenSource != null)
                 {
                     return;
                 }
 
-                cancellationTokenSource = new CancellationTokenSource();
+                _cancellationTokenSource = new CancellationTokenSource();
             }
 
             private void OnSubscribed()
             {
                 SubscribeToggleView();
 
-                onChangeViewModel
-                    .Select(_ => characterSelectViewModelUseCase.InAsTask())
+                _onChangeViewModel
+                    .Select(_ => _CharacterSelectViewModelUseCase.InAsTask())
                     .Subscribe(viewModel =>
                     {
-                        View.ApplyViewModel(viewModel);
+                        _View.ApplyViewModel(viewModel);
                         CreateUIContents(viewModel.OrderType);
                     })
-                    .AddTo(cancellationTokenSource.Token);
+                    .AddTo(_cancellationTokenSource.Token);
 
-                View.ClickBackButton
+                _View._ClickBackButton
                     .Subscribe(_ => OnClickBack())
-                    .AddTo(cancellationTokenSource.Token);
-                View.VirtualCurrencyAddPopup.OnClickCancelButton
-                    .Subscribe(_ => OnClickCancelPurchase())
-                    .AddTo(cancellationTokenSource.Token);
-                View.VirtualCurrencyAddPopup.OnClickCloseButton
-                    .Subscribe(_ => OnClickClosePopup())
-                    .AddTo(cancellationTokenSource.Token);
-                View.VirtualCurrencyAddPopup.OnClickAddButton
-                    .Subscribe(_ => OnClickAddGem())
-                    .AddTo(cancellationTokenSource.Token);
-
-                onChangeViewModel.OnNext(Unit.Default);
+                    .AddTo(_cancellationTokenSource.Token);
+                _onChangeViewModel.OnNext(Unit.Default);
             }
 
             private void SubscribeToggleView()
             {
-                foreach (var element in View.ToggleElements)
+                foreach (var element in _View._ToggleElements)
                 {
                     element.ClickOffButtonObservable
                         .Subscribe(type =>
                         {
-                            View.ApplyToggleView(type);
-                            characterSelectRepository.SetOrderType(type);
+                            _View.ApplyToggleView(type);
+                            _CharacterSelectRepository.SetOrderType(type);
                             CreateUIContents(type);
                         })
-                        .AddTo(cancellationTokenSource.Token);
+                        .AddTo(_cancellationTokenSource.Token);
                 }
             }
 
 
             private void CreateUIContents(CharacterSelectRepository.OrderType orderType)
             {
-                foreach (var gridGroupList in gridGroupLists)
+                foreach (var gridGroupList in _gridGroupLists)
                 {
                     Destroy(gridGroupList);
                 }
 
-                gridGroupLists.Clear();
+                _gridGroupLists.Clear();
                 GameObject gridGroup = null;
                 var index = 0;
-                var fixedCharacterDataArray = sortCharactersUseCase.InAsTask(orderType);
+                var fixedCharacterDataArray = _SortCharactersUseCase.InAsTask(orderType);
                 foreach (var fixedCharacterData in fixedCharacterDataArray)
                 {
                     if (index % 5 == 0)
                     {
-                        gridGroup = Instantiate(View.HorizontalGroupGameObject,
-                            View.ContentsTransform);
-                        gridGroupLists.Add(gridGroup);
+                        gridGroup = Instantiate(_View._HorizontalGroupGameObject,
+                            _View._ContentsTransform);
+                        _gridGroupLists.Add(gridGroup);
                     }
 
                     if (gridGroup != null)
@@ -134,12 +131,12 @@ namespace UI.Title
                     index++;
                 }
 
-                foreach (var characterData in UserDataRepository.GetNotAvailableCharacters())
+                foreach (var characterData in _UserDataRepository.GetNotAvailableCharacters())
                 {
                     if (index % 5 == 0)
                     {
-                        gridGroup = Instantiate(View.HorizontalGroupGameObject, View.ContentsTransform);
-                        gridGroupLists.Add(gridGroup);
+                        gridGroup = Instantiate(_View._HorizontalGroupGameObject, _View._ContentsTransform);
+                        _gridGroupLists.Add(gridGroup);
                     }
 
                     if (gridGroup != null)
@@ -154,7 +151,7 @@ namespace UI.Title
             private void CreateActiveGrid(CharacterData fixedCharacterData, Transform parent,
                 CharacterSelectRepository.OrderType orderType)
             {
-                var grid = Instantiate(View.Grid, parent);
+                var grid = Instantiate(_View._Grid, parent);
                 var characterGrid = grid.GetComponentInChildren<CharacterGridView>();
                 characterGrid.ApplyStatusGridViews(orderType, fixedCharacterData);
                 characterGrid.gridButton.onClick.AddListener(() =>
@@ -165,7 +162,7 @@ namespace UI.Title
 
             private void CreateDisableGrid(CharacterData characterData, Transform parent)
             {
-                var disableGrid = Instantiate(View.GridDisable, parent).GetComponent<CharacterDisableGrid>();
+                var disableGrid = Instantiate(_View._GridDisable, parent).GetComponent<CharacterDisableGrid>();
                 disableGrid.characterImage.color = Color.black;
                 disableGrid.characterImage.sprite = characterData.SelfPortraitSprite;
                 disableGrid.purchaseButton.OnClickAsObservable()
@@ -180,20 +177,20 @@ namespace UI.Title
             private void OnClickCharacterGrid(CharacterData characterData, Button gridButton)
             {
                 gridButton.interactable = false;
-                CharacterCreateUseCase.CreateCharacter(characterData.Id);
-                characterSelectRepository.SetSelectedCharacterId(characterData.Id);
-                Owner.uiAnimation.ClickScale(gridButton.gameObject).OnComplete(() =>
+                _CharacterCreateUseCase.CreateCharacter(characterData.Id);
+                _CharacterSelectRepository.SetSelectedCharacterId(characterData.Id);
+                Owner._uiAnimation.ClickScale(gridButton.gameObject).OnComplete(() =>
                 {
-                    Owner.stateMachine.Dispatch((int)State.CharacterDetail);
+                    Owner._stateMachine.Dispatch((int)State.CharacterDetail);
                     gridButton.interactable = true;
                 }).SetLink(Owner.gameObject);
             }
 
             private void OnClickBack()
             {
-                Owner.uiAnimation.ClickScaleColor(View.BackButton.gameObject).OnComplete(() =>
+                Owner._uiAnimation.ClickScaleColor(_View._BackButton.gameObject).OnComplete(() =>
                 {
-                    Owner.stateMachine.Dispatch((int)State.Main);
+                    Owner._stateMachine.Dispatch((int)State.Main);
                 }).SetLink(Owner.gameObject);
             }
 
@@ -201,11 +198,11 @@ namespace UI.Title
                 CancellationToken token)
             {
                 disableGrid.interactable = false;
-                Owner.uiAnimation.ClickScale(disableGrid.gameObject).OnComplete(() => UniTask.Void(async () =>
+                Owner._uiAnimation.ClickScale(disableGrid.gameObject).OnComplete(() => UniTask.Void(async () =>
                 {
-                    var user = Owner.userDataRepository.GetUserData();
+                    var user = Owner._userDataRepository.GetUserData();
                     var characterPrice = GameCommonData.CharacterPrice;
-                    var gem = await playFabVirtualCurrencyManager.GetGem();
+                    var gem = await _PlayFabVirtualCurrencyManager.GetGem();
                     if (gem == GameCommonData.NetworkErrorCode)
                     {
                         disableGrid.interactable = true;
@@ -214,7 +211,13 @@ namespace UI.Title
 
                     if (gem < characterPrice)
                     {
-                        View.VirtualCurrencyAddPopup.gameObject.SetActive(true);
+                        await _PopupGenerateUseCase.GenerateConfirmPopup
+                        (AddGemPopupTile,
+                            AddGemPopupExplanation,
+                            AddGemPopupOk,
+                            AddGemPopupCancel,
+                            okAction: () => { Owner._stateMachine.Dispatch((int)State.Shop); }
+                        );
                         disableGrid.interactable = true;
                         return;
                     }
@@ -227,7 +230,7 @@ namespace UI.Title
 
                     var virtualCurrencyKey = GameCommonData.GemKey;
                     var price = characterPrice;
-                    var isSuccessPurchase = await Owner.playFabShopManager
+                    var isSuccessPurchase = await Owner._playFabShopManager
                         .TryPurchaseCharacter(characterData.Id, virtualCurrencyKey, price)
                         .AttachExternalCancellation(token);
                     if (!isSuccessPurchase)
@@ -239,45 +242,21 @@ namespace UI.Title
 
                     await Owner.SetGemText();
                     await Owner.SetRewardUI(1, characterData.SelfPortraitSprite);
-                    onChangeViewModel.OnNext(Unit.Default);
+                    _onChangeViewModel.OnNext(Unit.Default);
                     disableGrid.interactable = true;
                 })).SetLink(disableGrid.gameObject);
             }
 
-            private void OnClickClosePopup()
-            {
-                var closeButton = View.VirtualCurrencyAddPopup.CloseButton.gameObject;
-                var popup = View.VirtualCurrencyAddPopup.gameObject;
-                Owner.uiAnimation.ClickScaleColor(closeButton).OnComplete(() => { popup.SetActive(false); })
-                    .SetLink(popup);
-            }
-
-            private void OnClickCancelPurchase()
-            {
-                var cancelButton = View.VirtualCurrencyAddPopup.CancelButton.gameObject;
-                var popup = View.VirtualCurrencyAddPopup.gameObject;
-                Owner.uiAnimation.ClickScaleColor(cancelButton).OnComplete(() => { popup.SetActive(false); })
-                    .SetLink(popup);
-            }
-
-            private void OnClickAddGem()
-            {
-                var addButton = View.VirtualCurrencyAddPopup.AddButton.gameObject;
-                var popup = View.VirtualCurrencyAddPopup.gameObject;
-                Owner.uiAnimation.ClickScaleColor(addButton)
-                    .OnComplete(() => { Owner.stateMachine.Dispatch((int)State.Shop); }).SetLink(popup);
-            }
-
             private void Cancel()
             {
-                if (cancellationTokenSource == null)
+                if (_cancellationTokenSource == null)
                 {
                     return;
                 }
 
-                cancellationTokenSource.Cancel();
-                cancellationTokenSource.Dispose();
-                cancellationTokenSource = null;
+                _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Dispose();
+                _cancellationTokenSource = null;
             }
         }
     }

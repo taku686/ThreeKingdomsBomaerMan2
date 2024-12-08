@@ -45,7 +45,7 @@ namespace UI.Title
 
             private void SetupEvent()
             {
-                Owner.photonNetworkManager.OnStartConnectNetwork();
+                Owner._photonNetworkManager.OnStartConnectNetwork();
             }
 
             private void InitializeButton()
@@ -58,22 +58,22 @@ namespace UI.Title
 
             private void InitializeSubscribe()
             {
-                Owner.photonNetworkManager.JoinedRoomSubject.Subscribe(OnJoinedRoom).AddTo(cts.Token);
-                Owner.photonNetworkManager.LeftRoomSubject.Subscribe(OnLeftRoom).AddTo(cts.Token);
+                Owner._photonNetworkManager.JoinedRoomSubject.Subscribe(OnJoinedRoom).AddTo(cts.Token);
+                Owner._photonNetworkManager.LeftRoomSubject.Subscribe(OnLeftRoom).AddTo(cts.Token);
             }
 
             private void OnClickBackButton()
             {
-                Owner.uiAnimation.ClickScaleColor(View.BackButton.gameObject).OnComplete(() =>
+                Owner._uiAnimation.ClickScaleColor(View.BackButton.gameObject).OnComplete(() =>
                 {
                     if (!PhotonNetwork.InRoom)
                     {
                         return;
                     }
 
-                    Owner.photonNetworkManager.LeftRoomSubject.OnNext(PhotonNetwork.LocalPlayer.ActorNumber);
+                    Owner._photonNetworkManager.LeftRoomSubject.OnNext(PhotonNetwork.LocalPlayer.ActorNumber);
                     PhotonNetwork.LeaveRoom();
-                    Owner.stateMachine.Dispatch((int)State.Main);
+                    Owner._stateMachine.Dispatch((int)State.Main);
                 }).SetLink(Owner.gameObject);
             }
 
@@ -98,8 +98,8 @@ namespace UI.Title
 
             private void CreateGrid(int index)
             {
-                var characterData = Owner.photonNetworkManager.GetCharacterData(index);
-                var levelData = Owner.photonNetworkManager.GetLevelMasterData(index);
+                var characterData = Owner._photonNetworkManager.GetCharacterData(index);
+                var levelData = Owner._photonNetworkManager.GetLevelMasterData(index);
                 var grid = Instantiate(View.BattleReadyGrid.gameObject, View.GridParent);
                 var battleReadyGrid = grid.GetComponent<BattleReadyGrid>();
                 gridDictionary[index] = grid;

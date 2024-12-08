@@ -43,11 +43,11 @@ namespace UI.Title
 
             private async UniTask Initialize()
             {
-                missionDataRepository = Owner.missionDataRepository;
-                userDataRepository = Owner.userDataRepository;
-                catalogDataRepository = Owner.catalogDataRepository;
-                playFabShopManager = Owner.playFabShopManager;
-                commonView = Owner.commonView;
+                missionDataRepository = Owner._missionDataRepository;
+                userDataRepository = Owner._userDataRepository;
+                catalogDataRepository = Owner._catalogDataRepository;
+                playFabShopManager = Owner._playFabShopManager;
+                commonView = Owner._commonView;
                 token = View.GetCancellationTokenOnDestroy();
                 await GenerateMissionGrid();
                 InitializeButton();
@@ -108,7 +108,7 @@ namespace UI.Title
                 }
 
                 isProgress = true;
-                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     var errorText = commonView.purchaseErrorView.errorInfoText;
                     var rewardData = catalogDataRepository.GetAddVirtualCurrencyItemData(missionData.rewardId);
@@ -132,9 +132,9 @@ namespace UI.Title
 
             private async UniTask OnClickBack()
             {
-                Owner.stateMachine.Dispatch((int)State.Main);
+                Owner._stateMachine.Dispatch((int)State.Main);
                 var button = View.backButton.gameObject;
-                await Owner.uiAnimation.ClickScaleColor(button).ToUniTask(cancellationToken: token);
+                await Owner._uiAnimation.ClickScaleColor(button).ToUniTask(cancellationToken: token);
             }
 
             private async UniTask RemoveMission(int missionId)

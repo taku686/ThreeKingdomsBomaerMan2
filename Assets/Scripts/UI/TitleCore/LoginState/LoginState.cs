@@ -11,10 +11,10 @@ namespace UI.Title
     {
         public class LoginState : StateMachine<TitleCore>.State
         {
-            private CancellationTokenSource cts;
-            private PlayFabUserDataManager playFabUserDataManager;
+            private CancellationTokenSource _cancellationTokenSource;
+            private PlayFabUserDataManager _playFabUserDataManager;
             private LoginView View => (LoginView)Owner.GetView(State.Login);
-            private CommonView commonView;
+            private CommonView _commonView;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -23,14 +23,14 @@ namespace UI.Title
 
             protected override void OnLateExit(StateMachine<TitleCore>.State nextState)
             {
-                Owner.Cancel(cts);
+                Owner.Cancel(_cancellationTokenSource);
             }
 
             private void Initialize()
             {
-                cts = new CancellationTokenSource();
-                playFabUserDataManager = Owner.playFabUserDataManager;
-                commonView = Owner.commonView;
+                _cancellationTokenSource = new CancellationTokenSource();
+                _playFabUserDataManager = Owner._playFabUserDataManager;
+                _commonView = Owner._commonView;
 
                 InitializeButton();
                 InitializeObject();
@@ -49,76 +49,76 @@ namespace UI.Title
                     .SelectMany(_ => Owner.OnClickButtonAnimation(View.RetryButton).ToObservable())
                     .SelectMany(_ => OnClickRetry().ToObservable())
                     .Subscribe()
-                    .AddTo(cts.Token);
+                    .AddTo(_cancellationTokenSource.Token);
 
                 View.LoginButton.OnClickAsObservable()
                     .SelectMany(_ => Owner.OnClickButtonAnimation(View.LoginButton).ToObservable())
                     .SelectMany(_ => OnClickLogin().ToObservable())
                     .Subscribe()
-                    .AddTo(cts.Token);
+                    .AddTo(_cancellationTokenSource.Token);
 
                 View.DisplayNameView.OkButton.OnClickAsObservable()
                     .SelectMany(_ => Owner.OnClickButtonAnimation(View.DisplayNameView.OkButton).ToObservable())
                     .SelectMany(_ => OnClickDisplayName().ToObservable())
                     .Subscribe()
-                    .AddTo(cts.Token);
+                    .AddTo(_cancellationTokenSource.Token);
             }
 
             private async UniTask OnClickLogin()
             {
                 View.LoginButton.interactable = false;
-                await Login().AttachExternalCancellation(cts.Token);
+                await Login().AttachExternalCancellation(_cancellationTokenSource.Token);
             }
 
             private async UniTask OnClickRetry()
             {
                 View.RetryButton.interactable = false;
                 View.ErrorGameObject.SetActive(false);
-                await Login().AttachExternalCancellation(cts.Token);
+                await Login().AttachExternalCancellation(_cancellationTokenSource.Token);
             }
 
             private async UniTask Login()
             {
-                commonView.waitPopup.SetActive(true);
-                Owner.playFabLoginManager.Initialize(View.DisplayNameView, View.ErrorGameObject);
-                var result = await Owner.playFabLoginManager.Login()
-                    .AttachExternalCancellation(cts.Token);
+                _commonView.waitPopup.SetActive(true);
+                Owner._playFabLoginManager.Initialize(View.DisplayNameView, View.ErrorGameObject);
+                var result = await Owner._playFabLoginManager.Login()
+                    .AttachExternalCancellation(_cancellationTokenSource.Token);
 
                 if (!result)
                 {
-                    commonView.waitPopup.SetActive(false);
+                    _commonView.waitPopup.SetActive(false);
                     View.RetryButton.interactable = true;
                     View.LoginButton.interactable = true;
                     return;
                 }
 
-                Owner.mainManager.isInitialize = true;
-                Owner.stateMachine.Dispatch((int)State.Main);
-                commonView.waitPopup.SetActive(false);
+                Owner._mainManager.isInitialize = true;
+                Owner._stateMachine.Dispatch((int)State.Main);
+                _commonView.waitPopup.SetActive(false);
                 View.RetryButton.interactable = true;
             }
 
             private async UniTask OnClickDisplayName()
             {
                 View.DisplayNameView.OkButton.interactable = false;
-                commonView.waitPopup.SetActive(true);
+                _commonView.waitPopup.SetActive(true);
                 var displayName = View.DisplayNameView.InputField.text;
                 var errorText = View.DisplayNameView.ErrorText;
-                var success = await playFabUserDataManager.UpdateUserDisplayName(displayName, errorText);
+                var success = await _playFabUserDataManager.UpdateUserDisplayName(displayName, errorText);
                 if (!success)
                 {
-                    commonView.waitPopup.SetActive(false);
+                    _commonView.waitPopup.SetActive(false);
                     View.DisplayNameView.OkButton.interactable = true;
                     return;
                 }
 
-                var createSuccess = await Owner.playFabLoginManager.CreateUserData();
+                var createSuccess = await Owner._playFabLoginManager.CreateUserData();
                 if (createSuccess)
                 {
                     View.DisplayNameView.gameObject.SetActive(false);
-                    Owner.mainManager.isInitialize = true;
-                    Owner.stateMachine.Dispatch((int)State.Main);
-                    commonView.waitPopup.SetActive(false);
+                    Owner._mainManager.isInitialize = true;
+                    Owner._stateMachine.Dispatch((int)State.Main);
+                    _commonView.waitPopup.SetActive(false);
                 }
             }
         }

@@ -18,16 +18,16 @@ namespace UI.Title
         public class CharacterDetailState : StateMachine<TitleCore>.State
         {
             private CharacterDetailView View => (CharacterDetailView)Owner.GetView(State.CharacterDetail);
-            private CommonView CommonView => Owner.commonView;
-            private CharacterCreateUseCase CharacterCreateUseCase => Owner.characterCreateUseCase;
-            private CharacterObjectRepository CharacterObjectRepository => Owner.characterObjectRepository;
-            private AnimationPlayBackUseCase AnimationPlayBackUseCase => Owner.animationPlayBackUseCase;
+            private CommonView CommonView => Owner._commonView;
+            private CharacterCreateUseCase CharacterCreateUseCase => Owner._characterCreateUseCase;
+            private CharacterObjectRepository CharacterObjectRepository => Owner._characterObjectRepository;
+            private AnimationPlayBackUseCase AnimationPlayBackUseCase => Owner._animationPlayBackUseCase;
 
             private CharacterDetailViewModelUseCase CharacterDetailViewModelUseCase =>
-                Owner.characterDetailViewModelUseCase;
+                Owner._characterDetailViewModelUseCase;
 
-            private UserDataRepository UserDataRepository => Owner.userDataRepository;
-            private SortCharactersUseCase SortCharactersUseCase => Owner.sortCharactersUseCase;
+            private UserDataRepository UserDataRepository => Owner._userDataRepository;
+            private SortCharactersUseCase SortCharactersUseCase => Owner._sortCharactersUseCase;
             private PlayFabUserDataManager playFabUserDataManager;
             private PlayFabShopManager playFabShopManager;
             private PlayFabVirtualCurrencyManager playFabVirtualCurrencyManager;
@@ -52,11 +52,11 @@ namespace UI.Title
             private async UniTask Initialize()
             {
                 SetupCancellationToken();
-                playFabUserDataManager = Owner.playFabUserDataManager;
-                playFabShopManager = Owner.playFabShopManager;
-                playFabVirtualCurrencyManager = Owner.playFabVirtualCurrencyManager;
-                uiAnimation = Owner.uiAnimation;
-                characterSelectRepository = Owner.characterSelectRepository;
+                playFabUserDataManager = Owner._playFabUserDataManager;
+                playFabShopManager = Owner._playFabShopManager;
+                playFabVirtualCurrencyManager = Owner._playFabVirtualCurrencyManager;
+                uiAnimation = Owner._uiAnimation;
+                characterSelectRepository = Owner._characterSelectRepository;
                 GenerateCharacter();
                 OnSubscribe();
                 await Owner.SwitchUiObject(State.CharacterDetail, true);
@@ -140,14 +140,14 @@ namespace UI.Title
 
             private void OnClickBackButton()
             {
-                Owner.stateMachine.Dispatch((int)State.CharacterSelect);
+                Owner._stateMachine.Dispatch((int)State.CharacterSelect);
             }
 
             private void OnClickRightArrow()
             {
                 var button = View.RightArrowButton;
                 button.interactable = false;
-                Owner.uiAnimation.ClickScaleColor(button.gameObject).OnComplete(() =>
+                Owner._uiAnimation.ClickScaleColor(button.gameObject).OnComplete(() =>
                 {
                     var userData = UserDataRepository.GetUserData();
                     if (userData.Characters.Count <= 1)
@@ -175,7 +175,7 @@ namespace UI.Title
             {
                 var button = View.LeftArrowButton;
                 button.interactable = false;
-                Owner.uiAnimation.ClickScaleColor(button.gameObject).OnComplete(() =>
+                Owner._uiAnimation.ClickScaleColor(button.gameObject).OnComplete(() =>
                 {
                     var userData = UserDataRepository.GetUserData();
                     if (userData.Characters.Count <= 1)
@@ -207,7 +207,7 @@ namespace UI.Title
                 var result = await playFabUserDataManager.TryUpdateUserDataAsync(userData);
                 if (result)
                 {
-                    Owner.stateMachine.Dispatch((int)State.Main);
+                    Owner._stateMachine.Dispatch((int)State.Main);
                 }
 
                 View.SelectButton.interactable = true;
@@ -266,7 +266,7 @@ namespace UI.Title
 
             private void OnClickCloseVirtualCurrencyAddView(GameObject button)
             {
-                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                     {
                         var virtualCurrencyAddView = View.VirtualCurrencyAddPopup;
                         await uiAnimation.Close(virtualCurrencyAddView.transform, GameCommonData.CloseDuration);
@@ -278,9 +278,9 @@ namespace UI.Title
             private void OnClickAddVirtualCurrency()
             {
                 var button = View.VirtualCurrencyAddPopup.AddButton.gameObject;
-                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() =>
+                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() =>
                 {
-                    Owner.stateMachine.Dispatch((int)State.Shop);
+                    Owner._stateMachine.Dispatch((int)State.Shop);
                 }).SetLink(button);
             }
 
@@ -295,7 +295,7 @@ namespace UI.Title
             private void OnClickCloseErrorView()
             {
                 var button = CommonView.errorView.okButton.gameObject;
-                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
+                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                     {
                         var errorView = CommonView.errorView.transform;
                         await uiAnimation.Close(errorView, GameCommonData.CloseDuration);
