@@ -15,40 +15,40 @@ namespace Common.Data
 {
     public class UserDataRepository : IDisposable
     {
-        private UserData userData;
-        private CancellationTokenSource cancellationTokenSource;
-        [Inject] private CharacterMasterDataRepository characterMasterDataRepository;
-        [Inject] private LevelMasterDataRepository levelMasterDataRepository;
-        [Inject] private MissionDataRepository missionDataRepository;
-        [Inject] private PlayFabUserDataManager playFabUserDataManager;
-        [Inject] private WeaponMasterDataRepository weaponMasterDataRepository;
+        private UserData _userData;
+        private CancellationTokenSource _cancellationTokenSource;
+        [Inject] private CharacterMasterDataRepository _characterMasterDataRepository;
+        [Inject] private LevelMasterDataRepository _levelMasterDataRepository;
+        [Inject] private MissionDataRepository _missionDataRepository;
+        [Inject] private PlayFabUserDataManager _playFabUserDataManager;
+        [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
 
         public async UniTask Initialize(UserData data)
         {
-            cancellationTokenSource = new CancellationTokenSource();
+            _cancellationTokenSource = new CancellationTokenSource();
             SetUserData(data);
             await AddMissionData();
         }
 
         public UserData GetUserData()
         {
-            return userData;
+            return _userData;
         }
 
         public void SetUserData(UserData data)
         {
-            userData = data;
+            _userData = data;
         }
 
         public async UniTask UpdateUserData(UserData data)
         {
-            userData = data;
-            await playFabUserDataManager.TryUpdateUserDataAsync(userData);
+            _userData = data;
+            await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
         }
 
         public async UniTask<bool> SetLoginBonus(int index, LoginBonusStatus status)
         {
-            if (!userData.LoginBonus.ContainsKey(index))
+            if (!_userData.LoginBonus.ContainsKey(index))
             {
                 return false;
             }
@@ -56,56 +56,56 @@ namespace Common.Data
             var data = GetUserData();
             data.LoginBonus[index] = (int)status;
             SetUserData(data);
-            var result = await playFabUserDataManager.TryUpdateUserDataAsync(data)
-                .AttachExternalCancellation(cancellationTokenSource.Token);
+            var result = await _playFabUserDataManager.TryUpdateUserDataAsync(data)
+                .AttachExternalCancellation(_cancellationTokenSource.Token);
             return result;
         }
 
         public async UniTask<bool> ResetLoginBonus()
         {
             var data = GetUserData();
-            for (var i = 0; i < userData.LoginBonus.Count; i++)
+            for (var i = 0; i < _userData.LoginBonus.Count; i++)
             {
-                userData.LoginBonus[i] = (int)LoginBonusStatus.Disable;
+                _userData.LoginBonus[i] = (int)LoginBonusStatus.Disable;
             }
 
             SetUserData(data);
-            var result = await playFabUserDataManager.TryUpdateUserDataAsync(data)
-                .AttachExternalCancellation(cancellationTokenSource.Token);
+            var result = await _playFabUserDataManager.TryUpdateUserDataAsync(data)
+                .AttachExternalCancellation(_cancellationTokenSource.Token);
             return result;
         }
 
         public LoginBonusStatus GetLoginBonusStatus(int index)
         {
-            var status = userData.LoginBonus[index];
+            var status = _userData.LoginBonus[index];
             return GameCommonData.GetLoginBonusStatus(status);
         }
 
         public int GetEquippedCharacterId()
         {
-            return characterMasterDataRepository.GetCharacterData(userData.EquippedCharacterId).Id;
+            return _characterMasterDataRepository.GetCharacterData(_userData.EquippedCharacterId).Id;
         }
 
         public CharacterData GetEquippedCharacterData()
         {
-            return characterMasterDataRepository.GetCharacterData(userData.EquippedCharacterId);
+            return _characterMasterDataRepository.GetCharacterData(_userData.EquippedCharacterId);
         }
 
         public LevelMasterData GetCurrentLevelData(int characterId)
         {
-            var level = userData.CharacterLevels[characterId];
-            return levelMasterDataRepository.GetLevelMasterData(level);
+            var level = _userData.CharacterLevels[characterId];
+            return _levelMasterDataRepository.GetLevelMasterData(level);
         }
 
         public LevelMasterData GetNextLevelData(int characterId)
         {
-            var level = userData.CharacterLevels[characterId] + 1;
-            return levelMasterDataRepository.GetLevelMasterData(level);
+            var level = _userData.CharacterLevels[characterId] + 1;
+            return _levelMasterDataRepository.GetLevelMasterData(level);
         }
 
         public bool UpgradeCharacterLevel(int characterId, int level)
         {
-            if (!userData.CharacterLevels.TryGetValue(characterId, out var characterLevel))
+            if (!_userData.CharacterLevels.TryGetValue(characterId, out var characterLevel))
             {
                 Debug.LogError("characterId is not found.");
                 return false;
@@ -117,13 +117,13 @@ namespace Common.Data
                 return false;
             }
 
-            userData.CharacterLevels[characterId] = level;
+            _userData.CharacterLevels[characterId] = level;
             return true;
         }
 
         private void SetMissionData(int index, int progress)
         {
-            if (userData.MissionProgressDatum.ContainsKey(index))
+            if (_userData.MissionProgressDatum.ContainsKey(index))
             {
                 return;
             }
@@ -133,61 +133,61 @@ namespace Common.Data
                 progress = GameCommonData.MaxMissionProgress;
             }
 
-            userData.MissionProgressDatum[index] = progress;
+            _userData.MissionProgressDatum[index] = progress;
         }
 
         public Dictionary<int, int> GetMissionProgressDatum()
         {
-            return userData.MissionProgressDatum;
+            return _userData.MissionProgressDatum;
         }
 
         public int GetMissionProgress(int missionId)
         {
-            return userData.MissionProgressDatum.GetValueOrDefault(missionId, GameCommonData.ExceptionMissionProgress);
+            return _userData.MissionProgressDatum.GetValueOrDefault(missionId, GameCommonData.ExceptionMissionProgress);
         }
 
         public void SetMissionProgress(int missionId, int missionProgress)
         {
-            if (!userData.MissionProgressDatum.ContainsKey(missionId))
+            if (!_userData.MissionProgressDatum.ContainsKey(missionId))
             {
                 return;
             }
 
-            userData.MissionProgressDatum[missionId] = missionProgress;
+            _userData.MissionProgressDatum[missionId] = missionProgress;
         }
 
         public async UniTask AddMissionData()
         {
-            if (userData.MissionProgressDatum.Count >= GameCommonData.MaxMissionCount)
+            if (_userData.MissionProgressDatum.Count >= GameCommonData.MaxMissionCount)
             {
                 return;
             }
 
-            var missionDatum = missionDataRepository.MissionDatum;
-            while (userData.MissionProgressDatum.Count < GameCommonData.MaxMissionCount)
+            var missionDatum = _missionDataRepository.MissionDatum;
+            while (_userData.MissionProgressDatum.Count < GameCommonData.MaxMissionCount)
             {
                 var index = Random.Range(0, missionDatum.Count);
                 var missionIndex = missionDatum[index].index;
                 SetMissionData(missionIndex, 0);
             }
 
-            await playFabUserDataManager.TryUpdateUserDataAsync(userData);
+            await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
         }
 
         public async UniTask RemoveMissionData(int missionId)
         {
-            if (!userData.MissionProgressDatum.ContainsKey(missionId))
+            if (!_userData.MissionProgressDatum.ContainsKey(missionId))
             {
                 return;
             }
 
-            userData.MissionProgressDatum.Remove(missionId);
-            await playFabUserDataManager.TryUpdateUserDataAsync(userData);
+            _userData.MissionProgressDatum.Remove(missionId);
+            await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
         }
 
         public async UniTask<bool> AddCharacterData(int characterId)
         {
-            if (userData.Characters.Contains(characterId))
+            if (_userData.Characters.Contains(characterId))
             {
                 return false;
             }
@@ -197,34 +197,34 @@ namespace Common.Data
             data.CharacterLevels[characterId] = 0;
             data.EquippedWeapons[characterId] = GameCommonData.DefaultWeaponId;
             SetUserData(data);
-            var result = await playFabUserDataManager.TryUpdateUserDataAsync(data)
-                .AttachExternalCancellation(cancellationTokenSource.Token);
+            var result = await _playFabUserDataManager.TryUpdateUserDataAsync(data)
+                .AttachExternalCancellation(_cancellationTokenSource.Token);
             return result;
         }
 
         public int GetAvailableCharacterAmount()
         {
-            return userData.Characters.Count;
+            return _userData.Characters.Count;
         }
 
         public IReadOnlyCollection<CharacterData> GetAvailableCharacters()
         {
-            return userData.Characters
-                .Select(characterMasterDataRepository.GetCharacterData)
+            return _userData.Characters
+                .Select(_characterMasterDataRepository.GetCharacterData)
                 .ToArray();
         }
 
         public IReadOnlyCollection<CharacterData> GetNotAvailableCharacters()
         {
-            return characterMasterDataRepository.GetAllCharacterData()
-                .Where(data => !userData.Characters.Contains(data.Id))
+            return _characterMasterDataRepository.GetAllCharacterData()
+                .Where(data => !_userData.Characters.Contains(data.Id))
                 .ToArray();
         }
 
         public IReadOnlyDictionary<WeaponMasterData, int> GetAllPossessedWeaponDatum()
         {
-            return userData.PossessedWeapons
-                .ToDictionary(keyValue => weaponMasterDataRepository.GetWeaponData(keyValue.Key),
+            return _userData.PossessedWeapons
+                .ToDictionary(keyValue => _weaponMasterDataRepository.GetWeaponData(keyValue.Key),
                     keyValue => keyValue.Value);
         }
 
@@ -234,48 +234,48 @@ namespace Common.Data
             data.EquippedWeapons[selectedCharacterId] = weaponId;
 
             SetUserData(data);
-            await playFabUserDataManager.TryUpdateUserDataAsync(data);
+            await _playFabUserDataManager.TryUpdateUserDataAsync(data);
         }
 
         public int GetEquippedWeaponId(int selectedCharacterId)
         {
-            return userData.EquippedWeapons[selectedCharacterId];
+            return _userData.EquippedWeapons[selectedCharacterId];
         }
 
         public WeaponMasterData GetEquippedWeaponData(int selectedCharacterId)
         {
             var weaponId = GetEquippedWeaponId(selectedCharacterId);
-            return weaponMasterDataRepository.GetWeaponData(weaponId);
+            return _weaponMasterDataRepository.GetWeaponData(weaponId);
         }
 
         public void AddWeaponData(int weaponId)
         {
-            if (!userData.PossessedWeapons.TryAdd(weaponId, 1))
+            if (!_userData.PossessedWeapons.TryAdd(weaponId, 1))
             {
-                userData.PossessedWeapons[weaponId]++;
+                _userData.PossessedWeapons[weaponId]++;
             }
         }
 
         public void Dispose()
         {
-            userData?.Dispose();
-            cancellationTokenSource.Cancel();
-            cancellationTokenSource?.Dispose();
-            characterMasterDataRepository?.Dispose();
-            levelMasterDataRepository?.Dispose();
-            playFabUserDataManager?.Dispose();
+            _userData?.Dispose();
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource?.Dispose();
+            _characterMasterDataRepository?.Dispose();
+            _levelMasterDataRepository?.Dispose();
+            _playFabUserDataManager?.Dispose();
         }
 
         //todo デバッグ用後で消す
         public async UniTask AddAllWeapon()
         {
-            var weaponData = weaponMasterDataRepository.GetAllWeaponData();
+            var weaponData = _weaponMasterDataRepository.GetAllWeaponData();
             foreach (var data in weaponData)
             {
                 AddWeaponData(data.Id);
             }
 
-            await UpdateUserData(userData);
+            await UpdateUserData(_userData);
         }
     }
 }

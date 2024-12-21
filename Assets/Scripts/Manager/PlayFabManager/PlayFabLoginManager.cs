@@ -9,35 +9,30 @@ using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine;
 using Newtonsoft.Json;
-using UI.Title.LoginState;
+using UniRx;
 using Zenject;
 
 namespace Assets.Scripts.Common.PlayFab
 {
     public class PlayFabLoginManager : MonoBehaviour
     {
-        private const int DefaultCharacterIndex = 0;
         private const int OneDay = 1;
         private const int TimeDifference = 9;
-        [Inject] private UserDataRepository userDataRepository;
-        [Inject] private CharacterMasterDataRepository characterMasterDataRepository;
+        [Inject] private UserDataRepository _userDataRepository;
+        [Inject] private CharacterMasterDataRepository _characterMasterDataRepository;
         [Inject] private PlayFabCatalogManager _playFabCatalogManager;
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private PlayFabShopManager _playFabShopManager;
         [Inject] private PlayFabTitleDataManager _playFabTitleDataManager;
         [Inject] private MissionManager _missionManager;
+
         private GetPlayerCombinedInfoRequestParams _info;
-        private DisplayNameView _displayNameView;
-        private GameObject _errorGameObject;
-        private PlayFabResult<LoginResult> _loginResponse;
-        public bool haveLoginBonus;
+        public bool _haveLoginBonus;
 
 
-        public void Initialize(DisplayNameView displayNameView, GameObject errorGameObject)
+        public void Initialize()
         {
             _playFabTitleDataManager.Initialize();
-            _displayNameView = displayNameView;
-            _errorGameObject = errorGameObject;
             PlayFabSettings.staticSettings.TitleId = GameCommonData.TitleID;
             _info = new GetPlayerCombinedInfoRequestParams()
             {
@@ -50,98 +45,59 @@ namespace Assets.Scripts.Common.PlayFab
             };
         }
 
-        public async UniTask<bool> Login()
+        public async UniTask<PlayFabResult<LoginResult>> Login()
         {
-            var request = new LoginWithAndroidDeviceIDRequest()
+            var request = new LoginWithAndroidDeviceIDRequest
             {
                 CreateAccount = true,
                 InfoRequestParameters = _info,
                 AndroidDeviceId = SystemInfo.deviceUniqueIdentifier,
             };
-            var response = await PlayFabClientAPI.LoginWithAndroidDeviceIDAsync(request);
-
-            if (response.Error != null)
-            {
-                Debug.LogError(response.Error.GenerateErrorReport());
-                _errorGameObject.SetActive(true);
-                return false;
-            }
-
-            return await SetData(response).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+            return await PlayFabClientAPI.LoginWithAndroidDeviceIDAsync(request);
         }
 
 
-        private async UniTask<bool> SetData(PlayFabResult<LoginResult> response)
+        public async UniTask<bool> InitializeGameData(PlayFabResult<LoginResult> response)
         {
             await _playFabCatalogManager.Initialize();
             await _playFabShopManager.InitializePurchasing();
             await _playFabTitleDataManager.SetTitleData(response.Result.InfoResultPayload.TitleData);
-            if (!response.Result.InfoResultPayload.UserData.TryGetValue(GameCommonData.UserKey,
-                    out UserDataRecord userData))
+            if (!response.Result.InfoResultPayload.UserData.TryGetValue(GameCommonData.UserKey, value: out var value))
             {
-                _loginResponse = response;
-                _displayNameView.gameObject.SetActive(true);
                 return false;
             }
 
-            var user = JsonConvert.DeserializeObject<UserData>(response.Result.InfoResultPayload
-                .UserData[GameCommonData.UserKey].Value);
-            var virtualCurrency = response.Result.InfoResultPayload.UserVirtualCurrency;
-
-
-            if (user != null)
-            {
-                user.Coin = virtualCurrency[GameCommonData.CoinKey];
-                user.Gem = virtualCurrency[GameCommonData.GemKey];
-                await userDataRepository.Initialize(user);
-                _missionManager.Initialize();
-                if (response.Result.LastLoginTime != null)
-                {
-                    await HaveLoginBonus(response.Result);
-                    //todo 後で消す
-                    await SetLoginBonus(response.Result.LastLoginTime.Value);
-                }
-
-                return true;
-            }
-
-            return false;
+            var user = JsonConvert.DeserializeObject<UserData>(value.Value);
+            if (user == null) return false;
+            await _userDataRepository.Initialize(user);
+            _missionManager.Initialize();
+            return true;
         }
 
-        public async UniTask<bool> CreateUserData()
+        public async UniTask<PlayFabResult<LoginResult>> CreateUserData(PlayFabResult<LoginResult> loginResult)
         {
-            var characterData = characterMasterDataRepository.GetCharacterData(DefaultCharacterIndex);
-            var userData = new UserData().Create(characterData);
-            var virtualCurrency = _loginResponse.Result.InfoResultPayload.UserVirtualCurrency;
-            userData.Coin = virtualCurrency[GameCommonData.CoinKey];
-            userData.Gem = virtualCurrency[GameCommonData.GemKey];
-            var isSuccess = await _playFabUserDataManager.TryUpdateUserDataAsync(userData)
-                .AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
-            if (!isSuccess)
-            {
-                Debug.LogError("ユーザーデータの更新に失敗しました");
-                return false;
-            }
-
-            return await Login().AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+            var userData = new UserData().Create();
+            _userDataRepository.SetUserData(userData);
+            await _playFabUserDataManager.TryUpdateUserDataAsync(userData).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+            return loginResult;
         }
 
         private async UniTask SetLoginBonus(DateTime lastLoginDate)
         {
             var daySubtraction = DateTime.Today - lastLoginDate.Date;
             var dayOfWeek = DateTime.Today.DayOfWeek;
-            haveLoginBonus = daySubtraction.Days >= OneDay;
+            _haveLoginBonus = daySubtraction.Days >= OneDay;
             if (dayOfWeek == DayOfWeek.Sunday)
             {
-                await userDataRepository.ResetLoginBonus();
+                await _userDataRepository.ResetLoginBonus();
             }
 
-            if (!haveLoginBonus)
+            if (!_haveLoginBonus)
             {
                 return;
             }
 
-            await userDataRepository.SetLoginBonus((int)dayOfWeek, LoginBonusStatus.CanReceive);
+            await _userDataRepository.SetLoginBonus((int)dayOfWeek, LoginBonusStatus.CanReceive);
         }
 
         private async UniTask<bool> HaveLoginBonus(LoginResult loginResult)
@@ -159,7 +115,6 @@ namespace Assets.Scripts.Common.PlayFab
             var result = await _playFabShopManager.TryPurchaseItem(GameCommonData.LoginBonusNotificationItemKey,
                 GameCommonData.CoinKey, 0, null);
             return result;
-
         }
     }
 }

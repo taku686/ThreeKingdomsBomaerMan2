@@ -7,16 +7,16 @@ using Zenject;
 
 public class MissionManager : IDisposable
 {
-    [Inject] private UserDataRepository userDataRepository;
-    [Inject] private MissionDataRepository missionDataRepository;
+    [Inject] private UserDataRepository _userDataRepository;
+    [Inject] private MissionDataRepository _missionDataRepository;
     private readonly List<MissionBase> _missionBases = new();
 
     public void Initialize()
     {
-        foreach (var mission in userDataRepository.GetMissionProgressDatum())
+        foreach (var mission in _userDataRepository.GetMissionProgressDatum())
         {
-            var missionData = missionDataRepository.GetMissionData(mission.Key);
-            var missionBase = GenerateMissionBase(missionData, userDataRepository);
+            var missionData = _missionDataRepository.GetMissionData(mission.Key);
+            var missionBase = GenerateMissionBase(missionData, _userDataRepository);
             _missionBases.Add(missionBase);
         }
     }

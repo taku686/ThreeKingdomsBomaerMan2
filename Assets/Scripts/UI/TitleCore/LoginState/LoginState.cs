@@ -1,9 +1,9 @@
 ﻿using System.Threading;
+using Assets.Scripts.Common.PlayFab;
+using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.NetworkManager;
 using UniRx;
-using UnityEngine;
-using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
 {
@@ -13,7 +13,9 @@ namespace UI.Title
         {
             private CancellationTokenSource _cancellationTokenSource;
             private PlayFabUserDataManager _playFabUserDataManager;
-            private LoginView View => (LoginView)Owner.GetView(State.Login);
+            private PlayFabLoginManager _PlayFabLoginManager => Owner._playFabLoginManager;
+            private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
+            private LoginView _View => (LoginView)Owner.GetView(State.Login);
             private CommonView _commonView;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
@@ -33,93 +35,81 @@ namespace UI.Title
                 _commonView = Owner._commonView;
 
                 InitializeButton();
-                InitializeObject();
                 Owner.SwitchUiObject(State.Login, false).Forget();
-            }
-
-            private void InitializeObject()
-            {
-                View.ErrorGameObject.SetActive(false);
-                View.DisplayNameView.gameObject.SetActive(false);
             }
 
             private void InitializeButton()
             {
-                View.RetryButton.OnClickAsObservable()
-                    .SelectMany(_ => Owner.OnClickButtonAnimation(View.RetryButton).ToObservable())
-                    .SelectMany(_ => OnClickRetry().ToObservable())
-                    .Subscribe()
-                    .AddTo(_cancellationTokenSource.Token);
-
-                View.LoginButton.OnClickAsObservable()
-                    .SelectMany(_ => Owner.OnClickButtonAnimation(View.LoginButton).ToObservable())
+                _View._LoginButton.OnClickAsObservable()
+                    .SelectMany(_ => Owner.OnClickButtonAnimation(_View._LoginButton).ToObservable())
                     .SelectMany(_ => OnClickLogin().ToObservable())
-                    .Subscribe()
-                    .AddTo(_cancellationTokenSource.Token);
-
-                View.DisplayNameView.OkButton.OnClickAsObservable()
-                    .SelectMany(_ => Owner.OnClickButtonAnimation(View.DisplayNameView.OkButton).ToObservable())
-                    .SelectMany(_ => OnClickDisplayName().ToObservable())
                     .Subscribe()
                     .AddTo(_cancellationTokenSource.Token);
             }
 
             private async UniTask OnClickLogin()
             {
-                View.LoginButton.interactable = false;
-                await Login().AttachExternalCancellation(_cancellationTokenSource.Token);
-            }
-
-            private async UniTask OnClickRetry()
-            {
-                View.RetryButton.interactable = false;
-                View.ErrorGameObject.SetActive(false);
+                _View._LoginButton.interactable = false;
                 await Login().AttachExternalCancellation(_cancellationTokenSource.Token);
             }
 
             private async UniTask Login()
             {
                 _commonView.waitPopup.SetActive(true);
-                Owner._playFabLoginManager.Initialize(View.DisplayNameView, View.ErrorGameObject);
-                var result = await Owner._playFabLoginManager.Login()
-                    .AttachExternalCancellation(_cancellationTokenSource.Token);
+                _PlayFabLoginManager.Initialize();
+                var loginResult = await _PlayFabLoginManager.Login().AttachExternalCancellation(_cancellationTokenSource.Token);
 
-                if (!result)
+                if (loginResult.Error != null)
                 {
                     _commonView.waitPopup.SetActive(false);
-                    View.RetryButton.interactable = true;
-                    View.LoginButton.interactable = true;
+                    _View._LoginButton.interactable = true;
                     return;
                 }
 
-                Owner._mainManager.isInitialize = true;
-                Owner._stateMachine.Dispatch((int)State.Main);
-                _commonView.waitPopup.SetActive(false);
-                View.RetryButton.interactable = true;
-            }
-
-            private async UniTask OnClickDisplayName()
-            {
-                View.DisplayNameView.OkButton.interactable = false;
-                _commonView.waitPopup.SetActive(true);
-                var displayName = View.DisplayNameView.InputField.text;
-                var errorText = View.DisplayNameView.ErrorText;
-                var success = await _playFabUserDataManager.UpdateUserDisplayName(displayName, errorText);
-                if (!success)
+                if (!loginResult.Result.InfoResultPayload.UserData.ContainsKey(GameCommonData.UserKey))
                 {
-                    _commonView.waitPopup.SetActive(false);
-                    View.DisplayNameView.OkButton.interactable = true;
-                    return;
+                    var checkDisplayName = _PopupGenerateUseCase
+                        .GenerateInputNamePopup("名前を入力してください", "")
+                        .SelectMany(displayName => ValidationCheck(displayName).ToObservable())
+                        .Publish();
+
+                    checkDisplayName
+                        .Where(tuple => !tuple.Item1)
+                        .SelectMany(_ => _PopupGenerateUseCase.GenerateErrorPopup("名前が不正です", "OK"))
+                        .Subscribe(_ =>
+                        {
+                            _View._LoginButton.interactable = true;
+                            _commonView.waitPopup.SetActive(false);
+                        });
+
+                    checkDisplayName
+                        .Where(tuple => tuple.Item1)
+                        .SelectMany(_ => _PlayFabLoginManager.Login().ToObservable())
+                        .SelectMany(response => _PlayFabLoginManager.CreateUserData(response).ToObservable())
+                        .SelectMany(response => _PlayFabLoginManager.InitializeGameData(response).ToObservable())
+                        .Subscribe(_ =>
+                        {
+                            Owner._mainManager.isInitialize = true;
+                            Owner._stateMachine.Dispatch((int)State.Main);
+                            _commonView.waitPopup.SetActive(false);
+                        });
+
+                    checkDisplayName.Connect().AddTo(_cancellationTokenSource.Token);
                 }
-
-                var createSuccess = await Owner._playFabLoginManager.CreateUserData();
-                if (createSuccess)
+                else
                 {
-                    View.DisplayNameView.gameObject.SetActive(false);
+                    await _PlayFabLoginManager.InitializeGameData(loginResult);
                     Owner._mainManager.isInitialize = true;
                     Owner._stateMachine.Dispatch((int)State.Main);
                     _commonView.waitPopup.SetActive(false);
                 }
+            }
+
+            private async UniTask<(bool, string)> ValidationCheck(string displayName)
+            {
+                _commonView.waitPopup.SetActive(true);
+                var result = await _playFabUserDataManager.UpdateUserDisplayNameAsync(displayName);
+                return result;
             }
         }
     }

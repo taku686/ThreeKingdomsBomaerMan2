@@ -20,7 +20,7 @@ namespace Common.Data
         public readonly Dictionary<int, int> EquippedWeapons = new();
         public Dictionary<int, int> MissionProgressDatum = new();
 
-        public UserData Create(CharacterData characterData)
+        public UserData Create()
         {
             var user = this;
             user.Gender = Gender.Male;
@@ -28,7 +28,7 @@ namespace Common.Data
             user.Level = 1;
             user.Name = "";
             user.IsTutorial = false;
-            user.Characters.Add(characterData.Id);
+            user.Characters.Add(0);
             user.Gem = 0;
             user.Coin = 0;
             user.Ticket = 0;

@@ -5,7 +5,6 @@ using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using PlayFab;
 using PlayFab.ClientModels;
-using TMPro;
 using UnityEngine;
 using Zenject;
 
@@ -13,7 +12,7 @@ namespace Manager.NetworkManager
 {
     public class PlayFabUserDataManager : IDisposable
     {
-        [Inject] private UserDataRepository userDataRepository;
+        [Inject] private UserDataRepository _userDataRepository;
 
         /// <summary>
         /// playerデータの更新
@@ -64,7 +63,7 @@ namespace Manager.NetworkManager
                 return null;
             }
 
-            userDataRepository.SetUserData(user);
+            _userDataRepository.SetUserData(user);
             return user;
         }
 
@@ -83,13 +82,8 @@ namespace Manager.NetworkManager
             }
         }
 
-        public async UniTask<bool> UpdateUserDisplayName(string playerName, TextMeshProUGUI errorText)
+        public async UniTask<(bool, string)> UpdateUserDisplayNameAsync(string playerName)
         {
-            if (string.IsNullOrEmpty(playerName))
-            {
-                return false;
-            }
-
             var request = new UpdateUserTitleDisplayNameRequest
             {
                 DisplayName = playerName
@@ -101,21 +95,15 @@ namespace Manager.NetworkManager
                 switch (response.Error.Error)
                 {
                     case PlayFabErrorCode.InvalidParams:
-                        Debug.Log("名前の文字数制限エラーです");
-                        errorText.text = "名前は3~15文字以内で入力して下さい。";
-                        return false;
+                        return (false, "名前は3~15文字以内で入力して下さい。");
                     case PlayFabErrorCode.ProfaneDisplayName:
-                        Debug.Log("この名前は使用できません");
-                        errorText.text = "この名前は使用できません。";
-                        return false;
+                        return (false, "この名前は使用できません。");
                     default:
-                        errorText.text = "この名前は使用できません。";
-                        Debug.Log(response.Error.GenerateErrorReport());
-                        return false;
+                        return (false, "この名前は使用できません。");
                 }
             }
 
-            return true;
+            return (true, string.Empty);
         }
 
         public void Dispose()

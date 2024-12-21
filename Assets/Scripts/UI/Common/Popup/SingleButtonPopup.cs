@@ -6,22 +6,19 @@ using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
-public class InputNamePopup : PopupBase
+public class SingleButtonPopup : PopupBase
 {
-    [SerializeField] private TextMeshProUGUI _titleText;
-    [SerializeField] private TextMeshProUGUI _okText;
     [SerializeField] private Button _okButton;
-    [SerializeField] private TMP_InputField _inputField;
-    [SerializeField] private TextMeshProUGUI _validationText;
-    public IObservable<string> _OnClickButton { get; private set; }
-
+    [SerializeField] private TextMeshProUGUI _okText;
+    private IObservable<Unit> _onClickOk;
+    public IObservable<Unit> _OnClickButton => _onClickOk;
     public async UniTask Open(ViewModel viewModel)
     {
         ApplyViewModel(viewModel);
-        _OnClickButton = _okButton
+        _onClickOk = _okButton
             .OnClickAsObservable()
             .SelectMany(_ => Close().ToObservable())
-            .Select(_ => _inputField.text);
+            .Select(_ => Unit.Default);
 
         await base.Open(viewModel);
     }
@@ -44,9 +41,5 @@ public class InputNamePopup : PopupBase
         {
             _OkText = okText;
         }
-    }
-
-    public class Factory : PlaceholderFactory<InputNamePopup>
-    {
     }
 }

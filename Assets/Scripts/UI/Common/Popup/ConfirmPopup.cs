@@ -29,6 +29,7 @@ public class ConfirmPopup : PopupBase
             .OnClickAsObservable()
             .SelectMany(_ => Close().ToObservable())
             .Select(_ => false);
+
         await base.Open(viewModel);
     }
 
