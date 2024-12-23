@@ -57,8 +57,9 @@ namespace UI.Title
 
         [SerializeField] private Fade _fade;
         [SerializeField] private Transform _characterCreatePosition;
-        [SerializeField] private ViewBase[] _views;
         [SerializeField] private CommonView _commonView;
+        [SerializeField] private ViewBase[] _views;
+      
 
         private StateMachine<TitleCore> _stateMachine;
         private CancellationTokenSource _cts;
@@ -76,7 +77,8 @@ namespace UI.Title
             LoginBonus,
             Mission,
             SelectBattleMode,
-            Inventory
+            Inventory,
+            Reward
         }
 
 
@@ -150,7 +152,7 @@ namespace UI.Title
         {
             foreach (var view in _views)
             {
-                if (view.State == state)
+                if (view._State == state)
                 {
                     return view;
                 }
@@ -165,7 +167,7 @@ namespace UI.Title
             {
                 foreach (var view in _views)
                 {
-                    view.gameObject.SetActive(view.State == state);
+                    view.gameObject.SetActive(view._State == state);
                 }
 
                 action?.Invoke();
