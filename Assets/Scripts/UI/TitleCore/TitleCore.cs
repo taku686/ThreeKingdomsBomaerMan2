@@ -59,7 +59,7 @@ namespace UI.Title
         [SerializeField] private Transform _characterCreatePosition;
         [SerializeField] private CommonView _commonView;
         [SerializeField] private ViewBase[] _views;
-      
+
 
         private StateMachine<TitleCore> _stateMachine;
         private CancellationTokenSource _cts;
@@ -135,6 +135,9 @@ namespace UI.Title
             _stateMachine.AddTransition<MainState, SettingState>((int)State.Setting);
             _stateMachine.AddTransition<MainState, LoginBonusState>((int)State.LoginBonus);
             _stateMachine.AddTransition<MainState, MissionState>((int)State.Mission);
+            _stateMachine.AddTransition<CharacterSelectState, RewardState>((int)State.Reward);
+            _stateMachine.AddTransition<ShopState, RewardState>((int)State.Reward);
+            _stateMachine.AddTransition<RewardState, CharacterSelectState>((int)State.CharacterSelect);
         }
 
         private void InitializeButton()

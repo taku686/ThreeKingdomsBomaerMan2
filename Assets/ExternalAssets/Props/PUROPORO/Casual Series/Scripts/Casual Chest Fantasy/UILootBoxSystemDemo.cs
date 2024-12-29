@@ -40,7 +40,7 @@ namespace PUROPORO
         private CardUI[] m_CardUIs = new CardUI[0];
         private int[] m_AchievedCards;
 
-        private void Start()
+        /*private void Start()
         {
             m_State = LootBoxState.Starting;
 
@@ -59,10 +59,11 @@ namespace PUROPORO
             }
 
             ShowIntro();
-        }
+        }*/
 
         public void Initialize()
         {
+            m_LootBox.Initialize();
             m_State = LootBoxState.Starting;
 
             m_CardAnimator = GetComponent<AnimateAToBUi>();
@@ -78,6 +79,8 @@ namespace PUROPORO
                 m_TotalRange += (int)m_CardsDB.GetCard(i).GetRarity();
                 m_ProbabilityRange[i].m_Max = m_TotalRange;
             }
+
+            m_State = LootBoxState.Waiting;
         }
 
         [System.Obsolete]

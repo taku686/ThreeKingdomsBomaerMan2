@@ -6,6 +6,8 @@ namespace UI.Title
     {
         public class RewardState : StateMachine<TitleCore>.State
         {
+            private RewardView _View => (RewardView)Owner.GetView(State.Reward);
+
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
                 Initialize();
@@ -13,7 +15,8 @@ namespace UI.Title
 
             private void Initialize()
             {
-                Owner.SwitchUiObject(State.Login, false).Forget();
+                _View._LootBoxSystem.Initialize();
+                Owner.SwitchUiObject(State.Reward, false).Forget();
             }
         }
     }

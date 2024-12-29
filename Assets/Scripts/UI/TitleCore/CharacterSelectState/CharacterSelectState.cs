@@ -181,7 +181,7 @@ namespace UI.Title
                     ).Select(isOk => (isOk, purchasedCharacterData)))
                     .Where(tuple => tuple.isOk)
                     .SelectMany(tuple => PurchaseCharacter(tuple.purchasedCharacterData.characterData).ToObservable())
-                    .Subscribe()
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.Reward); })
                     .AddTo(disableGrid.GetCancellationTokenOnDestroy());
 
                 haveEnoughGem.Connect().AddTo(disableGrid.GetCancellationTokenOnDestroy());
@@ -221,7 +221,7 @@ namespace UI.Title
                 }
 
                 await Owner.SetGemText();
-                await Owner.SetRewardUI(1, characterData.characterSprite);
+                //await Owner.SetRewardUI(1, characterData.characterSprite);
                 _onChangeViewModel.OnNext(Unit.Default);
             }
 

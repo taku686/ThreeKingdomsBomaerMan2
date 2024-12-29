@@ -54,8 +54,21 @@ namespace PUROPORO
 
         private Color32 m_RarityColor;
 
-        private void Start()
+        /*private void Start()
         {
+            m_ChestMeshRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
+            m_Material = m_ChestMeshRenderer.materials[0];
+            m_Anim = GetComponent<Animator>();
+
+            ChestHide();
+
+            m_IsEmpty = false;
+            m_IsGlows = true;
+        }*/
+
+        public void Initialize()
+        {
+            gameObject.SetActive(true);
             m_ChestMeshRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
             m_Material = m_ChestMeshRenderer.materials[0];
             m_Anim = GetComponent<Animator>();
