@@ -7,8 +7,8 @@ namespace Manager.DataManager
 {
     public class CharacterMasterDataRepository : IDisposable
     {
-        [Inject] private MainManager mainManager;
-        [Inject] private UserDataRepository userDataRepository;
+        [Inject] private MainManager _mainManager;
+        [Inject] private UserDataRepository _userDataRepository;
         private static readonly Dictionary<int, CharacterData> CharacterDatum = new();
 
         public void SetCharacterData(CharacterData characterData)
@@ -33,7 +33,7 @@ namespace Manager.DataManager
 
         public CharacterData GetUserEquippedCharacterData()
         {
-            return GetCharacterData(userDataRepository.GetUserData().EquippedCharacterId);
+            return GetCharacterData(_userDataRepository.GetUserData().EquippedCharacterId);
         }
 
         public void Dispose()

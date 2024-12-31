@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
@@ -18,6 +17,7 @@ namespace UI.Title
         public class CharacterSelectState : StateMachine<TitleCore>.State
         {
             private CharacterSelectView _View => (CharacterSelectView)Owner.GetView(State.CharacterSelect);
+            private CommonView _CommonView => Owner._commonView;
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
             private CharacterSelectViewModelUseCase _CharacterSelectViewModelUseCase => Owner._characterSelectViewModelUseCase;
             private CharacterSelectRepository _CharacterSelectRepository => Owner._characterSelectRepository;
@@ -26,6 +26,7 @@ namespace UI.Title
             private UserDataRepository _UserDataRepository => Owner._userDataRepository;
             private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
             private StateMachine<TitleCore> _StateMachine => Owner._stateMachine;
+            private RewardDataRepository _RewardDataRepository => Owner._rewardDataRepository;
 
             private CancellationTokenSource _cancellationTokenSource;
             private readonly Subject<Unit> _onChangeViewModel = new();
@@ -46,7 +47,7 @@ namespace UI.Title
             {
                 _View.InitializeUiPosition();
                 SetupCancellationToken();
-                OnSubscribed();
+                Subscribe();
                 Owner.SwitchUiObject(State.CharacterSelect, true).Forget();
             }
 
@@ -60,7 +61,7 @@ namespace UI.Title
                 _cancellationTokenSource = new CancellationTokenSource();
             }
 
-            private void OnSubscribed()
+            private void Subscribe()
             {
                 SubscribeToggleView();
 
@@ -76,6 +77,7 @@ namespace UI.Title
                 _View._ClickBackButton
                     .Subscribe(_ => OnClickBack())
                     .AddTo(_cancellationTokenSource.Token);
+
                 _onChangeViewModel.OnNext(Unit.Default);
             }
 
@@ -181,7 +183,14 @@ namespace UI.Title
                     ).Select(isOk => (isOk, purchasedCharacterData)))
                     .Where(tuple => tuple.isOk)
                     .SelectMany(tuple => PurchaseCharacter(tuple.purchasedCharacterData.characterData).ToObservable())
-                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.Reward); })
+                    .Subscribe(characterId =>
+                    {
+                        (int, RewardDataUseCase.RewardData.RewardType)[] characterIds =
+                            { (characterId, RewardDataUseCase.RewardData.RewardType.Character) };
+                        _RewardDataRepository.SetRewardIds(characterIds);
+                        _StateMachine.Dispatch((int)State.Reward, (int)State.CharacterSelect);
+                        _onChangeViewModel.OnNext(Unit.Default);
+                    })
                     .AddTo(disableGrid.GetCancellationTokenOnDestroy());
 
                 haveEnoughGem.Connect().AddTo(disableGrid.GetCancellationTokenOnDestroy());
@@ -206,7 +215,7 @@ namespace UI.Title
                 return gem >= characterPrice ? (true, tuple: characterData) : (false, tuple: characterData);
             }
 
-            private async UniTask PurchaseCharacter((int characterId, Sprite characterSprite) characterData)
+            private async UniTask<int> PurchaseCharacter((int characterId, Sprite characterSprite) characterData)
             {
                 var characterPrice = GameCommonData.CharacterPrice;
                 var virtualCurrencyKey = GameCommonData.GemKey;
@@ -217,12 +226,11 @@ namespace UI.Title
                 if (!isSuccessPurchase)
                 {
                     //todo 購入に失敗したときの処理
-                    return;
+                    return -1;
                 }
 
                 await Owner.SetGemText();
-                //await Owner.SetRewardUI(1, characterData.characterSprite);
-                _onChangeViewModel.OnNext(Unit.Default);
+                return characterData.characterId;
             }
 
             private void OnClickCharacterGrid(CharacterData characterData, Button gridButton)

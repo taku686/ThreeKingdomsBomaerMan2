@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Assets.Scripts.Common.Data;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.DataManager;
+using Manager.PlayFabManager;
+using Newtonsoft.Json;
 using PlayFab;
 using PlayFab.ClientModels;
 using TMPro;
@@ -353,6 +356,19 @@ namespace Manager.NetworkManager
         {
             _storeController = controller;
             _extensionProvider = extensions;
+        }
+
+        public async UniTask<int[]> AddRandomWeaponAsync()
+        {
+            var result = await PlayFabBaseManager.AzureFunctionAsync("AddRandomWeapon");
+            if (result == null)
+            {
+                return new[] { -1 };
+            }
+
+            await _playFabUserDataManager.GetUserDataAsync();
+            var weaponIds = JsonConvert.DeserializeObject<Dictionary<string, int[]>>(result.ToString());
+            return weaponIds["result"];
         }
     }
 

@@ -30,6 +30,7 @@ namespace UI.Title
         [Inject] private CharacterSelectRepository _characterSelectRepository;
         [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
         [Inject] private CharacterObjectRepository _characterObjectRepository;
+        [Inject] private RewardDataRepository _rewardDataRepository;
 
         //UseCase
         [Inject] private CharacterSelectViewModelUseCase _characterSelectViewModelUseCase;
@@ -40,6 +41,7 @@ namespace UI.Title
         [Inject] private CharacterDetailViewModelUseCase _characterDetailViewModelUseCase;
         [Inject] private SkillDetailViewModelUseCase _skillDetailViewModelUseCase;
         [Inject] private PopupGenerateUseCase _popupGenerateUseCase;
+        [Inject] private RewardDataUseCase _rewardDataUseCase;
 
         //Manager
         [Inject] private PhotonNetworkManager _photonNetworkManager;
@@ -173,6 +175,8 @@ namespace UI.Title
                     view.gameObject.SetActive(view._State == state);
                 }
 
+                _commonView.SetCharacterStageActive(state != State.Reward);
+                _commonView.SetGachaStageActive(state == State.Reward);
                 action?.Invoke();
                 _commonView.virtualCurrencyView.gameObject.SetActive(isViewVirtualCurrencyUi);
             });

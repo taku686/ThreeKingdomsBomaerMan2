@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace PUROPORO
@@ -24,8 +23,7 @@ namespace PUROPORO
         public bool IsURPDemo;
         public MaterialType MaterialType;
 
-        [Header("Chest")]
-        [SerializeField] private SOChestsDB m_ChestsDB; // ScriptableObject
+        [Header("Chest")] [SerializeField] private SOChestsDB m_ChestsDB; // ScriptableObject
         private SkinnedMeshRenderer m_ChestMeshRenderer;
         private bool m_IsEmpty;
         private bool m_IsGlows;
@@ -47,24 +45,11 @@ namespace PUROPORO
         private static readonly int c_AnimDrops = Animator.StringToHash("Drops");
         private static readonly int c_AnimQuickOpens = Animator.StringToHash("Quick Opens");
 
-        [Header("Particles")]
-        [SerializeField] private ParticleSystem m_ParticlesSpawnChest;
+        [Header("Particles")] [SerializeField] private ParticleSystem m_ParticlesSpawnChest;
         [SerializeField] private ParticleSystem m_ParticlesSpawnCard;
         [SerializeField] private ParticleSystem m_ParticlesDisappearChest;
 
         private Color32 m_RarityColor;
-
-        /*private void Start()
-        {
-            m_ChestMeshRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
-            m_Material = m_ChestMeshRenderer.materials[0];
-            m_Anim = GetComponent<Animator>();
-
-            ChestHide();
-
-            m_IsEmpty = false;
-            m_IsGlows = true;
-        }*/
 
         public void Initialize()
         {
@@ -199,7 +184,6 @@ namespace PUROPORO
 
             m_Anim.CrossFade(c_AnimDrops, 0, 0);
             m_CurrentAnimState = c_AnimDrops;
-
             m_ParticlesSpawnChest.startDelay = 0.3f;
             m_ParticlesSpawnChest.Play();
         }

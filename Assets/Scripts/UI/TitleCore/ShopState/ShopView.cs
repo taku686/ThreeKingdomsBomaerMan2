@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UniRx;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace UI.Title.ShopState
@@ -14,19 +16,21 @@ namespace UI.Title.ShopState
         [SerializeField] private Button twoHundredGemButton;
         [SerializeField] private Button adsButton;
         [SerializeField] private Button gachaButton;
+        [SerializeField] private Button _weaponButton;
         [SerializeField] private RewardGetView rewardGetView;
         [SerializeField] private PurchaseErrorView purchaseErrorView;
 
-        public PurchaseErrorView PurchaseErrorView => purchaseErrorView;
-        public RewardGetView RewardGetView => rewardGetView;
-        public Button AdsButton => adsButton;
-        public Button GachaButton => gachaButton;
-        public Button BackButton => backButton;
-        public Button ThousandCoinButton => thousandCoinButton;
-        public Button FiveThousandCoinButton => fiveThousandCoinButton;
-        public Button TwelveThousandCoinButton => twelveThousandCoinButton;
-        public Button TwentyGemButton => twentyGemButton;
-        public Button HundredGemButton => hundredGemButton;
-        public Button TwoHundredGemButton => twoHundredGemButton;
+        public PurchaseErrorView _PurchaseErrorView => purchaseErrorView;
+        public RewardGetView _RewardGetView => rewardGetView;
+        public Button _AdsButton => adsButton;
+        public Button _GachaButton => gachaButton;
+        public Button _BackButton => backButton;
+        public IObservable<Unit> _OnClickAddThousandCoin => thousandCoinButton.OnClickAsObservable();
+        public IObservable<Unit> _OnClickAddWeapon => _weaponButton.OnClickAsObservable();
+        public Button _FiveThousandCoinButton => fiveThousandCoinButton;
+        public Button _TwelveThousandCoinButton => twelveThousandCoinButton;
+        public Button _TwentyGemButton => twentyGemButton;
+        public Button _HundredGemButton => hundredGemButton;
+        public Button _TwoHundredGemButton => twoHundredGemButton;
     }
 }

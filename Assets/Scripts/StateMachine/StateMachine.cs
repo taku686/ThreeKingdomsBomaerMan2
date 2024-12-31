@@ -128,6 +128,8 @@ public class StateMachine<TOwner>
     /// </summary>
     public State CurrentState { get; private set; }
 
+    public int PreviousState { get; private set; }
+
     // ステートリスト
     private LinkedList<State> states = new LinkedList<State>();
 
@@ -233,7 +235,7 @@ public class StateMachine<TOwner>
     /// イベントを発行する
     /// </summary>
     /// <param name="eventId">イベントID</param>
-    public void Dispatch(int eventId)
+    public void Dispatch(int eventId, int prevEventId = -1)
     {
         State to;
         if (!CurrentState.transitions.TryGetValue(eventId, out to))
@@ -243,6 +245,11 @@ public class StateMachine<TOwner>
                 // イベントに対応する遷移が見つからなかった
                 return;
             }
+        }
+
+        if (prevEventId != -1)
+        {
+            PreviousState = prevEventId;
         }
 
         Change(to).Forget();

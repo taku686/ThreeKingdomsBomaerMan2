@@ -7,21 +7,21 @@ namespace Repository
 {
     public class WeaponMasterDataRepository : IDisposable
     {
-        private readonly List<WeaponMasterData> weaponDataList = new();
+        private readonly List<WeaponMasterData> _weaponDataList = new();
 
         public void AddWeaponData(WeaponMasterData weaponMasterData)
         {
-            if (weaponDataList.Contains(weaponMasterData))
+            if (_weaponDataList.Contains(weaponMasterData))
             {
                 return;
             }
 
-            weaponDataList.Add(weaponMasterData);
+            _weaponDataList.Add(weaponMasterData);
         }
 
         public IReadOnlyCollection<WeaponMasterData> GetAllWeaponData()
         {
-            var result = weaponDataList
+            var result = _weaponDataList
                 .OrderBy(data => data.WeaponType)
                 .ThenBy(data => data.Id)
                 .ToArray();
@@ -30,7 +30,7 @@ namespace Repository
 
         public WeaponMasterData GetWeaponData(int weaponId)
         {
-            return weaponDataList.Find(data => data.Id == weaponId);
+            return _weaponDataList.Find(data => data.Id == weaponId);
         }
 
         public void Dispose()

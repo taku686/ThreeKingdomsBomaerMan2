@@ -41,12 +41,12 @@ namespace Manager.NetworkManager
             return true;
         }
 
-        public async UniTask<UserData> GetPlayerData(string key)
+        public async UniTask<UserData> GetUserDataAsync()
         {
             var request = new GetUserDataRequest
             {
-                PlayFabId = GameCommonData.TitleID,
-                Keys = new List<string> { key }
+                PlayFabId = PlayFabSettings.staticPlayer.PlayFabId,
+                Keys = new List<string> { GameCommonData.UserKey }
             };
 
             var response = await PlayFabClientAPI.GetUserDataAsync(request);
@@ -56,7 +56,7 @@ namespace Manager.NetworkManager
                 return null;
             }
 
-            var value = response.Result.Data[key].Value;
+            var value = response.Result.Data[GameCommonData.UserKey].Value;
             var user = JsonConvert.DeserializeObject<UserData>(value);
             if (user == null)
             {

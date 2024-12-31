@@ -2,17 +2,20 @@
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.DataManager;
+using Manager.PlayFabManager;
+using Newtonsoft.Json;
 using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine;
 using Zenject;
+using JsonObject = PlayFab.Json.JsonObject;
 
 namespace Manager.NetworkManager
 {
     public class PlayFabVirtualCurrencyManager : IDisposable
     {
-        [Inject] private UserDataRepository userDataRepository;
-        [Inject] private CharacterMasterDataRepository characterMasterDataRepository;
+        [Inject] private UserDataRepository _userDataRepository;
+        [Inject] private CharacterMasterDataRepository _characterMasterDataRepository;
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
 
         public async UniTask SetVirtualCurrency()
@@ -23,7 +26,7 @@ namespace Manager.NetworkManager
                 Debug.Log(result.Error.GenerateErrorReport());
             }
 
-            var user = userDataRepository.GetUserData();
+            var user = _userDataRepository.GetUserData();
             foreach (var item in result.Result.VirtualCurrency)
             {
                 if (item.Key.Equals(GameCommonData.CoinKey))
@@ -42,7 +45,7 @@ namespace Manager.NetworkManager
                 }
             }
 
-            userDataRepository.SetUserData(user);
+            _userDataRepository.SetUserData(user);
         }
 
         public async UniTask<int> GetCoin()
@@ -123,6 +126,11 @@ namespace Manager.NetworkManager
             return true;
         }
 
+        public async UniTask Add1000CoinAsync()
+        {
+            await PlayFabBaseManager.AzureFunctionAsync("Add1000Coin");
+        }
+
         public async UniTask SetInventoryData()
         {
             var result = await PlayFabClientAPI.GetUserInventoryAsync(new GetUserInventoryRequest());
@@ -132,17 +140,17 @@ namespace Manager.NetworkManager
                 return;
             }
 
-            var user = userDataRepository.GetUserData();
+            var user = _userDataRepository.GetUserData();
             foreach (var item in result.Result.Inventory)
             {
                 if (item.ItemClass.Equals(GameCommonData.CharacterClassKey))
                 {
                     var index = int.Parse(item.ItemId);
-                    user.Characters.Add(characterMasterDataRepository.GetCharacterData(index).Id);
+                    user.Characters.Add(_characterMasterDataRepository.GetCharacterData(index).Id);
                 }
             }
 
-            userDataRepository.SetUserData(user);
+            _userDataRepository.SetUserData(user);
             await _playFabUserDataManager.TryUpdateUserDataAsync(user);
         }
 

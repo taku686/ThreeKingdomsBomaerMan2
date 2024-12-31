@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+﻿using System;
+using Cysharp.Threading.Tasks;
+using UI.Title;
+using UniRx;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace PUROPORO
@@ -21,84 +25,73 @@ namespace PUROPORO
         private LootBoxState m_State;
         private int m_TotalRange;
 
-        [Header("LootBox")] [SerializeField] private LootBoxDemo m_LootBox;
+        [Header("LootBox")] [SerializeField] private LootBoxDemo _lootBoxPrefab;
+        [SerializeField] private Transform _lootBoxParent;
 
         [Header("UI Elements")] [SerializeField]
         private CardCounter m_Counter;
 
         [SerializeField] private GameObject m_TextYouGot;
-        [SerializeField] private GameObject m_TextPressContinue;
-        [SerializeField] private GameObject m_TextWelcome;
+        [SerializeField] private Text m_TextPressContinue;
         private int m_Count;
 
         [Header("Cards")] [SerializeField] private AnimateAToBUi m_CardAnimator;
         [SerializeField] private CardUI m_CardUI;
         [SerializeField] private GameObject m_CardUiGo;
+
         [SerializeField] private RectTransform m_AchievedCardsUI;
-        [SerializeField] private SOCardsDB m_CardsDB; // ScriptableObject
-        private ProbabilityRange[] m_ProbabilityRange;
+
+        // [SerializeField] private SOCardsDB m_CardsDB; // ScriptableObject
+        [SerializeField] private Button _button;
+
+        //private ProbabilityRange[] m_ProbabilityRange;
         private CardUI[] m_CardUIs = new CardUI[0];
-        private int[] m_AchievedCards;
 
-        /*private void Start()
+        //private int[] m_AchievedCards;
+        private RewardDataUseCase.RewardData[] _rewardDatum;
+
+        private LootBoxDemo _lootBox;
+        public IObservable<LootBoxState> _OnClickAsObservable => _button.OnClickAsObservable().Select(_ => OnClick());
+
+        [Obsolete("Obsolete")]
+        public async void Initialize(RewardDataUseCase.RewardData[] rewardDatum)
         {
+            _lootBox = Instantiate(_lootBoxPrefab, _lootBoxParent);
+            _lootBox.Initialize();
             m_State = LootBoxState.Starting;
-
             m_CardAnimator = GetComponent<AnimateAToBUi>();
-
             m_TotalRange = 0;
-            m_ProbabilityRange = new ProbabilityRange[m_CardsDB.GetCount()];
-
-            /// This method calculates and lists the probability for each card.
-            for (int i = 0; i < m_ProbabilityRange.Length; i++)
-            {
-                m_ProbabilityRange[i] = new ProbabilityRange();
-                m_ProbabilityRange[i].m_Min = m_TotalRange;
-                m_TotalRange += (int)m_CardsDB.GetCard(i).GetRarity();
-                m_ProbabilityRange[i].m_Max = m_TotalRange;
-            }
-
-            ShowIntro();
-        }*/
-
-        public void Initialize()
-        {
-            m_LootBox.Initialize();
-            m_State = LootBoxState.Starting;
-
-            m_CardAnimator = GetComponent<AnimateAToBUi>();
-
-            m_TotalRange = 0;
-            m_ProbabilityRange = new ProbabilityRange[m_CardsDB.GetCount()];
-
-            /// This method calculates and lists the probability for each card.
-            for (int i = 0; i < m_ProbabilityRange.Length; i++)
-            {
-                m_ProbabilityRange[i] = new ProbabilityRange();
-                m_ProbabilityRange[i].m_Min = m_TotalRange;
-                m_TotalRange += (int)m_CardsDB.GetCard(i).GetRarity();
-                m_ProbabilityRange[i].m_Max = m_TotalRange;
-            }
-
-            m_State = LootBoxState.Waiting;
+            _rewardDatum = rewardDatum;
+            m_TextYouGot.SetActive(false);
+            m_TextPressContinue.gameObject.SetActive(true);
+            m_TextPressContinue.text = "Press to Open";
+            await UniTask.Delay(1000);
+            SpawnChest();
         }
 
-        [System.Obsolete]
-        public void OnClick()
+        [Obsolete]
+        public LootBoxState OnClick()
         {
             switch (m_State)
             {
                 case LootBoxState.Opening:
                     SpawnCard();
-                    return;
-                case LootBoxState.Ending:
-                    ShowEnding();
-                    return;
+                    return m_State;
+                case LootBoxState.Resulting:
+                    m_State = LootBoxState.Ending;
+                    if (m_CardUIs.Length > 0)
+                    {
+                        foreach (var t in m_CardUIs)
+                            Destroy(t.gameObject);
+                    }
+
+                    Destroy(_lootBox.gameObject);
+                    _lootBox = null;
+                    return m_State;
                 case LootBoxState.Waiting:
-                    SpawnChest();
-                    return;
+                    return m_State;
                 default:
-                    return;
+                    return m_State;
             }
         }
 
@@ -108,28 +101,20 @@ namespace PUROPORO
         [System.Obsolete]
         private void SpawnChest()
         {
-            m_Count = m_LootBox.ChestChangeGraphics();
+            m_Count = _rewardDatum.Length;
 
             if (m_Count == 6 || m_Count == 3)
                 m_AchievedCardsUI.GetComponent<GridLayoutGroup>().constraintCount = 3;
-            else
+            else if (m_Count == 8 || m_Count == 4)
                 m_AchievedCardsUI.GetComponent<GridLayoutGroup>().constraintCount = 4;
+            else
+                m_AchievedCardsUI.GetComponent<GridLayoutGroup>().constraintCount = 5;
 
-            m_LootBox.ChestDrop();
+            _lootBox.ChestDrop();
 
             m_Counter.gameObject.SetActive(true);
             m_Counter.UpdateCounter(m_Count);
-            m_AchievedCards = new int[m_Count];
 
-            if (m_CardUIs.Length > 0)
-            {
-                for (int i = 0; i < m_CardUIs.Length; i++)
-                    Destroy(m_CardUIs[i].gameObject);
-            }
-
-            m_TextWelcome.SetActive(false);
-            m_TextYouGot.SetActive(false);
-            m_TextPressContinue.SetActive(false);
             m_State = LootBoxState.Opening;
         }
 
@@ -144,21 +129,12 @@ namespace PUROPORO
         {
             if (m_State != LootBoxState.Opening) return;
 
-            int i = Random.Range(0, m_TotalRange);
 
-            for (int j = 0; j < m_ProbabilityRange.Length; j++)
-            {
-                if (i >= m_ProbabilityRange[j].m_Min && i <= m_ProbabilityRange[j].m_Max)
-                {
-                    SOCard temp = m_CardsDB.GetCard(j);
-                    m_AchievedCards[m_Count - 1] = j;
-                    m_CardUI.SetCard(GetRarityColor(temp.GetRarity()), temp.GetImage(), temp.GetName());
-                    m_LootBox.SetRarityColor(GetRarityColor(temp.GetRarity()));
-                    break;
-                }
-            }
+            var rewardData = _rewardDatum[m_Count - 1];
+            m_CardUI.SetCard(rewardData._Color, rewardData._Icon, rewardData._Name);
+            _lootBox.SetRarityColor(rewardData._Color);
 
-            m_LootBox.ChestQuickOpens();
+            _lootBox.ChestQuickOpens();
             m_CardAnimator.StartAnimation(0);
 
             m_Count--;
@@ -166,23 +142,11 @@ namespace PUROPORO
 
             if (m_Count <= 0)
             {
-                m_LootBox.ChestEmpty();
-
-                m_TextPressContinue.SetActive(true);
-                m_State = LootBoxState.Ending;
+                _lootBox.ChestEmpty();
+                m_TextPressContinue.gameObject.SetActive(true);
+                m_TextPressContinue.text = "Press to Back";
+                ShowEnding();
             }
-        }
-
-        /// <summary>
-        /// Shows Loot Box's start intro.
-        /// </summary>
-        public void ShowIntro()
-        {
-            m_TextWelcome.SetActive(true);
-            m_TextYouGot.SetActive(false);
-            m_TextPressContinue.SetActive(true);
-
-            m_State = LootBoxState.Waiting;
         }
 
         /// <summary>
@@ -191,19 +155,20 @@ namespace PUROPORO
         /// </summary>
         private void ShowEnding()
         {
-            if (m_State != LootBoxState.Ending) return;
+            // if (m_State != LootBoxState.Resulting) return;
 
-            m_LootBox.ChestDisappear();
+            _lootBox.ChestDisappear();
             m_CardAnimator.ResetAnimation();
 
-            m_CardUIs = new CardUI[m_AchievedCards.Length];
+            m_CardUIs = new CardUI[_rewardDatum.Length];
+            var index = 0;
 
-            for (int i = 0; i < m_AchievedCards.Length; i++)
+            foreach (var rewardData in _rewardDatum)
             {
                 GameObject go = Instantiate(m_CardUiGo, m_AchievedCardsUI);
-                SOCard temp = m_CardsDB.GetCard(m_AchievedCards[i]);
-                go.GetComponent<CardUI>().SetCard(GetRarityColor(temp.GetRarity()), temp.GetImage(), temp.GetName());
-                m_CardUIs[i] = go.GetComponent<CardUI>();
+                go.GetComponent<CardUI>().SetCard(rewardData._Color, rewardData._Icon, rewardData._Name);
+                m_CardUIs[index] = go.GetComponent<CardUI>();
+                index++;
             }
 
             for (int i = 0; i < m_CardUIs.Length; i++)
@@ -212,40 +177,9 @@ namespace PUROPORO
             m_Counter.gameObject.SetActive(false);
 
             m_TextYouGot.SetActive(true);
-            m_TextPressContinue.SetActive(true);
-            m_State = LootBoxState.Waiting;
+            m_TextPressContinue.gameObject.SetActive(true);
+            m_State = LootBoxState.Resulting;
         }
-
-        /// <summary>
-        /// Returns the color of rarity by rarity enum.
-        /// </summary>
-        /// <param name="r">Enum of Rarity</param>
-        /// <returns>Color of Rarity (Color32)</returns>
-        public Color GetRarityColor(Rarity r)
-        {
-            switch (r)
-            {
-                case Rarity.common:
-                    return new Color32(188, 188, 188, 255);
-                case Rarity.uncommon:
-                    return new Color32(165, 226, 57, 255);
-                case Rarity.rare:
-                    return new Color32(74, 160, 241, 255);
-                case Rarity.epic:
-                    return new Color32(202, 67, 250, 255);
-                case Rarity.legendary:
-                    return new Color32(255, 225, 0, 255);
-                default:
-                    return new Color32(188, 188, 188, 255);
-            }
-        }
-    }
-
-    [System.Serializable]
-    public class ProbabilityRange
-    {
-        public int m_Min;
-        public int m_Max;
     }
 
     public enum Rarity
@@ -261,6 +195,7 @@ namespace PUROPORO
     {
         Starting,
         Opening,
+        Resulting,
         Ending,
         Waiting
     }

@@ -29,6 +29,8 @@ namespace Common.Installer
             Container.Bind<ChatGPTManager>().AsCached();
             Container.Bind<CharacterCreateUseCase>().AsCached().WithArguments(characterGenerateParent);
             Container.Bind<CharacterObjectRepository>().AsCached();
+            Container.Bind<RewardDataUseCase>().AsCached();
+            Container.Bind<RewardDataRepository>().AsCached();
             Container.Bind<AnimatorControllerRepository>().FromComponentOn(animatorControllerRepository).AsCached();
 
             InstallCharacterSelect();
