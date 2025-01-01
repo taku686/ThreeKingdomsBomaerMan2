@@ -19,16 +19,16 @@ namespace Manager.PlayFabManager
         private const string MissionMasterKey = "MissionMaster";
         private const string SkillMasterKey = "SkillMaster";
         private const string WeaponMasterKey = "WeaponMaster";
-        [Inject] private CharacterMasterDataRepository characterMasterDataRepository;
-        [Inject] private LevelMasterDataRepository levelMasterDataRepository;
-        [Inject] private MissionDataRepository missionDataRepository;
-        [Inject] private SkillMasterDataRepository skillMasterDataRepository;
-        [Inject] private WeaponMasterDataRepository weaponMasterDataRepository;
-        private CancellationTokenSource cts;
+        [Inject] private CharacterMasterDataRepository _characterMasterDataRepository;
+        [Inject] private LevelMasterDataRepository _levelMasterDataRepository;
+        [Inject] private MissionDataRepository _missionDataRepository;
+        [Inject] private SkillMasterDataRepository _skillMasterDataRepository;
+        [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
+        private CancellationTokenSource _cts;
 
         public void Initialize()
         {
-            cts = new CancellationTokenSource();
+            _cts = new CancellationTokenSource();
         }
 
         public async UniTask SetTitleData(Dictionary<string, string> titleDatum)
@@ -55,14 +55,14 @@ namespace Manager.PlayFabManager
             foreach (var characterData in characterDatum)
             {
                 characterData.CharacterObject =
-                    await LoadGameObject(GameCommonData.CharacterPrefabPath, characterData.CharaObj, cts.Token);
+                    await LoadGameObject(GameCommonData.CharacterPrefabPath, characterData.CharaObj, _cts.Token);
                 characterData.SelfPortraitSprite =
-                    await LoadCharacterSprite(characterData.Id, cts.Token);
+                    await LoadCharacterSprite(characterData.Id, _cts.Token);
                 characterData.ColorSprite =
-                    await LoadCharacterColor(characterData.CharaColor, cts.Token);
+                    await LoadCharacterColor(characterData.CharaColor, _cts.Token);
                 characterData.BombLimit /= FixedValue;
                 characterData.FireRange /= FixedValue;
-                characterMasterDataRepository.SetCharacterData(characterData);
+                _characterMasterDataRepository.SetCharacterData(characterData);
             }
         }
 
@@ -73,7 +73,7 @@ namespace Manager.PlayFabManager
                 var id = skillData.Id;
                 var explanation = skillData.Explanation;
                 var name = skillData.Name;
-                var sprite = await LoadSkillSprite(skillData.IconID, cts.Token);
+                var sprite = await LoadSkillSprite(skillData.IconID, _cts.Token);
                 var skillType = (SkillType)skillData.SkillTypeInt;
                 var attributeType = (AttributeType)skillData.AttributeTypeInt;
                 var skillEffectType =
@@ -97,7 +97,7 @@ namespace Manager.PlayFabManager
                     effectTime
                 );
 
-                skillMasterDataRepository.AddSkillData(newSkillData);
+                _skillMasterDataRepository.AddSkillData(newSkillData);
             }
         }
 
@@ -109,11 +109,11 @@ namespace Manager.PlayFabManager
                 var id = weaponData.Id;
                 var weaponType = (WeaponType)weaponData.WeaponTypeInt;
                 var attributeType = (AttributeType)weaponData.AttributeTypeInt;
-                var weaponObject = await LoadWeaponGameObject(id, cts.Token);
-                var weaponIcon = await LoadWeaponSprite(id, cts.Token);
-                var statusSkillData = skillMasterDataRepository.GetSkillData(weaponData.StatusSkillId);
-                var normalSkillData = skillMasterDataRepository.GetSkillData(weaponData.NormalSkillId);
-                var specialSkillData = skillMasterDataRepository.GetSkillData(weaponData.SpecialSkillId);
+                var weaponObject = await LoadWeaponGameObject(id, _cts.Token);
+                var weaponIcon = await LoadWeaponSprite(id, _cts.Token);
+                var statusSkillData = _skillMasterDataRepository.GetSkillData(weaponData.StatusSkillId);
+                var normalSkillData = _skillMasterDataRepository.GetSkillData(weaponData.NormalSkillId);
+                var specialSkillData = _skillMasterDataRepository.GetSkillData(weaponData.SpecialSkillId);
                 var scale = weaponData.Scale;
                 var isBothHands = weaponData.IsBothHands;
                 var rare = weaponData.Rare;
@@ -134,7 +134,7 @@ namespace Manager.PlayFabManager
                     rare
                 );
 
-                weaponMasterDataRepository.AddWeaponData(newWeaponData);
+                _weaponMasterDataRepository.AddWeaponData(newWeaponData);
             }
         }
 
@@ -142,7 +142,7 @@ namespace Manager.PlayFabManager
         {
             foreach (var characterLevelMasterData in characterLevelMasterDatum)
             {
-                levelMasterDataRepository.SetCharacterLevelData(characterLevelMasterData);
+                _levelMasterDataRepository.SetCharacterLevelData(characterLevelMasterData);
             }
         }
 
@@ -150,7 +150,7 @@ namespace Manager.PlayFabManager
         {
             foreach (var missionData in missionDatum)
             {
-                missionDataRepository.AddMissionData(missionData);
+                _missionDataRepository.AddMissionData(missionData);
             }
         }
 
@@ -223,8 +223,8 @@ namespace Manager.PlayFabManager
 
         public void Dispose()
         {
-            cts.Cancel();
-            cts?.Dispose();
+            _cts.Cancel();
+            _cts?.Dispose();
         }
     }
 }

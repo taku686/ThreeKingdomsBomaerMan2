@@ -14,8 +14,8 @@ namespace Assets.Scripts.Common.ResourceManager
 {
     public class PlayFabCatalogManager : IDisposable
     {
-        [Inject] private readonly CatalogDataRepository catalogDataRepository;
-        private readonly CancellationTokenSource cancellationTokenSource = new();
+        [Inject] private readonly CatalogDataRepository _catalogDataRepository;
+        private readonly CancellationTokenSource _cancellationTokenSource = new();
         private static readonly int ModifiedValue = 10;
 
         public async UniTask Initialize()
@@ -50,7 +50,7 @@ namespace Assets.Scripts.Common.ResourceManager
             }
 
             var catalogItemList = response.Result.Catalog;
-            catalogDataRepository.SetCatalogItemList(catalogItemList);
+            _catalogDataRepository.SetCatalogItemList(catalogItemList);
             return catalogItemList;
         }
 
@@ -76,7 +76,7 @@ namespace Assets.Scripts.Common.ResourceManager
                 Hp = customData.Hp,
                 CharaColor = customData.CharaColor
             };
-            catalogDataRepository.SetCharacter(characterData);
+            _catalogDataRepository.SetCharacter(characterData);
         }
 
         private void SetAddVirtualCurrencyItemData(CatalogItem item)
@@ -98,7 +98,7 @@ namespace Assets.Scripts.Common.ResourceManager
                 price = customData.price,
                 Name = item.ItemId
             };
-            catalogDataRepository.SetAddVirtualCurrencyData(addVirtualCurrencyItemData);
+            _catalogDataRepository.SetAddVirtualCurrencyData(addVirtualCurrencyItemData);
         }
 
         private void SetLoginBonusItemData(CatalogItem item)
@@ -120,14 +120,14 @@ namespace Assets.Scripts.Common.ResourceManager
                 price = customData.price,
                 Name = item.ItemId
             };
-            catalogDataRepository.SetLoginBonusItemData(addVirtualCurrencyItemData);
+            _catalogDataRepository.SetLoginBonusItemData(addVirtualCurrencyItemData);
         }
 
         public void Dispose()
         {
-            cancellationTokenSource.Cancel();
-            cancellationTokenSource.Dispose();
-            catalogDataRepository.Dispose();
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
+            _catalogDataRepository.Dispose();
         }
     }
 }

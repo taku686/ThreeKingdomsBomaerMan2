@@ -48,11 +48,11 @@ Shader "KriptoFX/ME/Distortion"
 	}
 	SubShader
 	{
-		GrabPass {
+		/*GrabPass {
 			"_GrabTexture"
- 		}
+ 		}*/
 
-		Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent"}
+		Tags { "Queue"="Transparent-10" "IgnoreProjector"="True" "RenderType"="Transparent"}
 		ZWrite [_ZWriteMode]
 		Cull [_CullMode]
 			Offset -1, -1

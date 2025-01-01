@@ -30,6 +30,7 @@ namespace UI.Title
         [Inject] private CharacterSelectRepository _characterSelectRepository;
         [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
         [Inject] private CharacterObjectRepository _characterObjectRepository;
+        [Inject] private RewardDataRepository _rewardDataRepository;
 
         //UseCase
         [Inject] private CharacterSelectViewModelUseCase _characterSelectViewModelUseCase;
@@ -40,6 +41,7 @@ namespace UI.Title
         [Inject] private CharacterDetailViewModelUseCase _characterDetailViewModelUseCase;
         [Inject] private SkillDetailViewModelUseCase _skillDetailViewModelUseCase;
         [Inject] private PopupGenerateUseCase _popupGenerateUseCase;
+        [Inject] private RewardDataUseCase _rewardDataUseCase;
 
         //Manager
         [Inject] private PhotonNetworkManager _photonNetworkManager;
@@ -57,8 +59,9 @@ namespace UI.Title
 
         [SerializeField] private Fade _fade;
         [SerializeField] private Transform _characterCreatePosition;
-        [SerializeField] private ViewBase[] _views;
         [SerializeField] private CommonView _commonView;
+        [SerializeField] private ViewBase[] _views;
+
 
         private StateMachine<TitleCore> _stateMachine;
         private CancellationTokenSource _cts;
@@ -76,7 +79,8 @@ namespace UI.Title
             LoginBonus,
             Mission,
             SelectBattleMode,
-            Inventory
+            Inventory,
+            Reward
         }
 
 
@@ -133,6 +137,9 @@ namespace UI.Title
             _stateMachine.AddTransition<MainState, SettingState>((int)State.Setting);
             _stateMachine.AddTransition<MainState, LoginBonusState>((int)State.LoginBonus);
             _stateMachine.AddTransition<MainState, MissionState>((int)State.Mission);
+            _stateMachine.AddTransition<CharacterSelectState, RewardState>((int)State.Reward);
+            _stateMachine.AddTransition<ShopState, RewardState>((int)State.Reward);
+            _stateMachine.AddTransition<RewardState, CharacterSelectState>((int)State.CharacterSelect);
         }
 
         private void InitializeButton()
@@ -150,7 +157,7 @@ namespace UI.Title
         {
             foreach (var view in _views)
             {
-                if (view.State == state)
+                if (view._State == state)
                 {
                     return view;
                 }
@@ -165,9 +172,11 @@ namespace UI.Title
             {
                 foreach (var view in _views)
                 {
-                    view.gameObject.SetActive(view.State == state);
+                    view.gameObject.SetActive(view._State == state);
                 }
 
+                _commonView.SetCharacterStageActive(state != State.Reward);
+                _commonView.SetGachaStageActive(state == State.Reward);
                 action?.Invoke();
                 _commonView.virtualCurrencyView.gameObject.SetActive(isViewVirtualCurrencyUi);
             });

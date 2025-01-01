@@ -16,7 +16,7 @@ namespace PlayFab
 
         public readonly static PlayFabApiSettings staticSettings = new PlayFabApiSettings();
         // This field will likely be removed someday
-        internal readonly static PlayFabAuthenticationContext staticPlayer = new PlayFabAuthenticationContext();
+        public readonly static PlayFabAuthenticationContext staticPlayer = new PlayFabAuthenticationContext();
 
         #region Deprecated staticSettings redirect properties
         [Obsolete("Moved to PlayFabSettings.staticSettings.RequestGetParams")]

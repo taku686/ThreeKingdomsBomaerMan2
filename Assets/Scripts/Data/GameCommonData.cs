@@ -96,40 +96,41 @@ namespace Common.Data
         public const int NormalSkillReleaseLevel = 7;
         public const int SpecialSkillReleaseLevel = 10;
 
+        public static class Terms
+        {
+            public const string AddGemPopupTile = "ジェムの数が足りません";
+            public  const string AddGemPopupExplanation = "ジェムの数が足りません。\nジェムを追加しますか？";
+            public  const string AddGemPopupOk = "追加";
+            public  const string AddGemPopupCancel = "キャンセル";
+            public  const string PurchaseCharacterPopupTitle = "キャラクターを購入しますか？";
+            public  const string PurchaseCharacterPopupExplanation = "200ジェムを消費して \nキャラクターを購入しますか？";
+            public  const string PurchaseCharacterPopupOk = "購入";
+            public  const string PurchaseCharacterPopupCancel = "キャンセル";
+        }
+
         public static CharacterColor GetCharacterColor(string color)
         {
-            switch (color)
+            return color switch
             {
-                case "Red":
-                    return CharacterColor.Red;
-                case "Blue":
-                    return CharacterColor.Blue;
-                case "Green":
-                    return CharacterColor.Green;
-                case "Purple":
-                    return CharacterColor.Purple;
-                case "Yellow":
-                    return CharacterColor.Yellow;
-                default:
-                    return CharacterColor.Red;
-            }
+                "Red" => CharacterColor.Red,
+                "Blue" => CharacterColor.Blue,
+                "Green" => CharacterColor.Green,
+                "Purple" => CharacterColor.Purple,
+                "Yellow" => CharacterColor.Yellow,
+                _ => CharacterColor.Red
+            };
         }
 
         public static Vector3 GetPlayerDirection(float rotation)
         {
-            switch (rotation)
+            return rotation switch
             {
-                case -180:
-                    return Vector3.back;
-                case 0:
-                    return Vector3.forward;
-                case -90:
-                    return Vector3.left;
-                case 90:
-                    return Vector3.right;
-                default:
-                    return Vector3.zero;
-            }
+                -180 => Vector3.back,
+                0 => Vector3.forward,
+                -90 => Vector3.left,
+                90 => Vector3.right,
+                _ => Vector3.zero
+            };
         }
 
         public static Vector3 DirectionToVector3(Direction direction)
