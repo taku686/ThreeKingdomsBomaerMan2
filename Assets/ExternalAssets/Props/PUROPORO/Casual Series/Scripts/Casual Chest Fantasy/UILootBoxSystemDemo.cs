@@ -53,7 +53,6 @@ namespace PUROPORO
         private LootBoxDemo _lootBox;
         public IObservable<LootBoxState> _OnClickAsObservable => _button.OnClickAsObservable().Select(_ => OnClick());
 
-        [Obsolete("Obsolete")]
         public async void Initialize(RewardDataUseCase.RewardData[] rewardDatum)
         {
             _lootBox = Instantiate(_lootBoxPrefab, _lootBoxParent);
@@ -89,6 +88,7 @@ namespace PUROPORO
                     _lootBox = null;
                     return m_State;
                 case LootBoxState.Waiting:
+                    ShowResult();
                     return m_State;
                 default:
                     return m_State;
@@ -113,7 +113,7 @@ namespace PUROPORO
             _lootBox.ChestDrop();
 
             m_Counter.gameObject.SetActive(true);
-            m_Counter.UpdateCounter(m_Count);
+            m_Counter.UpdateCounter(_rewardDatum.Length);
 
             m_State = LootBoxState.Opening;
         }
@@ -124,11 +124,10 @@ namespace PUROPORO
         /// The card probabilities are calculated in the Start function.
         /// The function also gives the command to stop drawing when the cards run out of the chest.
         /// </summary>
-        [System.Obsolete]
+        [Obsolete]
         private void SpawnCard()
         {
             if (m_State != LootBoxState.Opening) return;
-
 
             var rewardData = _rewardDatum[m_Count - 1];
             m_CardUI.SetCard(rewardData._Color, rewardData._Icon, rewardData._Name);
@@ -136,17 +135,20 @@ namespace PUROPORO
 
             _lootBox.ChestQuickOpens();
             m_CardAnimator.StartAnimation(0);
-
             m_Count--;
             m_Counter.UpdateCounter(m_Count);
-
             if (m_Count <= 0)
             {
-                _lootBox.ChestEmpty();
-                m_TextPressContinue.gameObject.SetActive(true);
-                m_TextPressContinue.text = "Press to Back";
-                ShowEnding();
+                m_State = LootBoxState.Waiting;
             }
+        }
+
+        private void ShowResult()
+        {
+            _lootBox.ChestEmpty();
+            m_TextPressContinue.gameObject.SetActive(true);
+            m_TextPressContinue.text = "Press to Back";
+            ShowEnding();
         }
 
         /// <summary>
