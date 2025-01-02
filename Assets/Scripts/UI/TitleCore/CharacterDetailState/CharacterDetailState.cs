@@ -22,10 +22,7 @@ namespace UI.Title
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
             private CharacterObjectRepository _CharacterObjectRepository => Owner._characterObjectRepository;
             private AnimationPlayBackUseCase _AnimationPlayBackUseCase => Owner._animationPlayBackUseCase;
-
-            private CharacterDetailViewModelUseCase _CharacterDetailViewModelUseCase =>
-                Owner._characterDetailViewModelUseCase;
-
+            private CharacterDetailViewModelUseCase _CharacterDetailViewModelUseCase => Owner._characterDetailViewModelUseCase;
             private UserDataRepository _UserDataRepository => Owner._userDataRepository;
             private SortCharactersUseCase _SortCharactersUseCase => Owner._sortCharactersUseCase;
             private PlayFabUserDataManager _playFabUserDataManager;
@@ -70,50 +67,50 @@ namespace UI.Title
                     .Subscribe(viewModel => _View.ApplyViewModel(viewModel))
                     .AddTo(_cts.Token);
 
-                _View.PurchaseErrorView.okButton.OnClickAsObservable()
+                _View._PurchaseErrorView.okButton.OnClickAsObservable()
                     .SelectMany(_ => OnClickClosePurchaseErrorView().ToObservable())
                     .Subscribe()
                     .AddTo(_cts.Token);
 
-                _View.BackButton.OnClickAsObservable()
+                _View._BackButton.OnClickAsObservable()
                     .Subscribe(_ => OnClickBackButton())
                     .AddTo(_cts.Token);
 
-                _View.SelectButton.OnClickAsObservable()
+                _View._SelectButton.OnClickAsObservable()
                     .SelectMany(_ => OnClickDecideButton().ToObservable())
                     .Subscribe()
                     .AddTo(_cts.Token);
 
-                _View.LeftArrowButton.OnClickAsObservable()
+                _View._LeftArrowButton.OnClickAsObservable()
                     .Subscribe(_ => OnClickLeftArrow())
                     .AddTo(_cts.Token);
 
-                _View.RightArrowButton.OnClickAsObservable()
+                _View._RightArrowButton.OnClickAsObservable()
                     .Subscribe(_ => OnClickRightArrow())
                     .AddTo(_cts.Token);
 
-                _View.UpgradeButton.OnClickAsObservable()
+                _View._UpgradeButton.OnClickAsObservable()
                     .SelectMany(_ => OnClickUpgrade().ToObservable())
                     .Subscribe()
                     .AddTo(_cts.Token);
 
-                _View.VirtualCurrencyAddPopup.OnClickCancelButton
+                _View._VirtualCurrencyAddPopup.OnClickCancelButton
                     .Subscribe(_ =>
                     {
-                        OnClickCloseVirtualCurrencyAddView(_View.VirtualCurrencyAddPopup
+                        OnClickCloseVirtualCurrencyAddView(_View._VirtualCurrencyAddPopup
                             .CancelButton.gameObject);
                     })
                     .AddTo(_cts.Token);
 
-                _View.VirtualCurrencyAddPopup.OnClickCloseButton
-                    .Subscribe(_ => { OnClickCloseVirtualCurrencyAddView(_View.VirtualCurrencyAddPopup.CloseButton.gameObject); })
+                _View._VirtualCurrencyAddPopup.OnClickCloseButton
+                    .Subscribe(_ => { OnClickCloseVirtualCurrencyAddView(_View._VirtualCurrencyAddPopup.CloseButton.gameObject); })
                     .AddTo(_cts.Token);
 
-                _View.VirtualCurrencyAddPopup.OnClickAddButton
+                _View._VirtualCurrencyAddPopup.OnClickAddButton
                     .Subscribe(_ => OnClickAddVirtualCurrency())
                     .AddTo(_cts.Token);
 
-                _View.InventoryButton.OnClickAsObservable()
+                _View._InventoryButton.OnClickAsObservable()
                     .Subscribe(_ => stateMachine.Dispatch((int)State.Inventory))
                     .AddTo(_cts.Token);
 
@@ -142,7 +139,7 @@ namespace UI.Title
 
             private void OnClickRightArrow()
             {
-                var button = _View.RightArrowButton;
+                var button = _View._RightArrowButton;
                 button.interactable = false;
                 Owner._uiAnimation.ClickScaleColor(button.gameObject).OnComplete(() =>
                 {
@@ -170,7 +167,7 @@ namespace UI.Title
 
             private void OnClickLeftArrow()
             {
-                var button = _View.LeftArrowButton;
+                var button = _View._LeftArrowButton;
                 button.interactable = false;
                 Owner._uiAnimation.ClickScaleColor(button.gameObject).OnComplete(() =>
                 {
@@ -198,7 +195,7 @@ namespace UI.Title
 
             private async UniTask OnClickDecideButton()
             {
-                _View.SelectButton.interactable = false;
+                _View._SelectButton.interactable = false;
                 var userData = _UserDataRepository.GetUserData();
                 userData.EquippedCharacterId = _sortedCharacters[_candidateIndex].Id;
                 var result = await _playFabUserDataManager.TryUpdateUserDataAsync(userData);
@@ -207,28 +204,28 @@ namespace UI.Title
                     Owner._stateMachine.Dispatch((int)State.Main);
                 }
 
-                _View.SelectButton.interactable = true;
+                _View._SelectButton.interactable = true;
             }
 
             private async UniTask OnClickUpgrade()
             {
-                _View.UpgradeButton.interactable = false;
+                _View._UpgradeButton.interactable = false;
                 var selectedCharacterData = _sortedCharacters[_candidateIndex];
                 var coin = await _playFabVirtualCurrencyManager.GetCoin();
                 if (coin == GameCommonData.NetworkErrorCode)
                 {
-                    _View.UpgradeButton.interactable = true;
+                    _View._UpgradeButton.interactable = true;
                     return;
                 }
 
 
                 var nextLevelData = _UserDataRepository.GetNextLevelData(selectedCharacterData.Id);
-                var virtualCurrencyAddView = _View.VirtualCurrencyAddPopup;
-                var purchaseErrorView = _View.PurchaseErrorView;
+                var virtualCurrencyAddView = _View._VirtualCurrencyAddPopup;
+                var purchaseErrorView = _View._PurchaseErrorView;
                 if (coin < nextLevelData.NeedCoin)
                 {
                     Debug.LogError("コイン足りない");
-                    _View.UpgradeButton.interactable = true;
+                    _View._UpgradeButton.interactable = true;
                     virtualCurrencyAddView.transform.localScale = Vector3.zero;
                     virtualCurrencyAddView.gameObject.SetActive(true);
                     await _uiAnimation.Open(virtualCurrencyAddView.transform, GameCommonData.OpenDuration);
@@ -243,7 +240,7 @@ namespace UI.Title
                     Debug.LogError("購入処理エラー");
                     purchaseErrorView.transform.localScale = Vector3.zero;
                     purchaseErrorView.gameObject.SetActive(true);
-                    _View.UpgradeButton.interactable = true;
+                    _View._UpgradeButton.interactable = true;
                     await _uiAnimation.Open(purchaseErrorView.transform, GameCommonData.OpenDuration);
                     return;
                 }
@@ -258,14 +255,14 @@ namespace UI.Title
                     CreateCharacter(selectedCharacterData);
                 }
 
-                _View.UpgradeButton.interactable = true;
+                _View._UpgradeButton.interactable = true;
             }
 
             private void OnClickCloseVirtualCurrencyAddView(GameObject button)
             {
                 Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                     {
-                        var virtualCurrencyAddView = _View.VirtualCurrencyAddPopup;
+                        var virtualCurrencyAddView = _View._VirtualCurrencyAddPopup;
                         await _uiAnimation.Close(virtualCurrencyAddView.transform, GameCommonData.CloseDuration);
                         virtualCurrencyAddView.gameObject.SetActive(false);
                     }
@@ -274,13 +271,13 @@ namespace UI.Title
 
             private void OnClickAddVirtualCurrency()
             {
-                var button = _View.VirtualCurrencyAddPopup.AddButton.gameObject;
+                var button = _View._VirtualCurrencyAddPopup.AddButton.gameObject;
                 Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => { Owner._stateMachine.Dispatch((int)State.Shop); }).SetLink(button);
             }
 
             private async UniTask OnClickClosePurchaseErrorView()
             {
-                var purchaseErrorView = _View.PurchaseErrorView;
+                var purchaseErrorView = _View._PurchaseErrorView;
                 await _uiAnimation.Close(purchaseErrorView.transform, GameCommonData.CloseDuration);
                 purchaseErrorView.gameObject.SetActive(false);
             }

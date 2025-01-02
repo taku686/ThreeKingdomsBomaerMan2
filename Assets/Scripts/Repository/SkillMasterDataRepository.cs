@@ -6,21 +6,21 @@ namespace Manager.DataManager
 {
     public class SkillMasterDataRepository : IDisposable
     {
-        private readonly List<SkillMasterData> skillDatum = new();
+        private readonly List<SkillMasterData> _skillDatum = new();
 
         public void AddSkillData(SkillMasterData masterData)
         {
-            if (skillDatum.Contains(masterData))
+            if (_skillDatum.Contains(masterData))
             {
                 return;
             }
 
-            skillDatum.Add(masterData);
+            _skillDatum.Add(masterData);
         }
 
         public SkillMasterData GetSkillData(int id)
         {
-            return skillDatum.Find(data => data.Id == id);
+            return _skillDatum.Find(data => data.Id == id);
         }
 
         public void Dispose()

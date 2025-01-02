@@ -81,7 +81,7 @@ namespace Common.Data
         public const float OpenDuration = 1.0f;
         public const int ThreeMilliSecondsBeforeExplosion = 3000;
         public const int MaxCharacterLevel = 10;
-        public const int MinCharacterLevel = 0;
+        public const int MinCharacterLevel = 1;
         public const int MaxMissionCount = 3;
         public const int MaxMissionProgress = 100;
         public const int BattleCountActionId = 0;

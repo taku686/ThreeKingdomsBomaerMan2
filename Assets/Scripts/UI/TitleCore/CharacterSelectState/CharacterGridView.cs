@@ -11,14 +11,17 @@ namespace UI.Title
         public Image backGroundImage;
         public TextMeshProUGUI nameText;
         public Button gridButton;
+        [SerializeField] private Image _typeImage;
+        [SerializeField] private Image _typeIcon;
         [SerializeField] private StatusGridView[] statusGridViews;
 
-        public void ApplyStatusGridViews(CharacterSelectRepository.OrderType orderType,
-            CharacterData fixedCharacterData)
+        public void ApplyStatusGridViews(CharacterSelectRepository.OrderType orderType, CharacterData fixedCharacterData, (Sprite, Color) typeData)
         {
             characterImage.sprite = fixedCharacterData.SelfPortraitSprite;
             backGroundImage.sprite = fixedCharacterData.ColorSprite;
             nameText.text = fixedCharacterData.Name;
+            _typeImage.color = typeData.Item2;
+            _typeIcon.sprite = typeData.Item1;
             foreach (var statusGridView in statusGridViews)
             {
                 statusGridView.gameObject.SetActive(statusGridView.OrderType == orderType);

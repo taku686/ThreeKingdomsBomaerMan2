@@ -53,6 +53,7 @@ namespace UI.Title
         [Inject] private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
         [Inject] private MissionManager _missionManager;
         [Inject] private ChatGPTManager _chatGptManager;
+        [Inject] private CharacterTypeManager _characterTypeManager;
 
         //UI
         [Inject] private UIAnimation _uiAnimation;

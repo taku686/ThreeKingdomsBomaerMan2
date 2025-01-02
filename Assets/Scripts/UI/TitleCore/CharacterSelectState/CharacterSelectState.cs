@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Manager.NetworkManager;
 using Repository;
+using UI.Common;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,7 +18,6 @@ namespace UI.Title
         public class CharacterSelectState : StateMachine<TitleCore>.State
         {
             private CharacterSelectView _View => (CharacterSelectView)Owner.GetView(State.CharacterSelect);
-            private CommonView _CommonView => Owner._commonView;
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
             private CharacterSelectViewModelUseCase _CharacterSelectViewModelUseCase => Owner._characterSelectViewModelUseCase;
             private CharacterSelectRepository _CharacterSelectRepository => Owner._characterSelectRepository;
@@ -27,6 +27,7 @@ namespace UI.Title
             private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
             private StateMachine<TitleCore> _StateMachine => Owner._stateMachine;
             private RewardDataRepository _RewardDataRepository => Owner._rewardDataRepository;
+            private CharacterTypeManager _CharacterTypeManager => Owner._characterTypeManager;
 
             private CancellationTokenSource _cancellationTokenSource;
             private readonly Subject<Unit> _onChangeViewModel = new();
@@ -70,7 +71,7 @@ namespace UI.Title
                     .Subscribe(viewModel =>
                     {
                         _View.ApplyViewModel(viewModel);
-                        CreateUIContents(viewModel.OrderType);
+                        CreateUIContents(viewModel._OrderType);
                     })
                     .AddTo(_cancellationTokenSource.Token);
 
@@ -112,8 +113,7 @@ namespace UI.Title
                 {
                     if (index % 5 == 0)
                     {
-                        gridGroup = Instantiate(_View._HorizontalGroupGameObject,
-                            _View._ContentsTransform);
+                        gridGroup = Instantiate(_View._HorizontalGroupGameObject, _View._ContentsTransform);
                         _gridGroupLists.Add(gridGroup);
                     }
 
@@ -142,12 +142,12 @@ namespace UI.Title
                 }
             }
 
-            private void CreateActiveGrid(CharacterData fixedCharacterData, Transform parent,
-                CharacterSelectRepository.OrderType orderType)
+            private void CreateActiveGrid(CharacterData fixedCharacterData, Transform parent, CharacterSelectRepository.OrderType orderType)
             {
                 var grid = Instantiate(_View._Grid, parent);
                 var characterGrid = grid.GetComponentInChildren<CharacterGridView>();
-                characterGrid.ApplyStatusGridViews(orderType, fixedCharacterData);
+                var (typeSprite, typeColor) = _CharacterTypeManager.GetCharacterTypeData(fixedCharacterData.Type);
+                characterGrid.ApplyStatusGridViews(orderType, fixedCharacterData, (typeSprite, typeColor));
                 characterGrid.gridButton.onClick.AddListener(() => { OnClickCharacterGrid(fixedCharacterData, characterGrid.gridButton); });
             }
 
