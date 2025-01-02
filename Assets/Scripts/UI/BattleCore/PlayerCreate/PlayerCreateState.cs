@@ -73,8 +73,6 @@ namespace Manager.BattleManager
                 var weaponType = weaponData.WeaponType;
                 player.tag = GameCommonData.PlayerTag;
                 player.layer = LayerMask.NameToLayer(GameCommonData.PlayerLayer);
-                InitializeStatus(out var playerStatusManager, characterData, weaponData, photonView.IsMine);
-                playerPutBomb.Initialize(BombProvider, playerStatusManager, MapManager);
                 SetPlayerUI(player, playerId, out var hpKey);
                 SetAnimatorController(player, weaponType, photonAnimator);
                 GenerateEffectActivator(player, playerId);
@@ -87,6 +85,8 @@ namespace Manager.BattleManager
                 AddBoxCollider(player);
                 AddRigidbody(player);
                 CameraManager.Initialize(player.transform);
+                InitializeStatus(out var playerStatusManager, characterData, weaponData, photonView.IsMine);
+                playerPutBomb.Initialize(BombProvider, playerStatusManager, MapManager);
                 var playerCore = player.AddComponent<PlayerCore>();
                 Owner.SetPlayerCore(playerCore);
                 playerCore.Initialize
