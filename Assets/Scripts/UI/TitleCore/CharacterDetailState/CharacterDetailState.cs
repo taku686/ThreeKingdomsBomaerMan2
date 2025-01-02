@@ -67,16 +67,21 @@ namespace UI.Title
                     .Subscribe(viewModel => _View.ApplyViewModel(viewModel))
                     .AddTo(_cts.Token);
 
-                _View._PurchaseErrorView.okButton.OnClickAsObservable()
+                _View._PurchaseErrorView.okButton
+                    .OnClickAsObservable()
                     .SelectMany(_ => OnClickClosePurchaseErrorView().ToObservable())
                     .Subscribe()
                     .AddTo(_cts.Token);
 
-                _View._BackButton.OnClickAsObservable()
+                _View._BackButton
+                    .OnClickAsObservable()
+                    .Take(1)
                     .Subscribe(_ => OnClickBackButton())
                     .AddTo(_cts.Token);
 
-                _View._SelectButton.OnClickAsObservable()
+                _View._SelectButton
+                    .OnClickAsObservable()
+                    .Take(1)
                     .SelectMany(_ => OnClickDecideButton().ToObservable())
                     .Subscribe()
                     .AddTo(_cts.Token);
@@ -89,7 +94,8 @@ namespace UI.Title
                     .Subscribe(_ => OnClickRightArrow())
                     .AddTo(_cts.Token);
 
-                _View._UpgradeButton.OnClickAsObservable()
+                _View._UpgradeButton
+                    .OnClickAsObservable()
                     .SelectMany(_ => OnClickUpgrade().ToObservable())
                     .Subscribe()
                     .AddTo(_cts.Token);

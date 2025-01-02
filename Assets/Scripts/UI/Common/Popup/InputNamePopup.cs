@@ -8,7 +8,6 @@ using Zenject;
 
 public class InputNamePopup : PopupBase
 {
-    [SerializeField] private TextMeshProUGUI _titleText;
     [SerializeField] private TextMeshProUGUI _okText;
     [SerializeField] private Button _okButton;
     [SerializeField] private TMP_InputField _inputField;

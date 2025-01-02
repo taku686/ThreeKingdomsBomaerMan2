@@ -7,7 +7,7 @@ using Zenject;
 
 public abstract class PopupBase : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI _titleText;
+    [SerializeField] private TextMeshProUGUI _titleTMP;
     [SerializeField] private TextMeshProUGUI _explanationText;
     [Inject] private BlockingGameObject _blockingImageObject;
     private const float Duration = 0.2f;
@@ -31,9 +31,9 @@ public abstract class PopupBase : MonoBehaviour
 
     private void ApplyViewModel(ViewModel viewModel)
     {
-        if (_titleText != null)
+        if (_titleTMP != null)
         {
-            _titleText.text = viewModel._Title;
+            _titleTMP.text = viewModel._Title;
         }
 
         if (_explanationText != null)

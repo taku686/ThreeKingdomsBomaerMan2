@@ -5,7 +5,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Manager.DataManager;
 using Manager.NetworkManager;
-using MoreMountains.Tools;
 using Repository;
 using UnityEngine;
 using Zenject;
@@ -56,8 +55,7 @@ namespace Common.Data
             var data = GetUserData();
             data.LoginBonus[index] = (int)status;
             SetUserData(data);
-            var result = await _playFabUserDataManager.TryUpdateUserDataAsync(data)
-                .AttachExternalCancellation(_cancellationTokenSource.Token);
+            var result = await _playFabUserDataManager.TryUpdateUserDataAsync(data).AttachExternalCancellation(_cancellationTokenSource.Token);
             return result;
         }
 
@@ -194,11 +192,10 @@ namespace Common.Data
 
             var data = GetUserData();
             data.Characters.Add(characterId);
-            data.CharacterLevels[characterId] = 0;
+            data.CharacterLevels[characterId] = 1;
             data.EquippedWeapons[characterId] = GameCommonData.DefaultWeaponId;
             SetUserData(data);
-            var result = await _playFabUserDataManager.TryUpdateUserDataAsync(data)
-                .AttachExternalCancellation(_cancellationTokenSource.Token);
+            var result = await _playFabUserDataManager.TryUpdateUserDataAsync(data);
             return result;
         }
 
@@ -264,18 +261,6 @@ namespace Common.Data
             _characterMasterDataRepository?.Dispose();
             _levelMasterDataRepository?.Dispose();
             _playFabUserDataManager?.Dispose();
-        }
-
-        //todo デバッグ用後で消す
-        public async UniTask AddAllWeapon()
-        {
-            var weaponData = _weaponMasterDataRepository.GetAllWeaponData();
-            foreach (var data in weaponData)
-            {
-                AddWeaponData(data.Id);
-            }
-
-            await UpdateUserData(_userData);
         }
     }
 }
