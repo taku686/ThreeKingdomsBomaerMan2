@@ -130,6 +130,7 @@ Material:
     - _BumpScale: 1
     - _CullMode: 0
     - _CullModeForward: 0
+    - _Culling: 0
     - _Cutoff: 0.5
     - _DepthOffsetEnable: 0
     - _Depthpower: 0.5
@@ -192,6 +193,7 @@ Material:
     - _UVSec: 0
     - _UseAlphaDisolve: 0
     - _UseAlphaOverride: 0
+    - _UsePixelation: 0
     - _UseRamp: 0
     - _UseShadowThreshold: 0
     - _UseSoftAlpha: 0
@@ -211,6 +213,7 @@ Material:
     - _DetailDistortionChannel: {r: 1, g: 0, b: 0, a: 0}
     - _DetailMultiplyChannel: {r: 0, g: 0, b: 0, a: 0}
     - _DetailNoisePanning: {r: 0, g: 0, b: 0, a: 0}
+    - _DetailVertexOffsetChannel: {r: 1, g: 0, b: 0, a: 0}
     - _DistortionSpeedXYPowerZ: {r: 0, g: 0, b: 0, a: 0}
     - _DoubleSidedConstants: {r: 1, g: 1, b: 1, a: 0}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
@@ -226,6 +229,7 @@ Material:
     - _MaskTiling: {r: 1, g: 1, b: 0, a: 0}
     - _MidColor: {r: 1, g: 0.44479147, b: 0, a: 0}
     - _NoiseTiling: {r: 1, g: 1, b: 0, a: 0}
+    - _Resolution: {r: 64, g: 64, b: 0, a: 0}
     - _SpeedMainTexUVNoiseZW: {r: 0, g: 0, b: 0, a: 0}
     - _UnlitColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
     - _WhiteColor: {r: 1, g: 0.8950032, b: 0, a: 0}

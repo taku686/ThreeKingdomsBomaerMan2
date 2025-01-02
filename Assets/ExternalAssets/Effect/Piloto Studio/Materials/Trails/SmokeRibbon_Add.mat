@@ -58,6 +58,7 @@ Material:
     - _BumpScale: 1
     - _CullMode: 2
     - _CullModeForward: 2
+    - _Culling: 0
     - _Cutoff: 0.5
     - _Desaturate: 0
     - _DetailNormalMapScale: 1
@@ -112,6 +113,7 @@ Material:
     - _TransparentZWrite: 0
     - _UVSec: 0
     - _UseAlphaOverride: 1
+    - _UsePixelation: 0
     - _UseRamp: 0
     - _UseShadowThreshold: 0
     - _UseSoftAlpha: 0
@@ -134,6 +136,7 @@ Material:
     - _DetailDistortionChannel: {r: 0, g: 0, b: 0, a: 0}
     - _DetailMultiplyChannel: {r: 0, g: 0, b: 0, a: 0}
     - _DetailNoisePanning: {r: 0.2, g: 0, b: 0, a: 0}
+    - _DetailVertexOffsetChannel: {r: 1, g: 0, b: 0, a: 0}
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
     - _FresnelColor: {r: 1, g: 1, b: 1, a: 1}
@@ -142,6 +145,7 @@ Material:
     - _MainTextureChannel: {r: 1, g: 1, b: 1, a: 0}
     - _MainTexturePanning: {r: -2.5, g: 0, b: 0, a: 0}
     - _MidColor: {r: 1, g: 0.4447915, b: 0, a: 0}
+    - _Resolution: {r: 64, g: 64, b: 0, a: 0}
     - _UnlitColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
     - _WhiteColor: {r: 1, g: 0.8950032, b: 0, a: 0}
     - _diff_c: {r: 0.5, g: 0.4882075, b: 0.4882075, a: 1}
