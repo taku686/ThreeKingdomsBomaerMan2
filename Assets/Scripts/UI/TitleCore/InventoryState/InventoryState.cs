@@ -39,7 +39,7 @@ namespace UI.Title
 
             private void OnSubscribed()
             {
-                View.BackButton.OnClickAsObservable()
+                View._BackButton.OnClickAsObservable()
                     .Subscribe(_ => StateMachine.Dispatch((int)State.CharacterDetail))
                     .AddTo(cts.Token);
 
@@ -50,14 +50,14 @@ namespace UI.Title
                         View.ApplyViewModel(viewModel);
                         foreach (var gridView in View.WeaponGridViews)
                         {
-                            gridView.OnClickObservable
+                            gridView._OnClickObservable
                                 .Subscribe(weaponId => onChangeSelectedWeaponSubject.OnNext(weaponId))
                                 .AddTo(gridView.GetCancellationTokenOnDestroy());
                         }
                     })
                     .AddTo(cts.Token);
 
-                View.EquipButton.OnClickAsObservable()
+                View._EquipButton.OnClickAsObservable()
                     .WithLatestFrom(onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
                     .Select(selectedWeaponId => (selectedWeaponId,
                         selectedCharacterId: CharacterSelectRepository.GetSelectedCharacterId()))

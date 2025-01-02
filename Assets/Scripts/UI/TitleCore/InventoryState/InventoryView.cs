@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Common.Data;
+using MoreMountains.Tools;
 using UI.Title;
 using UniRx;
 using UnityEngine;
@@ -15,10 +16,10 @@ public class InventoryView : ViewBase
     [SerializeField] private Transform weaponGridParent;
     [SerializeField] private SkillDetailView skillDetailView;
 
-    private readonly List<WeaponGridView> weaponGridViews = new();
-    public Button BackButton => backButton;
-    public Button EquipButton => weaponDetailView.EquipButton;
-    public Button SellButton => weaponDetailView.SellButton;
+    private readonly List<WeaponGridView> _weaponGridViews = new();
+    public Button _BackButton => backButton;
+    public Button _EquipButton => weaponDetailView._EquipButton;
+    public Button _SellButton => weaponDetailView._SellButton;
 
     public IObservable<Unit> OnClickBackButtonAsObservable()
     {
@@ -40,7 +41,7 @@ public class InventoryView : ViewBase
         return weaponDetailView.OnClickSpecialSkillDetailButtonAsObservable();
     }
 
-    public IReadOnlyCollection<WeaponGridView> WeaponGridViews => weaponGridViews;
+    public IReadOnlyCollection<WeaponGridView> WeaponGridViews => _weaponGridViews;
 
     public void ApplyViewModel(ViewModel viewModel)
     {
@@ -50,25 +51,25 @@ public class InventoryView : ViewBase
 
     private void GenerateWeaponGridViews(ViewModel viewModel)
     {
-        foreach (var weaponGridView in weaponGridViews)
+        foreach (var weaponGridView in _weaponGridViews)
         {
             Destroy(weaponGridView.gameObject);
         }
 
-        weaponGridViews.Clear();
+        _weaponGridViews.Clear();
         var possessedWeaponDatum =
             viewModel.PossessedWeaponDatum
-                .OrderBy(data => data.Key.WeaponType)
+                .OrderBy(data => data.Key.Rare)
+                .ThenBy(data => data.Key.WeaponType)
                 .ThenBy(data => data.Key.Id);
         foreach (var keyValuePair in possessedWeaponDatum)
         {
             var weaponGridView = Instantiate(weaponGridViewPrefab, weaponGridParent);
             var weaponMasterData = keyValuePair.Key;
             var possessedAmount = keyValuePair.Value;
-            var weaponGridViewModel =
-                TranslateWeaponDataToViewModel(weaponMasterData, possessedAmount, viewModel.WeaponMasterData.Id);
+            var weaponGridViewModel = TranslateWeaponDataToViewModel(weaponMasterData, possessedAmount, viewModel.WeaponMasterData.Id);
             weaponGridView.ApplyViewModel(weaponGridViewModel);
-            weaponGridViews.Add(weaponGridView);
+            _weaponGridViews.Add(weaponGridView);
         }
     }
 
@@ -89,7 +90,8 @@ public class InventoryView : ViewBase
             weaponMasterData.WeaponIcon,
             possessedAmount,
             weaponMasterData.Id,
-            selectedWeaponId
+            selectedWeaponId,
+            weaponMasterData.Rare
         );
     }
 
@@ -110,7 +112,8 @@ public class InventoryView : ViewBase
             weaponMasterData.SpecialSkillMasterData,
             weaponMasterData.WeaponObject,
             weaponMasterData.WeaponType,
-            weaponMasterData.Scale
+            weaponMasterData.Scale,
+            weaponMasterData.Rare
         );
     }
 
@@ -121,7 +124,7 @@ public class InventoryView : ViewBase
 
     private void OnDestroy()
     {
-        weaponGridViews.Clear();
+        _weaponGridViews.Clear();
     }
 
     public class ViewModel
