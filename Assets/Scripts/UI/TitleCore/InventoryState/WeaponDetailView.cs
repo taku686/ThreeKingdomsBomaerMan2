@@ -23,6 +23,10 @@ namespace UI.Title
         private bool _isInitialized;
         public Button _EquipButton => equipButton;
         public Button _SellButton => sellButton;
+        public Button _StatusSkillDetailButton => statusSkillGridView._DetailButton;
+        public Button _NormalSkillDetailButton => normalSkillGridView._DetailButton;
+        public Button _SpecialSkillDetailButton => specialSkillGridView._DetailButton;
+
 
         public IObservable<Unit> OnClickStatusSkillDetailButtonAsObservable()
         {

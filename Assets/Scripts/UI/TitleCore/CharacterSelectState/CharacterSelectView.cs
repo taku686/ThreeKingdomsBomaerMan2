@@ -19,7 +19,6 @@ namespace UI.Title
         [SerializeField] private ToggleView toggleView;
 
         public Button _BackButton => backButton;
-        public IObservable<Unit> _ClickBackButton => backButton.OnClickAsObservable();
         public GameObject _HorizontalGroupGameObject => horizontalGroupGameObject;
         public GameObject _Grid => grid;
         public GameObject _GridDisable => gridDisable;

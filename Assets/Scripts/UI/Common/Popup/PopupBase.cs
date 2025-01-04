@@ -17,14 +17,12 @@ public abstract class PopupBase : MonoBehaviour
         _blockingImageObject.gameObject.SetActive(true);
         ApplyViewModel(viewModel);
         transform.localScale = Vector3.zero;
-        await transform.DOScale(Vector3.one, Duration).SetEase(Ease.OutBack)
-            .ToUniTask(cancellationToken: this.GetCancellationTokenOnDestroy());
+        await transform.DOScale(Vector3.one, Duration).SetEase(Ease.OutBack).ToUniTask(cancellationToken: this.GetCancellationTokenOnDestroy());
     }
 
     public virtual async UniTask Close()
     {
-        await transform.DOScale(Vector3.zero, Duration).SetEase(Ease.InBack)
-            .ToUniTask(cancellationToken: this.GetCancellationTokenOnDestroy());
+        await transform.DOScale(Vector3.zero, Duration).SetEase(Ease.InBack).ToUniTask(cancellationToken: this.GetCancellationTokenOnDestroy());
         Destroy(gameObject);
         _blockingImageObject.gameObject.SetActive(false);
     }

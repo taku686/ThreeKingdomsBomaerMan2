@@ -4,6 +4,6 @@ namespace Manager
 {
     public class MainManager : MonoBehaviour
     {
-        public bool isInitialize;
+        public bool _isInitialize;
     }
 }

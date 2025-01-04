@@ -1,8 +1,9 @@
-﻿using Assets.Scripts.Common.PlayFab;
+﻿using System.Threading;
+using Assets.Scripts.Common.PlayFab;
 using Common.Data;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using Repository;
+using UniRx;
 
 namespace UI.Title
 {
@@ -10,10 +11,12 @@ namespace UI.Title
     {
         public class MainState : StateMachine<TitleCore>.State
         {
+            private StateMachine<TitleCore> _StateMachine => Owner._stateMachine;
             private PlayFabLoginManager _PlayFabLoginManager => Owner._playFabLoginManager;
             private MainView _View => (MainView)Owner.GetView(State.Main);
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
             private UserDataRepository _UserDataRepository => Owner._userDataRepository;
+            private CancellationTokenSource _cts;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -22,37 +25,60 @@ namespace UI.Title
 
             protected override void OnExit(StateMachine<TitleCore>.State nextState)
             {
+                Cancel();
                 _View.SetBackgroundEffect(false);
-            }
-
-
-            protected override void OnUpdate()
-            {
             }
 
             private async UniTaskVoid Initialize()
             {
-                var characterId = _UserDataRepository.GetEquippedCharacterId();
-                _CharacterCreateUseCase.CreateCharacter(characterId);
-                _View.SetBackgroundEffect(true);
-                InitializeButton();
-                Owner.SwitchUiObject(State.Main, true).Forget();
+                _cts = new CancellationTokenSource();
+                Subscribe();
+                Owner.SwitchUiObject(State.Main, true, () =>
+                {
+                    _View.SetBackgroundEffect(true);
+                    var characterId = _UserDataRepository.GetEquippedCharacterId();
+                    _CharacterCreateUseCase.CreateCharacter(characterId);
+                }).Forget();
                 await InitializeText();
             }
 
 
-            private void InitializeButton()
+            private void Subscribe()
             {
-                _View.CharacterSelectButton.onClick.RemoveAllListeners();
-                _View.BattleReadyButton.onClick.RemoveAllListeners();
-                _View.SettingButton.onClick.RemoveAllListeners();
-                _View.ShopButton.onClick.RemoveAllListeners();
-                _View.MissionButton.onClick.RemoveAllListeners();
-                _View.CharacterSelectButton.onClick.AddListener(OnClickCharacterSelect);
-                _View.BattleReadyButton.onClick.AddListener(OnClickBattleReady);
-                _View.SettingButton.onClick.AddListener(OnClickSetting);
-                _View.ShopButton.onClick.AddListener(OnClickShop);
-                _View.MissionButton.onClick.AddListener(OnClickMission);
+                _View._MissionButton
+                    .OnClickAsObservable()
+                    .Take(1)
+                    .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._MissionButton).ToObservable())
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.Mission); })
+                    .AddTo(_cts.Token);
+
+                _View._ShopButton
+                    .OnClickAsObservable()
+                    .Take(1)
+                    .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._ShopButton).ToObservable())
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.Shop); })
+                    .AddTo(_cts.Token);
+
+                _View._SettingButton
+                    .OnClickAsObservable()
+                    .Take(1)
+                    .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._SettingButton).ToObservable())
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.Setting); })
+                    .AddTo(_cts.Token);
+
+                _View._BattleReadyButton
+                    .OnClickAsObservable()
+                    .Take(1)
+                    .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._BattleReadyButton).ToObservable())
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.BattleReady); })
+                    .AddTo(_cts.Token);
+
+                _View._CharacterSelectButton
+                    .OnClickAsObservable()
+                    .Take(1)
+                    .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._CharacterSelectButton).ToObservable())
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.CharacterSelect); })
+                    .AddTo(_cts.Token);
             }
 
             private async UniTask InitializeText()
@@ -75,40 +101,11 @@ namespace UI.Title
                 Owner._stateMachine.Dispatch((int)State.LoginBonus);
             }
 
-
-            private void OnClickCharacterSelect()
+            private void Cancel()
             {
-                Owner._uiAnimation.ClickScaleColor(_View.CharacterSelectButton.gameObject)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)State.CharacterSelect); })
-                    .SetLink(Owner.gameObject);
-            }
-
-            private void OnClickBattleReady()
-            {
-                Owner._uiAnimation.ClickScaleColor(_View.BattleReadyButton.gameObject)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)State.BattleReady); })
-                    .SetLink(Owner.gameObject);
-            }
-
-            private void OnClickSetting()
-            {
-                Owner._uiAnimation.ClickScaleColor(_View.SettingButton.gameObject)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)State.Setting); })
-                    .SetLink(Owner.gameObject);
-            }
-
-            private void OnClickShop()
-            {
-                Owner._uiAnimation.ClickScaleColor(_View.ShopButton.gameObject)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)State.Shop); })
-                    .SetLink(Owner.gameObject);
-            }
-
-            private void OnClickMission()
-            {
-                Owner._uiAnimation.ClickScaleColor(_View.MissionButton.gameObject)
-                    .OnComplete(() => { Owner._stateMachine.Dispatch((int)State.Mission); })
-                    .SetLink(Owner.gameObject);
+                _cts.Cancel();
+                _cts.Dispose();
+                _cts = null;
             }
         }
     }

@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Common.Data;
+using Cysharp.Threading.Tasks;
 using MoreMountains.Tools;
+using UI.Common;
 using UI.Title;
 using UniRx;
 using UnityEngine;
@@ -21,32 +23,34 @@ public class InventoryView : ViewBase
     public Button _EquipButton => weaponDetailView._EquipButton;
     public Button _SellButton => weaponDetailView._SellButton;
 
-    public IObservable<Unit> OnClickBackButtonAsObservable()
-    {
-        return skillDetailView.OnClickCloseButtonAsObservable();
-    }
+    public IObservable<AsyncUnit> _OnClickSkillDetailViewCloseButtonAsObservable
+        => skillDetailView.OnClickCloseButtonAsObservable();
 
-    public IObservable<Unit> OnClickStatusSkillDetailButtonAsObservable()
-    {
-        return weaponDetailView.OnClickStatusSkillDetailButtonAsObservable();
-    }
+    public IObservable<AsyncUnit> _OnClickStatusSkillDetailButtonAsObservable
+        => weaponDetailView
+            .OnClickStatusSkillDetailButtonAsObservable()
+            .SelectMany(_ => _uiAnimation.ClickScaleColor(weaponDetailView._StatusSkillDetailButton.gameObject).ToUniTask().ToObservable());
 
-    public IObservable<Unit> OnClickNormalSkillDetailButtonAsObservable()
-    {
-        return weaponDetailView.OnClickNormalSkillDetailButtonAsObservable();
-    }
+    public IObservable<AsyncUnit> _OnClickNormalSkillDetailButtonAsObservable
+        => weaponDetailView
+            .OnClickNormalSkillDetailButtonAsObservable()
+            .SelectMany(_ => _uiAnimation.ClickScaleColor(weaponDetailView._NormalSkillDetailButton.gameObject).ToUniTask().ToObservable());
 
-    public IObservable<Unit> OnClickSpecialSkillDetailButtonAsObservable()
-    {
-        return weaponDetailView.OnClickSpecialSkillDetailButtonAsObservable();
-    }
+    public IObservable<AsyncUnit> _OnClickSpecialSkillDetailButtonAsObservable
+        => weaponDetailView
+            .OnClickSpecialSkillDetailButtonAsObservable()
+            .SelectMany(_ => _uiAnimation.ClickScaleColor(weaponDetailView._SpecialSkillDetailButton.gameObject).ToUniTask().ToObservable());
 
-    public IReadOnlyCollection<WeaponGridView> WeaponGridViews => _weaponGridViews;
+    public IReadOnlyCollection<WeaponGridView> _WeaponGridViews => _weaponGridViews;
+    private UIAnimation _uiAnimation;
+    private Action<bool> _setActivePanelAction;
 
-    public void ApplyViewModel(ViewModel viewModel)
+    public void ApplyViewModel(ViewModel viewModel, UIAnimation uiAnimation, Action<bool> setActivePanelAction)
     {
+        _uiAnimation = uiAnimation;
+        _setActivePanelAction = setActivePanelAction;
         GenerateWeaponGridViews(viewModel);
-        ApplyWeaponDetailViewModel(viewModel.WeaponMasterData);
+        ApplyWeaponDetailViewModel(viewModel._WeaponMasterData);
     }
 
     private void GenerateWeaponGridViews(ViewModel viewModel)
@@ -57,25 +61,24 @@ public class InventoryView : ViewBase
         }
 
         _weaponGridViews.Clear();
-        var possessedWeaponDatum =
-            viewModel.PossessedWeaponDatum
-                .OrderBy(data => data.Key.Rare)
-                .ThenBy(data => data.Key.WeaponType)
-                .ThenBy(data => data.Key.Id);
+        var possessedWeaponDatum = viewModel._PossessedWeaponDatum
+            .OrderBy(data => data.Key.Rare)
+            .ThenBy(data => data.Key.WeaponType)
+            .ThenBy(data => data.Key.Id);
         foreach (var keyValuePair in possessedWeaponDatum)
         {
             var weaponGridView = Instantiate(weaponGridViewPrefab, weaponGridParent);
             var weaponMasterData = keyValuePair.Key;
             var possessedAmount = keyValuePair.Value;
-            var weaponGridViewModel = TranslateWeaponDataToViewModel(weaponMasterData, possessedAmount, viewModel.WeaponMasterData.Id);
-            weaponGridView.ApplyViewModel(weaponGridViewModel);
+            var weaponGridViewModel = TranslateWeaponDataToViewModel(weaponMasterData, possessedAmount, viewModel._WeaponMasterData.Id);
+            weaponGridView.ApplyViewModel(weaponGridViewModel, _uiAnimation, _setActivePanelAction);
             _weaponGridViews.Add(weaponGridView);
         }
     }
 
     public void ApplySkillDetailViewModel(SkillDetailView.ViewModel viewModel)
     {
-        skillDetailView.ApplyViewModel(viewModel);
+        skillDetailView.ApplyViewModel(viewModel, _uiAnimation, _setActivePanelAction);
     }
 
     private WeaponGridView.ViewModel TranslateWeaponDataToViewModel
@@ -129,8 +132,8 @@ public class InventoryView : ViewBase
 
     public class ViewModel
     {
-        public IReadOnlyDictionary<WeaponMasterData, int> PossessedWeaponDatum { get; }
-        public WeaponMasterData WeaponMasterData { get; }
+        public IReadOnlyDictionary<WeaponMasterData, int> _PossessedWeaponDatum { get; }
+        public WeaponMasterData _WeaponMasterData { get; }
 
         public ViewModel
         (
@@ -138,8 +141,8 @@ public class InventoryView : ViewBase
             WeaponMasterData weaponMasterData
         )
         {
-            PossessedWeaponDatum = possessedWeaponDatum;
-            WeaponMasterData = weaponMasterData;
+            _PossessedWeaponDatum = possessedWeaponDatum;
+            _WeaponMasterData = weaponMasterData;
         }
     }
 }

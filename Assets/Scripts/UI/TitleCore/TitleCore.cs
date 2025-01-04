@@ -62,7 +62,7 @@ namespace UI.Title
         [SerializeField] private Transform _characterCreatePosition;
         [SerializeField] private CommonView _commonView;
         [SerializeField] private ViewBase[] _views;
-
+        [SerializeField] private GameObject _blockPanel;
 
         private StateMachine<TitleCore> _stateMachine;
         private CancellationTokenSource _cts;
@@ -84,6 +84,10 @@ namespace UI.Title
             Reward
         }
 
+        private void Awake()
+        {
+            SetActiveBlockPanel(true);
+        }
 
         private void Start()
         {
@@ -111,13 +115,14 @@ namespace UI.Title
             _commonView.Initialize();
             InitializeState();
             InitializeButton();
+            SetActiveBlockPanel(false);
         }
 
 
         private void InitializeState()
         {
             _stateMachine = new StateMachine<TitleCore>(this);
-            if (_mainManager.isInitialize)
+            if (_mainManager._isInitialize)
             {
                 _stateMachine.Start<MainState>();
             }
@@ -148,7 +153,7 @@ namespace UI.Title
             var gemAddButton = _commonView.virtualCurrencyView.gemAddButton;
             var coinAddButton = _commonView.virtualCurrencyView.coinAddButton;
             var ticketAddButton = _commonView.virtualCurrencyView.ticketAddButton;
-            SetupRewardOkButton();
+            SubscribeRewardOkButton();
             OnClickTransitionState(gemAddButton, State.Shop, _cts.Token);
             OnClickTransitionState(coinAddButton, State.Shop, _cts.Token);
             OnClickTransitionState(ticketAddButton, State.Shop, _cts.Token);
@@ -185,9 +190,11 @@ namespace UI.Title
 
         private async UniTask TransitionUiAnimation(Action action)
         {
+            SetActiveBlockPanel(true);
             await _fade.FadeIn(GameCommonData.FadeOutTime, null, false);
             action.Invoke();
             await _fade.FadeOut(GameCommonData.FadeOutTime);
+            SetActiveBlockPanel(false);
         }
 
         private void CheckMission(int actionId)
@@ -236,25 +243,27 @@ namespace UI.Title
             button.OnClickAsObservable()
                 .Subscribe(_ =>
                 {
-                    button.interactable = false;
+                    SetActiveBlockPanel(true);
                     _uiAnimation.ClickScaleColor(button.gameObject)
                         .OnComplete(() =>
                         {
                             _stateMachine.Dispatch((int)state);
-                            button.interactable = true;
+                            SetActiveBlockPanel(false);
                         })
                         .SetLink(button.gameObject);
                 })
                 .AddTo(cancellationToken);
         }
 
-        private void SetupRewardOkButton()
+        private void SubscribeRewardOkButton()
         {
-            _commonView.rewardGetView.okButton.onClick.RemoveAllListeners();
-            _commonView.rewardGetView.okButton.onClick.AddListener(() => UniTask.Void(async () =>
-            {
-                await _uiAnimation.Close(_commonView.rewardGetView.transform, GameCommonData.CloseDuration);
-            }));
+            _commonView.rewardGetView.okButton
+                .OnClickAsObservable()
+                .Take(1)
+                .SelectMany(_ => OnClickScaleColorAnimation(_commonView.rewardGetView.okButton).ToObservable())
+                .SelectMany(_ => _uiAnimation.Close(_commonView.rewardGetView.transform, GameCommonData.CloseDuration).ToObservable())
+                .Subscribe(_ => { SetActiveBlockPanel(false); })
+                .AddTo(_cts.Token);
         }
 
         private async UniTask SetRewardUI(int value, Sprite rewardSprite)
@@ -267,9 +276,21 @@ namespace UI.Title
             await _uiAnimation.Open(rewardView.transform, GameCommonData.OpenDuration);
         }
 
-        private async UniTask OnClickButtonAnimation(Button button)
+        private async UniTask OnClickScaleColorAnimation(Button button)
         {
+            _blockPanel.SetActive(true);
             await _uiAnimation.ClickScaleColor(button.gameObject).ToUniTask();
+        }
+
+        private async UniTask OnClickScaleAnimation(Button button)
+        {
+            _blockPanel.SetActive(true);
+            await _uiAnimation.ClickScale(button.gameObject).ToUniTask();
+        }
+
+        private void SetActiveBlockPanel(bool isActive)
+        {
+            _blockPanel.SetActive(isActive);
         }
 
         private void Cancel(CancellationTokenSource cancellationTokenSource)

@@ -41,16 +41,10 @@ namespace UI.Title
             private void InitializeButton()
             {
                 _View._LoginButton.OnClickAsObservable()
-                    .SelectMany(_ => Owner.OnClickButtonAnimation(_View._LoginButton).ToObservable())
-                    .SelectMany(_ => OnClickLogin().ToObservable())
+                    .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._LoginButton).ToObservable())
+                    .SelectMany(_ => Login().ToObservable())
                     .Subscribe()
                     .AddTo(_cancellationTokenSource.Token);
-            }
-
-            private async UniTask OnClickLogin()
-            {
-                _View._LoginButton.interactable = false;
-                await Login().AttachExternalCancellation(_cancellationTokenSource.Token);
             }
 
             private async UniTask Login()
@@ -62,23 +56,24 @@ namespace UI.Title
                 if (loginResult.Error != null)
                 {
                     _commonView.waitPopup.SetActive(false);
-                    _View._LoginButton.interactable = true;
+                    Owner.SetActiveBlockPanel(false);
                     return;
                 }
 
                 if (!loginResult.Result.InfoResultPayload.UserData.ContainsKey(GameCommonData.UserKey))
                 {
-                    var checkDisplayName = _PopupGenerateUseCase
-                        .GenerateInputNamePopup("名前を入力してください", "")
-                        .SelectMany(displayName => ValidationCheck(displayName).ToObservable())
-                        .Publish();
+                    var checkDisplayName =
+                        _PopupGenerateUseCase
+                            .GenerateInputNamePopup("名前を入力してください", "")
+                            .SelectMany(displayName => ValidationCheck(displayName).ToObservable())
+                            .Publish();
 
                     checkDisplayName
                         .Where(tuple => !tuple.Item1)
                         .SelectMany(_ => _PopupGenerateUseCase.GenerateErrorPopup("名前が不正です", "OK"))
                         .Subscribe(_ =>
                         {
-                            _View._LoginButton.interactable = true;
+                            Owner.SetActiveBlockPanel(false);
                             _commonView.waitPopup.SetActive(false);
                         });
 
@@ -89,7 +84,8 @@ namespace UI.Title
                         .SelectMany(response => _PlayFabLoginManager.InitializeGameData(response).ToObservable())
                         .Subscribe(_ =>
                         {
-                            Owner._mainManager.isInitialize = true;
+                            Owner._mainManager._isInitialize = true;
+                            Owner.SetActiveBlockPanel(false);
                             Owner._stateMachine.Dispatch((int)State.Main);
                             _commonView.waitPopup.SetActive(false);
                         });
@@ -99,7 +95,8 @@ namespace UI.Title
                 else
                 {
                     await _PlayFabLoginManager.InitializeGameData(loginResult);
-                    Owner._mainManager.isInitialize = true;
+                    Owner._mainManager._isInitialize = true;
+                    Owner.SetActiveBlockPanel(false);
                     Owner._stateMachine.Dispatch((int)State.Main);
                     _commonView.waitPopup.SetActive(false);
                 }

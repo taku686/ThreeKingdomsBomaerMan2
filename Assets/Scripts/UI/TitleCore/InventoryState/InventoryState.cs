@@ -1,6 +1,7 @@
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using UI.Common;
 using UniRx;
 
 namespace UI.Title
@@ -9,14 +10,15 @@ namespace UI.Title
     {
         public class InventoryState : StateMachine<TitleCore>.State
         {
-            private InventoryView View => (InventoryView)Owner.GetView(State.Inventory);
-            private InventoryViewModelUseCase InventoryViewModelUseCase => Owner._inventoryViewModelUseCase;
-            private CharacterSelectRepository CharacterSelectRepository => Owner._characterSelectRepository;
-            private UserDataRepository UserDataRepository => Owner._userDataRepository;
-            private SkillDetailViewModelUseCase SkillDetailViewModelUseCase => Owner._skillDetailViewModelUseCase;
+            private InventoryView _View => (InventoryView)Owner.GetView(State.Inventory);
+            private InventoryViewModelUseCase _InventoryViewModelUseCase => Owner._inventoryViewModelUseCase;
+            private CharacterSelectRepository _CharacterSelectRepository => Owner._characterSelectRepository;
+            private UserDataRepository _UserDataRepository => Owner._userDataRepository;
+            private SkillDetailViewModelUseCase _SkillDetailViewModelUseCase => Owner._skillDetailViewModelUseCase;
+            private UIAnimation _UIAnimation => Owner._uiAnimation;
 
-            private CancellationTokenSource cts;
-            private Subject<int> onChangeSelectedWeaponSubject;
+            private CancellationTokenSource _cts;
+            private Subject<int> _onChangeSelectedWeaponSubject;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -25,80 +27,95 @@ namespace UI.Title
 
             protected override void OnExit(StateMachine<TitleCore>.State nextState)
             {
-                onChangeSelectedWeaponSubject.Dispose();
+                _onChangeSelectedWeaponSubject.Dispose();
                 Cancel();
             }
 
             private void Initialize()
             {
-                onChangeSelectedWeaponSubject = new Subject<int>();
-                cts = new CancellationTokenSource();
-                OnSubscribed();
+                _onChangeSelectedWeaponSubject = new Subject<int>();
+                _cts = new CancellationTokenSource();
+                Subscribe();
                 Owner.SwitchUiObject(State.Inventory, true).Forget();
             }
 
-            private void OnSubscribed()
+            private void Subscribe()
             {
-                View._BackButton.OnClickAsObservable()
+                _View._BackButton.OnClickAsObservable()
+                    .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._BackButton).ToObservable())
                     .Subscribe(_ => StateMachine.Dispatch((int)State.CharacterDetail))
-                    .AddTo(cts.Token);
+                    .AddTo(_cts.Token);
 
-                onChangeSelectedWeaponSubject
-                    .Select(weaponId => InventoryViewModelUseCase.InAsTask(weaponId))
+                _onChangeSelectedWeaponSubject
+                    .Select(weaponId => _InventoryViewModelUseCase.InAsTask(weaponId))
                     .Subscribe(viewModel =>
                     {
-                        View.ApplyViewModel(viewModel);
-                        foreach (var gridView in View.WeaponGridViews)
+                        _View.ApplyViewModel(viewModel, _UIAnimation, Owner.SetActiveBlockPanel);
+                        foreach (var gridView in _View._WeaponGridViews)
                         {
                             gridView._OnClickObservable
-                                .Subscribe(weaponId => onChangeSelectedWeaponSubject.OnNext(weaponId))
-                                .AddTo(gridView.GetCancellationTokenOnDestroy());
+                                .Subscribe(weaponId => { _onChangeSelectedWeaponSubject.OnNext(weaponId); })
+                                .AddTo(_cts.Token);
                         }
                     })
-                    .AddTo(cts.Token);
+                    .AddTo(_cts.Token);
 
-                View._EquipButton.OnClickAsObservable()
-                    .WithLatestFrom(onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
-                    .Select(selectedWeaponId => (selectedWeaponId,
-                        selectedCharacterId: CharacterSelectRepository.GetSelectedCharacterId()))
-                    .SelectMany(tuple =>
-                        UserDataRepository.SetEquippedWeapon(tuple.selectedCharacterId, tuple.selectedWeaponId)
-                            .ToObservable())
+                _View._EquipButton.OnClickAsObservable()
+                    .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._EquipButton).ToObservable())
+                    .WithLatestFrom(_onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
+                    .Select(selectedWeaponId => (selectedWeaponId, selectedCharacterId: _CharacterSelectRepository.GetSelectedCharacterId()))
+                    .SelectMany(tuple => _UserDataRepository.SetEquippedWeapon(tuple.selectedCharacterId, tuple.selectedWeaponId).ToObservable())
                     .Subscribe(_ => { stateMachine.Dispatch((int)State.CharacterDetail); })
-                    .AddTo(cts.Token);
+                    .AddTo(_cts.Token);
 
-                View.OnClickStatusSkillDetailButtonAsObservable()
-                    .WithLatestFrom(onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
-                    .Select(weaponId => SkillDetailViewModelUseCase.InAsTask(weaponId, SkillType.Status))
-                    .Subscribe(viewModel => View.ApplySkillDetailViewModel(viewModel))
-                    .AddTo(cts.Token);
+                _View._OnClickStatusSkillDetailButtonAsObservable
+                    .WithLatestFrom(_onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
+                    .Select(weaponId => _SkillDetailViewModelUseCase.InAsTask(weaponId, SkillType.Status))
+                    .Subscribe(viewModel =>
+                    {
+                        _View.ApplySkillDetailViewModel(viewModel);
+                        Owner.SetActiveBlockPanel(false);
+                    })
+                    .AddTo(_cts.Token);
 
-                View.OnClickNormalSkillDetailButtonAsObservable()
-                    .WithLatestFrom(onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
-                    .Select(weaponId => SkillDetailViewModelUseCase.InAsTask(weaponId, SkillType.Normal))
-                    .Subscribe(viewModel => View.ApplySkillDetailViewModel(viewModel))
-                    .AddTo(cts.Token);
+                _View._OnClickNormalSkillDetailButtonAsObservable
+                    .WithLatestFrom(_onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
+                    .Select(weaponId => _SkillDetailViewModelUseCase.InAsTask(weaponId, SkillType.Normal))
+                    .Subscribe(viewModel =>
+                    {
+                        _View.ApplySkillDetailViewModel(viewModel);
+                        Owner.SetActiveBlockPanel(false);
+                    })
+                    .AddTo(_cts.Token);
 
-                View.OnClickSpecialSkillDetailButtonAsObservable()
-                    .WithLatestFrom(onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
-                    .Select(weaponId => SkillDetailViewModelUseCase.InAsTask(weaponId, SkillType.Special))
-                    .Subscribe(viewModel => View.ApplySkillDetailViewModel(viewModel))
-                    .AddTo(cts.Token);
+                _View._OnClickSpecialSkillDetailButtonAsObservable
+                    .WithLatestFrom(_onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
+                    .Select(weaponId => _SkillDetailViewModelUseCase.InAsTask(weaponId, SkillType.Special))
+                    .Subscribe(viewModel =>
+                    {
+                        _View.ApplySkillDetailViewModel(viewModel);
+                        Owner.SetActiveBlockPanel(false);
+                    })
+                    .AddTo(_cts.Token);
 
-                View.OnClickBackButtonAsObservable()
-                    .Subscribe(_ => View.CloseSkillDetailView())
-                    .AddTo(cts.Token);
+                _View._OnClickSkillDetailViewCloseButtonAsObservable
+                    .Subscribe(_ =>
+                    {
+                        _View.CloseSkillDetailView();
+                        Owner.SetActiveBlockPanel(false);
+                    })
+                    .AddTo(_cts.Token);
 
-                var selectedCharacterId = CharacterSelectRepository.GetSelectedCharacterId();
-                var selectedWeaponId = UserDataRepository.GetEquippedWeaponId(selectedCharacterId);
-                onChangeSelectedWeaponSubject.OnNext(selectedWeaponId);
+                var selectedCharacterId = _CharacterSelectRepository.GetSelectedCharacterId();
+                var selectedWeaponId = _UserDataRepository.GetEquippedWeaponId(selectedCharacterId);
+                _onChangeSelectedWeaponSubject.OnNext(selectedWeaponId);
             }
 
             private void Cancel()
             {
-                cts.Cancel();
-                cts.Dispose();
-                cts = null;
+                _cts.Cancel();
+                _cts.Dispose();
+                _cts = null;
             }
         }
     }

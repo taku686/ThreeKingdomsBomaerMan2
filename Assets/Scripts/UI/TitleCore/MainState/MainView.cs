@@ -14,12 +14,12 @@ namespace UI.Title
         [SerializeField] private Button missionButton;
         [SerializeField] private GameObject backgroundEffect;
 
-        public GameObject LoginBonusGameObjet => loginBonusGameObjet;
-        public Button SettingButton => settingButton;
-        public Button MissionButton => missionButton;
-        public Button BattleReadyButton => battleReadyButton;
-        public Button CharacterSelectButton => characterSelectButton;
-        public Button ShopButton => shopButton;
+        public GameObject _LoginBonusGameObjet => loginBonusGameObjet;
+        public Button _SettingButton => settingButton;
+        public Button _MissionButton => missionButton;
+        public Button _BattleReadyButton => battleReadyButton;
+        public Button _CharacterSelectButton => characterSelectButton;
+        public Button _ShopButton => shopButton;
 
         public void SetBackgroundEffect(bool isActive)
         {

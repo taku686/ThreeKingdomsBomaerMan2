@@ -100,7 +100,7 @@ namespace UI.Title
                     })
                     .AddTo(_cts.Token);
 
-                Owner.SetupRewardOkButton();
+                Owner.SubscribeRewardOkButton();
             }
 
             private void OnCLickBack()

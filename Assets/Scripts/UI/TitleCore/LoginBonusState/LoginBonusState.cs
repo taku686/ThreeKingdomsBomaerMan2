@@ -182,7 +182,7 @@ namespace UI.Title
                 var button = View.closeButton.gameObject;
                 Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
-                    var panel = MainView.LoginBonusGameObjet.transform;
+                    var panel = MainView._LoginBonusGameObjet.transform;
                     await uiAnimation.Close(panel, GameCommonData.CloseDuration)
                         .AttachExternalCancellation(panel.GetCancellationTokenOnDestroy());
                     panel.gameObject.SetActive(false);
