@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using System.Linq;
 using Bomb;
 using Common.Data;
+using Cysharp.Threading.Tasks;
 using Manager.BattleManager.Camera;
 using Manager.BattleManager.Environment;
 using Manager.DataManager;
@@ -8,6 +10,7 @@ using Manager.NetworkManager;
 using Photon.Pun;
 using Player.Common;
 using UI.Battle;
+using UI.BattleCore;
 using UnityEngine;
 using Zenject;
 
@@ -34,9 +37,7 @@ namespace Manager.BattleManager
         [SerializeField] private MapManager mapManager;
 
         //UI
-        [SerializeField] private BattleStartView battleStartView;
-        [SerializeField] private BattleResultView battleResultView;
-        [SerializeField] private InBattleView inBattleView;
+        [SerializeField] private BattleViewBase[] _views;
 
         //Other
         [Inject] private BombProvider _bombProvider;
@@ -46,9 +47,9 @@ namespace Manager.BattleManager
 
         private StateMachine<BattleCore> _stateMachine;
         private PlayerCore _playerCore;
-        private List<PlayerStatusUI> _playerStatusUiList = new();
+        private readonly List<PlayerStatusUI> _playerStatusUiList = new();
 
-        private enum State
+        public enum State
         {
             PlayerCreate,
             BattleStart,
@@ -59,7 +60,6 @@ namespace Manager.BattleManager
         // Start is called before the first frame update
         void Start()
         {
-            DisableUi();
             InitializeUi();
             InitializeState();
             InitializeComponent();
@@ -72,12 +72,14 @@ namespace Manager.BattleManager
 
         private void InitializeUi()
         {
-            inBattleView.UpdateTime(GameCommonData.BattleTime);
-            InitializeStateUi();
-        }
+            var inBattleView = _views.FirstOrDefault(view => view._State == State.InBattle) as InBattleView;
+            if (inBattleView == null)
+            {
+                Debug.LogError("InBattleView is null");
+                return;
+            }
 
-        private void InitializeStateUi()
-        {
+            inBattleView.UpdateTime(GameCommonData.BattleTime);
             var viewModel = _statusInBattleViewModelUseCase.InAsTask();
             inBattleView.ApplyStatusViewModel(viewModel);
         }
@@ -95,6 +97,19 @@ namespace Manager.BattleManager
         private void InitializeComponent()
         {
             gameObject.AddComponent<SynchronizedValue>();
+        }
+
+        private void SwitchUiObject(State state)
+        {
+            foreach (var view in _views)
+            {
+                view.gameObject.SetActive(view._State == state);
+            }
+        }
+
+        private BattleViewBase GetView(State state)
+        {
+            return _views.FirstOrDefault(view => view._State == state);
         }
 
         private void CheckMission(int actionId)
@@ -117,12 +132,6 @@ namespace Manager.BattleManager
         private void SetPlayerCore(PlayerCore player)
         {
             _playerCore = player;
-        }
-
-        private void DisableUi()
-        {
-            battleStartView.gameObject.SetActive(true);
-            battleResultView.gameObject.SetActive(false);
         }
     }
 }

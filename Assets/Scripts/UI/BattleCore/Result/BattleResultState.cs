@@ -13,7 +13,7 @@ namespace Manager.BattleManager
             //順位に応じた報酬をもらう処理を行う
             //報酬もらった後はmainシーンに戻る
 
-            private BattleResultView _BattleResultView => Owner.battleResultView;
+            private BattleResultView _BattleResultView => Owner.GetView(State.Result) as BattleResultView;
             private CancellationTokenSource _cts;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
@@ -25,18 +25,18 @@ namespace Manager.BattleManager
             protected override void OnExit(StateMachine<BattleCore>.State nextState)
             {
                 Cancel();
-                _BattleResultView.gameObject.SetActive(false);
             }
 
             private void Initialize()
             {
                 _cts = new CancellationTokenSource();
-                _BattleResultView.gameObject.SetActive(true);
+                _BattleResultView.ApplyView(1);
+                Owner.SwitchUiObject(State.Result);
             }
 
             private void OnSubscribe()
             {
-                _BattleResultView.OkButtonObservable
+                _BattleResultView._ClaimButtonObservable
                     .Subscribe(_ => { MMSceneLoadingManager.LoadScene(GameCommonData.TitleScene); })
                     .AddTo(_cts.Token);
             }

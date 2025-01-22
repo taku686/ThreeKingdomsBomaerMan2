@@ -1,14 +1,15 @@
 ﻿using System;
+using UI.BattleCore;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
 
 namespace Manager.BattleManager
 {
-    public class BattleStartView : MonoBehaviour
+    public class BattleStartView : BattleViewBase
     {
         [SerializeField] private Animator battleStartAnimator;
-        private ObservableStateMachineTrigger observableStateMachineTrigger;
+        private ObservableStateMachineTrigger _observableStateMachineTrigger;
 
         public void Initialize()
         {
@@ -16,10 +17,11 @@ namespace Manager.BattleManager
             {
                 child.gameObject.SetActive(true);
             }
-            observableStateMachineTrigger = battleStartAnimator.GetBehaviour<ObservableStateMachineTrigger>();
+
+            _observableStateMachineTrigger = battleStartAnimator.GetBehaviour<ObservableStateMachineTrigger>();
         }
 
-        public IObservable<Unit> Exit => observableStateMachineTrigger
+        public IObservable<Unit> Exit => _observableStateMachineTrigger
             .OnStateExitAsObservable()
             .AsUnitObservable();
     }

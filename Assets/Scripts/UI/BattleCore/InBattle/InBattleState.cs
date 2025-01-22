@@ -13,7 +13,7 @@ namespace Manager.BattleManager
     {
         public class InBattleState : StateMachine<BattleCore>.State
         {
-            private InBattleView _View => Owner.inBattleView;
+            private InBattleView _View => Owner.GetView(State.InBattle) as InBattleView;
             private PlayerCore _PlayerCore => Owner._playerCore;
             private StateMachine<BattleCore> _StateMachine => Owner._stateMachine;
             private List<PlayerStatusUI> _PlayerStatusUiList => Owner._playerStatusUiList;
@@ -37,6 +37,7 @@ namespace Manager.BattleManager
             {
                 _cts = new CancellationTokenSource();
                 _startTime = PhotonNetwork.ServerTimestamp;
+                Owner.SwitchUiObject(State.InBattle);
             }
 
             private void OnSubscribe()

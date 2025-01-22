@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Pathfinding.Examples.RTS;
 using UniRx;
 using UnityEngine;
 using State = StateMachine<Manager.BattleManager.BattleCore>.State;
@@ -11,9 +12,9 @@ namespace Manager.BattleManager
     {
         public class BattleStartState : StateMachine<BattleCore>.State
         {
-            private UserDataRepository userDataRepository;
-            private BattleStartView battleStartView;
-            private CancellationTokenSource cts;
+            private UserDataRepository _userDataRepository;
+            private BattleStartView _BattleStartView => Owner.GetView(State.BattleStart) as BattleStartView;
+            private CancellationTokenSource _cts;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
             {
@@ -24,16 +25,16 @@ namespace Manager.BattleManager
             protected override void OnExit(StateMachine<BattleCore>.State nextState)
             {
                 Cancel();
-                battleStartView.gameObject.SetActive(false);
+                _BattleStartView.gameObject.SetActive(false);
             }
 
             private void Initialize()
             {
-                cts = new CancellationTokenSource();
-                userDataRepository = Owner._userDataRepository;
-                battleStartView = Owner.battleStartView;
-                battleStartView.gameObject.SetActive(true);
-                battleStartView.Initialize();
+                _cts = new CancellationTokenSource();
+                _userDataRepository = Owner._userDataRepository;
+                _BattleStartView.gameObject.SetActive(true);
+                _BattleStartView.Initialize();
+                Owner.SwitchUiObject(State.BattleStart);
                 CheckMission().Forget();
             }
 
@@ -41,27 +42,27 @@ namespace Manager.BattleManager
             {
                 Owner.CheckMission(GameCommonData.CharacterBattleActionId);
                 Owner.CheckMission(GameCommonData.BattleCountActionId);
-                var userData = userDataRepository.GetUserData();
-                await userDataRepository.UpdateUserData(userData);
+                var userData = _userDataRepository.GetUserData();
+                await _userDataRepository.UpdateUserData(userData);
             }
 
             private void OnSubscribe()
             {
-                battleStartView.Exit
+                _BattleStartView.Exit
                     .Subscribe(_ => { Owner._stateMachine.Dispatch((int)State.InBattle); })
-                    .AddTo(cts.Token);
+                    .AddTo(_cts.Token);
             }
 
             private void Cancel()
             {
-                if (cts == null)
+                if (_cts == null)
                 {
                     return;
                 }
 
-                cts.Cancel();
-                cts.Dispose();
-                cts = null;
+                _cts.Cancel();
+                _cts.Dispose();
+                _cts = null;
             }
         }
     }

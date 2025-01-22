@@ -2,7 +2,6 @@
 using Cysharp.Threading.Tasks;
 using Photon.Pun;
 using UniRx;
-using UnityEngine;
 using State = StateMachine<Player.Common.PlayerCore>.State;
 
 namespace Player.Common
