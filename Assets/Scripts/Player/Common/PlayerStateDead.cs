@@ -18,8 +18,8 @@ namespace Player.Common
 
             private void PlayBackAnimation()
             {
-                Owner.animator.SetTrigger(GameCommonData.DeadHashKey);
-                Owner.observableStateMachineTrigger.OnStateExitAsObservable()
+                Owner._animator.SetTrigger(GameCommonData.DeadHashKey);
+                Owner._observableStateMachineTrigger.OnStateExitAsObservable()
                     .Where(info => info.StateInfo.IsName(GameCommonData.DeadKey))
                     .Take(1)
                     .SelectMany(_ => Dead().ToObservable())
@@ -31,7 +31,7 @@ namespace Player.Common
             {
                 await UniTask.Delay(2000);
                 PhotonNetwork.LeaveRoom();
-                Owner.deadSubject.OnNext(Unit.Default);
+                Owner._deadSubject.OnNext(Unit.Default);
             }
         }
     }

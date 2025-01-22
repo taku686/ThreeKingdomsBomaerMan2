@@ -10,9 +10,9 @@ namespace UI.Title
         [SerializeField] private Transform gridParent;
         [SerializeField] private BattleReadyGrid battleReadyGrid;
 
-        public BattleReadyGrid BattleReadyGrid => battleReadyGrid;
-        public Transform GridParent => gridParent;
-        public Button BackButton => backButton;
-        public Button BattleStartButton => battleStartButton;
+        public BattleReadyGrid _BattleReadyGrid => battleReadyGrid;
+        public Transform _GridParent => gridParent;
+        public Button _BackButton => backButton;
+        public Button _BattleStartButton => battleStartButton;
     }
 }

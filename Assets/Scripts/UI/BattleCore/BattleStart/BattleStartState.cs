@@ -30,7 +30,7 @@ namespace Manager.BattleManager
             private void Initialize()
             {
                 cts = new CancellationTokenSource();
-                userDataRepository = Owner.userDataRepository;
+                userDataRepository = Owner._userDataRepository;
                 battleStartView = Owner.battleStartView;
                 battleStartView.gameObject.SetActive(true);
                 battleStartView.Initialize();
@@ -48,7 +48,7 @@ namespace Manager.BattleManager
             private void OnSubscribe()
             {
                 battleStartView.Exit
-                    .Subscribe(_ => { Owner.stateMachine.Dispatch((int)State.InBattle); })
+                    .Subscribe(_ => { Owner._stateMachine.Dispatch((int)State.InBattle); })
                     .AddTo(cts.Token);
             }
 

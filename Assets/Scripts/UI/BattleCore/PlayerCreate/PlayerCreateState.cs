@@ -1,4 +1,5 @@
-﻿using Bomb;
+﻿using System.Collections.Generic;
+using Bomb;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.BattleManager.Camera;
@@ -19,16 +20,17 @@ namespace Manager.BattleManager
             private static readonly Vector3 ColliderCenter = new(0, 0.6f, 0);
             private static readonly Vector3 ColliderSize = new(0.4f, 0.6f, 0.4f);
             private static readonly float MaxRate = 1f;
-            private PhotonNetworkManager PhotonNetworkManager => Owner.photonNetworkManager;
-            private PlayerGeneratorUseCase PlayerGeneratorUseCase => Owner.playerGeneratorUseCase;
-            private MapManager MapManager => Owner.mapManager;
-            private CameraManager CameraManager => Owner.cameraManager;
-            private StateMachine<BattleCore> StateMachineClone => Owner.stateMachine;
-            private BombProvider BombProvider => Owner.bombProvider;
-            private AnimatorControllerRepository AnimatorControllerRepository => Owner.animatorControllerRepository;
-            private WeaponCreateInBattleUseCase WeaponCreateInBattleUseCase => Owner.weaponCreateInBattleUseCase;
-            private EffectActivateUseCase EffectActivateUseCase => Owner.effectActivator;
-            private ApplyStatusSkillUseCase ApplyStatusSkillUseCase => Owner.applyStatusSkillUseCase;
+            private PhotonNetworkManager _PhotonNetworkManager => Owner._photonNetworkManager;
+            private PlayerGeneratorUseCase _PlayerGeneratorUseCase => Owner._playerGeneratorUseCase;
+            private MapManager _MapManager => Owner.mapManager;
+            private CameraManager _CameraManager => Owner.cameraManager;
+            private StateMachine<BattleCore> _StateMachineClone => Owner._stateMachine;
+            private BombProvider _BombProvider => Owner._bombProvider;
+            private AnimatorControllerRepository _AnimatorControllerRepository => Owner.animatorControllerRepository;
+            private WeaponCreateInBattleUseCase _WeaponCreateInBattleUseCase => Owner._weaponCreateInBattleUseCase;
+            private EffectActivateUseCase _EffectActivateUseCase => Owner.effectActivator;
+            private ApplyStatusSkillUseCase _ApplyStatusSkillUseCase => Owner._applyStatusSkillUseCase;
+            private List<PlayerStatusUI> _PlayerStatusUiList => Owner._playerStatusUiList;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
             {
@@ -44,13 +46,13 @@ namespace Manager.BattleManager
             private void CreatePlayer()
             {
                 var index = PhotonNetwork.LocalPlayer.ActorNumber;
-                var characterData = PhotonNetworkManager.GetCharacterData(index);
-                PlayerGeneratorUseCase.GenerateCharacter(index, characterData);
+                var characterData = _PhotonNetworkManager.GetCharacterData(index);
+                _PlayerGeneratorUseCase.GenerateCharacter(index, characterData);
             }
 
             private void SetPlayerGenerateCompleteSubscribe()
             {
-                PhotonNetworkManager.PlayerGenerateCompleteSubject.Subscribe(_ =>
+                _PhotonNetworkManager._PlayerGenerateCompleteSubject.Subscribe(_ =>
                 {
                     var players = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
                     foreach (var player in players)
@@ -58,7 +60,7 @@ namespace Manager.BattleManager
                         InitializePlayerComponent(player);
                     }
 
-                    StateMachineClone.Dispatch((int)State.BattleStart);
+                    _StateMachineClone.Dispatch((int)State.BattleStart);
                 }).AddTo(Owner.GetCancellationTokenOnDestroy());
             }
 
@@ -68,15 +70,15 @@ namespace Manager.BattleManager
                 var photonAnimator = player.GetComponent<PhotonAnimatorView>();
                 var playerPutBomb = player.AddComponent<PutBomb>();
                 var playerId = photonView.OwnerActorNr;
-                var characterData = PhotonNetworkManager.GetCharacterData(playerId);
-                var weaponData = PhotonNetworkManager.GetWeaponData(playerId);
+                var characterData = _PhotonNetworkManager.GetCharacterData(playerId);
+                var weaponData = _PhotonNetworkManager.GetWeaponData(playerId);
                 var weaponType = weaponData.WeaponType;
                 player.tag = GameCommonData.PlayerTag;
                 player.layer = LayerMask.NameToLayer(GameCommonData.PlayerLayer);
                 SetPlayerUI(player, playerId, out var hpKey);
                 SetAnimatorController(player, weaponType, photonAnimator);
                 GenerateEffectActivator(player, playerId);
-                WeaponCreateInBattleUseCase.CreateWeapon(player, weaponData, photonView);
+                _WeaponCreateInBattleUseCase.CreateWeapon(player, weaponData, photonView);
                 if (!photonView.IsMine)
                 {
                     return;
@@ -84,16 +86,16 @@ namespace Manager.BattleManager
 
                 AddBoxCollider(player);
                 AddRigidbody(player);
-                CameraManager.Initialize(player.transform);
+                _CameraManager.Initialize(player.transform);
                 InitializeStatus(out var playerStatusManager, characterData, weaponData, photonView.IsMine);
-                playerPutBomb.Initialize(BombProvider, playerStatusManager, MapManager);
+                playerPutBomb.Initialize(_BombProvider, playerStatusManager, _MapManager);
                 var playerCore = player.AddComponent<PlayerCore>();
                 Owner.SetPlayerCore(playerCore);
                 playerCore.Initialize
                 (
                     playerStatusManager,
-                    PhotonNetworkManager,
-                    ApplyStatusSkillUseCase,
+                    _PhotonNetworkManager,
+                    _ApplyStatusSkillUseCase,
                     hpKey
                 );
             }
@@ -109,11 +111,11 @@ namespace Manager.BattleManager
                 var statusSkillData = weaponData.StatusSkillMasterData;
                 var characterId = characterData.Id;
                 var skillId = statusSkillData.Id;
-                var hp = ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Hp);
-                var speed = ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Speed);
-                var attack = ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Attack);
-                var fireRange = ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.FireRange);
-                var bombLimit = ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.BombLimit);
+                var hp = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Hp);
+                var speed = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Speed);
+                var attack = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Attack);
+                var fireRange = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.FireRange);
+                var bombLimit = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.BombLimit);
 
                 playerStatusForBattleUseCase = new TranslateStatusForBattleUseCase
                 (
@@ -128,10 +130,10 @@ namespace Manager.BattleManager
 
             private void GenerateEffectActivator(GameObject playerObj, int playerId)
             {
-                var effect = Instantiate(EffectActivateUseCase, playerObj.transform);
+                var effect = Instantiate(_EffectActivateUseCase, playerObj.transform);
                 effect.transform.localPosition = new Vector3(0, 0, 0);
                 effect.transform.localRotation = quaternion.identity;
-                var subject = PhotonNetworkManager.ActivateSkillSubject;
+                var subject = _PhotonNetworkManager._ActivateSkillSubject;
                 effect.Initialize(subject, playerId);
             }
 
@@ -144,6 +146,7 @@ namespace Manager.BattleManager
                 SynchronizedValue.Instance.Create(hpKey, MaxRate);
                 var playerStatusUI = playerUI.GetComponent<PlayerStatusUI>();
                 playerStatusUI.Initialize(SynchronizedValue.Instance.GetFloatValue(hpKey));
+                _PlayerStatusUiList.Add(playerStatusUI);
             }
 
             private void SetAnimatorController
@@ -154,7 +157,7 @@ namespace Manager.BattleManager
             )
             {
                 var animator = player.GetComponent<Animator>();
-                animator.runtimeAnimatorController = AnimatorControllerRepository.GetAnimatorController(weaponType);
+                animator.runtimeAnimatorController = _AnimatorControllerRepository.GetAnimatorController(weaponType);
                 photonAnimatorView.SetParameterSynchronized
                 (
                     GameCommonData.SpeedhParameterName,

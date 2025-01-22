@@ -3,7 +3,6 @@ using Common.Data;
 using Cysharp.Threading.Tasks;
 using MoreMountains.Tools;
 using UniRx;
-using State = StateMachine<Manager.BattleManager.BattleCore>.State;
 
 namespace Manager.BattleManager
 {
@@ -14,8 +13,8 @@ namespace Manager.BattleManager
             //順位に応じた報酬をもらう処理を行う
             //報酬もらった後はmainシーンに戻る
 
-            private BattleResultView battleResultView;
-            private CancellationTokenSource cts;
+            private BattleResultView _BattleResultView => Owner.battleResultView;
+            private CancellationTokenSource _cts;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
             {
@@ -26,33 +25,32 @@ namespace Manager.BattleManager
             protected override void OnExit(StateMachine<BattleCore>.State nextState)
             {
                 Cancel();
-                battleResultView.gameObject.SetActive(false);
+                _BattleResultView.gameObject.SetActive(false);
             }
 
             private void Initialize()
             {
-                cts = new CancellationTokenSource();
-                battleResultView = Owner.battleResultView;
-                battleResultView.gameObject.SetActive(true);
+                _cts = new CancellationTokenSource();
+                _BattleResultView.gameObject.SetActive(true);
             }
 
             private void OnSubscribe()
             {
-                battleResultView.OkButtonObservable
+                _BattleResultView.OkButtonObservable
                     .Subscribe(_ => { MMSceneLoadingManager.LoadScene(GameCommonData.TitleScene); })
-                    .AddTo(cts.Token);
+                    .AddTo(_cts.Token);
             }
 
             private void Cancel()
             {
-                if (cts == null)
+                if (_cts == null)
                 {
                     return;
                 }
 
-                cts.Cancel();
-                cts.Dispose();
-                cts = null;
+                _cts.Cancel();
+                _cts.Dispose();
+                _cts = null;
             }
         }
     }

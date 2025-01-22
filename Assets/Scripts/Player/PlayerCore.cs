@@ -16,31 +16,31 @@ namespace Player.Common
 {
     public partial class PlayerCore : MonoBehaviourPunCallbacks
     {
-        private ApplyStatusSkillUseCase applyStatusSkillUseCase;
-        private PhotonNetworkManager photonNetworkManager;
-        private InputManager inputManager;
-        private PlayerMove playerMove;
-        private PutBomb putBomb;
-        private Animator animator;
-        private ObservableStateMachineTrigger observableStateMachineTrigger;
-        private TranslateStatusForBattleUseCase translateStatusForBattleUseCase;
+        private ApplyStatusSkillUseCase _applyStatusSkillUseCase;
+        private PhotonNetworkManager _photonNetworkManager;
+        private InputManager _inputManager;
+        private PlayerMove _playerMove;
+        private PutBomb _putBomb;
+        private Animator _animator;
+        private ObservableStateMachineTrigger _observableStateMachineTrigger;
+        private TranslateStatusForBattleUseCase _translateStatusForBattleUseCase;
         private const int DeadHp = 0;
         private const int InvincibleDuration = 2;
         private const float WaitDuration = 0.3f;
-        private bool isDamage;
-        private bool isInvincible;
-        private Renderer playerRenderer;
-        private BoxCollider boxCollider;
-        private SkillBase skillOne;
-        private SkillBase skillTwo;
-        private string hpKey;
-        private readonly Subject<Unit> deadSubject = new();
-        private StateMachine<PlayerCore> stateMachine;
-        private CancellationToken cancellationToken;
-        private readonly Subject<(StatusType statusType, float value)> statusBuffSubject = new();
-        private readonly Subject<(StatusType statusType, int speed, bool isBiff, bool isDebuff)> statusBuffUiSubject = new();
-        public IObservable<Unit> DeadObservable => deadSubject;
-        public IObservable<(StatusType statusType, int speed, bool isBuff, bool isDebuff)> StatusBuffUiObservable => statusBuffUiSubject;
+        private bool _isDamage;
+        private bool _isInvincible;
+        private Renderer _playerRenderer;
+        private BoxCollider _boxCollider;
+        private SkillBase _skillOne;
+        private SkillBase _skillTwo;
+        private string _hpKey;
+        private readonly Subject<Unit> _deadSubject = new();
+        private StateMachine<PlayerCore> _stateMachine;
+        private CancellationToken _cancellationToken;
+        private readonly Subject<(StatusType statusType, float value)> _statusBuffSubject = new();
+        private readonly Subject<(StatusType statusType, int speed, bool isBiff, bool isDebuff)> _statusBuffUiSubject = new();
+        public IObservable<Unit> _DeadObservable => _deadSubject;
+        public IObservable<(StatusType statusType, int speed, bool isBuff, bool isDebuff)> _StatusBuffUiObservable => _statusBuffUiSubject;
 
         private enum PLayerState
         {
@@ -59,36 +59,36 @@ namespace Player.Common
             string key
         )
         {
-            hpKey = key;
-            translateStatusForBattleUseCase = forBattleUseCase;
-            photonNetworkManager = networkManager;
-            applyStatusSkillUseCase = applyStatusSkill;
+            _hpKey = key;
+            _translateStatusForBattleUseCase = forBattleUseCase;
+            _photonNetworkManager = networkManager;
+            _applyStatusSkillUseCase = applyStatusSkill;
             InitializeComponent();
             InitializeState();
         }
 
         private void InitializeComponent()
         {
-            inputManager = gameObject.AddComponent<InputManager>();
-            inputManager.Initialize(photonView, photonNetworkManager);
-            putBomb = GetComponent<PutBomb>();
-            animator = GetComponent<Animator>();
-            observableStateMachineTrigger = animator.GetBehaviour<ObservableStateMachineTrigger>();
-            playerMove = gameObject.AddComponent<PlayerMove>();
-            playerMove.Initialize(statusBuffSubject, translateStatusForBattleUseCase.Speed);
-            playerRenderer = GetComponentInChildren<Renderer>();
-            boxCollider = GetComponent<BoxCollider>();
-            cancellationToken = gameObject.GetCancellationTokenOnDestroy();
+            _inputManager = gameObject.AddComponent<InputManager>();
+            _inputManager.Initialize(photonView, _photonNetworkManager);
+            _putBomb = GetComponent<PutBomb>();
+            _animator = GetComponent<Animator>();
+            _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
+            _playerMove = gameObject.AddComponent<PlayerMove>();
+            _playerMove.Initialize(_statusBuffSubject, _translateStatusForBattleUseCase._Speed);
+            _playerRenderer = GetComponentInChildren<Renderer>();
+            _boxCollider = GetComponent<BoxCollider>();
+            _cancellationToken = gameObject.GetCancellationTokenOnDestroy();
         }
 
         private void InitializeState()
         {
-            stateMachine = new StateMachine<PlayerCore>(this);
-            stateMachine.Start<PlayerIdleState>();
-            stateMachine.AddAnyTransition<PlayerDeadState>((int)PLayerState.Dead);
-            stateMachine.AddAnyTransition<PlayerIdleState>((int)PLayerState.Idle);
-            stateMachine.AddTransition<PlayerIdleState, PlayerNormalSkillState>((int)PLayerState.NormalSkill);
-            stateMachine.AddTransition<PlayerIdleState, PlayerSpecialSkillState>((int)PLayerState.SpecialSkill);
+            _stateMachine = new StateMachine<PlayerCore>(this);
+            _stateMachine.Start<PlayerIdleState>();
+            _stateMachine.AddAnyTransition<PlayerDeadState>((int)PLayerState.Dead);
+            _stateMachine.AddAnyTransition<PlayerIdleState>((int)PLayerState.Idle);
+            _stateMachine.AddTransition<PlayerIdleState, PlayerNormalSkillState>((int)PLayerState.NormalSkill);
+            _stateMachine.AddTransition<PlayerIdleState, PlayerSpecialSkillState>((int)PLayerState.SpecialSkill);
         }
 
         private void Update()
@@ -98,8 +98,8 @@ namespace Player.Common
                 return;
             }
 
-            stateMachine.Update();
-            inputManager.UpdateSkillUI();
+            _stateMachine.Update();
+            _inputManager.UpdateSkillUI();
             OnInvincible();
         }
 
@@ -111,72 +111,72 @@ namespace Player.Common
 
         private async void OnInvincible()
         {
-            if (isInvincible)
+            if (_isInvincible)
             {
                 return;
             }
 
-            isInvincible = true;
-            while (isDamage)
+            _isInvincible = true;
+            while (_isDamage)
             {
-                if (playerRenderer == null)
+                if (_playerRenderer == null)
                 {
                     break;
                 }
 
-                playerRenderer.enabled = false;
-                await UniTask.Delay(TimeSpan.FromSeconds(WaitDuration), cancellationToken: cancellationToken);
-                if (playerRenderer == null)
+                _playerRenderer.enabled = false;
+                await UniTask.Delay(TimeSpan.FromSeconds(WaitDuration), cancellationToken: _cancellationToken);
+                if (_playerRenderer == null)
                 {
                     break;
                 }
 
-                playerRenderer.enabled = true;
-                await UniTask.Delay(TimeSpan.FromSeconds(WaitDuration), cancellationToken: cancellationToken);
+                _playerRenderer.enabled = true;
+                await UniTask.Delay(TimeSpan.FromSeconds(WaitDuration), cancellationToken: _cancellationToken);
             }
 
-            isInvincible = false;
+            _isInvincible = false;
         }
 
         private async UniTaskVoid OnDamage(GameObject other)
         {
-            if (!other.CompareTag(GameCommonData.BombEffectTag) || isDamage)
+            if (!other.CompareTag(GameCommonData.BombEffectTag) || _isDamage)
             {
                 return;
             }
 
             var explosion = other.GetComponentInParent<Explosion>();
-            translateStatusForBattleUseCase.CurrentHp -= explosion.damageAmount;
-            var hpRate = translateStatusForBattleUseCase.CurrentHp / (float)translateStatusForBattleUseCase.MaxHp;
-            SynchronizedValue.Instance.SetValue(hpKey, hpRate);
-            if (translateStatusForBattleUseCase.CurrentHp <= DeadHp)
+            _translateStatusForBattleUseCase._CurrentHp -= explosion.damageAmount;
+            var hpRate = _translateStatusForBattleUseCase._CurrentHp / (float)_translateStatusForBattleUseCase._MaxHp;
+            SynchronizedValue.Instance.SetValue(_hpKey, hpRate);
+            if (_translateStatusForBattleUseCase._CurrentHp <= DeadHp)
             {
                 Dead().Forget();
                 return;
             }
 
-            isDamage = true;
-            await UniTask.Delay(TimeSpan.FromSeconds(InvincibleDuration), cancellationToken: cancellationToken);
-            isDamage = false;
-            if (playerRenderer == null)
+            _isDamage = true;
+            await UniTask.Delay(TimeSpan.FromSeconds(InvincibleDuration), cancellationToken: _cancellationToken);
+            _isDamage = false;
+            if (_playerRenderer == null)
             {
                 return;
             }
 
-            playerRenderer.enabled = true;
+            _playerRenderer.enabled = true;
         }
 
         private async UniTask Dead()
         {
-            await UniTask.Delay(500, cancellationToken: cancellationToken);
-            stateMachine.Dispatch((int)PLayerState.Dead);
+            await UniTask.Delay(500, cancellationToken: _cancellationToken);
+            _stateMachine.Dispatch((int)PLayerState.Dead);
         }
 
         private void OnDestroy()
         {
-            translateStatusForBattleUseCase.Dispose();
-            deadSubject.Dispose();
-            statusBuffSubject.Dispose();
+            _translateStatusForBattleUseCase.Dispose();
+            _deadSubject.Dispose();
+            _statusBuffSubject.Dispose();
         }
     }
 }

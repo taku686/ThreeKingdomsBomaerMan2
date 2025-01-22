@@ -381,7 +381,7 @@ namespace MoreMountains.TopDownEngine
 		/// <summary>
 		/// Kills the player.
 		/// </summary>
-		public virtual void PlayerDead(Character playerCharacter)
+		protected virtual void PlayerDead(Character playerCharacter)
 		{
 			if (Players.Count < 2)
 			{

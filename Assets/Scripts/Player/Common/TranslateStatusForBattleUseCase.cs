@@ -6,19 +6,15 @@ namespace Player.Common
 {
     public class TranslateStatusForBattleUseCase : IDisposable
     {
-        private readonly bool isMine;
+        private readonly bool _isMine;
         private const float HpRate = 1.8f;
-        private int maxHp;
-        private float speed;
-        private int maxBombLimit;
-        private int currentBombLimit;
-        private int attack;
-        private int fireRange;
-        public int CurrentHp { get; set; }
-        public int MaxHp => maxHp;
-        public float Speed => speed;
-        public int Attack => attack;
-        public int FireRange => fireRange;
+        private int _maxBombLimit;
+        private int _currentBombLimit;
+        public int _CurrentHp { get; set; }
+        public int _MaxHp { get; private set; }
+        public float _Speed { get; private set; }
+        public int _Attack { get; private set; }
+        public int _FireRange { get; private set; }
 
 
         public TranslateStatusForBattleUseCase
@@ -31,14 +27,14 @@ namespace Player.Common
             bool isMine
         )
         {
-            CurrentHp = (int)(hp * HpRate);
-            maxHp = (int)(hp * HpRate);
-            this.speed = Mathf.Sqrt(speed * 0.1f);
-            currentBombLimit = 0;
-            maxBombLimit = bombLimit;
-            this.attack = attack;
-            this.fireRange = Mathf.RoundToInt(fireRange / 2f);
-            this.isMine = isMine;
+            _CurrentHp = (int)(hp * HpRate);
+            _MaxHp = (int)(hp * HpRate);
+            _Speed = Mathf.Sqrt(speed * 0.1f);
+            _currentBombLimit = 0;
+            _maxBombLimit = bombLimit;
+            _Attack = attack;
+            _FireRange = Mathf.RoundToInt(fireRange / 2f);
+            _isMine = isMine;
         }
 
         public float TranslateStatusValue(StatusType statusType, int value)
@@ -46,20 +42,22 @@ namespace Player.Common
             switch (statusType)
             {
                 case StatusType.Hp:
-                    maxHp = (int)(value * HpRate);
-                    return maxHp;
+                    _MaxHp = (int)(value * HpRate);
+                    return _MaxHp;
                 case StatusType.Attack:
-                    attack = value;
-                    return attack;
+                    _Attack = value;
+                    return _Attack;
                 case StatusType.Speed:
-                    speed = Mathf.Sqrt(value * 0.1f);
-                    return speed;
+                    _Speed = Mathf.Sqrt(value * 0.1f);
+                    return _Speed;
                 case StatusType.BombLimit:
-                    maxBombLimit = value;
-                    return maxBombLimit;
+                    _maxBombLimit = value;
+                    return _maxBombLimit;
                 case StatusType.FireRange:
-                    fireRange = Mathf.RoundToInt(value / 2f);
-                    return fireRange;
+                    _FireRange = Mathf.RoundToInt(value / 2f);
+                    return _FireRange;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(statusType), statusType, null);
             }
 
             return value;
@@ -67,40 +65,38 @@ namespace Player.Common
 
         public float Heal(int value)
         {
-            CurrentHp += value;
-            var rate = (float)CurrentHp / maxHp;
-            if (rate > 1)
-            {
-                CurrentHp = maxHp;
-                rate = 1;
-            }
+            _CurrentHp += value;
+            var rate = (float)_CurrentHp / _MaxHp;
+            if (!(rate > 1)) return rate;
+            _CurrentHp = _MaxHp;
+            rate = 1;
 
             return rate;
         }
 
         public bool CanPutBomb()
         {
-            return currentBombLimit <= maxBombLimit;
+            return _currentBombLimit <= _maxBombLimit;
         }
 
         public void IncrementBombCount()
         {
-            if (!isMine)
+            if (!_isMine)
             {
                 return;
             }
 
-            currentBombLimit++;
+            _currentBombLimit++;
         }
 
         public void DecrementBombCount()
         {
-            if (!isMine || currentBombLimit <= 0)
+            if (!_isMine || _currentBombLimit <= 0)
             {
                 return;
             }
 
-            currentBombLimit--;
+            _currentBombLimit--;
         }
 
 
