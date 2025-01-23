@@ -39,7 +39,7 @@ namespace Player.Common
             int explosionTime, int playerId)
         {
             _mapManager.AddMap(MapManager.Area.Bomb, playerPos.x, playerPos.z);
-            for (int i = 1; i <= fireRange; i++)
+            for (var i = 1; i <= fireRange; i++)
             {
                 _mapManager.AddMap(MapManager.Area.Explosion, playerPos.x + i, playerPos.z);
                 _mapManager.AddMap(MapManager.Area.Explosion, playerPos.x - i, playerPos.z);

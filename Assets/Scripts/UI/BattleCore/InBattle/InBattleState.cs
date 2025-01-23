@@ -2,10 +2,13 @@
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Manager.NetworkManager;
 using Photon.Pun;
 using Player.Common;
+using Repository;
 using UI.Battle;
 using UniRx;
+using UnityEngine;
 
 namespace Manager.BattleManager
 {
@@ -17,8 +20,10 @@ namespace Manager.BattleManager
             private PlayerCore _PlayerCore => Owner._playerCore;
             private StateMachine<BattleCore> _StateMachine => Owner._stateMachine;
             private List<PlayerStatusUI> _PlayerStatusUiList => Owner._playerStatusUiList;
+            private BattleResultDataRepository _BattleResultDataRepository => Owner._battleResultDataRepository;
             private CancellationTokenSource _cts;
             private int _startTime;
+            private int _rank;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
             {
@@ -43,7 +48,13 @@ namespace Manager.BattleManager
             private void OnSubscribe()
             {
                 _PlayerCore._DeadObservable
-                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.Result); })
+                    .Subscribe(_ =>
+                    {
+                        _rank = PhotonNetwork.CurrentRoom.PlayerCount;
+                        _BattleResultDataRepository.SetRank(_rank);
+                        PhotonNetwork.LeaveRoom();
+                        _StateMachine.Dispatch((int)State.Result);
+                    })
                     .AddTo(_cts.Token);
 
                 _PlayerCore._StatusBuffUiObservable

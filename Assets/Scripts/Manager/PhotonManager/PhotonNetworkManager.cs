@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using Common.Data;
 using ExitGames.Client.Photon;
 using Manager.DataManager;
-using Newtonsoft.Json;
 using Photon.Pun;
 using Photon.Realtime;
 using Repository;
 using UniRx;
+using Unity.Entities;
 using UnityEngine;
 using Zenject;
 
@@ -28,6 +28,7 @@ namespace Manager.NetworkManager
         private readonly Dictionary<int, WeaponMasterData> _currentRoomWeaponDatum = new();
         private readonly Dictionary<int, LevelMasterData> _currentRoomLevelDatum = new();
         private int _playerCount;
+        public bool _isTitle;
 
         public Subject<int> _LeftRoomSubject => _leftRoomSubject;
         public IObservable<Photon.Realtime.Player[]> _JoinedRoomSubject => _joinedRoomSubject;
@@ -90,6 +91,11 @@ namespace Manager.NetworkManager
 
         public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
         {
+            if (!_isTitle)
+            {
+                return;
+            }
+
             _leftRoomSubject.OnNext(otherPlayer.GetPlayerIndex());
         }
 

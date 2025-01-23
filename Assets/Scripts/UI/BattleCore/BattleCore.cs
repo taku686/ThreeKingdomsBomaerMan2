@@ -9,6 +9,7 @@ using Manager.DataManager;
 using Manager.NetworkManager;
 using Photon.Pun;
 using Player.Common;
+using Repository;
 using UI.Battle;
 using UI.BattleCore;
 using UnityEngine;
@@ -21,6 +22,7 @@ namespace Manager.BattleManager
         //Repository
         [Inject] private UserDataRepository _userDataRepository;
         [Inject] private SkillMasterDataRepository _skillMasterDataRepository;
+        [Inject] private BattleResultDataRepository _battleResultDataRepository;
         [SerializeField] private AnimatorControllerRepository animatorControllerRepository;
 
         //UseCase
@@ -60,6 +62,7 @@ namespace Manager.BattleManager
         // Start is called before the first frame update
         void Start()
         {
+            _photonNetworkManager._isTitle = false;
             InitializeUi();
             InitializeState();
             InitializeComponent();

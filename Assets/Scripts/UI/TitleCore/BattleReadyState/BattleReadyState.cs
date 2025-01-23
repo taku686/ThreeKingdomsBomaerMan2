@@ -37,6 +37,7 @@ namespace UI.Title
 
             private void Initialize()
             {
+                _PhotonNetworkManager._isTitle = true;
                 _isInitialize = false;
                 SetupCancellationToken();
                 InitializeButton();
@@ -46,7 +47,7 @@ namespace UI.Title
 
             private void SetupEvent()
             {
-               _PhotonNetworkManager.OnStartConnectNetwork();
+                _PhotonNetworkManager.OnStartConnectNetwork();
             }
 
             private void InitializeButton()

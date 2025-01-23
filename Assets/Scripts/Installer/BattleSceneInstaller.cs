@@ -1,5 +1,6 @@
 using Bomb;
 using Manager.BattleManager;
+using Repository;
 using UI.Common;
 using UnityEngine;
 using Zenject;
@@ -20,6 +21,7 @@ namespace Common.Installer
             Container.Bind<InputView>().FromComponentOn(buttonsGameObject).AsCached();
             Container.Bind<WeaponCreateInBattleUseCase>().AsCached();
             Container.Bind<StatusInBattleViewModelUseCase>().AsCached();
+            Container.Bind<BattleResultDataRepository>().AsCached();
         }
     }
 }

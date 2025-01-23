@@ -29,7 +29,6 @@ namespace Player.Common
             private async UniTask Dead()
             {
                 await UniTask.Delay(2000);
-                PhotonNetwork.LeaveRoom();
                 Owner._deadSubject.OnNext(Unit.Default);
             }
         }

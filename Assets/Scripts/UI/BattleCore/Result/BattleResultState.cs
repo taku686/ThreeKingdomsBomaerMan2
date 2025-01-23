@@ -2,6 +2,7 @@
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using MoreMountains.Tools;
+using Repository;
 using UniRx;
 
 namespace Manager.BattleManager
@@ -14,6 +15,7 @@ namespace Manager.BattleManager
             //報酬もらった後はmainシーンに戻る
 
             private BattleResultView _BattleResultView => Owner.GetView(State.Result) as BattleResultView;
+            private BattleResultDataRepository _BattleResultDataRepository => Owner._battleResultDataRepository;
             private CancellationTokenSource _cts;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
@@ -30,7 +32,8 @@ namespace Manager.BattleManager
             private void Initialize()
             {
                 _cts = new CancellationTokenSource();
-                _BattleResultView.ApplyView(1);
+                var rank = _BattleResultDataRepository.GetRank();
+                _BattleResultView.ApplyView(rank);
                 Owner.SwitchUiObject(State.Result);
             }
 
