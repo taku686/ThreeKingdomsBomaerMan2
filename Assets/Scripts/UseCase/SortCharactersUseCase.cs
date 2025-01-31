@@ -48,7 +48,9 @@ namespace UseCase
                     Name = characterData.Name,
                     SelfPortraitSprite = characterData.SelfPortraitSprite,
                     ColorSprite = characterData.ColorSprite,
-                    WeaponEffectObj = characterData.WeaponEffectObj
+                    WeaponEffectObj = characterData.WeaponEffectObj,
+                    Type = characterData.Type,
+                    Team = characterData.Team,
                 };
                 result.Add(newCharacterData);
             }

@@ -74,7 +74,8 @@ namespace Assets.Scripts.Common.ResourceManager
                 Attack = customData.Attack,
                 FireRange = customData.FireRange / ModifiedValue,
                 Hp = customData.Hp,
-                CharaColor = customData.CharaColor
+                CharaColor = customData.CharaColor,
+                Type = customData.Type
             };
             _catalogDataRepository.SetCharacter(characterData);
         }

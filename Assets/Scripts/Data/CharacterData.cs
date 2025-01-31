@@ -16,6 +16,8 @@ namespace Common.Data
         private int attack;
         private int fireRange;
         private int hp;
+        private int type;
+        private int passiveSkillId;
         private string charaColor;
         public Sprite SelfPortraitSprite;
         public Sprite ColorSprite;
@@ -86,6 +88,18 @@ namespace Common.Data
         {
             get => charaColor;
             set => charaColor = value;
+        }
+
+        public int Type
+        {
+            get => type;
+            set => type = value;
+        }
+
+        public int PassiveSkillId
+        {
+            get => passiveSkillId;
+            set => passiveSkillId = value;
         }
 
         public void Dispose()

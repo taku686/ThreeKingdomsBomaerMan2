@@ -11,7 +11,7 @@
 
             protected override void OnUpdate()
             {
-                Owner.stateMachine.Dispatch((int)State.PlayerCreate);
+                Owner._stateMachine.Dispatch((int)State.PlayerCreate);
             }
 
             private void OnInitialize()

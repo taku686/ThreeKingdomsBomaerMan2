@@ -48,8 +48,8 @@ namespace Enemy
                 var playerId = _photonView.ViewID;
                 var explosionTime = PhotonNetwork.ServerTimestamp + GameCommonData.ThreeMilliSecondsBeforeExplosion;
                 var photonView = _photonView;
-                var damageAmount = translateStatusForBattleUseCase.Attack;
-                var fireRange = translateStatusForBattleUseCase.FireRange;
+                var damageAmount = translateStatusForBattleUseCase._Attack;
+                var fireRange = translateStatusForBattleUseCase._FireRange;
                 var boxCollider = _boxCollider;
                 _putBomb.SetBomb(boxCollider, photonView, Owner.transform,
                     (int)BombType.Normal, damageAmount, fireRange, explosionTime, playerId);

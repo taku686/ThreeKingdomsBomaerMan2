@@ -10,19 +10,19 @@ namespace Repository
 {
     public class CharacterCreateUseCase : IDisposable
     {
-        private readonly Transform characterGenerateTransform;
-        private readonly CharacterMasterDataRepository characterMasterDataRepository;
-        private readonly UserDataRepository userDataRepository;
-        private readonly CharacterObjectRepository characterObjectRepository;
-        private readonly AnimatorControllerRepository animatorControllerRepository;
-        private readonly Vector3 bowPosition = new(-0.029f, 0.02f, -0.001f);
-        private readonly Vector3 knifePosition = new(-0.0332f, 0.0284f, -0.0129f);
-        private readonly Vector3 othersPosition = new(-0.061f, 0.026f, 0.003f);
-        private readonly Vector3 bowRightRotation = new(-87.91f, 204.73f, -24.69f);
-        private readonly Vector3 bowLeftRotation = new(87.91f, -204.73f, -24.69f);
-        private readonly Vector3 knifeLeftRotation = new(53.571f, 294.535f, -253.946f);
-        private readonly Vector3 othersRightRotation = new(-90.574f, -421.51f, -292.623f);
-        private readonly Vector3 othersLeftRotation = new(-36.033f, 92.88f, 84.68f);
+        private readonly Transform _characterGenerateTransform;
+        private readonly CharacterMasterDataRepository _characterMasterDataRepository;
+        private readonly UserDataRepository _userDataRepository;
+        private readonly CharacterObjectRepository _characterObjectRepository;
+        private readonly AnimatorControllerRepository _animatorControllerRepository;
+        private readonly Vector3 _bowPosition = new(-0.029f, 0.02f, -0.001f);
+        private readonly Vector3 _knifePosition = new(-0.0332f, 0.0284f, -0.0129f);
+        private readonly Vector3 _othersPosition = new(-0.061f, 0.026f, 0.003f);
+        private readonly Vector3 _bowRightRotation = new(-87.91f, 204.73f, -24.69f);
+        private readonly Vector3 _bowLeftRotation = new(87.91f, -204.73f, -24.69f);
+        private readonly Vector3 _knifeLeftRotation = new(53.571f, 294.535f, -253.946f);
+        private readonly Vector3 _othersRightRotation = new(-90.574f, -421.51f, -292.623f);
+        private readonly Vector3 _othersLeftRotation = new(-36.033f, 92.88f, 84.68f);
 
         [Inject]
         public CharacterCreateUseCase
@@ -34,23 +34,23 @@ namespace Repository
             AnimatorControllerRepository animatorControllerRepository
         )
         {
-            this.characterGenerateTransform = characterGenerateTransform;
-            this.characterMasterDataRepository = characterMasterDataRepository;
-            this.userDataRepository = userDataRepository;
-            this.characterObjectRepository = characterObjectRepository;
-            this.animatorControllerRepository = animatorControllerRepository;
+            _characterGenerateTransform = characterGenerateTransform;
+            _characterMasterDataRepository = characterMasterDataRepository;
+            _userDataRepository = userDataRepository;
+            _characterObjectRepository = characterObjectRepository;
+            _animatorControllerRepository = animatorControllerRepository;
         }
 
         public void CreateCharacter(int characterId)
         {
-            var characterObject = characterObjectRepository.GetCharacterObject();
+            var characterObject = _characterObjectRepository.GetCharacterObject();
             if (characterObject != null)
             {
                 Object.Destroy(characterObject);
             }
 
-            var createCharacterData = characterMasterDataRepository.GetCharacterData(characterId);
-            var weaponData = userDataRepository.GetEquippedWeaponData(characterId);
+            var createCharacterData = _characterMasterDataRepository.GetCharacterData(characterId);
+            var weaponData = _userDataRepository.GetEquippedWeaponData(characterId);
             characterObject = CreateCharacter(createCharacterData);
             CreateWeapon(characterObject, weaponData);
             ChangeAnimatorController(characterObject, weaponData.WeaponType);
@@ -63,11 +63,11 @@ namespace Repository
             var characterObject = Object.Instantiate
             (
                 createCharacterData.CharacterObject,
-                characterGenerateTransform.position,
-                characterGenerateTransform.rotation,
-                characterGenerateTransform
+                _characterGenerateTransform.position,
+                _characterGenerateTransform.rotation,
+                _characterGenerateTransform
             );
-            characterObjectRepository.SetCharacterObject(characterObject);
+            _characterObjectRepository.SetCharacterObject(characterObject);
             return characterObject;
         }
 
@@ -80,10 +80,11 @@ namespace Repository
             var weaponObjects = characterObject.GetComponentsInChildren<WeaponObject>();
             foreach (var weaponObject in weaponObjects)
             {
-                if(weaponObject.gameObject == null)
+                if (weaponObject.gameObject == null)
                 {
                     continue;
                 }
+
                 Object.Destroy(weaponObject.gameObject);
             }
 
@@ -93,34 +94,36 @@ namespace Repository
             {
                 if (WeaponType.Bow == weaponData.WeaponType)
                 {
-                    weaponLeftParent.transform.localPosition = bowPosition;
-                    weaponLeftParent.transform.localEulerAngles = bowLeftRotation;
+                    weaponLeftParent.transform.localPosition = _bowPosition;
+                    weaponLeftParent.transform.localEulerAngles = _bowLeftRotation;
                 }
                 else if (WeaponType.Knife == weaponData.WeaponType)
                 {
-                    weaponLeftParent.transform.localPosition = knifePosition;
-                    weaponLeftParent.transform.localEulerAngles = knifeLeftRotation;
+                    weaponLeftParent.transform.localPosition = _knifePosition;
+                    weaponLeftParent.transform.localEulerAngles = _knifeLeftRotation;
                 }
                 else
                 {
-                    weaponLeftParent.transform.localPosition = othersPosition;
-                    weaponLeftParent.transform.localEulerAngles = othersLeftRotation;
+                    weaponLeftParent.transform.localPosition = _othersPosition;
+                    weaponLeftParent.transform.localEulerAngles = _othersLeftRotation;
                 }
+
                 InstantiateWeapon(weaponData, weaponLeftParent.transform);
             }
 
             if (IsRightHand(weaponData.WeaponType))
             {
-                if(WeaponType.Bow == weaponData.WeaponType)
+                if (WeaponType.Bow == weaponData.WeaponType)
                 {
-                    weaponRightParent.transform.localPosition = bowPosition;
-                    weaponRightParent.transform.localEulerAngles = bowRightRotation;
+                    weaponRightParent.transform.localPosition = _bowPosition;
+                    weaponRightParent.transform.localEulerAngles = _bowRightRotation;
                 }
                 else
                 {
-                    weaponRightParent.transform.localPosition = othersPosition;
-                    weaponRightParent.transform.localEulerAngles = othersRightRotation;
+                    weaponRightParent.transform.localPosition = _othersPosition;
+                    weaponRightParent.transform.localEulerAngles = _othersRightRotation;
                 }
+
                 InstantiateWeapon(weaponData, weaponRightParent.transform);
             }
         }
@@ -167,12 +170,12 @@ namespace Repository
                 return;
             }
 
-            animator.runtimeAnimatorController = animatorControllerRepository.GetAnimatorController(weaponType);
+            animator.runtimeAnimatorController = _animatorControllerRepository.GetAnimatorController(weaponType);
         }
 
         private void CreateWeaponEffect(CharacterData createCharacterData, GameObject characterObject)
         {
-            var currentCharacterLevel = userDataRepository.GetCurrentLevelData(createCharacterData.Id);
+            var currentCharacterLevel = _userDataRepository.GetCurrentLevelData(createCharacterData.Id);
             if (currentCharacterLevel.Level < GameCommonData.MaxCharacterLevel)
             {
                 return;

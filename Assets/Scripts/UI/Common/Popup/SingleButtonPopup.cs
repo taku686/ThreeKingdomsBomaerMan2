@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using TMPro;
+using UI.Common;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,13 +11,16 @@ public class SingleButtonPopup : PopupBase
 {
     [SerializeField] private Button _okButton;
     [SerializeField] private TextMeshProUGUI _okText;
-    private IObservable<Unit> _onClickOk;
-    public IObservable<Unit> _OnClickButton => _onClickOk;
+    [Inject] private UIAnimation _uiAnimation;
+    public IObservable<Unit> _OnClickButton { get; private set; }
+
     public async UniTask Open(ViewModel viewModel)
     {
         ApplyViewModel(viewModel);
-        _onClickOk = _okButton
+        _OnClickButton = _okButton
             .OnClickAsObservable()
+            .Take(1)
+            .SelectMany(_ => OnClickButtonAnimation(_okButton).ToObservable())
             .SelectMany(_ => Close().ToObservable())
             .Select(_ => Unit.Default);
 
@@ -26,6 +30,11 @@ public class SingleButtonPopup : PopupBase
     private void ApplyViewModel(ViewModel viewModel)
     {
         _okText.text = viewModel._OkText;
+    }
+
+    private async UniTask OnClickButtonAnimation(Button button)
+    {
+        await _uiAnimation.ClickScaleColor(button.gameObject).ToUniTask();
     }
 
     public class ViewModel : PopupBase.ViewModel

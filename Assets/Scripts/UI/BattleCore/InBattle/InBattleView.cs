@@ -1,8 +1,9 @@
 using Common.Data;
 using TMPro;
+using UI.BattleCore;
 using UnityEngine;
 
-public class InBattleView : MonoBehaviour
+public class InBattleView : BattleViewBase
 {
     [SerializeField] private TextMeshProUGUI timerText;
     [SerializeField] private StatusInBattleView statusInBattleView;
@@ -11,10 +12,10 @@ public class InBattleView : MonoBehaviour
     {
         statusInBattleView.ApplyViewModel(viewModel);
     }
-    
-    public void ApplyBuffState(StatusType statusType, int value,bool isBuff,bool isDebuff)
+
+    public void ApplyBuffState(StatusType statusType, int value, bool isBuff, bool isDebuff)
     {
-        statusInBattleView.ApplyBuffState(statusType, value, isBuff,isDebuff);
+        statusInBattleView.ApplyBuffState(statusType, value, isBuff, isDebuff);
     }
 
     public void UpdateTime(int time)

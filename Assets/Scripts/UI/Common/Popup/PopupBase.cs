@@ -7,7 +7,7 @@ using Zenject;
 
 public abstract class PopupBase : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI _titleText;
+    [SerializeField] private TextMeshProUGUI _titleTMP;
     [SerializeField] private TextMeshProUGUI _explanationText;
     [Inject] private BlockingGameObject _blockingImageObject;
     private const float Duration = 0.2f;
@@ -17,23 +17,21 @@ public abstract class PopupBase : MonoBehaviour
         _blockingImageObject.gameObject.SetActive(true);
         ApplyViewModel(viewModel);
         transform.localScale = Vector3.zero;
-        await transform.DOScale(Vector3.one, Duration).SetEase(Ease.OutBack)
-            .ToUniTask(cancellationToken: this.GetCancellationTokenOnDestroy());
+        await transform.DOScale(Vector3.one, Duration).SetEase(Ease.OutBack).ToUniTask(cancellationToken: this.GetCancellationTokenOnDestroy());
     }
 
     public virtual async UniTask Close()
     {
-        await transform.DOScale(Vector3.zero, Duration).SetEase(Ease.InBack)
-            .ToUniTask(cancellationToken: this.GetCancellationTokenOnDestroy());
+        await transform.DOScale(Vector3.zero, Duration).SetEase(Ease.InBack).ToUniTask(cancellationToken: this.GetCancellationTokenOnDestroy());
         Destroy(gameObject);
         _blockingImageObject.gameObject.SetActive(false);
     }
 
     private void ApplyViewModel(ViewModel viewModel)
     {
-        if (_titleText != null)
+        if (_titleTMP != null)
         {
-            _titleText.text = viewModel._Title;
+            _titleTMP.text = viewModel._Title;
         }
 
         if (_explanationText != null)

@@ -26,30 +26,45 @@ namespace UI.Title
         [SerializeField] private PurchaseErrorView purchaseErrorView;
         [SerializeField] private VirtualCurrencyAddPopup virtualCurrencyAddPopup;
         [SerializeField] private Button inventoryButton;
-        [Inject] private ApplyStatusSkillUseCase applyStatusSkillUseCase;
-        private bool isInitialized;
+        [SerializeField] private GameObject[] _teamTextObjects;
+        [SerializeField] private Image _typeImage;
+        [SerializeField] private Image _typeIcon;
+        [SerializeField] private TextMeshProUGUI _passiveSkillName;
+        [SerializeField] private TextMeshProUGUI _passiveSkillExplanation;
+        [Inject] private ApplyStatusSkillUseCase _applyStatusSkillUseCase;
+        private bool _isInitialized;
         private const float MoveAmount = 50;
-        public VirtualCurrencyAddPopup VirtualCurrencyAddPopup => virtualCurrencyAddPopup;
-        public PurchaseErrorView PurchaseErrorView => purchaseErrorView;
-        public Button UpgradeButton => upgradeButton;
-        public Button BackButton => backButton;
-        public Button SelectButton => selectButton;
-        public Button LeftArrowButton => leftArrowButton;
-        public Button RightArrowButton => rightArrowButton;
-        public Button InventoryButton => inventoryButton;
+        public VirtualCurrencyAddPopup _VirtualCurrencyAddPopup => virtualCurrencyAddPopup;
+        public PurchaseErrorView _PurchaseErrorView => purchaseErrorView;
+        public Button _UpgradeButton => upgradeButton;
+        public Button _BackButton => backButton;
+        public Button _SelectButton => selectButton;
+        public Button _LeftArrowButton => leftArrowButton;
+        public Button _RightArrowButton => rightArrowButton;
+        public Button _InventoryButton => inventoryButton;
 
         public void ApplyViewModel(ViewModel viewModel)
         {
-            var characterData = viewModel.CharacterData;
-            var currentLevelData = viewModel.CurrentLevelMasterData;
-            var nextLevelData = viewModel.NextLevelMasterData;
-            var skillsViewModel = viewModel.SkillsViewModel;
-            var weaponMasterData = viewModel.WeaponMasterData;
+            var characterData = viewModel._CharacterData;
+            var currentLevelData = viewModel._CurrentLevelMasterData;
+            var nextLevelData = viewModel._NextLevelMasterData;
+            var skillsViewModel = viewModel._SkillsViewModel;
+            var weaponMasterData = viewModel._WeaponMasterData;
             SetStatusView(characterData, weaponMasterData);
             ApplySkillsViewModel(skillsViewModel);
             SetLevelView(currentLevelData, nextLevelData);
             purchaseErrorView.gameObject.SetActive(false);
             virtualCurrencyAddPopup.gameObject.SetActive(false);
+            _typeImage.color = viewModel._TypeColor;
+            _typeIcon.sprite = viewModel._TypeSprite;
+            _passiveSkillName.text = viewModel._PassiveSkillMasterData.Name;
+            _passiveSkillExplanation.text = viewModel._PassiveSkillMasterData.Explanation;
+            foreach (var teamText in _teamTextObjects)
+            {
+                teamText.SetActive(false);
+            }
+
+            _teamTextObjects[characterData.Team].SetActive(true);
             InitializeArrowAnimation();
         }
 
@@ -61,16 +76,11 @@ namespace UI.Title
         {
             nameText.text = characterData.Name;
             var statusSkillId = weaponMasterData.StatusSkillMasterData.Id;
-            statusView.HpText.text =
-                GetFixedStatus(characterData, statusSkillId, StatusType.Hp);
-            statusView.DamageText.text =
-                GetFixedStatus(characterData, statusSkillId, StatusType.Attack);
-            statusView.SpeedText.text =
-                GetFixedStatus(characterData, statusSkillId, StatusType.Speed);
-            statusView.BombLimitText.text =
-                GetFixedStatus(characterData, statusSkillId, StatusType.BombLimit);
-            statusView.FireRangeText.text =
-                GetFixedStatus(characterData, statusSkillId, StatusType.FireRange);
+            statusView.HpText.text = GetFixedStatus(characterData, statusSkillId, StatusType.Hp);
+            statusView.DamageText.text = GetFixedStatus(characterData, statusSkillId, StatusType.Attack);
+            statusView.SpeedText.text = GetFixedStatus(characterData, statusSkillId, StatusType.Speed);
+            statusView.BombLimitText.text = GetFixedStatus(characterData, statusSkillId, StatusType.BombLimit);
+            statusView.FireRangeText.text = GetFixedStatus(characterData, statusSkillId, StatusType.FireRange);
         }
 
         private void ApplySkillsViewModel(SkillsView.ViewModel viewModel)
@@ -103,8 +113,8 @@ namespace UI.Title
             StatusType statusType
         )
         {
-            var fixedValue = applyStatusSkillUseCase.ApplyLevelStatus(characterData.Id, statusType);
-            var statusAddValue = applyStatusSkillUseCase.ApplyStatusSkill(characterData.Id, skillId, statusType);
+            var fixedValue = _applyStatusSkillUseCase.ApplyLevelStatus(characterData.Id, statusType);
+            var statusAddValue = _applyStatusSkillUseCase.ApplyStatusSkill(characterData.Id, skillId, statusType);
             var increaseValue = statusAddValue - fixedValue;
             if (increaseValue == 0)
             {
@@ -116,12 +126,12 @@ namespace UI.Title
 
         private void InitializeArrowAnimation()
         {
-            if (isInitialized)
+            if (_isInitialized)
             {
                 return;
             }
 
-            isInitialized = true;
+            _isInitialized = true;
             var leftArrowTransform = leftArrowRect;
             var rightArrowTransform = rightArrowRect;
             var leftPosition = leftArrowTransform.anchoredPosition3D;
@@ -139,11 +149,14 @@ namespace UI.Title
 
         public class ViewModel
         {
-            public CharacterData CharacterData { get; }
-            public LevelMasterData CurrentLevelMasterData { get; }
-            public LevelMasterData NextLevelMasterData { get; }
-            public SkillsView.ViewModel SkillsViewModel { get; }
-            public WeaponMasterData WeaponMasterData { get; }
+            public CharacterData _CharacterData { get; }
+            public LevelMasterData _CurrentLevelMasterData { get; }
+            public LevelMasterData _NextLevelMasterData { get; }
+            public SkillsView.ViewModel _SkillsViewModel { get; }
+            public WeaponMasterData _WeaponMasterData { get; }
+            public Sprite _TypeSprite { get; }
+            public Color _TypeColor { get; }
+            public SkillMasterData _PassiveSkillMasterData { get; }
 
             public ViewModel
             (
@@ -151,14 +164,20 @@ namespace UI.Title
                 LevelMasterData currentLevelMasterData,
                 LevelMasterData nextLevelMasterData,
                 SkillsView.ViewModel skillsViewModel,
-                WeaponMasterData weaponMasterData
+                WeaponMasterData weaponMasterData,
+                Sprite typeSprite,
+                Color typeColor,
+                SkillMasterData passiveSkillMasterData
             )
             {
-                CharacterData = characterData;
-                CurrentLevelMasterData = currentLevelMasterData;
-                NextLevelMasterData = nextLevelMasterData;
-                SkillsViewModel = skillsViewModel;
-                WeaponMasterData = weaponMasterData;
+                _CharacterData = characterData;
+                _CurrentLevelMasterData = currentLevelMasterData;
+                _NextLevelMasterData = nextLevelMasterData;
+                _SkillsViewModel = skillsViewModel;
+                _WeaponMasterData = weaponMasterData;
+                _TypeSprite = typeSprite;
+                _TypeColor = typeColor;
+                _PassiveSkillMasterData = passiveSkillMasterData;
             }
         }
     }

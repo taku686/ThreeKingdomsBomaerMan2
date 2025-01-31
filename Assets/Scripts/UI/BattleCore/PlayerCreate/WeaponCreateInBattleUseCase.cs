@@ -60,7 +60,7 @@ public class WeaponCreateInBattleUseCase : IDisposable
 
     private bool IsLeftHand(WeaponType weaponType)
     {
-        return weaponType == WeaponType.Bow || weaponType == WeaponType.Knife || weaponType == WeaponType.Shield;
+        return weaponType is WeaponType.Bow or WeaponType.Knife or WeaponType.Shield;
     }
 
     private void InstantiateWeapon(WeaponMasterData weaponMasterData, Transform weaponParent)

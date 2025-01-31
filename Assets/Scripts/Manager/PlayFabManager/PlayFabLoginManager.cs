@@ -69,6 +69,7 @@ namespace Assets.Scripts.Common.PlayFab
 
             var user = JsonConvert.DeserializeObject<UserData>(value.Value);
             if (user == null) return false;
+            await _playFabUserDataManager.TryUpdateUserDataAsync(user);
             await _userDataRepository.Initialize(user);
             _missionManager.Initialize();
             return true;

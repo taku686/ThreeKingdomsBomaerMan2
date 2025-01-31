@@ -11,12 +11,12 @@ namespace Player.Common
     {
         public class PlayerSpecialSkillState : State
         {
-            private PhotonNetworkManager PhotonNetworkManager => Owner.photonNetworkManager;
+            private PhotonNetworkManager PhotonNetworkManager => Owner._photonNetworkManager;
             private PhotonView PhotonView => Owner.photonView;
-            private TranslateStatusForBattleUseCase TranslateStatusForBattleUseCase => Owner.translateStatusForBattleUseCase;
-            private ApplyStatusSkillUseCase ApplyStatusSkillUseCase => Owner.applyStatusSkillUseCase;
-            private Subject<(StatusType statusType, float value)> StatusBuff => Owner.statusBuffSubject;
-            private Subject<(StatusType statusType, int value, bool isBuff, bool isDebuff)> StatusBuffUi => Owner.statusBuffUiSubject;
+            private TranslateStatusForBattleUseCase TranslateStatusForBattleUseCase => Owner._translateStatusForBattleUseCase;
+            private ApplyStatusSkillUseCase ApplyStatusSkillUseCase => Owner._applyStatusSkillUseCase;
+            private Subject<(StatusType statusType, float value)> StatusBuff => Owner._statusBuffSubject;
+            private Subject<(StatusType statusType, int value, bool isBuff, bool isDebuff)> StatusBuffUi => Owner._statusBuffUiSubject;
 
             protected override void OnEnter(State prevState)
             {
@@ -32,11 +32,11 @@ namespace Player.Common
 
             private void PlayBackAnimation(int hashKey, string key)
             {
-                Owner.animator.SetTrigger(hashKey);
-                Owner.observableStateMachineTrigger.OnStateExitAsObservable().Where(info =>
+                Owner._animator.SetTrigger(hashKey);
+                Owner._observableStateMachineTrigger.OnStateExitAsObservable().Where(info =>
                     info.StateInfo.IsName(key)).Take(1).Subscribe(_ =>
                 {
-                    Owner.stateMachine.Dispatch((int)PLayerState.Idle);
+                    Owner._stateMachine.Dispatch((int)PLayerState.Idle);
                 }).AddTo(Owner.GetCancellationTokenOnDestroy());
             }
 

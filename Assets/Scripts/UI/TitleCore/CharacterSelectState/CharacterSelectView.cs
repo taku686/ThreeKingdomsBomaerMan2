@@ -17,11 +17,8 @@ namespace UI.Title
         [SerializeField] private VirtualCurrencyAddPopup virtualCurrencyAddPopup;
         [SerializeField] private TextMeshProUGUI characterAmountText;
         [SerializeField] private ToggleView toggleView;
-        
 
-        //public VirtualCurrencyAddPopup VirtualCurrencyAddPopup => virtualCurrencyAddPopup;
         public Button _BackButton => backButton;
-        public IObservable<Unit> _ClickBackButton => backButton.OnClickAsObservable();
         public GameObject _HorizontalGroupGameObject => horizontalGroupGameObject;
         public GameObject _Grid => grid;
         public GameObject _GridDisable => gridDisable;
@@ -30,9 +27,9 @@ namespace UI.Title
 
         public void ApplyViewModel(ViewModel viewModel)
         {
-            var availableAmount = viewModel.AvailableAmount;
-            var totalAmount = viewModel.TotalAmount;
-            var orderType = viewModel.OrderType;
+            var availableAmount = viewModel._AvailableAmount;
+            var totalAmount = viewModel._TotalAmount;
+            var orderType = viewModel._OrderType;
             SetCharacterAmount(availableAmount, totalAmount);
             ApplyToggleView(orderType);
         }
@@ -54,9 +51,9 @@ namespace UI.Title
 
         public class ViewModel
         {
-            public int AvailableAmount { get; }
-            public int TotalAmount { get; }
-            public CharacterSelectRepository.OrderType OrderType { get; }
+            public int _AvailableAmount { get; }
+            public int _TotalAmount { get; }
+            public CharacterSelectRepository.OrderType _OrderType { get; }
 
 
             public ViewModel
@@ -66,9 +63,9 @@ namespace UI.Title
                 CharacterSelectRepository.OrderType orderType
             )
             {
-                AvailableAmount = availableAmount;
-                TotalAmount = totalAmount;
-                OrderType = orderType;
+                _AvailableAmount = availableAmount;
+                _TotalAmount = totalAmount;
+                _OrderType = orderType;
             }
         }
     }

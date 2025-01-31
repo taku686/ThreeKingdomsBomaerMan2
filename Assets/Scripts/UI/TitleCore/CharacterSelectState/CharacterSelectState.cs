@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Manager.NetworkManager;
 using Repository;
+using UI.Common;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,7 +18,6 @@ namespace UI.Title
         public class CharacterSelectState : StateMachine<TitleCore>.State
         {
             private CharacterSelectView _View => (CharacterSelectView)Owner.GetView(State.CharacterSelect);
-            private CommonView _CommonView => Owner._commonView;
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
             private CharacterSelectViewModelUseCase _CharacterSelectViewModelUseCase => Owner._characterSelectViewModelUseCase;
             private CharacterSelectRepository _CharacterSelectRepository => Owner._characterSelectRepository;
@@ -27,6 +27,7 @@ namespace UI.Title
             private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
             private StateMachine<TitleCore> _StateMachine => Owner._stateMachine;
             private RewardDataRepository _RewardDataRepository => Owner._rewardDataRepository;
+            private CharacterTypeManager _CharacterTypeManager => Owner._characterTypeManager;
 
             private CancellationTokenSource _cancellationTokenSource;
             private readonly Subject<Unit> _onChangeViewModel = new();
@@ -70,12 +71,19 @@ namespace UI.Title
                     .Subscribe(viewModel =>
                     {
                         _View.ApplyViewModel(viewModel);
-                        CreateUIContents(viewModel.OrderType);
+                        CreateUIContents(viewModel._OrderType);
                     })
                     .AddTo(_cancellationTokenSource.Token);
 
-                _View._ClickBackButton
-                    .Subscribe(_ => OnClickBack())
+                _View._BackButton
+                    .OnClickAsObservable()
+                    .Take(1)
+                    .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._BackButton).ToObservable())
+                    .Subscribe(_ =>
+                    {
+                        _StateMachine.Dispatch((int)State.Main);
+                        Owner.SetActiveBlockPanel(false);
+                    })
                     .AddTo(_cancellationTokenSource.Token);
 
                 _onChangeViewModel.OnNext(Unit.Default);
@@ -88,9 +96,11 @@ namespace UI.Title
                     element.ClickOffButtonObservable
                         .Subscribe(type =>
                         {
+                            Owner.SetActiveBlockPanel(true);
                             _View.ApplyToggleView(type);
                             _CharacterSelectRepository.SetOrderType(type);
                             CreateUIContents(type);
+                            Owner.SetActiveBlockPanel(false);
                         })
                         .AddTo(_cancellationTokenSource.Token);
                 }
@@ -112,8 +122,7 @@ namespace UI.Title
                 {
                     if (index % 5 == 0)
                     {
-                        gridGroup = Instantiate(_View._HorizontalGroupGameObject,
-                            _View._ContentsTransform);
+                        gridGroup = Instantiate(_View._HorizontalGroupGameObject, _View._ContentsTransform);
                         _gridGroupLists.Add(gridGroup);
                     }
 
@@ -142,34 +151,58 @@ namespace UI.Title
                 }
             }
 
-            private void CreateActiveGrid(CharacterData fixedCharacterData, Transform parent,
-                CharacterSelectRepository.OrderType orderType)
+            private void CreateActiveGrid(CharacterData fixedCharacterData, Transform parent, CharacterSelectRepository.OrderType orderType)
             {
                 var grid = Instantiate(_View._Grid, parent);
                 var characterGrid = grid.GetComponentInChildren<CharacterGridView>();
-                characterGrid.ApplyStatusGridViews(orderType, fixedCharacterData);
-                characterGrid.gridButton.onClick.AddListener(() => { OnClickCharacterGrid(fixedCharacterData, characterGrid.gridButton); });
+                var (typeSprite, typeColor) = _CharacterTypeManager.GetCharacterTypeData(fixedCharacterData.Type);
+                characterGrid.ApplyStatusGridViews(orderType, fixedCharacterData, (typeSprite, typeColor));
+                
+                characterGrid.gridButton
+                    .OnClickAsObservable()
+                    .Take(1)
+                    .SelectMany(_ => Owner.OnClickScaleColorAnimation(characterGrid.gridButton).ToObservable())
+                    .Subscribe(_ =>
+                    {
+                        OnClickCharacterGrid(fixedCharacterData);
+                        Owner.SetActiveBlockPanel(false);
+                    })
+                    .AddTo(characterGrid.GetCancellationTokenOnDestroy());
             }
 
             private void CreateDisableGrid(CharacterData characterData, Transform parent)
             {
                 var disableGrid = Instantiate(_View._GridDisable, parent).GetComponent<CharacterDisableGrid>();
-                disableGrid.ApplyView(characterData.Id, characterData.SelfPortraitSprite);
+                disableGrid.ApplyView
+                (
+                    characterData.Id,
+                    characterData.SelfPortraitSprite,
+                    () => Owner.OnClickScaleAnimation(disableGrid.purchaseButton)
+                );
 
                 var haveEnoughGem = disableGrid._OnClickPurchaseButton
                     .SelectMany(tuple => HaveEnoughGem(tuple).ToObservable())
                     .Publish();
 
-                haveEnoughGem
+                var addGem = haveEnoughGem
                     .Where(purchasedCharacterData => purchasedCharacterData.haveEnoughGem == false)
                     .SelectMany(_ => _PopupGenerateUseCase.GenerateConfirmPopup
-                    (GameCommonData.Terms.AddGemPopupTile,
+                    (
+                        GameCommonData.Terms.AddGemPopupTile,
                         GameCommonData.Terms.AddGemPopupExplanation,
                         GameCommonData.Terms.AddGemPopupOk,
                         GameCommonData.Terms.AddGemPopupCancel
                     ))
+                    .Publish();
+
+                addGem
+                    .Where(isOk => !isOk)
+                    .Subscribe(_ => Owner.SetActiveBlockPanel(false))
+                    .AddTo(disableGrid.GetCancellationTokenOnDestroy());
+
+                addGem
                     .Where(isOk => isOk)
-                    .Subscribe(_ => _StateMachine.Dispatch((int)State.Shop))
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.Shop); })
                     .AddTo(disableGrid.GetCancellationTokenOnDestroy());
 
                 haveEnoughGem
@@ -194,6 +227,7 @@ namespace UI.Title
                     .AddTo(disableGrid.GetCancellationTokenOnDestroy());
 
                 haveEnoughGem.Connect().AddTo(disableGrid.GetCancellationTokenOnDestroy());
+                addGem.Connect().AddTo(disableGrid.GetCancellationTokenOnDestroy());
             }
 
             private async UniTask<(bool haveEnoughGem, (int characterId, Sprite characterSprite) characterData)> HaveEnoughGem(
@@ -233,23 +267,13 @@ namespace UI.Title
                 return characterData.characterId;
             }
 
-            private void OnClickCharacterGrid(CharacterData characterData, Button gridButton)
+            private void OnClickCharacterGrid(CharacterData characterData)
             {
-                gridButton.interactable = false;
                 _CharacterCreateUseCase.CreateCharacter(characterData.Id);
                 _CharacterSelectRepository.SetSelectedCharacterId(characterData.Id);
-                Owner._uiAnimation.ClickScale(gridButton.gameObject).OnComplete(() =>
-                {
-                    Owner._stateMachine.Dispatch((int)State.CharacterDetail);
-                    gridButton.interactable = true;
-                }).SetLink(Owner.gameObject);
+                _StateMachine.Dispatch((int)State.CharacterDetail);
             }
 
-            private void OnClickBack()
-            {
-                Owner._uiAnimation.ClickScaleColor(_View._BackButton.gameObject).OnComplete(() => { Owner._stateMachine.Dispatch((int)State.Main); })
-                    .SetLink(Owner.gameObject);
-            }
 
             private void Cancel()
             {

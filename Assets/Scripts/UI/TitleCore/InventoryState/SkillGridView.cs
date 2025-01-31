@@ -12,12 +12,14 @@ namespace UI.Title
         [SerializeField] private TextMeshProUGUI skillName;
         [SerializeField] private Button detailButton;
 
+        public Button _DetailButton => detailButton;
+
         public void ApplyViewModel(ViewModel viewModel)
         {
             iconImage.sprite = viewModel.Icon;
             skillName.text = viewModel.Name;
         }
-        
+
         public IObservable<Unit> OnClickDetailButtonAsObservable()
         {
             return detailButton.OnClickAsObservable();

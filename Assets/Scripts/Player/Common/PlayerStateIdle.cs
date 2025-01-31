@@ -49,7 +49,7 @@ namespace Player.Common
 
             private void InitializeComponent()
             {
-                playerMove = Owner.playerMove;
+                playerMove = Owner._playerMove;
             }
 
             private void InitialiseIdleState()
@@ -60,8 +60,8 @@ namespace Player.Common
                 }
 
                 playerTransform = Owner.transform;
-                Owner.inputManager.OnClickNormalSkill(OnClickNormalSkill, Owner.GetCancellationTokenOnDestroy());
-                Owner.inputManager.OnClickSpecialSkill(OnClickSpecialSkill, Owner.GetCancellationTokenOnDestroy());
+                Owner._inputManager.OnClickNormalSkill(OnClickNormalSkill, Owner.GetCancellationTokenOnDestroy());
+                Owner._inputManager.OnClickSpecialSkill(OnClickSpecialSkill, Owner.GetCancellationTokenOnDestroy());
                 isSetup = true;
             }
 
@@ -72,8 +72,8 @@ namespace Player.Common
 
             private void InitializeButton()
             {
-                Owner.inputManager.BombButton.OnClickAsObservable()
-                    .Where(_ => Owner.translateStatusForBattleUseCase.CanPutBomb())
+                Owner._inputManager.BombButton.OnClickAsObservable()
+                    .Where(_ => Owner._translateStatusForBattleUseCase.CanPutBomb())
                     .Throttle(TimeSpan.FromSeconds(GameCommonData.InputBombInterval))
                     .Subscribe(
                         _ =>
@@ -81,10 +81,10 @@ namespace Player.Common
                             var playerId = PhotonView.ViewID;
                             var explosionTime =
                                 PhotonNetwork.ServerTimestamp + GameCommonData.ThreeMilliSecondsBeforeExplosion;
-                            var damageAmount = Owner.translateStatusForBattleUseCase.Attack;
-                            var fireRange = Owner.translateStatusForBattleUseCase.FireRange;
-                            var boxCollider = Owner.boxCollider;
-                            Owner.putBomb.SetBomb
+                            var damageAmount = Owner._translateStatusForBattleUseCase._Attack;
+                            var fireRange = Owner._translateStatusForBattleUseCase._FireRange;
+                            var boxCollider = Owner._boxCollider;
+                            Owner._putBomb.SetBomb
                             (
                                 boxCollider,
                                 PhotonView,
@@ -100,12 +100,12 @@ namespace Player.Common
 
             private void OnClickNormalSkill()
             {
-                Owner.stateMachine.Dispatch((int)PLayerState.NormalSkill);
+                Owner._stateMachine.Dispatch((int)PLayerState.NormalSkill);
             }
 
             private void OnClickSpecialSkill()
             {
-                Owner.stateMachine.Dispatch((int)PLayerState.SpecialSkill);
+                Owner._stateMachine.Dispatch((int)PLayerState.SpecialSkill);
             }
 
             private void Cancel()

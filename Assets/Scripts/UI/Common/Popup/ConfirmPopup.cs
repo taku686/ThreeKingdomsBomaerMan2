@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using TMPro;
+using UI.Common;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,6 +13,7 @@ public class ConfirmPopup : PopupBase
     [SerializeField] private Button _cancelButton;
     [SerializeField] private TextMeshProUGUI _okText;
     [SerializeField] private TextMeshProUGUI _cancelText;
+    [Inject] private UIAnimation _uiAnimation;
 
     private IObservable<bool> _onClickCancel;
     private IObservable<bool> _onClickOk;
@@ -22,11 +24,15 @@ public class ConfirmPopup : PopupBase
         ApplyViewModel(viewModel);
         _onClickOk = _okButton
             .OnClickAsObservable()
+            .Take(1)
+            .SelectMany(_ => OnClickButtonAnimation(_okButton).ToObservable())
             .SelectMany(_ => Close().ToObservable())
             .Select(_ => true);
 
         _onClickCancel = _cancelButton
             .OnClickAsObservable()
+            .Take(1)
+            .SelectMany(_ => OnClickButtonAnimation(_cancelButton).ToObservable())
             .SelectMany(_ => Close().ToObservable())
             .Select(_ => false);
 
@@ -37,6 +43,11 @@ public class ConfirmPopup : PopupBase
     {
         _okText.text = viewModel._OkText;
         _cancelText.text = viewModel._CancelText;
+    }
+
+    private async UniTask OnClickButtonAnimation(Button button)
+    {
+        await _uiAnimation.ClickScaleColor(button.gameObject).ToUniTask();
     }
 
     public class ViewModel : PopupBase.ViewModel
