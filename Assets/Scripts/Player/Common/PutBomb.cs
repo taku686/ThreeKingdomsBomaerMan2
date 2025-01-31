@@ -20,11 +20,19 @@ namespace Player.Common
         }
 
 
-        public void SetBomb(BoxCollider boxCollider, PhotonView photonView, Transform playerTransform, int bombType,
+        public void SetBomb
+        (
+            BoxCollider boxCollider,
+            PhotonView photonView,
+            Transform playerTransform,
+            int bombType,
             int damageAmount,
-            int fireRange, int explosionTime, int playerId)
+            int fireRange,
+            int explosionTime,
+            int playerId
+        )
         {
-            var playerPos = CalculatePlayerPos(playerTransform.position);
+            var playerPos = playerTransform.position;
             if (CanPutBomb(playerPos, boxCollider))
             {
                 return;
@@ -39,7 +47,7 @@ namespace Player.Common
             int explosionTime, int playerId)
         {
             _mapManager.AddMap(MapManager.Area.Bomb, playerPos.x, playerPos.z);
-            for (var i = 1; i <= fireRange; i++)
+            for (var i = 0; i <= fireRange; i++)
             {
                 _mapManager.AddMap(MapManager.Area.Explosion, playerPos.x + i, playerPos.z);
                 _mapManager.AddMap(MapManager.Area.Explosion, playerPos.x - i, playerPos.z);
@@ -58,7 +66,6 @@ namespace Player.Common
             return modifiedPlayerPos;
         }
 
-        //todo 後でmapManagerを使用して方法に修正する
         private bool CanPutBomb(Vector3 startPos, BoxCollider boxCollider)
         {
             var pos = new Vector3(startPos.x, startPos.y + ModifiedValue, startPos.z);

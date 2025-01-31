@@ -79,6 +79,8 @@ namespace Manager.BattleManager
                 SetAnimatorController(player, weaponType, photonAnimator);
                 GenerateEffectActivator(player, playerId);
                 _WeaponCreateInBattleUseCase.CreateWeapon(player, weaponData, photonView);
+                InitializeStatus(out var playerStatusManager, characterData, weaponData, photonView.IsMine);
+                playerPutBomb.Initialize(_BombProvider, playerStatusManager, _MapManager);
                 if (!photonView.IsMine)
                 {
                     return;
@@ -87,8 +89,6 @@ namespace Manager.BattleManager
                 AddBoxCollider(player);
                 AddRigidbody(player);
                 _CameraManager.Initialize(player.transform);
-                InitializeStatus(out var playerStatusManager, characterData, weaponData, photonView.IsMine);
-                playerPutBomb.Initialize(_BombProvider, playerStatusManager, _MapManager);
                 var playerCore = player.AddComponent<PlayerCore>();
                 Owner.SetPlayerCore(playerCore);
                 playerCore.Initialize
