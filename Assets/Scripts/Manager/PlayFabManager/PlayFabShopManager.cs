@@ -6,10 +6,9 @@ using Assets.Scripts.Common.Data;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.DataManager;
-using Manager.PlayFabManager;
-using Newtonsoft.Json;
 using PlayFab;
 using PlayFab.ClientModels;
+using Repository;
 using TMPro;
 using Unity.Services.Core;
 using UnityEngine;
@@ -30,9 +29,11 @@ namespace Manager.NetworkManager
         private CancellationTokenSource _cancellationTokenSource;
         [Inject] private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
-        [Inject] private CharacterMasterDataRepository characterMasterDataRepository;
-        [Inject] private UserDataRepository userDataRepository;
-        [Inject] private CatalogDataRepository catalogDataRepository;
+        [Inject] private CharacterMasterDataRepository _characterMasterDataRepository;
+        [Inject] private UserDataRepository _userDataRepository;
+        [Inject] private CatalogDataRepository _catalogDataRepository;
+        [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
+        [Inject] private PopupGenerateUseCase _popupGenerateUseCase;
 
         public async UniTask InitializePurchasing()
         {
@@ -46,7 +47,7 @@ namespace Manager.NetworkManager
             var options = new InitializationOptions();
             await UnityServices.InitializeAsync(options);
             _builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
-            foreach (var catalogItem in catalogDataRepository.GetCatalogItems().FindAll(x =>
+            foreach (var catalogItem in _catalogDataRepository.GetCatalogItems().FindAll(x =>
                          x.ItemClass == GameCommonData.ConsumableClassKey))
             {
                 _builder.AddProduct(catalogItem.ItemId, ProductType.Consumable);
@@ -92,14 +93,14 @@ namespace Manager.NetworkManager
                 if (item.ItemClass.Equals(GameCommonData.CharacterClassKey))
                 {
                     var index = int.Parse(item.ItemId);
-                    var characterData = characterMasterDataRepository.GetCharacterData(index);
+                    var characterData = _characterMasterDataRepository.GetCharacterData(index);
                     rewardView.rewardImage.sprite = characterData.SelfPortraitSprite;
-                    await userDataRepository.AddCharacterData(index);
+                    await _userDataRepository.AddCharacterData(index);
                 }
 
                 if (item.ItemClass.Equals(GameCommonData.LoginBonusClassKey))
                 {
-                    var loginBonusItemData = catalogDataRepository.GetAddVirtualCurrencyItemData(item.ItemId);
+                    var loginBonusItemData = _catalogDataRepository.GetAddVirtualCurrencyItemData(item.ItemId);
                     if (loginBonusItemData == null)
                     {
                         return false;
@@ -141,7 +142,7 @@ namespace Manager.NetworkManager
             }
 
             await _playFabVirtualCurrencyManager.SetVirtualCurrency();
-            var result2 = await userDataRepository.AddCharacterData(characterId);
+            var result2 = await _userDataRepository.AddCharacterData(characterId);
             return result2;
         }
 
@@ -162,7 +163,7 @@ namespace Manager.NetworkManager
                 return false;
             }
 
-            var result2 = userDataRepository.UpgradeCharacterLevel(characterId, level);
+            var result2 = _userDataRepository.UpgradeCharacterLevel(characterId, level);
             return result2;
         }
 
@@ -187,7 +188,7 @@ namespace Manager.NetworkManager
             {
                 if (item.ItemClass.Equals(GameCommonData.LoginBonusClassKey))
                 {
-                    var loginBonusItemData = catalogDataRepository.GetAddVirtualCurrencyItemData(item.ItemId);
+                    var loginBonusItemData = _catalogDataRepository.GetAddVirtualCurrencyItemData(item.ItemId);
                     if (loginBonusItemData == null)
                     {
                         return false;
@@ -278,7 +279,7 @@ namespace Manager.NetworkManager
         {
             Debug.Log(e.purchasedProduct.metadata.isoCurrencyCode);
             var googleReceipt = GooglePurchase.FromJson(e.purchasedProduct.receipt);
-            var request = new ValidateGooglePlayPurchaseRequest()
+            var request = new ValidateGooglePlayPurchaseRequest
             {
                 CurrencyCode = e.purchasedProduct.metadata.isoCurrencyCode,
                 PurchasePrice = (uint)(e.purchasedProduct.metadata.localizedPrice * 100),
@@ -294,7 +295,7 @@ namespace Manager.NetworkManager
                 return;
             }
 
-            var itemData = catalogDataRepository.GetAddVirtualCurrencyItemDatum()
+            var itemData = _catalogDataRepository.GetAddVirtualCurrencyItemDatum()
                 .FirstOrDefault(x => x.Name == _itemName);
             if (itemData == null)
             {
@@ -358,7 +359,7 @@ namespace Manager.NetworkManager
             _extensionProvider = extensions;
         }
 
-        public async UniTask<int[]> AddRandomWeaponAsync()
+        /*public async UniTask<int[]> AddRandomWeaponAsync()
         {
             var result = await PlayFabBaseManager.AzureFunctionAsync("AddRandomWeapon");
             if (result == null)
@@ -369,6 +370,29 @@ namespace Manager.NetworkManager
             await _playFabUserDataManager.GetUserDataAsync();
             var weaponIds = JsonConvert.DeserializeObject<Dictionary<string, int[]>>(result.ToString());
             return weaponIds["result"];
+        }*/
+
+        public async UniTask<(bool, IReadOnlyList<int>)> AddRandomWeaponAsync(int createCount)
+        {
+            var cost = createCount * GameCommonData.WeaponPrice;
+            var userData = _userDataRepository.GetUserData();
+            if (userData.Gem < cost)
+            {
+                return (true, null);
+            }
+
+            var weaponMasterDatum = _weaponMasterDataRepository.GetAllWeaponData().ToArray();
+            var result = new List<int>();
+            for (var i = 0; i < createCount; i++)
+            {
+                var weaponId = weaponMasterDatum[UnityEngine.Random.Range(0, weaponMasterDatum.Length)].Id;
+                _userDataRepository.AddWeaponData(weaponId);
+                result.Add(weaponId);
+            }
+
+            await _playFabUserDataManager.TryUpdateUserDataAsync();
+            await _playFabVirtualCurrencyManager.SubtractVirtualCurrency(GameCommonData.GemKey, cost);
+            return (false, result);
         }
     }
 

@@ -23,7 +23,7 @@ namespace Manager.NetworkManager
             var result = await PlayFabClientAPI.GetUserInventoryAsync(new GetUserInventoryRequest());
             if (result.Error != null)
             {
-                Debug.Log(result.Error.GenerateErrorReport());
+                Debug.LogError(result.Error.GenerateErrorReport());
             }
 
             var user = _userDataRepository.GetUserData();
@@ -116,6 +116,24 @@ namespace Manager.NetworkManager
                 VirtualCurrency = virtualCurrencyKey
             };
             var result = await PlayFabClientAPI.AddUserVirtualCurrencyAsync(request);
+
+            if (result.Error != null)
+            {
+                return false;
+            }
+
+            await SetVirtualCurrency();
+            return true;
+        }
+
+        public async UniTask<bool> SubtractVirtualCurrency(string virtualCurrencyKey, int amount)
+        {
+            var request = new SubtractUserVirtualCurrencyRequest
+            {
+                Amount = amount,
+                VirtualCurrency = virtualCurrencyKey
+            };
+            var result = await PlayFabClientAPI.SubtractUserVirtualCurrencyAsync(request);
 
             if (result.Error != null)
             {

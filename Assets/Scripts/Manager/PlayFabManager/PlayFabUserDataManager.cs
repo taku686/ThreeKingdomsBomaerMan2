@@ -17,9 +17,19 @@ namespace Manager.NetworkManager
         /// <summary>
         /// playerデータの更新
         /// </summary>
-        public async UniTask<bool> TryUpdateUserDataAsync(UserData value)
+        public async UniTask<bool> TryUpdateUserDataAsync(UserData userData = null)
         {
-            var userJson = JsonConvert.SerializeObject(value);
+            string userJson;
+            if (userData == null)
+            {
+                var user = _userDataRepository.GetUserData();
+                userJson = JsonConvert.SerializeObject(user);
+            }
+            else
+            {
+                userJson = JsonConvert.SerializeObject(userData);
+            }
+
             var request = new UpdateUserDataRequest
             {
                 Data = new Dictionary<string, string>
@@ -32,13 +42,9 @@ namespace Manager.NetworkManager
 
             var response = await PlayFabClientAPI.UpdateUserDataAsync(request);
 
-            if (response.Error != null)
-            {
-                Debug.Log(response.Error.GenerateErrorReport());
-                return false;
-            }
-
-            return true;
+            if (response.Error == null) return true;
+            Debug.Log(response.Error.GenerateErrorReport());
+            return false;
         }
 
         public async UniTask<UserData> GetUserDataAsync()

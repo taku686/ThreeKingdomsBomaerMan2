@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
@@ -22,9 +23,12 @@ namespace UI.Title
             private PlayFabShopManager _PlayFabShopManager => Owner._playFabShopManager;
             private RewardDataRepository _RewardDataRepository => Owner._rewardDataRepository;
             private ShopView _View => (ShopView)Owner.GetView(State.Shop);
+            private UserDataRepository _UserDataRepository => Owner._userDataRepository;
+            private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
             private StateMachine<TitleCore> _StateMachine => Owner._stateMachine;
             private Sprite _gemSprite;
             private CancellationTokenSource _cts;
+            private const int CreateWeaponCount = 10;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -42,7 +46,9 @@ namespace UI.Title
                 _View._RewardGetView.gameObject.SetActive(false);
                 _View._PurchaseErrorView.gameObject.SetActive(false);
                 _View._PurchaseErrorView.errorInfoText.text = "";
+                _View._ShopWeaponGridView.ApplyView(CreateWeaponCount, GameCommonData.WeaponPrice);
                 InitializeButton();
+                await SetVirtualCurrencyText();
                 _gemSprite = (Sprite)await Resources.LoadAsync<Sprite>(GameCommonData.VirtualCurrencySpritePath + "gem");
                 Owner.SwitchUiObject(State.Shop, true).Forget();
             }
@@ -60,21 +66,11 @@ namespace UI.Title
                 _View._RewardGetView.okButton.onClick.RemoveAllListeners();
                 _View._PurchaseErrorView.okButton.onClick.RemoveAllListeners();
                 _View._BackButton.onClick.AddListener(OnCLickBack);
-                _View._FiveThousandCoinButton.onClick.AddListener(() =>
-                    OnClickBuyItem(GameCommonData.FiveThousandCoinItemKey,
-                        _View._FiveThousandCoinButton.gameObject));
-                _View._TwelveThousandCoinButton.onClick.AddListener(() =>
-                    OnClickBuyItem(GameCommonData.TwelveThousandCoinItemKey,
-                        _View._TwelveThousandCoinButton.gameObject));
-                _View._TwentyGemButton.onClick.AddListener(() =>
-                    OnClickBuyItem(GameCommonData.TwentyGemItemKey,
-                        _View._TwentyGemButton.gameObject));
-                _View._HundredGemButton.onClick.AddListener(() =>
-                    OnClickBuyItem(GameCommonData.HundredGemItemKey,
-                        _View._HundredGemButton.gameObject));
-                _View._TwoHundredGemButton.onClick.AddListener(() =>
-                    OnClickBuyItem(GameCommonData.TwoHundredGemItemKey,
-                        _View._TwoHundredGemButton.gameObject));
+                _View._FiveThousandCoinButton.onClick.AddListener(() => OnClickBuyItem(GameCommonData.FiveThousandCoinItemKey, _View._FiveThousandCoinButton.gameObject));
+                _View._TwelveThousandCoinButton.onClick.AddListener(() => OnClickBuyItem(GameCommonData.TwelveThousandCoinItemKey, _View._TwelveThousandCoinButton.gameObject));
+                _View._TwentyGemButton.onClick.AddListener(() => OnClickBuyItem(GameCommonData.TwentyGemItemKey, _View._TwentyGemButton.gameObject));
+                _View._HundredGemButton.onClick.AddListener(() => OnClickBuyItem(GameCommonData.HundredGemItemKey, _View._HundredGemButton.gameObject));
+                _View._TwoHundredGemButton.onClick.AddListener(() => OnClickBuyItem(GameCommonData.TwoHundredGemItemKey, _View._TwoHundredGemButton.gameObject));
                 _View._AdsButton.onClick.AddListener(OnClickAds);
                 _View._GachaButton.onClick.AddListener(OnClickCharacterGacha);
                 _View._RewardGetView.okButton.onClick.AddListener(OnClickCloseRewardView);
@@ -84,23 +80,49 @@ namespace UI.Title
                     .SelectMany(_ => SetVirtualCurrencyText().ToObservable())
                     .Subscribe()
                     .AddTo(_cts.Token);
+                WeaponGridSubscribe();
 
-                _View._OnClickAddWeapon
-                    .SelectMany(_ => _PlayFabShopManager.AddRandomWeaponAsync().ToObservable())
-                    .Subscribe(ids =>
+
+                Owner.SubscribeRewardOkButton();
+            }
+
+            private void WeaponGridSubscribe()
+            {
+                var addWeapon =
+                    _View._ShopWeaponGridView._OnClickWeaponButton
+                        .Select(_ => EnoughGem(GameCommonData.WeaponPrice))
+                        .Publish();
+
+                addWeapon
+                    .Where(enoughGem => !enoughGem)
+                    .SelectMany(_ => _PopupGenerateUseCase.GenerateErrorPopup("ジェムが足りません"))
+                    .Subscribe()
+                    .AddTo(_cts.Token);
+
+                addWeapon
+                    .Where(enoughGem => enoughGem)
+                    .SelectMany(_ => _PlayFabShopManager.AddRandomWeaponAsync(CreateWeaponCount).ToObservable())
+                    .Subscribe(tuple =>
                     {
-                        var rewards = new List<(int, RewardDataUseCase.RewardData.RewardType)>();
-                        foreach (var id in ids)
+                        var isError = tuple.Item1;
+                        if (isError)
                         {
-                            rewards.Add((id, RewardDataUseCase.RewardData.RewardType.Weapon));
+                            return;
                         }
 
-                        _RewardDataRepository.SetRewardIds(rewards.ToArray());
+                        var weaponIds = tuple.Item2.ToArray();
+                        _RewardDataRepository.SetRewardIds(weaponIds.Select(id => (id, RewardDataUseCase.RewardData.RewardType.Weapon)).ToArray());
                         _StateMachine.Dispatch((int)State.Reward, (int)State.Shop);
                     })
                     .AddTo(_cts.Token);
 
-                Owner.SubscribeRewardOkButton();
+                addWeapon.Connect().AddTo(_cts.Token);
+            }
+
+            private bool EnoughGem(int cost)
+            {
+                var gem = _UserDataRepository.GetUserData().Gem;
+                return gem >= cost;
             }
 
             private void OnCLickBack()
@@ -113,7 +135,7 @@ namespace UI.Title
             {
                 _UiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
-                    await Owner._playFabShopManager.TryPurchaseItemByRealMoney(itemKey);
+                    await _PlayFabShopManager.TryPurchaseItemByRealMoney(itemKey);
                     await SetVirtualCurrencyText();
                 })).SetLink(button);
             }
@@ -123,8 +145,7 @@ namespace UI.Title
                 var button = _View._AdsButton.gameObject;
                 Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
-                    var result =
-                        await Owner._playFabAdsManager.GetAdPlacementAsync(Owner.GetCancellationTokenOnDestroy());
+                    var result = await Owner._playFabAdsManager.GetAdPlacementAsync(Owner.GetCancellationTokenOnDestroy());
                     if (!result)
                     {
                         return;

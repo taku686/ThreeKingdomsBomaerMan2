@@ -16,17 +16,17 @@ namespace UI.Title.ShopState
         [SerializeField] private Button twoHundredGemButton;
         [SerializeField] private Button adsButton;
         [SerializeField] private Button gachaButton;
-        [SerializeField] private Button _weaponButton;
         [SerializeField] private RewardGetView rewardGetView;
         [SerializeField] private PurchaseErrorView purchaseErrorView;
+        [SerializeField] private ShopWeaponGridView _shopWeaponGridView;
 
         public PurchaseErrorView _PurchaseErrorView => purchaseErrorView;
         public RewardGetView _RewardGetView => rewardGetView;
+        public ShopWeaponGridView _ShopWeaponGridView => _shopWeaponGridView;
         public Button _AdsButton => adsButton;
         public Button _GachaButton => gachaButton;
         public Button _BackButton => backButton;
         public IObservable<Unit> _OnClickAddThousandCoin => thousandCoinButton.OnClickAsObservable();
-        public IObservable<Unit> _OnClickAddWeapon => _weaponButton.OnClickAsObservable();
         public Button _FiveThousandCoinButton => fiveThousandCoinButton;
         public Button _TwelveThousandCoinButton => twelveThousandCoinButton;
         public Button _TwentyGemButton => twentyGemButton;
