@@ -7,7 +7,7 @@ namespace UI.Common
     {
         [SerializeField] private ToggleElement[] toggleElements;
 
-        public ToggleElement[] ToggleElements => toggleElements;
+        public ToggleElement[] _ToggleElements => toggleElements;
 
         public void ApplyView(CharacterSelectRepository.OrderType orderType)
         {
