@@ -1,6 +1,7 @@
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Manager.NetworkManager;
 using UI.Common;
 using UniRx;
 
@@ -16,7 +17,8 @@ namespace UI.Title
             private UserDataRepository _UserDataRepository => Owner._userDataRepository;
             private SkillDetailViewModelUseCase _SkillDetailViewModelUseCase => Owner._skillDetailViewModelUseCase;
             private UIAnimation _UIAnimation => Owner._uiAnimation;
-
+            private PlayFabShopManager _PlayFabShopManager => Owner._playFabShopManager;
+            private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
             private CancellationTokenSource _cts;
             private Subject<int> _onChangeSelectedWeaponSubject;
 
@@ -106,9 +108,35 @@ namespace UI.Title
                     })
                     .AddTo(_cts.Token);
 
+                var sellWeapon =
+                    _View._OnClickSellButtonAsObservable
+                        .WithLatestFrom(_onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
+                        .SelectMany(weaponId => _PlayFabShopManager.SellWeaponAsync(weaponId, 1).ToObservable())
+                        .Publish();
+
+                sellWeapon
+                    .Where(tuple => !tuple.Item1)
+                    .Do(tuple => { _onChangeSelectedWeaponSubject.OnNext(tuple.Item3); })
+                    .SelectMany(tuple => _PopupGenerateUseCase.GenerateErrorPopup(tuple.Item2))
+                    .Subscribe()
+                    .AddTo(_cts.Token);
+
+                sellWeapon
+                    .Where(result => result.Item1)
+                    .Do(_ => SetVirtualCurrencyText().ToObservable())
+                    .Subscribe(tuple => { _onChangeSelectedWeaponSubject.OnNext(tuple.Item3); })
+                    .AddTo(_cts.Token);
+
+                sellWeapon.Connect().AddTo(_cts.Token);
                 var selectedCharacterId = _CharacterSelectRepository.GetSelectedCharacterId();
                 var selectedWeaponId = _UserDataRepository.GetEquippedWeaponId(selectedCharacterId);
                 _onChangeSelectedWeaponSubject.OnNext(selectedWeaponId);
+            }
+
+            private async UniTask SetVirtualCurrencyText()
+            {
+                await Owner.SetCoinText();
+                await Owner.SetGemText();
             }
 
             private void Cancel()

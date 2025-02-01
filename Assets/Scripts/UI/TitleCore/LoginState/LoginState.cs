@@ -75,7 +75,8 @@ namespace UI.Title
                         {
                             Owner.SetActiveBlockPanel(false);
                             _commonView.waitPopup.SetActive(false);
-                        });
+                        })
+                        .AddTo(_cancellationTokenSource.Token);
 
                     checkDisplayName
                         .Where(tuple => tuple.Item1)
@@ -88,7 +89,8 @@ namespace UI.Title
                             Owner.SetActiveBlockPanel(false);
                             Owner._stateMachine.Dispatch((int)State.Main);
                             _commonView.waitPopup.SetActive(false);
-                        });
+                        })
+                        .AddTo(_cancellationTokenSource.Token);
 
                     checkDisplayName.Connect().AddTo(_cancellationTokenSource.Token);
                 }

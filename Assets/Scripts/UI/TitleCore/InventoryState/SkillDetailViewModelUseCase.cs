@@ -5,20 +5,21 @@ using Zenject;
 
 public class SkillDetailViewModelUseCase : IDisposable
 {
-    private readonly WeaponMasterDataRepository weaponMasterDataRepository;
+    private readonly WeaponMasterDataRepository _weaponMasterDataRepository;
 
     [Inject]
     public SkillDetailViewModelUseCase
     (
-        WeaponMasterDataRepository weaponMasterDataRepository
+        WeaponMasterDataRepository weaponMasterDataRepository,
+        UserDataRepository userDataRepository
     )
     {
-        this.weaponMasterDataRepository = weaponMasterDataRepository;
+        _weaponMasterDataRepository = weaponMasterDataRepository;
     }
 
     public SkillDetailView.ViewModel InAsTask(int weaponId, SkillType skillType)
     {
-        var weaponData = weaponMasterDataRepository.GetWeaponData(weaponId);
+        var weaponData = _weaponMasterDataRepository.GetWeaponData(weaponId);
         var skillData = weaponData.GetSkillData(skillType);
         return new SkillDetailView.ViewModel
         (

@@ -374,7 +374,7 @@ namespace Manager.NetworkManager
 
         public async UniTask<(bool, IReadOnlyList<int>)> AddRandomWeaponAsync(int createCount)
         {
-            var cost = createCount * GameCommonData.WeaponPrice;
+            var cost = createCount * GameCommonData.WeaponBuyPrice;
             var userData = _userDataRepository.GetUserData();
             if (userData.Gem < cost)
             {
@@ -393,6 +393,49 @@ namespace Manager.NetworkManager
             await _playFabUserDataManager.TryUpdateUserDataAsync();
             await _playFabVirtualCurrencyManager.SubtractVirtualCurrency(GameCommonData.GemKey, cost);
             return (false, result);
+        }
+
+        public async UniTask<(bool, string, int)> SellWeaponAsync(int weaponId, int sellCount)
+        {
+            var userData = _userDataRepository.GetUserData();
+            var possessedWeaponDatum = _userDataRepository.GetAllPossessedWeaponDatum();
+            var weaponMasterDatum = _weaponMasterDataRepository.GetAllWeaponData().ToArray();
+            var weaponData = weaponMasterDatum.FirstOrDefault(x => x.Id == weaponId);
+            if (weaponData == null)
+            {
+                var candidate = possessedWeaponDatum
+                    .OrderBy(weapon => weapon.Key.WeaponType)
+                    .ThenBy(weapon => weapon.Key.Rare)
+                    .ThenBy(weapon => weapon.Key.Id)
+                    .First();
+                return (false, GameCommonData.Terms.InvalidData, candidate.Key.Id);
+            }
+
+            if (!userData.PossessedWeapons.ContainsKey(weaponId))
+            {
+                var candidate = possessedWeaponDatum
+                    .OrderBy(weapon => weapon.Key.WeaponType)
+                    .ThenBy(weapon => weapon.Key.Rare)
+                    .ThenBy(weapon => weapon.Key.Id)
+                    .First();
+                return (false, GameCommonData.Terms.NorHaveWeapon, candidate.Key.Id);
+            }
+
+            var totalPrice = GameCommonData.GetWeaponSellPrice(weaponData.Rare) * sellCount;
+            var addVirtualCurrencyResponse = await _playFabVirtualCurrencyManager.AddVirtualCurrency(GameCommonData.CoinKey, totalPrice);
+            if (!addVirtualCurrencyResponse)
+            {
+                return (false, GameCommonData.Terms.ErrorAddVirtualCurrency, weaponId);
+            }
+
+            _userDataRepository.SubtractWeaponData(weaponId, sellCount);
+            var userUpdateResponse = await _playFabUserDataManager.TryUpdateUserDataAsync();
+            if (!userUpdateResponse)
+            {
+                return (false, GameCommonData.Terms.ErrorUpdateUserData, weaponId);
+            }
+
+            return (true, "", weaponId);
         }
     }
 
