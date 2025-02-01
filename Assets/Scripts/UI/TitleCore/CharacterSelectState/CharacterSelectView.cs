@@ -23,7 +23,7 @@ namespace UI.Title
         public GameObject _Grid => grid;
         public GameObject _GridDisable => gridDisable;
         public RectTransform _ContentsTransform => contentsTransform;
-        public ToggleElement[] _ToggleElements => toggleView.ToggleElements;
+        public ToggleElement[] _ToggleElements => toggleView._ToggleElements;
 
         public void ApplyViewModel(ViewModel viewModel)
         {
