@@ -95,7 +95,7 @@ namespace UI.Title
 
                 addWeapon
                     .Where(enoughGem => !enoughGem)
-                    .SelectMany(_ => _PopupGenerateUseCase.GenerateErrorPopup("ジェムが足りません"))
+                    .SelectMany(_ => _PopupGenerateUseCase.GenerateErrorPopup(GameCommonData.Terms.AddGemPopupTile))
                     .Subscribe()
                     .AddTo(_cts.Token);
 
