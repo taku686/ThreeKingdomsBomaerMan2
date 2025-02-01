@@ -113,13 +113,4 @@ public class FadeImage : UnityEngine.UI.Graphic, IFade
         maskTexture = maskTextureList[index];
         UpdateMaskTexture(maskTexture);
     }
-
-/*#if UNITY_EDITOR
-    protected override void OnValidate()
-    {
-        base.OnValidate();
-        UpdateMaskCutout(Range);
-        UpdateMaskTexture(maskTexture);
-    }
-#endif*/
 }
