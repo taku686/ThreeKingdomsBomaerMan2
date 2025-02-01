@@ -35,7 +35,7 @@ namespace Common.Data
             user.CharacterLevels[0] = 1;
             user.PossessedWeapons[GameCommonData.DefaultWeaponId] = 1;
             user.EquippedWeapons[0] = GameCommonData.DefaultWeaponId;
-            for (int i = 0; i < 7; i++)
+            for (var i = 0; i < 7; i++)
             {
                 user.LoginBonus[i] = (int)LoginBonusStatus.Disable;
             }

@@ -46,7 +46,7 @@ namespace UI.Title
                 _View._RewardGetView.gameObject.SetActive(false);
                 _View._PurchaseErrorView.gameObject.SetActive(false);
                 _View._PurchaseErrorView.errorInfoText.text = "";
-                _View._ShopWeaponGridView.ApplyView(CreateWeaponCount, GameCommonData.WeaponPrice);
+                _View._ShopWeaponGridView.ApplyView(CreateWeaponCount, GameCommonData.WeaponBuyPrice);
                 InitializeButton();
                 await SetVirtualCurrencyText();
                 _gemSprite = (Sprite)await Resources.LoadAsync<Sprite>(GameCommonData.VirtualCurrencySpritePath + "gem");
@@ -90,12 +90,12 @@ namespace UI.Title
             {
                 var addWeapon =
                     _View._ShopWeaponGridView._OnClickWeaponButton
-                        .Select(_ => EnoughGem(GameCommonData.WeaponPrice))
+                        .Select(_ => EnoughGem(GameCommonData.WeaponBuyPrice))
                         .Publish();
 
                 addWeapon
                     .Where(enoughGem => !enoughGem)
-                    .SelectMany(_ => _PopupGenerateUseCase.GenerateErrorPopup("ジェムが足りません"))
+                    .SelectMany(_ => _PopupGenerateUseCase.GenerateErrorPopup(GameCommonData.Terms.AddGemPopupTile))
                     .Subscribe()
                     .AddTo(_cts.Token);
 

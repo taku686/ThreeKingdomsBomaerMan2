@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Common.Data;
 using Repository;
 using UnityEngine;
@@ -7,8 +8,8 @@ namespace UI.Title
 {
     public class InventoryViewModelUseCase : IDisposable
     {
-        private readonly UserDataRepository userDataRepository;
-        private readonly WeaponMasterDataRepository weaponMasterDataRepository;
+        private readonly UserDataRepository _userDataRepository;
+        private readonly WeaponMasterDataRepository _weaponMasterDataRepository;
 
         public InventoryViewModelUseCase
         (
@@ -16,17 +17,27 @@ namespace UI.Title
             WeaponMasterDataRepository weaponMasterDataRepository
         )
         {
-            this.userDataRepository = userDataRepository;
-            this.weaponMasterDataRepository = weaponMasterDataRepository;
+            _userDataRepository = userDataRepository;
+            _weaponMasterDataRepository = weaponMasterDataRepository;
         }
 
         public InventoryView.ViewModel InAsTask(int selectedWeaponId)
         {
-            var weaponDatum = userDataRepository.GetAllPossessedWeaponDatum();
-            var weaponMasterData = weaponMasterDataRepository.GetWeaponData(selectedWeaponId);
+            var possessedWeaponDatum = _userDataRepository.GetAllPossessedWeaponDatum();
+            var weaponMasterData = _weaponMasterDataRepository.GetWeaponData(selectedWeaponId);
+            if (!possessedWeaponDatum.ContainsKey(weaponMasterData))
+            {
+                var candidate = possessedWeaponDatum
+                    .OrderBy(weapon => weapon.Key.WeaponType)
+                    .ThenBy(weapon => weapon.Key.Rare)
+                    .ThenBy(weapon => weapon.Key.Id)
+                    .First();
+                weaponMasterData = _weaponMasterDataRepository.GetWeaponData(candidate.Key.Id);
+            }
+
             return new InventoryView.ViewModel
             (
-                weaponDatum,
+                possessedWeaponDatum,
                 weaponMasterData
             );
         }

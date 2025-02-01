@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Common.Data;
 using Cysharp.Threading.Tasks;
-using MoreMountains.Tools;
 using UI.Common;
 using UI.Title;
 using UniRx;
@@ -19,9 +18,15 @@ public class InventoryView : ViewBase
     [SerializeField] private SkillDetailView skillDetailView;
 
     private readonly List<WeaponGridView> _weaponGridViews = new();
+    public IReadOnlyCollection<WeaponGridView> _WeaponGridViews => _weaponGridViews;
+    private UIAnimation _uiAnimation;
+    private Action<bool> _setActivePanelAction;
     public Button _BackButton => backButton;
     public Button _EquipButton => weaponDetailView._EquipButton;
-    public Button _SellButton => weaponDetailView._SellButton;
+
+    public IObservable<AsyncUnit> _OnClickSellButtonAsObservable => weaponDetailView._SellButton
+        .OnClickAsObservable()
+        .SelectMany(_ => _uiAnimation.ClickScaleColor(weaponDetailView._SellButton.gameObject).ToUniTask().ToObservable());
 
     public IObservable<AsyncUnit> _OnClickSkillDetailViewCloseButtonAsObservable
         => skillDetailView.OnClickCloseButtonAsObservable();
@@ -40,10 +45,6 @@ public class InventoryView : ViewBase
         => weaponDetailView
             .OnClickSpecialSkillDetailButtonAsObservable()
             .SelectMany(_ => _uiAnimation.ClickScaleColor(weaponDetailView._SpecialSkillDetailButton.gameObject).ToUniTask().ToObservable());
-
-    public IReadOnlyCollection<WeaponGridView> _WeaponGridViews => _weaponGridViews;
-    private UIAnimation _uiAnimation;
-    private Action<bool> _setActivePanelAction;
 
     public void ApplyViewModel(ViewModel viewModel, UIAnimation uiAnimation, Action<bool> setActivePanelAction)
     {

@@ -253,6 +253,21 @@ namespace Common.Data
             }
         }
 
+        public void SubtractWeaponData(int weaponId, int amount)
+        {
+            if (!_userData.PossessedWeapons.ContainsKey(weaponId))
+            {
+                return;
+            }
+
+
+            _userData.PossessedWeapons[weaponId] -= amount;
+            if (_userData.PossessedWeapons[weaponId] <= 0)
+            {
+                _userData.PossessedWeapons.Remove(weaponId);
+            }
+        }
+
         public void Dispose()
         {
             _userData?.Dispose();

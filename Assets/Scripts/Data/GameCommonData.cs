@@ -6,7 +6,7 @@ namespace Common.Data
     public static class GameCommonData
     {
         public const int CharacterPrice = 200;
-        public const int WeaponPrice = 100;
+        public const int WeaponBuyPrice = 100;
         public const float TurnDuration = 0.3f;
         public const float InputBombInterval = 0.05f;
         public const string TitleID = "92AF5";
@@ -101,12 +101,38 @@ namespace Common.Data
         {
             public const string AddGemPopupTile = "ジェムの数が足りません";
             public const string AddGemPopupExplanation = "ジェムの数が足りません。\nジェムを追加しますか？";
+            public const string InvalidData = "無効なデータです。";
+            public const string NorHaveWeapon = "所持していない武器です。";
+            public const string ErrorAddVirtualCurrency = "仮想通貨の追加に失敗しました。";
+            public const string ErrorUpdateUserData = "ユーザーデータの更新に失敗しました。";
             public const string AddGemPopupOk = "追加";
             public const string AddGemPopupCancel = "キャンセル";
             public const string PurchaseCharacterPopupTitle = "キャラクターを購入しますか？";
             public const string PurchaseCharacterPopupExplanation = "200ジェムを消費して \nキャラクターを購入しますか？";
             public const string PurchaseCharacterPopupOk = "購入";
             public const string PurchaseCharacterPopupCancel = "キャンセル";
+        }
+
+        public static int GetWeaponSellPrice(int rare)
+        {
+            return rare switch
+            {
+                1 => (int)WeaponPriceByRarity.One,
+                2 => (int)WeaponPriceByRarity.Two,
+                3 => (int)WeaponPriceByRarity.Three,
+                4 => (int)WeaponPriceByRarity.Four,
+                5 => (int)WeaponPriceByRarity.Five,
+                _ => 0
+            };
+        }
+
+        public enum WeaponPriceByRarity
+        {
+            One = 50,
+            Two = 100,
+            Three = 150,
+            Four = 200,
+            Five = 300
         }
 
         public static CharacterColor GetCharacterColor(string color)
@@ -239,14 +265,6 @@ namespace Common.Data
         Yellow
     }
 
-    public enum PlayerIndex
-    {
-        Player1,
-        Player2,
-        Player3,
-        Player4,
-    }
-
     public enum Gender
     {
         Male,
@@ -259,14 +277,6 @@ namespace Common.Data
         Normal,
         Penetration,
         Danger
-    }
-
-    public enum Team
-    {
-        Gi,
-        Go,
-        Syoku,
-        Other
     }
 
     public enum LoginBonusStatus

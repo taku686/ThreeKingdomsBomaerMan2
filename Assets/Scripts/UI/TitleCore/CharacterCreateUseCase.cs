@@ -143,23 +143,9 @@ namespace Repository
             var currentWeapon = Object.Instantiate(weaponMasterData.WeaponObject, weaponParent.transform);
             currentWeapon.transform.localPosition = Vector3.zero;
             currentWeapon.transform.localRotation = quaternion.Euler(0, 0, 0);
-            currentWeapon.transform.localScale =
-                FixedScale(weaponMasterData.WeaponType, weaponMasterData.Scale);
+            currentWeapon.transform.localScale *= weaponMasterData.Scale;
             currentWeapon.tag = GameCommonData.WeaponTag;
             currentWeapon.AddComponent<WeaponObject>();
-        }
-
-        private Vector3 FixedScale(WeaponType weaponType, float scale)
-        {
-            switch (weaponType)
-            {
-                case WeaponType.Bow:
-                    return new Vector3(1, 1, 1) * scale;
-                case WeaponType.Shield:
-                    return new Vector3(1, -1, 1);
-                default:
-                    return new Vector3(1, 1, 1) * scale;
-            }
         }
 
         private void ChangeAnimatorController(GameObject characterObject, WeaponType weaponType)
