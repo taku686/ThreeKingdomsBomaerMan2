@@ -108,6 +108,27 @@ namespace UI.Title
                     })
                     .AddTo(_cts.Token);
 
+                SellWeaponSubscribe();
+                SortViewSubscribe();
+
+                var selectedCharacterId = _CharacterSelectRepository.GetSelectedCharacterId();
+                var selectedWeaponId = _UserDataRepository.GetEquippedWeaponId(selectedCharacterId);
+                _onChangeSelectedWeaponSubject.OnNext(selectedWeaponId);
+            }
+
+            private void SortViewSubscribe()
+            {
+                _View._OnClickSortButtonAsObservable
+                    .Subscribe(_ => { _View.ApplySortView(); })
+                    .AddTo(_cts.Token);
+
+                _View._OnClickSortOkButtonAsObservable
+                    .Subscribe(_ => { _View.CloseSortView(); })
+                    .AddTo(_cts.Token);
+            }
+
+            private void SellWeaponSubscribe()
+            {
                 var sellWeapon =
                     _View._OnClickSellButtonAsObservable
                         .WithLatestFrom(_onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
@@ -128,10 +149,8 @@ namespace UI.Title
                     .AddTo(_cts.Token);
 
                 sellWeapon.Connect().AddTo(_cts.Token);
-                var selectedCharacterId = _CharacterSelectRepository.GetSelectedCharacterId();
-                var selectedWeaponId = _UserDataRepository.GetEquippedWeaponId(selectedCharacterId);
-                _onChangeSelectedWeaponSubject.OnNext(selectedWeaponId);
             }
+
 
             private async UniTask SetVirtualCurrencyText()
             {

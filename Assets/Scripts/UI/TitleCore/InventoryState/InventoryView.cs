@@ -16,6 +16,8 @@ public class InventoryView : ViewBase
     [SerializeField] private WeaponDetailView weaponDetailView;
     [SerializeField] private Transform weaponGridParent;
     [SerializeField] private SkillDetailView skillDetailView;
+    [SerializeField] private Button _sortButton;
+    [SerializeField] private SortView _sortView;
 
     private readonly List<WeaponGridView> _weaponGridViews = new();
     public IReadOnlyCollection<WeaponGridView> _WeaponGridViews => _weaponGridViews;
@@ -23,6 +25,15 @@ public class InventoryView : ViewBase
     private Action<bool> _setActivePanelAction;
     public Button _BackButton => backButton;
     public Button _EquipButton => weaponDetailView._EquipButton;
+
+    public IObservable<AsyncUnit> _OnClickSortButtonAsObservable => _sortButton
+        .OnClickAsObservable()
+        .SelectMany(_ => _uiAnimation.ClickScaleColor(_sortButton.gameObject).ToUniTask().ToObservable());
+
+    public IObservable<AsyncUnit> _OnClickSortOkButtonAsObservable => _sortView
+        ._OnClickOkButtonAsObservable
+        .SelectMany(button => _uiAnimation.ClickScaleColor(button.gameObject).ToUniTask().ToObservable());
+
 
     public IObservable<AsyncUnit> _OnClickSellButtonAsObservable => weaponDetailView._SellButton
         .OnClickAsObservable()
@@ -103,6 +114,16 @@ public class InventoryView : ViewBase
     {
         var weaponDetailViewModel = TranslateWeaponDataToViewModel(weaponMasterData);
         weaponDetailView.ApplyViewModel(weaponDetailViewModel);
+    }
+
+    public void ApplySortView()
+    {
+        _sortView.gameObject.SetActive(true);
+    }
+
+    public void CloseSortView()
+    {
+        _sortView.gameObject.SetActive(false);
     }
 
     private WeaponDetailView.ViewModel TranslateWeaponDataToViewModel(WeaponMasterData weaponMasterData)
