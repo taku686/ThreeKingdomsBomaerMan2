@@ -73,6 +73,21 @@ namespace UI.Title
                     .Subscribe(_ => { stateMachine.Dispatch((int)State.CharacterDetail); })
                     .AddTo(_cts.Token);
 
+                DetailSkillSubscribe();
+                SellWeaponSubscribe();
+                SortViewSubscribe();
+                OnNextSelectedWeapon();
+            }
+
+            private void OnNextSelectedWeapon()
+            {
+                var selectedCharacterId = _CharacterSelectRepository.GetSelectedCharacterId();
+                var selectedWeaponId = _UserDataRepository.GetEquippedWeaponId(selectedCharacterId);
+                _onChangeSelectedWeaponSubject.OnNext(selectedWeaponId);
+            }
+
+            private void DetailSkillSubscribe()
+            {
                 _View._OnClickStatusSkillDetailButtonAsObservable
                     .WithLatestFrom(_onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
                     .Select(weaponId => _SkillDetailViewModelUseCase.InAsTask(weaponId, SkillType.Status))
@@ -110,13 +125,6 @@ namespace UI.Title
                         Owner.SetActiveBlockPanel(false);
                     })
                     .AddTo(_cts.Token);
-
-                SellWeaponSubscribe();
-                SortViewSubscribe();
-
-                var selectedCharacterId = _CharacterSelectRepository.GetSelectedCharacterId();
-                var selectedWeaponId = _UserDataRepository.GetEquippedWeaponId(selectedCharacterId);
-                _onChangeSelectedWeaponSubject.OnNext(selectedWeaponId);
             }
 
             private void SortViewSubscribe()
@@ -129,36 +137,45 @@ namespace UI.Title
 
                 foreach (var sortToggleView in sortToggleViews)
                 {
-                    foreach (var (sort, isActive) in sortTypes)
+                    foreach (var (sort, isDisable) in sortTypes)
                     {
-                        sortToggleView.SetActive(sort, isActive);
+                        sortToggleView.SetActive(sort, isDisable);
                     }
 
                     sortToggleView._OnClickSortButtonAsObservable
-                        .Subscribe(tuple =>
+                        .Subscribe(sortType =>
                         {
-                            var sortType = tuple.Item1;
-                            var isActive = tuple.Item2;
                             _WeaponSortRepository.SetSortType(sortType);
-                            sortToggleView.SetActive(sortType, isActive);
+                            foreach (var (sort, isDisable) in sortTypes)
+                            {
+                                foreach (var toggleView in sortToggleViews)
+                                {
+                                    toggleView.SetActive(sort, isDisable);
+                                }
+                            }
                         })
                         .AddTo(_cts.Token);
                 }
 
                 foreach (var filterToggleView in filterToggleViews)
                 {
-                    foreach (var (filter, isActive) in filterTypes)
+                    foreach (var (filter, isDisable) in filterTypes)
                     {
-                        filterToggleView.SetActive(filter, isActive);
+                        filterToggleView.Initialize();
+                        filterToggleView.SetActive(filter, isDisable);
                     }
 
-                    filterToggleView._OnClickFilterButtonAsObservable
-                        .Subscribe(tuple =>
+                    filterToggleView._OnChangedValueFilterToggleAsObservable
+                        .Subscribe(filterType =>
                         {
-                            var filterType = tuple.Item1;
-                            var isActive = tuple.Item2;
                             _WeaponSortRepository.SetFilterType(filterType);
-                            filterToggleView.SetActive(filterType, isActive);
+                            foreach (var (filter, isDisable) in filterTypes)
+                            {
+                                foreach (var toggleView in filterToggleViews)
+                                {
+                                    toggleView.SetActive(filter, isDisable);
+                                }
+                            }
                         })
                         .AddTo(_cts.Token);
                 }
@@ -168,7 +185,11 @@ namespace UI.Title
                     .AddTo(_cts.Token);
 
                 _View._OnClickSortOkButtonAsObservable
-                    .Subscribe(_ => { _View.CloseSortView(); })
+                    .Subscribe(_ =>
+                    {
+                        OnNextSelectedWeapon();
+                        _View.CloseSortView();
+                    })
                     .AddTo(_cts.Token);
             }
 

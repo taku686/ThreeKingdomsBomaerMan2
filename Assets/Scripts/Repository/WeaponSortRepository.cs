@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Common.Data;
 
 namespace Repository
 {
@@ -7,38 +9,38 @@ namespace Repository
     {
         private readonly Dictionary<SortType, bool> _sortTypeDictionary = new()
         {
-            { SortType.WeaponType, true },
-            { SortType.Rarity, true },
-            { SortType.Possession, true },
-            { SortType.Hp, true },
-            { SortType.Attack, true },
-            { SortType.Defense, true },
-            { SortType.Speed, true },
-            { SortType.Resistance, true },
-            { SortType.Element, true },
-            { SortType.Skill, true },
-            { SortType.Slot, true },
-            { SortType.Set, true },
-            { SortType.Favorite, true },
-            { SortType.BombCount, true },
-            { SortType.Fire, true },
-            { SortType.None, false },
+            { SortType.WeaponType, false },
+            { SortType.Rarity, false },
+            { SortType.Possession, false },
+            { SortType.Hp, false },
+            { SortType.Attack, false },
+            { SortType.Defense, false },
+            { SortType.Speed, false },
+            { SortType.Resistance, false },
+            { SortType.Attribute, false },
+            { SortType.Skill, false },
+            { SortType.Slot, false },
+            { SortType.Set, false },
+            { SortType.Favorite, false },
+            { SortType.BombCount, false },
+            { SortType.Fire, false },
+            { SortType.None, true },
         };
 
-        private readonly Dictionary<FilterType, bool> _filterTypeDictionary = new()
+        private readonly Dictionary<WeaponType, bool> _weaponFilterTypeDictionary = new()
         {
-            { FilterType.Spear, true },
-            { FilterType.Hammer, true },
-            { FilterType.Sword, true },
-            { FilterType.Knife, true },
-            { FilterType.Fan, true },
-            { FilterType.Bow, true },
-            { FilterType.Shield, true },
-            { FilterType.Axe, true },
-            { FilterType.Staff, true },
-            { FilterType.Scythe, true },
-            { FilterType.BigSword, true },
-            { FilterType.None, false },
+            { WeaponType.Spear, false },
+            { WeaponType.Hammer, false },
+            { WeaponType.Sword, false },
+            { WeaponType.Knife, false },
+            { WeaponType.Fan, false },
+            { WeaponType.Bow, false },
+            { WeaponType.Shield, false },
+            { WeaponType.Axe, false },
+            { WeaponType.Staff, false },
+            { WeaponType.Scythe, false },
+            { WeaponType.BigSword, false },
+            { WeaponType.None, true },
         };
 
         public void SetSortType(SortType sortType)
@@ -46,14 +48,32 @@ namespace Repository
             var sortTypeDictionary = new Dictionary<SortType, bool>(_sortTypeDictionary);
             foreach (var sort in sortTypeDictionary)
             {
-                _sortTypeDictionary[sort.Key] = sort.Key != sortType;
+                _sortTypeDictionary[sort.Key] = sort.Key == sortType;
             }
         }
 
-        public void SetFilterType(FilterType filterType)
+        public void SetFilterType(WeaponType filterType)
         {
-            var isActive = _filterTypeDictionary[filterType];
-            _filterTypeDictionary[filterType] = !isActive;
+            if (filterType == WeaponType.None)
+            {
+                var filterTypeDictionary = new Dictionary<WeaponType, bool>(_weaponFilterTypeDictionary);
+                foreach (var filter in filterTypeDictionary)
+                {
+                    _weaponFilterTypeDictionary[filter.Key] = false;
+                }
+
+                _weaponFilterTypeDictionary[WeaponType.None] = true;
+                return;
+            }
+
+            var isActive = _weaponFilterTypeDictionary[filterType];
+            _weaponFilterTypeDictionary[filterType] = !isActive;
+            _weaponFilterTypeDictionary[WeaponType.None] = false;
+
+            if(_weaponFilterTypeDictionary.Values.All(value => !value))
+            {
+                _weaponFilterTypeDictionary[WeaponType.None] = true;
+            }
         }
 
         public IReadOnlyDictionary<SortType, bool> GetSortTypeDictionary()
@@ -61,9 +81,9 @@ namespace Repository
             return _sortTypeDictionary;
         }
 
-        public IReadOnlyDictionary<FilterType, bool> GetFilterTypeDictionary()
+        public IReadOnlyDictionary<WeaponType, bool> GetFilterTypeDictionary()
         {
-            return _filterTypeDictionary;
+            return _weaponFilterTypeDictionary;
         }
 
         public enum SortType
@@ -77,7 +97,7 @@ namespace Repository
             Defense,
             Speed,
             Resistance,
-            Element,
+            Attribute,
             Skill,
             Slot,
             Set,
@@ -86,25 +106,9 @@ namespace Repository
             Fire
         }
 
-        public enum FilterType
-        {
-            Spear = 0,
-            Hammer = 1,
-            Sword = 2,
-            Knife = 3,
-            Fan = 4,
-            Bow = 5,
-            Shield = 6,
-            Axe = 7,
-            Staff = 8,
-            Scythe = 9,
-            BigSword = 10,
-            None = 999,
-        }
-
         public void Dispose()
         {
-            _filterTypeDictionary.Clear();
+            _weaponFilterTypeDictionary.Clear();
             _sortTypeDictionary.Clear();
         }
     }

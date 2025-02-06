@@ -73,11 +73,8 @@ public class InventoryView : ViewBase
         }
 
         _weaponGridViews.Clear();
-        var possessedWeaponDatum = viewModel._PossessedWeaponDatum
-            .OrderBy(data => data.Key.Rare)
-            .ThenBy(data => data.Key.WeaponType)
-            .ThenBy(data => data.Key.Id);
-        foreach (var keyValuePair in possessedWeaponDatum)
+        var sortedWeaponDatum = viewModel._SortedWeaponDatum;
+        foreach (var keyValuePair in sortedWeaponDatum)
         {
             var weaponGridView = Instantiate(weaponGridViewPrefab, weaponGridParent);
             var weaponMasterData = keyValuePair.Key;
@@ -154,16 +151,16 @@ public class InventoryView : ViewBase
 
     public class ViewModel
     {
-        public IReadOnlyDictionary<WeaponMasterData, int> _PossessedWeaponDatum { get; }
+        public IReadOnlyDictionary<WeaponMasterData, int> _SortedWeaponDatum { get; }
         public WeaponMasterData _WeaponMasterData { get; }
 
         public ViewModel
         (
-            IReadOnlyDictionary<WeaponMasterData, int> possessedWeaponDatum,
+            IReadOnlyDictionary<WeaponMasterData, int> sortedWeaponDatum,
             WeaponMasterData weaponMasterData
         )
         {
-            _PossessedWeaponDatum = possessedWeaponDatum;
+            _SortedWeaponDatum = sortedWeaponDatum;
             _WeaponMasterData = weaponMasterData;
         }
     }

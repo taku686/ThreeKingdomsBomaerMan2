@@ -56,6 +56,7 @@ namespace Common.Installer
             Container.Bind<InventoryViewModelUseCase>().AsCached();
             Container.Bind<SkillDetailViewModelUseCase>().AsCached();
             Container.Bind<WeaponSortRepository>().AsCached();
+            Container.Bind<SortWeaponUseCase>().AsCached();
         }
     }
 }

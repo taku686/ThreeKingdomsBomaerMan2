@@ -11,14 +11,15 @@ namespace UI.Title
         [SerializeField] private WeaponSortRepository.SortType _sortType;
         [SerializeField] private Button _sortButton;
 
-        public IObservable<(WeaponSortRepository.SortType, bool)> _OnClickSortButtonAsObservable => _sortButton
-            .OnClickAsObservable()
-            .Select(_ => (_sortType, _sortButton.interactable));
+        public IObservable<WeaponSortRepository.SortType> _OnClickSortButtonAsObservable =>
+            _sortButton
+                .OnClickAsObservable()
+                .Select(_ => _sortType);
 
-        public void SetActive(WeaponSortRepository.SortType sortType, bool isActive)
+        public void SetActive(WeaponSortRepository.SortType sortType, bool isDisable)
         {
             if (_sortType != sortType) return;
-            _sortButton.interactable = isActive;
+            _sortButton.interactable = !isDisable;
         }
     }
 }

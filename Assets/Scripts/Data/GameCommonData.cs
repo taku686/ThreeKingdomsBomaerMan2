@@ -298,6 +298,9 @@ namespace Common.Data
         Shield = 6,
         Axe = 7,
         Staff = 8,
+        Scythe = 9,
+        BigSword = 10,
+        None = 999,
     }
 
     public enum AttributeType
