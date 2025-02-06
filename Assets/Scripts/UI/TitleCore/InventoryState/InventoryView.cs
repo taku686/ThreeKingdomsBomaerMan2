@@ -17,10 +17,11 @@ public class InventoryView : ViewBase
     [SerializeField] private Transform weaponGridParent;
     [SerializeField] private SkillDetailView skillDetailView;
     [SerializeField] private Button _sortButton;
-    [SerializeField] private SortView _sortView;
+    [SerializeField] private SortPopupView _sortPopupView;
 
     private readonly List<WeaponGridView> _weaponGridViews = new();
     public IReadOnlyCollection<WeaponGridView> _WeaponGridViews => _weaponGridViews;
+    public SortPopupView _SortPopupView => _sortPopupView;
     private UIAnimation _uiAnimation;
     private Action<bool> _setActivePanelAction;
     public Button _BackButton => backButton;
@@ -30,10 +31,9 @@ public class InventoryView : ViewBase
         .OnClickAsObservable()
         .SelectMany(_ => _uiAnimation.ClickScaleColor(_sortButton.gameObject).ToUniTask().ToObservable());
 
-    public IObservable<AsyncUnit> _OnClickSortOkButtonAsObservable => _sortView
+    public IObservable<AsyncUnit> _OnClickSortOkButtonAsObservable => _sortPopupView
         ._OnClickOkButtonAsObservable
         .SelectMany(button => _uiAnimation.ClickScaleColor(button.gameObject).ToUniTask().ToObservable());
-
 
     public IObservable<AsyncUnit> _OnClickSellButtonAsObservable => weaponDetailView._SellButton
         .OnClickAsObservable()
@@ -118,12 +118,12 @@ public class InventoryView : ViewBase
 
     public void ApplySortView()
     {
-        _sortView.gameObject.SetActive(true);
+        _sortPopupView.gameObject.SetActive(true);
     }
 
     public void CloseSortView()
     {
-        _sortView.gameObject.SetActive(false);
+        _sortPopupView.gameObject.SetActive(false);
     }
 
     private WeaponDetailView.ViewModel TranslateWeaponDataToViewModel(WeaponMasterData weaponMasterData)

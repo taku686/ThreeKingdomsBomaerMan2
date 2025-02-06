@@ -2,6 +2,7 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.NetworkManager;
+using Repository;
 using UI.Common;
 using UniRx;
 
@@ -19,6 +20,7 @@ namespace UI.Title
             private UIAnimation _UIAnimation => Owner._uiAnimation;
             private PlayFabShopManager _PlayFabShopManager => Owner._playFabShopManager;
             private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
+            private WeaponSortRepository _WeaponSortRepository => Owner._weaponSortRepository;
             private CancellationTokenSource _cts;
             private Subject<int> _onChangeSelectedWeaponSubject;
 
@@ -37,6 +39,7 @@ namespace UI.Title
             {
                 _onChangeSelectedWeaponSubject = new Subject<int>();
                 _cts = new CancellationTokenSource();
+                _View.CloseSortView();
                 Subscribe();
                 Owner.SwitchUiObject(State.Inventory, true).Forget();
             }
@@ -118,6 +121,48 @@ namespace UI.Title
 
             private void SortViewSubscribe()
             {
+                var sortTypes = _WeaponSortRepository.GetSortTypeDictionary();
+                var filterTypes = _WeaponSortRepository.GetFilterTypeDictionary();
+                var sortToggleViews = _View._SortPopupView._SortToggleViews;
+                var filterToggleViews = _View._SortPopupView._FilterToggleViews;
+
+
+                foreach (var sortToggleView in sortToggleViews)
+                {
+                    foreach (var (sort, isActive) in sortTypes)
+                    {
+                        sortToggleView.SetActive(sort, isActive);
+                    }
+
+                    sortToggleView._OnClickSortButtonAsObservable
+                        .Subscribe(tuple =>
+                        {
+                            var sortType = tuple.Item1;
+                            var isActive = tuple.Item2;
+                            _WeaponSortRepository.SetSortType(sortType);
+                            sortToggleView.SetActive(sortType, isActive);
+                        })
+                        .AddTo(_cts.Token);
+                }
+
+                foreach (var filterToggleView in filterToggleViews)
+                {
+                    foreach (var (filter, isActive) in filterTypes)
+                    {
+                        filterToggleView.SetActive(filter, isActive);
+                    }
+
+                    filterToggleView._OnClickFilterButtonAsObservable
+                        .Subscribe(tuple =>
+                        {
+                            var filterType = tuple.Item1;
+                            var isActive = tuple.Item2;
+                            _WeaponSortRepository.SetFilterType(filterType);
+                            filterToggleView.SetActive(filterType, isActive);
+                        })
+                        .AddTo(_cts.Token);
+                }
+
                 _View._OnClickSortButtonAsObservable
                     .Subscribe(_ => { _View.ApplySortView(); })
                     .AddTo(_cts.Token);
