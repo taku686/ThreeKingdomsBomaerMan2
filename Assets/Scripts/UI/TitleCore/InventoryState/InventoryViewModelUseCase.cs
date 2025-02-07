@@ -3,6 +3,7 @@ using System.Linq;
 using Common.Data;
 using Repository;
 using UnityEngine;
+using UseCase;
 
 namespace UI.Title
 {
@@ -10,34 +11,34 @@ namespace UI.Title
     {
         private readonly UserDataRepository _userDataRepository;
         private readonly WeaponMasterDataRepository _weaponMasterDataRepository;
+        private readonly SortWeaponUseCase _sortWeaponUseCase;
 
         public InventoryViewModelUseCase
         (
             UserDataRepository userDataRepository,
-            WeaponMasterDataRepository weaponMasterDataRepository
+            WeaponMasterDataRepository weaponMasterDataRepository,
+            SortWeaponUseCase sortWeaponUseCase
         )
         {
             _userDataRepository = userDataRepository;
             _weaponMasterDataRepository = weaponMasterDataRepository;
+            _sortWeaponUseCase = sortWeaponUseCase;
         }
 
         public InventoryView.ViewModel InAsTask(int selectedWeaponId)
         {
             var possessedWeaponDatum = _userDataRepository.GetAllPossessedWeaponDatum();
+            var sortedWeaponDatum = _sortWeaponUseCase.InAsTask(possessedWeaponDatum);
             var weaponMasterData = _weaponMasterDataRepository.GetWeaponData(selectedWeaponId);
-            if (!possessedWeaponDatum.ContainsKey(weaponMasterData))
+            if (!sortedWeaponDatum.ContainsKey(weaponMasterData))
             {
-                var candidate = possessedWeaponDatum
-                    .OrderBy(weapon => weapon.Key.WeaponType)
-                    .ThenBy(weapon => weapon.Key.Rare)
-                    .ThenBy(weapon => weapon.Key.Id)
-                    .First();
+                var candidate = sortedWeaponDatum.First();
                 weaponMasterData = _weaponMasterDataRepository.GetWeaponData(candidate.Key.Id);
             }
 
             return new InventoryView.ViewModel
             (
-                possessedWeaponDatum,
+                sortedWeaponDatum,
                 weaponMasterData
             );
         }

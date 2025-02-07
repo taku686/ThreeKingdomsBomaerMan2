@@ -2,6 +2,7 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.NetworkManager;
+using Repository;
 using UI.Common;
 using UniRx;
 
@@ -19,6 +20,7 @@ namespace UI.Title
             private UIAnimation _UIAnimation => Owner._uiAnimation;
             private PlayFabShopManager _PlayFabShopManager => Owner._playFabShopManager;
             private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
+            private WeaponSortRepository _WeaponSortRepository => Owner._weaponSortRepository;
             private CancellationTokenSource _cts;
             private Subject<int> _onChangeSelectedWeaponSubject;
 
@@ -37,6 +39,7 @@ namespace UI.Title
             {
                 _onChangeSelectedWeaponSubject = new Subject<int>();
                 _cts = new CancellationTokenSource();
+                _View.CloseSortView();
                 Subscribe();
                 Owner.SwitchUiObject(State.Inventory, true).Forget();
             }
@@ -70,6 +73,21 @@ namespace UI.Title
                     .Subscribe(_ => { stateMachine.Dispatch((int)State.CharacterDetail); })
                     .AddTo(_cts.Token);
 
+                DetailSkillSubscribe();
+                SellWeaponSubscribe();
+                SortViewSubscribe();
+                OnNextSelectedWeapon();
+            }
+
+            private void OnNextSelectedWeapon()
+            {
+                var selectedCharacterId = _CharacterSelectRepository.GetSelectedCharacterId();
+                var selectedWeaponId = _UserDataRepository.GetEquippedWeaponId(selectedCharacterId);
+                _onChangeSelectedWeaponSubject.OnNext(selectedWeaponId);
+            }
+
+            private void DetailSkillSubscribe()
+            {
                 _View._OnClickStatusSkillDetailButtonAsObservable
                     .WithLatestFrom(_onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
                     .Select(weaponId => _SkillDetailViewModelUseCase.InAsTask(weaponId, SkillType.Status))
@@ -107,7 +125,76 @@ namespace UI.Title
                         Owner.SetActiveBlockPanel(false);
                     })
                     .AddTo(_cts.Token);
+            }
 
+            private void SortViewSubscribe()
+            {
+                var sortTypes = _WeaponSortRepository.GetSortTypeDictionary();
+                var filterTypes = _WeaponSortRepository.GetFilterTypeDictionary();
+                var sortToggleViews = _View._SortPopupView._SortToggleViews;
+                var filterToggleViews = _View._SortPopupView._FilterToggleViews;
+
+
+                foreach (var sortToggleView in sortToggleViews)
+                {
+                    foreach (var (sort, isDisable) in sortTypes)
+                    {
+                        sortToggleView.SetActive(sort, isDisable);
+                    }
+
+                    sortToggleView._OnClickSortButtonAsObservable
+                        .Subscribe(sortType =>
+                        {
+                            _WeaponSortRepository.SetSortType(sortType);
+                            foreach (var (sort, isDisable) in sortTypes)
+                            {
+                                foreach (var toggleView in sortToggleViews)
+                                {
+                                    toggleView.SetActive(sort, isDisable);
+                                }
+                            }
+                        })
+                        .AddTo(_cts.Token);
+                }
+
+                foreach (var filterToggleView in filterToggleViews)
+                {
+                    foreach (var (filter, isDisable) in filterTypes)
+                    {
+                        filterToggleView.Initialize();
+                        filterToggleView.SetActive(filter, isDisable);
+                    }
+
+                    filterToggleView._OnChangedValueFilterToggleAsObservable
+                        .Subscribe(filterType =>
+                        {
+                            _WeaponSortRepository.SetFilterType(filterType);
+                            foreach (var (filter, isDisable) in filterTypes)
+                            {
+                                foreach (var toggleView in filterToggleViews)
+                                {
+                                    toggleView.SetActive(filter, isDisable);
+                                }
+                            }
+                        })
+                        .AddTo(_cts.Token);
+                }
+
+                _View._OnClickSortButtonAsObservable
+                    .Subscribe(_ => { _View.ApplySortView(); })
+                    .AddTo(_cts.Token);
+
+                _View._OnClickSortOkButtonAsObservable
+                    .Subscribe(_ =>
+                    {
+                        OnNextSelectedWeapon();
+                        _View.CloseSortView();
+                    })
+                    .AddTo(_cts.Token);
+            }
+
+            private void SellWeaponSubscribe()
+            {
                 var sellWeapon =
                     _View._OnClickSellButtonAsObservable
                         .WithLatestFrom(_onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
@@ -128,10 +215,8 @@ namespace UI.Title
                     .AddTo(_cts.Token);
 
                 sellWeapon.Connect().AddTo(_cts.Token);
-                var selectedCharacterId = _CharacterSelectRepository.GetSelectedCharacterId();
-                var selectedWeaponId = _UserDataRepository.GetEquippedWeaponId(selectedCharacterId);
-                _onChangeSelectedWeaponSubject.OnNext(selectedWeaponId);
             }
+
 
             private async UniTask SetVirtualCurrencyText()
             {

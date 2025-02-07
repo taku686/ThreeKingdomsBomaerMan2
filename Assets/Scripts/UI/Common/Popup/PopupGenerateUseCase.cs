@@ -1,8 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
-using UI.Common;
 using UniRx;
-using UnityEngine.UI;
 using Zenject;
 
 public class PopupGenerateUseCase : IDisposable

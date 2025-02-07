@@ -16,13 +16,24 @@ public class InventoryView : ViewBase
     [SerializeField] private WeaponDetailView weaponDetailView;
     [SerializeField] private Transform weaponGridParent;
     [SerializeField] private SkillDetailView skillDetailView;
+    [SerializeField] private Button _sortButton;
+    [SerializeField] private SortPopupView _sortPopupView;
 
     private readonly List<WeaponGridView> _weaponGridViews = new();
     public IReadOnlyCollection<WeaponGridView> _WeaponGridViews => _weaponGridViews;
+    public SortPopupView _SortPopupView => _sortPopupView;
     private UIAnimation _uiAnimation;
     private Action<bool> _setActivePanelAction;
     public Button _BackButton => backButton;
     public Button _EquipButton => weaponDetailView._EquipButton;
+
+    public IObservable<AsyncUnit> _OnClickSortButtonAsObservable => _sortButton
+        .OnClickAsObservable()
+        .SelectMany(_ => _uiAnimation.ClickScaleColor(_sortButton.gameObject).ToUniTask().ToObservable());
+
+    public IObservable<AsyncUnit> _OnClickSortOkButtonAsObservable => _sortPopupView
+        ._OnClickOkButtonAsObservable
+        .SelectMany(button => _uiAnimation.ClickScaleColor(button.gameObject).ToUniTask().ToObservable());
 
     public IObservable<AsyncUnit> _OnClickSellButtonAsObservable => weaponDetailView._SellButton
         .OnClickAsObservable()
@@ -62,11 +73,8 @@ public class InventoryView : ViewBase
         }
 
         _weaponGridViews.Clear();
-        var possessedWeaponDatum = viewModel._PossessedWeaponDatum
-            .OrderBy(data => data.Key.Rare)
-            .ThenBy(data => data.Key.WeaponType)
-            .ThenBy(data => data.Key.Id);
-        foreach (var keyValuePair in possessedWeaponDatum)
+        var sortedWeaponDatum = viewModel._SortedWeaponDatum;
+        foreach (var keyValuePair in sortedWeaponDatum)
         {
             var weaponGridView = Instantiate(weaponGridViewPrefab, weaponGridParent);
             var weaponMasterData = keyValuePair.Key;
@@ -105,6 +113,16 @@ public class InventoryView : ViewBase
         weaponDetailView.ApplyViewModel(weaponDetailViewModel);
     }
 
+    public void ApplySortView()
+    {
+        _sortPopupView.gameObject.SetActive(true);
+    }
+
+    public void CloseSortView()
+    {
+        _sortPopupView.gameObject.SetActive(false);
+    }
+
     private WeaponDetailView.ViewModel TranslateWeaponDataToViewModel(WeaponMasterData weaponMasterData)
     {
         return new WeaponDetailView.ViewModel
@@ -133,16 +151,16 @@ public class InventoryView : ViewBase
 
     public class ViewModel
     {
-        public IReadOnlyDictionary<WeaponMasterData, int> _PossessedWeaponDatum { get; }
+        public IReadOnlyDictionary<WeaponMasterData, int> _SortedWeaponDatum { get; }
         public WeaponMasterData _WeaponMasterData { get; }
 
         public ViewModel
         (
-            IReadOnlyDictionary<WeaponMasterData, int> possessedWeaponDatum,
+            IReadOnlyDictionary<WeaponMasterData, int> sortedWeaponDatum,
             WeaponMasterData weaponMasterData
         )
         {
-            _PossessedWeaponDatum = possessedWeaponDatum;
+            _SortedWeaponDatum = sortedWeaponDatum;
             _WeaponMasterData = weaponMasterData;
         }
     }
