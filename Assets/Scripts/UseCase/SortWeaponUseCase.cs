@@ -23,7 +23,7 @@ namespace UseCase
 
         public IReadOnlyDictionary<WeaponMasterData, int> InAsTask(IReadOnlyDictionary<WeaponMasterData, int> possessedWeaponDatum)
         {
-            var sortType = _weaponSortRepository.GetSortTypeDictionary().Where(keyValue => !keyValue.Value).Select(keyValue => keyValue.Key).First();
+            var sortType = _weaponSortRepository.GetSortTypeDictionary().Where(keyValue => keyValue.Value).Select(keyValue => keyValue.Key).First();
             var filter = _weaponSortRepository.GetFilterTypeDictionary();
             if (!filter[WeaponType.None])
             {
