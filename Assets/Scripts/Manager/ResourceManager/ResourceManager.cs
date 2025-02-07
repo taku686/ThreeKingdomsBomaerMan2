@@ -1,14 +1,16 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
-using Manager.ResourceManager;
 using PlayFab.ClientModels;
 using UnityEngine;
 
 namespace Manager.ResourceManager
 {
-    public class ResourceManager : MonoBehaviour, ILoadResource
+    public class ResourceManager : ILoadResource
     {
+        private List<Sprite> _userSprites = new();
+
         public async UniTask<GameObject> LoadGameObject(string path, CancellationToken token)
         {
             var resource = await Resources.LoadAsync<GameObject>(path).WithCancellation(token);
@@ -48,11 +50,22 @@ namespace Manager.ResourceManager
             return (Sprite)resource;
         }
 
+        public async UniTask<Sprite> LoadUserIconSprite(string fileName)
+        {
+            var path = string.IsNullOrEmpty(fileName) ? GameCommonData.UserIconSpritePath + "default" : GameCommonData.UserIconSpritePath + fileName;
+            var resource = await Resources.LoadAsync<Sprite>(path);
+            return (Sprite)resource;
+        }
+
         public async UniTask<Sprite> LoadCharacterColor(int id, CancellationToken token)
         {
             var resource = await Resources.LoadAsync<Sprite>(GameCommonData.CharacterColorPath + id)
                 .WithCancellation(token);
             return (Sprite)resource;
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

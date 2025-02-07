@@ -7,6 +7,7 @@ namespace Common.Data
     {
         public Gender Gender;
         public int EquippedCharacterId;
+        public string UserIconFileName;
         public int Level;
         public string Name;
         public bool IsTutorial;
@@ -27,6 +28,7 @@ namespace Common.Data
             user.EquippedCharacterId = 0;
             user.Level = 1;
             user.Name = "";
+            user.UserIconFileName = "default";
             user.IsTutorial = false;
             user.Characters.Add(0);
             user.Gem = 0;
