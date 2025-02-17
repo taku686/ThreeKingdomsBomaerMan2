@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Data;
 using Manager.DataManager;
 using Newtonsoft.Json;
 using Repository;
@@ -19,11 +20,13 @@ namespace Manager.PlayFabManager
         private const string MissionMasterKey = "MissionMaster";
         private const string SkillMasterKey = "SkillMaster";
         private const string WeaponMasterKey = "WeaponMaster";
+        private const string EntitledMasterKey = "EntitledMaster";
         [Inject] private CharacterMasterDataRepository _characterMasterDataRepository;
         [Inject] private LevelMasterDataRepository _levelMasterDataRepository;
         [Inject] private MissionDataRepository _missionDataRepository;
         [Inject] private SkillMasterDataRepository _skillMasterDataRepository;
         [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
+        [Inject] private EntitledMasterDataRepository _entitledMasterDataRepository;
         private CancellationTokenSource _cts;
 
         public void Initialize()
@@ -43,11 +46,14 @@ namespace Manager.PlayFabManager
                 JsonConvert.DeserializeObject<SkillMasterData[]>(titleDatum[SkillMasterKey]);
             var weaponDatum =
                 JsonConvert.DeserializeObject<WeaponMasterData[]>(titleDatum[WeaponMasterKey]);
+            var entitledDatum =
+                JsonConvert.DeserializeObject<EntitledMasterData[]>(titleDatum[EntitledMasterKey]);
             await SetCharacterData(characterDatum);
             SetCharacterLevelData(characterLevelDatum);
             SetMissionData(missionDatum);
             await SetSkillData(skillDatum);
             await SetWeaponData(weaponDatum);
+            SetEntitledData(entitledDatum);
         }
 
         private async UniTask SetCharacterData(CharacterData[] characterDatum)
@@ -143,6 +149,14 @@ namespace Manager.PlayFabManager
             foreach (var characterLevelMasterData in characterLevelMasterDatum)
             {
                 _levelMasterDataRepository.SetCharacterLevelData(characterLevelMasterData);
+            }
+        }
+
+        private void SetEntitledData(EntitledMasterData[] entitledMasterDatum)
+        {
+            foreach (var entitledMasterData in entitledMasterDatum)
+            {
+                _entitledMasterDataRepository.AddEntitledMasterData(entitledMasterData);
             }
         }
 

@@ -17,7 +17,7 @@ namespace UI.Title
             private MainView _View => (MainView)Owner.GetView(State.Main);
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
             private UserDataRepository _UserDataRepository => Owner._userDataRepository;
-            private CharacterMasterDataRepository _CharacterMasterDataRepository => Owner._characterMasterDataRepository;
+            private EntitledMasterDataRepository _EntitledMasterDataRepository => Owner._entitledMasterDataRepository;
             private CancellationTokenSource _cts;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
@@ -50,10 +50,12 @@ namespace UI.Title
                 var userData = _UserDataRepository.GetUserData();
                 var userName = userData.Name;
                 var userIcon = _UserDataRepository.GetUserIconSprite();
+                var entitled = _EntitledMasterDataRepository.GetEntitledMasterData(userData.EntitledId).Entitled;
                 var viewModel = new SimpleUserInfoView.ViewModel
                 (
                     userIcon,
-                    userName
+                    userName,
+                    entitled
                 );
                 _View.ApplySimpleUserInfoView(viewModel);
             }

@@ -10,6 +10,7 @@ namespace Common.Data
         public string UserIconFileName;
         public int Level;
         public string Name;
+        public int EntitledId;
         public bool IsTutorial;
         public int Gem;
         public int Coin;
@@ -28,6 +29,7 @@ namespace Common.Data
             user.EquippedCharacterId = 0;
             user.Level = 1;
             user.Name = "";
+            user.EntitledId = 0;
             user.UserIconFileName = "default";
             user.IsTutorial = false;
             user.Characters.Add(0);

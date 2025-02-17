@@ -33,6 +33,7 @@ namespace UI.Title
         [Inject] private CharacterObjectRepository _characterObjectRepository;
         [Inject] private RewardDataRepository _rewardDataRepository;
         [Inject] private WeaponSortRepository _weaponSortRepository;
+        [Inject] private EntitledMasterDataRepository _entitledMasterDataRepository;
 
         //UseCase
         [Inject] private CharacterSelectViewModelUseCase _characterSelectViewModelUseCase;
