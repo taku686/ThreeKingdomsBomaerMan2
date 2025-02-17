@@ -7,8 +7,10 @@ namespace Common.Data
     {
         public Gender Gender;
         public int EquippedCharacterId;
+        public string UserIconFileName;
         public int Level;
         public string Name;
+        public int EntitledId;
         public bool IsTutorial;
         public int Gem;
         public int Coin;
@@ -27,6 +29,8 @@ namespace Common.Data
             user.EquippedCharacterId = 0;
             user.Level = 1;
             user.Name = "";
+            user.EntitledId = 0;
+            user.UserIconFileName = "default";
             user.IsTutorial = false;
             user.Characters.Add(0);
             user.Gem = 0;

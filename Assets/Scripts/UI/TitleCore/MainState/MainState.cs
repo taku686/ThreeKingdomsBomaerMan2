@@ -2,6 +2,7 @@
 using Assets.Scripts.Common.PlayFab;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Manager.DataManager;
 using Repository;
 using UniRx;
 
@@ -16,6 +17,7 @@ namespace UI.Title
             private MainView _View => (MainView)Owner.GetView(State.Main);
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
             private UserDataRepository _UserDataRepository => Owner._userDataRepository;
+            private EntitledMasterDataRepository _EntitledMasterDataRepository => Owner._entitledMasterDataRepository;
             private CancellationTokenSource _cts;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
@@ -35,11 +37,27 @@ namespace UI.Title
                 Subscribe();
                 Owner.SwitchUiObject(State.Main, true, () =>
                 {
+                    ApplySimpleUserInfoView();
                     _View.SetBackgroundEffect(true);
                     var characterId = _UserDataRepository.GetEquippedCharacterId();
                     _CharacterCreateUseCase.CreateCharacter(characterId);
                 }).Forget();
                 await InitializeText();
+            }
+
+            private void ApplySimpleUserInfoView()
+            {
+                var userData = _UserDataRepository.GetUserData();
+                var userName = userData.Name;
+                var userIcon = _UserDataRepository.GetUserIconSprite();
+                var entitled = _EntitledMasterDataRepository.GetEntitledMasterData(userData.EntitledId).Entitled;
+                var viewModel = new SimpleUserInfoView.ViewModel
+                (
+                    userIcon,
+                    userName,
+                    entitled
+                );
+                _View.ApplySimpleUserInfoView(viewModel);
             }
 
 
@@ -78,6 +96,13 @@ namespace UI.Title
                     .Take(1)
                     .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._CharacterSelectButton).ToObservable())
                     .Subscribe(_ => { _StateMachine.Dispatch((int)State.CharacterSelect); })
+                    .AddTo(_cts.Token);
+
+                _View._UserInfoButton
+                    .OnClickAsObservable()
+                    .Take(1)
+                    .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._UserInfoButton).ToObservable())
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.UserInfo); })
                     .AddTo(_cts.Token);
             }
 

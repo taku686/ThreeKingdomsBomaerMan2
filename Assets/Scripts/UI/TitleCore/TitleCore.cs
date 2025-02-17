@@ -13,6 +13,7 @@ using UnityEngine;
 using Zenject;
 using Manager.DataManager;
 using Repository;
+using UI.TitleCore.UserInfoState;
 using UniRx;
 using UnityEngine.UI;
 using UseCase;
@@ -32,6 +33,7 @@ namespace UI.Title
         [Inject] private CharacterObjectRepository _characterObjectRepository;
         [Inject] private RewardDataRepository _rewardDataRepository;
         [Inject] private WeaponSortRepository _weaponSortRepository;
+        [Inject] private EntitledMasterDataRepository _entitledMasterDataRepository;
 
         //UseCase
         [Inject] private CharacterSelectViewModelUseCase _characterSelectViewModelUseCase;
@@ -43,6 +45,7 @@ namespace UI.Title
         [Inject] private SkillDetailViewModelUseCase _skillDetailViewModelUseCase;
         [Inject] private PopupGenerateUseCase _popupGenerateUseCase;
         [Inject] private RewardDataUseCase _rewardDataUseCase;
+        [Inject] private UserInfoViewModelUseCase _userInfoViewModelUseCase;
 
         //Manager
         [Inject] private PhotonNetworkManager _photonNetworkManager;
@@ -82,7 +85,8 @@ namespace UI.Title
             Mission,
             SelectBattleMode,
             Inventory,
-            Reward
+            Reward,
+            UserInfo
         }
 
         private void Awake()
@@ -135,6 +139,7 @@ namespace UI.Title
             _stateMachine.AddAnyTransition<MainState>((int)State.Main);
             _stateMachine.AddAnyTransition<ShopState>((int)State.Shop);
             _stateMachine.AddTransition<MainState, CharacterSelectState>((int)State.CharacterSelect);
+            _stateMachine.AddTransition<MainState, UserInfoState>((int)State.UserInfo);
             _stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)State.CharacterDetail);
             _stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)State.CharacterSelect);
             _stateMachine.AddTransition<CharacterDetailState, InventoryState>((int)State.Inventory);

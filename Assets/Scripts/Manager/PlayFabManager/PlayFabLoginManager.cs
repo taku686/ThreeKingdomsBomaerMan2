@@ -9,7 +9,6 @@ using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine;
 using Newtonsoft.Json;
-using UniRx;
 using Zenject;
 
 namespace Assets.Scripts.Common.PlayFab
@@ -25,6 +24,7 @@ namespace Assets.Scripts.Common.PlayFab
         [Inject] private PlayFabShopManager _playFabShopManager;
         [Inject] private PlayFabTitleDataManager _playFabTitleDataManager;
         [Inject] private MissionManager _missionManager;
+        [Inject] private Manager.ResourceManager.ResourceManager _resourceManager;
 
         private GetPlayerCombinedInfoRequestParams _info;
         public bool _haveLoginBonus;
@@ -67,10 +67,13 @@ namespace Assets.Scripts.Common.PlayFab
                 return false;
             }
 
+
             var user = JsonConvert.DeserializeObject<UserData>(value.Value);
             if (user == null) return false;
+            var userName = response.Result.InfoResultPayload.AccountInfo.TitleInfo.DisplayName;
+            var userIcon = await _resourceManager.LoadUserIconSprite(user.UserIconFileName);
             await _playFabUserDataManager.TryUpdateUserDataAsync(user);
-            await _userDataRepository.Initialize(user);
+            await _userDataRepository.Initialize(user, userName, userIcon);
             _missionManager.Initialize();
             return true;
         }

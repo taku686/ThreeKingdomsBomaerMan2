@@ -14,6 +14,7 @@ namespace Common.Data
 {
     public class UserDataRepository : IDisposable
     {
+        private Sprite _userIconSprite;
         private UserData _userData;
         private CancellationTokenSource _cancellationTokenSource;
         [Inject] private CharacterMasterDataRepository _characterMasterDataRepository;
@@ -22,11 +23,18 @@ namespace Common.Data
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
 
-        public async UniTask Initialize(UserData data)
+        public async UniTask Initialize(UserData data, string userName, Sprite userIcon)
         {
             _cancellationTokenSource = new CancellationTokenSource();
             SetUserData(data);
+            _userData.Name = userName;
+            _userIconSprite = userIcon;
             await AddMissionData();
+        }
+
+        public Sprite GetUserIconSprite()
+        {
+            return _userIconSprite;
         }
 
         public UserData GetUserData()

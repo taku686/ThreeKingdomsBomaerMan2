@@ -2,9 +2,12 @@
 using Common.Data;
 using Manager.NetworkManager;
 using Manager.PlayFabManager;
+using Manager.ResourceManager;
+using PlayFab.MultiplayerModels;
 using Repository;
 using UI.Common;
 using UI.Title;
+using UI.TitleCore.UserInfoState;
 using UnityEngine;
 using UseCase;
 using Zenject;
@@ -32,10 +35,12 @@ namespace Common.Installer
             Container.Bind<RewardDataUseCase>().AsCached();
             Container.Bind<RewardDataRepository>().AsCached();
             Container.Bind<AnimatorControllerRepository>().FromComponentOn(animatorControllerRepository).AsCached();
+            Container.Bind<ResourceManager>().AsCached();
 
             InstallCharacterSelect();
             InstallInventory();
             InstallCharacterDetail();
+            InstallMain();
         }
 
         private void InstallCharacterSelect()
@@ -57,6 +62,11 @@ namespace Common.Installer
             Container.Bind<SkillDetailViewModelUseCase>().AsCached();
             Container.Bind<WeaponSortRepository>().AsCached();
             Container.Bind<SortWeaponUseCase>().AsCached();
+        }
+
+        private void InstallMain()
+        {
+            Container.Bind<UserInfoViewModelUseCase>().AsCached();
         }
     }
 }
