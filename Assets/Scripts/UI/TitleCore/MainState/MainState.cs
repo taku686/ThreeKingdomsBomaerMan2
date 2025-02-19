@@ -2,6 +2,7 @@
 using Assets.Scripts.Common.PlayFab;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Manager;
 using Manager.DataManager;
 using Repository;
 using UniRx;
@@ -18,6 +19,7 @@ namespace UI.Title
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
             private UserDataRepository _UserDataRepository => Owner._userDataRepository;
             private EntitledMasterDataRepository _EntitledMasterDataRepository => Owner._entitledMasterDataRepository;
+            private SkyBoxManager _SkyBoxManager => Owner._skyBoxManager;
             private CancellationTokenSource _cts;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
@@ -37,6 +39,7 @@ namespace UI.Title
                 Subscribe();
                 Owner.SwitchUiObject(State.Main, true, () =>
                 {
+                    _SkyBoxManager.ChangeSkyBox();
                     ApplySimpleUserInfoView();
                     _View.SetBackgroundEffect(true);
                     var characterId = _UserDataRepository.GetEquippedCharacterId();

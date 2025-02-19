@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.Common.PlayFab;
 using Common.Data;
+using Manager;
 using Manager.NetworkManager;
 using Manager.PlayFabManager;
 using Manager.ResourceManager;
@@ -19,10 +20,12 @@ namespace Common.Installer
         [SerializeField] private GameObject playFabManagerGameObject;
         [SerializeField] private Transform characterGenerateParent;
         [SerializeField] private GameObject animatorControllerRepository;
+        [SerializeField] private GameObject _skyBoxManager;
 
         public override void InstallBindings()
         {
             Container.Bind<PlayFabLoginManager>().FromComponentOn(playFabManagerGameObject).AsCached();
+            Container.Bind<SkyBoxManager>().FromComponentOn(_skyBoxManager).AsCached();
             Container.Bind<UIAnimation>().AsCached();
             Container.Bind<UserData>().AsCached();
             Container.Bind<PlayFabShopManager>().AsCached();
@@ -36,6 +39,7 @@ namespace Common.Installer
             Container.Bind<RewardDataRepository>().AsCached();
             Container.Bind<AnimatorControllerRepository>().FromComponentOn(animatorControllerRepository).AsCached();
             Container.Bind<ResourceManager>().AsCached();
+
 
             InstallCharacterSelect();
             InstallInventory();

@@ -56,8 +56,8 @@ namespace UI.Title
         [Inject] private PlayFabAdsManager _playFabAdsManager;
         [Inject] private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
         [Inject] private MissionManager _missionManager;
-        [Inject] private ChatGPTManager _chatGptManager;
         [Inject] private CharacterTypeManager _characterTypeManager;
+        [Inject] private SkyBoxManager _skyBoxManager;
 
         //UI
         [Inject] private UIAnimation _uiAnimation;
@@ -267,7 +267,9 @@ namespace UI.Title
                 .OnClickAsObservable()
                 .Take(1)
                 .SelectMany(_ => OnClickScaleColorAnimation(_commonView.rewardGetView.okButton).ToObservable())
-                .SelectMany(_ => _uiAnimation.Close(_commonView.rewardGetView.transform, GameCommonData.CloseDuration).ToObservable())
+                .SelectMany(_ =>
+                    _uiAnimation.Close(_commonView.rewardGetView.transform, GameCommonData.CloseDuration)
+                        .ToObservable())
                 .Subscribe(_ => { SetActiveBlockPanel(false); })
                 .AddTo(_cts.Token);
         }
