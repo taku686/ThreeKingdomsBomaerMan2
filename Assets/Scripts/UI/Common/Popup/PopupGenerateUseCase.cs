@@ -1,5 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
+using UI.TitleCore.UserInfoState;
 using UniRx;
 using Zenject;
 
@@ -8,6 +9,7 @@ public class PopupGenerateUseCase : IDisposable
     [Inject] private ConfirmPopup.Factory _confirmPopupFactory;
     [Inject] private InputNamePopup.Factory _inputNamePopupFactory;
     [Inject] private ErrorPopup.Factory _errorPopupFactory;
+    [Inject] private UserInfoPopup.Factory _userInfoPopupFactory;
 
     public IObservable<bool> GenerateConfirmPopup
     (
@@ -47,6 +49,13 @@ public class PopupGenerateUseCase : IDisposable
         var errorPopup = _errorPopupFactory.Create();
         errorPopup.Open(viewModel).Forget();
         return errorPopup._OnClickButton;
+    }
+
+    public IObservable<Unit> GenerateUserInfoPopup(UserInfoPopup.ViewModel viewModel)
+    {
+        var userInfoPopup = _userInfoPopupFactory.Create();
+        userInfoPopup.Open(viewModel).Forget();
+        return userInfoPopup._OnClickButton;
     }
 
     public void Dispose()

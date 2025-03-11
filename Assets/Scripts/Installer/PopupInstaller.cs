@@ -1,3 +1,4 @@
+using UI.TitleCore.UserInfoState;
 using UnityEngine;
 using Zenject;
 
@@ -8,6 +9,7 @@ public class PopupInstaller : MonoInstaller<PopupInstaller>
     [SerializeField] private GameObject _blockingImageObject;
     [SerializeField] private GameObject _inputNamePopupPrefab;
     [SerializeField] private GameObject _errorPopupPrefab;
+    [SerializeField] private GameObject _userInfoPopupPrefab;
 
     public override void InstallBindings()
     {
@@ -17,6 +19,8 @@ public class PopupInstaller : MonoInstaller<PopupInstaller>
             .FromComponentInNewPrefab(_inputNamePopupPrefab).UnderTransform(_popupParent).AsTransient();
         Container.BindFactory<ErrorPopup, ErrorPopup.Factory>()
             .FromComponentInNewPrefab(_errorPopupPrefab).UnderTransform(_popupParent).AsTransient();
+        Container.BindFactory<UserInfoPopup, UserInfoPopup.Factory>()
+            .FromComponentInNewPrefab(_userInfoPopupPrefab).UnderTransform(_popupParent).AsTransient();
         Container.Bind<PopupGenerateUseCase>().AsCached();
         Container.Bind<BlockingGameObject>().FromComponentOn(_blockingImageObject).AsCached();
     }

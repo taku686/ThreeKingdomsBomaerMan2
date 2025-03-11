@@ -17,12 +17,12 @@ namespace UI.TitleCore.UserInfoState
             _userDataRepository = userDataRepository;
         }
 
-        public UserInfoView.ViewModel InAsTask()
+        public UserInfoPopup.ViewModel InAsTask()
         {
             var userData = _userDataRepository.GetUserData();
             var userName = userData.Name;
             var userIcon = _userDataRepository.GetUserIconSprite();
-            return new UserInfoView.ViewModel(userName, userIcon);
+            return new UserInfoPopup.ViewModel("", "", userName, userIcon);
         }
 
 

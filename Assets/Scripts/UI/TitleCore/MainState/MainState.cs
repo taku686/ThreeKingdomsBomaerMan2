@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using Manager;
 using Manager.DataManager;
 using Repository;
+using UI.TitleCore.UserInfoState;
 using UniRx;
 
 namespace UI.Title
@@ -20,6 +21,8 @@ namespace UI.Title
             private UserDataRepository _UserDataRepository => Owner._userDataRepository;
             private EntitledMasterDataRepository _EntitledMasterDataRepository => Owner._entitledMasterDataRepository;
             private SkyBoxManager _SkyBoxManager => Owner._skyBoxManager;
+            private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
+            private UserInfoViewModelUseCase _userInfoViewModelUseCase => Owner._userInfoViewModelUseCase;
             private CancellationTokenSource _cts;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
@@ -103,9 +106,10 @@ namespace UI.Title
 
                 _View._UserInfoButton
                     .OnClickAsObservable()
-                    .Take(1)
                     .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._UserInfoButton).ToObservable())
-                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.UserInfo); })
+                    .Select(_ => _userInfoViewModelUseCase.InAsTask())
+                    .SelectMany(viewModel => _PopupGenerateUseCase.GenerateUserInfoPopup(viewModel))
+                    .Subscribe(_ => Owner.SetActiveBlockPanel(false))
                     .AddTo(_cts.Token);
             }
 

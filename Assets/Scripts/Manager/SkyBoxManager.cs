@@ -6,9 +6,16 @@ namespace Manager
     public class SkyBoxManager : MonoBehaviour
 
     {
+        private static readonly int Rotation = Shader.PropertyToID("_Rotation");
         [SerializeField] private Material[] _skyBoxMaterials;
         [Range(0.01f, 0.1f)] public float _rotateSpeed;
         private Material _sky;
+        private const　int EarlyMorning = 0;
+        private const　int Morning = 10;
+        private const　int Noon = 20;
+        private const　int Afternoon = 30;
+        private const　int Evening = 40;
+        private const　int Night = 50;
 
         private enum DayTime
         {
@@ -28,8 +35,8 @@ namespace Manager
         private void Update()
         {
             if (_sky == null) return;
-            var rotationRepeatValue = Mathf.Repeat(_sky.GetFloat("_Rotation") + _rotateSpeed, 360f);
-            _sky.SetFloat("_Rotation", rotationRepeatValue);
+            var rotationRepeatValue = Mathf.Repeat(_sky.GetFloat(Rotation) + _rotateSpeed, 360f);
+            _sky.SetFloat(Rotation, rotationRepeatValue);
         }
 
         public void ChangeSkyBox()
@@ -39,18 +46,17 @@ namespace Manager
             RenderSettings.skybox = _sky;
         }
 
-        private int GetIndex()
+        private static int GetIndex()
         {
-            var nowHour = DateTime.Now.Hour;
-            return nowHour switch
+            var minute = DateTime.Now.Minute;
+            return minute switch
             {
-                >= 4 and < 7 => (int)DayTime.EarlyMorning,
-                >= 7 and < 10 => (int)DayTime.Morning,
-                >= 10 and < 13 => (int)DayTime.Noon,
-                >= 13 and < 16 => (int)DayTime.Afternoon,
-                >= 16 and < 19 => (int)DayTime.Evening,
-                >= 19 and < 24 => (int)DayTime.Night,
-                >= 0 and < 4 => (int)DayTime.Night,
+                >= EarlyMorning and < Morning => (int)DayTime.EarlyMorning,
+                >= Morning and < Noon => (int)DayTime.Morning,
+                >= Noon and < Afternoon => (int)DayTime.Noon,
+                >= Afternoon and < Evening => (int)DayTime.Afternoon,
+                >= Evening and < Night => (int)DayTime.Evening,
+                >= Night => (int)DayTime.Night,
                 _ => 0
             };
         }

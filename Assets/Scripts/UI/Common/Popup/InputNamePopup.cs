@@ -2,6 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using TMPro;
 using UI.Common;
+using UI.Common.Popup;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
