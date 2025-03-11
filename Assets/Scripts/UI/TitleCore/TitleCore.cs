@@ -139,7 +139,6 @@ namespace UI.Title
             _stateMachine.AddAnyTransition<MainState>((int)State.Main);
             _stateMachine.AddAnyTransition<ShopState>((int)State.Shop);
             _stateMachine.AddTransition<MainState, CharacterSelectState>((int)State.CharacterSelect);
-            _stateMachine.AddTransition<MainState, UserInfoState>((int)State.UserInfo);
             _stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)State.CharacterDetail);
             _stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)State.CharacterSelect);
             _stateMachine.AddTransition<CharacterDetailState, InventoryState>((int)State.Inventory);
