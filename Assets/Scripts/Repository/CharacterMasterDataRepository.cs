@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Common.Data;
 using Zenject;
+using Random = UnityEngine.Random;
 
 namespace Manager.DataManager
 {
@@ -34,6 +35,11 @@ namespace Manager.DataManager
         public CharacterData GetUserEquippedCharacterData()
         {
             return GetCharacterData(_userDataRepository.GetUserData().EquippedCharacterId);
+        }
+
+        public int GetRandomCharacterId()
+        {
+            return Random.Range(0, GetAllCharacterAmount());
         }
 
         public void Dispose()

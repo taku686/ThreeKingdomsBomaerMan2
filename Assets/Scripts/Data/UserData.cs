@@ -5,7 +5,6 @@ namespace Common.Data
 {
     public class UserData : IDisposable
     {
-        public Gender Gender;
         public int EquippedCharacterId;
         public string UserIconFileName;
         public int Level;
@@ -14,18 +13,17 @@ namespace Common.Data
         public bool IsTutorial;
         public int Gem;
         public int Coin;
-        public int Ticket;
         public readonly List<int> Characters = new();
         public readonly Dictionary<int, int> CharacterLevels = new();
         public readonly Dictionary<int, int> LoginBonus = new();
         public readonly Dictionary<int, int> PossessedWeapons = new();
         public readonly Dictionary<int, int> EquippedWeapons = new();
         public Dictionary<int, int> MissionProgressDatum = new();
+        public List<string> MissionDatum = new();
 
         public UserData Create()
         {
             var user = this;
-            user.Gender = Gender.Male;
             user.EquippedCharacterId = 0;
             user.Level = 1;
             user.Name = "";
@@ -35,7 +33,6 @@ namespace Common.Data
             user.Characters.Add(0);
             user.Gem = 0;
             user.Coin = 0;
-            user.Ticket = 0;
             user.CharacterLevels[0] = 1;
             user.PossessedWeapons[GameCommonData.DefaultWeaponId] = 1;
             user.EquippedWeapons[0] = GameCommonData.DefaultWeaponId;
@@ -45,6 +42,7 @@ namespace Common.Data
             }
 
             user.MissionProgressDatum = MissionProgressDatum;
+            user.MissionDatum = MissionDatum;
             return user;
         }
 
@@ -54,6 +52,7 @@ namespace Common.Data
             CharacterLevels.Clear();
             LoginBonus.Clear();
             MissionProgressDatum.Clear();
+            MissionDatum.Clear();
         }
     }
 }

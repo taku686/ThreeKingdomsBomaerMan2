@@ -7,17 +7,16 @@ namespace Manager.DataManager
 {
     public class MissionDataRepository : IDisposable
     {
-        private readonly List<MissionData> missionDatum = new();
-        public List<MissionData> MissionDatum => missionDatum;
+        public List<MissionMasterData> _MissionDatum { get; } = new();
 
-        public void AddMissionData(MissionData data)
+        public void AddMissionData(MissionMasterData masterData)
         {
-            missionDatum.Add(data);
+            _MissionDatum.Add(masterData);
         }
 
-        public MissionData GetMissionData(int index)
+        public MissionMasterData GetMissionData(int index)
         {
-            return missionDatum.FirstOrDefault(x => x.index == index);
+            return _MissionDatum.FirstOrDefault(x => x.Index == index);
         }
 
         public void Dispose()

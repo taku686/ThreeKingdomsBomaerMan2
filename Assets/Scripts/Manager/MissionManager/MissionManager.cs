@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Common.Data;
 using Manager.DataManager;
-using UnityEngine;
 using Zenject;
 
 public class MissionManager : IDisposable
@@ -21,8 +20,9 @@ public class MissionManager : IDisposable
         }
     }
 
-    public void CheckMission(int actionId)
+    public void CheckMission(GameCommonData.MissionActionId actionType, int amount, int characterId = -1, int weaponId = -1)
     {
+        var actionId = (int)actionType;
         foreach (var missionBase in _missionBases)
         {
             if (missionBase.GetActionId() != actionId)
@@ -30,36 +30,25 @@ public class MissionManager : IDisposable
                 continue;
             }
 
-            missionBase.Action();
-        }
-    }
-
-    public void CheckMission(int actionId, int characterId)
-    {
-        foreach (var missionBase in _missionBases)
-        {
-            if (missionBase.GetActionId() != actionId)
+            if (GameCommonData.IsMissionsUsingCharacter(actionId))
             {
+                missionBase.CharacterMissionAction(amount, characterId);
                 continue;
             }
 
-            missionBase.Action(characterId);
+            if (GameCommonData.IsMissionsUsingWeapon(actionId))
+            {
+                missionBase.WeaponMissionAction(amount, weaponId);
+                continue;
+            }
+
+            missionBase.Action(amount);
         }
     }
 
-    private MissionBase GenerateMissionBase(MissionData missionData, UserDataRepository userDataRepository)
+    private static MissionBase GenerateMissionBase(MissionMasterData missionMasterData, UserDataRepository userDataRepository)
     {
-        switch (missionData.action)
-        {
-            case GameCommonData.LevelUpActionId:
-                return new LevelUpMission(missionData, userDataRepository);
-            case GameCommonData.BattleCountActionId:
-                return new BattleCountMission(missionData, userDataRepository);
-            case GameCommonData.CharacterBattleActionId:
-                return new CharacterBattleMission(missionData, userDataRepository);
-            default:
-                return null;
-        }
+        return new MissionBase(missionMasterData, userDataRepository);
     }
 
     public void Dispose()

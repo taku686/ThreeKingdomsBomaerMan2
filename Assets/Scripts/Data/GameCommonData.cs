@@ -84,13 +84,8 @@ namespace Common.Data
         public const int ThreeMilliSecondsBeforeExplosion = 3000;
         public const int MaxCharacterLevel = 10;
         public const int MinCharacterLevel = 1;
-        public const int MaxMissionCount = 3;
-        public const int MaxMissionProgress = 100;
-        public const int BattleCountActionId = 0;
-        public const int LevelUpActionId = 1;
-        public const int CharacterBattleActionId = 2;
-        public const int ExceptionMissionProgress = 999;
-        public const int NetworkErrorCode = Int32.MaxValue;
+        public const int MaxMissionCount = 20;
+        public const int NetworkErrorCode = int.MaxValue;
         public const float FadeOutTime = 0.8f;
         public const int BattleTime = 180;
         public const int DefaultWeaponId = 71;
@@ -124,6 +119,63 @@ namespace Common.Data
                 4 => (int)WeaponPriceByRarity.Four,
                 5 => (int)WeaponPriceByRarity.Five,
                 _ => 0
+            };
+        }
+
+        public enum RewardType
+        {
+            Coin = 0,
+            Gem = 1,
+            Weapon = 2,
+            Character = 3,
+            Consumable = 4,
+            TreasureBox = 5,
+            None = 999
+        }
+
+        public enum MissionActionId
+        {
+            LevelUp = 0,
+            CharacterLevelUp = 1,
+            BattleCount = 2,
+            CharacterBattleCount = 3,
+            WeaponBattleCount = 4,
+            FirstWonCount = 5,
+            CharacterFirstWonCount = 6,
+            WeaponFirstWonCount = 7,
+            KillCount = 8,
+            CharacterKillCount = 9,
+            WeaponKillCount = 10,
+            DamageAmount = 11,
+            CharacterDamageAmount = 12,
+            WeaponDamageAmount = 13,
+            GachaCount = 14,
+            WeaponGachaCount = 15
+        }
+
+        public static bool IsMissionsUsingCharacter(int missionActionId)
+        {
+            return missionActionId switch
+            {
+                (int)MissionActionId.CharacterLevelUp => true,
+                (int)MissionActionId.CharacterBattleCount => true,
+                (int)MissionActionId.CharacterFirstWonCount => true,
+                (int)MissionActionId.CharacterKillCount => true,
+                (int)MissionActionId.CharacterDamageAmount => true,
+                _ => false
+            };
+        }
+
+        public static bool IsMissionsUsingWeapon(int missionActionId)
+        {
+            return missionActionId switch
+            {
+                (int)MissionActionId.WeaponBattleCount => true,
+                (int)MissionActionId.WeaponFirstWonCount => true,
+                (int)MissionActionId.WeaponKillCount => true,
+                (int)MissionActionId.WeaponDamageAmount => true,
+                (int)MissionActionId.WeaponGachaCount => true,
+                _ => false
             };
         }
 

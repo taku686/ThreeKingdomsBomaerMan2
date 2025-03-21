@@ -33,6 +33,11 @@ namespace Repository
             return _weaponDataList.Find(data => data.Id == weaponId);
         }
 
+        public int GetRandomWeaponId()
+        {
+            return UnityEngine.Random.Range(0, _weaponDataList.Count);
+        }
+
         public void Dispose()
         {
             // TODO release managed resources here

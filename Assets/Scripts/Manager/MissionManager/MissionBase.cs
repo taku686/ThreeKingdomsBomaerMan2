@@ -5,56 +5,66 @@ using UnityEngine;
 
 public class MissionBase : IDisposable
 {
-    private readonly MissionData _missionData;
-    private readonly UserDataRepository userDataRepository;
+    private readonly MissionMasterData _missionMasterData;
+    private readonly UserDataRepository _userDataRepository;
 
-    protected MissionBase(MissionData missionData, UserDataRepository userDataRepository)
+    public MissionBase(MissionMasterData missionMasterData, UserDataRepository userDataRepository)
     {
-        _missionData = missionData;
-        this.userDataRepository = userDataRepository;
+        _missionMasterData = missionMasterData;
+        _userDataRepository = userDataRepository;
     }
 
     public int GetActionId()
     {
-        return _missionData.action;
+        return _missionMasterData.Action;
     }
 
     public int GetMissionId()
     {
-        return _missionData.index;
+        return _missionMasterData.Index;
     }
 
     public int GetCharacterId()
     {
-        return _missionData.characterId;
+        return _missionMasterData.CharacterId;
     }
 
-    public virtual void Action()
+    public void Action(int amount)
     {
-        IncreaseMissionProgress();
+        IncreaseMissionProgress(amount);
     }
 
-    public virtual void Action(int characterId)
+    public void CharacterMissionAction(int amount, int characterId)
     {
-        if (_missionData.characterId != characterId)
+        if (_missionMasterData.CharacterId != characterId)
         {
             return;
         }
 
-        IncreaseMissionProgress();
+        IncreaseMissionProgress(amount);
     }
 
-    private void IncreaseMissionProgress()
+    public void WeaponMissionAction(int amount, int weaponId)
     {
-        var missionProgress = userDataRepository.GetMissionProgress(_missionData.index);
-        if (missionProgress == GameCommonData.ExceptionMissionProgress)
+        if (_missionMasterData.CharacterId != weaponId)
         {
-            Debug.Log(missionProgress);
             return;
         }
 
-        missionProgress += 1;
-        userDataRepository.SetMissionProgress(_missionData.index, missionProgress);
+        IncreaseMissionProgress(amount);
+    }
+
+    private void IncreaseMissionProgress(int amount)
+    {
+        var missionProgress = _userDataRepository.GetMissionProgress(_missionMasterData.Index);
+        if (missionProgress == -1)
+        {
+            Debug.LogError(missionProgress);
+            return;
+        }
+
+        missionProgress += amount;
+        _userDataRepository.SetMissionProgress(_missionMasterData.Index, missionProgress);
     }
 
 

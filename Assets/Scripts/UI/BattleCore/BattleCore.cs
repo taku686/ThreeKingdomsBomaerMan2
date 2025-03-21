@@ -115,23 +115,6 @@ namespace Manager.BattleManager
             return _views.FirstOrDefault(view => view._State == state);
         }
 
-        private void CheckMission(int actionId)
-        {
-            switch (actionId)
-            {
-                case GameCommonData.LevelUpActionId:
-                    _missionManager.CheckMission(GameCommonData.LevelUpActionId);
-                    break;
-                case GameCommonData.BattleCountActionId:
-                    _missionManager.CheckMission(GameCommonData.BattleCountActionId);
-                    break;
-                case GameCommonData.CharacterBattleActionId:
-                    var characterId = _userDataRepository.GetEquippedCharacterId();
-                    _missionManager.CheckMission(GameCommonData.CharacterBattleActionId, characterId);
-                    break;
-            }
-        }
-
         private void SetPlayerCore(PlayerCore player)
         {
             _playerCore = player;

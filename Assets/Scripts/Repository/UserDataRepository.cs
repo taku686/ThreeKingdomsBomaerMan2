@@ -127,16 +127,17 @@ namespace Common.Data
             return true;
         }
 
-        private void SetMissionData(int index, int progress)
+        private void SetMissionData(MissionMasterData mission, int progress)
         {
+            var index = mission.Index;
             if (_userData.MissionProgressDatum.ContainsKey(index))
             {
                 return;
             }
 
-            if (progress >= GameCommonData.MaxMissionProgress)
+            if (progress >= mission.ActionCount)
             {
-                progress = GameCommonData.MaxMissionProgress;
+                progress = mission.ActionCount;
             }
 
             _userData.MissionProgressDatum[index] = progress;
@@ -149,7 +150,7 @@ namespace Common.Data
 
         public int GetMissionProgress(int missionId)
         {
-            return _userData.MissionProgressDatum.GetValueOrDefault(missionId, GameCommonData.ExceptionMissionProgress);
+            return _userData.MissionProgressDatum.GetValueOrDefault(missionId, -1);
         }
 
         public void SetMissionProgress(int missionId, int missionProgress)
@@ -169,12 +170,34 @@ namespace Common.Data
                 return;
             }
 
-            var missionDatum = _missionDataRepository.MissionDatum;
+            var missionDatum = _missionDataRepository._MissionDatum;
             while (_userData.MissionProgressDatum.Count < GameCommonData.MaxMissionCount)
             {
                 var index = Random.Range(0, missionDatum.Count);
-                var missionIndex = missionDatum[index].index;
-                SetMissionData(missionIndex, 0);
+                var missionData = missionDatum[index];
+                var missionIndex = missionData.Index;
+                var actionId = missionData.Action;
+
+                if (_userData.MissionProgressDatum.ContainsKey(missionIndex))
+                {
+                    continue;
+                }
+
+                if (GameCommonData.IsMissionsUsingCharacter(actionId))
+                {
+                    var characterId = _characterMasterDataRepository.GetRandomCharacterId();
+                    missionData.CharacterId = characterId;
+                }
+
+                if (GameCommonData.IsMissionsUsingWeapon(actionId))
+                {
+                    var weaponId = _weaponMasterDataRepository.GetRandomWeaponId();
+                    missionData.WeaponId = weaponId;
+                }
+
+                SetMissionData(missionData, 0);
+                var json = JsonUtility.ToJson(missionData);
+                _userData.MissionDatum.Add(json);
             }
 
             await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);

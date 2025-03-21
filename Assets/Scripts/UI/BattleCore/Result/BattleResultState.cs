@@ -16,11 +16,13 @@ namespace Manager.BattleManager
 
             private BattleResultView _BattleResultView => Owner.GetView(State.Result) as BattleResultView;
             private BattleResultDataRepository _BattleResultDataRepository => Owner._battleResultDataRepository;
+            private MissionManager _MissionManager => Owner._missionManager;
+            private UserDataRepository _UserDataRepository => Owner._userDataRepository;
             private CancellationTokenSource _cts;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
             {
-                Initialize();
+                Initialize().Forget();
                 OnSubscribe();
             }
 
@@ -29,19 +31,47 @@ namespace Manager.BattleManager
                 Cancel();
             }
 
-            private void Initialize()
+            private async UniTaskVoid Initialize()
             {
                 _cts = new CancellationTokenSource();
                 var rank = _BattleResultDataRepository.GetRank();
                 _BattleResultView.ApplyView(rank);
+                await CheckMission();
                 Owner.SwitchUiObject(State.Result);
             }
 
             private void OnSubscribe()
             {
-                _BattleResultView._ClaimButtonObservable
+                _BattleResultView
+                    ._ClaimButtonObservable
                     .Subscribe(_ => { MMSceneLoadingManager.LoadScene(GameCommonData.TitleScene); })
                     .AddTo(_cts.Token);
+            }
+
+            private async UniTask CheckMission()
+            {
+                var rank = _BattleResultDataRepository.GetRank();
+                var characterId = _UserDataRepository.GetEquippedCharacterId();
+                var weaponId = _UserDataRepository.GetEquippedWeaponId(characterId);
+                //todo あとで修正が必要
+                _MissionManager.CheckMission(GameCommonData.MissionActionId.BattleCount, 1);
+                _MissionManager.CheckMission(GameCommonData.MissionActionId.CharacterBattleCount, 1, characterId, weaponId);
+                _MissionManager.CheckMission(GameCommonData.MissionActionId.WeaponBattleCount, 1, characterId, weaponId);
+                if (rank == 1)
+                {
+                    _MissionManager.CheckMission(GameCommonData.MissionActionId.FirstWonCount, 1);
+                    _MissionManager.CheckMission(GameCommonData.MissionActionId.CharacterFirstWonCount, 1, characterId, weaponId);
+                    _MissionManager.CheckMission(GameCommonData.MissionActionId.WeaponFirstWonCount, 1, characterId, weaponId);
+                }
+
+                _MissionManager.CheckMission(GameCommonData.MissionActionId.KillCount, 1);
+                _MissionManager.CheckMission(GameCommonData.MissionActionId.CharacterFirstWonCount, 1, characterId, weaponId);
+                _MissionManager.CheckMission(GameCommonData.MissionActionId.WeaponFirstWonCount, 1, characterId, weaponId);
+                _MissionManager.CheckMission(GameCommonData.MissionActionId.DamageAmount, 1);
+                _MissionManager.CheckMission(GameCommonData.MissionActionId.CharacterDamageAmount, 1, characterId, weaponId);
+                _MissionManager.CheckMission(GameCommonData.MissionActionId.WeaponDamageAmount, 1, characterId, weaponId);
+                var userData = _UserDataRepository.GetUserData();
+                await _UserDataRepository.UpdateUserData(userData);
             }
 
             private void Cancel()

@@ -202,23 +202,6 @@ namespace UI.Title
             SetActiveBlockPanel(false);
         }
 
-        private void CheckMission(int actionId)
-        {
-            switch (actionId)
-            {
-                case GameCommonData.LevelUpActionId:
-                    _missionManager.CheckMission(GameCommonData.LevelUpActionId);
-                    break;
-                case GameCommonData.BattleCountActionId:
-                    _missionManager.CheckMission(GameCommonData.BattleCountActionId);
-                    break;
-                case GameCommonData.CharacterBattleActionId:
-                    var characterId = _userDataRepository.GetEquippedCharacterId();
-                    _missionManager.CheckMission(GameCommonData.CharacterBattleActionId, characterId);
-                    break;
-            }
-        }
-
         private async UniTask SetCoinText()
         {
             var coin = await _playFabVirtualCurrencyManager.GetCoin();

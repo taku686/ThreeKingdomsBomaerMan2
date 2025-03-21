@@ -6,9 +6,9 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Manager.DataManager;
 using Manager.NetworkManager;
+using Repository;
 using UniRx;
 using UnityEngine;
-using State = StateMachine<UI.Title.TitleCore>.State;
 
 namespace UI.Title
 {
@@ -18,18 +18,20 @@ namespace UI.Title
         {
             private const string CanGet = "Get";
             private const string InProgress = "In Progress";
-            private const string ProgressBarText = " <#b3bedb>/ 100";
-            private MissionDataRepository missionDataRepository;
-            private UserDataRepository userDataRepository;
-            private CatalogDataRepository catalogDataRepository;
-            private PlayFabShopManager playFabShopManager;
-            private MissionView View => (MissionView)Owner.GetView(State.Mission);
-            private CommonView commonView;
-            private Sprite coinSprite;
-            private Sprite gemSprite;
-            private readonly Dictionary<int, MissionGrid> missionGrids = new();
-            private bool isProgress;
-            private CancellationToken token;
+            private const string ProgressBarText = " <#b3bedb>/ ";
+            private MissionDataRepository _missionDataRepository;
+            private UserDataRepository _userDataRepository;
+            private CatalogDataRepository _catalogDataRepository;
+            private PlayFabShopManager _playFabShopManager;
+            private CharacterMasterDataRepository _CharacterMasterDataRepository => Owner._characterMasterDataRepository;
+            private WeaponMasterDataRepository _WeaponMasterDataRepository => Owner._weaponMasterDataRepository;
+            private MissionView _View => (MissionView)Owner.GetView(State.Mission);
+            private CommonView _commonView;
+            private Sprite _coinSprite;
+            private Sprite _gemSprite;
+            private readonly Dictionary<int, MissionGrid> _missionGrids = new();
+            private bool _isProgress;
+            private CancellationToken _token;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -43,12 +45,12 @@ namespace UI.Title
 
             private async UniTask Initialize()
             {
-                missionDataRepository = Owner._missionDataRepository;
-                userDataRepository = Owner._userDataRepository;
-                catalogDataRepository = Owner._catalogDataRepository;
-                playFabShopManager = Owner._playFabShopManager;
-                commonView = Owner._commonView;
-                token = View.GetCancellationTokenOnDestroy();
+                _missionDataRepository = Owner._missionDataRepository;
+                _userDataRepository = Owner._userDataRepository;
+                _catalogDataRepository = Owner._catalogDataRepository;
+                _playFabShopManager = Owner._playFabShopManager;
+                _commonView = Owner._commonView;
+                _token = _View.GetCancellationTokenOnDestroy();
                 await GenerateMissionGrid();
                 InitializeButton();
                 Owner.SwitchUiObject(State.Mission, true).Forget();
@@ -56,113 +58,130 @@ namespace UI.Title
 
             private void InitializeButton()
             {
-                View.backButton.onClick.RemoveAllListeners();
-                View.backButton.OnClickAsObservable()
+                _View.backButton.onClick.RemoveAllListeners();
+                _View.backButton.OnClickAsObservable()
                     .Take(1)
                     .SelectMany(_ => OnClickBack().ToObservable())
                     .Subscribe()
-                    .AddTo(token);
+                    .AddTo(_token);
             }
 
             private async UniTask GenerateMissionGrid()
             {
                 DestroyMissionGrids();
-                coinSprite = (Sprite)await Resources.LoadAsync<Sprite>(GameCommonData.VirtualCurrencySpritePath + "coin");
-                gemSprite = (Sprite)await Resources.LoadAsync<Sprite>(GameCommonData.VirtualCurrencySpritePath + "gem");
-                var missionProgressDatum = userDataRepository.GetMissionProgressDatum();
+                _coinSprite = (Sprite)await Resources.LoadAsync<Sprite>(GameCommonData.VirtualCurrencySpritePath + "coin");
+                _gemSprite = (Sprite)await Resources.LoadAsync<Sprite>(GameCommonData.VirtualCurrencySpritePath + "gem");
+                var missionProgressDatum = _userDataRepository.GetMissionProgressDatum();
                 foreach (var data in missionProgressDatum)
                 {
-                    var missionData = missionDataRepository.GetMissionData(data.Key);
-                    var rewardData = catalogDataRepository.GetAddVirtualCurrencyItemData(missionData.rewardId);
-                    var missionGrid = Instantiate(View.missionGrid, View.gridParent);
-                    var progressValue =
-                        (int)(data.Value / (float)missionData.count * GameCommonData.MaxMissionProgress);
-                    progressValue = progressValue >= GameCommonData.MaxMissionProgress
-                        ? GameCommonData.MaxMissionProgress
-                        : progressValue;
-                    missionGrids[missionData.index] = missionGrid;
-                    missionGrid.progressSlider.maxValue = GameCommonData.MaxMissionProgress;
+                    var missionData = _missionDataRepository.GetMissionData(data.Key);
+                    var actionCount = missionData.ActionCount;
+                    var rewardData = _catalogDataRepository.GetAddVirtualCurrencyItemData(missionData.RewardId);
+                    var missionGrid = Instantiate(_View.missionGrid, _View.gridParent);
+                    var progressValue = data.Value;
+                    progressValue = progressValue >= actionCount ? actionCount : progressValue;
+                    _missionGrids[missionData.Index] = missionGrid;
+                    missionGrid.progressSlider.maxValue = actionCount;
                     missionGrid.progressSlider.value = progressValue;
-                    missionGrid.progressText.text = progressValue + ProgressBarText;
-                    missionGrid.missionText.text = missionData.explanation;
-                    missionGrid.buttonText.text =
-                        progressValue >= GameCommonData.MaxMissionProgress ? CanGet : InProgress;
-                    missionGrid.getButton.enabled = progressValue >= GameCommonData.MaxMissionProgress;
-                    missionGrid.getButton.onClick.AddListener(() =>
-                        OnClickGetMissionReward(missionData, missionGrid.getButton.gameObject));
+                    missionGrid.progressText.text = progressValue + ProgressBarText + actionCount;
+                    missionGrid.missionText.text = GetExplanationText(missionData);
+                    missionGrid.buttonText.text = progressValue >= actionCount ? CanGet : InProgress;
+                    missionGrid.getButton.enabled = progressValue >= actionCount;
+                    missionGrid.getButton.onClick.AddListener(() => OnClickGetMissionReward(missionData, missionGrid.getButton.gameObject));
                     if (rewardData == null)
                     {
                         continue;
                     }
 
                     missionGrid.rewardText.text = rewardData.price.ToString("D");
-                    missionGrid.rewardImage.sprite = rewardData.vc == GameCommonData.CoinKey ? coinSprite : gemSprite;
+                    missionGrid.rewardImage.sprite = rewardData.vc == GameCommonData.CoinKey ? _coinSprite : _gemSprite;
                 }
             }
 
-            private void OnClickGetMissionReward(MissionData missionData, GameObject button)
+            private string GetExplanationText(MissionMasterData missionData)
             {
-                if (isProgress)
+                var actionCount = missionData.ActionCount;
+                var actionId = missionData.Action;
+                var characterId = missionData.CharacterId;
+                var characterName = _CharacterMasterDataRepository.GetCharacterData(characterId).Name;
+                var weaponId = missionData.WeaponId;
+                var weaponName = _WeaponMasterDataRepository.GetWeaponData(weaponId).Name;
+                var explanation = missionData.Explanation.Replace("n", actionCount.ToString());
+                if (GameCommonData.IsMissionsUsingCharacter(actionId))
+                {
+                    explanation = explanation.Replace("x", characterName);
+                }
+
+                if (GameCommonData.IsMissionsUsingWeapon(actionId))
+                {
+                    explanation = explanation.Replace("x", weaponName);
+                }
+
+                return explanation;
+            }
+
+            private void OnClickGetMissionReward(MissionMasterData missionMasterData, GameObject button)
+            {
+                if (_isProgress)
                 {
                     return;
                 }
 
-                isProgress = true;
+                _isProgress = true;
                 Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
-                    var errorText = commonView.purchaseErrorView.errorInfoText;
-                    var rewardData = catalogDataRepository.GetAddVirtualCurrencyItemData(missionData.rewardId);
-                    await playFabShopManager.TryPurchaseItem(missionData.rewardId, GameCommonData.CoinKey, 0,
-                        errorText);
+                    var errorText = _commonView.purchaseErrorView.errorInfoText;
+                    var rewardData = _catalogDataRepository.GetAddVirtualCurrencyItemData(missionMasterData.RewardId);
+                    await _playFabShopManager.TryPurchaseItem(missionMasterData.RewardId, GameCommonData.CoinKey, 0, errorText);
                     if (rewardData == null)
                     {
-                        isProgress = false;
+                        _isProgress = false;
                         return;
                     }
 
-                    var rewardSprite = rewardData.vc == GameCommonData.CoinKey ? coinSprite : gemSprite;
+                    var rewardSprite = rewardData.vc == GameCommonData.CoinKey ? _coinSprite : _gemSprite;
                     await Owner.SetRewardUI(rewardData.price, rewardSprite);
-                    await RemoveMission(missionData.index);
+                    await RemoveMission(missionMasterData.Index);
                     await AddMission();
                     await Owner.SetGemText();
                     await Owner.SetCoinText();
-                    isProgress = false;
+                    _isProgress = false;
                 })).SetLink(button);
             }
 
             private async UniTask OnClickBack()
             {
                 Owner._stateMachine.Dispatch((int)State.Main);
-                var button = View.backButton.gameObject;
-                await Owner._uiAnimation.ClickScaleColor(button).ToUniTask(cancellationToken: token);
+                var button = _View.backButton.gameObject;
+                await Owner._uiAnimation.ClickScaleColor(button).ToUniTask(cancellationToken: _token);
             }
 
             private async UniTask RemoveMission(int missionId)
             {
-                if (!missionGrids.ContainsKey(missionId))
+                if (!_missionGrids.ContainsKey(missionId))
                 {
                     return;
                 }
 
-                Destroy(missionGrids[missionId].gameObject);
-                missionGrids.Remove(missionId);
-                await userDataRepository.RemoveMissionData(missionId);
+                Destroy(_missionGrids[missionId].gameObject);
+                _missionGrids.Remove(missionId);
+                await _userDataRepository.RemoveMissionData(missionId);
             }
 
             private async UniTask AddMission()
             {
-                await userDataRepository.AddMissionData();
+                await _userDataRepository.AddMissionData();
                 await GenerateMissionGrid();
             }
 
             private void DestroyMissionGrids()
             {
-                foreach (var missionGrid in missionGrids)
+                foreach (var missionGrid in _missionGrids)
                 {
                     Destroy(missionGrid.Value.gameObject);
                 }
 
-                missionGrids.Clear();
+                _missionGrids.Clear();
             }
         }
     }

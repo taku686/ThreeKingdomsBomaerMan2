@@ -36,18 +36,12 @@ namespace Manager.PlayFabManager
 
         public async UniTask SetTitleData(Dictionary<string, string> titleDatum)
         {
-            var characterDatum =
-                JsonConvert.DeserializeObject<CharacterData[]>(titleDatum[CharacterMasterKey]);
-            var characterLevelDatum =
-                JsonConvert.DeserializeObject<LevelMasterData[]>(titleDatum[CharacterLevelMasterKey]);
-            var missionDatum =
-                JsonConvert.DeserializeObject<MissionData[]>(titleDatum[MissionMasterKey]);
-            var skillDatum =
-                JsonConvert.DeserializeObject<SkillMasterData[]>(titleDatum[SkillMasterKey]);
-            var weaponDatum =
-                JsonConvert.DeserializeObject<WeaponMasterData[]>(titleDatum[WeaponMasterKey]);
-            var entitledDatum =
-                JsonConvert.DeserializeObject<EntitledMasterData[]>(titleDatum[EntitledMasterKey]);
+            var characterDatum = JsonConvert.DeserializeObject<CharacterData[]>(titleDatum[CharacterMasterKey]);
+            var characterLevelDatum = JsonConvert.DeserializeObject<LevelMasterData[]>(titleDatum[CharacterLevelMasterKey]);
+            var missionDatum = JsonConvert.DeserializeObject<MissionMasterData[]>(titleDatum[MissionMasterKey]);
+            var skillDatum = JsonConvert.DeserializeObject<SkillMasterData[]>(titleDatum[SkillMasterKey]);
+            var weaponDatum = JsonConvert.DeserializeObject<WeaponMasterData[]>(titleDatum[WeaponMasterKey]);
+            var entitledDatum = JsonConvert.DeserializeObject<EntitledMasterData[]>(titleDatum[EntitledMasterKey]);
             await SetCharacterData(characterDatum);
             SetCharacterLevelData(characterLevelDatum);
             SetMissionData(missionDatum);
@@ -60,12 +54,9 @@ namespace Manager.PlayFabManager
         {
             foreach (var characterData in characterDatum)
             {
-                characterData.CharacterObject =
-                    await LoadGameObject(GameCommonData.CharacterPrefabPath, characterData.CharaObj, _cts.Token);
-                characterData.SelfPortraitSprite =
-                    await LoadCharacterSprite(characterData.Id, _cts.Token);
-                characterData.ColorSprite =
-                    await LoadCharacterColor(characterData.CharaColor, _cts.Token);
+                characterData.CharacterObject = await LoadGameObject(GameCommonData.CharacterPrefabPath, characterData.CharaObj, _cts.Token);
+                characterData.SelfPortraitSprite = await LoadCharacterSprite(characterData.Id, _cts.Token);
+                characterData.ColorSprite = await LoadCharacterColor(characterData.CharaColor, _cts.Token);
                 characterData.BombLimit /= FixedValue;
                 characterData.FireRange /= FixedValue;
                 _characterMasterDataRepository.SetCharacterData(characterData);
@@ -82,8 +73,7 @@ namespace Manager.PlayFabManager
                 var sprite = await LoadSkillSprite(skillData.IconID, _cts.Token);
                 var skillType = (SkillType)skillData.SkillTypeInt;
                 var attributeType = (AttributeType)skillData.AttributeTypeInt;
-                var skillEffectType =
-                    (SkillEffectType)Enum.Parse(typeof(SkillEffectType), skillData.SkillEffectTypeString);
+                var skillEffectType = (SkillEffectType)Enum.Parse(typeof(SkillEffectType), skillData.SkillEffectTypeString);
                 var amount = skillData.Amount;
                 var range = skillData.Range;
                 var interval = skillData.Interval;
@@ -160,7 +150,7 @@ namespace Manager.PlayFabManager
             }
         }
 
-        private void SetMissionData(MissionData[] missionDatum)
+        private void SetMissionData(MissionMasterData[] missionDatum)
         {
             foreach (var missionData in missionDatum)
             {
@@ -176,8 +166,7 @@ namespace Manager.PlayFabManager
                 return null;
             }
 
-            var resource = await Resources.LoadAsync<GameObject>(path + charaObj)
-                .WithCancellation(token);
+            var resource = await Resources.LoadAsync<GameObject>(path + charaObj).WithCancellation(token);
             return (GameObject)resource;
         }
 

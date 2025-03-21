@@ -38,11 +38,6 @@ namespace Manager.NetworkManager
                 {
                     user.Gem = item.Value;
                 }
-
-                if (item.Key.Equals(GameCommonData.TicketKey))
-                {
-                    user.Ticket = item.Value;
-                }
             }
 
             _userDataRepository.SetUserData(user);

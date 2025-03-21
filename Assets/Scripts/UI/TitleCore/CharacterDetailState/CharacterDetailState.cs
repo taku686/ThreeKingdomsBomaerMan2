@@ -26,6 +26,7 @@ namespace UI.Title
             private CharacterDetailViewModelUseCase _CharacterDetailViewModelUseCase => Owner._characterDetailViewModelUseCase;
             private UserDataRepository _UserDataRepository => Owner._userDataRepository;
             private SortCharactersUseCase _SortCharactersUseCase => Owner._sortCharactersUseCase;
+            private MissionManager _MissionManager => Owner._missionManager;
             private PlayFabUserDataManager _playFabUserDataManager;
             private PlayFabShopManager _playFabShopManager;
             private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
@@ -262,7 +263,8 @@ namespace UI.Title
                     return;
                 }
 
-                Owner.CheckMission(GameCommonData.LevelUpActionId);
+                _MissionManager.CheckMission(GameCommonData.MissionActionId.LevelUp, 1);
+                _MissionManager.CheckMission(GameCommonData.MissionActionId.CharacterLevelUp, 1, selectedCharacterData.Id);
                 var userData = _UserDataRepository.GetUserData();
                 await _UserDataRepository.UpdateUserData(userData);
                 await Owner.SetCoinText();

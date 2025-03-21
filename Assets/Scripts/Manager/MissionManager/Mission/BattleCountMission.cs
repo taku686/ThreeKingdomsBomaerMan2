@@ -2,7 +2,7 @@ using Common.Data;
 
 public class BattleCountMission : MissionBase
 {
-    public BattleCountMission(MissionData missionData, UserDataRepository userDataRepository) : base(missionData,
+    public BattleCountMission(MissionMasterData missionMasterData, UserDataRepository userDataRepository) : base(missionMasterData,
         userDataRepository)
     {
     }

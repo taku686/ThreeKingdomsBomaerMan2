@@ -12,7 +12,6 @@ namespace Manager.BattleManager
     {
         public class BattleStartState : StateMachine<BattleCore>.State
         {
-            private UserDataRepository _userDataRepository;
             private BattleStartView _BattleStartView => Owner.GetView(State.BattleStart) as BattleStartView;
             private CancellationTokenSource _cts;
 
@@ -31,19 +30,9 @@ namespace Manager.BattleManager
             private void Initialize()
             {
                 _cts = new CancellationTokenSource();
-                _userDataRepository = Owner._userDataRepository;
                 _BattleStartView.gameObject.SetActive(true);
                 _BattleStartView.Initialize();
                 Owner.SwitchUiObject(State.BattleStart);
-                CheckMission().Forget();
-            }
-
-            private async UniTask CheckMission()
-            {
-                Owner.CheckMission(GameCommonData.CharacterBattleActionId);
-                Owner.CheckMission(GameCommonData.BattleCountActionId);
-                var userData = _userDataRepository.GetUserData();
-                await _userDataRepository.UpdateUserData(userData);
             }
 
             private void OnSubscribe()
