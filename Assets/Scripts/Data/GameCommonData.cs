@@ -76,6 +76,7 @@ namespace Common.Data
         public const string WeaponSpritePath = "Sprites/Weapon/";
         public const string WeaponPrefabPath = "Prefabs/Weapon/";
         public const string VirtualCurrencySpritePath = "Sprites/VirtualCurrency/";
+        public const string RewardSpritePath = "Sprites/Reward/";
         public const string LevelText = "Lv.";
         public const string TitleScene = "Title";
         public const string BattleScene = "Battle";

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Common.Data;
 using Zenject;
 using Random = UnityEngine.Random;
@@ -39,7 +40,9 @@ namespace Manager.DataManager
 
         public int GetRandomCharacterId()
         {
-            return Random.Range(0, GetAllCharacterAmount());
+            var keys = CharacterDatum.Keys.ToArray();
+            var index = Random.Range(0, keys.Length);
+            return keys[index];
         }
 
         public void Dispose()

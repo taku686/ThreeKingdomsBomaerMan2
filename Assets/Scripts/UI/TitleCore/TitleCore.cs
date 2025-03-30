@@ -26,7 +26,7 @@ namespace UI.Title
         //Repository
         [Inject] private CharacterMasterDataRepository _characterMasterDataRepository;
         [Inject] private UserDataRepository _userDataRepository;
-        [Inject] private MissionDataRepository _missionDataRepository;
+        [Inject] private MissionMasterDataRepository _missionMasterDataRepository;
         [Inject] private CatalogDataRepository _catalogDataRepository;
         [Inject] private CharacterSelectRepository _characterSelectRepository;
         [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
@@ -34,6 +34,7 @@ namespace UI.Title
         [Inject] private RewardDataRepository _rewardDataRepository;
         [Inject] private WeaponSortRepository _weaponSortRepository;
         [Inject] private EntitledMasterDataRepository _entitledMasterDataRepository;
+        [Inject] private RewardSpriteDataRepository _rewardSpriteDataRepository;
 
         //UseCase
         [Inject] private CharacterSelectViewModelUseCase _characterSelectViewModelUseCase;

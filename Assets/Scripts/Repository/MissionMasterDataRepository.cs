@@ -5,7 +5,7 @@ using Common.Data;
 
 namespace Manager.DataManager
 {
-    public class MissionDataRepository : IDisposable
+    public class MissionMasterDataRepository : IDisposable
     {
         public List<MissionMasterData> _MissionDatum { get; } = new();
 

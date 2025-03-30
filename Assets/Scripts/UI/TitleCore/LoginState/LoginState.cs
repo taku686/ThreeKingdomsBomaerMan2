@@ -51,8 +51,8 @@ namespace UI.Title
             {
                 _commonView.waitPopup.SetActive(true);
                 _PlayFabLoginManager.Initialize();
-                var loginResult = await _PlayFabLoginManager.Login().AttachExternalCancellation(_cancellationTokenSource.Token);
-
+                var result = await _PlayFabLoginManager.Login().AttachExternalCancellation(_cancellationTokenSource.Token);
+                var loginResult = result.Item1;
                 if (loginResult.Error != null)
                 {
                     _commonView.waitPopup.SetActive(false);
@@ -70,7 +70,7 @@ namespace UI.Title
 
                     checkDisplayName
                         .Where(tuple => !tuple.Item1)
-                        .SelectMany(_ => _PopupGenerateUseCase.GenerateErrorPopup("名前が不正です", "OK"))
+                        .SelectMany(_ => _PopupGenerateUseCase.GenerateErrorPopup("適切な名前を入力してください", "OK"))
                         .Subscribe(_ =>
                         {
                             Owner.SetActiveBlockPanel(false);
@@ -80,8 +80,8 @@ namespace UI.Title
 
                     checkDisplayName
                         .Where(tuple => tuple.Item1)
-                        .SelectMany(_ => _PlayFabLoginManager.Login().ToObservable())
-                        .SelectMany(response => _PlayFabLoginManager.CreateUserData(response).ToObservable())
+                        .SelectMany(tuple => _PlayFabLoginManager.Login(tuple.Item2).ToObservable())
+                        .SelectMany(tuple => _PlayFabLoginManager.CreateUserData(tuple).ToObservable())
                         .SelectMany(response => _PlayFabLoginManager.InitializeGameData(response).ToObservable())
                         .Subscribe(_ =>
                         {

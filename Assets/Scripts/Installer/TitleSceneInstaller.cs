@@ -39,6 +39,7 @@ namespace Common.Installer
             Container.Bind<RewardDataRepository>().AsCached();
             Container.Bind<AnimatorControllerRepository>().FromComponentOn(animatorControllerRepository).AsCached();
             Container.Bind<ResourceManager>().AsCached();
+            Container.Bind<RewardSpriteDataRepository>().AsCached();
 
 
             InstallCharacterSelect();

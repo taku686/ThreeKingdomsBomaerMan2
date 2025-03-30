@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Common.Data;
+using Random = UnityEngine.Random;
 
 namespace Repository
 {
@@ -35,7 +36,8 @@ namespace Repository
 
         public int GetRandomWeaponId()
         {
-            return UnityEngine.Random.Range(0, _weaponDataList.Count);
+            var index = Random.Range(0, _weaponDataList.Count);
+            return _weaponDataList[index].Id;
         }
 
         public void Dispose()

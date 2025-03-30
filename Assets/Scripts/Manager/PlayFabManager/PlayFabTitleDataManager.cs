@@ -23,7 +23,7 @@ namespace Manager.PlayFabManager
         private const string EntitledMasterKey = "EntitledMaster";
         [Inject] private CharacterMasterDataRepository _characterMasterDataRepository;
         [Inject] private LevelMasterDataRepository _levelMasterDataRepository;
-        [Inject] private MissionDataRepository _missionDataRepository;
+        [Inject] private MissionMasterDataRepository _missionMasterDataRepository;
         [Inject] private SkillMasterDataRepository _skillMasterDataRepository;
         [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
         [Inject] private EntitledMasterDataRepository _entitledMasterDataRepository;
@@ -154,7 +154,7 @@ namespace Manager.PlayFabManager
         {
             foreach (var missionData in missionDatum)
             {
-                _missionDataRepository.AddMissionData(missionData);
+                _missionMasterDataRepository.AddMissionData(missionData);
             }
         }
 

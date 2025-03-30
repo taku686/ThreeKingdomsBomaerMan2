@@ -6,12 +6,10 @@ namespace Common.Data
     {
         public int Index;
         public string Explanation;
-        public string RewardId;
-        public string RewardAmount;
+        public int RewardId;
+        public int RewardAmount;
         public int Action;
         public int ActionCount;
-        public int CharacterId;
-        public int WeaponId;
 
         public void Dispose()
         {

@@ -5,6 +5,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Manager.DataManager;
 using Manager.NetworkManager;
+using Newtonsoft.Json;
 using Repository;
 using UnityEngine;
 using Zenject;
@@ -19,17 +20,16 @@ namespace Common.Data
         private CancellationTokenSource _cancellationTokenSource;
         [Inject] private CharacterMasterDataRepository _characterMasterDataRepository;
         [Inject] private LevelMasterDataRepository _levelMasterDataRepository;
-        [Inject] private MissionDataRepository _missionDataRepository;
+        [Inject] private MissionMasterDataRepository _missionMasterDataRepository;
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
 
-        public async UniTask Initialize(UserData data, string userName, Sprite userIcon)
+        public void Initialize(UserData data, string userName, Sprite userIcon)
         {
             _cancellationTokenSource = new CancellationTokenSource();
             SetUserData(data);
             _userData.Name = userName;
             _userIconSprite = userIcon;
-            await AddMissionData();
         }
 
         public Sprite GetUserIconSprite()
@@ -127,58 +127,84 @@ namespace Common.Data
             return true;
         }
 
-        private void SetMissionData(MissionMasterData mission, int progress)
+        private void SetMissionData(KeyValuePair<int, UserData.MissionData> mission, int progress)
         {
-            var index = mission.Index;
-            if (_userData.MissionProgressDatum.ContainsKey(index))
+            var index = mission.Key;
+            var masterData = _missionMasterDataRepository.GetMissionData(index);
+            if (_userData.MissionDatum.ContainsKey(index))
             {
                 return;
             }
 
-            if (progress >= mission.ActionCount)
+            if (progress >= masterData.ActionCount)
             {
-                progress = mission.ActionCount;
+                progress = masterData.ActionCount;
             }
 
-            _userData.MissionProgressDatum[index] = progress;
+            mission.Value._progress = progress;
+            var json = JsonConvert.SerializeObject(mission.Value);
+            _userData.MissionDatum[index] = json;
         }
 
-        public Dictionary<int, int> GetMissionProgressDatum()
+        public Dictionary<int, UserData.MissionData> GetMissionDatum()
         {
-            return _userData.MissionProgressDatum;
+            var result = new Dictionary<int, UserData.MissionData>();
+            foreach (var mission in _userData.MissionDatum)
+            {
+                var missionData = JsonConvert.DeserializeObject<UserData.MissionData>(mission.Value);
+                result.Add(mission.Key, missionData);
+            }
+
+            return result;
         }
 
         public int GetMissionProgress(int missionId)
         {
-            return _userData.MissionProgressDatum.GetValueOrDefault(missionId, -1);
+            if (!_userData.MissionDatum.TryGetValue(missionId, out var value))
+            {
+                return -1;
+            }
+
+            var missionData = JsonConvert.DeserializeObject<UserData.MissionData>(value);
+            return missionData._progress;
         }
 
         public void SetMissionProgress(int missionId, int missionProgress)
         {
-            if (!_userData.MissionProgressDatum.ContainsKey(missionId))
+            if (!_userData.MissionDatum.TryGetValue(missionId, out var value))
             {
                 return;
             }
 
-            _userData.MissionProgressDatum[missionId] = missionProgress;
+            var missionData = JsonConvert.DeserializeObject<UserData.MissionData>(value);
+            missionData._progress = missionProgress;
+            var json = JsonConvert.SerializeObject(missionData);
+            _userData.MissionDatum[missionId] = json;
         }
 
         public async UniTask AddMissionData()
         {
-            if (_userData.MissionProgressDatum.Count >= GameCommonData.MaxMissionCount)
+            if (_userData == null)
             {
                 return;
             }
 
-            var missionDatum = _missionDataRepository._MissionDatum;
-            while (_userData.MissionProgressDatum.Count < GameCommonData.MaxMissionCount)
+            var missionDatum = _userData.MissionDatum ?? new Dictionary<int, string>();
+            var masterDatum = _missionMasterDataRepository._MissionDatum;
+            if (missionDatum.Count >= GameCommonData.MaxMissionCount)
             {
-                var index = Random.Range(0, missionDatum.Count);
-                var missionData = missionDatum[index];
-                var missionIndex = missionData.Index;
-                var actionId = missionData.Action;
+                return;
+            }
 
-                if (_userData.MissionProgressDatum.ContainsKey(missionIndex))
+            while (missionDatum.Count < GameCommonData.MaxMissionCount)
+            {
+                var index = Random.Range(0, masterDatum.Count);
+                var masterData = masterDatum[index];
+                var missionIndex = masterData.Index;
+                var actionId = masterData.Action;
+                var missionData = _userData.CreateMissionData();
+
+                if (_userData.MissionDatum.ContainsKey(missionIndex))
                 {
                     continue;
                 }
@@ -186,18 +212,19 @@ namespace Common.Data
                 if (GameCommonData.IsMissionsUsingCharacter(actionId))
                 {
                     var characterId = _characterMasterDataRepository.GetRandomCharacterId();
-                    missionData.CharacterId = characterId;
+                    missionData._characterId = characterId;
                 }
 
                 if (GameCommonData.IsMissionsUsingWeapon(actionId))
                 {
                     var weaponId = _weaponMasterDataRepository.GetRandomWeaponId();
-                    missionData.WeaponId = weaponId;
+                    missionData._weaponId = weaponId;
                 }
 
-                SetMissionData(missionData, 0);
-                var json = JsonUtility.ToJson(missionData);
-                _userData.MissionDatum.Add(json);
+                var keyValuePair = new KeyValuePair<int, UserData.MissionData>(missionIndex, missionData);
+                SetMissionData(keyValuePair, 0);
+                var json = JsonConvert.SerializeObject(missionData);
+                _userData.MissionDatum[missionIndex] = json;
             }
 
             await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
@@ -205,12 +232,12 @@ namespace Common.Data
 
         public async UniTask RemoveMissionData(int missionId)
         {
-            if (!_userData.MissionProgressDatum.ContainsKey(missionId))
+            if (!_userData.MissionDatum.ContainsKey(missionId))
             {
                 return;
             }
 
-            _userData.MissionProgressDatum.Remove(missionId);
+            _userData.MissionDatum.Remove(missionId);
             await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
         }
 

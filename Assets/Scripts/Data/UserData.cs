@@ -18,8 +18,25 @@ namespace Common.Data
         public readonly Dictionary<int, int> LoginBonus = new();
         public readonly Dictionary<int, int> PossessedWeapons = new();
         public readonly Dictionary<int, int> EquippedWeapons = new();
-        public Dictionary<int, int> MissionProgressDatum = new();
-        public List<string> MissionDatum = new();
+        public Dictionary<int, string> MissionDatum = new();
+
+        [Serializable]
+        public class MissionData
+        {
+            public int _progress;
+            public int _characterId;
+            public int _weaponId;
+        }
+
+        public MissionData CreateMissionData()
+        {
+            return new MissionData
+            {
+                _progress = 0,
+                _characterId = 0,
+                _weaponId = 0
+            };
+        }
 
         public UserData Create()
         {
@@ -41,8 +58,7 @@ namespace Common.Data
                 user.LoginBonus[i] = (int)LoginBonusStatus.Disable;
             }
 
-            user.MissionProgressDatum = MissionProgressDatum;
-            user.MissionDatum = MissionDatum;
+            user.MissionDatum = new Dictionary<int, string>();
             return user;
         }
 
@@ -51,7 +67,6 @@ namespace Common.Data
             Characters.Clear();
             CharacterLevels.Clear();
             LoginBonus.Clear();
-            MissionProgressDatum.Clear();
             MissionDatum.Clear();
         }
     }
