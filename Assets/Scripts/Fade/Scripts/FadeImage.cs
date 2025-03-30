@@ -30,7 +30,7 @@ public class FadeImage : UnityEngine.UI.Graphic, IFade
     private readonly Gradient gradient = new();
     [SerializeField, Range(0, 1)] private float cutoutRange;
     [SerializeField] private List<Color> colorList = new();
-    [SerializeField] private List<Texture> maskTextureList = new();
+    [SerializeField] private List<Texture> _maskTextureList = new();
     private static readonly int Range1 = Shader.PropertyToID("_Range");
     private static readonly int Color1 = Shader.PropertyToID("_Color");
     private static readonly int MaskTex = Shader.PropertyToID("_MaskTex");
@@ -102,15 +102,15 @@ public class FadeImage : UnityEngine.UI.Graphic, IFade
 
     public void SetRandomMaskTexture()
     {
-        var index = Random.Range(0, maskTextureList.Count);
-        maskTexture = maskTextureList[index];
+        var index = Random.Range(0, _maskTextureList.Count);
+        maskTexture = _maskTextureList[index];
         ProjectCommonData.Instance.maskTextureIndex = index;
         UpdateMaskTexture(maskTexture);
     }
 
     public void SetMaskTexture(int index)
     {
-        maskTexture = maskTextureList[index];
+        maskTexture = _maskTextureList[index];
         UpdateMaskTexture(maskTexture);
     }
 }
