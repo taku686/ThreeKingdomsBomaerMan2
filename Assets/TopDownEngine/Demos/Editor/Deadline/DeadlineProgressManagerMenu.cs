@@ -10,7 +10,7 @@ namespace MoreMountains.TopDownEngine
 		/// </summary>
 		private static void ResetProgress()
 		{
-			DeadlineProgressManager.Instance.ResetProgress ();
+	//		DeadlineProgressManager.Instance.ResetProgress ();
 		}
 	}
 }

@@ -1,32 +1,32 @@
 using System;
+using System.Collections.Generic;
 using Common.Data;
+using Manager.DataManager;
 using UnityEngine;
 
 
 public class MissionBase : IDisposable
 {
-    private readonly MissionMasterData _missionMasterData;
+    private readonly KeyValuePair<int, UserData.MissionData> _missionData;
     private readonly UserDataRepository _userDataRepository;
+    private readonly MissionMasterDataRepository _missionMasterDataRepository;
 
-    public MissionBase(MissionMasterData missionMasterData, UserDataRepository userDataRepository)
+    public MissionBase
+    (
+        KeyValuePair<int, UserData.MissionData> missionData,
+        UserDataRepository userDataRepository,
+        MissionMasterDataRepository missionMasterDataRepository
+    )
     {
-        _missionMasterData = missionMasterData;
+        _missionData = missionData;
         _userDataRepository = userDataRepository;
+        _missionMasterDataRepository = missionMasterDataRepository;
     }
 
-    public int GetActionId()
+    public int GetAction()
     {
-        return _missionMasterData.Action;
-    }
-
-    public int GetMissionId()
-    {
-        return _missionMasterData.Index;
-    }
-
-    public int GetCharacterId()
-    {
-        return _missionMasterData.CharacterId;
+        var masterData = _missionMasterDataRepository.GetMissionData(_missionData.Key);
+        return masterData.Action;
     }
 
     public void Action(int amount)
@@ -36,7 +36,7 @@ public class MissionBase : IDisposable
 
     public void CharacterMissionAction(int amount, int characterId)
     {
-        if (_missionMasterData.CharacterId != characterId)
+        if (_missionData.Value._characterId != characterId)
         {
             return;
         }
@@ -46,7 +46,7 @@ public class MissionBase : IDisposable
 
     public void WeaponMissionAction(int amount, int weaponId)
     {
-        if (_missionMasterData.CharacterId != weaponId)
+        if (_missionData.Value._weaponId != weaponId)
         {
             return;
         }
@@ -56,7 +56,7 @@ public class MissionBase : IDisposable
 
     private void IncreaseMissionProgress(int amount)
     {
-        var missionProgress = _userDataRepository.GetMissionProgress(_missionMasterData.Index);
+        var missionProgress = _userDataRepository.GetMissionProgress(_missionData.Key);
         if (missionProgress == -1)
         {
             Debug.LogError(missionProgress);
@@ -64,7 +64,7 @@ public class MissionBase : IDisposable
         }
 
         missionProgress += amount;
-        _userDataRepository.SetMissionProgress(_missionMasterData.Index, missionProgress);
+        _userDataRepository.SetMissionProgress(_missionData.Key, missionProgress);
     }
 
 

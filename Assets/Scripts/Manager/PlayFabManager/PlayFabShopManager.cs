@@ -186,25 +186,24 @@ namespace Manager.NetworkManager
 
             foreach (var item in result.Result.Items)
             {
-                if (item.ItemClass.Equals(GameCommonData.LoginBonusClassKey))
+                if (!item.ItemClass.Equals(GameCommonData.LoginBonusClassKey)) continue;
+                var itemName = item.ItemId;
+                var loginBonusItemData = _catalogDataRepository.GetAddVirtualCurrencyItemData(itemName);
+                if (loginBonusItemData == null)
                 {
-                    var loginBonusItemData = _catalogDataRepository.GetAddVirtualCurrencyItemData(item.ItemId);
-                    if (loginBonusItemData == null)
-                    {
-                        return false;
-                    }
+                    return false;
+                }
 
-                    if (loginBonusItemData.vc == GameCommonData.CoinKey)
-                    {
-                        rewardView.rewardImage.sprite = _coinSprite;
-                        rewardView.rewardText.text = loginBonusItemData.price.ToString("D");
-                    }
+                if (loginBonusItemData.vc == GameCommonData.CoinKey)
+                {
+                    rewardView.rewardImage.sprite = _coinSprite;
+                    rewardView.rewardText.text = loginBonusItemData.price.ToString("D");
+                }
 
-                    if (loginBonusItemData.vc == GameCommonData.GemKey)
-                    {
-                        rewardView.rewardImage.sprite = _gemSprite;
-                        rewardView.rewardText.text = loginBonusItemData.price.ToString("D");
-                    }
+                if (loginBonusItemData.vc == GameCommonData.GemKey)
+                {
+                    rewardView.rewardImage.sprite = _gemSprite;
+                    rewardView.rewardText.text = loginBonusItemData.price.ToString("D");
                 }
             }
 
@@ -229,7 +228,7 @@ namespace Manager.NetworkManager
                     errorText.text = result.Error.ErrorMessage;
                 }
 
-                Debug.Log(result.Error.GenerateErrorReport());
+                Debug.LogError(result.Error.GenerateErrorReport());
                 return false;
             }
 

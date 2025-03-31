@@ -7,15 +7,14 @@ using Zenject;
 public class MissionManager : IDisposable
 {
     [Inject] private UserDataRepository _userDataRepository;
-    [Inject] private MissionDataRepository _missionDataRepository;
+    [Inject] private MissionMasterDataRepository _missionMasterDataRepository;
     private readonly List<MissionBase> _missionBases = new();
 
     public void Initialize()
     {
-        foreach (var mission in _userDataRepository.GetMissionProgressDatum())
+        foreach (var mission in _userDataRepository.GetMissionDatum())
         {
-            var missionData = _missionDataRepository.GetMissionData(mission.Key);
-            var missionBase = GenerateMissionBase(missionData, _userDataRepository);
+            var missionBase = new MissionBase(mission, _userDataRepository, _missionMasterDataRepository);
             _missionBases.Add(missionBase);
         }
     }
@@ -25,7 +24,7 @@ public class MissionManager : IDisposable
         var actionId = (int)actionType;
         foreach (var missionBase in _missionBases)
         {
-            if (missionBase.GetActionId() != actionId)
+            if (missionBase.GetAction() != actionId)
             {
                 continue;
             }
@@ -44,11 +43,6 @@ public class MissionManager : IDisposable
 
             missionBase.Action(amount);
         }
-    }
-
-    private static MissionBase GenerateMissionBase(MissionMasterData missionMasterData, UserDataRepository userDataRepository)
-    {
-        return new MissionBase(missionMasterData, userDataRepository);
     }
 
     public void Dispose()

@@ -9,6 +9,7 @@ using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine;
 using Newtonsoft.Json;
+using Repository;
 using Zenject;
 
 namespace Assets.Scripts.Common.PlayFab
@@ -25,6 +26,7 @@ namespace Assets.Scripts.Common.PlayFab
         [Inject] private PlayFabTitleDataManager _playFabTitleDataManager;
         [Inject] private MissionManager _missionManager;
         [Inject] private Manager.ResourceManager.ResourceManager _resourceManager;
+        [Inject] private RewardSpriteDataRepository _rewardSpriteDataRepository;
 
         private GetPlayerCombinedInfoRequestParams _info;
         public bool _haveLoginBonus;
@@ -45,7 +47,7 @@ namespace Assets.Scripts.Common.PlayFab
             };
         }
 
-        public async UniTask<PlayFabResult<LoginResult>> Login()
+        public async UniTask<(PlayFabResult<LoginResult>, string)> Login(string userName = "")
         {
             var request = new LoginWithAndroidDeviceIDRequest
             {
@@ -53,7 +55,7 @@ namespace Assets.Scripts.Common.PlayFab
                 InfoRequestParameters = _info,
                 AndroidDeviceId = SystemInfo.deviceUniqueIdentifier,
             };
-            return await PlayFabClientAPI.LoginWithAndroidDeviceIDAsync(request);
+            return (await PlayFabClientAPI.LoginWithAndroidDeviceIDAsync(request), userName);
         }
 
 
@@ -62,6 +64,8 @@ namespace Assets.Scripts.Common.PlayFab
             await _playFabCatalogManager.Initialize();
             await _playFabShopManager.InitializePurchasing();
             await _playFabTitleDataManager.SetTitleData(response.Result.InfoResultPayload.TitleData);
+            await _userDataRepository.AddMissionData();
+            await _rewardSpriteDataRepository.Initialize();
             if (!response.Result.InfoResultPayload.UserData.TryGetValue(GameCommonData.UserKey, value: out var value))
             {
                 return false;
@@ -73,17 +77,20 @@ namespace Assets.Scripts.Common.PlayFab
             var userName = response.Result.InfoResultPayload.AccountInfo.TitleInfo.DisplayName;
             var userIcon = await _resourceManager.LoadUserIconSprite(user.UserIconFileName);
             await _playFabUserDataManager.TryUpdateUserDataAsync(user);
-            await _userDataRepository.Initialize(user, userName, userIcon);
+            _userDataRepository.Initialize(user, userName, userIcon);
             _missionManager.Initialize();
+            await _userDataRepository.AddMissionData();
             return true;
         }
 
-        public async UniTask<PlayFabResult<LoginResult>> CreateUserData(PlayFabResult<LoginResult> loginResult)
+        public async UniTask<PlayFabResult<LoginResult>> CreateUserData((PlayFabResult<LoginResult>, string) tuple)
         {
             var userData = new UserData().Create();
-            _userDataRepository.SetUserData(userData);
+            var userName = tuple.Item2;
+            var userIcon = await _resourceManager.LoadUserIconSprite(userData.UserIconFileName);
+            _userDataRepository.Initialize(userData, userName, userIcon);
             await _playFabUserDataManager.TryUpdateUserDataAsync(userData).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
-            return loginResult;
+            return tuple.Item1;
         }
 
         private async UniTask SetLoginBonus(DateTime lastLoginDate)
