@@ -34,7 +34,7 @@ namespace UI.Title
         [Inject] private RewardDataRepository _rewardDataRepository;
         [Inject] private WeaponSortRepository _weaponSortRepository;
         [Inject] private EntitledMasterDataRepository _entitledMasterDataRepository;
-        [Inject] private RewardSpriteDataRepository _rewardSpriteDataRepository;
+        [Inject] private MissionSpriteDataRepository _missionSpriteDataRepository;
 
         //UseCase
         [Inject] private CharacterSelectViewModelUseCase _characterSelectViewModelUseCase;
@@ -118,6 +118,7 @@ namespace UI.Title
             _fade.InitializeInSceneTransition(1, ProjectCommonData.Instance.isSceneTransition);
             var view = (MainView)GetView(State.Main);
             view.SetBackgroundEffect(false);
+            _missionSpriteDataRepository.Initialize().Forget();
             _commonView.Initialize();
             InitializeState();
             InitializeButton();

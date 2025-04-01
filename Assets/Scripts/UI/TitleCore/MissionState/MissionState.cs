@@ -25,7 +25,7 @@ namespace UI.Title
             private WeaponMasterDataRepository _WeaponMasterDataRepository => Owner._weaponMasterDataRepository;
             private MissionView _View => (MissionView)Owner.GetView(State.Mission);
             private CommonView _CommonView => Owner._commonView;
-            private RewardSpriteDataRepository _RewardSpriteDataRepository => Owner._rewardSpriteDataRepository;
+            private MissionSpriteDataRepository _MissionSpriteDataRepository => Owner._missionSpriteDataRepository;
 
             private readonly Dictionary<int, MissionGrid> _missionGrids = new();
             private bool _isProgress;
@@ -66,12 +66,14 @@ namespace UI.Title
                 foreach (var (index, missionData) in missionDatum)
                 {
                     var masterData = _MissionMasterDataRepository.GetMissionData(index);
+                    var actionId = (GameCommonData.MissionActionId)masterData.Action;
                     var actionCount = masterData.ActionCount;
                     var rewardId = masterData.RewardId;
                     var missionGrid = Instantiate(_View.missionGrid, _View.gridParent);
                     var progress = missionData._progress;
                     progress = progress >= actionCount ? actionCount : progress;
                     _missionGrids[masterData.Index] = missionGrid;
+                    missionGrid.missionImage.sprite = _MissionSpriteDataRepository.GetActionSprite(actionId);
                     missionGrid.progressSlider.maxValue = actionCount;
                     missionGrid.progressSlider.value = progress;
                     missionGrid.progressText.text = progress + ProgressBarText + actionCount;
@@ -80,7 +82,7 @@ namespace UI.Title
                     missionGrid.getButton.enabled = progress >= actionCount;
                     missionGrid.getButton.onClick.AddListener(() => OnClickGetMissionReward(masterData, missionGrid.getButton.gameObject));
                     missionGrid.rewardText.text = masterData.RewardAmount.ToString("D");
-                    missionGrid.rewardImage.sprite = _RewardSpriteDataRepository.GetRewardSprite((GameCommonData.RewardType)rewardId);
+                    missionGrid.rewardImage.sprite = _MissionSpriteDataRepository.GetRewardSprite((GameCommonData.RewardType)rewardId);
                 }
             }
 
@@ -126,7 +128,7 @@ namespace UI.Title
                         return;
                     }
 
-                    var rewardSprite = _RewardSpriteDataRepository.GetRewardSprite((GameCommonData.RewardType)missionMasterData.RewardId);
+                    var rewardSprite = _MissionSpriteDataRepository.GetRewardSprite((GameCommonData.RewardType)missionMasterData.RewardId);
                     await Owner.SetRewardUI(rewardData.price, rewardSprite);
                     await RemoveMission(missionMasterData.Index);
                     await AddMission();
