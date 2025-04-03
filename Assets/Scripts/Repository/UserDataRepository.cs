@@ -241,11 +241,11 @@ namespace Common.Data
             await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
         }
 
-        public async UniTask<bool> AddCharacterData(int characterId)
+        public UserData AddCharacterData(int characterId)
         {
             if (_userData.Characters.Contains(characterId))
             {
-                return false;
+                return _userData;
             }
 
             var data = GetUserData();
@@ -253,8 +253,7 @@ namespace Common.Data
             data.CharacterLevels[characterId] = 1;
             data.EquippedWeapons[characterId] = GameCommonData.DefaultWeaponId;
             SetUserData(data);
-            var result = await _playFabUserDataManager.TryUpdateUserDataAsync(data);
-            return result;
+            return _userData;
         }
 
         public int GetAvailableCharacterAmount()

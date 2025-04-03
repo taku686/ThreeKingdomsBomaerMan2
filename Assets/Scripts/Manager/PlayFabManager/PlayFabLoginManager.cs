@@ -26,7 +26,7 @@ namespace Assets.Scripts.Common.PlayFab
         [Inject] private PlayFabTitleDataManager _playFabTitleDataManager;
         [Inject] private MissionManager _missionManager;
         [Inject] private Manager.ResourceManager.ResourceManager _resourceManager;
-        [Inject] private RewardSpriteDataRepository _rewardSpriteDataRepository;
+        [Inject] private MissionSpriteDataRepository _missionSpriteDataRepository;
 
         private GetPlayerCombinedInfoRequestParams _info;
         public bool _haveLoginBonus;
@@ -65,7 +65,6 @@ namespace Assets.Scripts.Common.PlayFab
             await _playFabShopManager.InitializePurchasing();
             await _playFabTitleDataManager.SetTitleData(response.Result.InfoResultPayload.TitleData);
             await _userDataRepository.AddMissionData();
-            await _rewardSpriteDataRepository.Initialize();
             if (!response.Result.InfoResultPayload.UserData.TryGetValue(GameCommonData.UserKey, value: out var value))
             {
                 return false;

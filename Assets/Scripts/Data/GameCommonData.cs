@@ -77,6 +77,7 @@ namespace Common.Data
         public const string WeaponPrefabPath = "Prefabs/Weapon/";
         public const string VirtualCurrencySpritePath = "Sprites/VirtualCurrency/";
         public const string RewardSpritePath = "Sprites/Reward/";
+        public const string MissionActionPath = "Sprites/MissionAction/";
         public const string LevelText = "Lv.";
         public const string TitleScene = "Title";
         public const string BattleScene = "Battle";
@@ -133,6 +134,41 @@ namespace Common.Data
             TreasureBox = 5,
             None = 999
         }
+        
+        public enum MissionType
+        {
+            LevelUp = 0,
+            BattleCount = 1,
+            WonCount = 2,
+            KillCount = 3,
+            DamageAmount = 4,
+            Gacha = 5,
+            None = 999
+        }
+        
+        public static MissionType TranslateMissionType(MissionActionId actionId)
+        {
+            return actionId switch
+            {
+                MissionActionId.LevelUp => MissionType.LevelUp,
+                MissionActionId.CharacterLevelUp => MissionType.LevelUp,
+                MissionActionId.BattleCount => MissionType.BattleCount,
+                MissionActionId.CharacterBattleCount => MissionType.BattleCount,
+                MissionActionId.WeaponBattleCount => MissionType.BattleCount,
+                MissionActionId.FirstWonCount => MissionType.WonCount,
+                MissionActionId.CharacterFirstWonCount => MissionType.WonCount,
+                MissionActionId.WeaponFirstWonCount => MissionType.WonCount,
+                MissionActionId.KillCount => MissionType.KillCount,
+                MissionActionId.CharacterKillCount => MissionType.KillCount,
+                MissionActionId.WeaponKillCount => MissionType.KillCount,
+                MissionActionId.DamageAmount => MissionType.DamageAmount,
+                MissionActionId.CharacterDamageAmount => MissionType.DamageAmount,
+                MissionActionId.WeaponDamageAmount => MissionType.DamageAmount,
+                MissionActionId.GachaCount => MissionType.Gacha,
+                MissionActionId.WeaponGachaCount => MissionType.Gacha,
+                _ => MissionType.None
+            };
+        }
 
         public enum MissionActionId
         {
@@ -175,7 +211,6 @@ namespace Common.Data
                 (int)MissionActionId.WeaponFirstWonCount => true,
                 (int)MissionActionId.WeaponKillCount => true,
                 (int)MissionActionId.WeaponDamageAmount => true,
-                (int)MissionActionId.WeaponGachaCount => true,
                 _ => false
             };
         }

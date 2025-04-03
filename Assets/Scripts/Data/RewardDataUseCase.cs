@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Common.Data;
 using Manager.DataManager;
 using PUROPORO;
 using Repository;
@@ -24,14 +25,14 @@ namespace UI.Title
             _weaponMasterDataRepository = weaponMasterDataRepository;
         }
 
-        public IReadOnlyCollection<RewardData> InAsTask((int, RewardData.RewardType)[] rewards)
+        public IReadOnlyCollection<RewardData> InAsTask((int, GameCommonData.RewardType)[] rewards)
         {
             var rewardDataList = new List<RewardData>();
             foreach (var (rewardId, rewardType) in rewards)
             {
                 switch (rewardType)
                 {
-                    case RewardData.RewardType.Character:
+                    case GameCommonData.RewardType.Character:
                         var characterData = _characterMasterDataRepository.GetCharacterData(rewardId);
                         var characterReward = new RewardData
                         (
@@ -42,7 +43,7 @@ namespace UI.Title
                         );
                         rewardDataList.Add(characterReward);
                         break;
-                    case RewardData.RewardType.Weapon:
+                    case GameCommonData.RewardType.Weapon:
                         var weaponData = _weaponMasterDataRepository.GetWeaponData(rewardId);
                         var weaponReward = new RewardData
                         (
@@ -102,12 +103,6 @@ namespace UI.Title
                 _Icon = icon;
                 _Name = name;
                 _Rarity = rarity;
-            }
-
-            public enum RewardType
-            {
-                Character,
-                Weapon
             }
 
             public void Dispose()

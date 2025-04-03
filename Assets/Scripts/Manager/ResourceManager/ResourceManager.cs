@@ -66,6 +66,14 @@ namespace Manager.ResourceManager
             var resource = await Resources.LoadAsync<Sprite>(GameCommonData.RewardSpritePath + (int)rewardType)
                 .WithCancellation(token);
             return (Sprite)resource;
+        } 
+        
+        public async UniTask<Sprite> LoadMissionActionSprite(GameCommonData.MissionActionId actionId, CancellationToken token)
+        {
+            var missionType = GameCommonData.TranslateMissionType(actionId); 
+            var resource = await Resources.LoadAsync<Sprite>(GameCommonData.MissionActionPath + (int)missionType)
+                .WithCancellation(token);
+            return (Sprite)resource;
         }
 
         public void Dispose()

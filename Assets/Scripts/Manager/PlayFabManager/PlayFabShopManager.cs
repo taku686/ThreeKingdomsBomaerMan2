@@ -95,7 +95,8 @@ namespace Manager.NetworkManager
                     var index = int.Parse(item.ItemId);
                     var characterData = _characterMasterDataRepository.GetCharacterData(index);
                     rewardView.rewardImage.sprite = characterData.SelfPortraitSprite;
-                    await _userDataRepository.AddCharacterData(index);
+                    var userData = _userDataRepository.AddCharacterData(index);
+                    await _playFabUserDataManager.TryUpdateUserDataAsync(userData);
                 }
 
                 if (item.ItemClass.Equals(GameCommonData.LoginBonusClassKey))
@@ -142,7 +143,22 @@ namespace Manager.NetworkManager
             }
 
             await _playFabVirtualCurrencyManager.SetVirtualCurrency();
-            var result2 = await _userDataRepository.AddCharacterData(characterId);
+            var userData = _userDataRepository.AddCharacterData(characterId);
+            var result2 = await _playFabUserDataManager.TryUpdateUserDataAsync(userData);
+            return result2;
+        }
+
+        public async UniTask<bool> TryPurchaseRandomCharacters(int createCount)
+        {
+            var characterMasterDatum = _characterMasterDataRepository.GetAllCharacterData().ToArray();
+            for (var i = 0; i < createCount; i++)
+            {
+                var characterId = characterMasterDatum[UnityEngine.Random.Range(0, characterMasterDatum.Length)].Id;
+                _userDataRepository.AddCharacterData(characterId);
+            }
+
+            await _playFabVirtualCurrencyManager.SetVirtualCurrency();
+            var result2 = await _playFabUserDataManager.TryUpdateUserDataAsync();
             return result2;
         }
 
@@ -211,8 +227,13 @@ namespace Manager.NetworkManager
             return true;
         }
 
-        public async UniTask<bool> TryPurchaseItem(string itemId, string virtualCurrencyKey, int price,
-            TextMeshProUGUI errorText)
+        public async UniTask<bool> TryPurchaseItem
+        (
+            string itemId,
+            string virtualCurrencyKey,
+            int price,
+            TextMeshProUGUI errorText
+        )
         {
             var request = new PurchaseItemRequest
             {
@@ -371,15 +392,8 @@ namespace Manager.NetworkManager
             return weaponIds["result"];
         }*/
 
-        public async UniTask<(bool, IReadOnlyList<int>)> AddRandomWeaponAsync(int createCount)
+        public async UniTask<(bool, IReadOnlyList<int>)> AddRandomWeaponAsync(int createCount, int cost)
         {
-            var cost = createCount * GameCommonData.WeaponBuyPrice;
-            var userData = _userDataRepository.GetUserData();
-            if (userData.Gem < cost)
-            {
-                return (true, null);
-            }
-
             var weaponMasterDatum = _weaponMasterDataRepository.GetAllWeaponData().ToArray();
             var result = new List<int>();
             for (var i = 0; i < createCount; i++)
