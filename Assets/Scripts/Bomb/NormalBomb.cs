@@ -38,8 +38,8 @@ namespace Bomb
             var index = (int)direction;
             BombRenderer.enabled = false;
             BoxColliderComponent.enabled = false;
-            var isHit = TryGetObstacles(base.fireRange, dir, startPos, ObstaclesLayerMask, out var hit);
-            var fireRange = isHit ? CalculateFireRange(hit, startPos) : base.fireRange;
+            var isHit = TryGetObstacles(_fireRange, dir, startPos, ObstaclesLayerMask, out var hit);
+            var fireRange = isHit ? CalculateFireRange(hit, startPos) : _fireRange;
             var endPos = CalculateEndPos(isHit, hit, startPos, fireRange, dir);
             var distance = (endPos - startPos).magnitude;
             var isExplosion = distance >= MinDistance;
@@ -52,11 +52,16 @@ namespace Bomb
             await UniTask.WhenAll(SetupExplosionEffect(ExplosionMoveDuration, endPos, explosionList[index].transform));
         }
 
-        private bool TryGetObstacles(int fireRange, Vector3 direction, Vector3 startPos, LayerMask obstaclesLayer,
-            out RaycastHit obstacle)
+        private bool TryGetObstacles
+        (
+            int fireRange,
+            Vector3 direction,
+            Vector3 startPos,
+            LayerMask obstaclesLayer,
+            out RaycastHit obstacle
+        )
         {
-            return Physics.Raycast(startPos, direction, out obstacle, fireRange, obstaclesLayer,
-                QueryTriggerInteraction.Collide);
+            return Physics.Raycast(startPos, direction, out obstacle, fireRange, obstaclesLayer, QueryTriggerInteraction.Collide);
         }
 
         private int CalculateFireRange(RaycastHit hit, Vector3 startPos)
@@ -69,10 +74,9 @@ namespace Bomb
         private async void GenerateCollider(Vector3 startPos, Direction direction, int fireRange, int damageAmount)
         {
             var dir = GameCommonData.DirectionToVector3(direction);
-            for (int i = 1; i <= fireRange; i++)
+            for (var i = 0; i <= fireRange; i++)
             {
-                var colliderObj = Instantiate(bombCollider, CalculateGeneratePos(startPos, dir, i),
-                    bombCollider.transform.rotation, gameObject.transform);
+                var colliderObj = Instantiate(bombCollider, CalculateGeneratePos(startPos, dir, i), bombCollider.transform.rotation, gameObject.transform);
                 var explosion = colliderObj.GetComponent<Explosion>();
                 colliderObj.layer = LayerMask.NameToLayer(GameCommonData.ExplosionLayer);
                 explosion.explosionDirection = direction;
@@ -84,7 +88,7 @@ namespace Bomb
 
         private Vector3 CalculateGeneratePos(Vector3 startPos, Vector3 direction, int index)
         {
-            bool isX = direction.x != 0;
+            var isX = direction.x != 0;
             if (isX)
             {
                 return new Vector3(startPos.x + direction.x * index, startPos.y, startPos.z);

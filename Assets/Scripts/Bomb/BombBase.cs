@@ -17,7 +17,7 @@ namespace Bomb
         protected static readonly float ExplosionDisplayDuration = 0.9f;
         protected static readonly float MinDistance = 1.0f;
         protected CancellationTokenSource Cts;
-        public int fireRange;
+        public int _fireRange;
         protected LayerMask ObstaclesLayerMask;
         protected bool IsExplosion;
         protected Renderer BombRenderer;
@@ -30,9 +30,7 @@ namespace Bomb
         private readonly Subject<Unit> _onFinishSubject = new();
 
         private CancellationToken _token;
-
-
-        public IObservable<Unit> OnFinishIObservable => _onFinishSubject.Take(1);
+        public IObservable<Unit> _OnFinishIObservable => _onFinishSubject.Take(1);
 
         public void Initialize()
         {
@@ -44,8 +42,14 @@ namespace Bomb
             gameObject.layer = LayerMask.NameToLayer(GameCommonData.BombLayer);
         }
 
-        public void Setup(int damageAmount, int fireRange, int playerId, int explosionTime,
-            StageOrnamentsBlock stageOrnamentsBlock)
+        public void Setup
+        (
+            int damageAmount,
+            int fireRange,
+            int playerId,
+            int explosionTime,
+            StageOrnamentsBlock stageOrnamentsBlock
+        )
         {
             gameObject.tag = GameCommonData.BombTag;
             BombRenderer.enabled = true;
@@ -53,7 +57,7 @@ namespace Bomb
             _damageAmount = damageAmount;
             _playerId = playerId;
             _explosionTime = explosionTime;
-            this.fireRange = fireRange;
+            _fireRange = fireRange;
             BlockShakeAction = stageOrnamentsBlock.Shake;
             IsExplosion = false;
             foreach (var bombEffect in explosionList)
