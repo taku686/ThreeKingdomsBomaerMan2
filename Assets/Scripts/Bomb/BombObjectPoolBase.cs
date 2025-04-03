@@ -8,18 +8,23 @@ namespace Bomb
     {
         protected ObjectPool<BombBase> Pool;
         private readonly BombBase _bombBase;
-        private readonly TranslateStatusForBattleUseCase translateStatusForBattleUseCase;
-        private MapManager _mapManager;
+        private readonly TranslateStatusForBattleUseCase _translateStatusForBattleUseCase;
+        private readonly MapManager _mapManager;
         private readonly Transform _bombParent;
-        private static readonly Vector3 ColliderCenter = new Vector3(0, 0.5f, 0);
-        private static readonly Vector3 ColliderScale = new Vector3(0.7f, 1, 0.7f);
+        private static readonly Vector3 ColliderCenter = new(0, 0.5f, 0);
+        private static readonly Vector3 ColliderScale = new(0.7f, 1, 0.7f);
 
-        protected BombObjectPoolBase(BombBase bombBase, Transform parent, TranslateStatusForBattleUseCase translateStatusForBattleUseCase,
-            MapManager mapManager)
+        protected BombObjectPoolBase
+        (
+            BombBase bombBase,
+            Transform parent,
+            TranslateStatusForBattleUseCase translateStatusForBattleUseCase,
+            MapManager mapManager
+        )
         {
             _bombBase = bombBase;
             _bombParent = parent;
-            this.translateStatusForBattleUseCase = translateStatusForBattleUseCase;
+            _translateStatusForBattleUseCase = translateStatusForBattleUseCase;
             _mapManager = mapManager;
         }
 
@@ -35,7 +40,7 @@ namespace Bomb
 
         protected override void OnBeforeRent(BombBase instance)
         {
-            translateStatusForBattleUseCase.IncrementBombCount();
+            _translateStatusForBattleUseCase.IncrementBombCount();
             base.OnBeforeRent(instance);
         }
 
@@ -43,7 +48,7 @@ namespace Bomb
         {
             var position = instance.transform.position;
             _mapManager.RemoveMap(position.x, position.z);
-            for (int i = 1; i <= instance.fireRange; i++)
+            for (var i = 1; i <= instance._fireRange; i++)
             {
                 _mapManager.RemoveMap(position.x + i, position.z);
                 _mapManager.RemoveMap(position.x - i, position.z);
@@ -51,7 +56,7 @@ namespace Bomb
                 _mapManager.RemoveMap(position.x, position.z - i);
             }
 
-            translateStatusForBattleUseCase.DecrementBombCount();
+            _translateStatusForBattleUseCase.DecrementBombCount();
             base.OnBeforeReturn(instance);
         }
 

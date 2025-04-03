@@ -29,7 +29,7 @@ namespace Bomb
             }
 
             bomb.Setup(damageAmount, fireRange, playerId, explosionTime, stageOrnamentsBlock);
-            bomb.OnFinishIObservable.Take(1).Subscribe(_ => { bombPool.Return(bomb); });
+            bomb._OnFinishIObservable.Take(1).Subscribe(_ => { bombPool.Return(bomb); });
             return bomb;
         }
 
