@@ -7,4 +7,10 @@ public class RewardGetView : MonoBehaviour
     public Image rewardImage;
     public Button okButton;
     public TextMeshProUGUI rewardText;
+
+    private void OnEnable()
+    {
+        okButton.onClick.RemoveAllListeners();
+        okButton.onClick.AddListener(() => { gameObject.SetActive(false); });
+    }
 }

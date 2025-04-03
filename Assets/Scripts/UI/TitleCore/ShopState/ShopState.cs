@@ -101,7 +101,7 @@ namespace UI.Title
 
                 addWeapon
                     .Where(enoughGem => enoughGem)
-                    .SelectMany(_ => _PlayFabShopManager.AddRandomWeaponAsync(CreateWeaponCount).ToObservable())
+                    .SelectMany(_ => _PlayFabShopManager.AddRandomWeaponAsync(CreateWeaponCount, CreateWeaponCount * GameCommonData.WeaponBuyPrice).ToObservable())
                     .Subscribe(tuple =>
                     {
                         var isError = tuple.Item1;
@@ -111,7 +111,7 @@ namespace UI.Title
                         }
 
                         var weaponIds = tuple.Item2.ToArray();
-                        _RewardDataRepository.SetRewardIds(weaponIds.Select(id => (id, RewardDataUseCase.RewardData.RewardType.Weapon)).ToArray());
+                        _RewardDataRepository.SetRewardIds(weaponIds.Select(id => (id, GameCommonData.RewardType.Weapon)).ToArray());
                         _StateMachine.Dispatch((int)State.Reward, (int)State.Shop);
                     })
                     .AddTo(_cts.Token);
@@ -121,7 +121,9 @@ namespace UI.Title
 
             private bool EnoughGem(int cost)
             {
-                var gem = _UserDataRepository.GetUserData().Gem;
+                cost *= GameCommonData.WeaponBuyPrice;
+                var userData = _UserDataRepository.GetUserData();
+                var gem = userData.Gem;
                 return gem >= cost;
             }
 

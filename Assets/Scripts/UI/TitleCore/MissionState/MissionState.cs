@@ -26,14 +26,12 @@ namespace UI.Title
             private MissionView _View => (MissionView)Owner.GetView(State.Mission);
             private CommonView _CommonView => Owner._commonView;
             private MissionSpriteDataRepository _MissionSpriteDataRepository => Owner._missionSpriteDataRepository;
+            private PlayFabVirtualCurrencyManager _PlayFabVirtualCurrencyManager => Owner._playFabVirtualCurrencyManager;
 
             private readonly Dictionary<int, MissionGrid> _missionGrids = new();
             private bool _isProgress;
             private CancellationToken _token;
 
-            private const string CanGet = "Get";
-            private const string InProgress = "In Progress";
-            private const string ProgressBarText = " <#b3bedb>/ ";
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -62,51 +60,26 @@ namespace UI.Title
             {
                 DestroyMissionGrids();
                 var missionDatum = _UserDataRepository.GetMissionDatum();
-                missionDatum = missionDatum.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
+                missionDatum = missionDatum
+                    .OrderBy(x => x.Key)
+                    .ToDictionary(x => x.Key, x => x.Value);
                 foreach (var (index, missionData) in missionDatum)
                 {
                     var masterData = _MissionMasterDataRepository.GetMissionData(index);
                     var actionId = (GameCommonData.MissionActionId)masterData.Action;
-                    var actionCount = masterData.ActionCount;
                     var rewardId = masterData.RewardId;
-                    var missionGrid = Instantiate(_View.missionGrid, _View.gridParent);
-                    var progress = missionData._progress;
-                    progress = progress >= actionCount ? actionCount : progress;
-                    _missionGrids[masterData.Index] = missionGrid;
-                    missionGrid.missionImage.sprite = _MissionSpriteDataRepository.GetActionSprite(actionId);
-                    missionGrid.progressSlider.maxValue = actionCount;
-                    missionGrid.progressSlider.value = progress;
-                    missionGrid.progressText.text = progress + ProgressBarText + actionCount;
-                    missionGrid.missionText.text = GetExplanationText(missionData, masterData);
-                    missionGrid.buttonText.text = progress >= actionCount ? CanGet : InProgress;
-                    missionGrid.getButton.enabled = progress >= actionCount;
-                    missionGrid.getButton.onClick.AddListener(() => OnClickGetMissionReward(masterData, missionGrid.getButton.gameObject));
-                    missionGrid.rewardText.text = masterData.RewardAmount.ToString("D");
-                    missionGrid.rewardImage.sprite = _MissionSpriteDataRepository.GetRewardSprite((GameCommonData.RewardType)rewardId);
-                }
-            }
-
-            private string GetExplanationText(UserData.MissionData missionData, MissionMasterData masterData)
-            {
-                var actionCount = masterData.ActionCount;
-                var actionId = masterData.Action;
-                var explanation = masterData.Explanation.Replace("n", actionCount.ToString());
-                if (GameCommonData.IsMissionsUsingCharacter(actionId))
-                {
                     var characterId = missionData._characterId;
-                    var characterName = _CharacterMasterDataRepository.GetCharacterData(characterId).Name;
-                    explanation = explanation.Replace("x", characterName);
-                }
-
-                if (GameCommonData.IsMissionsUsingWeapon(actionId))
-                {
                     var weaponId = missionData._weaponId;
-                    var weaponName = _WeaponMasterDataRepository.GetWeaponData(weaponId).Name;
-                    explanation = explanation.Replace("x", weaponName);
+                    var characterData = _CharacterMasterDataRepository.GetCharacterData(characterId);
+                    var weaponData = _WeaponMasterDataRepository.GetWeaponData(weaponId);
+                    var missionSprite = _MissionSpriteDataRepository.GetActionSprite(actionId);
+                    var rewardSprite = _MissionSpriteDataRepository.GetRewardSprite((GameCommonData.RewardType)rewardId);
+                    var grid = _View.GenerateGrid(missionData, masterData, characterData, weaponData, missionSprite, rewardSprite);
+                    _missionGrids[masterData.Index] = grid;
+                    grid.getButton.onClick.AddListener(() => OnClickGetMissionReward(masterData, grid.getButton.gameObject));
                 }
-
-                return explanation;
             }
+
 
             private void OnClickGetMissionReward(MissionMasterData missionMasterData, GameObject button)
             {
@@ -119,23 +92,54 @@ namespace UI.Title
                 Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
                     var errorText = _CommonView.purchaseErrorView.errorInfoText;
-                    var rewardName = missionMasterData.RewardId.ToString();
-                    var rewardData = _CatalogDataRepository.GetAddVirtualCurrencyItemData(rewardName);
-                    await _PlayFabShopManager.TryPurchaseItem(rewardName, GameCommonData.CoinKey, 0, errorText);
-                    if (rewardData == null)
+                    var rewardId = missionMasterData.RewardId;
+                    var rewardAmount = missionMasterData.RewardAmount;
+                    var result = await GetRewardAsync(rewardId, rewardAmount);
+
+                    if (result)
                     {
-                        _isProgress = false;
-                        return;
+                        var rewardSprite = _MissionSpriteDataRepository.GetRewardSprite((GameCommonData.RewardType)missionMasterData.RewardId);
+                        await Owner.SetRewardUI(rewardAmount, rewardSprite);
+                        await RemoveMission(missionMasterData.Index);
+                        await AddMission();
+                        await Owner.SetGemText();
+                        await Owner.SetCoinText();
+                    }
+                    else
+                    {
+                        errorText.text = "報酬の取得に失敗しました";
+                        _CommonView.purchaseErrorView.gameObject.SetActive(true);
                     }
 
-                    var rewardSprite = _MissionSpriteDataRepository.GetRewardSprite((GameCommonData.RewardType)missionMasterData.RewardId);
-                    await Owner.SetRewardUI(rewardData.price, rewardSprite);
-                    await RemoveMission(missionMasterData.Index);
-                    await AddMission();
-                    await Owner.SetGemText();
-                    await Owner.SetCoinText();
                     _isProgress = false;
                 })).SetLink(button);
+            }
+
+            private async UniTask<bool> GetRewardAsync(int rewardId, int rewardAmount)
+            {
+                if (rewardId == (int)GameCommonData.RewardType.Coin)
+                {
+                    return await _PlayFabVirtualCurrencyManager.AddVirtualCurrency(GameCommonData.CoinKey, rewardAmount);
+                }
+
+                if (rewardId == (int)GameCommonData.RewardType.Gem)
+                {
+                    return await _PlayFabVirtualCurrencyManager.AddVirtualCurrency(GameCommonData.GemKey, rewardAmount);
+                }
+
+                if (rewardId == (int)GameCommonData.RewardType.Weapon)
+                {
+                    const int free = 0;
+                    var result = await _PlayFabShopManager.AddRandomWeaponAsync(rewardAmount, free);
+                    return result.Item1;
+                }
+
+                if (rewardId == (int)GameCommonData.RewardType.Character)
+                {
+                    return await _PlayFabShopManager.TryPurchaseRandomCharacters(rewardAmount);
+                }
+
+                return false;
             }
 
             private async UniTask OnClickBack()

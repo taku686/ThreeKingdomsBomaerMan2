@@ -157,7 +157,7 @@ namespace UI.Title
                 var characterGrid = grid.GetComponentInChildren<CharacterGridView>();
                 var (typeSprite, typeColor) = _CharacterTypeManager.GetCharacterTypeData(fixedCharacterData.Type);
                 characterGrid.ApplyStatusGridViews(orderType, fixedCharacterData, (typeSprite, typeColor));
-                
+
                 characterGrid.gridButton
                     .OnClickAsObservable()
                     .Take(1)
@@ -218,8 +218,7 @@ namespace UI.Title
                     .SelectMany(tuple => PurchaseCharacter(tuple.purchasedCharacterData.characterData).ToObservable())
                     .Subscribe(characterId =>
                     {
-                        (int, RewardDataUseCase.RewardData.RewardType)[] characterIds =
-                            { (characterId, RewardDataUseCase.RewardData.RewardType.Character) };
+                        (int, GameCommonData.RewardType)[] characterIds = { (characterId, GameCommonData.RewardType.Character) };
                         _RewardDataRepository.SetRewardIds(characterIds);
                         _StateMachine.Dispatch((int)State.Reward, (int)State.CharacterSelect);
                         _onChangeViewModel.OnNext(Unit.Default);
