@@ -11,20 +11,20 @@ namespace Player.Common
     {
         public class PlayerSpecialSkillState : State
         {
-            private PhotonNetworkManager PhotonNetworkManager => Owner._photonNetworkManager;
-            private PhotonView PhotonView => Owner.photonView;
-            private TranslateStatusForBattleUseCase TranslateStatusForBattleUseCase => Owner._translateStatusForBattleUseCase;
-            private ApplyStatusSkillUseCase ApplyStatusSkillUseCase => Owner._applyStatusSkillUseCase;
-            private Subject<(StatusType statusType, float value)> StatusBuff => Owner._statusBuffSubject;
-            private Subject<(StatusType statusType, int value, bool isBuff, bool isDebuff)> StatusBuffUi => Owner._statusBuffUiSubject;
+            private PhotonNetworkManager _PhotonNetworkManager => Owner._photonNetworkManager;
+            private PhotonView _PhotonView => Owner.photonView;
+            private TranslateStatusForBattleUseCase _TranslateStatusForBattleUseCase => Owner._translateStatusForBattleUseCase;
+            private ApplyStatusSkillUseCase _ApplyStatusSkillUseCase => Owner._applyStatusSkillUseCase;
+            private Subject<(StatusType statusType, float value)> _StatusBuff => Owner._statusBuffSubject;
+            private Subject<(StatusType statusType, int value, bool isBuff, bool isDebuff)> _StatusBuffUi => Owner._statusBuffUiSubject;
 
             protected override void OnEnter(State prevState)
             {
-                var index = PhotonView.OwnerActorNr;
-                var weaponData = PhotonNetworkManager.GetWeaponData(index);
+                var index = _PhotonView.OwnerActorNr;
+                var weaponData = _PhotonNetworkManager.GetWeaponData(index);
                 var specialSkillData = weaponData.SpecialSkillMasterData;
                 var statusSkillData = weaponData.StatusSkillMasterData;
-                var characterData = PhotonNetworkManager.GetCharacterData(index);
+                var characterData = _PhotonNetworkManager.GetCharacterData(index);
                 var characterId = characterData.Id;
                 ActivateSkill(specialSkillData, statusSkillData, characterId);
                 PhotonNetwork.LocalPlayer.SetSkillData(specialSkillData.Id);
@@ -33,11 +33,12 @@ namespace Player.Common
             private void PlayBackAnimation(int hashKey, string key)
             {
                 Owner._animator.SetTrigger(hashKey);
-                Owner._observableStateMachineTrigger.OnStateExitAsObservable().Where(info =>
-                    info.StateInfo.IsName(key)).Take(1).Subscribe(_ =>
-                {
-                    Owner._stateMachine.Dispatch((int)PLayerState.Idle);
-                }).AddTo(Owner.GetCancellationTokenOnDestroy());
+                Owner._observableStateMachineTrigger
+                    .OnStateExitAsObservable()
+                    .Where(info => info.StateInfo.IsName(key))
+                    .Take(1)
+                    .Subscribe(_ => { Owner._stateMachine.Dispatch((int)PLayerState.Idle); })
+                    .AddTo(Owner.GetCancellationTokenOnDestroy());
             }
 
             private void ActivateSkill
@@ -82,15 +83,15 @@ namespace Player.Common
                 bool isDebuff = false
             )
             {
-                var value = ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, statusSKillId, statusType);
-                var appliedSkillValue = ApplyStatusSkillUseCase.ApplyBuffStatusSkill(characterId, specialSkill.Id, statusType, value);
-                var translatedValue = TranslateStatusForBattleUseCase.TranslateStatusValue(statusType, appliedSkillValue);
-                StatusBuff.OnNext((statusType, translatedValue));
-                StatusBuffUi.OnNext((statusType, value: appliedSkillValue, isBuff, isDebuff));
+                var value = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, statusSKillId, statusType);
+                var appliedSkillValue = _ApplyStatusSkillUseCase.ApplyBuffStatusSkill(characterId, specialSkill.Id, statusType, value);
+                var translatedValue = _TranslateStatusForBattleUseCase.TranslateStatusValue(statusType, appliedSkillValue);
+                _StatusBuff.OnNext((statusType, translatedValue));
+                _StatusBuffUi.OnNext((statusType, value: appliedSkillValue, isBuff, isDebuff));
                 await UniTask.Delay((int)specialSkill.EffectTime * 1000);
-                var translatedPrefValue = TranslateStatusForBattleUseCase.TranslateStatusValue(statusType, value);
-                StatusBuff.OnNext((statusType, translatedPrefValue));
-                StatusBuffUi.OnNext((statusType, value, isBuff: false, isDebuff: false));
+                var translatedPrefValue = _TranslateStatusForBattleUseCase.TranslateStatusValue(statusType, value);
+                _StatusBuff.OnNext((statusType, translatedPrefValue));
+                _StatusBuffUi.OnNext((statusType, value, isBuff: false, isDebuff: false));
             }
         }
     }

@@ -2,6 +2,7 @@
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Manager;
 using Photon.Pun;
 using UniRx;
 using UnityEngine;
@@ -13,16 +14,17 @@ namespace Player.Common
     {
         public class PlayerIdleState : State
         {
-            private PhotonView PhotonView => Owner.photonView;
-            private Transform playerTransform;
-            private bool isSetup;
-            private PlayerMove playerMove;
-            private CancellationTokenSource cancellationTokenSource;
+            private PhotonView _PhotonView => Owner.photonView;
+            private PlayerMove _PlayerMove => Owner._playerMove;
+            private InputManager _InputManager => Owner._inputManager;
+            private StateMachine<PlayerCore> _StateMachine => Owner._stateMachine;
+            private Transform _playerTransform;
+            private bool _isSetup;
+            private CancellationTokenSource _cancellationTokenSource;
 
             protected override void OnEnter(State prevState)
             {
                 base.OnEnter(prevState);
-                InitializeComponent();
                 InitializeCancellationToken();
                 InitialiseIdleState();
                 InitializeButton();
@@ -32,87 +34,85 @@ namespace Player.Common
             {
                 base.OnExit(nextState);
                 Cancel();
-                playerMove = null;
             }
 
             protected override void OnUpdate()
             {
-                if (playerMove == null)
+                if (_PlayerMove == null)
                 {
                     return;
                 }
 
-                var direction = new Vector3(UltimateJoystick.GetHorizontalAxis(GameCommonData.JoystickName), 0,
-                    UltimateJoystick.GetVerticalAxis(GameCommonData.JoystickName));
-                playerMove.Move(direction);
-            }
-
-            private void InitializeComponent()
-            {
-                playerMove = Owner._playerMove;
+                var direction = new Vector3(UltimateJoystick.GetHorizontalAxis(GameCommonData.JoystickName), 0, UltimateJoystick.GetVerticalAxis(GameCommonData.JoystickName));
+                _PlayerMove.Run(direction);
             }
 
             private void InitialiseIdleState()
             {
-                if (isSetup)
+                if (_isSetup)
                 {
                     return;
                 }
 
-                playerTransform = Owner.transform;
-                Owner._inputManager.OnClickNormalSkill(OnClickNormalSkill, Owner.GetCancellationTokenOnDestroy());
-                Owner._inputManager.OnClickSpecialSkill(OnClickSpecialSkill, Owner.GetCancellationTokenOnDestroy());
-                isSetup = true;
+                _playerTransform = Owner.transform;
+                _InputManager.OnClickNormalSkill(OnClickNormalSkill, Owner.GetCancellationTokenOnDestroy());
+                _InputManager.OnClickSpecialSkill(OnClickSpecialSkill, Owner.GetCancellationTokenOnDestroy());
+                _InputManager.OnClickDash(OnClickDash, Owner.GetCancellationTokenOnDestroy());
+                _isSetup = true;
             }
 
             private void InitializeCancellationToken()
             {
-                cancellationTokenSource ??= new CancellationTokenSource();
+                _cancellationTokenSource ??= new CancellationTokenSource();
             }
 
             private void InitializeButton()
             {
-                Owner._inputManager.BombButton.OnClickAsObservable()
+                _InputManager.BombButton.OnClickAsObservable()
                     .Where(_ => Owner._translateStatusForBattleUseCase.CanPutBomb())
                     .Throttle(TimeSpan.FromSeconds(GameCommonData.InputBombInterval))
                     .Subscribe(
                         _ =>
                         {
-                            var playerId = PhotonView.ViewID;
-                            var explosionTime =
-                                PhotonNetwork.ServerTimestamp + GameCommonData.ThreeMilliSecondsBeforeExplosion;
+                            var playerId = _PhotonView.ViewID;
+                            var explosionTime = PhotonNetwork.ServerTimestamp + GameCommonData.ThreeMilliSecondsBeforeExplosion;
                             var damageAmount = Owner._translateStatusForBattleUseCase._Attack;
                             var fireRange = Owner._translateStatusForBattleUseCase._FireRange;
                             var boxCollider = Owner._boxCollider;
                             Owner._putBomb.SetBomb
                             (
                                 boxCollider,
-                                PhotonView,
-                                playerTransform,
+                                _PhotonView,
+                                _playerTransform,
                                 (int)BombType.Normal,
                                 damageAmount,
                                 fireRange,
                                 explosionTime,
                                 playerId
                             );
-                        }).AddTo(cancellationTokenSource.Token);
+                        }).AddTo(_cancellationTokenSource.Token);
             }
 
             private void OnClickNormalSkill()
             {
-                Owner._stateMachine.Dispatch((int)PLayerState.NormalSkill);
+                _StateMachine.Dispatch((int)PLayerState.NormalSkill);
             }
 
             private void OnClickSpecialSkill()
             {
-                Owner._stateMachine.Dispatch((int)PLayerState.SpecialSkill);
+                _StateMachine.Dispatch((int)PLayerState.SpecialSkill);
+            }
+
+            private void OnClickDash()
+            {
+                _StateMachine.Dispatch((int)PLayerState.Dash);
             }
 
             private void Cancel()
             {
-                cancellationTokenSource?.Cancel();
-                cancellationTokenSource?.Dispose();
-                cancellationTokenSource = null;
+                _cancellationTokenSource?.Cancel();
+                _cancellationTokenSource?.Dispose();
+                _cancellationTokenSource = null;
             }
         }
     }

@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace Common.Data
@@ -9,6 +8,7 @@ namespace Common.Data
         public const int WeaponBuyPrice = 100;
         public const float TurnDuration = 0.3f;
         public const float InputBombInterval = 0.05f;
+        public const float DashInterval = 0.5f;
         public const string TitleID = "92AF5";
         public const string ChatGptApiKey = "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";
         public const string JoystickName = "JoyStickMove";
@@ -30,7 +30,6 @@ namespace Common.Data
         public const string CharacterClassKey = "Character";
         public const string LoginBonusClassKey = "Consumable";
         public const string CharacterGachaItemKey = "bundle01";
-        public const string ThousandCoinItemKey = "coin1000";
         public const string FiveThousandCoinItemKey = "coin5000";
         public const string TwelveThousandCoinItemKey = "coin12000";
         public const string TwentyGemItemKey = "gem20";
@@ -134,7 +133,7 @@ namespace Common.Data
             TreasureBox = 5,
             None = 999
         }
-        
+
         public enum MissionType
         {
             LevelUp = 0,
@@ -145,7 +144,7 @@ namespace Common.Data
             Gacha = 5,
             None = 999
         }
-        
+
         public static MissionType TranslateMissionType(MissionActionId actionId)
         {
             return actionId switch
@@ -251,87 +250,55 @@ namespace Common.Data
 
         public static Vector3 DirectionToVector3(Direction direction)
         {
-            switch (direction)
+            return direction switch
             {
-                case Direction.Forward:
-                    return Vector3.forward;
-                case Direction.Back:
-                    return Vector3.back;
-                case Direction.Left:
-                    return Vector3.left;
-                case Direction.Right:
-                    return Vector3.right;
-                default:
-                    return Vector3.zero;
-            }
+                Direction.Forward => Vector3.forward,
+                Direction.Back => Vector3.back,
+                Direction.Left => Vector3.left,
+                Direction.Right => Vector3.right,
+                _ => Vector3.zero
+            };
         }
 
         public static Color GetWeaponColor(int characterId)
         {
-            switch (characterId)
+            return characterId switch
             {
-                case 0:
-                    return Color.green;
-                case 1:
-                    return Color.red;
-                case 2:
-                    return new Color(0, 7, 255);
-                case 3:
-                    return Color.green;
-                case 4:
-                    return Color.red;
-                case 5:
-                    return new Color(116, 0, 255);
-                case 6:
-                    return Color.blue;
-                case 7:
-                    return new Color(91, 2193, 255);
-                case 8:
-                    return new Color(139, 255, 0);
-                case 9:
-                    return new Color(108, 0, 255);
-                case 10:
-                    return new Color(255, 100, 0);
-                case 11:
-                    return new Color(0, 205, 255);
-                case 12:
-                    return new Color(94, 94, 183);
-                case 13:
-                    return new Color(255, 0, 140);
-                case 14:
-                    return new Color(154, 0, 255);
-                case 15:
-                    return Color.blue;
-                case 16:
-                    return Color.green;
-                case 17:
-                    return new Color(121, 0, 255);
-                case 18:
-                    return new Color(0, 124, 255);
-                case 19:
-                    return new Color(255, 29, 0);
-                case 20:
-                    return Color.green;
-                case 21:
-                    return new Color(130, 0, 8);
-                default:
-                    return Color.black;
-            }
+                0 => Color.green,
+                1 => Color.red,
+                2 => new Color(0, 7, 255),
+                3 => Color.green,
+                4 => Color.red,
+                5 => new Color(116, 0, 255),
+                6 => Color.blue,
+                7 => new Color(91, 2193, 255),
+                8 => new Color(139, 255, 0),
+                9 => new Color(108, 0, 255),
+                10 => new Color(255, 100, 0),
+                11 => new Color(0, 205, 255),
+                12 => new Color(94, 94, 183),
+                13 => new Color(255, 0, 140),
+                14 => new Color(154, 0, 255),
+                15 => Color.blue,
+                16 => Color.green,
+                17 => new Color(121, 0, 255),
+                18 => new Color(0, 124, 255),
+                19 => new Color(255, 29, 0),
+                20 => Color.green,
+                21 => new Color(130, 0, 8),
+                _ => Color.black
+            };
         }
 
         public static LoginBonusStatus GetLoginBonusStatus(int index)
         {
-            switch (index)
+            return index switch
             {
-                case 0:
-                    return LoginBonusStatus.Disable;
-                case 1:
-                    return LoginBonusStatus.CanReceive;
-                case 2:
-                    return LoginBonusStatus.Received;
-                default:
-                    return LoginBonusStatus.Exception;
-            }
+                0 => LoginBonusStatus.Disable,
+                1 => LoginBonusStatus.CanReceive,
+                2 => LoginBonusStatus.Received,
+                _ => LoginBonusStatus.Exception
+            };
         }
     }
 

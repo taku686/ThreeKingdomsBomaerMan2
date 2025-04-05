@@ -48,6 +48,7 @@ namespace Player.Common
             Dead,
             NormalSkill,
             SpecialSkill,
+            Dash
         }
 
 
@@ -89,6 +90,7 @@ namespace Player.Common
             _stateMachine.AddAnyTransition<PlayerIdleState>((int)PLayerState.Idle);
             _stateMachine.AddTransition<PlayerIdleState, PlayerNormalSkillState>((int)PLayerState.NormalSkill);
             _stateMachine.AddTransition<PlayerIdleState, PlayerSpecialSkillState>((int)PLayerState.SpecialSkill);
+            _stateMachine.AddTransition<PlayerIdleState, PlayerStateDash>((int)PLayerState.Dash);
         }
 
         private void Update()
