@@ -1,4 +1,5 @@
 trackSelection = true
+refreshSearchWindowsInPlayMode = false
 fetchPreview = true
 defaultFlags = 0
 keepOpen = false
@@ -10,6 +11,12 @@ scopes = {
 	"last_search.DA949528" = ""
 	"OpenInspectorPreview.DA949528" = "0"
 	"currentGroup.DA949528" = "all"
+	"last_search.053608A6" = "demonic"
+	"OpenInspectorPreview.053608A6" = "0"
+	"currentGroup.053608A6" = "all"
+	"last_search.756173B0" = "p: dir=\"weapon\" "
+	"OpenInspectorPreview.756173B0" = "0"
+	"currentGroup.756173B0" = "asset"
 }
 providers = {
 	adb = {
@@ -52,18 +59,39 @@ providers = {
 		priority = 50
 		defaultAction = null
 	}
+	archetype = {
+		active = true
+		priority = 2500
+		defaultAction = null
+	}
+	journal = {
+		active = true
+		priority = 2500
+		defaultAction = null
+	}
+	profilermarkers = {
+		active = false
+		priority = 100
+		defaultAction = null
+	}
 }
 objectSelectors = {
 }
 recentSearches = [
+	"t:Material"
+	"p: dir=\"weapon\" "
+	""
 ]
 searchItemFavorites = [
 ]
 savedSearchesSortOrder = 0
 showSavedSearchPanel = false
+hideTabs = false
 expandedQueries = [
 ]
-queryBuilder = false
+queryBuilder = true
 ignoredProperties = "id;name;classname;imagecontentshash"
-helperWidgetCurrentArea = "all"
+helperWidgetCurrentArea = "find:"
 disabledIndexers = ""
+minIndexVariations = 2
+findProviderIndexHelper = true

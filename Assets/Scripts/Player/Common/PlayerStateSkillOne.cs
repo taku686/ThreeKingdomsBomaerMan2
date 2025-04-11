@@ -5,6 +5,7 @@ using Manager.BattleManager;
 using Manager.NetworkManager;
 using Photon.Pun;
 using UniRx;
+using UniRx.Triggers;
 using UnityEngine;
 using State = StateMachine<Player.Common.PlayerCore>.State;
 
@@ -14,6 +15,8 @@ namespace Player.Common
     {
         public class PlayerNormalSkillState : State
         {
+            private Animator _Animator => Owner._animator;
+            private ObservableStateMachineTrigger _ObservableStateMachineTrigger => Owner._observableStateMachineTrigger;
             private PhotonNetworkManager _PhotonNetworkManager => Owner._photonNetworkManager;
             private PhotonView _PhotonView => Owner.photonView;
             private string _HpKey => Owner._hpKey;
@@ -36,8 +39,8 @@ namespace Player.Common
 
             private void PlayBackAnimation(int hashKey, string key)
             {
-                Owner._animator.SetTrigger(hashKey);
-                Owner._observableStateMachineTrigger
+                _Animator.SetTrigger(hashKey);
+                _ObservableStateMachineTrigger
                     .OnStateExitAsObservable()
                     .Where(info => info.StateInfo.IsName(key))
                     .Take(1)

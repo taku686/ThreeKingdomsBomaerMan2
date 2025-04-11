@@ -375,7 +375,8 @@ namespace Common.Data
     {
         Status,
         Normal,
-        Special
+        Special,
+        Passive
     }
 
     public enum AnimationStateType
@@ -484,6 +485,10 @@ namespace Common.Data
         Summon = 73,
         Fear = 74,
         GodPower = 75,
+        Resistance = 76,
+        Defense = 77,
+        ResistanceBuff = 78,
+        DefenseBuff = 79,
         None = 999
     }
 }

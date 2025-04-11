@@ -71,14 +71,14 @@ namespace Player.Common
         private void InitializeComponent()
         {
             _inputManager = gameObject.AddComponent<InputManager>();
-            _inputManager.Initialize(photonView, _photonNetworkManager);
             _putBomb = GetComponent<PutBomb>();
             _animator = GetComponent<Animator>();
-            _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
             _playerMove = gameObject.AddComponent<PlayerMove>();
-            _playerMove.Initialize(_statusBuffSubject, _translateStatusForBattleUseCase._Speed);
             _playerRenderer = GetComponentInChildren<Renderer>();
             _boxCollider = GetComponent<BoxCollider>();
+            _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
+            _inputManager.Initialize(photonView, _photonNetworkManager);
+            _playerMove.Initialize(_statusBuffSubject, _translateStatusForBattleUseCase._Speed);
             _cancellationToken = gameObject.GetCancellationTokenOnDestroy();
         }
 
