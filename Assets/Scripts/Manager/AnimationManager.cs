@@ -21,26 +21,26 @@ namespace Manager
             this.animator = animator;
         }
 
-        public void Move(Direction direction)
+        public void Move(MoveDirection moveDirection)
         {
-            var vec3Dir = DirectionToVector3(direction);
+            var vec3Dir = DirectionToVector3(moveDirection);
             var speed = Mathf.Max(Mathf.Abs(vec3Dir.x), Mathf.Abs(vec3Dir.z));
             animator.SetFloat(MoveKey, speed);
         }
 
-        private Vector3 DirectionToVector3(Direction direction)
+        private Vector3 DirectionToVector3(MoveDirection moveDirection)
         {
-            switch (direction)
+            switch (moveDirection)
             {
-                case Direction.Forward:
+                case MoveDirection.Forward:
                     return Vector3.forward;
-                case Direction.Back:
+                case MoveDirection.Back:
                     return Vector3.back;
-                case Direction.Left:
+                case MoveDirection.Left:
                     return Vector3.left;
-                case Direction.Right:
+                case MoveDirection.Right:
                     return Vector3.right;
-                case Direction.None:
+                case MoveDirection.None:
                     return Vector3.zero;
                 default:
                     return Vector3.zero;

@@ -88,16 +88,6 @@ namespace UI.Title
 
             private void DetailSkillSubscribe()
             {
-                _View._OnClickStatusSkillDetailButtonAsObservable
-                    .WithLatestFrom(_onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
-                    .Select(weaponId => _SkillDetailViewModelUseCase.InAsTask(weaponId, SkillType.Status))
-                    .Subscribe(viewModel =>
-                    {
-                        _View.ApplySkillDetailViewModel(viewModel);
-                        Owner.SetActiveBlockPanel(false);
-                    })
-                    .AddTo(_cts.Token);
-
                 _View._OnClickNormalSkillDetailButtonAsObservable
                     .WithLatestFrom(_onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
                     .Select(weaponId => _SkillDetailViewModelUseCase.InAsTask(weaponId, SkillType.Normal))

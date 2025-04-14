@@ -24,18 +24,18 @@ namespace Bomb
             var position = transform.position;
             Vector3 startPos = new Vector3(position.x, 0.5f, position.z);
             await UniTask.WhenAll(
-                Explosion(startPos, Direction.Forward, damageAmount),
-                Explosion(startPos, Direction.Back, damageAmount),
-                Explosion(startPos, Direction.Left, damageAmount),
-                Explosion(startPos, Direction.Right, damageAmount));
+                Explosion(startPos, MoveDirection.Forward, damageAmount),
+                Explosion(startPos, MoveDirection.Back, damageAmount),
+                Explosion(startPos, MoveDirection.Left, damageAmount),
+                Explosion(startPos, MoveDirection.Right, damageAmount));
 
             await base.Explosion(damageAmount);
         }
 
-        private async UniTask Explosion(Vector3 startPos, Direction direction, int damageAmount)
+        private async UniTask Explosion(Vector3 startPos, MoveDirection moveDirection, int damageAmount)
         {
-            var dir = GameCommonData.DirectionToVector3(direction);
-            var index = (int)direction;
+            var dir = GameCommonData.DirectionToVector3(moveDirection);
+            var index = (int)moveDirection;
             BombRenderer.enabled = false;
             BoxColliderComponent.enabled = false;
             var isHit = TryGetObstacles(_fireRange, dir, startPos, ObstaclesLayerMask, out var hit);
@@ -48,7 +48,7 @@ namespace Bomb
                 return;
             }
 
-            GenerateCollider(startPos, direction, fireRange, damageAmount);
+            GenerateCollider(startPos, moveDirection, fireRange, damageAmount);
             await UniTask.WhenAll(SetupExplosionEffect(ExplosionMoveDuration, endPos, explosionList[index].transform));
         }
 
@@ -71,15 +71,15 @@ namespace Bomb
             return (int)Mathf.Abs((endPos - startPos).magnitude);
         }
 
-        private async void GenerateCollider(Vector3 startPos, Direction direction, int fireRange, int damageAmount)
+        private async void GenerateCollider(Vector3 startPos, MoveDirection moveDirection, int fireRange, int damageAmount)
         {
-            var dir = GameCommonData.DirectionToVector3(direction);
+            var dir = GameCommonData.DirectionToVector3(moveDirection);
             for (var i = 0; i <= fireRange; i++)
             {
                 var colliderObj = Instantiate(bombCollider, CalculateGeneratePos(startPos, dir, i), bombCollider.transform.rotation, gameObject.transform);
                 var explosion = colliderObj.GetComponent<Explosion>();
                 colliderObj.layer = LayerMask.NameToLayer(GameCommonData.ExplosionLayer);
-                explosion.explosionDirection = direction;
+                explosion._explosionMoveDirection = moveDirection;
                 explosion.damageAmount = damageAmount;
                 await UniTask.Delay(TimeSpan.FromSeconds(ExplosionMoveDuration / fireRange),
                     cancellationToken: Cts.Token);

@@ -42,11 +42,6 @@ public class InventoryView : ViewBase
     public IObservable<AsyncUnit> _OnClickSkillDetailViewCloseButtonAsObservable
         => skillDetailView.OnClickCloseButtonAsObservable();
 
-    public IObservable<AsyncUnit> _OnClickStatusSkillDetailButtonAsObservable
-        => weaponDetailView
-            .OnClickStatusSkillDetailButtonAsObservable()
-            .SelectMany(_ => _uiAnimation.ClickScaleColor(weaponDetailView._StatusSkillDetailButton.gameObject).ToUniTask().ToObservable());
-
     public IObservable<AsyncUnit> _OnClickNormalSkillDetailButtonAsObservable
         => weaponDetailView
             .OnClickNormalSkillDetailButtonAsObservable()
@@ -129,7 +124,6 @@ public class InventoryView : ViewBase
         (
             weaponMasterData.WeaponIcon,
             weaponMasterData.Name,
-            weaponMasterData.StatusSkillMasterData,
             weaponMasterData.NormalSkillMasterData,
             weaponMasterData.SpecialSkillMasterData,
             weaponMasterData.WeaponObject,

@@ -30,7 +30,7 @@ namespace Player.Common
                 var index = _PhotonView.OwnerActorNr;
                 var weaponData = _PhotonNetworkManager.GetWeaponData(index);
                 var normalSkillData = weaponData.NormalSkillMasterData;
-                var statusSkillData = weaponData.StatusSkillMasterData;
+                var statusSkillData = weaponData.StatusSkillMasterDatum;
                 var characterData = _PhotonNetworkManager.GetCharacterData(index);
                 var characterId = characterData.Id;
                 ActivateSkill(normalSkillData, statusSkillData, characterId);
@@ -65,7 +65,7 @@ namespace Player.Common
                 {
                     case SkillEffectType.Heal:
                         PlayBackAnimation(GameCommonData.BuffHashKey, GameCommonData.BuffKey);
-                        var hpRate = _TranslateStatusForBattleUseCase.Heal((int)normalSkill.Amount);
+                        var hpRate = _TranslateStatusForBattleUseCase.Heal((int)normalSkill.DamagePlu);
                         SynchronizedValue.Instance.SetValue(_HpKey, hpRate);
                         break;
                     case SkillEffectType.Kick:
@@ -248,6 +248,11 @@ namespace Player.Common
                         break;
                     case SkillEffectType.None:
                         break;
+                    case SkillEffectType.Dash:
+                    case SkillEffectType.Resistance:
+                    case SkillEffectType.Defense:
+                    case SkillEffectType.ResistanceBuff:
+                    case SkillEffectType.DefenseBuff:
                     default:
                         throw new ArgumentOutOfRangeException();
                 }

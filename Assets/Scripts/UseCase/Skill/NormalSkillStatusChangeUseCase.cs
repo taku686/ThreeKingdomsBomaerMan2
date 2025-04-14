@@ -37,11 +37,11 @@ public class NormalSkillStatusChangeUseCase : IDisposable
         var skillData = skillMasterDataRepository.GetSkillData(skillId);
         return skillData.SkillEffectType switch
         {
-            SkillEffectType.Hp when statusType == StatusType.Hp => fixedValue + (int)skillData.Amount,
-            SkillEffectType.Attack when statusType == StatusType.Attack => fixedValue + (int)skillData.Amount,
-            SkillEffectType.Speed when statusType == StatusType.Speed => fixedValue + (int)skillData.Amount,
-            SkillEffectType.BombLimit when statusType == StatusType.BombLimit => fixedValue + (int)skillData.Amount,
-            SkillEffectType.FireRange when statusType == StatusType.FireRange => fixedValue + (int)skillData.Amount,
+            SkillEffectType.Hp when statusType == StatusType.Hp => fixedValue + (int)skillData.DamagePlu,
+            SkillEffectType.Attack when statusType == StatusType.Attack => fixedValue + (int)skillData.DamagePlu,
+            SkillEffectType.Speed when statusType == StatusType.Speed => fixedValue + (int)skillData.DamagePlu,
+            SkillEffectType.BombLimit when statusType == StatusType.BombLimit => fixedValue + (int)skillData.DamagePlu,
+            SkillEffectType.FireRange when statusType == StatusType.FireRange => fixedValue + (int)skillData.DamagePlu,
             _ => fixedValue
         };
     }

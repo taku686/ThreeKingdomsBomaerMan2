@@ -75,7 +75,7 @@ namespace UI.Title
         )
         {
             nameText.text = characterData.Name;
-            var statusSkillId = weaponMasterData.StatusSkillMasterData.Id;
+            var statusSkillId = weaponMasterData.StatusSkillMasterDatum.Id;
             statusView.HpText.text = GetFixedStatus(characterData, statusSkillId, StatusType.Hp);
             statusView.DamageText.text = GetFixedStatus(characterData, statusSkillId, StatusType.Attack);
             statusView.SpeedText.text = GetFixedStatus(characterData, statusSkillId, StatusType.Speed);

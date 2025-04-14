@@ -7,7 +7,7 @@ namespace Bomb
     {
         public Transform boxCollider;
         public Transform explosionTransform;
-        public Direction explosionDirection;
+        public MoveDirection _explosionMoveDirection;
         public int damageAmount;
     }
 }

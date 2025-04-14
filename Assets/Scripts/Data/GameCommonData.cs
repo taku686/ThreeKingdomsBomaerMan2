@@ -248,14 +248,14 @@ namespace Common.Data
             };
         }
 
-        public static Vector3 DirectionToVector3(Direction direction)
+        public static Vector3 DirectionToVector3(MoveDirection moveDirection)
         {
-            return direction switch
+            return moveDirection switch
             {
-                Direction.Forward => Vector3.forward,
-                Direction.Back => Vector3.back,
-                Direction.Left => Vector3.left,
-                Direction.Right => Vector3.right,
+                MoveDirection.Forward => Vector3.forward,
+                MoveDirection.Back => Vector3.back,
+                MoveDirection.Left => Vector3.left,
+                MoveDirection.Right => Vector3.right,
                 _ => Vector3.zero
             };
         }
@@ -303,7 +303,7 @@ namespace Common.Data
     }
 
 
-    public enum Direction
+    public enum MoveDirection
     {
         Forward,
         Back,
@@ -329,10 +329,18 @@ namespace Common.Data
 
     public enum BombType
     {
-        Error,
         Normal,
         Penetration,
-        Danger
+        Diffusion,
+        Paralysis,
+        Poison,
+        Frozen,
+        Confusion,
+        Sealed,
+        DeadlyPoison,
+        GreatFire,
+        LifeSteal,
+        Holy
     }
 
     public enum LoginBonusStatus
@@ -374,9 +382,28 @@ namespace Common.Data
     public enum SkillType
     {
         Status,
-        Normal,
-        Special,
-        Passive
+        Active,
+        Passive,
+        AlwaysActive
+    }
+
+    public enum NumberRequirementType
+    {
+        Character = 0,
+        CharacterType = 1,
+        AnyTeam = 2,
+        Weapon = 3,
+        HpRate = 4,
+        BattleRank = 5,
+        AllTeam = 6,
+    }
+
+    public enum BoolRequirementType
+    {
+        Buff = 0,
+        Debuff = 1,
+        AbnormalCondition = 2,
+        ReceiveDamage = 3
     }
 
     public enum AnimationStateType
@@ -394,17 +421,22 @@ namespace Common.Data
         Speed = 2,
         BombLimit = 3,
         FireRange = 4,
+        Defense = 5,
+        Resistance = 6,
     }
 
-    public enum AbnormalStatusType
+    public enum SkillDirection
     {
-        Paralysis = 0,
-        Confusion = 1,
-        Illusion = 2,
-        Frozen = 3,
-        Poison = 4,
-        Fear = 5,
-        None = 999
+        Forward = 0,
+        Back = 1,
+        Left = 2,
+        Right = 3,
+        ForwardBack = 4,
+        LeftRight = 5,
+        All = 6,
+        Random = 7,
+        Specified = 8,
+        Everywhere = 9,
     }
 
     public enum SkillEffectType

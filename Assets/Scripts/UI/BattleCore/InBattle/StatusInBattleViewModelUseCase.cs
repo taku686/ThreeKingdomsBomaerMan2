@@ -23,7 +23,7 @@ public class StatusInBattleViewModelUseCase : IDisposable
         var characterData = userDataRepository.GetEquippedCharacterData();
         var characterId = characterData.Id;
         var weaponData = userDataRepository.GetEquippedWeaponData(characterId);
-        var statusSkillId = weaponData.StatusSkillMasterData.Id;
+        var statusSkillId = weaponData.StatusSkillMasterDatum.Id;
         var hp = applyStatusSkillUseCase.ApplyStatusSkill(characterId, statusSkillId, StatusType.Hp);
         var attack = applyStatusSkillUseCase.ApplyStatusSkill(characterId, statusSkillId, StatusType.Attack);
         var speed = applyStatusSkillUseCase.ApplyStatusSkill(characterId, statusSkillId, StatusType.Speed);

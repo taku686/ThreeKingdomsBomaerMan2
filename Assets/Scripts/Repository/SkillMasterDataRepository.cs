@@ -23,6 +23,17 @@ namespace Manager.DataManager
             return _skillDatum.Find(data => data.Id == id);
         }
 
+        public SkillMasterData[] GetSkillDatum(int[] ids)
+        {
+            var skillMasterData = new SkillMasterData[ids.Length];
+            for (var i = 0; i < ids.Length; i++)
+            {
+                skillMasterData[i] = GetSkillData(ids[i]);
+            }
+
+            return skillMasterData;
+        }
+
         public void Dispose()
         {
             // TODO release managed resources here

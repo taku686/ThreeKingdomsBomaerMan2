@@ -7,8 +7,8 @@ namespace Common.Data
     {
         public string Name { get; }
         public int Id { get; }
-        public int StatusSkillId { get; set; }
-        public SkillMasterData StatusSkillMasterData { get; }
+        public string StatusSkillId { get; set; }
+        public SkillMasterData[] StatusSkillMasterDatum { get; }
         public int NormalSkillId { get; set; }
         public SkillMasterData NormalSkillMasterData { get; }
         public int SpecialSkillId { get; set; }
@@ -34,7 +34,7 @@ namespace Common.Data
             WeaponType weaponType,
             AttributeType attributeType,
             SkillMasterData normalSkillMasterData,
-            SkillMasterData statusSkillMasterData,
+            SkillMasterData[] statusSkillMasterDatum,
             SkillMasterData specialSkillMasterData,
             float scale,
             bool isBothHands,
@@ -49,7 +49,7 @@ namespace Common.Data
             WeaponType = weaponType;
             AttributeType = attributeType;
             NormalSkillMasterData = normalSkillMasterData;
-            StatusSkillMasterData = statusSkillMasterData;
+            StatusSkillMasterDatum = statusSkillMasterDatum;
             SpecialSkillMasterData = specialSkillMasterData;
             Scale = scale;
             IsBothHands = isBothHands;
@@ -60,7 +60,6 @@ namespace Common.Data
         {
             return skillType switch
             {
-                SkillType.Status => StatusSkillMasterData,
                 SkillType.Normal => NormalSkillMasterData,
                 SkillType.Special => SpecialSkillMasterData,
                 _ => null

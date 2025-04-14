@@ -108,7 +108,7 @@ namespace Manager.BattleManager
                 bool isMine
             )
             {
-                var statusSkillData = weaponData.StatusSkillMasterData;
+                var statusSkillData = weaponData.StatusSkillMasterDatum;
                 var characterId = characterData.Id;
                 var skillId = statusSkillData.Id;
                 var hp = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Hp);

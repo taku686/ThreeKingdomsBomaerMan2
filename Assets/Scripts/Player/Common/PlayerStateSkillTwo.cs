@@ -23,7 +23,7 @@ namespace Player.Common
                 var index = _PhotonView.OwnerActorNr;
                 var weaponData = _PhotonNetworkManager.GetWeaponData(index);
                 var specialSkillData = weaponData.SpecialSkillMasterData;
-                var statusSkillData = weaponData.StatusSkillMasterData;
+                var statusSkillData = weaponData.StatusSkillMasterDatum;
                 var characterData = _PhotonNetworkManager.GetCharacterData(index);
                 var characterId = characterData.Id;
                 ActivateSkill(specialSkillData, statusSkillData, characterId);
@@ -49,11 +49,11 @@ namespace Player.Common
             )
             {
                 var statusId = statusSkillData.Id;
-                var hpType = StatusType.Hp;
-                var attackType = StatusType.Attack;
-                var speedType = StatusType.Speed;
-                var bombLimitType = StatusType.BombLimit;
-                var fireRangeType = StatusType.FireRange;
+                const StatusType hpType = StatusType.Hp;
+                const StatusType attackType = StatusType.Attack;
+                const StatusType speedType = StatusType.Speed;
+                const StatusType bombLimitType = StatusType.BombLimit;
+                const StatusType fireRangeType = StatusType.FireRange;
                 switch (specialSkill.SkillEffectType)
                 {
                     case SkillEffectType.Kick:
@@ -67,6 +67,85 @@ namespace Player.Common
                         ApplyBuffStatus(charaId, specialSkill, statusId, bombLimitType).Forget();
                         ApplyBuffStatus(charaId, specialSkill, statusId, fireRangeType).Forget();
                         break;
+                    case SkillEffectType.Hp:
+                    case SkillEffectType.Attack:
+                    case SkillEffectType.Speed:
+                    case SkillEffectType.BombLimit:
+                    case SkillEffectType.FireRange:
+                    case SkillEffectType.Heal:
+                    case SkillEffectType.ContinuousHeal:
+                    case SkillEffectType.Barrier:
+                    case SkillEffectType.PerfectBarrier:
+                    case SkillEffectType.Reborn:
+                    case SkillEffectType.SlowTime:
+                    case SkillEffectType.ProhibitedSkill:
+                    case SkillEffectType.Paralysis:
+                    case SkillEffectType.Confusion:
+                    case SkillEffectType.Illusion:
+                    case SkillEffectType.Jump:
+                    case SkillEffectType.Dash:
+                    case SkillEffectType.WallThrough:
+                    case SkillEffectType.WallDestruction:
+                    case SkillEffectType.Teleport:
+                    case SkillEffectType.Transparent:
+                    case SkillEffectType.Clairvoyance:
+                    case SkillEffectType.LinerArrangement:
+                    case SkillEffectType.CircleArrangement:
+                    case SkillEffectType.ArrowArrangement:
+                    case SkillEffectType.Meteor:
+                    case SkillEffectType.BombDestruction:
+                    case SkillEffectType.BombBlowOff:
+                    case SkillEffectType.EnemyBlowOff:
+                    case SkillEffectType.BlastReflection:
+                    case SkillEffectType.SkillBarrier:
+                    case SkillEffectType.Frozen:
+                    case SkillEffectType.RewardCoin:
+                    case SkillEffectType.RewardGem:
+                    case SkillEffectType.PenetrationBomb:
+                    case SkillEffectType.DiffusionBomb:
+                    case SkillEffectType.FullPowerBomb:
+                    case SkillEffectType.ParalysisBomb:
+                    case SkillEffectType.ConfusionBomb:
+                    case SkillEffectType.PoisonBomb:
+                    case SkillEffectType.IceBomb:
+                    case SkillEffectType.GoldenBomb:
+                    case SkillEffectType.ChaseBomb:
+                    case SkillEffectType.RotateBomb:
+                    case SkillEffectType.GenerateWall:
+                    case SkillEffectType.CantMoveTrap:
+                    case SkillEffectType.PoisonTrap:
+                    case SkillEffectType.GenerateBombAlly:
+                    case SkillEffectType.BombDestructionShot:
+                    case SkillEffectType.BombBlowOffShot:
+                    case SkillEffectType.EnemyBlowOffShot:
+                    case SkillEffectType.AllStatusBuff:
+                    case SkillEffectType.HpBuff:
+                    case SkillEffectType.AttackBuff:
+                    case SkillEffectType.SpeedBuff:
+                    case SkillEffectType.BombLimitBuff:
+                    case SkillEffectType.FireRangeBuff:
+                    case SkillEffectType.AllStatusDebuff:
+                    case SkillEffectType.HpDebuff:
+                    case SkillEffectType.AttackDebuff:
+                    case SkillEffectType.SpeedDebuff:
+                    case SkillEffectType.BombLimitDebuff:
+                    case SkillEffectType.FireRangeDebuff:
+                    case SkillEffectType.PoisonShot:
+                    case SkillEffectType.IceShot:
+                    case SkillEffectType.ParalysisShot:
+                    case SkillEffectType.ConfusionShot:
+                    case SkillEffectType.Poison:
+                    case SkillEffectType.RandomDebuff:
+                    case SkillEffectType.FastMove:
+                    case SkillEffectType.BombThrough:
+                    case SkillEffectType.BlackHole:
+                    case SkillEffectType.Summon:
+                    case SkillEffectType.Fear:
+                    case SkillEffectType.Resistance:
+                    case SkillEffectType.Defense:
+                    case SkillEffectType.ResistanceBuff:
+                    case SkillEffectType.DefenseBuff:
+                    case SkillEffectType.None:
                     default:
                         PlayBackAnimation(GameCommonData.SpecialHashKey, GameCommonData.SpecialKey);
                         break;

@@ -52,7 +52,7 @@ public class CharacterDetailViewModelUseCase : IDisposable
     private SkillsView.ViewModel CreateSkillsViewModel(int characterId, int characterLevel)
     {
         var weaponData = _userDataRepository.GetEquippedWeaponData(characterId);
-        var statusSkillSprite = weaponData.StatusSkillMasterData.Sprite;
+        var statusSkillSprite = weaponData.StatusSkillMasterDatum.Sprite;
         var normalSkillSprite = weaponData.NormalSkillMasterData.Sprite;
         var specialSkillSprite = weaponData.SpecialSkillMasterData.Sprite;
 

@@ -22,8 +22,8 @@ namespace Player.Common
         private bool _isMoving;
         private LayerMask _blockingLayer;
         private float _moveSpeed;
-        private Direction _currentDirection;
-        private Direction _prevDirection = Direction.None;
+        private MoveDirection _currentMoveDirection;
+        private MoveDirection _prevMoveDirection = MoveDirection.None;
         private Animator _animator;
         private AnimationManager _animationManager;
         private CancellationTokenSource _cts;
@@ -71,7 +71,7 @@ namespace Player.Common
         {
             if (inputValue is { x: 0, z: 0 })
             {
-                _animationManager.Move(Direction.None);
+                _animationManager.Move(MoveDirection.None);
                 return;
             }
 
@@ -110,7 +110,7 @@ namespace Player.Common
             Rotate(goDir, _playerTransform).Forget();
             _animationManager.Move(goDir);
             OnChangeDirection(goDir);
-            if (goDir == Direction.None)
+            if (goDir == MoveDirection.None)
             {
                 return;
             }
@@ -119,7 +119,7 @@ namespace Player.Common
             var playerPos = _playerTransform.position;
             var destination = GetDestination(playerPos, inputValue);
             var isObstacle = IsObstacleOnSphere(playerPos, destination, out var obstacle);
-            var modifiedDestination = ModifiedDestination(goDir, _prevDirection, destination, playerPos, out Direction modifiedDir);
+            var modifiedDestination = ModifiedDestination(goDir, _prevMoveDirection, destination, playerPos, out MoveDirection modifiedDir);
             _currentDestination = modifiedDestination;
             if (!isObstacle)
             {
@@ -144,41 +144,41 @@ namespace Player.Common
             }
         }
 
-        private Direction GetDirection(Vector3 direction)
+        private MoveDirection GetDirection(Vector3 direction)
         {
             if (direction is { x: 0, z: 0 })
             {
-                return Direction.None;
+                return MoveDirection.None;
             }
 
             var absX = Mathf.Abs(direction.x);
             var absZ = Mathf.Abs(direction.z);
             if (absX > absZ)
             {
-                return direction.x > 0 ? Direction.Right : Direction.Left;
+                return direction.x > 0 ? MoveDirection.Right : MoveDirection.Left;
             }
 
             if (absZ > absX)
             {
-                return direction.z > 0 ? Direction.Forward : Direction.Back;
+                return direction.z > 0 ? MoveDirection.Forward : MoveDirection.Back;
             }
 
-            return Direction.None;
+            return MoveDirection.None;
         }
 
-        private Vector3 ModifiedInputValue(Vector3 inputValue, Direction dir)
+        private Vector3 ModifiedInputValue(Vector3 inputValue, MoveDirection dir)
         {
-            if (dir == Direction.None)
+            if (dir == MoveDirection.None)
             {
                 return inputValue;
             }
 
-            if (dir is Direction.Right or Direction.Left)
+            if (dir is MoveDirection.Right or MoveDirection.Left)
             {
                 inputValue.z = 0;
             }
 
-            if (dir is Direction.Forward or Direction.Back)
+            if (dir is MoveDirection.Forward or MoveDirection.Back)
             {
                 inputValue.x = 0;
             }
@@ -193,23 +193,23 @@ namespace Player.Common
 
         private Vector3 ModifiedDestination
         (
-            Direction currentDir,
-            Direction previousDir,
+            MoveDirection currentDir,
+            MoveDirection previousDir,
             Vector3 currentDestination,
             Vector3 playerPos,
-            out Direction modifiedDir
+            out MoveDirection modifiedDir
         )
         {
             modifiedDir = currentDir;
             //進行方向が同じ場合
-            if (previousDir == currentDir || currentDir == Direction.None)
+            if (previousDir == currentDir || currentDir == MoveDirection.None)
             {
                 return currentDestination;
             }
 
             //前、後ろ方向に直角に曲がるとき + 止まっていて前、後ろに動き始めるとき
-            if (currentDir is Direction.Forward or Direction.Back &&
-                previousDir is Direction.Left or Direction.Right or Direction.None)
+            if (currentDir is MoveDirection.Forward or MoveDirection.Back &&
+                previousDir is MoveDirection.Left or MoveDirection.Right or MoveDirection.None)
             {
                 //x軸方向の値を修正
                 var currentX = currentDestination.x;
@@ -222,20 +222,20 @@ namespace Player.Common
                 if (currentX > 0)
                 {
                     modifiedX = (int)currentX % 2 == 0 ? Mathf.Floor(currentX) : Mathf.Ceil(currentX);
-                    modifiedDir = (int)currentX % 2 == 0 ? Direction.Left : Direction.Right;
+                    modifiedDir = (int)currentX % 2 == 0 ? MoveDirection.Left : MoveDirection.Right;
                 }
                 else if (currentX < 0)
                 {
                     modifiedX = (int)currentX % 2 == 0 ? Mathf.Ceil(currentX) : Mathf.Floor(currentX);
-                    modifiedDir = (int)currentX % 2 == 0 ? Direction.Right : Direction.Left;
+                    modifiedDir = (int)currentX % 2 == 0 ? MoveDirection.Right : MoveDirection.Left;
                 }
 
                 return new Vector3(modifiedX, currentDestination.y, playerPos.z);
             }
 
             //左、右に直角に曲がるとき　+ 止まっていて左、右に動き始めるとき
-            if (currentDir is Direction.Left or Direction.Right &&
-                previousDir is Direction.Forward or Direction.Back or Direction.None)
+            if (currentDir is MoveDirection.Left or MoveDirection.Right &&
+                previousDir is MoveDirection.Forward or MoveDirection.Back or MoveDirection.None)
             {
                 //z軸の値を修正
                 var currentZ = currentDestination.z;
@@ -248,12 +248,12 @@ namespace Player.Common
                 if (currentZ > 0)
                 {
                     modifiedZ = (int)currentZ % 2 == 0 ? Mathf.Ceil(currentZ) : Mathf.Floor(currentZ);
-                    modifiedDir = (int)currentZ % 2 == 0 ? Direction.Forward : Direction.Back;
+                    modifiedDir = (int)currentZ % 2 == 0 ? MoveDirection.Forward : MoveDirection.Back;
                 }
                 else if (currentZ < 0)
                 {
                     modifiedZ = (int)currentZ % 2 == 0 ? Mathf.Floor(currentZ) : Mathf.Ceil(currentZ);
-                    modifiedDir = (int)currentZ % 2 == 0 ? Direction.Back : Direction.Forward;
+                    modifiedDir = (int)currentZ % 2 == 0 ? MoveDirection.Back : MoveDirection.Forward;
                 }
 
                 return new Vector3(playerPos.x, currentDestination.y, modifiedZ);
@@ -262,15 +262,15 @@ namespace Player.Common
             return currentDestination;
         }
 
-        private void OnChangeDirection(Direction currentDirection)
+        private void OnChangeDirection(MoveDirection currentMoveDirection)
         {
-            if (_currentDirection == currentDirection)
+            if (_currentMoveDirection == currentMoveDirection)
             {
                 return;
             }
 
-            _prevDirection = _currentDirection;
-            _currentDirection = currentDirection;
+            _prevMoveDirection = _currentMoveDirection;
+            _currentMoveDirection = currentMoveDirection;
         }
 
         private bool IsObstacleOnSphere(Vector3 start, Vector3 end, out RaycastHit obstacle)
@@ -305,14 +305,14 @@ namespace Player.Common
             _isMoving = false;
         }
 
-        private bool CanAvoid(Vector3 playerPos, Vector3 obstaclePos, Direction goDir)
+        private bool CanAvoid(Vector3 playerPos, Vector3 obstaclePos, MoveDirection goDir)
         {
-            if (goDir is Direction.Back or Direction.Forward)
+            if (goDir is MoveDirection.Back or MoveDirection.Forward)
             {
                 return Mathf.Abs(playerPos.x - obstaclePos.x) > ObstacleDistance;
             }
 
-            if (goDir is Direction.Left or Direction.Right)
+            if (goDir is MoveDirection.Left or MoveDirection.Right)
             {
                 return Mathf.Abs(playerPos.z - obstaclePos.z) > ObstacleDistance;
             }
@@ -320,19 +320,19 @@ namespace Player.Common
             return false;
         }
 
-        private async UniTask Rotate(Direction direction, Transform player)
+        private async UniTask Rotate(MoveDirection moveDirection, Transform player)
         {
-            if (direction == Direction.None)
+            if (moveDirection == MoveDirection.None)
             {
                 return;
             }
 
-            var nextRotation = direction switch
+            var nextRotation = moveDirection switch
             {
-                Direction.Back => _initRotation,
-                Direction.Forward => _initRotation + new Vector3(0, -180, 0),
-                Direction.Right => _initRotation + new Vector3(0, -90, 0),
-                Direction.Left => _initRotation + new Vector3(0, 90, 0),
+                MoveDirection.Back => _initRotation,
+                MoveDirection.Forward => _initRotation + new Vector3(0, -180, 0),
+                MoveDirection.Right => _initRotation + new Vector3(0, -90, 0),
+                MoveDirection.Left => _initRotation + new Vector3(0, 90, 0),
                 _ => _initRotation
             };
 

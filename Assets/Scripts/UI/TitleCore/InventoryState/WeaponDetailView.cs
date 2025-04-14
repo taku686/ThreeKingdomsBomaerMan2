@@ -13,7 +13,6 @@ namespace UI.Title
     {
         [SerializeField] private GameObject[] _rareObjects;
         [SerializeField] private TextMeshProUGUI weaponName;
-        [SerializeField] private SkillGridView statusSkillGridView;
         [SerializeField] private SkillGridView normalSkillGridView;
         [SerializeField] private SkillGridView specialSkillGridView;
         [SerializeField] private Button equipButton;
@@ -23,15 +22,8 @@ namespace UI.Title
         private bool _isInitialized;
         public Button _EquipButton => equipButton;
         public Button _SellButton => sellButton;
-        public Button _StatusSkillDetailButton => statusSkillGridView._DetailButton;
         public Button _NormalSkillDetailButton => normalSkillGridView._DetailButton;
         public Button _SpecialSkillDetailButton => specialSkillGridView._DetailButton;
-
-
-        public IObservable<Unit> OnClickStatusSkillDetailButtonAsObservable()
-        {
-            return statusSkillGridView.OnClickDetailButtonAsObservable();
-        }
 
         public IObservable<Unit> OnClickNormalSkillDetailButtonAsObservable()
         {
@@ -46,10 +38,8 @@ namespace UI.Title
         public void ApplyViewModel(ViewModel viewModel)
         {
             weaponName.text = viewModel._Name;
-            var statusSkillViewModel = TranslateSkillDataToViewModel(viewModel._StatusSkillMasterData);
             var normalSkillViewModel = TranslateSkillDataToViewModel(viewModel._NormalSkillMasterData);
             var specialSkillViewModel = TranslateSkillDataToViewModel(viewModel._SpecialSkillMasterData);
-            statusSkillGridView.ApplyViewModel(statusSkillViewModel);
             normalSkillGridView.ApplyViewModel(normalSkillViewModel);
             specialSkillGridView.ApplyViewModel(specialSkillViewModel);
             Destroy(_weaponObject);
@@ -134,7 +124,6 @@ namespace UI.Title
         {
             public Sprite _Icon { get; }
             public string _Name { get; }
-            public SkillMasterData _StatusSkillMasterData { get; }
             public SkillMasterData _NormalSkillMasterData { get; }
             public SkillMasterData _SpecialSkillMasterData { get; }
             public GameObject _WeaponObject { get; }
@@ -147,7 +136,6 @@ namespace UI.Title
             (
                 Sprite icon,
                 string name,
-                SkillMasterData statusSkillMasterData,
                 SkillMasterData normalSkillMasterData,
                 SkillMasterData specialSkillMasterData,
                 GameObject weaponObject,
@@ -158,7 +146,6 @@ namespace UI.Title
             {
                 _Icon = icon;
                 _Name = name;
-                _StatusSkillMasterData = statusSkillMasterData;
                 _NormalSkillMasterData = normalSkillMasterData;
                 _SpecialSkillMasterData = specialSkillMasterData;
                 _WeaponObject = weaponObject;

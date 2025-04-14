@@ -74,7 +74,7 @@ namespace Manager.PlayFabManager
                 var skillType = (SkillType)skillData.SkillTypeInt;
                 var attributeType = (AttributeType)skillData.AttributeTypeInt;
                 var skillEffectType = (SkillEffectType)Enum.Parse(typeof(SkillEffectType), skillData.SkillEffectTypeString);
-                var amount = skillData.Amount;
+                var amount = skillData.DamagePlu;
                 var range = skillData.Range;
                 var interval = skillData.Interval;
                 var effectTime = skillData.EffectTime;
@@ -105,11 +105,12 @@ namespace Manager.PlayFabManager
                 var id = weaponData.Id;
                 var weaponType = (WeaponType)weaponData.WeaponTypeInt;
                 var attributeType = (AttributeType)weaponData.AttributeTypeInt;
-                var weaponObject = await LoadWeaponGameObject(id, _cts.Token);
-                var weaponIcon = await LoadWeaponSprite(id, _cts.Token);
-                var statusSkillData = _skillMasterDataRepository.GetSkillData(weaponData.StatusSkillId);
+                var statusSkillIds = TranslateStatusSkillIds(weaponData.StatusSkillId);
+                var statusSkillData = _skillMasterDataRepository.GetSkillDatum(statusSkillIds);
                 var normalSkillData = _skillMasterDataRepository.GetSkillData(weaponData.NormalSkillId);
                 var specialSkillData = _skillMasterDataRepository.GetSkillData(weaponData.SpecialSkillId);
+                var weaponObject = await LoadWeaponGameObject(id, _cts.Token);
+                var weaponIcon = await LoadWeaponSprite(id, _cts.Token);
                 var scale = weaponData.Scale;
                 var isBothHands = weaponData.IsBothHands;
                 var rare = weaponData.Rare;
@@ -132,6 +133,21 @@ namespace Manager.PlayFabManager
 
                 _weaponMasterDataRepository.AddWeaponData(newWeaponData);
             }
+        }
+
+        private int[] TranslateStatusSkillIds(string statusSkillIds)
+        {
+            var ids = statusSkillIds.Split(',');
+            var result = new int[ids.Length];
+            for (var i = 0; i < ids.Length; i++)
+            {
+                if (int.TryParse(ids[i], out var id))
+                {
+                    result[i] = id;
+                }
+            }
+
+            return result;
         }
 
         private void SetCharacterLevelData(LevelMasterData[] characterLevelMasterDatum)
