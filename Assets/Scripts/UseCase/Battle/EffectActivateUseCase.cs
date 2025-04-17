@@ -116,10 +116,15 @@ public class EffectActivateUseCase : MonoBehaviour
         }
     }
 
-    private async UniTask PlayEffect(ParticleSystem effect, float duration)
+    private async UniTask PlayEffect(ParticleSystem effect, float? duration)
     {
         effect.gameObject.SetActive(true);
         effect.Play();
+        if (duration == null)
+        {
+            return;
+        }
+
         await UniTask.Delay((int)(duration * 1000));
         effect.Stop();
         effect.gameObject.SetActive(false);

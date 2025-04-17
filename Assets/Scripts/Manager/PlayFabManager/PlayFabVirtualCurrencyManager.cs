@@ -56,6 +56,7 @@ namespace Manager.NetworkManager
             {
                 if (item.Key.Equals(GameCommonData.CoinKey))
                 {
+                    _userDataRepository.SetCoin(item.Value);
                     return item.Value;
                 }
             }
@@ -76,6 +77,7 @@ namespace Manager.NetworkManager
             {
                 if (item.Key.Equals(GameCommonData.GemKey))
                 {
+                    _userDataRepository.SetGem(item.Value);
                     return item.Value;
                 }
             }

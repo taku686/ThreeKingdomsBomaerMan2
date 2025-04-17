@@ -325,6 +325,16 @@ namespace Common.Data
             }
         }
 
+        public void SetCoin(int coin)
+        {
+            _userData.Coin = coin;
+        }
+
+        public void SetGem(int gem)
+        {
+            _userData.Gem = gem;
+        }
+
         public void Dispose()
         {
             _userData?.Dispose();

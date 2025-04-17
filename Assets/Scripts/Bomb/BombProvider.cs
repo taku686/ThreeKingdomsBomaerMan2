@@ -14,9 +14,9 @@ namespace Bomb
         private BombObjectPoolBase _penetrationBombProvider;
         private BombObjectPoolBase _dangerBombProvider;
 
-        public void Initialize(TranslateStatusForBattleUseCase translateStatusForBattleUseCase)
+        public void Initialize(TranslateStatusInBattleUseCase translateStatusInBattleUseCase)
         {
-            _normalBombProvider = bombObjectPoolProvider.GetNormalBombPool(translateStatusForBattleUseCase);
+            _normalBombProvider = bombObjectPoolProvider.GetNormalBombPool(translateStatusInBattleUseCase);
         }
 
         public BombBase GetBomb(int bombType, int damageAmount, int fireRange, int explosionTime, int playerId)
@@ -41,10 +41,8 @@ namespace Bomb
                     return _normalBombProvider;
                 case (int)BombType.Penetration:
                     return _penetrationBombProvider;
-                case (int)BombType.Danger:
+                case (int)BombType.Diffusion:
                     return _dangerBombProvider;
-                case (int)BombType.Error:
-                    return null;
                 default:
                     return null;
             }

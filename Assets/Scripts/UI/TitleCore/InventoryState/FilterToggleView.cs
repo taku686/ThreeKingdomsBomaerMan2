@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
 using Common.Data;
 using TMPro;
 using UniRx;
-using Unity.Transforms;
 using UnityEngine;
 using UnityEngine.UI;
 

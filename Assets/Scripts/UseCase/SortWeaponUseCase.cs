@@ -33,7 +33,7 @@ namespace UseCase
             }
 
             var sortDatum = possessedWeaponDatum
-                .OrderBy(weapon => TranslateSortType(sortType, weapon))
+                .OrderBy(weapon => WhichSortType(sortType, weapon))
                 .ThenBy(weapon => weapon.Key.WeaponType)
                 .ThenBy(weapon => weapon.Key.Rare)
                 .ThenBy(weapon => weapon.Key.Id)
@@ -41,7 +41,7 @@ namespace UseCase
             return sortDatum;
         }
 
-        private static int TranslateSortType(WeaponSortRepository.SortType sortType, KeyValuePair<WeaponMasterData, int> weapon)
+        private static int WhichSortType(WeaponSortRepository.SortType sortType, KeyValuePair<WeaponMasterData, int> weapon)
         {
             return sortType switch
             {
@@ -53,7 +53,6 @@ namespace UseCase
                 WeaponSortRepository.SortType.Defense => weapon.Key.Rare,
                 WeaponSortRepository.SortType.Speed => weapon.Key.Rare,
                 WeaponSortRepository.SortType.Resistance => weapon.Key.Rare,
-                WeaponSortRepository.SortType.Attribute => (int)weapon.Key.AttributeType,
                 WeaponSortRepository.SortType.Skill => weapon.Key.Rare,
                 WeaponSortRepository.SortType.Slot => weapon.Key.Rare,
                 WeaponSortRepository.SortType.Set => weapon.Key.Rare,

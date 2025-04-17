@@ -3,8 +3,6 @@ using System.Linq;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
-using FORGE3D;
 using Manager.NetworkManager;
 using Repository;
 using UI.Common;
@@ -26,6 +24,8 @@ namespace UI.Title
             private CharacterDetailViewModelUseCase _CharacterDetailViewModelUseCase => Owner._characterDetailViewModelUseCase;
             private UserDataRepository _UserDataRepository => Owner._userDataRepository;
             private SortCharactersUseCase _SortCharactersUseCase => Owner._sortCharactersUseCase;
+            private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
+            private SkillDetailViewModelUseCase _SkillDetailViewModelUseCase => Owner._skillDetailViewModelUseCase;
             private MissionManager _MissionManager => Owner._missionManager;
             private PlayFabUserDataManager _playFabUserDataManager;
             private PlayFabShopManager _playFabShopManager;
@@ -37,6 +37,8 @@ namespace UI.Title
             private int _candidateIndex;
             private CharacterData[] _sortedCharacters;
             private readonly Subject<int> _onChangeViewModel = new();
+            private const int SkillOne = 1;
+            private const int SkillTwo = 2;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -147,6 +149,24 @@ namespace UI.Title
                     .SelectMany(_ => Owner.OnClickScaleColorAnimation(_CommonView.errorView.okButton).ToObservable())
                     .SelectMany(_ => OnClickCloseErrorView().ToObservable())
                     .Subscribe()
+                    .AddTo(_cts.Token);
+
+                _View._OnClickNormalSkillButtonAsObservable
+                    .SelectMany(button => Owner.OnClickScaleColorAnimation(button).ToObservable())
+                    .WithLatestFrom(_onChangeViewModel, (_, onChange) => onChange)
+                    .Select(characterId => _CharacterDetailViewModelUseCase.InAsTask(characterId))
+                    .Select(viewModel => _SkillDetailViewModelUseCase.InAsTask(viewModel._WeaponMasterData.Id, SkillOne))
+                    .SelectMany(viewModel => _PopupGenerateUseCase.GenerateSkillDetailPopup(viewModel))
+                    .Subscribe(_ => { Owner.SetActiveBlockPanel(false); })
+                    .AddTo(_cts.Token);
+
+                _View._OnClickSpecialSkillButtonAsObservable
+                    .SelectMany(button => Owner.OnClickScaleColorAnimation(button).ToObservable())
+                    .WithLatestFrom(_onChangeViewModel, (_, onChange) => onChange)
+                    .Select(characterId => _CharacterDetailViewModelUseCase.InAsTask(characterId))
+                    .Select(viewModel => _SkillDetailViewModelUseCase.InAsTask(viewModel._WeaponMasterData.Id, SkillTwo))
+                    .SelectMany(viewModel => _PopupGenerateUseCase.GenerateSkillDetailPopup(viewModel))
+                    .Subscribe(_ => { Owner.SetActiveBlockPanel(false); })
                     .AddTo(_cts.Token);
 
                 var candidateCharacterId = _sortedCharacters[_candidateIndex].Id;

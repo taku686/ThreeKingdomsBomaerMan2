@@ -4,8 +4,8 @@ using Zenject;
 
 public class StatusInBattleViewModelUseCase : IDisposable
 {
-    private readonly UserDataRepository userDataRepository;
-    private readonly ApplyStatusSkillUseCase applyStatusSkillUseCase;
+    private readonly UserDataRepository _userDataRepository;
+    private readonly ApplyStatusSkillUseCase _applyStatusSkillUseCase;
 
     [Inject]
     public StatusInBattleViewModelUseCase
@@ -14,33 +14,50 @@ public class StatusInBattleViewModelUseCase : IDisposable
         ApplyStatusSkillUseCase applyStatusSkillUseCase
     )
     {
-        this.userDataRepository = userDataRepository;
-        this.applyStatusSkillUseCase = applyStatusSkillUseCase;
+        _userDataRepository = userDataRepository;
+        _applyStatusSkillUseCase = applyStatusSkillUseCase;
     }
 
     public StatusInBattleView.ViewModel InAsTask()
     {
-        var characterData = userDataRepository.GetEquippedCharacterData();
+        var characterData = _userDataRepository.GetEquippedCharacterData();
         var characterId = characterData.Id;
-        var weaponData = userDataRepository.GetEquippedWeaponData(characterId);
-        var statusSkillId = weaponData.StatusSkillMasterDatum.Id;
-        var hp = applyStatusSkillUseCase.ApplyStatusSkill(characterId, statusSkillId, StatusType.Hp);
-        var attack = applyStatusSkillUseCase.ApplyStatusSkill(characterId, statusSkillId, StatusType.Attack);
-        var speed = applyStatusSkillUseCase.ApplyStatusSkill(characterId, statusSkillId, StatusType.Speed);
-        var bombLimit = applyStatusSkillUseCase.ApplyStatusSkill(characterId, statusSkillId, StatusType.BombLimit);
-        var fireRange = applyStatusSkillUseCase.ApplyStatusSkill(characterId, statusSkillId, StatusType.FireRange);
+        var weaponData = _userDataRepository.GetEquippedWeaponData(characterId);
+        var statusSkillDatum = weaponData.StatusSkillMasterDatum;
+        var hp = 0;
+        var attack = 0;
+        var speed = 0;
+        var bombLimit = 0;
+        var fireRange = 0;
+        var defense = 0;
+        var resistance = 0;
+
+        foreach (var statusSkillData in statusSkillDatum)
+        {
+            var skillId = statusSkillData.Id;
+            hp = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Hp);
+            speed = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Speed);
+            attack = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Attack);
+            fireRange = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.FireRange);
+            bombLimit = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.BombLimit);
+            defense = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Defense);
+            resistance = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Resistance);
+        }
+
         return new StatusInBattleView.ViewModel
         (
             hp,
             attack,
             speed,
             bombLimit,
-            fireRange
+            fireRange,
+            defense,
+            resistance
         );
     }
 
     public void Dispose()
     {
-        userDataRepository?.Dispose();
+        _userDataRepository?.Dispose();
     }
 }

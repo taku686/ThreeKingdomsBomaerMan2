@@ -8,7 +8,7 @@ namespace Bomb
     {
         protected ObjectPool<BombBase> Pool;
         private readonly BombBase _bombBase;
-        private readonly TranslateStatusForBattleUseCase _translateStatusForBattleUseCase;
+        private readonly TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
         private readonly MapManager _mapManager;
         private readonly Transform _bombParent;
         private static readonly Vector3 ColliderCenter = new(0, 0.5f, 0);
@@ -18,13 +18,13 @@ namespace Bomb
         (
             BombBase bombBase,
             Transform parent,
-            TranslateStatusForBattleUseCase translateStatusForBattleUseCase,
+            TranslateStatusInBattleUseCase translateStatusInBattleUseCase,
             MapManager mapManager
         )
         {
             _bombBase = bombBase;
             _bombParent = parent;
-            _translateStatusForBattleUseCase = translateStatusForBattleUseCase;
+            _translateStatusInBattleUseCase = translateStatusInBattleUseCase;
             _mapManager = mapManager;
         }
 
@@ -40,7 +40,7 @@ namespace Bomb
 
         protected override void OnBeforeRent(BombBase instance)
         {
-            _translateStatusForBattleUseCase.IncrementBombCount();
+            _translateStatusInBattleUseCase.IncrementBombCount();
             base.OnBeforeRent(instance);
         }
 
@@ -56,7 +56,7 @@ namespace Bomb
                 _mapManager.RemoveMap(position.x, position.z - i);
             }
 
-            _translateStatusForBattleUseCase.DecrementBombCount();
+            _translateStatusInBattleUseCase.DecrementBombCount();
             base.OnBeforeReturn(instance);
         }
 

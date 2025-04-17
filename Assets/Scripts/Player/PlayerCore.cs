@@ -23,7 +23,7 @@ namespace Player.Common
         private PutBomb _putBomb;
         private Animator _animator;
         private ObservableStateMachineTrigger _observableStateMachineTrigger;
-        private TranslateStatusForBattleUseCase _translateStatusForBattleUseCase;
+        private TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
         private const int DeadHp = 0;
         private const int InvincibleDuration = 2;
         private const float WaitDuration = 0.3f;
@@ -54,14 +54,14 @@ namespace Player.Common
 
         public void Initialize
         (
-            TranslateStatusForBattleUseCase forBattleUseCase,
+            TranslateStatusInBattleUseCase inBattleUseCase,
             PhotonNetworkManager networkManager,
             ApplyStatusSkillUseCase applyStatusSkill,
             string key
         )
         {
             _hpKey = key;
-            _translateStatusForBattleUseCase = forBattleUseCase;
+            _translateStatusInBattleUseCase = inBattleUseCase;
             _photonNetworkManager = networkManager;
             _applyStatusSkillUseCase = applyStatusSkill;
             InitializeComponent();
@@ -78,7 +78,7 @@ namespace Player.Common
             _boxCollider = GetComponent<BoxCollider>();
             _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
             _inputManager.Initialize(photonView, _photonNetworkManager);
-            _playerMove.Initialize(_statusBuffSubject, _translateStatusForBattleUseCase._Speed);
+            _playerMove.Initialize(_statusBuffSubject, _translateStatusInBattleUseCase._Speed);
             _cancellationToken = gameObject.GetCancellationTokenOnDestroy();
         }
 
@@ -148,10 +148,10 @@ namespace Player.Common
             }
 
             var explosion = other.GetComponentInParent<Explosion>();
-            _translateStatusForBattleUseCase._CurrentHp -= explosion.damageAmount;
-            var hpRate = _translateStatusForBattleUseCase._CurrentHp / (float)_translateStatusForBattleUseCase._MaxHp;
+            _translateStatusInBattleUseCase._CurrentHp -= explosion.damageAmount;
+            var hpRate = _translateStatusInBattleUseCase._CurrentHp / (float)_translateStatusInBattleUseCase._MaxHp;
             SynchronizedValue.Instance.SetValue(_hpKey, hpRate);
-            if (_translateStatusForBattleUseCase._CurrentHp <= DeadHp)
+            if (_translateStatusInBattleUseCase._CurrentHp <= DeadHp)
             {
                 Dead().Forget();
                 return;
@@ -176,7 +176,7 @@ namespace Player.Common
 
         private void OnDestroy()
         {
-            _translateStatusForBattleUseCase.Dispose();
+            _translateStatusInBattleUseCase.Dispose();
             _deadSubject.Dispose();
             _statusBuffSubject.Dispose();
         }

@@ -15,7 +15,7 @@ namespace Enemy
         [SerializeField] private BombProvider bombProvider;
         [SerializeField] private MapManager mapManager;
         private BoxCollider _boxCollider;
-        private TranslateStatusForBattleUseCase translateStatusForBattleUseCase;
+        private TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
         private PhotonView _photonView;
         private PutBomb _putBomb;
         private StateMachine<EnemyCore> _stateMachine;
@@ -95,7 +95,7 @@ namespace Enemy
         private void SetupPutBomb()
         {
             _putBomb = gameObject.AddComponent<PutBomb>();
-            _putBomb.Initialize(bombProvider, translateStatusForBattleUseCase, mapManager);
+            _putBomb.Initialize(bombProvider, _translateStatusInBattleUseCase, mapManager);
         }
 
         private void InitializeState()

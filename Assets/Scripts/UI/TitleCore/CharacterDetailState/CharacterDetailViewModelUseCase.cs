@@ -3,6 +3,7 @@ using Common.Data;
 using Manager.DataManager;
 using UI.Common;
 using UI.Title;
+using UnityEngine;
 using Zenject;
 
 public class CharacterDetailViewModelUseCase : IDisposable
@@ -52,13 +53,11 @@ public class CharacterDetailViewModelUseCase : IDisposable
     private SkillsView.ViewModel CreateSkillsViewModel(int characterId, int characterLevel)
     {
         var weaponData = _userDataRepository.GetEquippedWeaponData(characterId);
-        var statusSkillSprite = weaponData.StatusSkillMasterDatum.Sprite;
-        var normalSkillSprite = weaponData.NormalSkillMasterData.Sprite;
-        var specialSkillSprite = weaponData.SpecialSkillMasterData.Sprite;
+        var normalSkillSprite = weaponData.NormalSkillMasterData?.Sprite;
+        var specialSkillSprite = weaponData.SpecialSkillMasterData?.Sprite;
 
         return new SkillsView.ViewModel
         (
-            statusSkillSprite,
             normalSkillSprite,
             specialSkillSprite,
             characterLevel

@@ -1,41 +1,41 @@
+using System;
 using Common.Data;
+using UniRx;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SkillsView : MonoBehaviour
 {
-    [SerializeField] SkillGridView statusSkillGridView;
     [SerializeField] SkillGridView normalSkillGridView;
     [SerializeField] SkillGridView specialSkillGridView;
 
+    public IObservable<Button> _OnClickNormalSkillButtonAsObservable => normalSkillGridView._OnClickSkillButtonAsObservable;
+    public IObservable<Button> _OnClickSpecialSkillButtonAsObservable => specialSkillGridView._OnClickSkillButtonAsObservable;
+
     public void ApplyViewModel(ViewModel viewModel)
     {
-        var isStatusSkillActive = viewModel.CharacterLevel >= GameCommonData.StatusSkillReleaseLevel;
-        var isNormalSkillActive = viewModel.CharacterLevel >= GameCommonData.NormalSkillReleaseLevel;
-        var isSpecialSkillActive = viewModel.CharacterLevel >= GameCommonData.SpecialSkillReleaseLevel;
-        statusSkillGridView.ApplyViewModel(isStatusSkillActive, viewModel.StatusImage);
-        normalSkillGridView.ApplyViewModel(isNormalSkillActive, viewModel.NormalImage);
-        specialSkillGridView.ApplyViewModel(isSpecialSkillActive, viewModel.SpecialImage);
+        var isNormalSkillActive = viewModel._CharacterLevel >= GameCommonData.NormalSkillReleaseLevel;
+        var isSpecialSkillActive = viewModel._CharacterLevel >= GameCommonData.SpecialSkillReleaseLevel;
+        normalSkillGridView.ApplyViewModel(isNormalSkillActive, viewModel._NormalImage, GameCommonData.NormalSkillReleaseLevel);
+        specialSkillGridView.ApplyViewModel(isSpecialSkillActive, viewModel._SpecialImage, GameCommonData.SpecialSkillReleaseLevel);
     }
 
     public class ViewModel
     {
-        public Sprite StatusImage { get; }
-        public Sprite NormalImage { get; }
-        public Sprite SpecialImage { get; }
-        public int CharacterLevel { get; }
+        public Sprite _NormalImage { get; }
+        public Sprite _SpecialImage { get; }
+        public int _CharacterLevel { get; }
 
         public ViewModel
         (
-            Sprite statusImage,
             Sprite normalImage,
             Sprite specialImage,
             int characterLevel
         )
         {
-            StatusImage = statusImage;
-            NormalImage = normalImage;
-            SpecialImage = specialImage;
-            CharacterLevel = characterLevel;
+            _NormalImage = normalImage;
+            _SpecialImage = specialImage;
+            _CharacterLevel = characterLevel;
         }
     }
 }

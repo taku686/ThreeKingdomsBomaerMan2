@@ -21,6 +21,8 @@ namespace Manager.PlayFabManager
         private const string SkillMasterKey = "SkillMaster";
         private const string WeaponMasterKey = "WeaponMaster";
         private const string EntitledMasterKey = "EntitledMaster";
+        private const string BombMasterKey = "BombMaster";
+        private const string AbnormalConditionMasterKey = "AbnormalConditionMaster";
         [Inject] private CharacterMasterDataRepository _characterMasterDataRepository;
         [Inject] private LevelMasterDataRepository _levelMasterDataRepository;
         [Inject] private MissionMasterDataRepository _missionMasterDataRepository;
@@ -72,9 +74,41 @@ namespace Manager.PlayFabManager
                 var name = skillData.Name;
                 var sprite = await LoadSkillSprite(skillData.IconID, _cts.Token);
                 var skillType = (SkillType)skillData.SkillTypeInt;
-                var attributeType = (AttributeType)skillData.AttributeTypeInt;
-                var skillEffectType = (SkillEffectType)Enum.Parse(typeof(SkillEffectType), skillData.SkillEffectTypeString);
-                var amount = skillData.DamagePlu;
+                var hpPlu = skillData.HpPlu;
+                var attackPlu = skillData.AttackPlu;
+                var defensePlu = skillData.DefensePlu;
+                var speedPlu = skillData.SpeedPlu;
+                var resistancePlu = skillData.ResistancePlu;
+                var bombPlu = skillData.BombPlu;
+                var firePlu = skillData.FirePlu;
+                var coinPlu = skillData.CoinPlu;
+                var gemPlu = skillData.GemPlu;
+                var skillPlu = skillData.SkillPlu;
+                var damagePlu = skillData.DamagePlu;
+                var hpMul = skillData.HpMul;
+                var attackMul = skillData.AttackMul;
+                var defenseMul = skillData.DefenseMul;
+                var speedMul = skillData.SpeedMul;
+                var resistanceMul = skillData.ResistanceMul;
+                var bombMul = skillData.BombMul;
+                var fireMul = skillData.FireMul;
+                var coinMul = skillData.CoinMul;
+                var gemMul = skillData.GemMul;
+                var skillMul = skillData.SkillMul;
+                var damageMul = skillData.DamageMul;
+                var numberRequirementString = skillData.NumberRequirement;
+                var numberRequirements = TranslateStringToFloatArray(numberRequirementString);
+                var numberRequirementTypeString = skillData.NumberRequirementType;
+                var numberRequirementType = TranslateStringToNumberRequirementType(numberRequirementTypeString);
+                var boolRequirementTypeString = skillData.BoolRequirementType;
+                var boolRequirementType = TranslateStringToBoolRequirementType(boolRequirementTypeString);
+                var skillDirectionString = skillData.SkillDirection;
+                var skillDirection = TranslateStringToSkillDirection(skillDirectionString);
+                var invalidAbnormalCondition = TranslateStringToAbnormalConditions(skillData.InvalidAbnormalCondition);
+                var abnormalCondition = TranslateStringToAbnormalConditions(skillData.AbnormalCondition);
+                var bombTypeString = skillData.BombType;
+                var bombType = TranslateStringToBombType(bombTypeString);
+                var isAll = skillData.IsAll;
                 var range = skillData.Range;
                 var interval = skillData.Interval;
                 var effectTime = skillData.EffectTime;
@@ -85,9 +119,36 @@ namespace Manager.PlayFabManager
                     name,
                     sprite,
                     skillType,
-                    attributeType,
-                    skillEffectType,
-                    amount,
+                    hpPlu,
+                    attackPlu,
+                    defensePlu,
+                    speedPlu,
+                    resistancePlu,
+                    bombPlu,
+                    firePlu,
+                    coinPlu,
+                    gemPlu,
+                    skillPlu,
+                    damagePlu,
+                    hpMul,
+                    attackMul,
+                    defenseMul,
+                    speedMul,
+                    resistanceMul,
+                    bombMul,
+                    fireMul,
+                    coinMul,
+                    gemMul,
+                    skillMul,
+                    damageMul,
+                    numberRequirements,
+                    numberRequirementType,
+                    boolRequirementType,
+                    skillDirection,
+                    invalidAbnormalCondition,
+                    abnormalCondition,
+                    bombType,
+                    isAll,
                     range,
                     interval,
                     effectTime
@@ -104,8 +165,7 @@ namespace Manager.PlayFabManager
                 var name = weaponData.Name;
                 var id = weaponData.Id;
                 var weaponType = (WeaponType)weaponData.WeaponTypeInt;
-                var attributeType = (AttributeType)weaponData.AttributeTypeInt;
-                var statusSkillIds = TranslateStatusSkillIds(weaponData.StatusSkillId);
+                var statusSkillIds = TranslateStringToIntArray(weaponData.StatusSkillId);
                 var statusSkillData = _skillMasterDataRepository.GetSkillDatum(statusSkillIds);
                 var normalSkillData = _skillMasterDataRepository.GetSkillData(weaponData.NormalSkillId);
                 var specialSkillData = _skillMasterDataRepository.GetSkillData(weaponData.SpecialSkillId);
@@ -122,7 +182,6 @@ namespace Manager.PlayFabManager
                     weaponEffectObj: null,
                     weaponIcon,
                     weaponType,
-                    attributeType,
                     normalSkillData,
                     statusSkillData,
                     specialSkillData,
@@ -135,8 +194,13 @@ namespace Manager.PlayFabManager
             }
         }
 
-        private int[] TranslateStatusSkillIds(string statusSkillIds)
+        private static int[] TranslateStringToIntArray(string statusSkillIds)
         {
+            if (string.IsNullOrEmpty(statusSkillIds))
+            {
+                return Array.Empty<int>();
+            }
+
             var ids = statusSkillIds.Split(',');
             var result = new int[ids.Length];
             for (var i = 0; i < ids.Length; i++)
@@ -145,6 +209,83 @@ namespace Manager.PlayFabManager
                 {
                     result[i] = id;
                 }
+            }
+
+            return result;
+        }
+
+        private static float[] TranslateStringToFloatArray(string statusSkillIds)
+        {
+            if (string.IsNullOrEmpty(statusSkillIds))
+            {
+                return Array.Empty<float>();
+            }
+
+            var ids = statusSkillIds.Split(',');
+            var result = new float[ids.Length];
+            for (var i = 0; i < ids.Length; i++)
+            {
+                if (float.TryParse(ids[i], out var id))
+                {
+                    result[i] = id;
+                }
+            }
+
+            return result;
+        }
+
+        private static NumberRequirementType TranslateStringToNumberRequirementType(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return NumberRequirementType.None;
+            }
+
+            return Enum.TryParse<NumberRequirementType>(value, out var result) ? result : NumberRequirementType.None;
+        }
+
+        private static BoolRequirementType TranslateStringToBoolRequirementType(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return BoolRequirementType.None;
+            }
+
+            return Enum.TryParse<BoolRequirementType>(value, out var result) ? result : BoolRequirementType.None;
+        }
+
+        private static SkillDirection TranslateStringToSkillDirection(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return SkillDirection.None;
+            }
+
+            return Enum.TryParse<SkillDirection>(value, out var result) ? result : SkillDirection.None;
+        }
+
+        private static BombType TranslateStringToBombType(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return BombType.None;
+            }
+
+            return Enum.TryParse<BombType>(value, out var result) ? result : BombType.None;
+        }
+
+        private static AbnormalCondition[] TranslateStringToAbnormalConditions(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return Array.Empty<AbnormalCondition>();
+            }
+
+            var ids = value.Split(',');
+            var result = new AbnormalCondition[ids.Length];
+            for (var i = 0; i < ids.Length; i++)
+            {
+                result[i] = Enum.TryParse<AbnormalCondition>(value, out var abnormal) ? abnormal : AbnormalCondition.None;
             }
 
             return result;
@@ -211,6 +352,11 @@ namespace Manager.PlayFabManager
 
         private async UniTask<Sprite> LoadSkillSprite(int skillId, CancellationToken token)
         {
+            if (skillId == GameCommonData.InvalidNumber)
+            {
+                return null;
+            }
+
             var response = await Resources
                 .LoadAsync<Sprite>(GameCommonData.SkillSpritePath + skillId)
                 .WithCancellation(token);

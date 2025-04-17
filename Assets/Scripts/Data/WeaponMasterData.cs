@@ -21,8 +21,6 @@ namespace Common.Data
         public Sprite WeaponIcon { get; }
         public WeaponType WeaponType { get; }
         public int WeaponTypeInt { get; set; }
-        public AttributeType AttributeType { get; }
-        public int AttributeTypeInt { get; set; }
 
         public WeaponMasterData
         (
@@ -32,7 +30,6 @@ namespace Common.Data
             GameObject weaponEffectObj,
             Sprite weaponIcon,
             WeaponType weaponType,
-            AttributeType attributeType,
             SkillMasterData normalSkillMasterData,
             SkillMasterData[] statusSkillMasterDatum,
             SkillMasterData specialSkillMasterData,
@@ -47,7 +44,6 @@ namespace Common.Data
             WeaponEffectObj = weaponEffectObj;
             WeaponIcon = weaponIcon;
             WeaponType = weaponType;
-            AttributeType = attributeType;
             NormalSkillMasterData = normalSkillMasterData;
             StatusSkillMasterDatum = statusSkillMasterDatum;
             SpecialSkillMasterData = specialSkillMasterData;
@@ -56,12 +52,12 @@ namespace Common.Data
             Rare = rare;
         }
 
-        public SkillMasterData GetSkillData(SkillType skillType)
+        public SkillMasterData GetSkillData(int skillType)
         {
             return skillType switch
             {
-                SkillType.Normal => NormalSkillMasterData,
-                SkillType.Special => SpecialSkillMasterData,
+                1 => NormalSkillMasterData,
+                2 => SpecialSkillMasterData,
                 _ => null
             };
         }

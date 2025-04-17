@@ -6,9 +6,9 @@ using Zenject;
 
 public class NormalSkillStatusChangeUseCase : IDisposable
 {
-    private readonly SkillMasterDataRepository skillMasterDataRepository;
-    private readonly UserDataRepository userDataRepository;
-    private readonly CharacterMasterDataRepository characterMasterDataRepository;
+    private readonly SkillMasterDataRepository _skillMasterDataRepository;
+    private readonly UserDataRepository _userDataRepository;
+    private readonly CharacterMasterDataRepository _characterMasterDataRepository;
 
     [Inject]
     public NormalSkillStatusChangeUseCase
@@ -18,32 +18,9 @@ public class NormalSkillStatusChangeUseCase : IDisposable
         CharacterMasterDataRepository characterMasterDataRepository
     )
     {
-        this.skillMasterDataRepository = skillMasterDataRepository;
-        this.userDataRepository = userDataRepository;
-        this.characterMasterDataRepository = characterMasterDataRepository;
-    }
-
-    public int ApplyBuffSkill(int characterId, int skillId, StatusType statusType)
-    {
-        var levelData = userDataRepository.GetCurrentLevelData(characterId);
-        var characterData = characterMasterDataRepository.GetCharacterData(characterId);
-        var statusValue = GetStatus(characterData, statusType);
-        var fixedValue = Mathf.FloorToInt(levelData.StatusRate * statusValue);
-        if (levelData.Level < GameCommonData.StatusSkillReleaseLevel)
-        {
-            return fixedValue;
-        }
-
-        var skillData = skillMasterDataRepository.GetSkillData(skillId);
-        return skillData.SkillEffectType switch
-        {
-            SkillEffectType.Hp when statusType == StatusType.Hp => fixedValue + (int)skillData.DamagePlu,
-            SkillEffectType.Attack when statusType == StatusType.Attack => fixedValue + (int)skillData.DamagePlu,
-            SkillEffectType.Speed when statusType == StatusType.Speed => fixedValue + (int)skillData.DamagePlu,
-            SkillEffectType.BombLimit when statusType == StatusType.BombLimit => fixedValue + (int)skillData.DamagePlu,
-            SkillEffectType.FireRange when statusType == StatusType.FireRange => fixedValue + (int)skillData.DamagePlu,
-            _ => fixedValue
-        };
+        _skillMasterDataRepository = skillMasterDataRepository;
+        _userDataRepository = userDataRepository;
+        _characterMasterDataRepository = characterMasterDataRepository;
     }
 
     private int GetStatus(CharacterData characterData, StatusType statusType)

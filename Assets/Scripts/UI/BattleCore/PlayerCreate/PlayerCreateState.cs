@@ -7,9 +7,9 @@ using Manager.NetworkManager;
 using Photon.Pun;
 using Player.Common;
 using UI.Battle;
-using UniRx;
 using Unity.Mathematics;
 using UnityEngine;
+using UniRx;
 
 namespace Manager.BattleManager
 {
@@ -79,7 +79,7 @@ namespace Manager.BattleManager
                 SetAnimatorController(player, weaponType, photonAnimator);
                 GenerateEffectActivator(player, playerId);
                 _WeaponCreateInBattleUseCase.CreateWeapon(player, weaponData, photonView);
-                InitializeStatus(out var playerStatusManager, characterData, weaponData, photonView.IsMine);
+                var playerStatusManager = InitializeStatus(characterData, weaponData, photonView.IsMine);
                 playerPutBomb.Initialize(_BombProvider, playerStatusManager, _MapManager);
                 if (!photonView.IsMine)
                 {
@@ -100,32 +100,49 @@ namespace Manager.BattleManager
                 );
             }
 
-            private void InitializeStatus
+            private TranslateStatusInBattleUseCase InitializeStatus
             (
-                out TranslateStatusForBattleUseCase playerStatusForBattleUseCase,
                 CharacterData characterData,
                 WeaponMasterData weaponData,
                 bool isMine
             )
             {
-                var statusSkillData = weaponData.StatusSkillMasterDatum;
+                var statusSkillDatum = weaponData.StatusSkillMasterDatum;
                 var characterId = characterData.Id;
-                var skillId = statusSkillData.Id;
-                var hp = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Hp);
-                var speed = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Speed);
-                var attack = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Attack);
-                var fireRange = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.FireRange);
-                var bombLimit = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.BombLimit);
+                var hp = 0;
+                var attack = 0;
+                var speed = 0;
+                var bombLimit = 0;
+                var fireRange = 0;
+                var defense = 0;
+                var resistance = 0;
 
-                playerStatusForBattleUseCase = new TranslateStatusForBattleUseCase
+                foreach (var statusSkillData in statusSkillDatum)
+                {
+                    var skillId = statusSkillData.Id;
+                    hp = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Hp);
+                    speed = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Speed);
+                    attack = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Attack);
+                    fireRange = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.FireRange);
+                    bombLimit = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.BombLimit);
+                    defense = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Defense);
+                    resistance = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Resistance);
+                }
+
+
+                var playerStatusForBattleUseCase = new TranslateStatusInBattleUseCase
                 (
                     hp,
                     speed,
                     bombLimit,
                     attack,
                     fireRange,
+                    defense,
+                    resistance,
                     isMine
                 );
+
+                return playerStatusForBattleUseCase;
             }
 
             private void GenerateEffectActivator(GameObject playerObj, int playerId)

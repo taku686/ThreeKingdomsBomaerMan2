@@ -25,85 +25,39 @@ public class ApplyStatusSkillUseCase : IDisposable
 
     public int ApplyStatusSkill(int characterId, int skillId, StatusType statusType)
     {
-        var levelData = userDataRepository.GetCurrentLevelData(characterId);
         var appliedLevelValue = ApplyLevelStatus(characterId, statusType);
-        if (levelData.Level < GameCommonData.StatusSkillReleaseLevel)
+        var skillData = skillMasterDataRepository.GetSkillData(skillId);
+        if (skillData.SkillType != SkillType.Status)
         {
             return appliedLevelValue;
         }
 
-        var skillData = skillMasterDataRepository.GetSkillData(skillId);
-        return skillData.SkillEffectType switch
+        var addValue = statusType switch
         {
-            SkillEffectType.Hp when statusType == StatusType.Hp
-                => appliedLevelValue + (int)skillData.DamagePlu,
-            SkillEffectType.Attack when statusType == StatusType.Attack
-                => appliedLevelValue + (int)skillData.DamagePlu,
-            SkillEffectType.Speed when statusType == StatusType.Speed
-                => appliedLevelValue + (int)skillData.DamagePlu,
-            SkillEffectType.BombLimit when statusType == StatusType.BombLimit
-                => appliedLevelValue + (int)skillData.DamagePlu,
-            SkillEffectType.FireRange when statusType == StatusType.FireRange
-                => appliedLevelValue + (int)skillData.DamagePlu,
-            _ => appliedLevelValue
+            StatusType.Hp => (int)skillData.HpPlu,
+            StatusType.Attack => (int)skillData.AttackPlu,
+            StatusType.Speed => (int)skillData.SpeedPlu,
+            StatusType.BombLimit => (int)skillData.BombPlu,
+            StatusType.FireRange => (int)skillData.FirePlu,
+            StatusType.Defense => (int)skillData.DefensePlu,
+            StatusType.Resistance => (int)skillData.ResistancePlu,
+            _ => throw new ArgumentOutOfRangeException(nameof(statusType), statusType, null)
         };
+        addValue = addValue == GameCommonData.InvalidNumber ? 0 : addValue;
+        return appliedLevelValue + addValue;
     }
 
     public int ApplyBuffStatusSkill(int characterId, int skillId, StatusType statusType, int value)
     {
+        //todo 後で修正する
         var levelData = userDataRepository.GetCurrentLevelData(characterId);
-        if (levelData.Level < GameCommonData.StatusSkillReleaseLevel)
+        if (levelData.Level < GameCommonData.NormalSkillReleaseLevel)
         {
             return value;
         }
 
         var skillData = skillMasterDataRepository.GetSkillData(skillId);
-        value = skillData.SkillEffectType switch
-        {
-            SkillEffectType.HpBuff when statusType == StatusType.Hp
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            SkillEffectType.AttackBuff when statusType == StatusType.Attack
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            SkillEffectType.SpeedBuff when statusType == StatusType.Speed
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            SkillEffectType.BombLimitBuff when statusType == StatusType.BombLimit
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            SkillEffectType.FireRangeBuff when statusType == StatusType.FireRange
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            SkillEffectType.AllStatusBuff when statusType == StatusType.Hp
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            SkillEffectType.AllStatusBuff when statusType == StatusType.Attack
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            SkillEffectType.AllStatusBuff when statusType == StatusType.Speed
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            SkillEffectType.AllStatusBuff when statusType == StatusType.BombLimit
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            SkillEffectType.AllStatusBuff when statusType == StatusType.FireRange
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            SkillEffectType.AllStatusDebuff when statusType == StatusType.Hp
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            SkillEffectType.AllStatusDebuff when statusType == StatusType.Attack
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            SkillEffectType.AllStatusDebuff when statusType == StatusType.Speed
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            SkillEffectType.AllStatusDebuff when statusType == StatusType.BombLimit
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            SkillEffectType.AllStatusDebuff when statusType == StatusType.FireRange
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            SkillEffectType.FastMove when statusType == StatusType.Speed
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            SkillEffectType.GodPower when statusType == StatusType.Hp
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            SkillEffectType.GodPower when statusType == StatusType.Attack
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            SkillEffectType.GodPower when statusType == StatusType.Speed
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            SkillEffectType.GodPower when statusType == StatusType.BombLimit
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            SkillEffectType.GodPower when statusType == StatusType.FireRange
-                => Mathf.FloorToInt(value * skillData.DamagePlu),
-            _ => value
-        };
+
 
         return value;
     }

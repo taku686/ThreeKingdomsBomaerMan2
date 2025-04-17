@@ -117,7 +117,7 @@ namespace UI.Title
 
         private SkillGridView.ViewModel TranslateSkillDataToViewModel(SkillMasterData skillMasterData)
         {
-            return new SkillGridView.ViewModel(skillMasterData.Sprite, skillMasterData.Name);
+            return skillMasterData == null ? null : new SkillGridView.ViewModel(skillMasterData.Sprite, skillMasterData.Name);
         }
 
         public class ViewModel

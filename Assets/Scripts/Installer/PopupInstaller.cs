@@ -10,6 +10,7 @@ public class PopupInstaller : MonoInstaller<PopupInstaller>
     [SerializeField] private GameObject _inputNamePopupPrefab;
     [SerializeField] private GameObject _errorPopupPrefab;
     [SerializeField] private GameObject _userInfoPopupPrefab;
+    [SerializeField] private GameObject _skillDetailPopupPrefab;
 
     public override void InstallBindings()
     {
@@ -21,6 +22,8 @@ public class PopupInstaller : MonoInstaller<PopupInstaller>
             .FromComponentInNewPrefab(_errorPopupPrefab).UnderTransform(_popupParent).AsTransient();
         Container.BindFactory<UserInfoPopup, UserInfoPopup.Factory>()
             .FromComponentInNewPrefab(_userInfoPopupPrefab).UnderTransform(_popupParent).AsTransient();
+        Container.BindFactory<SkillDetailPopup, SkillDetailPopup.Factory>()
+            .FromComponentInNewPrefab(_skillDetailPopupPrefab).UnderTransform(_popupParent).AsTransient();
         Container.Bind<PopupGenerateUseCase>().AsCached();
         Container.Bind<BlockingGameObject>().FromComponentOn(_blockingImageObject).AsCached();
     }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Common.Data;
+using UnityEngine;
 
 namespace Manager.DataManager
 {
@@ -20,12 +22,13 @@ namespace Manager.DataManager
 
         public SkillMasterData GetSkillData(int id)
         {
-            return _skillDatum.Find(data => data.Id == id);
+            return _skillDatum.FirstOrDefault(data => data.Id == id);
         }
 
         public SkillMasterData[] GetSkillDatum(int[] ids)
         {
             var skillMasterData = new SkillMasterData[ids.Length];
+
             for (var i = 0; i < ids.Length; i++)
             {
                 skillMasterData[i] = GetSkillData(ids[i]);

@@ -90,7 +90,7 @@ namespace UI.Title
             {
                 var addWeapon =
                     _View._ShopWeaponGridView._OnClickWeaponButton
-                        .Select(_ => EnoughGem(GameCommonData.WeaponBuyPrice))
+                        .Select(_ => EnoughGem(10))
                         .Publish();
 
                 addWeapon
@@ -119,9 +119,9 @@ namespace UI.Title
                 addWeapon.Connect().AddTo(_cts.Token);
             }
 
-            private bool EnoughGem(int cost)
+            private bool EnoughGem(int buyCount)
             {
-                cost *= GameCommonData.WeaponBuyPrice;
+                var cost = GameCommonData.WeaponBuyPrice * buyCount;
                 var userData = _UserDataRepository.GetUserData();
                 var gem = userData.Gem;
                 return gem >= cost;

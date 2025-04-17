@@ -27,7 +27,7 @@ namespace Repository
             { SortType.None, true },
         };
 
-        private readonly Dictionary<WeaponType, bool> _weaponFilterTypeDictionary = new()
+        private readonly Dictionary<WeaponType, bool> _filterTypeDictionary = new()
         {
             { WeaponType.Spear, false },
             { WeaponType.Hammer, false },
@@ -40,7 +40,10 @@ namespace Repository
             { WeaponType.Staff, false },
             { WeaponType.Scythe, false },
             { WeaponType.BigSword, false },
-            { WeaponType.None, true },
+            { WeaponType.Crow, false },
+            { WeaponType.Katana, false },
+            { WeaponType.Lance, false },
+            { WeaponType.None, true }
         };
 
         public void SetSortType(SortType sortType)
@@ -56,23 +59,23 @@ namespace Repository
         {
             if (filterType == WeaponType.None)
             {
-                var filterTypeDictionary = new Dictionary<WeaponType, bool>(_weaponFilterTypeDictionary);
+                var filterTypeDictionary = new Dictionary<WeaponType, bool>(_filterTypeDictionary);
                 foreach (var filter in filterTypeDictionary)
                 {
-                    _weaponFilterTypeDictionary[filter.Key] = false;
+                    _filterTypeDictionary[filter.Key] = false;
                 }
 
-                _weaponFilterTypeDictionary[WeaponType.None] = true;
+                _filterTypeDictionary[WeaponType.None] = true;
                 return;
             }
 
-            var isActive = _weaponFilterTypeDictionary[filterType];
-            _weaponFilterTypeDictionary[filterType] = !isActive;
-            _weaponFilterTypeDictionary[WeaponType.None] = false;
+            var isActive = _filterTypeDictionary[filterType];
+            _filterTypeDictionary[filterType] = !isActive;
+            _filterTypeDictionary[WeaponType.None] = false;
 
-            if(_weaponFilterTypeDictionary.Values.All(value => !value))
+            if (_filterTypeDictionary.Values.All(value => !value))
             {
-                _weaponFilterTypeDictionary[WeaponType.None] = true;
+                _filterTypeDictionary[WeaponType.None] = true;
             }
         }
 
@@ -83,7 +86,7 @@ namespace Repository
 
         public IReadOnlyDictionary<WeaponType, bool> GetFilterTypeDictionary()
         {
-            return _weaponFilterTypeDictionary;
+            return _filterTypeDictionary;
         }
 
         public enum SortType
@@ -108,7 +111,7 @@ namespace Repository
 
         public void Dispose()
         {
-            _weaponFilterTypeDictionary.Clear();
+            _filterTypeDictionary.Clear();
             _sortTypeDictionary.Clear();
         }
     }

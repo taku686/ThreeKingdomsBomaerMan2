@@ -15,29 +15,23 @@ public class AnimatorControllerRepository : MonoBehaviour
 
     public RuntimeAnimatorController GetAnimatorController(WeaponType weaponType)
     {
-        switch (weaponType)
+        return weaponType switch
         {
-            case WeaponType.Spear:
-                return spearAnimatorController;
-            case WeaponType.Hammer:
-                return hammerAnimatorController;
-            case WeaponType.Sword:
-                return swordAnimatorController;
-            case WeaponType.Knife:
-                return knifeAnimatorController;
-            case WeaponType.Fan:
-                return fanAnimatorController;
-            case WeaponType.Bow:
-                return bowAnimatorController;
-            case WeaponType.Shield:
-                return shieldAnimatorController;
-            case WeaponType.Axe:
-                return axeAnimatorController;
-            case WeaponType.Staff:
-                return staffAnimatorController;
-            default:
-                return null;
-        }
-        
+            WeaponType.Spear => spearAnimatorController,
+            WeaponType.Hammer => hammerAnimatorController,
+            WeaponType.Sword => swordAnimatorController,
+            WeaponType.Knife => knifeAnimatorController,
+            WeaponType.Fan => fanAnimatorController,
+            WeaponType.Bow => bowAnimatorController,
+            WeaponType.Shield => shieldAnimatorController,
+            WeaponType.Axe => axeAnimatorController,
+            WeaponType.Staff => staffAnimatorController,
+            WeaponType.BigSword => swordAnimatorController,
+            WeaponType.Scythe => axeAnimatorController,
+            WeaponType.Crow => knifeAnimatorController,
+            WeaponType.Katana => swordAnimatorController,
+            WeaponType.Lance => spearAnimatorController,
+            _ => null
+        };
     }
 }

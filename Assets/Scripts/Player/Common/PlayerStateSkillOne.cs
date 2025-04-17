@@ -20,7 +20,7 @@ namespace Player.Common
             private PhotonNetworkManager _PhotonNetworkManager => Owner._photonNetworkManager;
             private PhotonView _PhotonView => Owner.photonView;
             private string _HpKey => Owner._hpKey;
-            private TranslateStatusForBattleUseCase _TranslateStatusForBattleUseCase => Owner._translateStatusForBattleUseCase;
+            private TranslateStatusInBattleUseCase _TranslateStatusInBattleUseCase => Owner._translateStatusInBattleUseCase;
             private ApplyStatusSkillUseCase _ApplyStatusSkillUseCase => Owner._applyStatusSkillUseCase;
             private Subject<(StatusType statusType, float value)> _StatusBuff => Owner._statusBuffSubject;
             private Subject<(StatusType statusType, int value, bool isBuff, bool isDebuff)> _StatusBuffUi => Owner._statusBuffUiSubject;
@@ -33,7 +33,8 @@ namespace Player.Common
                 var statusSkillData = weaponData.StatusSkillMasterDatum;
                 var characterData = _PhotonNetworkManager.GetCharacterData(index);
                 var characterId = characterData.Id;
-                ActivateSkill(normalSkillData, statusSkillData, characterId);
+                //todo　後で治す　 
+                //ActivateSkill(normalSkillData, statusSkillData, characterId);
                 PhotonNetwork.LocalPlayer.SetSkillData(normalSkillData.Id);
             }
 
@@ -65,7 +66,7 @@ namespace Player.Common
                 {
                     case SkillEffectType.Heal:
                         PlayBackAnimation(GameCommonData.BuffHashKey, GameCommonData.BuffKey);
-                        var hpRate = _TranslateStatusForBattleUseCase.Heal((int)normalSkill.DamagePlu);
+                        var hpRate = _TranslateStatusInBattleUseCase.Heal((int)normalSkill.DamagePlu);
                         SynchronizedValue.Instance.SetValue(_HpKey, hpRate);
                         break;
                     case SkillEffectType.Kick:
@@ -270,11 +271,11 @@ namespace Player.Common
             {
                 var value = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, statusSKillId, statusType);
                 var appliedSkillValue = _ApplyStatusSkillUseCase.ApplyBuffStatusSkill(characterId, normalSkill.Id, statusType, value);
-                var translatedValue = _TranslateStatusForBattleUseCase.TranslateStatusValue(statusType, appliedSkillValue);
+                var translatedValue = _TranslateStatusInBattleUseCase.TranslateStatusValue(statusType, appliedSkillValue);
                 _StatusBuff.OnNext((statusType, translatedValue));
                 _StatusBuffUi.OnNext((statusType, value: appliedSkillValue, isBuff, isDebuff));
                 await UniTask.Delay((int)normalSkill.EffectTime * 1000);
-                var translatedPrefValue = _TranslateStatusForBattleUseCase.TranslateStatusValue(statusType, value);
+                var translatedPrefValue = _TranslateStatusInBattleUseCase.TranslateStatusValue(statusType, value);
                 _StatusBuff.OnNext((statusType, translatedPrefValue));
                 _StatusBuffUi.OnNext((statusType, value, isBuff: false, isDebuff: false));
             }

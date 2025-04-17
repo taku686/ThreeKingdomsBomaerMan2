@@ -10,6 +10,7 @@ public class PopupGenerateUseCase : IDisposable
     [Inject] private InputNamePopup.Factory _inputNamePopupFactory;
     [Inject] private ErrorPopup.Factory _errorPopupFactory;
     [Inject] private UserInfoPopup.Factory _userInfoPopupFactory;
+    [Inject] private SkillDetailPopup.Factory _skillDetailPopupFactory;
 
     public IObservable<bool> GenerateConfirmPopup
     (
@@ -56,6 +57,13 @@ public class PopupGenerateUseCase : IDisposable
         var userInfoPopup = _userInfoPopupFactory.Create();
         userInfoPopup.Open(viewModel).Forget();
         return userInfoPopup._OnClickButton;
+    }
+
+    public IObservable<Unit> GenerateSkillDetailPopup(SkillDetailPopup.ViewModel viewModel)
+    {
+        var skillDetailPopup = _skillDetailPopupFactory.Create();
+        skillDetailPopup.Open(viewModel).Forget();
+        return skillDetailPopup._OnClickButton;
     }
 
     public void Dispose()

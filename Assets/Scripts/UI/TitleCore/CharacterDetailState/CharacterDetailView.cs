@@ -1,6 +1,10 @@
-﻿using Common.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Common.Data;
 using DG.Tweening;
 using TMPro;
+using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
@@ -31,8 +35,10 @@ namespace UI.Title
         [SerializeField] private Image _typeIcon;
         [SerializeField] private TextMeshProUGUI _passiveSkillName;
         [SerializeField] private TextMeshProUGUI _passiveSkillExplanation;
+        [SerializeField] private Image _levelIcon;
         [Inject] private ApplyStatusSkillUseCase _applyStatusSkillUseCase;
         private bool _isInitialized;
+        private readonly Dictionary<int, (bool, string)> _statusTextDictionary = new();
         private const float MoveAmount = 50;
         public VirtualCurrencyAddPopup _VirtualCurrencyAddPopup => virtualCurrencyAddPopup;
         public PurchaseErrorView _PurchaseErrorView => purchaseErrorView;
@@ -42,6 +48,9 @@ namespace UI.Title
         public Button _LeftArrowButton => leftArrowButton;
         public Button _RightArrowButton => rightArrowButton;
         public Button _InventoryButton => inventoryButton;
+
+        public IObservable<Button> _OnClickNormalSkillButtonAsObservable => skillsView._OnClickNormalSkillButtonAsObservable;
+        public IObservable<Button> _OnClickSpecialSkillButtonAsObservable => skillsView._OnClickSpecialSkillButtonAsObservable;
 
         public void ApplyViewModel(ViewModel viewModel)
         {
@@ -75,12 +84,27 @@ namespace UI.Title
         )
         {
             nameText.text = characterData.Name;
-            var statusSkillId = weaponMasterData.StatusSkillMasterDatum.Id;
-            statusView.HpText.text = GetFixedStatus(characterData, statusSkillId, StatusType.Hp);
-            statusView.DamageText.text = GetFixedStatus(characterData, statusSkillId, StatusType.Attack);
-            statusView.SpeedText.text = GetFixedStatus(characterData, statusSkillId, StatusType.Speed);
-            statusView.BombLimitText.text = GetFixedStatus(characterData, statusSkillId, StatusType.BombLimit);
-            statusView.FireRangeText.text = GetFixedStatus(characterData, statusSkillId, StatusType.FireRange);
+            _statusTextDictionary.Clear();
+            var statusSkillDatum = weaponMasterData.StatusSkillMasterDatum;
+            foreach (var statusSkillData in statusSkillDatum)
+            {
+                var skillId = statusSkillData.Id;
+                GetFixedStatuesText(characterData, skillId, StatusType.Hp);
+                GetFixedStatuesText(characterData, skillId, StatusType.Attack);
+                GetFixedStatuesText(characterData, skillId, StatusType.Speed);
+                GetFixedStatuesText(characterData, skillId, StatusType.BombLimit);
+                GetFixedStatuesText(characterData, skillId, StatusType.FireRange);
+                GetFixedStatuesText(characterData, skillId, StatusType.Defense);
+                GetFixedStatuesText(characterData, skillId, StatusType.Resistance);
+            }
+
+            statusView._HpText.text = _statusTextDictionary.First(x => x.Key == (int)StatusType.Hp).Value.Item2;
+            statusView._AttackText.text = _statusTextDictionary.First(x => x.Key == (int)StatusType.Attack).Value.Item2;
+            statusView._SpeedText.text = _statusTextDictionary.First(x => x.Key == (int)StatusType.Speed).Value.Item2;
+            statusView._BombLimitText.text = _statusTextDictionary.First(x => x.Key == (int)StatusType.BombLimit).Value.Item2;
+            statusView._FireRangeText.text = _statusTextDictionary.First(x => x.Key == (int)StatusType.FireRange).Value.Item2;
+            statusView._DefenseText.text = _statusTextDictionary.First(x => x.Key == (int)StatusType.Defense).Value.Item2;
+            statusView._ResistanceText.text = _statusTextDictionary.First(x => x.Key == (int)StatusType.Resistance).Value.Item2;
         }
 
         private void ApplySkillsViewModel(SkillsView.ViewModel viewModel)
@@ -92,36 +116,47 @@ namespace UI.Title
         {
             if (currentLevelMasterData.Level < GameCommonData.MaxCharacterLevel)
             {
-                upgradeButton.gameObject.SetActive(true);
-                upgradeInfoGameObject.gameObject.SetActive(true);
+                upgradeButton.interactable = true;
                 levelText.text = "LV <#94aed0><size=170%>" + currentLevelMasterData.Level;
                 upgradeInfoText.text = $"Lv{nextLevelMasterData.Level} Upgrade";
                 upgradeText.text = nextLevelMasterData.NeedCoin.ToString("D");
+                _levelIcon.color = Color.white;
             }
             else
             {
                 levelText.text = "LV <#94aed0><size=170%>" + currentLevelMasterData.Level;
-                upgradeButton.gameObject.SetActive(false);
-                upgradeInfoGameObject.gameObject.SetActive(false);
+                upgradeButton.interactable = false;
+                upgradeText.text = "MAX LV";
+                upgradeInfoText.text = "MAX LV";
+                _levelIcon.color = new Color(1, 1, 1, 0.5f);
             }
         }
 
-        private string GetFixedStatus
+        private void GetFixedStatuesText
         (
             CharacterData characterData,
             int skillId,
             StatusType statusType
         )
         {
-            var fixedValue = _applyStatusSkillUseCase.ApplyLevelStatus(characterData.Id, statusType);
-            var statusAddValue = _applyStatusSkillUseCase.ApplyStatusSkill(characterData.Id, skillId, statusType);
-            var increaseValue = statusAddValue - fixedValue;
-            if (increaseValue == 0)
+            if (_statusTextDictionary.TryGetValue((int)statusType, out var statusText))
             {
-                return statusAddValue.ToString();
+                if (statusText.Item1)
+                {
+                    return;
+                }
             }
 
-            return statusAddValue + $"<#ff0000>+{increaseValue}<size=170%>";
+            var appliedLevelValue = _applyStatusSkillUseCase.ApplyLevelStatus(characterData.Id, statusType);
+            var appliedStatusSkillValue = _applyStatusSkillUseCase.ApplyStatusSkill(characterData.Id, skillId, statusType);
+            var increaseValue = appliedStatusSkillValue - appliedLevelValue;
+            if (increaseValue is 0)
+            {
+                _statusTextDictionary[(int)statusType] = (false, appliedStatusSkillValue.ToString());
+                return;
+            }
+
+            _statusTextDictionary[(int)statusType] = (true, appliedStatusSkillValue + $"<#ff0000> +{increaseValue}<size=170%>");
         }
 
         private void InitializeArrowAnimation()

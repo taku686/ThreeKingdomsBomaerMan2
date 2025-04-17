@@ -1,3 +1,4 @@
+using System;
 using Common.Data;
 using UnityEngine;
 
@@ -11,13 +12,14 @@ public class StatusInBattleView : MonoBehaviour
 
     public void ApplyViewModel(ViewModel viewModel)
     {
-        hpStatusGridView.SetValueText(viewModel.Hp);
-        attackStatusGridView.SetValueText(viewModel.Attack);
-        speedStatusGridView.SetValueText(viewModel.Speed);
-        bombLimitStatusGridView.SetValueText(viewModel.BombLimit);
-        firePowerStatusGridView.SetValueText(viewModel.FireRange);
+        hpStatusGridView.SetValueText(viewModel._Hp);
+        attackStatusGridView.SetValueText(viewModel._Attack);
+        speedStatusGridView.SetValueText(viewModel._Speed);
+        bombLimitStatusGridView.SetValueText(viewModel._BombLimit);
+        firePowerStatusGridView.SetValueText(viewModel._FireRange);
     }
 
+    //todo 後で修正　防御と抵抗値を追加する
     public void ApplyBuffState(StatusType statusType, int value, bool isBuff, bool isDebuff)
     {
         switch (statusType)
@@ -59,16 +61,24 @@ public class StatusInBattleView : MonoBehaviour
             case StatusType.FireRange:
                 firePowerStatusGridView.SetDebuffState(true, value);
                 break;
+            case StatusType.Defense:
+                break;
+            case StatusType.Resistance:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(statusType), statusType, null);
         }
     }
 
     public class ViewModel
     {
-        public int Hp { get; }
-        public int Attack { get; }
-        public int Speed { get; }
-        public int BombLimit { get; }
-        public int FireRange { get; }
+        public int _Hp { get; }
+        public int _Attack { get; }
+        public int _Speed { get; }
+        public int _BombLimit { get; }
+        public int _FireRange { get; }
+        public int _Defense { get; }
+        public int _Resistance { get; }
 
         public ViewModel
         (
@@ -76,14 +86,18 @@ public class StatusInBattleView : MonoBehaviour
             int attack,
             int speed,
             int bombLimit,
-            int fireRange
+            int fireRange,
+            int defense,
+            int resistance
         )
         {
-            Hp = hp;
-            Attack = attack;
-            Speed = speed;
-            BombLimit = bombLimit;
-            FireRange = fireRange;
+            _Hp = hp;
+            _Attack = attack;
+            _Speed = speed;
+            _BombLimit = bombLimit;
+            _FireRange = fireRange;
+            _Defense = defense;
+            _Resistance = resistance;
         }
     }
 }

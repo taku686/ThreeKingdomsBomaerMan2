@@ -379,29 +379,23 @@ namespace Manager.NetworkManager
             _extensionProvider = extensions;
         }
 
-        /*public async UniTask<int[]> AddRandomWeaponAsync()
-        {
-            var result = await PlayFabBaseManager.AzureFunctionAsync("AddRandomWeapon");
-            if (result == null)
-            {
-                return new[] { -1 };
-            }
-
-            await _playFabUserDataManager.GetUserDataAsync();
-            var weaponIds = JsonConvert.DeserializeObject<Dictionary<string, int[]>>(result.ToString());
-            return weaponIds["result"];
-        }*/
-
         public async UniTask<(bool, IReadOnlyList<int>)> AddRandomWeaponAsync(int createCount, int cost)
         {
             var weaponMasterDatum = _weaponMasterDataRepository.GetAllWeaponData().ToArray();
             var result = new List<int>();
+
             for (var i = 0; i < createCount; i++)
             {
                 var weaponId = weaponMasterDatum[UnityEngine.Random.Range(0, weaponMasterDatum.Length)].Id;
                 _userDataRepository.AddWeaponData(weaponId);
                 result.Add(weaponId);
             }
+            //todo: 1回の購入で全ての武器を購入できるようにする
+            /*foreach (var masterData in weaponMasterDatum)
+            {
+                _userDataRepository.AddWeaponData(masterData.Id);
+                result.Add(masterData.Id);
+            }*/
 
             await _playFabUserDataManager.TryUpdateUserDataAsync();
             await _playFabVirtualCurrencyManager.SubtractVirtualCurrency(GameCommonData.GemKey, cost);

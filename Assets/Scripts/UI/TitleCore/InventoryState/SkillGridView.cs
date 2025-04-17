@@ -16,8 +16,15 @@ namespace UI.Title
 
         public void ApplyViewModel(ViewModel viewModel)
         {
-            iconImage.sprite = viewModel.Icon;
-            skillName.text = viewModel.Name;
+            if (viewModel == null)
+            {
+                gameObject.SetActive(false);
+                return;
+            }
+
+            gameObject.SetActive(true);
+            iconImage.sprite = viewModel._Icon;
+            skillName.text = viewModel._Name;
         }
 
         public IObservable<Unit> OnClickDetailButtonAsObservable()
@@ -27,13 +34,13 @@ namespace UI.Title
 
         public class ViewModel
         {
-            public Sprite Icon { get; }
-            public string Name { get; }
+            public Sprite _Icon { get; }
+            public string _Name { get; }
 
             public ViewModel(Sprite icon, string name)
             {
-                Icon = icon;
-                Name = name;
+                _Icon = icon;
+                _Name = name;
             }
         }
     }

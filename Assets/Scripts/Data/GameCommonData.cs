@@ -90,9 +90,9 @@ namespace Common.Data
         public const float FadeOutTime = 0.8f;
         public const int BattleTime = 180;
         public const int DefaultWeaponId = 71;
-        public const int StatusSkillReleaseLevel = 3;
-        public const int NormalSkillReleaseLevel = 7;
-        public const int SpecialSkillReleaseLevel = 10;
+        public const int NormalSkillReleaseLevel = 3;
+        public const int SpecialSkillReleaseLevel = 5;
+        public const int InvalidNumber = -9999;
 
         public static class Terms
         {
@@ -329,18 +329,42 @@ namespace Common.Data
 
     public enum BombType
     {
-        Normal,
-        Penetration,
-        Diffusion,
-        Paralysis,
-        Poison,
-        Frozen,
-        Confusion,
-        Sealed,
-        DeadlyPoison,
-        GreatFire,
-        LifeSteal,
-        Holy
+        Normal = 0,
+        Penetration = 1,
+        Diffusion = 2,
+        Paralysis = 3,
+        Poison = 4,
+        Frozen = 5,
+        Confusion = 6,
+        Sealed = 7,
+        DeadlyPoison = 8,
+        GreatFire = 9,
+        LifeSteal = 10,
+        Holy = 11,
+        None = 999
+    }
+
+    public enum AbnormalCondition
+    {
+        Paralysis = 0,
+        Poison = 1,
+        Frozen = 2,
+        Confusion = 3,
+        NockBack = 4,
+        Charm = 5,
+        Miasma = 6,
+        Darkness = 7,
+        Sealed = 8,
+        LifeSteal = 9,
+        Curse = 10,
+        HellFire = 11,
+        Fear = 12,
+        TimeStop = 13,
+        Apraxia = 14,
+        BombLock = 15,
+        Burning = 16,
+        All = 99,
+        None = 999
     }
 
     public enum LoginBonusStatus
@@ -362,21 +386,12 @@ namespace Common.Data
         Shield = 6,
         Axe = 7,
         Staff = 8,
-        Scythe = 9,
-        BigSword = 10,
+        BigSword = 9,
+        Crow = 10,
+        Katana = 11,
+        Scythe = 12,
+        Lance = 13,
         None = 999,
-    }
-
-    public enum AttributeType
-    {
-        Fire = 0,
-        Water = 1,
-        Wind = 2,
-        Earth = 3,
-        Light = 4,
-        Dark = 5,
-        Poison = 6,
-        None = 100
     }
 
     public enum SkillType
@@ -384,7 +399,6 @@ namespace Common.Data
         Status,
         Active,
         Passive,
-        AlwaysActive
     }
 
     public enum NumberRequirementType
@@ -396,6 +410,7 @@ namespace Common.Data
         HpRate = 4,
         BattleRank = 5,
         AllTeam = 6,
+        None = 999
     }
 
     public enum BoolRequirementType
@@ -403,7 +418,8 @@ namespace Common.Data
         Buff = 0,
         Debuff = 1,
         AbnormalCondition = 2,
-        ReceiveDamage = 3
+        ReceiveDamage = 3,
+        None = 999
     }
 
     public enum AnimationStateType
@@ -437,6 +453,7 @@ namespace Common.Data
         Random = 7,
         Specified = 8,
         Everywhere = 9,
+        None = 999
     }
 
     public enum SkillEffectType

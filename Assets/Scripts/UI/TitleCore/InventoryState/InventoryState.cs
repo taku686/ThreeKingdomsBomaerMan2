@@ -23,6 +23,8 @@ namespace UI.Title
             private WeaponSortRepository _WeaponSortRepository => Owner._weaponSortRepository;
             private CancellationTokenSource _cts;
             private Subject<int> _onChangeSelectedWeaponSubject;
+            private const int SkillOne = 1;
+            private const int SkillTwo = 2;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -90,30 +92,16 @@ namespace UI.Title
             {
                 _View._OnClickNormalSkillDetailButtonAsObservable
                     .WithLatestFrom(_onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
-                    .Select(weaponId => _SkillDetailViewModelUseCase.InAsTask(weaponId, SkillType.Normal))
-                    .Subscribe(viewModel =>
-                    {
-                        _View.ApplySkillDetailViewModel(viewModel);
-                        Owner.SetActiveBlockPanel(false);
-                    })
+                    .Select(weaponId => _SkillDetailViewModelUseCase.InAsTask(weaponId, SkillOne))
+                    .SelectMany(viewModel => _PopupGenerateUseCase.GenerateSkillDetailPopup(viewModel))
+                    .Subscribe(_ => { Owner.SetActiveBlockPanel(false); })
                     .AddTo(_cts.Token);
 
                 _View._OnClickSpecialSkillDetailButtonAsObservable
                     .WithLatestFrom(_onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
-                    .Select(weaponId => _SkillDetailViewModelUseCase.InAsTask(weaponId, SkillType.Special))
-                    .Subscribe(viewModel =>
-                    {
-                        _View.ApplySkillDetailViewModel(viewModel);
-                        Owner.SetActiveBlockPanel(false);
-                    })
-                    .AddTo(_cts.Token);
-
-                _View._OnClickSkillDetailViewCloseButtonAsObservable
-                    .Subscribe(_ =>
-                    {
-                        _View.CloseSkillDetailView();
-                        Owner.SetActiveBlockPanel(false);
-                    })
+                    .Select(weaponId => _SkillDetailViewModelUseCase.InAsTask(weaponId, SkillTwo))
+                    .SelectMany(viewModel => _PopupGenerateUseCase.GenerateSkillDetailPopup(viewModel))
+                    .Subscribe(_ => { Owner.SetActiveBlockPanel(false); })
                     .AddTo(_cts.Token);
             }
 
@@ -123,7 +111,6 @@ namespace UI.Title
                 var filterTypes = _WeaponSortRepository.GetFilterTypeDictionary();
                 var sortToggleViews = _View._SortPopupView._SortToggleViews;
                 var filterToggleViews = _View._SortPopupView._FilterToggleViews;
-
 
                 foreach (var sortToggleView in sortToggleViews)
                 {
@@ -156,6 +143,7 @@ namespace UI.Title
                     }
 
                     filterToggleView._OnChangedValueFilterToggleAsObservable
+                        .Skip(1)
                         .Subscribe(filterType =>
                         {
                             _WeaponSortRepository.SetFilterType(filterType);

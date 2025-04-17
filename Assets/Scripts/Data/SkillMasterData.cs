@@ -6,10 +6,10 @@ namespace Common.Data
     public class SkillMasterData : IDisposable
     {
         public int Id { get; }
-        public string Explanation { get; }
         public string Name { get; }
-        public Sprite Sprite { get; }
+        public string Explanation { get; }
         public int IconID { get; set; }
+        public Sprite Sprite { get; }
         public SkillEffectType SkillEffectType { get; }
         public float DamagePlu { get; set; }
         public float HpPlu { get; set; }
@@ -33,20 +33,26 @@ namespace Common.Data
         public float CoinMul { get; set; }
         public float GemMul { get; set; }
         public float SkillMul { get; set; }
-        public int AbnormalCondition { get; set; }
         public float Range { get; }
         public float Interval { get; }
         public float EffectTime { get; }
         public bool IsAll { get; }
         public string BombType { get; }
+        public BombType BombTypeEnum { get; }
         public string NumberRequirement { get; }
+        public float[] NumberRequirements { get; }
         public string NumberRequirementType { get; }
+        public NumberRequirementType NumberRequirementTypeEnum { get; }
         public string BoolRequirementType { get; }
+        public BoolRequirementType BoolRequirementTypeEnum { get; }
         public string SkillDirection { get; }
-        public string SkillInvalid { get; }
+        public SkillDirection SkillDirectionEnum { get; }
+        public string InvalidAbnormalCondition { get; }
+        public AbnormalCondition[] InvalidAbnormalConditionEnum { get; }
+        public string AbnormalCondition { get; set; }
+        public AbnormalCondition[] AbnormalConditionEnum { get; set; }
         public SkillType SkillType { get; }
         public int SkillTypeInt { get; set; }
-        public string SkillEffectTypeString { get; set; }
 
         public SkillMasterData
         (
@@ -55,8 +61,36 @@ namespace Common.Data
             string name,
             Sprite sprite,
             SkillType skillType,
-            SkillEffectType skillEffectType,
+            float hpPlu,
+            float attackPlu,
+            float defensePlu,
+            float speedPlu,
+            float resistancePlu,
+            float bombPlu,
+            float firePlu,
+            float coinPlu,
+            float gemPlu,
+            float skillPlu,
             float damagePlu,
+            float hpMul,
+            float attackMul,
+            float defenseMul,
+            float speedMul,
+            float resistanceMul,
+            float bombMul,
+            float fireMul,
+            float damageMul,
+            float coinMul,
+            float gemMul,
+            float skillMul,
+            float[] numberRequirements,
+            NumberRequirementType numberRequirementType,
+            BoolRequirementType boolRequirementType,
+            SkillDirection skillDirection,
+            AbnormalCondition[] invalidAbnormalConditionEnum,
+            AbnormalCondition[] abnormalConditionEnum,
+            BombType bombType,
+            bool isAll,
             float range,
             float interval,
             float effectTime
@@ -67,8 +101,36 @@ namespace Common.Data
             Name = name;
             Sprite = sprite;
             SkillType = skillType;
-            SkillEffectType = skillEffectType;
+            HpPlu = hpPlu;
+            AttackPlu = attackPlu;
+            DefensePlu = defensePlu;
+            SpeedPlu = speedPlu;
+            ResistancePlu = resistancePlu;
+            BombPlu = bombPlu;
+            FirePlu = firePlu;
+            CoinPlu = coinPlu;
+            GemPlu = gemPlu;
+            SkillPlu = skillPlu;
             DamagePlu = damagePlu;
+            HpMul = hpMul;
+            AttackMul = attackMul;
+            DefenseMul = defenseMul;
+            SpeedMul = speedMul;
+            ResistanceMul = resistanceMul;
+            BombMul = bombMul;
+            FireMul = fireMul;
+            DamageMul = damageMul;
+            CoinMul = coinMul;
+            GemMul = gemMul;
+            SkillMul = skillMul;
+            NumberRequirements = numberRequirements;
+            NumberRequirementTypeEnum = numberRequirementType;
+            BoolRequirementTypeEnum = boolRequirementType;
+            SkillDirectionEnum = skillDirection;
+            InvalidAbnormalConditionEnum = invalidAbnormalConditionEnum;
+            AbnormalConditionEnum = abnormalConditionEnum;
+            BombTypeEnum = bombType;
+            IsAll = isAll;
             Range = range;
             Interval = interval;
             EffectTime = effectTime;

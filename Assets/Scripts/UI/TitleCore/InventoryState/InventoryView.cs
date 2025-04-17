@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using UI.Common;
@@ -15,7 +14,6 @@ public class InventoryView : ViewBase
     [SerializeField] private WeaponGridView weaponGridViewPrefab;
     [SerializeField] private WeaponDetailView weaponDetailView;
     [SerializeField] private Transform weaponGridParent;
-    [SerializeField] private SkillDetailView skillDetailView;
     [SerializeField] private Button _sortButton;
     [SerializeField] private SortPopupView _sortPopupView;
 
@@ -38,9 +36,6 @@ public class InventoryView : ViewBase
     public IObservable<AsyncUnit> _OnClickSellButtonAsObservable => weaponDetailView._SellButton
         .OnClickAsObservable()
         .SelectMany(_ => _uiAnimation.ClickScaleColor(weaponDetailView._SellButton.gameObject).ToUniTask().ToObservable());
-
-    public IObservable<AsyncUnit> _OnClickSkillDetailViewCloseButtonAsObservable
-        => skillDetailView.OnClickCloseButtonAsObservable();
 
     public IObservable<AsyncUnit> _OnClickNormalSkillDetailButtonAsObservable
         => weaponDetailView
@@ -69,20 +64,13 @@ public class InventoryView : ViewBase
 
         _weaponGridViews.Clear();
         var sortedWeaponDatum = viewModel._SortedWeaponDatum;
-        foreach (var keyValuePair in sortedWeaponDatum)
+        foreach (var (weaponMasterData, possessedAmount) in sortedWeaponDatum)
         {
             var weaponGridView = Instantiate(weaponGridViewPrefab, weaponGridParent);
-            var weaponMasterData = keyValuePair.Key;
-            var possessedAmount = keyValuePair.Value;
             var weaponGridViewModel = TranslateWeaponDataToViewModel(weaponMasterData, possessedAmount, viewModel._WeaponMasterData.Id);
             weaponGridView.ApplyViewModel(weaponGridViewModel, _uiAnimation, _setActivePanelAction);
             _weaponGridViews.Add(weaponGridView);
         }
-    }
-
-    public void ApplySkillDetailViewModel(SkillDetailView.ViewModel viewModel)
-    {
-        skillDetailView.ApplyViewModel(viewModel, _uiAnimation, _setActivePanelAction);
     }
 
     private WeaponGridView.ViewModel TranslateWeaponDataToViewModel
@@ -131,11 +119,6 @@ public class InventoryView : ViewBase
             weaponMasterData.Scale,
             weaponMasterData.Rare
         );
-    }
-
-    public void CloseSkillDetailView()
-    {
-        skillDetailView.Close();
     }
 
     private void OnDestroy()

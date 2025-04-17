@@ -111,15 +111,17 @@ namespace Manager
             WeaponMasterData weaponData
         )
         {
-            _inputView.normalSkillButton.gameObject.SetActive(levelMasterData.IsSkillOneActive);
-            _inputView.specialSkillButton.gameObject.SetActive(levelMasterData.IsSkillTwoActive);
-            var normalSkill = weaponData.NormalSkillMasterData.Interval;
-            var specialSkill = weaponData.SpecialSkillMasterData.Interval;
-            _normalSkillInterval = normalSkill;
-            _specialSkillInterval = specialSkill;
+            var normalSkill = weaponData.NormalSkillMasterData;
+            var specialSkill = weaponData.SpecialSkillMasterData;
+            var isActiveNormalButton = levelMasterData.IsSkillOneActive && normalSkill.SkillTypeInt == (int)SkillType.Active;
+            var isActiveSpecialButton = levelMasterData.IsSkillTwoActive && specialSkill.SkillTypeInt == (int)SkillType.Active;
+            _inputView.normalSkillButton.gameObject.SetActive(isActiveNormalButton);
+            _inputView.specialSkillButton.gameObject.SetActive(isActiveSpecialButton);
+            _normalSkillInterval = normalSkill.Interval;
+            _specialSkillInterval = specialSkill.Interval;
             _dashInterval = GameCommonData.DashInterval;
-            _timerNormalSkill = normalSkill;
-            _timerSpecialSkill = specialSkill;
+            _timerNormalSkill = normalSkill.Interval;
+            _timerSpecialSkill = specialSkill.Interval;
             _normalSkillIntervalImage.fillAmount = MaxFillAmount;
             _specialSkillIntervalImage.fillAmount = MaxFillAmount;
             _inputView.normalSkillImage.sprite = weaponData.NormalSkillMasterData.Sprite;
