@@ -205,15 +205,19 @@ namespace UI.Title
                     .Subscribe(_ => { _StateMachine.Dispatch((int)State.Shop); })
                     .AddTo(disableGrid.GetCancellationTokenOnDestroy());
 
-                haveEnoughGem
-                    .Where(purchasedCharacterData => purchasedCharacterData.haveEnoughGem)
-                    .SelectMany(purchasedCharacterData => _PopupGenerateUseCase.GenerateConfirmPopup
-                    (
-                        GameCommonData.Terms.PurchaseCharacterPopupTitle,
-                        GameCommonData.Terms.PurchaseCharacterPopupExplanation,
-                        GameCommonData.Terms.PurchaseCharacterPopupOk,
-                        GameCommonData.Terms.PurchaseCharacterPopupCancel
-                    ).Select(isOk => (isOk, purchasedCharacterData)))
+                var purchaseCharacter =
+                    haveEnoughGem
+                        .Where(purchasedCharacterData => purchasedCharacterData.haveEnoughGem)
+                        .SelectMany(purchasedCharacterData => _PopupGenerateUseCase.GenerateConfirmPopup
+                        (
+                            GameCommonData.Terms.PurchaseCharacterPopupTitle,
+                            GameCommonData.Terms.PurchaseCharacterPopupExplanation,
+                            GameCommonData.Terms.PurchaseCharacterPopupOk,
+                            GameCommonData.Terms.PurchaseCharacterPopupCancel
+                        ).Select(isOk => (isOk, purchasedCharacterData)))
+                        .Publish();
+
+                purchaseCharacter
                     .Where(tuple => tuple.isOk)
                     .SelectMany(tuple => PurchaseCharacter(tuple.purchasedCharacterData.characterData).ToObservable())
                     .Subscribe(characterId =>
@@ -225,12 +229,17 @@ namespace UI.Title
                     })
                     .AddTo(disableGrid.GetCancellationTokenOnDestroy());
 
+                purchaseCharacter
+                    .Where(tuple => !tuple.isOk)
+                    .Subscribe(_ => { Owner.SetActiveBlockPanel(false); })
+                    .AddTo(disableGrid.GetCancellationTokenOnDestroy());
+
                 haveEnoughGem.Connect().AddTo(disableGrid.GetCancellationTokenOnDestroy());
                 addGem.Connect().AddTo(disableGrid.GetCancellationTokenOnDestroy());
+                purchaseCharacter.Connect().AddTo(disableGrid.GetCancellationTokenOnDestroy());
             }
 
-            private async UniTask<(bool haveEnoughGem, (int characterId, Sprite characterSprite) characterData)> HaveEnoughGem(
-                (int, Sprite) characterData)
+            private async UniTask<(bool haveEnoughGem, (int characterId, Sprite characterSprite) characterData)> HaveEnoughGem((int, Sprite) characterData)
             {
                 var user = Owner._userDataRepository.GetUserData();
                 var gem = await _PlayFabVirtualCurrencyManager.GetGem();
@@ -250,9 +259,9 @@ namespace UI.Title
 
             private async UniTask<int> PurchaseCharacter((int characterId, Sprite characterSprite) characterData)
             {
-                var characterPrice = GameCommonData.CharacterPrice;
-                var virtualCurrencyKey = GameCommonData.GemKey;
-                var price = characterPrice;
+                const int characterPrice = GameCommonData.CharacterPrice;
+                const string virtualCurrencyKey = GameCommonData.GemKey;
+                const int price = characterPrice;
                 var isSuccessPurchase = await Owner._playFabShopManager
                     .TryPurchaseCharacter(characterData.characterId, virtualCurrencyKey, price)
                     .AttachExternalCancellation(_cancellationTokenSource.Token);

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace PUROPORO
@@ -12,12 +13,12 @@ namespace PUROPORO
         /// <summary>
         /// Setups the card informations.
         /// </summary>
-        /// <param name="tempColor">The color of rarity.</param>
+        /// <param name="frameSprite"></param>
         /// <param name="tempSprite">Card's icon or image.</param>
         /// <param name="tempText">Card's name.</param>
-        public void SetCard(Color tempColor, Sprite tempSprite, string tempText)
+        public void SetCard(Sprite frameSprite, Sprite tempSprite, string tempText)
         {
-            m_CardFrame.color = tempColor;
+            m_CardFrame.sprite = frameSprite;
             m_CardImage.sprite = tempSprite;
             m_CardText.text = tempText;
         }

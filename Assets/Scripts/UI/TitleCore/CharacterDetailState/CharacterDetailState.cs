@@ -66,6 +66,11 @@ namespace UI.Title
                         _View._LeftArrowButton.gameObject.SetActive(false);
                         _View._RightArrowButton.gameObject.SetActive(false);
                     }
+                    else
+                    {
+                        _View._LeftArrowButton.gameObject.SetActive(true);
+                        _View._RightArrowButton.gameObject.SetActive(true);
+                    }
 
                     GenerateCharacter();
                     Subscribe();

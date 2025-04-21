@@ -17,7 +17,6 @@ namespace Repository
             { SortType.Defense, false },
             { SortType.Speed, false },
             { SortType.Resistance, false },
-            { SortType.Attribute, false },
             { SortType.Skill, false },
             { SortType.Slot, false },
             { SortType.Set, false },
@@ -45,6 +44,8 @@ namespace Repository
             { WeaponType.Lance, false },
             { WeaponType.None, true }
         };
+
+        private bool _isAscending = true;
 
         public void SetSortType(SortType sortType)
         {
@@ -79,6 +80,16 @@ namespace Repository
             }
         }
 
+        public void ChangeAscendingSwitch(bool isOn)
+        {
+            _isAscending = isOn;
+        }
+
+        public bool GetAscendingSwitch()
+        {
+            return _isAscending;
+        }
+
         public IReadOnlyDictionary<SortType, bool> GetSortTypeDictionary()
         {
             return _sortTypeDictionary;
@@ -100,7 +111,6 @@ namespace Repository
             Defense,
             Speed,
             Resistance,
-            Attribute,
             Skill,
             Slot,
             Set,

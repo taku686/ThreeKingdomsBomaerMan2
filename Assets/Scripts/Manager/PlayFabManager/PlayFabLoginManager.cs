@@ -88,11 +88,9 @@ namespace Assets.Scripts.Common.PlayFab
             var userData = new UserData().Create();
             var userName = tuple.Item2;
             var userIcon = await _resourceManager.LoadUserIconSprite(userData.UserIconFileName);
-            var coin = await _playFabVirtualCurrencyManager.GetCoin();
-            var gem = await _playFabVirtualCurrencyManager.GetGem();
-            userData.Coin = coin;
-            userData.Gem = gem;
             _userDataRepository.Initialize(userData, userName, userIcon);
+            await _playFabVirtualCurrencyManager.GetCoin();
+            await _playFabVirtualCurrencyManager.GetGem();
             await _playFabUserDataManager.TryUpdateUserDataAsync(userData).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
             return tuple.Item1;
         }

@@ -33,9 +33,12 @@ public class InventoryView : ViewBase
         ._OnClickOkButtonAsObservable
         .SelectMany(button => _uiAnimation.ClickScaleColor(button.gameObject).ToUniTask().ToObservable());
 
-    public IObservable<AsyncUnit> _OnClickSellButtonAsObservable => weaponDetailView._SellButton
-        .OnClickAsObservable()
-        .SelectMany(_ => _uiAnimation.ClickScaleColor(weaponDetailView._SellButton.gameObject).ToUniTask().ToObservable());
+    public IObservable<bool> _OnClickAscendingSwitchAsObservable => _sortPopupView._OnChangeAscendingToggleAsObservable;
+
+    public IObservable<AsyncUnit> _OnClickSellButtonAsObservable
+        => weaponDetailView._SellButton
+            .OnClickAsObservable()
+            .SelectMany(_ => _uiAnimation.ClickScaleColor(weaponDetailView._SellButton.gameObject).ToUniTask().ToObservable());
 
     public IObservable<AsyncUnit> _OnClickNormalSkillDetailButtonAsObservable
         => weaponDetailView
@@ -52,7 +55,7 @@ public class InventoryView : ViewBase
         _uiAnimation = uiAnimation;
         _setActivePanelAction = setActivePanelAction;
         GenerateWeaponGridViews(viewModel);
-        ApplyWeaponDetailViewModel(viewModel._WeaponMasterData);
+        ApplyWeaponDetailViewModel(viewModel._SelectedWeaponMasterData);
     }
 
     private void GenerateWeaponGridViews(ViewModel viewModel)
@@ -67,7 +70,7 @@ public class InventoryView : ViewBase
         foreach (var (weaponMasterData, possessedAmount) in sortedWeaponDatum)
         {
             var weaponGridView = Instantiate(weaponGridViewPrefab, weaponGridParent);
-            var weaponGridViewModel = TranslateWeaponDataToViewModel(weaponMasterData, possessedAmount, viewModel._WeaponMasterData.Id);
+            var weaponGridViewModel = TranslateWeaponDataToViewModel(weaponMasterData, possessedAmount, viewModel._SelectedWeaponMasterData.Id, viewModel._IsFocus);
             weaponGridView.ApplyViewModel(weaponGridViewModel, _uiAnimation, _setActivePanelAction);
             _weaponGridViews.Add(weaponGridView);
         }
@@ -77,7 +80,8 @@ public class InventoryView : ViewBase
     (
         WeaponMasterData weaponMasterData,
         int possessedAmount,
-        int selectedWeaponId
+        int selectedWeaponId,
+        bool isFocus
     )
     {
         return new WeaponGridView.ViewModel
@@ -86,7 +90,8 @@ public class InventoryView : ViewBase
             possessedAmount,
             weaponMasterData.Id,
             selectedWeaponId,
-            weaponMasterData.Rare
+            weaponMasterData.Rare,
+            isFocus
         );
     }
 
@@ -114,10 +119,12 @@ public class InventoryView : ViewBase
             weaponMasterData.Name,
             weaponMasterData.NormalSkillMasterData,
             weaponMasterData.SpecialSkillMasterData,
+            weaponMasterData.StatusSkillMasterDatum,
             weaponMasterData.WeaponObject,
             weaponMasterData.WeaponType,
             weaponMasterData.Scale,
-            weaponMasterData.Rare
+            weaponMasterData.Rare,
+            weaponMasterData.Id
         );
     }
 
@@ -129,16 +136,19 @@ public class InventoryView : ViewBase
     public class ViewModel
     {
         public IReadOnlyDictionary<WeaponMasterData, int> _SortedWeaponDatum { get; }
-        public WeaponMasterData _WeaponMasterData { get; }
+        public WeaponMasterData _SelectedWeaponMasterData { get; }
+        public bool _IsFocus { get; }
 
         public ViewModel
         (
             IReadOnlyDictionary<WeaponMasterData, int> sortedWeaponDatum,
-            WeaponMasterData weaponMasterData
+            WeaponMasterData selectedWeaponMasterData,
+            bool isFocus
         )
         {
             _SortedWeaponDatum = sortedWeaponDatum;
-            _WeaponMasterData = weaponMasterData;
+            _SelectedWeaponMasterData = selectedWeaponMasterData;
+            _IsFocus = isFocus;
         }
     }
 }

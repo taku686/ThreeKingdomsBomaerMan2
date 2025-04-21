@@ -12,6 +12,11 @@ public class AnimatorControllerRepository : MonoBehaviour
     [SerializeField] private RuntimeAnimatorController shieldAnimatorController;
     [SerializeField] private RuntimeAnimatorController axeAnimatorController;
     [SerializeField] private RuntimeAnimatorController staffAnimatorController;
+    [SerializeField] private RuntimeAnimatorController _bigSwordAnimatorController;
+    [SerializeField] private RuntimeAnimatorController _crowAnimatorController;
+    [SerializeField] private RuntimeAnimatorController _katanaAnimatorController;
+    [SerializeField] private RuntimeAnimatorController _scytheAnimatorController;
+    [SerializeField] private RuntimeAnimatorController _lanceAnimatorController;
 
     public RuntimeAnimatorController GetAnimatorController(WeaponType weaponType)
     {
@@ -26,11 +31,11 @@ public class AnimatorControllerRepository : MonoBehaviour
             WeaponType.Shield => shieldAnimatorController,
             WeaponType.Axe => axeAnimatorController,
             WeaponType.Staff => staffAnimatorController,
-            WeaponType.BigSword => swordAnimatorController,
-            WeaponType.Scythe => axeAnimatorController,
-            WeaponType.Crow => knifeAnimatorController,
-            WeaponType.Katana => swordAnimatorController,
-            WeaponType.Lance => spearAnimatorController,
+            WeaponType.BigSword => _bigSwordAnimatorController,
+            WeaponType.Scythe => _scytheAnimatorController,
+            WeaponType.Crow => _crowAnimatorController,
+            WeaponType.Katana => _katanaAnimatorController,
+            WeaponType.Lance => _lanceAnimatorController,
             _ => null
         };
     }

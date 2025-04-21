@@ -111,6 +111,7 @@ namespace UI.Title
                 var filterTypes = _WeaponSortRepository.GetFilterTypeDictionary();
                 var sortToggleViews = _View._SortPopupView._SortToggleViews;
                 var filterToggleViews = _View._SortPopupView._FilterToggleViews;
+                _View._SortPopupView.ApplyAscendingSwitch(true);
 
                 foreach (var sortToggleView in sortToggleViews)
                 {
@@ -167,6 +168,14 @@ namespace UI.Title
                     {
                         OnNextSelectedWeapon();
                         _View.CloseSortView();
+                    })
+                    .AddTo(_cts.Token);
+
+                _View._OnClickAscendingSwitchAsObservable
+                    .Subscribe(isOn =>
+                    {
+                        _View._SortPopupView.ApplyAscendingSwitch(isOn);
+                        _WeaponSortRepository.ChangeAscendingSwitch(isOn);
                     })
                     .AddTo(_cts.Token);
             }

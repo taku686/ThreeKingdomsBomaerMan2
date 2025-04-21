@@ -27,7 +27,15 @@ public class WeaponGridView : MonoBehaviour
         countText.text = viewModel._Count.ToString();
         _weaponId = viewModel._GridId;
         _gridImage.sprite = _rareGridSprites[viewModel._Rare - 1];
-        focusObject.SetActive(viewModel._SelectedWeaponId == viewModel._GridId);
+        if (viewModel._IsFocus)
+        {
+            focusObject.SetActive(viewModel._SelectedWeaponId == viewModel._GridId);
+        }
+        else
+        {
+            focusObject.SetActive(false);
+        }
+
         OnClickButton(setActivePanelAction);
     }
 
@@ -51,6 +59,7 @@ public class WeaponGridView : MonoBehaviour
         public int _GridId { get; }
         public int _SelectedWeaponId { get; }
         public int _Rare { get; }
+        public bool _IsFocus { get; }
 
         public ViewModel
         (
@@ -58,7 +67,8 @@ public class WeaponGridView : MonoBehaviour
             int count,
             int gridId,
             int selectedWeaponId,
-            int rare
+            int rare,
+            bool isFocus
         )
         {
             _Icon = icon;
@@ -66,6 +76,7 @@ public class WeaponGridView : MonoBehaviour
             _GridId = gridId;
             _SelectedWeaponId = selectedWeaponId;
             _Rare = rare;
+            _IsFocus = isFocus;
         }
     }
 }

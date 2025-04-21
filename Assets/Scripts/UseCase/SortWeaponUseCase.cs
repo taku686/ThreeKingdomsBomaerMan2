@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Common.Data;
+using Manager.DataManager;
 using Repository;
 using Zenject;
 
@@ -32,36 +32,59 @@ namespace UseCase
                     .ToDictionary(weapon => weapon.Key, weapon => weapon.Value);
             }
 
+            var isAscending = _weaponSortRepository.GetAscendingSwitch();
+
             var sortDatum = possessedWeaponDatum
-                .OrderBy(weapon => WhichSortType(sortType, weapon))
-                .ThenBy(weapon => weapon.Key.WeaponType)
+                .OrderBy(weapon => weapon.Key.WeaponType)
                 .ThenBy(weapon => weapon.Key.Rare)
-                .ThenBy(weapon => weapon.Key.Id)
-                .ToDictionary(weapon => weapon.Key, weapon => weapon.Value);
-            return sortDatum;
+                .ThenBy(weapon => weapon.Key.Id);
+            var result = isAscending
+                ? sortDatum
+                    .OrderBy(weapon => WhichSortType(sortType, weapon))
+                    .ToDictionary(weapon => weapon.Key, weapon => weapon.Value)
+                : sortDatum
+                    .OrderByDescending(weapon => WhichSortType(sortType, weapon))
+                    .ToDictionary(weapon => weapon.Key, weapon => weapon.Value);
+
+            return result;
         }
 
-        private static int WhichSortType(WeaponSortRepository.SortType sortType, KeyValuePair<WeaponMasterData, int> weapon)
+        private static float WhichSortType(WeaponSortRepository.SortType sortType, KeyValuePair<WeaponMasterData, int> weapon)
         {
             return sortType switch
             {
                 WeaponSortRepository.SortType.WeaponType => (int)weapon.Key.WeaponType,
                 WeaponSortRepository.SortType.Rarity => weapon.Key.Rare,
                 WeaponSortRepository.SortType.Possession => weapon.Value,
-                WeaponSortRepository.SortType.Hp => weapon.Key.Rare,
-                WeaponSortRepository.SortType.Attack => weapon.Key.Rare,
-                WeaponSortRepository.SortType.Defense => weapon.Key.Rare,
-                WeaponSortRepository.SortType.Speed => weapon.Key.Rare,
-                WeaponSortRepository.SortType.Resistance => weapon.Key.Rare,
-                WeaponSortRepository.SortType.Skill => weapon.Key.Rare,
-                WeaponSortRepository.SortType.Slot => weapon.Key.Rare,
-                WeaponSortRepository.SortType.Set => weapon.Key.Rare,
-                WeaponSortRepository.SortType.Favorite => weapon.Key.Rare,
-                WeaponSortRepository.SortType.BombCount => weapon.Key.Rare,
-                WeaponSortRepository.SortType.Fire => weapon.Key.Rare,
+                WeaponSortRepository.SortType.Hp => GetStatus(weapon.Key.StatusSkillMasterDatum, StatusType.Hp),
+                WeaponSortRepository.SortType.Attack => GetStatus(weapon.Key.StatusSkillMasterDatum, StatusType.Attack),
+                WeaponSortRepository.SortType.Defense => GetStatus(weapon.Key.StatusSkillMasterDatum, StatusType.Defense),
+                WeaponSortRepository.SortType.Speed => GetStatus(weapon.Key.StatusSkillMasterDatum, StatusType.Speed),
+                WeaponSortRepository.SortType.Resistance => GetStatus(weapon.Key.StatusSkillMasterDatum, StatusType.Resistance),
+                WeaponSortRepository.SortType.BombCount => GetStatus(weapon.Key.StatusSkillMasterDatum, StatusType.BombLimit),
+                WeaponSortRepository.SortType.Fire => GetStatus(weapon.Key.StatusSkillMasterDatum, StatusType.FireRange),
                 WeaponSortRepository.SortType.None => weapon.Key.Rare,
                 _ => throw new ArgumentOutOfRangeException()
             };
+        }
+
+        private static float GetStatus(SkillMasterData[] skillMasterDatum, StatusType statusType)
+        {
+            if (skillMasterDatum == null || skillMasterDatum.Length == 0)
+            {
+                return GameCommonData.InvalidNumber;
+            }
+
+            foreach (var skillMasterData in skillMasterDatum)
+            {
+                var candidate = SkillMasterDataRepository.GetStatusSkillValue(skillMasterData);
+                if (candidate.Item1 == statusType)
+                {
+                    return candidate.Item2;
+                }
+            }
+
+            return GameCommonData.InvalidNumber;
         }
 
         public void Dispose()

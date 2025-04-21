@@ -36,10 +36,10 @@ namespace UI.Title
                         var characterData = _characterMasterDataRepository.GetCharacterData(rewardId);
                         var characterReward = new RewardData
                         (
-                            GetRarityColor(Rarity.rare),
+                            Color.white,
                             characterData.SelfPortraitSprite,
                             characterData.Name,
-                            Rarity.rare
+                            1
                         );
                         rewardDataList.Add(characterReward);
                         break;
@@ -47,13 +47,25 @@ namespace UI.Title
                         var weaponData = _weaponMasterDataRepository.GetWeaponData(rewardId);
                         var weaponReward = new RewardData
                         (
-                            GetRarityColor(Rarity.rare),
+                            Color.white,
                             weaponData.WeaponIcon,
                             weaponData.Name,
-                            Rarity.rare
+                            weaponData.Rare
                         );
                         rewardDataList.Add(weaponReward);
                         break;
+                    case GameCommonData.RewardType.Coin:
+                        break;
+                    case GameCommonData.RewardType.Gem:
+                        break;
+                    case GameCommonData.RewardType.Consumable:
+                        break;
+                    case GameCommonData.RewardType.TreasureBox:
+                        break;
+                    case GameCommonData.RewardType.None:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
             }
 
@@ -64,15 +76,15 @@ namespace UI.Title
         {
             switch (r)
             {
-                case Rarity.common:
+                case Rarity.Common:
                     return new Color32(188, 188, 188, 255);
-                case Rarity.uncommon:
+                case Rarity.Uncommon:
                     return new Color32(165, 226, 57, 255);
-                case Rarity.rare:
+                case Rarity.Rare:
                     return new Color32(74, 160, 241, 255);
-                case Rarity.epic:
+                case Rarity.Epic:
                     return new Color32(202, 67, 250, 255);
-                case Rarity.legendary:
+                case Rarity.Legendary:
                     return new Color32(255, 225, 0, 255);
                 default:
                     return new Color32(188, 188, 188, 255);
@@ -86,7 +98,7 @@ namespace UI.Title
 
         public class RewardData : IDisposable
         {
-            public Rarity _Rarity { get; }
+            public int _Rarity { get; }
             public string _Name { get; }
             public Sprite _Icon { get; }
             public Color _Color { get; }
@@ -96,7 +108,7 @@ namespace UI.Title
                 Color color,
                 Sprite icon,
                 string name,
-                Rarity rarity
+                int rarity
             )
             {
                 _Color = color;

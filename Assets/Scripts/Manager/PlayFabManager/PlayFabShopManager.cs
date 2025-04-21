@@ -384,25 +384,25 @@ namespace Manager.NetworkManager
             var weaponMasterDatum = _weaponMasterDataRepository.GetAllWeaponData().ToArray();
             var result = new List<int>();
 
-            for (var i = 0; i < createCount; i++)
+            /*for (var i = 0; i < createCount; i++)
             {
                 var weaponId = weaponMasterDatum[UnityEngine.Random.Range(0, weaponMasterDatum.Length)].Id;
                 _userDataRepository.AddWeaponData(weaponId);
                 result.Add(weaponId);
-            }
+            }*/
             //todo: 1回の購入で全ての武器を購入できるようにする
-            /*foreach (var masterData in weaponMasterDatum)
+            foreach (var masterData in weaponMasterDatum)
             {
                 _userDataRepository.AddWeaponData(masterData.Id);
                 result.Add(masterData.Id);
-            }*/
+            }
 
             await _playFabUserDataManager.TryUpdateUserDataAsync();
             await _playFabVirtualCurrencyManager.SubtractVirtualCurrency(GameCommonData.GemKey, cost);
             return (false, result);
         }
 
-        public async UniTask<(bool, string, int)> SellWeaponAsync(int weaponId, int sellCount)
+        public async UniTask<(bool, string, int)> SellWeaponAsync(int weaponId, int sellAmount)
         {
             var userData = _userDataRepository.GetUserData();
             var possessedWeaponDatum = _userDataRepository.GetAllPossessedWeaponDatum();
@@ -428,14 +428,14 @@ namespace Manager.NetworkManager
                 return (false, GameCommonData.Terms.NorHaveWeapon, candidate.Key.Id);
             }
 
-            var totalPrice = GameCommonData.GetWeaponSellPrice(weaponData.Rare) * sellCount;
+            var totalPrice = GameCommonData.GetWeaponSellPrice(weaponData.Rare) * sellAmount;
             var addVirtualCurrencyResponse = await _playFabVirtualCurrencyManager.AddVirtualCurrency(GameCommonData.CoinKey, totalPrice);
             if (!addVirtualCurrencyResponse)
             {
                 return (false, GameCommonData.Terms.ErrorAddVirtualCurrency, weaponId);
             }
 
-            _userDataRepository.SubtractWeaponData(weaponId, sellCount);
+            _userDataRepository.SubtractWeaponData(weaponId, sellAmount);
             var userUpdateResponse = await _playFabUserDataManager.TryUpdateUserDataAsync();
             if (!userUpdateResponse)
             {

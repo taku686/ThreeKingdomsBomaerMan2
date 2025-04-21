@@ -198,9 +198,9 @@ namespace UI.Title
         private async UniTask TransitionUiAnimation(Action action)
         {
             SetActiveBlockPanel(true);
-            await _fade.FadeIn(GameCommonData.FadeOutTime, null, false);
+            await _fade.FadeIn(null, false);
             action.Invoke();
-            await _fade.FadeOut(GameCommonData.FadeOutTime);
+            await _fade.FadeOut();
             SetActiveBlockPanel(false);
         }
 

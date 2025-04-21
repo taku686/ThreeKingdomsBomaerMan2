@@ -30,16 +30,19 @@ namespace UI.Title
             var possessedWeaponDatum = _userDataRepository.GetAllPossessedWeaponDatum();
             var sortedWeaponDatum = _sortWeaponUseCase.InAsTask(possessedWeaponDatum);
             var weaponMasterData = _weaponMasterDataRepository.GetWeaponData(selectedWeaponId);
+            var isFocus = true;
             if (!sortedWeaponDatum.ContainsKey(weaponMasterData))
             {
                 var candidate = sortedWeaponDatum.First();
                 weaponMasterData = _weaponMasterDataRepository.GetWeaponData(candidate.Key.Id);
+                isFocus = false;
             }
 
             return new InventoryView.ViewModel
             (
                 sortedWeaponDatum,
-                weaponMasterData
+                weaponMasterData,
+                isFocus
             );
         }
 

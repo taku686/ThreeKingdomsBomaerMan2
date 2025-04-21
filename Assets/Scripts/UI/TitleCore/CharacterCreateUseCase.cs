@@ -150,24 +150,44 @@ namespace Repository
             currentWeapon.transform.localPosition = Vector3.zero;
             currentWeapon.transform.localEulerAngles = weaponMasterData.Id >= 146 ? new Vector3(-90, 0, 0) : new Vector3(0, 0, 0);
             currentWeapon.transform.localScale *= weaponMasterData.Scale;
-            if (weaponMasterData.WeaponType == WeaponType.Scythe)
+            FixWeaponAngle(currentWeapon, weaponMasterData, isLeftHand);
+            currentWeapon.tag = GameCommonData.WeaponTag;
+            currentWeapon.AddComponent<WeaponObject>();
+        }
+
+        private void FixWeaponAngle(GameObject currentWeapon, WeaponMasterData weaponMasterData, bool isLeftHand)
+        {
+            if (weaponMasterData.WeaponType == WeaponType.Hammer)
             {
-                currentWeapon.transform.localEulerAngles = new Vector3(-90, -90, 0);
+                if (weaponMasterData.Id == 241)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(0, 0, 90);
+                }
             }
 
-            if (weaponMasterData.WeaponType == WeaponType.Katana)
+            if (weaponMasterData.WeaponType == WeaponType.Sword && weaponMasterData.Id >= 146)
             {
-                currentWeapon.transform.localEulerAngles = new Vector3(-90, 180, 0);
-            }
+                currentWeapon.transform.localEulerAngles = new Vector3(-90, 0, 180);
 
-            if (weaponMasterData.WeaponType == WeaponType.Crow)
-            {
-                currentWeapon.transform.localEulerAngles = isLeftHand ? new Vector3(180, 0, 0) : new Vector3(0, 0, 0);
-            }
+                if (weaponMasterData.Id == 319)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(0, 180, 180);
+                }
 
-            if (weaponMasterData.Id == 241)
-            {
-                currentWeapon.transform.localEulerAngles = new Vector3(0, 0, 90);
+                if (weaponMasterData.Id == 313)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(180, 0, 180);
+                }
+
+                if (weaponMasterData.Id == 322)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(-90, 0, 234);
+                }
+
+                if (weaponMasterData.Id == 232)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(0, 0, -90);
+                }
             }
 
             if (weaponMasterData.WeaponType == WeaponType.Knife && weaponMasterData.Id >= 146)
@@ -180,9 +200,90 @@ namespace Repository
                 }
             }
 
+            if (weaponMasterData.WeaponType == WeaponType.Bow && weaponMasterData.Id >= 146)
+            {
+                currentWeapon.transform.localEulerAngles = new Vector3(90, 0, 0);
 
-            currentWeapon.tag = GameCommonData.WeaponTag;
-            currentWeapon.AddComponent<WeaponObject>();
+                if (weaponMasterData.Id == 318)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(180, 0, 0);
+                }
+            }
+
+            if (weaponMasterData.WeaponType == WeaponType.Shield && weaponMasterData.Id >= 146)
+            {
+                if (weaponMasterData.Id == 165)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(180, 90, 0);
+                }
+
+                if (weaponMasterData.Id == 236)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(0, 180, 180);
+                }
+
+                if (weaponMasterData.Id == 311)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(0, 0, 180);
+                }
+
+                if (weaponMasterData.Id == 316)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(180, 0, 90);
+                }
+            }
+
+            if (weaponMasterData.WeaponType == WeaponType.Axe && weaponMasterData.Id >= 146)
+            {
+                currentWeapon.transform.localEulerAngles = new Vector3(-90, 180, 0);
+
+                if (weaponMasterData.Id == 163)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(-90, 90, 0);
+                }
+            }
+
+            if (weaponMasterData.WeaponType == WeaponType.Staff && weaponMasterData.Id >= 146)
+            {
+                if (weaponMasterData.Id == 156)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(180, 0, 0);
+                }
+
+                if (weaponMasterData.Id == 315)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(0, 0, 0);
+                }
+            }
+
+            if (weaponMasterData.WeaponType == WeaponType.BigSword && weaponMasterData.Id >= 146)
+            {
+                currentWeapon.transform.localEulerAngles = new Vector3(-90, 180, 0);
+                if (weaponMasterData.Id == 146)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(180, 0, -180);
+                }
+
+                if (weaponMasterData.Id == 312)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(0, 0, 0);
+                }
+            }
+
+            if (weaponMasterData.WeaponType == WeaponType.Crow)
+            {
+                currentWeapon.transform.localEulerAngles = isLeftHand ? new Vector3(180, 0, 0) : new Vector3(0, 0, 0);
+            }
+
+            if (weaponMasterData.WeaponType == WeaponType.Katana)
+            {
+                currentWeapon.transform.localEulerAngles = new Vector3(-90, 180, 0);
+            }
+
+            if (weaponMasterData.WeaponType == WeaponType.Scythe)
+            {
+                currentWeapon.transform.localEulerAngles = new Vector3(-90, 0, 180);
+            }
         }
 
         private void ChangeAnimatorController(GameObject characterObject, WeaponType weaponType)

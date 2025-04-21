@@ -44,6 +44,8 @@ namespace PUROPORO
         // [SerializeField] private SOCardsDB m_CardsDB; // ScriptableObject
         [SerializeField] private Button _button;
 
+        [SerializeField] private Sprite[] _frameImages;
+
         //private ProbabilityRange[] m_ProbabilityRange;
         private CardUI[] m_CardUIs = new CardUI[0];
 
@@ -130,7 +132,8 @@ namespace PUROPORO
             if (m_State != LootBoxState.Opening) return;
 
             var rewardData = _rewardDatum[m_Count - 1];
-            m_CardUI.SetCard(rewardData._Color, rewardData._Icon, rewardData._Name);
+            var frameSprite = _frameImages[rewardData._Rarity - 1];
+            m_CardUI.SetCard(frameSprite, rewardData._Icon, rewardData._Name);
             _lootBox.SetRarityColor(rewardData._Color);
 
             _lootBox.ChestQuickOpens();
@@ -168,7 +171,8 @@ namespace PUROPORO
             foreach (var rewardData in _rewardDatum)
             {
                 GameObject go = Instantiate(m_CardUiGo, m_AchievedCardsUI);
-                go.GetComponent<CardUI>().SetCard(rewardData._Color, rewardData._Icon, rewardData._Name);
+                var frameSprite = _frameImages[rewardData._Rarity - 1];
+                go.GetComponent<CardUI>().SetCard(frameSprite, rewardData._Icon, rewardData._Name);
                 m_CardUIs[index] = go.GetComponent<CardUI>();
                 index++;
             }
@@ -186,11 +190,11 @@ namespace PUROPORO
 
     public enum Rarity
     {
-        common = 40,
-        uncommon = 30,
-        rare = 20,
-        epic = 10,
-        legendary = 5
+        Common = 40,
+        Uncommon = 30,
+        Rare = 20,
+        Epic = 10,
+        Legendary = 5
     }
 
     public enum LootBoxState

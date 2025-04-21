@@ -87,7 +87,6 @@ namespace Common.Data
         public const int MinCharacterLevel = 1;
         public const int MaxMissionCount = 20;
         public const int NetworkErrorCode = int.MaxValue;
-        public const float FadeOutTime = 0.8f;
         public const int BattleTime = 180;
         public const int DefaultWeaponId = 71;
         public const int NormalSkillReleaseLevel = 3;
@@ -214,7 +213,7 @@ namespace Common.Data
             };
         }
 
-        public enum WeaponPriceByRarity
+        private enum WeaponPriceByRarity
         {
             One = 50,
             Two = 100,
@@ -439,6 +438,7 @@ namespace Common.Data
         FireRange = 4,
         Defense = 5,
         Resistance = 6,
+        None = 999
     }
 
     public enum SkillDirection

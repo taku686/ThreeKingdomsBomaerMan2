@@ -27,6 +27,7 @@ using Cysharp.Threading.Tasks;
 
 public class Fade : MonoBehaviour
 {
+    [SerializeField] private float _fadeInTime = 0.5f;
     private IFade fade;
     private float cutoutRange;
     private CancellationTokenSource cts;
@@ -99,16 +100,16 @@ public class Fade : MonoBehaviour
         }
     }
 
-    public async UniTask FadeOut(float time, System.Action action = null)
+    public async UniTask FadeOut(System.Action action = null)
     {
         Cancel();
-        await FadeoutAsync(time, action, cts.Token);
+        await FadeoutAsync(_fadeInTime, action, cts.Token);
     }
 
-    public async UniTask FadeIn(float time, System.Action action, bool isTransition)
+    public async UniTask FadeIn(System.Action action, bool isTransition)
     {
         Cancel();
-        await FadeinAsync(time, action, isTransition, cts.Token);
+        await FadeinAsync(_fadeInTime, action, isTransition, cts.Token);
     }
 
     private void Cancel()
