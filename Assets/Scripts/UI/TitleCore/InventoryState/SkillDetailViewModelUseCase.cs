@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using Common.Data;
 using Repository;
+using UnityEngine;
 using Zenject;
 
 public class SkillDetailViewModelUseCase : IDisposable
@@ -23,11 +24,38 @@ public class SkillDetailViewModelUseCase : IDisposable
         var weaponData = _weaponMasterDataRepository.GetWeaponData(weaponId);
         var skillData = weaponData.GetSkillData(skillType);
         var explanation = TranslateExplanation(skillData);
+        var interval = !Mathf.Approximately(skillData.Interval, GameCommonData.InvalidNumber) ? skillData.Interval.ToString(CultureInfo.InvariantCulture) + "秒" : "-";
+        var effectTime = !Mathf.Approximately(skillData.EffectTime, GameCommonData.InvalidNumber) ? skillData.EffectTime.ToString(CultureInfo.InvariantCulture) + "秒" : "-";
+        var range = !Mathf.Approximately(skillData.Range, GameCommonData.InvalidNumber) ? skillData.Range.ToString(CultureInfo.InvariantCulture) : "-";
+        var skillTypeString = GameCommonData.TranslateStatusTypeToString(skillData.SkillType);
+        var index = 0;
+        var abnormalCondition = "";
+        foreach (var abnormalConditionEnum in skillData.AbnormalConditionEnum)
+        {
+            abnormalCondition += GameCommonData.TranslateAbnormalConditionToString(abnormalConditionEnum);
+            index++;
+            if (index == skillData.AbnormalConditionEnum.Length)
+            {
+                break;
+            }
+
+            if (index > 0)
+            {
+                abnormalCondition += "、";
+            }
+        }
+
+
         return new SkillDetailPopup.ViewModel
         (
             skillData.Sprite,
             skillData.Name,
-            explanation
+            explanation,
+            interval,
+            effectTime,
+            range,
+            skillTypeString,
+            abnormalCondition
         );
     }
 

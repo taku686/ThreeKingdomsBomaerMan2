@@ -314,7 +314,44 @@ namespace Common.Data
                 StatusType.Defense => "防御力",
                 StatusType.Resistance => "精神力",
                 StatusType.None => "Level",
-                _ => string.Empty
+                _ => "-"
+            };
+        }
+
+        public static string TranslateStatusTypeToString(SkillType skillType)
+        {
+            return skillType switch
+            {
+                SkillType.Status => "ステータス",
+                SkillType.Active => "アクティブ",
+                SkillType.Passive => "パッシブ",
+                _ => "-"
+            };
+        }
+
+        public static string TranslateAbnormalConditionToString(AbnormalCondition abnormalCondition)
+        {
+            return abnormalCondition switch
+            {
+                AbnormalCondition.Paralysis => "麻痺",
+                AbnormalCondition.Poison => "毒",
+                AbnormalCondition.Frozen => "氷",
+                AbnormalCondition.Confusion => "混乱",
+                AbnormalCondition.NockBack => "ノックバック",
+                AbnormalCondition.Charm => "魅惑",
+                AbnormalCondition.Miasma => "瘴気",
+                AbnormalCondition.Darkness => "暗黒",
+                AbnormalCondition.Sealed => "封印",
+                AbnormalCondition.LifeSteal => "吸血",
+                AbnormalCondition.Curse => "呪い",
+                AbnormalCondition.HellFire => "業火",
+                AbnormalCondition.Fear => "恐怖",
+                AbnormalCondition.TimeStop => "時止め",
+                AbnormalCondition.Apraxia => "行動不能",
+                AbnormalCondition.BombLock => "ボムロック",
+                AbnormalCondition.Burning => "灼熱",
+                AbnormalCondition.None => "なし",
+                _ => "-"
             };
         }
     }

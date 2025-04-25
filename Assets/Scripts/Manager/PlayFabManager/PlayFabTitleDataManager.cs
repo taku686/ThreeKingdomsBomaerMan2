@@ -285,7 +285,7 @@ namespace Manager.PlayFabManager
             var result = new AbnormalCondition[ids.Length];
             for (var i = 0; i < ids.Length; i++)
             {
-                result[i] = Enum.TryParse<AbnormalCondition>(value, out var abnormal) ? abnormal : AbnormalCondition.None;
+                result[i] = Enum.TryParse<AbnormalCondition>(ids[i], out var abnormal) ? abnormal : AbnormalCondition.None;
             }
 
             return result;
