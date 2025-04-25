@@ -27,7 +27,7 @@ namespace UI.Title
             private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
             private StateMachine<TitleCore> _StateMachine => Owner._stateMachine;
             private RewardDataRepository _RewardDataRepository => Owner._rewardDataRepository;
-            private CharacterTypeManager _CharacterTypeManager => Owner._characterTypeManager;
+            private CharacterTypeSpriteManager _CharacterTypeSpriteManager => Owner._characterTypeSpriteManager;
 
             private CancellationTokenSource _cancellationTokenSource;
             private readonly Subject<Unit> _onChangeViewModel = new();
@@ -81,8 +81,16 @@ namespace UI.Title
                     .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._BackButton).ToObservable())
                     .Subscribe(_ =>
                     {
-                        _StateMachine.Dispatch((int)State.Main);
-                        Owner.SetActiveBlockPanel(false);
+                        var prevState = _StateMachine._PreviousState;
+                        if (prevState >= 0)
+                        {
+                            _StateMachine.Dispatch(prevState);
+                            _StateMachine._PreviousState = -1;
+                        }
+                        else
+                        {
+                            _StateMachine.Dispatch((int)State.Main);
+                        }
                     })
                     .AddTo(_cancellationTokenSource.Token);
 
@@ -155,7 +163,7 @@ namespace UI.Title
             {
                 var grid = Instantiate(_View._Grid, parent);
                 var characterGrid = grid.GetComponentInChildren<CharacterGridView>();
-                var (typeSprite, typeColor) = _CharacterTypeManager.GetCharacterTypeData(fixedCharacterData.Type);
+                var (typeSprite, typeColor) = _CharacterTypeSpriteManager.GetCharacterTypeData(fixedCharacterData.Type);
                 characterGrid.ApplyStatusGridViews(orderType, fixedCharacterData, (typeSprite, typeColor));
 
                 characterGrid.gridButton

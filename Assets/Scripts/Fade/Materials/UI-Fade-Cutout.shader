@@ -27,6 +27,7 @@ Shader "UI/Fade Cutout"
     Properties
     {
         [PerRendererData] _MaskTex("Mask Texture", 2D) = "white" {}
+        _MainTex("MainTex", 2D) = "white" {}
         _Color ("Tint", Color) = (1,0,1,1)
         _Range("Range", Range (0, 1)) = 0
     }
@@ -90,6 +91,7 @@ Shader "UI/Fade Cutout"
                 return OUT;
             }
 
+            sampler2D _MainTex;
             sampler2D _MaskTex;
             float _Range;
 

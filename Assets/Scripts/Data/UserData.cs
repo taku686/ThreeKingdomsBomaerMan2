@@ -19,6 +19,7 @@ namespace Common.Data
         public readonly Dictionary<int, int> PossessedWeapons = new();
         public readonly Dictionary<int, int> EquippedWeapons = new();
         public Dictionary<int, string> MissionDatum = new();
+        public readonly Dictionary<int, int> TeamMembers = new();
 
         [Serializable]
         public class MissionData
@@ -53,6 +54,9 @@ namespace Common.Data
             user.CharacterLevels[0] = 1;
             user.PossessedWeapons[GameCommonData.DefaultWeaponId] = 1;
             user.EquippedWeapons[0] = GameCommonData.DefaultWeaponId;
+            user.TeamMembers[0] = 0;
+            user.TeamMembers[1] = GameCommonData.InvalidNumber;
+            user.TeamMembers[2] = GameCommonData.InvalidNumber;
             for (var i = 0; i < 7; i++)
             {
                 user.LoginBonus[i] = (int)LoginBonusStatus.Disable;

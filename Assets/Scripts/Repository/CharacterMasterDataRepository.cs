@@ -20,7 +20,12 @@ namespace Manager.DataManager
 
         public CharacterData GetCharacterData(int id)
         {
-            return CharacterDatum[id];
+            if (!CharacterDatum.TryGetValue(id, out var value))
+            {
+                return null;
+            }
+
+            return id == GameCommonData.InvalidNumber ? null : value;
         }
 
         public IReadOnlyCollection<CharacterData> GetAllCharacterData()

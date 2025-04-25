@@ -44,7 +44,8 @@ namespace UI.Title
                     .Where(state => state == LootBoxState.Ending)
                     .Subscribe(_ =>
                     {
-                        var prevState = _StateMachine.PreviousState;
+                        var prevState = _StateMachine._PreviousState;
+                        _StateMachine._PreviousState = -1;
                         if (prevState < 0)
                         {
                             Debug.LogError("Invalid previous state");

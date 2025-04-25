@@ -47,6 +47,7 @@ namespace UI.Title
         [Inject] private PopupGenerateUseCase _popupGenerateUseCase;
         [Inject] private RewardDataUseCase _rewardDataUseCase;
         [Inject] private UserInfoViewModelUseCase _userInfoViewModelUseCase;
+        [Inject] private TeamEditViewModelUseCase _teamEditViewModelUseCase;
 
         //Manager
         [Inject] private PhotonNetworkManager _photonNetworkManager;
@@ -57,13 +58,13 @@ namespace UI.Title
         [Inject] private PlayFabAdsManager _playFabAdsManager;
         [Inject] private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
         [Inject] private MissionManager _missionManager;
-        [Inject] private CharacterTypeManager _characterTypeManager;
+        [Inject] private CharacterTypeSpriteManager _characterTypeSpriteManager;
         [Inject] private SkyBoxManager _skyBoxManager;
 
         //UI
         [Inject] private UIAnimation _uiAnimation;
 
-        [SerializeField] private Fade _fade;
+        [SerializeField] private FadeView _fadeView;
         [SerializeField] private Transform _characterCreatePosition;
         [SerializeField] private CommonView _commonView;
         [SerializeField] private ViewBase[] _views;
@@ -87,7 +88,8 @@ namespace UI.Title
             SelectBattleMode,
             Inventory,
             Reward,
-            UserInfo
+            UserInfo,
+            TeamEdit
         }
 
         private void Awake()
@@ -115,7 +117,7 @@ namespace UI.Title
         private void Initialize()
         {
             _cts = new CancellationTokenSource();
-            _fade.InitializeInSceneTransition(1, ProjectCommonData.Instance.isSceneTransition);
+            _fadeView.Initialize();
             var view = (MainView)GetView(State.Main);
             view.SetBackgroundEffect(false);
             _missionSpriteDataRepository.Initialize().Forget();
@@ -128,7 +130,10 @@ namespace UI.Title
 
         private void InitializeState()
         {
-            _stateMachine = new StateMachine<TitleCore>(this);
+            _stateMachine = new StateMachine<TitleCore>(this)
+            {
+                _PreviousState = -1
+            };
             if (_mainManager._isInitialize)
             {
                 _stateMachine.Start<MainState>();
@@ -143,6 +148,7 @@ namespace UI.Title
             _stateMachine.AddTransition<MainState, CharacterSelectState>((int)State.CharacterSelect);
             _stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)State.CharacterDetail);
             _stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)State.CharacterSelect);
+            _stateMachine.AddTransition<TeamEditState, CharacterSelectState>((int)State.CharacterSelect);
             _stateMachine.AddTransition<CharacterDetailState, InventoryState>((int)State.Inventory);
             _stateMachine.AddTransition<InventoryState, CharacterDetailState>((int)State.CharacterDetail);
             _stateMachine.AddTransition<MainState, BattleReadyState>((int)State.BattleReady);
@@ -153,6 +159,9 @@ namespace UI.Title
             _stateMachine.AddTransition<CharacterSelectState, RewardState>((int)State.Reward);
             _stateMachine.AddTransition<ShopState, RewardState>((int)State.Reward);
             _stateMachine.AddTransition<RewardState, CharacterSelectState>((int)State.CharacterSelect);
+            _stateMachine.AddTransition<MainState, TeamEditState>((int)State.TeamEdit);
+            _stateMachine.AddTransition<CharacterDetailState, TeamEditState>((int)State.TeamEdit);
+            _stateMachine.AddTransition<CharacterSelectState, TeamEditState>((int)State.TeamEdit);
         }
 
         private void InitializeButton()
@@ -198,9 +207,9 @@ namespace UI.Title
         private async UniTask TransitionUiAnimation(Action action)
         {
             SetActiveBlockPanel(true);
-            await _fade.FadeIn(null, false);
+            await _fadeView.FadeInAsync();
             action.Invoke();
-            await _fade.FadeOut();
+            await _fadeView.FadeOutAsync();
             SetActiveBlockPanel(false);
         }
 
@@ -251,9 +260,7 @@ namespace UI.Title
                 .OnClickAsObservable()
                 .Take(1)
                 .SelectMany(_ => OnClickScaleColorAnimation(_commonView.rewardGetView.okButton).ToObservable())
-                .SelectMany(_ =>
-                    _uiAnimation.Close(_commonView.rewardGetView.transform, GameCommonData.CloseDuration)
-                        .ToObservable())
+                .SelectMany(_ => _uiAnimation.Close(_commonView.rewardGetView.transform, GameCommonData.CloseDuration).ToObservable())
                 .Subscribe(_ => { SetActiveBlockPanel(false); })
                 .AddTo(_cts.Token);
         }

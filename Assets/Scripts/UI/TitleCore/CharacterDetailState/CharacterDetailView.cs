@@ -5,7 +5,6 @@ using System.Linq;
 using Common.Data;
 using DG.Tweening;
 using TMPro;
-using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;

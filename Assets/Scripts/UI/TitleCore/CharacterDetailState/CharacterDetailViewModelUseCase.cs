@@ -10,7 +10,7 @@ public class CharacterDetailViewModelUseCase : IDisposable
 {
     private readonly UserDataRepository _userDataRepository;
     private readonly CharacterMasterDataRepository _characterMasterDataRepository;
-    private readonly CharacterTypeManager _characterTypeManager;
+    private readonly CharacterTypeSpriteManager _characterTypeSpriteManager;
     private readonly SkillMasterDataRepository _skillMasterDataRepository;
 
     [Inject]
@@ -18,13 +18,13 @@ public class CharacterDetailViewModelUseCase : IDisposable
     (
         UserDataRepository userDataRepository,
         CharacterMasterDataRepository characterMasterDataRepository,
-        CharacterTypeManager characterTypeManager,
+        CharacterTypeSpriteManager characterTypeSpriteManager,
         SkillMasterDataRepository skillMasterDataRepository
     )
     {
         _userDataRepository = userDataRepository;
         _characterMasterDataRepository = characterMasterDataRepository;
-        _characterTypeManager = characterTypeManager;
+        _characterTypeSpriteManager = characterTypeSpriteManager;
         _skillMasterDataRepository = skillMasterDataRepository;
     }
 
@@ -35,7 +35,7 @@ public class CharacterDetailViewModelUseCase : IDisposable
         var nextLevelData = _userDataRepository.GetNextLevelData(characterId);
         var skillsViewModel = CreateSkillsViewModel(characterId, currentLevelData.Level);
         var weaponData = _userDataRepository.GetEquippedWeaponData(characterId);
-        var (typeSprite, typeColor) = _characterTypeManager.GetCharacterTypeData(characterData.Type);
+        var (typeSprite, typeColor) = _characterTypeSpriteManager.GetCharacterTypeData(characterData.Type);
         var passiveSkillData = _skillMasterDataRepository.GetSkillData(characterData.PassiveSkillId);
         return new CharacterDetailView.ViewModel
         (

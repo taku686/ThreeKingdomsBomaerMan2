@@ -27,7 +27,7 @@ namespace Common.Installer
             Container.Bind<MissionMasterDataRepository>().AsCached();
             Container.Bind<PhotonNetworkManager>().FromComponentInNewPrefab(_photonNetworkGameObject).AsSingle();
             Container.Bind<MainManager>().FromComponentsInNewPrefab(_mainManagerGameObject).AsSingle();
-            Container.Bind<CharacterTypeManager>().FromComponentInNewPrefab(_characterTypeDataGameObject).AsSingle();
+            Container.Bind<CharacterTypeSpriteManager>().FromComponentInNewPrefab(_characterTypeDataGameObject).AsSingle();
             Container.Bind<UserDataRepository>().AsSingle();
             Container.Bind<MissionManager>().AsSingle();
             Container.Bind<PlayFabCatalogManager>().AsCached();

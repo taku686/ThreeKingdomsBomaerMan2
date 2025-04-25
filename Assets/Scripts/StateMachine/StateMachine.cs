@@ -26,7 +26,7 @@ public class StateMachine<TOwner>
         /// <summary>
         /// このステートのオーナー
         /// </summary>
-        protected TOwner Owner => stateMachine.Owner;
+        protected TOwner Owner => stateMachine._Owner;
 
         /// <summary>
         /// ステート開始
@@ -121,17 +121,17 @@ public class StateMachine<TOwner>
     /// <summary>
     /// このステートマシンのオーナー
     /// </summary>
-    public TOwner Owner { get; }
+    public TOwner _Owner { get; }
 
     /// <summary>
     /// 現在のステート
     /// </summary>
-    public State CurrentState { get; private set; }
+    public State _CurrentState { get; private set; }
 
-    public int PreviousState { get; private set; }
+    public int _PreviousState { get; set; }
 
     // ステートリスト
-    private LinkedList<State> states = new LinkedList<State>();
+    private readonly LinkedList<State> _states = new();
 
     /// <summary>
     /// ステートマシンを初期化する
@@ -139,7 +139,7 @@ public class StateMachine<TOwner>
     /// <param name="owner">ステートマシンのオーナー</param>
     public StateMachine(TOwner owner)
     {
-        Owner = owner;
+        _Owner = owner;
     }
 
     /// <summary>
@@ -149,7 +149,7 @@ public class StateMachine<TOwner>
     {
         var state = new T();
         state.stateMachine = this;
-        states.AddLast(state);
+        _states.AddLast(state);
         return state;
     }
 
@@ -158,7 +158,7 @@ public class StateMachine<TOwner>
     /// </summary>
     public T GetOrAddState<T>() where T : State, new()
     {
-        foreach (var state in states)
+        foreach (var state in _states)
         {
             if (state is T result)
             {
@@ -213,9 +213,9 @@ public class StateMachine<TOwner>
     /// <param name="param">パラメータ</param>
     private void Start(State firstState)
     {
-        CurrentState = firstState;
-        CurrentState.Enter(null);
-        CurrentState.AsyncEnter(null).Forget();
+        _CurrentState = firstState;
+        _CurrentState.Enter(null);
+        _CurrentState.AsyncEnter(null).Forget();
     }
 
     /// <summary>
@@ -223,12 +223,12 @@ public class StateMachine<TOwner>
     /// </summary>
     public void Update()
     {
-        CurrentState.Update();
+        _CurrentState.Update();
     }
 
     public void FixedUpdate()
     {
-        CurrentState.FixedUpdate();
+        _CurrentState.FixedUpdate();
     }
 
     /// <summary>
@@ -238,7 +238,7 @@ public class StateMachine<TOwner>
     public void Dispatch(int eventId, int prevEventId = -1)
     {
         State to;
-        if (!CurrentState.transitions.TryGetValue(eventId, out to))
+        if (!_CurrentState.transitions.TryGetValue(eventId, out to))
         {
             if (!GetOrAddState<AnyState>().transitions.TryGetValue(eventId, out to))
             {
@@ -249,7 +249,7 @@ public class StateMachine<TOwner>
 
         if (prevEventId != -1)
         {
-            PreviousState = prevEventId;
+            _PreviousState = prevEventId;
         }
 
         Change(to).Forget();
@@ -261,11 +261,11 @@ public class StateMachine<TOwner>
     /// <param name="nextState">遷移先のステート</param>
     private async UniTask Change(State nextState)
     {
-        CurrentState.Exit(nextState);
-        await CurrentState.OnAsyncExit(nextState);
-        nextState.Enter(CurrentState);
-        await nextState.AsyncEnter(CurrentState);
-        CurrentState.LateExit(nextState);
-        CurrentState = nextState;
+        _CurrentState.Exit(nextState);
+        await _CurrentState.OnAsyncExit(nextState);
+        nextState.Enter(_CurrentState);
+        await nextState.AsyncEnter(_CurrentState);
+        _CurrentState.LateExit(nextState);
+        _CurrentState = nextState;
     }
 }

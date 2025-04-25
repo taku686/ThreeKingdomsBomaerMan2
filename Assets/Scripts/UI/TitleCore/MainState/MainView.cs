@@ -12,6 +12,7 @@ namespace UI.Title
         [SerializeField] private Button shopButton;
         [SerializeField] private Button missionButton;
         [SerializeField] private Button _userInfoButton;
+        [SerializeField] private Button _teamEditButton;
         [SerializeField] private GameObject backgroundEffect;
         [SerializeField] private SimpleUserInfoView _simpleUserInfoView;
 
@@ -22,12 +23,13 @@ namespace UI.Title
         public Button _CharacterSelectButton => characterSelectButton;
         public Button _ShopButton => shopButton;
         public Button _UserInfoButton => _userInfoButton;
+        public Button _TeamEditButton => _teamEditButton;
 
         public void SetBackgroundEffect(bool isActive)
         {
             backgroundEffect.SetActive(isActive);
         }
-        
+
         public void ApplySimpleUserInfoView(SimpleUserInfoView.ViewModel viewModel)
         {
             _simpleUserInfoView.ApplyViewModel(viewModel);

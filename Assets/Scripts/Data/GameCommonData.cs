@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Common.Data
@@ -92,6 +93,7 @@ namespace Common.Data
         public const int NormalSkillReleaseLevel = 3;
         public const int SpecialSkillReleaseLevel = 5;
         public const int InvalidNumber = -9999;
+        public const int TeamMemberCount = 3;
 
         public static class Terms
         {
@@ -297,6 +299,22 @@ namespace Common.Data
                 1 => LoginBonusStatus.CanReceive,
                 2 => LoginBonusStatus.Received,
                 _ => LoginBonusStatus.Exception
+            };
+        }
+
+        public static string TranslateStatusTypeToString(StatusType statusType)
+        {
+            return statusType switch
+            {
+                StatusType.Hp => "HP",
+                StatusType.Attack => "攻撃力",
+                StatusType.Speed => "スピード",
+                StatusType.BombLimit => "ボム数",
+                StatusType.FireRange => "火力",
+                StatusType.Defense => "防御力",
+                StatusType.Resistance => "精神力",
+                StatusType.None => "Level",
+                _ => string.Empty
             };
         }
     }

@@ -24,22 +24,22 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 1b47ae12b7735bc4bb7c075b4b4d8aac, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MaskTex:
-        m_Texture: {fileID: 2800000, guid: ebfe599fc8790cf40a91c822e8d5b6a9, type: 3}
+        m_Texture: {fileID: 2800000, guid: a6f58c6e1410fda40a5b4702c81c6429, type: 3}
         m_Scale: {x: 3, y: 3}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _ColorMask: 15
-    - _Range: 1
+    - _Range: 0
     - _Stencil: 0
     - _StencilComp: 8
     - _StencilOp: 0
     - _StencilReadMask: 255
     - _StencilWriteMask: 255
     m_Colors:
-    - _Color: {r: 0.16353685, g: 0.37697968, b: 0.7075472, a: 0}
+    - _Color: {r: 0.7735849, g: 0.527711, b: 0.24448201, a: 1}
   m_BuildTextureStacks: []

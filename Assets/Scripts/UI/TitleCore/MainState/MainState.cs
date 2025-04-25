@@ -111,6 +111,12 @@ namespace UI.Title
                     .SelectMany(viewModel => _PopupGenerateUseCase.GenerateUserInfoPopup(viewModel))
                     .Subscribe(_ => Owner.SetActiveBlockPanel(false))
                     .AddTo(_cts.Token);
+
+                _View._TeamEditButton
+                    .OnClickAsObservable()
+                    .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._TeamEditButton).ToObservable())
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.TeamEdit); })
+                    .AddTo(_cts.Token);
             }
 
             private async UniTask InitializeText()

@@ -16,6 +16,8 @@ namespace Common.Data
         private int attack;
         private int fireRange;
         private int hp;
+        private int defense;
+        private int resistance;
         private int type;
         private int passiveSkillId;
         private string charaColor;
@@ -83,6 +85,17 @@ namespace Common.Data
             set => hp = value;
         }
 
+        public int Defense
+        {
+            get => defense;
+            set => defense = value;
+        }
+
+        public int Resistance
+        {
+            get => resistance;
+            set => resistance = value;
+        }
 
         public string CharaColor
         {
@@ -100,6 +113,11 @@ namespace Common.Data
         {
             get => passiveSkillId;
             set => passiveSkillId = value;
+        }
+
+        public CharacterData Clone()
+        {
+            return (CharacterData)MemberwiseClone();
         }
 
         public void Dispose()

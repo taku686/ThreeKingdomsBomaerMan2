@@ -282,7 +282,7 @@ namespace Repository
 
             if (weaponMasterData.WeaponType == WeaponType.Scythe)
             {
-                currentWeapon.transform.localEulerAngles = new Vector3(-90, 0, 180);
+                currentWeapon.transform.localEulerAngles = new Vector3(90, 180, 180);
             }
         }
 

@@ -18,6 +18,7 @@ namespace Common.Data
         private Sprite _userIconSprite;
         private UserData _userData;
         private CancellationTokenSource _cancellationTokenSource;
+        private int _candidateTeamMemberIndex = GameCommonData.InvalidNumber;
         [Inject] private CharacterMasterDataRepository _characterMasterDataRepository;
         [Inject] private LevelMasterDataRepository _levelMasterDataRepository;
         [Inject] private MissionMasterDataRepository _missionMasterDataRepository;
@@ -333,6 +334,26 @@ namespace Common.Data
         public void SetGem(int gem)
         {
             _userData.Gem = gem;
+        }
+
+        public IReadOnlyDictionary<int, int> GetTeamMembers()
+        {
+            return _userData.TeamMembers;
+        }
+
+        public void SetTeamMember(int characterId)
+        {
+            if (_userData.TeamMembers.ContainsValue(characterId))
+            {
+                return;
+            }
+
+            _userData.TeamMembers[_candidateTeamMemberIndex] = characterId;
+        }
+
+        public void SetCandidateTeamMemberIndex(int index)
+        {
+            _candidateTeamMemberIndex = index;
         }
 
         public void Dispose()

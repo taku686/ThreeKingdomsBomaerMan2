@@ -10,12 +10,6 @@ namespace PUROPORO
         [SerializeField] private Image m_CardImage;
         [SerializeField] private Text m_CardText;
 
-        /// <summary>
-        /// Setups the card informations.
-        /// </summary>
-        /// <param name="frameSprite"></param>
-        /// <param name="tempSprite">Card's icon or image.</param>
-        /// <param name="tempText">Card's name.</param>
         public void SetCard(Sprite frameSprite, Sprite tempSprite, string tempText)
         {
             m_CardFrame.sprite = frameSprite;

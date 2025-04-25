@@ -27,6 +27,7 @@ namespace UI.Title
             private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
             private SkillDetailViewModelUseCase _SkillDetailViewModelUseCase => Owner._skillDetailViewModelUseCase;
             private MissionManager _MissionManager => Owner._missionManager;
+            private StateMachine<TitleCore> _StateMachine => Owner._stateMachine;
             private PlayFabUserDataManager _playFabUserDataManager;
             private PlayFabShopManager _playFabShopManager;
             private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
@@ -243,11 +244,22 @@ namespace UI.Title
             private async UniTask OnClickDecideButton()
             {
                 var userData = _UserDataRepository.GetUserData();
-                userData.EquippedCharacterId = _sortedCharacters[_candidateIndex].Id;
+                var characterId = _sortedCharacters[_candidateIndex].Id;
+                userData.EquippedCharacterId = characterId;
+                _UserDataRepository.SetTeamMember(characterId);
                 var result = await _playFabUserDataManager.TryUpdateUserDataAsync(userData);
                 if (result)
                 {
-                    Owner._stateMachine.Dispatch((int)State.Main);
+                    var prevState = _StateMachine._PreviousState;
+                    if (prevState >= 0)
+                    {
+                        _StateMachine.Dispatch(prevState);
+                        _StateMachine._PreviousState = -1;
+                    }
+                    else
+                    {
+                        _StateMachine.Dispatch((int)State.Main);
+                    }
                 }
             }
 
@@ -312,7 +324,7 @@ namespace UI.Title
 
             private void OnClickAddVirtualCurrency()
             {
-                Owner._stateMachine.Dispatch((int)State.Shop);
+                _StateMachine.Dispatch((int)State.Shop);
                 Owner.SetActiveBlockPanel(false);
             }
 

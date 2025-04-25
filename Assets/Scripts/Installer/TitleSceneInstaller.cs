@@ -21,6 +21,7 @@ namespace Common.Installer
         [SerializeField] private Transform characterGenerateParent;
         [SerializeField] private GameObject animatorControllerRepository;
         [SerializeField] private GameObject _skyBoxManager;
+        [SerializeField] private GameObject _statusSpriteManager;
 
         public override void InstallBindings()
         {
@@ -38,6 +39,7 @@ namespace Common.Installer
             Container.Bind<RewardDataUseCase>().AsCached();
             Container.Bind<RewardDataRepository>().AsCached();
             Container.Bind<AnimatorControllerRepository>().FromComponentOn(animatorControllerRepository).AsCached();
+            Container.Bind<StatusSpriteManager>().FromComponentOn(_statusSpriteManager).AsCached();
             Container.Bind<ResourceManager>().AsCached();
             Container.Bind<MissionSpriteDataRepository>().AsCached();
 
@@ -46,6 +48,7 @@ namespace Common.Installer
             InstallInventory();
             InstallCharacterDetail();
             InstallMain();
+            InstallTeamEdit();
         }
 
         private void InstallCharacterSelect()
@@ -72,6 +75,13 @@ namespace Common.Installer
         private void InstallMain()
         {
             Container.Bind<UserInfoViewModelUseCase>().AsCached();
+        }
+
+        private void InstallTeamEdit()
+        {
+            Container.Bind<TeamEditViewModelUseCase>().AsCached();
+            Container.Bind<TeamGridViewModelUseCase>().AsCached();
+            Container.Bind<TeamStatusGridViewModelUseCase>().AsCached();
         }
     }
 }
