@@ -68,7 +68,7 @@ namespace Player.Common
 
             private void InitializeButton()
             {
-                _InputManager.BombButton.OnClickAsObservable()
+                _InputManager._BombButton.OnClickAsObservable()
                     .Where(_ => Owner._translateStatusInBattleUseCase.CanPutBomb())
                     .Throttle(TimeSpan.FromSeconds(GameCommonData.InputBombInterval))
                     .Subscribe(

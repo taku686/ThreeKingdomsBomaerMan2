@@ -31,6 +31,7 @@ public class FadeView : MonoBehaviour
         _fadeMaterial = _fadeImage.material;
         _fadeImage.sprite = GetRandomBackgroundSprite();
         _fadeMaterial.SetTexture(FadeTexture, GetRandomMaskTexture());
+        _Range =  1.1f;
     }
 
 
@@ -87,8 +88,8 @@ public class FadeView : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (_fadeMaterial == null) return;
-        Destroy(_fadeMaterial);
-        _fadeMaterial = null;
+        /*if (_fadeMaterial == null) return;
+        DestroyImmediate(_fadeMaterial);
+        _fadeMaterial = null;*/
     }
 }

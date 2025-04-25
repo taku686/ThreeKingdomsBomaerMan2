@@ -26,14 +26,14 @@ namespace Manager
         private float _normalSkillInterval;
         private float _specialSkillInterval;
         private float _dashInterval;
-        public Button BombButton { get; private set; }
+        public Button _BombButton { get; private set; }
 
 
         public void Initialize(PhotonView view, PhotonNetworkManager photonNetworkManager)
         {
             _photonView = view;
             _inputView = FindObjectOfType<InputView>();
-            BombButton = _inputView.bombButton;
+            _BombButton = _inputView.bombButton;
             if (!_photonView.IsMine)
             {
                 return;
@@ -113,19 +113,35 @@ namespace Manager
         {
             var normalSkill = weaponData.NormalSkillMasterData;
             var specialSkill = weaponData.SpecialSkillMasterData;
-            var isActiveNormalButton = levelMasterData.IsSkillOneActive && normalSkill.SkillTypeInt == (int)SkillType.Active;
-            var isActiveSpecialButton = levelMasterData.IsSkillTwoActive && specialSkill.SkillTypeInt == (int)SkillType.Active;
-            _inputView.normalSkillButton.gameObject.SetActive(isActiveNormalButton);
-            _inputView.specialSkillButton.gameObject.SetActive(isActiveSpecialButton);
-            _normalSkillInterval = normalSkill.Interval;
-            _specialSkillInterval = specialSkill.Interval;
+            if (normalSkill != null)
+            {
+                var isActiveNormalButton = levelMasterData.IsSkillOneActive && normalSkill.SkillTypeInt == (int)SkillType.Active;
+                _inputView.normalSkillButton.gameObject.SetActive(isActiveNormalButton);
+                _normalSkillInterval = normalSkill.Interval;
+                _timerNormalSkill = normalSkill.Interval;
+                _normalSkillIntervalImage.fillAmount = MaxFillAmount;
+                _inputView.normalSkillImage.sprite = weaponData.NormalSkillMasterData.Sprite;
+            }
+            else
+            {
+                _inputView.normalSkillButton.gameObject.SetActive(false);
+            }
+
+            if (specialSkill != null)
+            {
+                var isActiveSpecialButton = levelMasterData.IsSkillTwoActive && specialSkill.SkillTypeInt == (int)SkillType.Active;
+                _inputView.specialSkillButton.gameObject.SetActive(isActiveSpecialButton);
+                _specialSkillInterval = specialSkill.Interval;
+                _timerSpecialSkill = specialSkill.Interval;
+                _specialSkillIntervalImage.fillAmount = MaxFillAmount;
+                _inputView.specialSkillImage.sprite = weaponData.SpecialSkillMasterData.Sprite;
+            }
+            else
+            {
+                _inputView.specialSkillButton.gameObject.SetActive(false);
+            }
+
             _dashInterval = GameCommonData.DashInterval;
-            _timerNormalSkill = normalSkill.Interval;
-            _timerSpecialSkill = specialSkill.Interval;
-            _normalSkillIntervalImage.fillAmount = MaxFillAmount;
-            _specialSkillIntervalImage.fillAmount = MaxFillAmount;
-            _inputView.normalSkillImage.sprite = weaponData.NormalSkillMasterData.Sprite;
-            _inputView.specialSkillImage.sprite = weaponData.SpecialSkillMasterData.Sprite;
         }
 
         public void UpdateSkillUI()
