@@ -42,7 +42,8 @@ namespace Manager
         public void ChangeSkyBox()
         {
             var index = GetIndex();
-            _sky = _skyBoxMaterials[index];
+            var skyBoxMaterials = new Material(_skyBoxMaterials[index]);
+            _sky = skyBoxMaterials;
             RenderSettings.skybox = _sky;
         }
 
