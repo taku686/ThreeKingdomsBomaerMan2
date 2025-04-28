@@ -27,6 +27,11 @@ namespace Manager.DataManager
 
             return id == GameCommonData.InvalidNumber ? null : value;
         }
+        
+        public int GeCharacterCount()
+        {
+            return CharacterDatum.Count;
+        }
 
         public IReadOnlyCollection<CharacterData> GetAllCharacterData()
         {

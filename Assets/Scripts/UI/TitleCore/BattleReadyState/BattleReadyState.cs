@@ -27,6 +27,8 @@ namespace UI.Title
 
             protected override void OnExit(StateMachine<TitleCore>.State nextState)
             {
+                _PhotonNetworkManager.DisposedSubject();
+                GridAllDestroy();
                 Cancel();
             }
 
@@ -39,7 +41,8 @@ namespace UI.Title
             {
                 _PhotonNetworkManager._isTitle = true;
                 _isInitialize = false;
-                SetupCancellationToken();
+                _cts = new CancellationTokenSource();
+                _PhotonNetworkManager.CreateSubject();
                 InitializeButton();
                 InitializeSubscribe();
                 SetupEvent();
@@ -69,8 +72,12 @@ namespace UI.Title
 
             private void InitializeSubscribe()
             {
-                _PhotonNetworkManager._JoinedRoomSubject.Subscribe(OnJoinedRoom).AddTo(_cts.Token);
-                _PhotonNetworkManager._LeftRoomSubject.Subscribe(OnLeftRoom).AddTo(_cts.Token);
+                _PhotonNetworkManager._JoinedRoomSubject
+                    .Subscribe(OnJoinedRoom)
+                    .AddTo(_cts.Token);
+                _PhotonNetworkManager._LeftRoomSubject
+                    .Subscribe(OnLeftRoom)
+                    .AddTo(_cts.Token);
             }
 
             private void OnClickBackButton()
@@ -88,6 +95,7 @@ namespace UI.Title
             private void OnJoinedRoom(Photon.Realtime.Player[] players)
             {
                 GridAllDestroy();
+                Debug.Log(players.Length + "人");
                 foreach (var player in players)
                 {
                     var index = player.ActorNumber;
@@ -172,11 +180,6 @@ namespace UI.Title
                 }
 
                 _gridDictionary.Clear();
-            }
-
-            private void SetupCancellationToken()
-            {
-                _cts = new CancellationTokenSource();
             }
 
             private void Cancel()

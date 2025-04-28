@@ -5,16 +5,16 @@ namespace Repository
 {
     public class CharacterObjectRepository : IDisposable
     {
-        private GameObject characterObject;
+        private GameObject _characterObject;
 
         public GameObject GetCharacterObject()
         {
-            return characterObject;
+            return _characterObject;
         }
 
         public void SetCharacterObject(GameObject obj)
         {
-            characterObject = obj;
+            _characterObject = obj;
         }
 
         public void Dispose()

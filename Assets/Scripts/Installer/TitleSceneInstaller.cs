@@ -19,7 +19,6 @@ namespace Common.Installer
     {
         [SerializeField] private GameObject playFabManagerGameObject;
         [SerializeField] private Transform characterGenerateParent;
-        [SerializeField] private GameObject animatorControllerRepository;
         [SerializeField] private GameObject _skyBoxManager;
         [SerializeField] private GameObject _statusSpriteManager;
 
@@ -38,7 +37,6 @@ namespace Common.Installer
             Container.Bind<CharacterObjectRepository>().AsCached();
             Container.Bind<RewardDataUseCase>().AsCached();
             Container.Bind<RewardDataRepository>().AsCached();
-            Container.Bind<AnimatorControllerRepository>().FromComponentOn(animatorControllerRepository).AsCached();
             Container.Bind<StatusSpriteManager>().FromComponentOn(_statusSpriteManager).AsCached();
             Container.Bind<ResourceManager>().AsCached();
             Container.Bind<MissionSpriteDataRepository>().AsCached();

@@ -7,12 +7,12 @@ using Object = UnityEngine.Object;
 
 public class WeaponCreateInBattleUseCase : IDisposable
 {
-    private readonly Vector3 bowPosition = new(-0.029f, 0.02f, -0.001f);
-    private readonly Vector3 weaponPosition = new(-0.061f, 0.026f, 0.003f);
-    private readonly Vector3 bowRightRotation = new(-87.91f, 204.73f, -24.69f);
-    private readonly Vector3 bowLeftRotation = new(87.91f, -204.73f, -24.69f);
-    private readonly Vector3 weaponRightRotation = new(36.033f, -92.88f, 84.68f);
-    private readonly Vector3 weaponLeftRotation = new(-36.033f, 92.88f, 84.68f);
+    private readonly Vector3 _bowPosition = new(-0.029f, 0.02f, -0.001f);
+    private readonly Vector3 _weaponPosition = new(-0.061f, 0.026f, 0.003f);
+    private readonly Vector3 _bowRightRotation = new(-87.91f, 204.73f, -24.69f);
+    private readonly Vector3 _bowLeftRotation = new(87.91f, -204.73f, -24.69f);
+    private readonly Vector3 _weaponRightRotation = new(36.033f, -92.88f, 84.68f);
+    private readonly Vector3 _weaponLeftRotation = new(-36.033f, 92.88f, 84.68f);
 
     public void CreateWeapon
     (
@@ -37,18 +37,18 @@ public class WeaponCreateInBattleUseCase : IDisposable
         if (IsLeftHand(weaponData.WeaponType))
         {
             weaponLeftParent.transform.localPosition =
-                weaponData.WeaponType == WeaponType.Bow ? bowPosition : weaponPosition;
+                weaponData.WeaponType == WeaponType.Bow ? _bowPosition : _weaponPosition;
             weaponLeftParent.transform.localEulerAngles =
-                weaponData.WeaponType == WeaponType.Bow ? bowLeftRotation : weaponLeftRotation;
+                weaponData.WeaponType == WeaponType.Bow ? _bowLeftRotation : _weaponLeftRotation;
             InstantiateWeapon(weaponData, weaponLeftParent.transform);
         }
 
         if (IsRightHand(weaponData.WeaponType))
         {
             weaponRightParent.transform.localPosition =
-                weaponData.WeaponType == WeaponType.Bow ? bowPosition : weaponPosition;
+                weaponData.WeaponType == WeaponType.Bow ? _bowPosition : _weaponPosition;
             weaponRightParent.transform.localEulerAngles =
-                weaponData.WeaponType == WeaponType.Bow ? bowRightRotation : weaponRightRotation;
+                weaponData.WeaponType == WeaponType.Bow ? _bowRightRotation : _weaponRightRotation;
             InstantiateWeapon(weaponData, weaponRightParent.transform);
         }
     }

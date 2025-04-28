@@ -36,46 +36,20 @@ namespace Enemy
             Dead
         }
 
-        private void Start()
-        {
-            Initialize();
-        }
-
         private void Update()
         {
-            _stateMachine.Update();
+            _stateMachine?.Update();
         }
 
         public void Initialize()
         {
-            InitializeState();
+            /*InitializeState();
             _seeker = GetComponent<Seeker>();
             _aiLerp = GetComponent<AILerp>();
             _photonView = GetComponent<PhotonView>();
             SetupBoxCollider();
             SetupCharacterStatusManager();
-            SetupPutBomb();
-            DebugSetting();
-        }
-
-        //todo あとでけす
-
-        private bool joinedRoom;
-
-        private void DebugSetting()
-        {
-            PhotonNetwork.ConnectUsingSettings();
-        }
-
-        public override void OnConnectedToMaster()
-        {
-            PhotonNetwork.JoinOrCreateRoom("test", new RoomOptions(), TypedLobby.Default);
-        }
-
-
-        public override void OnJoinedRoom()
-        {
-            joinedRoom = true;
+            SetupPutBomb();*/
         }
 
         private void SetupBoxCollider()
@@ -89,7 +63,7 @@ namespace Enemy
         private void SetupCharacterStatusManager()
         {
             var characterData = characterMasterDataRepository.DebugGetCharacterData();
-         //   _characterStatusManager = new CharacterStatusManager(characterData, PhotonNetwork.IsMasterClient);
+            //   _characterStatusManager = new CharacterStatusManager(characterData, PhotonNetwork.IsMasterClient);
         }
 
         private void SetupPutBomb()

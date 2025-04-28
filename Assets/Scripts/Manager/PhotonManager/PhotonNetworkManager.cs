@@ -20,8 +20,8 @@ namespace Manager.NetworkManager
         [Inject] private LevelMasterDataRepository _levelMasterDataRepository;
         [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
         [Inject] private SkillMasterDataRepository _skillMasterDataRepository;
-        private readonly Subject<Photon.Realtime.Player[]> _joinedRoomSubject = new();
-        private readonly Subject<int> _leftRoomSubject = new();
+        private Subject<Photon.Realtime.Player[]> _joinedRoomSubject = new();
+        private Subject<int> _leftRoomSubject = new();
         private readonly Subject<Unit> _playerGenerateCompleteSubject = new();
         private readonly Subject<(int, SkillMasterData)> _activateSkillSubject = new();
         private readonly Dictionary<int, CharacterData> _currentRoomCharacterDatum = new();
@@ -177,6 +177,18 @@ namespace Manager.NetworkManager
 
             _playerCount = 0;
             _playerGenerateCompleteSubject.OnNext(Unit.Default);
+        }
+
+        public void DisposedSubject()
+        {
+            _joinedRoomSubject.Dispose();
+            _leftRoomSubject.Dispose();
+        }
+
+        public void CreateSubject()
+        {
+            _joinedRoomSubject = new Subject<Photon.Realtime.Player[]>();
+            _leftRoomSubject = new Subject<int>();
         }
 
         private void OnDestroy()

@@ -4,7 +4,6 @@ using UnityEngine;
 namespace Manager
 {
     public class SkyBoxManager : MonoBehaviour
-
     {
         private static readonly int Rotation = Shader.PropertyToID("_Rotation");
         [SerializeField] private Material[] _skyBoxMaterials;

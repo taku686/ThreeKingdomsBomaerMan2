@@ -1,6 +1,8 @@
 ﻿using System;
 using Common.Data;
 using Manager.DataManager;
+using Photon.Pun;
+using Unity.Mathematics;
 using UnityEngine;
 using Zenject;
 using Object = UnityEngine.Object;
@@ -54,7 +56,6 @@ namespace Repository
             characterObject = CreateCharacter(createCharacterData);
             CreateWeapon(characterObject, weaponData);
             ChangeAnimatorController(characterObject, weaponData.WeaponType);
-            //           CreateWeaponEffect(createCharacterData, characterObject);
         }
 
         private GameObject CreateCharacter(CharacterData createCharacterData)
@@ -70,10 +71,11 @@ namespace Repository
             return characterObject;
         }
 
-        private void CreateWeapon
+        public void CreateWeapon
         (
             GameObject characterObject,
-            WeaponMasterData weaponData
+            WeaponMasterData weaponData,
+            bool isPhotonObject = false
         )
         {
             var weaponObjects = characterObject.GetComponentsInChildren<WeaponObject>();
@@ -112,7 +114,7 @@ namespace Repository
                     weaponLeftParent.transform.localEulerAngles = _othersLeftRotation;
                 }
 
-                InstantiateWeapon(weaponData, weaponLeftParent.transform, true);
+                InstantiateWeapon(weaponData, weaponLeftParent.transform, true, isPhotonObject);
             }
 
             if (IsRightHand(weaponData.WeaponType))
@@ -128,7 +130,7 @@ namespace Repository
                     weaponRightParent.transform.localEulerAngles = _othersRightRotation;
                 }
 
-                InstantiateWeapon(weaponData, weaponRightParent.transform);
+                InstantiateWeapon(weaponData, weaponRightParent.transform, isPhotonObject);
             }
         }
 
@@ -142,9 +144,23 @@ namespace Repository
             return weaponType is WeaponType.Bow or WeaponType.Knife or WeaponType.Shield or WeaponType.Crow;
         }
 
-        private void InstantiateWeapon(WeaponMasterData weaponMasterData, Transform weaponParent, bool isLeftHand = false)
+        private void InstantiateWeapon(WeaponMasterData weaponMasterData, Transform weaponParent, bool isLeftHand = false, bool isPhotonObject = false)
         {
-            var currentWeapon = Object.Instantiate(weaponMasterData.WeaponObject, weaponParent.transform);
+            GameObject currentWeapon;
+            if (isPhotonObject)
+            {
+                currentWeapon = PhotonNetwork.Instantiate
+                (
+                    GameCommonData.WeaponPrefabPath + weaponMasterData.WeaponObject.name,
+                    Vector3.zero,
+                    quaternion.Euler(0, 0, 0)
+                );
+            }
+            else
+            {
+                currentWeapon = Object.Instantiate(weaponMasterData.WeaponObject, weaponParent.transform);
+            }
+
             currentWeapon.transform.localPosition = Vector3.zero;
             currentWeapon.transform.localEulerAngles = weaponMasterData.Id >= 146 ? new Vector3(-90, 0, 0) : new Vector3(0, 0, 0);
             currentWeapon.transform.localScale *= weaponMasterData.Scale;

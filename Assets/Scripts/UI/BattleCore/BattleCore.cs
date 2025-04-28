@@ -23,6 +23,8 @@ namespace Manager.BattleManager
         [Inject] private UserDataRepository _userDataRepository;
         [Inject] private SkillMasterDataRepository _skillMasterDataRepository;
         [Inject] private BattleResultDataRepository _battleResultDataRepository;
+        [Inject] private CharacterMasterDataRepository _characterMasterDataRepository;
+        [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
         [SerializeField] private AnimatorControllerRepository animatorControllerRepository;
 
         //UseCase
@@ -30,6 +32,7 @@ namespace Manager.BattleManager
         [Inject] private WeaponCreateInBattleUseCase _weaponCreateInBattleUseCase;
         [Inject] private StatusInBattleViewModelUseCase _statusInBattleViewModelUseCase;
         [Inject] private ApplyStatusSkillUseCase _applyStatusSkillUseCase;
+        [Inject] private CharacterCreateUseCase _characterCreateUseCase;
 
         //Manager
         [Inject] private PhotonNetworkManager _photonNetworkManager;

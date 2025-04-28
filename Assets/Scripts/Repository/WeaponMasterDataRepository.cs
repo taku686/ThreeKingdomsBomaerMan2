@@ -28,6 +28,11 @@ namespace Repository
                 .ToArray();
             return result;
         }
+        
+        public int GetWeaponCount()
+        {
+            return _weaponDataList.Count;
+        }
 
         public WeaponMasterData GetWeaponData(int weaponId)
         {

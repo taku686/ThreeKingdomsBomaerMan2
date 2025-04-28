@@ -15,7 +15,7 @@ namespace Manager.BattleManager
         private const int PlayerNotification = 1;
         private const float PlayerSize = 0.8f;
 
-        public void GenerateCharacter(int playerIndex, CharacterData characterData)
+        public GameObject GenerateCharacter(int playerIndex, CharacterData characterData)
         {
             var spawnPoint = GetSpawnPoint(playerIndex);
             _playerObj = PhotonNetwork.Instantiate
@@ -26,18 +26,27 @@ namespace Manager.BattleManager
             );
             _playerObj.transform.localScale *= PlayerSize;
             _playerObj.transform.SetParent(playerParent);
+            PhotonNetwork.LocalPlayer.SetPlayerGenerate(PlayerNotification);
+            return _playerObj;
+        }
 
-            PlayerGenerateNotification();
+        public GameObject GenerateCPUCharacter(int playerIndex, CharacterData characterData)
+        {
+            var spawnPoint = GetSpawnPoint(playerIndex);
+            _playerObj = PhotonNetwork.Instantiate
+            (
+                GameCommonData.CharacterPrefabPath + characterData.CharaObj,
+                spawnPoint.position,
+                spawnPoint.rotation
+            );
+            _playerObj.transform.localScale *= PlayerSize;
+            _playerObj.transform.SetParent(playerParent);
+            return _playerObj;
         }
 
         private Transform GetSpawnPoint(int index)
         {
             return startPointList[index - 1];
-        }
-
-        private void PlayerGenerateNotification()
-        {
-            PhotonNetwork.LocalPlayer.SetPlayerGenerate(PlayerNotification);
         }
     }
 }

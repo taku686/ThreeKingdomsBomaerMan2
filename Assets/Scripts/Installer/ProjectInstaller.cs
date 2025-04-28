@@ -17,6 +17,7 @@ namespace Common.Installer
         [SerializeField] private GameObject _photonNetworkGameObject;
         [SerializeField] private GameObject _mainManagerGameObject;
         [SerializeField] private GameObject _characterTypeDataGameObject;
+        [SerializeField] private GameObject _animatorControllerRepositoryGameObject;
 
         public override void InstallBindings()
         {
@@ -36,6 +37,7 @@ namespace Common.Installer
             Container.Bind<WeaponMasterDataRepository>().AsCached();
             Container.Bind<ApplyStatusSkillUseCase>().AsCached();
             Container.Bind<NormalSkillStatusChangeUseCase>().AsCached();
+            Container.Bind<AnimatorControllerRepository>().FromComponentInNewPrefab(_animatorControllerRepositoryGameObject).AsSingle();
         }
     }
 }
