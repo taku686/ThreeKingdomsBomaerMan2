@@ -112,4 +112,4 @@ Material:
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FogColorMultiplier: {r: 0, g: 0, b: 0, a: 0}
     - _FresnelColor: {r: 1, g: 1, b: 1, a: 1}
-    - _TintColor: {r: 0.5893711, g: 0.33288276, b: 0.9632353, a: 0.04}
+    - _TintColor: {r: 0.8753861, g: 0.21722424, b: 1.8420619, a: 0.04}

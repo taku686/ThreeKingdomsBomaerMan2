@@ -2,16 +2,14 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!21 &2100000
 Material:
-  serializedVersion: 8
+  serializedVersion: 6
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Splashes
   m_Shader: {fileID: 4800000, guid: 972a05a1fafc1c54d8287892f2a939b6, type: 3}
-  m_ValidKeywords:
-  - USE_ALPHA_CLIPING
-  m_InvalidKeywords: []
+  m_ShaderKeywords: USE_ALPHA_CLIPING
   m_LightmapFlags: 5
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -77,7 +75,6 @@ Material:
         m_Texture: {fileID: 2800000, guid: 288eab14fb0f7ec4398350582ada2801, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    m_Ints: []
     m_Floats:
     - _AlphaClip: 10
     - _BumpAmt: 0.08
@@ -128,4 +125,3 @@ Material:
     - _Speed: {r: 0, g: 0, b: 0, a: 0}
     - _Tiling: {r: 800, g: 1600, b: 8, a: 16}
     - _TintColor: {r: 0.28546715, g: 0.2936046, b: 0.32352942, a: 0.037}
-  m_BuildTextureStacks: []

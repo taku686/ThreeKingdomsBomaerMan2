@@ -9,6 +9,8 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Trail
   m_Shader: {fileID: 4800000, guid: 3bc67cd3532d0b2429f1a3eddf7f22f7, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _BLENDMODE_BLEND
   m_InvalidKeywords:
@@ -19,11 +21,12 @@ Material:
   - SoftParticles_OFF
   - VertLight_OFF
   m_LightmapFlags: 5
-  m_EnableInstancingVariants: 0
+  m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:

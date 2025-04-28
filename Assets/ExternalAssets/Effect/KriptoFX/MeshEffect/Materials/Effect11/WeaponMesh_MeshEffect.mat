@@ -110,7 +110,7 @@ Material:
     - _ZWriteMode: 0
     m_Colors:
     - _Color: {r: 0.38235295, g: 0.76997954, b: 1, a: 0.766}
-    - _CutoutColor: {r: 9.507274, g: 0.59036565, b: 11.3779545, a: 1}
+    - _CutoutColor: {r: 6.936742, g: 0.81844246, b: 8.262372, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FresnelColor: {r: 1, g: 0.16911763, b: 0.59888446, a: 1}
     - _HeightUVScrollDistort: {r: 2, g: 7, b: 0, a: 0}
@@ -118,3 +118,4 @@ Material:
     - _RimColor: {r: 1, g: 1, b: 1, a: 0.5}
     - _Speed: {r: 4, g: 2, b: 0, a: 0}
     - _TintColor: {r: 0, g: 0, b: 0, a: 1}
+  m_BuildTextureStacks: []

@@ -132,4 +132,5 @@ Material:
     - _FresnelColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _HeightUVScrollDistort: {r: 8, g: 12, b: 0, a: 0}
     - _MainColor: {r: 1, g: 1, b: 1, a: 1}
-    - _TintColor: {r: 2.1159735, g: 0.59138805, b: 0.2694872, a: 1}
+    - _TintColor: {r: 9.849155, g: 4.0169106, b: 3.1285553, a: 1}
+  m_BuildTextureStacks: []

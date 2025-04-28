@@ -14,18 +14,20 @@ Shader "KriptoFX/ME/GlowCutoutGradient" {
 
 		Pass{
 
-			Blend One OneMinusSrcAlpha
+			Blend SrcAlpha OneMinusSrcAlpha
+			
 			Cull Off
 			Offset -1, -1
 			ZWrite Off
 
 
-		CGPROGRAM
+		HLSLPROGRAM
 #pragma vertex vert
 #pragma fragment frag
 #pragma multi_compile_instancing
-#pragma multi_compile_fog
-#include "UnityCG.cginc"
+		#pragma multi_compile_fog
+
+  #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
 	sampler2D _MainTex;
 
@@ -43,7 +45,7 @@ Shader "KriptoFX/ME/GlowCutoutGradient" {
 
 	struct appdata_t {
 		float4 vertex : POSITION;
-		half4 color : COLOR;
+		float4 color : COLOR;
 		float2 texcoord : TEXCOORD0;
 		float3 normal : NORMAL;
 		UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -51,11 +53,11 @@ Shader "KriptoFX/ME/GlowCutoutGradient" {
 
 	struct v2f {
 		float4 vertex : POSITION;
-		half4 color : COLOR;
+		float4 color : COLOR;
 		float2 texcoord : TEXCOORD0;
 		float4 worldPosScaled : TEXCOORD1;
 		float3 normal : NORMAL;
-		UNITY_FOG_COORDS(2)
+		float fogFactor : TEXCOORD2;
 		UNITY_VERTEX_INPUT_INSTANCE_ID
 		UNITY_VERTEX_OUTPUT_STEREO
 	};
@@ -69,9 +71,8 @@ Shader "KriptoFX/ME/GlowCutoutGradient" {
 		UNITY_TRANSFER_INSTANCE_ID(v, o);
 		UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-
 		//v.vertex.xyz += v.normal / 100 * _BorderScale.z;
-		o.vertex = UnityObjectToClipPos(v.vertex);
+		o.vertex = TransformObjectToHClip(v.vertex.xyz);
 		o.color = 1;
 		o.texcoord = TRANSFORM_TEX(v.texcoord,_MainTex);
 		float3 worldPos = v.vertex * float3(length(unity_ObjectToWorld[0].xyz), length(unity_ObjectToWorld[1].xyz), length(unity_ObjectToWorld[2].xyz));
@@ -80,11 +81,11 @@ Shader "KriptoFX/ME/GlowCutoutGradient" {
 		o.worldPosScaled.z = worldPos.z *  _MainTex_ST.x;
 		o.worldPosScaled.w = worldPos.z *  _MainTex_ST.y;
 		o.normal = abs(v.normal);
-
-		UNITY_TRANSFER_FOG(o, o.vertex);
+		o.fogFactor = ComputeFogFactor(o.vertex.z);
 		return o;
 	}
 
+	sampler2D _CameraDepthTexture;
 
 	half tex2DTriplanar(sampler2D tex, float2 offset, float4 worldPos, float3 normal)
 	{
@@ -109,30 +110,27 @@ Shader "KriptoFX/ME/GlowCutoutGradient" {
 
 		float4 res;
 
-
-		res = pow(UNITY_ACCESS_INSTANCED_PROP(Props, _TintColor), 2.2);
+		float4 tintColor = UNITY_ACCESS_INSTANCED_PROP(Props, _TintColor);
+		res = i.color * tintColor * tintColor;
 		res *= tex * mask;
 
 		res = lerp(float4(0, 0, 0, 0), res, alphaMask.xxxx);
 
 
 		res.rgb = pow(res.rgb, borderScale.w);
-		//#ifndef UNITY_COLORSPACE_GAMMA
-		//		res.rgb = pow(res.rgb, 0.75);
-		//#endif
+		/*#ifndef UNITY_COLORSPACE_GAMMA
+				res.rgb = pow(res.rgb, 0.65);
+		#endif*/
 
 		half gray = dot(saturate(res.rgb + UNITY_ACCESS_INSTANCED_PROP(Props, _GradientStrength)), 0.33);
 		//res.rgb = 1 - exp(-res.rgb);
 		res =  float4(res.rgb, gray )* UNITY_ACCESS_INSTANCED_PROP(Props, _TintColor).a;
 
 		res.rgb = clamp(res.rgb, 0, 10);
-
-#if defined(FOG_LINEAR) || defined(FOG_EXP) || defined(FOG_EXP2)
-		res.rgba *= i.fogCoord.x;
-#endif
+		res.rgb = MixFogColor(res.rgb, unity_FogColor.rgb, i.fogFactor);
 		return  res;
 	}
-		ENDCG
+		ENDHLSL
 	}
 	}
 

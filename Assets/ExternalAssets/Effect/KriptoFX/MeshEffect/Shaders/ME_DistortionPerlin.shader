@@ -1,7 +1,9 @@
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 Shader "KriptoFX/ME/DistortionPerlin" {
 	Properties{
 			_TintColor("Main Color", Color) = (1,1,1,1)
-			_RimColor("Rim Color", Color) = (1,1,1,0.5)
+	[HDR]_RimColor("Rim Color", Color) = (1,1,1,0.5)
 			_BumpMap("Normalmap", 2D) = "bump" {}
 			_PerlinNoise("Perlin Noise Map (r)", 2D) = "white" {}
 			_DropWavesScale("Waves Scale (X) Height (YZ) Time (W)", Vector) = (1, 1, 1, 1)
@@ -13,29 +15,25 @@ Shader "KriptoFX/ME/DistortionPerlin" {
 	}
 		Category{
 
-			Tags { "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent" }
+			Tags { "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent"  }
 						Blend SrcAlpha OneMinusSrcAlpha
 						ZWrite Off
 						Cull Back
 
 			SubShader {
-				GrabPass {
-					"_GrabTexture"
-				}
+				
 				Pass {
 					CGPROGRAM
 					#pragma vertex vert
 					#pragma fragment frag
-					#pragma multi_compile_instancing
-					#pragma multi_compile_fog
-
+		             #pragma multi_compile_instancing
 					#include "UnityCG.cginc"
 
 					sampler2D _BumpMap;
 					sampler2D _PerlinNoise;
-					UNITY_DECLARE_SCREENSPACE_TEXTURE(_GrabTexture);
+					UNITY_DECLARE_SCREENSPACE_TEXTURE(_CameraOpaqueTexture);
 
-					float4 _GrabTexture_TexelSize;
+					float4 _CameraOpaqueTexture_TexelSize;
 					float4 _TintColor;
 					float4 _RimColor;
 					float4 _Speed;
@@ -54,29 +52,31 @@ Shader "KriptoFX/ME/DistortionPerlin" {
 						float3 normal : NORMAL;
 						half4 color : COLOR;
 						float2 texcoord : TEXCOORD0;
+
 						UNITY_VERTEX_INPUT_INSTANCE_ID
 					};
 
 					struct v2f {
 						half4 vertex : POSITION;
 						half2 uv_BumpMap : TEXCOORD0;
-						half4 grab : TEXCOORD1;
+						half4 uvgrab : TEXCOORD1;
 						half3 viewDir : TEXCOORD3;
 						half4 color : COLOR;
 						half4 localPos : TEXCOORD4;
-						UNITY_FOG_COORDS(5)
-							UNITY_VERTEX_INPUT_INSTANCE_ID
-							UNITY_VERTEX_OUTPUT_STEREO
+
+						UNITY_VERTEX_INPUT_INSTANCE_ID
+						UNITY_VERTEX_OUTPUT_STEREO
 					};
 
 					v2f vert(appdata_full v)
 					{
 						v2f o;
+
 						UNITY_SETUP_INSTANCE_ID(v);
 						UNITY_TRANSFER_INSTANCE_ID(v, o);
 						UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 						//////// Displacemnt by noise texture (rgb) and drop waves (a)
-						
+						float4 oPos = UnityObjectToClipPos(v.vertex);
 						float3 wpos = mul(unity_ObjectToWorld, v.vertex).xyz;
 
 						float4 coordNoise = float4(wpos * _NoiseScale.xyz, 0);
@@ -89,14 +89,14 @@ Shader "KriptoFX/ME/DistortionPerlin" {
 						o.vertex = UnityObjectToClipPos(v.vertex);
 						//////////////////////////////////////////////////////////////
 
-					
-						o.grab = ComputeGrabScreenPos(o.vertex);
+						oPos += o.vertex;
+
+						o.uvgrab = ComputeGrabScreenPos(o.vertex);
+
 						o.uv_BumpMap = TRANSFORM_TEX(v.texcoord, _BumpMap) + _Time.xx * _Speed.xy * _DropWavesScale;
-						o.color = 1;
+						o.color = v.color;
 						o.localPos = v.vertex;
 						o.viewDir = normalize(ObjSpaceViewDir(v.vertex));
-
-						UNITY_TRANSFER_FOG(o, o.vertex);
 						return o;
 					}
 
@@ -116,16 +116,12 @@ Shader "KriptoFX/ME/DistortionPerlin" {
 						fresnelRim = saturate(_R0 + (1.0 - _R0) * fresnelRim);
 						fresnelRim = fresnelRim*fresnelRim + fresnelRim;
 
-						half2 offset = normal.rg * _BumpAmt * _GrabTexture_TexelSize.xy * i.color.a;
-						i.grab.xy = offset * i.grab.z + i.grab.xy;
-						half4 col = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_GrabTexture, i.grab.xy/ i.grab.w);
+						half2 offset = normal.rg * _BumpAmt * _CameraOpaqueTexture_TexelSize.xy * i.color.a;
+						i.uvgrab.xy = offset * i.uvgrab.z + i.uvgrab.xy;
+						half4 col = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_CameraOpaqueTexture, i.uvgrab.xy / i.uvgrab.w);
 						half3 emission = _RimColor * i.color.rgb * 2;
 						emission = lerp(col.xyz * _TintColor.xyz, col.xyz * emission + emission / 2, saturate(fresnelRim));
-						half4 res = half4(emission, _TintColor.a * i.color.a);
-
-						UNITY_APPLY_FOG(i.fogCoord, res);
-
-						return res;
+						return fixed4(emission, _TintColor.a * i.color.a);
 					}
 					ENDCG
 				}

@@ -2,17 +2,14 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!21 &2100000
 Material:
-  serializedVersion: 8
+  serializedVersion: 6
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Distortion
   m_Shader: {fileID: 4800000, guid: 972a05a1fafc1c54d8287892f2a939b6, type: 3}
-  m_ValidKeywords:
-  - USE_ALPHA_CLIPING
-  - USE_SOFT_PARTICLES
-  m_InvalidKeywords: []
+  m_ShaderKeywords: USE_ALPHA_CLIPING USE_SOFT_PARTICLES
   m_LightmapFlags: 5
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -70,7 +67,6 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    m_Ints: []
     m_Floats:
     - _AlphaClip: 15
     - _BumpAmt: 20
@@ -113,4 +109,3 @@ Material:
     - _HeightUVScrollDistort: {r: 8, g: 12, b: 0, a: 0}
     - _MainColor: {r: 1, g: 1, b: 1, a: 1}
     - _TintColor: {r: 0.8602941, g: 0.5885075, b: 0.2973075, a: 0.559}
-  m_BuildTextureStacks: []

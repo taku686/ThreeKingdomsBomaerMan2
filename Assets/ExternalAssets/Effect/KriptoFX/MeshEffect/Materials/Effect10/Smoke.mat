@@ -2,26 +2,17 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!21 &2100000
 Material:
-  serializedVersion: 8
+  serializedVersion: 6
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Smoke
   m_Shader: {fileID: 4800000, guid: 3bc67cd3532d0b2429f1a3eddf7f22f7, type: 3}
-  m_ValidKeywords:
-  - _FADING_ON
-  - _FLIPBOOK_BLENDING
-  m_InvalidKeywords:
-  - BlendMul
-  - Clip_OFF
-  - FrameBlend_ON
-  - FresnelFade_OFF
-  - SoftParticles_ON
-  - VertLight_OFF
-  - _BLENDMODE_MUL
+  m_ShaderKeywords: BlendMul Clip_OFF FrameBlend_ON FresnelFade_OFF SoftParticles_ON
+    VertLight_OFF _BLENDMODE_MUL _FADING_ON _FLIPBOOK_BLENDING
   m_LightmapFlags: 5
-  m_EnableInstancingVariants: 1
+  m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
@@ -73,7 +64,6 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    m_Ints: []
     m_Floats:
     - CullMode: 2
     - DstMode: 0
@@ -123,5 +113,4 @@ Material:
     - _FogColorMultiplier: {r: 1, g: 1, b: 1, a: 1}
     - _FresnelColor: {r: 1, g: 1, b: 1, a: 1}
     - _Tiling: {r: 800, g: 800, b: 8, a: 8}
-    - _TintColor: {r: 1.1878297, g: 0.86764705, b: 2, a: 0.1254902}
-  m_BuildTextureStacks: []
+    - _TintColor: {r: 1.1878297, g: 0.86764705, b: 2, a: 0.3}

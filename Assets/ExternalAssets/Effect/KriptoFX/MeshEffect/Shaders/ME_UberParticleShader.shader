@@ -1,10 +1,12 @@
+// Upgrade NOTE: upgraded instancing buffer 'Props' to new syntax.
+
 Shader "KriptoFX/ME/Particle"
 {
 	Properties
 	{
 		[Header(Main Settings)]
 	[Space]
-	[PerRendererData] [HDR] _TintColor("Tint Color", Color) = (1,1,1,1)
+	[PerRendererData] [HDR]_TintColor("Tint Color", Color) = (1,1,1,1)
 		_MainTex("Main Texture", 2D) = "white" {}
 
 	[Header(Fading)]
@@ -99,7 +101,7 @@ Shader "KriptoFX/ME/Particle"
 		sampler2D _MainTex;
 	sampler2D _NoiseTex;
 	sampler2D _CutoutTex;
-	UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
+	sampler2D _CameraDepthTexture;
 
 	float4 _MainTex_ST;
 	float4 _NoiseTex_ST;
@@ -111,7 +113,7 @@ Shader "KriptoFX/ME/Particle"
 	half4 _CutoutColor;
 	half4 _FresnelColor;
 	half4 _DistortionSpeedScale;
-	half4 _FogColorMultiplier;
+	fixed4 _FogColorMultiplier;
 
 	half _InvFade;
 	half _SoftInverted;
@@ -123,7 +125,7 @@ Shader "KriptoFX/ME/Particle"
 	half InterpolationValue;
 	half _UseSoftCutout;
 	half _UseParticlesAlphaCutout;
-	half _UseVertexStreamRandom;
+	fixed _UseVertexStreamRandom;
 
 
 	UNITY_INSTANCING_BUFFER_START(Props)
@@ -162,7 +164,7 @@ Shader "KriptoFX/ME/Particle"
 
 #ifdef _FLIPBOOK_BLENDING
 		float4 texcoord : TEXCOORD0;
-		half blend : TEXCOORD1;
+		fixed blend : TEXCOORD1;
 #else
 		float2 texcoord : TEXCOORD0;
 #endif
@@ -193,7 +195,28 @@ Shader "KriptoFX/ME/Particle"
 		UNITY_VERTEX_OUTPUT_STEREO
 	};
 
-	float3 ME_AmbientColor;
+	sampler2D ME_PointLightAttenuation;
+	half4 ME_AmbientColor;
+	float4 ME_LightPositions[40];
+	float4 ME_LightColors[40];
+	int ME_LightCount;
+
+	half3 ShadeCustomLights(float4 vertex, half3 normal, int lightCount)
+	{
+		float3 worldPos = mul(unity_ObjectToWorld, vertex);
+		float3 worldNormal = UnityObjectToWorldNormal(normal);
+
+		float3 lightColor = 0;
+		for (int i = 0; i < lightCount; i++) {
+			float3 lightDir = ME_LightPositions[i].xyz - worldPos.xyz * ME_LightColors[i].w;
+			half normalizedDist = length(lightDir) / ME_LightPositions[i].w;
+			fixed attenuation = tex2Dlod(ME_PointLightAttenuation, half4(normalizedDist.xx, 0, 0));
+			attenuation = lerp(1, attenuation, ME_LightColors[i].w);
+			float diff = max(0, dot(normalize(worldNormal), normalize(lightDir)));
+			lightColor += ME_LightColors[i].rgb * (diff * attenuation);
+		}
+		return (lightColor);
+	}
 
 	v2f vert(appdata_t v)
 	{
@@ -210,9 +233,9 @@ Shader "KriptoFX/ME/Particle"
 	#endif
 #endif
 		o.color = v.color;
-//#if USE_VERTEX_LIGHT
-//		o.color.rgb *= ME_AmbientColor;
-//#endif
+#if USE_VERTEX_LIGHT
+		o.color.rgb *= ShadeCustomLights(v.vertex, 1, ME_LightCount) * 3;
+#endif
 
 		o.texcoord.xy = TRANSFORM_TEX(v.texcoord.xy, _MainTex);
 #ifdef _FLIPBOOK_BLENDING
@@ -261,10 +284,10 @@ Shader "KriptoFX/ME/Particle"
 	{
 
 		UNITY_SETUP_INSTANCE_ID(i);
-	UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i); //Insert
+
 #ifdef _FADING_ON
 	#ifdef SOFTPARTICLES_ON
-		float z = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.projPos.xy / i.projPos.w).r;
+		float z = tex2Dproj(_CameraDepthTexture, UNITY_PROJ_COORD(i.projPos)).r;
 		float sceneZ = LinearEyeDepth(UNITY_SAMPLE_DEPTH(z));
 		float partZ = i.projPos.z;
 		float fade = saturate(_InvFade * (sceneZ - partZ));
@@ -307,32 +330,30 @@ Shader "KriptoFX/ME/Particle"
 	tex = lerp(tex, tex3, InterpolationValue);
 #endif
 
-	half4 tintColor = UNITY_ACCESS_INSTANCED_PROP(_TintColor_arr, _TintColor);
-	tintColor.rgb = tintColor.rgb * tintColor.rgb * 2;
-	half4 res = 2 * tex * tintColor;
+	half4 res = 2 * tex *  UNITY_ACCESS_INSTANCED_PROP(_TintColor_arr, _TintColor);
 
 #ifdef USE_CUTOUT
-	half cutout = UNITY_ACCESS_INSTANCED_PROP(_Cutout_arr, _Cutout);
+	fixed cutout = UNITY_ACCESS_INSTANCED_PROP(_Cutout_arr, _Cutout);
 	cutout = lerp(cutout, (1.001 - i.color.a + cutout), _UseParticlesAlphaCutout);
 
 #ifdef USE_CUTOUT_TEX
-	half mask = tex2D(_CutoutTex, i.noiseCutoutTexcoord.zw);
+	fixed mask = tex2D(_CutoutTex, i.noiseCutoutTexcoord.zw);
 #else
-	half mask = tex.a;
+	fixed mask = tex.a;
 #endif
 
-	half diffMask = mask - cutout;
-	half alphaMask = lerp(saturate(diffMask * 10000) * res.a, saturate(diffMask * 2) * res.a, _UseSoftCutout);
+	fixed diffMask = mask - cutout;
+	fixed alphaMask = lerp(saturate(diffMask * 10000) * res.a, saturate(diffMask * 2) * res.a, _UseSoftCutout);
 
 #ifdef USE_CUTOUT_THRESHOLD
-	half alphaMaskThreshold = saturate((diffMask - _CutoutThreshold) * 10000) * res.a;
+	fixed alphaMaskThreshold = saturate((diffMask - _CutoutThreshold) * 10000) * res.a;
 	res.rgb = lerp(res.rgb, _CutoutColor, saturate((1 - alphaMaskThreshold) * alphaMask));
 	res.a = alphaMask;
 #else
 	res.a = alphaMask;
 #endif
 
-#endif	
+#endif
 
 	res *= i.color;
 

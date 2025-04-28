@@ -17,16 +17,12 @@ Material:
   - _METALLICSPECGLOSSMAP
   - _NORMALMAP
   - _OCCLUSIONMAP
-  - _SPECGLOSSMAP
   - _SPECULAR_SETUP
-  m_InvalidKeywords:
-  - _LIGHTMAPPING_DYNAMIC_LIGHTMAPS
-  - _LIGHTMAPPING_REALTIME
-  - _UVSEC_UV1
+  m_InvalidKeywords: []
   m_LightmapFlags: 1
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 2000
   stringTagMap:
     RenderType: Opaque
   disabledShaderPasses: []
@@ -59,7 +55,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 09fa14695ca756742996a3a973937375, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -140,7 +136,7 @@ Material:
     - _SpecColor: {r: 0.21176471, g: 0.21176471, b: 0.21176471, a: 1}
     - _SpecularColor: {r: 0.18431373, g: 0.18431373, b: 0.18431373, a: 1}
   m_BuildTextureStacks: []
---- !u!114 &5795642848190992818
+--- !u!114 &6823940780034912025
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}

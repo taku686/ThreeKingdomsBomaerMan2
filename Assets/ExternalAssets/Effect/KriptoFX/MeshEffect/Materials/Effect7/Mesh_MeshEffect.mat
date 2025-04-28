@@ -61,7 +61,7 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _Glossiness: 0.5
-    - _GradientStrength: 0.3
+    - _GradientStrength: 0.1
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -75,4 +75,5 @@ Material:
     - _Color: {r: 3, g: 1.5517249, b: 0, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _TimeScale: {r: -3, g: -8.86, b: -0.87, a: 11.94}
-    - _TintColor: {r: 3.3251011, g: 2.3527079, b: 1.7723416, a: 1}
+    - _TintColor: {r: 13.839059, g: 5.367035, b: 0.8486219, a: 1}
+  m_BuildTextureStacks: []

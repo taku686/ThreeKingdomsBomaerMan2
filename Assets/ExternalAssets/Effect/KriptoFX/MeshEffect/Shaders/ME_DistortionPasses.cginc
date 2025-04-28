@@ -1,5 +1,6 @@
 //KriptoFX
-UNITY_DECLARE_SCREENSPACE_TEXTURE(_GrabTexture);
+
+	UNITY_DECLARE_SCREENSPACE_TEXTURE(_CameraOpaqueTexture);
 	sampler2D _MainTex;
 	sampler2D _NormalTex;
 	float4 _NormalTex_ST;
@@ -62,7 +63,7 @@ UNITY_DECLARE_SCREENSPACE_TEXTURE(_GrabTexture);
 		half4 color : COLOR;
 #ifdef USE_BLENDING
 		float4 uv : TEXCOORD0;
-		half blend : TEXCOORD1;
+		fixed blend : TEXCOORD1;
 #else
 		float2 uv : TEXCOORD0;
 #endif
@@ -71,7 +72,7 @@ UNITY_DECLARE_SCREENSPACE_TEXTURE(_GrabTexture);
 #ifdef USE_CUTOUT
 		float2 uvCutout : TEXCOORD4;	
 #endif
-#if defined (USE_SOFT_PARTICLES)  && defined (SOFTPARTICLES_ON)
+#if defined (USE_SOFT_PARTICLES)
 		float4 projPos : TEXCOORD5;
 #endif
 #ifdef USE_MAINTEX
@@ -87,6 +88,7 @@ UNITY_DECLARE_SCREENSPACE_TEXTURE(_GrabTexture);
 #endif
 			UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
+
 	};
 			
 	v2f vert (appdata v)
@@ -129,7 +131,12 @@ UNITY_DECLARE_SCREENSPACE_TEXTURE(_GrabTexture);
 		o.uvCutout = (pos - 0.5) * _CutoutTex_ST.xy + _CutoutTex_ST.zw;
 #endif
 		o.vertex = UnityObjectToClipPos(v.vertex);
+
+
 		o.color = v.color;
+
+	
+		
 		o.uvgrab = ComputeGrabScreenPos(o.vertex);
 		
 #ifdef USE_REFRACTIVE
@@ -139,7 +146,7 @@ UNITY_DECLARE_SCREENSPACE_TEXTURE(_GrabTexture);
 #endif
 
 
-#if defined (USE_SOFT_PARTICLES)  && defined (SOFTPARTICLES_ON)
+#if defined (USE_SOFT_PARTICLES)
 		o.projPos = ComputeScreenPos (o.vertex);
 		COMPUTE_EYEDEPTH(o.projPos.z);
 #endif
@@ -155,6 +162,8 @@ UNITY_DECLARE_SCREENSPACE_TEXTURE(_GrabTexture);
 		o.fresnel = saturate(_FresnelR0 + (1.0 - _FresnelR0) * o.fresnel);
 	#endif
 #endif
+
+
 		UNITY_TRANSFER_FOG(o,o.vertex);
 		return o;
 	}
@@ -162,7 +171,7 @@ UNITY_DECLARE_SCREENSPACE_TEXTURE(_GrabTexture);
 	half4 frag (v2f i) : SV_Target
 	{
 		UNITY_SETUP_INSTANCE_ID(i);
-	
+	UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i); //Insert
 #if DISTORT_OFF
 		return 0;
 #endif
@@ -181,8 +190,9 @@ UNITY_DECLARE_SCREENSPACE_TEXTURE(_GrabTexture);
 
 #endif
 
-#if defined (USE_SOFT_PARTICLES)  && defined (SOFTPARTICLES_ON)
-		float sceneZ = LinearEyeDepth (SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.projPos.xy / i.projPos.w));
+#if defined (USE_SOFT_PARTICLES)
+		float z = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.projPos.xy / i.projPos.w).r;
+		float sceneZ = LinearEyeDepth(UNITY_SAMPLE_DEPTH(z));
 		float partZ = i.projPos.z;
 		half fade = saturate (_InvFade * (sceneZ-partZ));
 		half fadeStep = step(0.001, _InvFade);
@@ -225,18 +235,10 @@ UNITY_DECLARE_SCREENSPACE_TEXTURE(_GrabTexture);
 		offset *= alphaBump;
 #endif
 		i.uvgrab.xy = offset * i.color.a + i.uvgrab.xy;
-		half4 grabColor = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_GrabTexture, i.uvgrab.xy / i.uvgrab.w);
+		half4 grabColor = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_CameraOpaqueTexture, i.uvgrab.xy / i.uvgrab.w);
 		
 		half4 result = 1;
-#if defined(FOG_LINEAR) || defined(FOG_EXP) || defined(FOG_EXP2)
-		fresnelCol.rgb *= i.fogCoord.x;
-		cutoutCol.rgb *= i.fogCoord.x;
-		_TintColor.rgb *= i.fogCoord.x;
-		_MainColor.rgb = lerp(float3(1, 1, 1), _MainColor.rgb, i.fogCoord.x);
-		//return float4(i.fogCoord.x, 0, 0, 1);
-#endif
-
-		result.rgb = grabColor.rgb * lerp(float3(1, 1, 1), _MainColor.rgb, i.color.a) + fresnelCol.rgb * grabColor.rgb + cutoutCol.rgb;
+		result.rgb = grabColor.rgb * lerp(float3(1, 1, 1), _MainColor.rgb,  i.color.a) + fresnelCol.rgb * grabColor.rgb + cutoutCol.rgb;
 
 #ifdef USE_MAINTEX
 		half4 mainCol = tex2D(_MainTex, i.mainUV - offset / _TintColor.a);
@@ -249,6 +251,8 @@ UNITY_DECLARE_SCREENSPACE_TEXTURE(_GrabTexture);
 #ifdef USE_ALPHA_CLIPING
 		result.a *= alphaBump;
 #endif
+		
+		UNITY_APPLY_FOG(i.fogCoord, result);
 		result.a = saturate(result.a);
 		return result;
 	}

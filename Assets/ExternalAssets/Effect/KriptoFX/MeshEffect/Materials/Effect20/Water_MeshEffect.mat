@@ -2,17 +2,14 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!21 &2100000
 Material:
-  serializedVersion: 8
+  serializedVersion: 6
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Water_MeshEffect
   m_Shader: {fileID: 4800000, guid: 972a05a1fafc1c54d8287892f2a939b6, type: 3}
-  m_ValidKeywords:
-  - USE_FRESNEL
-  - USE_HEIGHT
-  m_InvalidKeywords: []
+  m_ShaderKeywords: USE_FRESNEL USE_HEIGHT
   m_LightmapFlags: 5
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -78,7 +75,6 @@ Material:
         m_Texture: {fileID: 2800000, guid: cd8abd51143aa5140aded186614aa040, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    m_Ints: []
     m_Floats:
     - _AlphaClip: 10
     - _BumpAmt: 3
@@ -123,7 +119,7 @@ Material:
     - _CutoutColor: {r: 1, g: 1, b: 1, a: 1}
     - _DropWavesScale: {r: 1, g: 0.5, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _FresnelColor: {r: 2.6178007, g: 3.3298426, b: 3.9999995, a: 1}
+    - _FresnelColor: {r: 1.3088238, g: 1.6567954, b: 2, a: 1}
     - _HeightUVScrollDistort: {r: 0, g: -7, b: 0, a: 0}
     - _MainColor: {r: 0.90441173, g: 0.95253557, b: 1, a: 1}
     - _NoiseScale: {r: 0, g: 0, b: 0, a: 0}
@@ -131,4 +127,3 @@ Material:
     - _RimColor: {r: 0.057093438, g: 0.06710122, b: 0.08088237, a: 1}
     - _Speed: {r: 2, g: 15, b: 0, a: 8}
     - _TintColor: {r: 0.9117647, g: 0.9306288, b: 1, a: 1}
-  m_BuildTextureStacks: []

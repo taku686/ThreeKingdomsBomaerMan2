@@ -22,7 +22,7 @@ Material:
     m_TexEnvs:
     - _DistortTex1:
         m_Texture: {fileID: 2800000, guid: 38b9834f06305f540b36b10955823e5d, type: 3}
-        m_Scale: {x: 0.7, y: 0.7}
+        m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DistortTex2:
         m_Texture: {fileID: 2800000, guid: 38b9834f06305f540b36b10955823e5d, type: 3}
@@ -40,10 +40,11 @@ Material:
     - _Cutout: 0
     - _FresnelStr: 1
     - _InvFade: 3
-    - _Offset: 0.3
+    - _Offset: 0.1
     - _UseVelocity: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _DistortSpeed: {r: 2, g: -0.4, b: 0.2, a: 0.25}
+    - _DistortSpeed: {r: 1.5, g: -0.4, b: 2, a: 0.2}
     - _Offset: {r: 0, g: 0, b: 0, a: 0}
-    - _TintColor: {r: 25.089405, g: 3.1953487, b: 9.121557, a: 1}
+    - _TintColor: {r: 98.08329, g: 6.0145445, b: 23.678917, a: 1}
+  m_BuildTextureStacks: []

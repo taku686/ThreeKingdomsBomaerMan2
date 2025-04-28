@@ -10,13 +10,16 @@ namespace UseCase
     public class SortCharactersUseCase : IDisposable
     {
         private readonly UserDataRepository _userDataRepository;
+        private readonly ApplyStatusSkillUseCase _applyStatusSkillUseCase;
 
         public SortCharactersUseCase
         (
-            UserDataRepository userDataRepository
+            UserDataRepository userDataRepository,
+            ApplyStatusSkillUseCase applyStatusSkillUseCase
         )
         {
             _userDataRepository = userDataRepository;
+            _applyStatusSkillUseCase = applyStatusSkillUseCase;
         }
 
         public IReadOnlyCollection<CharacterData> InAsTask(CharacterSelectRepository.OrderType orderType)
@@ -31,11 +34,14 @@ namespace UseCase
             foreach (var characterData in characterDatum)
             {
                 var level = _userDataRepository.GetCurrentLevelData(characterData.Id);
-                var hp = Mathf.RoundToInt(level.StatusRate * characterData.Hp);
-                var attack = Mathf.RoundToInt(level.StatusRate * characterData.Attack);
-                var speed = Mathf.RoundToInt(level.StatusRate * characterData.Speed);
-                var bomb = Mathf.RoundToInt(level.StatusRate * characterData.BombLimit);
-                var fire = Mathf.RoundToInt(level.StatusRate * characterData.FireRange);
+                var characterId = characterData.Id;
+                var hp = _applyStatusSkillUseCase.ApplyLevelStatus(characterId, StatusType.Hp);
+                var attack = _applyStatusSkillUseCase.ApplyLevelStatus(characterId, StatusType.Attack);
+                var speed = _applyStatusSkillUseCase.ApplyLevelStatus(characterId, StatusType.Speed);
+                var bomb = _applyStatusSkillUseCase.ApplyLevelStatus(characterId, StatusType.BombLimit);
+                var fire = _applyStatusSkillUseCase.ApplyLevelStatus(characterId, StatusType.FireRange);
+                var defense = _applyStatusSkillUseCase.ApplyLevelStatus(characterId, StatusType.Defense);
+                var resistance = _applyStatusSkillUseCase.ApplyLevelStatus(characterId, StatusType.Resistance);
                 var newCharacterData = new CharacterData
                 {
                     Id = characterData.Id,
@@ -45,6 +51,8 @@ namespace UseCase
                     Speed = speed,
                     BombLimit = bomb,
                     FireRange = fire,
+                    Defense = defense,
+                    Resistance = resistance,
                     Name = characterData.Name,
                     SelfPortraitSprite = characterData.SelfPortraitSprite,
                     ColorSprite = characterData.ColorSprite,
@@ -61,7 +69,7 @@ namespace UseCase
                 .ToArray();
         }
 
-        private int TranslateOrderType(CharacterSelectRepository.OrderType orderType, CharacterData data)
+        private static int TranslateOrderType(CharacterSelectRepository.OrderType orderType, CharacterData data)
         {
             return orderType switch
             {
@@ -72,6 +80,8 @@ namespace UseCase
                 CharacterSelectRepository.OrderType.Speed => data.Speed,
                 CharacterSelectRepository.OrderType.Bomb => data.BombLimit,
                 CharacterSelectRepository.OrderType.Fire => data.FireRange,
+                CharacterSelectRepository.OrderType.Defense => data.Defense,
+                CharacterSelectRepository.OrderType.Resistance => data.Resistance,
                 _ => 0
             };
         }

@@ -1,7 +1,7 @@
 Shader "KriptoFX/ME/Distortion"
 {
 	Properties
-	{
+	{	
 		[Header(Main Settings)]
 	[Toggle(USE_MAINTEX)] _UseMainTex("Use Main Texture", Int) = 0
 		[HDR]_TintColor("Tint Color", Color) = (1,1,1,1)
@@ -12,7 +12,7 @@ Shader "KriptoFX/ME/Distortion"
 		_Distortion ("Distortion", Float) = 100
 	[Toggle(USE_REFRACTIVE)] _UseRefractive("Use Refractive Distort", Int) = 0
 		_RefractiveStrength("Refractive Strength", Range (-1, 1)) = 0
-
+	
 	[Toggle(USE_SOFT_PARTICLES)] _UseSoft("Use Soft Particles", Int) = 0
 		_InvFade("Soft Particles Factor", Float) = 3
 		[Space]
@@ -21,7 +21,7 @@ Shader "KriptoFX/ME/Distortion"
 		_HeightTex ("Height Tex", 2D) = "white" {}
 		_Height("_Height", Float) = 0.1
 		_HeightUVScrollDistort("Height UV Scroll(XY)", Vector) = (8, 12, 0, 0)
-
+		
 		[Space]
 		[Header(Fresnel)]
 	[Toggle(USE_FRESNEL)] _UseFresnel("Use Fresnel", Int) = 0
@@ -29,7 +29,7 @@ Shader "KriptoFX/ME/Distortion"
 		_FresnelPow ("Fresnel Pow", Float) = 5
 		_FresnelR0 ("Fresnel R0", Float) = 0.04
 		_FresnelDistort("Fresnel Distort", Float) = 1500
-
+		
 		[Space]
 		[Header(Cutout)]
 	[Toggle(USE_CUTOUT)] _UseCutout("Use Cutout", Int) = 0
@@ -37,7 +37,7 @@ Shader "KriptoFX/ME/Distortion"
 		_Cutout("Cutout", Range(0, 1.2)) = 1
 		[HDR]_CutoutColor("Cutout Color", Color) = (1,1,1,1)
 		_CutoutThreshold("Cutout Threshold", Range(0, 1)) = 0.015
-
+		
 		[Space]
 		[Header(Rendering)]
 		[Toggle] _ZWriteMode("ZWrite On?", Int) = 0
@@ -48,16 +48,14 @@ Shader "KriptoFX/ME/Distortion"
 	}
 	SubShader
 	{
-		/*GrabPass {
-			"_GrabTexture"
- 		}*/
+		
 
-		Tags { "Queue"="Transparent-10" "IgnoreProjector"="True" "RenderType"="Transparent"}
+		Tags { "Queue"="Transparent-10" "IgnoreProjector"="True" "RenderType"="Transparent" }
 		ZWrite [_ZWriteMode]
 		Cull [_CullMode]
 			Offset -1, -1
 		Blend SrcAlpha OneMinusSrcAlpha
-
+		
 		Pass
 		{
 			CGPROGRAM
@@ -76,9 +74,13 @@ Shader "KriptoFX/ME/Distortion"
 			#pragma shader_feature USE_ALPHA_CLIPING
 			#pragma shader_feature USE_BLENDING
 			#pragma shader_feature USE_MAINTEX
-
+			
 			#include "UnityCG.cginc"
 
+			float4 CustomGrabScreenPos(float4 vertex)
+			{
+				return ComputeGrabScreenPos(vertex);
+			}
 
 			#include "ME_DistortionPasses.cginc"
 

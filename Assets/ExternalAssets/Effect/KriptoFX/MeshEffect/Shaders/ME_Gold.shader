@@ -18,51 +18,78 @@ Shader "KriptoFX/ME/Gold" {
 		CGPROGRAM
 #pragma vertex vert
 #pragma fragment frag
-
+		#pragma multi_compile_instancing
 #pragma multi_compile_fog
 
 #include "UnityCG.cginc"
 
 
-	float3 ME_AmbientColor;
+		sampler2D ME_PointLightAttenuation;
+	half4 ME_AmbientColor;
+	float4 ME_LightPositions[40];
+	float4 ME_LightColors[40];
+	int ME_LightCount;
+
 
 	sampler2D _MainTex;
 	float4 _MainTex_ST;
 	half _Cutoff;
-	half4 _MainColor;
+	fixed4 _MainColor;
 	half4 _SpeedDistort;
 	samplerCUBE  ME_Reflection;
 
 	struct appdata_t {
 		float4 vertex : POSITION;
-		half4 color : COLOR0;
+		fixed4 color : COLOR0;
 		half3 normal : NORMAL;
 		float2 texcoord : TEXCOORD0;
+
 
 		UNITY_VERTEX_INPUT_INSTANCE_ID
 	};
 
 	struct v2f {
 		float4 vertex : SV_POSITION;
-	
+		fixed3 lightColor : COLOR;
 		float2 texcoord : TEXCOORD0;
 		half3 normal : NORMAL;
 		float3 viewDir : TEXCOORD1;
 		UNITY_FOG_COORDS(2)
-
+			UNITY_VERTEX_INPUT_INSTANCE_ID
 			UNITY_VERTEX_OUTPUT_STEREO
 	};
 
 
 
+
+	half3 ShadeCustomLights(float4 vertex, half3 normal, int lightCount)
+	{
+		float3 worldPos = mul(unity_ObjectToWorld, vertex);
+		float3 worldNormal = UnityObjectToWorldNormal(normal);
+
+		float3 lightColor = 0;
+		for (int i = 0; i < lightCount; i++) {
+			float3 lightDir = ME_LightPositions[i].xyz - worldPos.xyz * ME_LightColors[i].w;
+			half normalizedDist = length(lightDir) / ME_LightPositions[i].w;
+			fixed attenuation = tex2Dlod(ME_PointLightAttenuation, half4(normalizedDist.xx, 0, 0));
+			attenuation = lerp(1, attenuation, ME_LightColors[i].w);
+			float diff = max(0, dot(normalize(worldNormal), normalize(lightDir)));
+			lightColor += ME_LightColors[i].rgb * (diff * attenuation);
+		}
+		return (lightColor);
+	}
+
 	v2f vert(appdata_t v)
 	{
 		v2f o;
 		UNITY_SETUP_INSTANCE_ID(v);
+		UNITY_TRANSFER_INSTANCE_ID(v, o);
 		UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 		o.vertex = UnityObjectToClipPos(v.vertex);
 
-	
+		o.lightColor = max(ShadeCustomLights(v.vertex, v.normal, ME_LightCount), ShadeCustomLights(v.vertex, 1, ME_LightCount) * 3);
+		o.lightColor = lerp(dot(o.lightColor, 0.33), o.lightColor, 0.25);
+
 		o.texcoord = TRANSFORM_TEX(v.texcoord,_MainTex);
 		o.normal = normalize(UnityObjectToWorldNormal(v.normal));
 		o.viewDir = normalize(WorldSpaceViewDir(v.vertex));
@@ -72,16 +99,17 @@ Shader "KriptoFX/ME/Gold" {
 	}
 
 
-	half4 frag(v2f i) : SV_Target
+	fixed4 frag(v2f i) : SV_Target
 	{
+		UNITY_SETUP_INSTANCE_ID(i);
 		float3 reflectionDir = reflect(-(i.viewDir), i.normal);
 		float4 envSample = texCUBE(ME_Reflection, reflectionDir);
 		half fresnel = 1 - saturate(dot(i.viewDir, i.normal));
 		fresnel *= fresnel;
-		half4 finalCol = 1;
-		finalCol.rgb = saturate(envSample.rgb * _MainColor.rgb * 1.5 + fresnel * ME_AmbientColor *  _MainColor.rgb * 0.25);
+		fixed4 finalCol = 1;
+		finalCol.rgb = saturate(envSample.rgb * _MainColor.rgb * 1.5 + fresnel * i.lightColor *  _MainColor.rgb * 0.25);
 
-		half4 mask = tex2D(_MainTex, i.texcoord + _Time.x * _SpeedDistort.xy);
+		fixed4 mask = tex2D(_MainTex, i.texcoord + _Time.x * _SpeedDistort.xy);
 		mask = tex2D(_MainTex, i.texcoord + mask * _SpeedDistort.zw - _Time.x * _SpeedDistort.xy  * 1.4);
 #ifndef UNITY_COLORSPACE_GAMMA
 		mask.rgb = pow(mask.rgb, 0.45);
@@ -105,7 +133,8 @@ Shader "KriptoFX/ME/Gold" {
 #pragma vertex vert
 #pragma fragment frag
 #pragma multi_compile_shadowcaster
-#pragma fragmentoption ARB_precision_hint_fastest
+#pragma multi_compile_instancing
+
 
 #include "UnityCG.cginc"
 
@@ -114,24 +143,31 @@ Shader "KriptoFX/ME/Gold" {
 		float2 texcoord : TEXCOORD0;
 		float4 vertex : POSITION;
 		half3 normal : NORMAL;
+		UNITY_VERTEX_INPUT_INSTANCE_ID
 	};
 
 
 	sampler2D _MainTex;
 	float4 _MainTex_ST;
 	half _Cutoff;
-	half4 _MainColor;
+	fixed4 _MainColor;
 	half4 _SpeedDistort;
 
 	struct v2f
 	{
 		float2 texcoord : TEXCOORD3;
 		V2F_SHADOW_CASTER;
+		UNITY_VERTEX_INPUT_INSTANCE_ID
+			UNITY_VERTEX_OUTPUT_STEREO
 	};
 
 	v2f vert(appdata v)
 	{
 		v2f o;
+		UNITY_SETUP_INSTANCE_ID(v);
+		UNITY_TRANSFER_INSTANCE_ID(v, o);
+		UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+
 		o.texcoord = TRANSFORM_TEX(v.texcoord, _MainTex);
 		TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
 			return o;
@@ -139,7 +175,8 @@ Shader "KriptoFX/ME/Gold" {
 
 	float4 frag(v2f i) : COLOR
 	{
-		half4 mask = tex2D(_MainTex, i.texcoord + _Time.x * _SpeedDistort.xy);
+		UNITY_SETUP_INSTANCE_ID(i);
+		fixed4 mask = tex2D(_MainTex, i.texcoord + _Time.x * _SpeedDistort.xy);
 	mask = tex2D(_MainTex, i.texcoord + mask * _SpeedDistort.zw - _Time.x * _SpeedDistort.xy  * 1.4);
 #ifndef UNITY_COLORSPACE_GAMMA
 	mask.rgb = pow(mask.rgb, 0.45);

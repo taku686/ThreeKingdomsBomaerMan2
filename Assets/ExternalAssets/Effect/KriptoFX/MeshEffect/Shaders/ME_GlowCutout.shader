@@ -18,13 +18,14 @@ Shader "KriptoFX/ME/GlowCutout" {
 		SubShader{
 		Pass{
 
-		CGPROGRAM
+		HLSLPROGRAM
 #pragma vertex vert
 #pragma fragment frag
 #pragma multi_compile_instancing
 #pragma multi_compile_fog
 
-#include "UnityCG.cginc"
+  #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
 
 		sampler2D _MainTex;
 	float4 _TintColor;
@@ -33,7 +34,7 @@ Shader "KriptoFX/ME/GlowCutout" {
 
 	struct appdata_t {
 		float4 vertex : POSITION;
-		fixed4 color : COLOR;
+		float4 color : COLOR;
 		float2 texcoord : TEXCOORD0;
 		float3 normal : NORMAL;
 		UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -41,12 +42,11 @@ Shader "KriptoFX/ME/GlowCutout" {
 
 	struct v2f {
 		float4 vertex : POSITION;
-		fixed4 color : COLOR;
+		float4 color : COLOR;
 		float2 texcoord : TEXCOORD0;
 		float3 normal : NORMAL;
 		float3 worldPosScaled : TEXCOORD1;
-
-		UNITY_FOG_COORDS(2)
+		float fogFactor : TEXCOORD2;
 		UNITY_VERTEX_INPUT_INSTANCE_ID
 		UNITY_VERTEX_OUTPUT_STEREO
 	};
@@ -56,20 +56,18 @@ Shader "KriptoFX/ME/GlowCutout" {
 	v2f vert(appdata_t v)
 	{
 		v2f o;
-
 		UNITY_SETUP_INSTANCE_ID(v);
 		UNITY_TRANSFER_INSTANCE_ID(v, o);
 		UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
 		v.vertex.xyz += v.normal / 100 * _BorderScale.z;
-		o.vertex = UnityObjectToClipPos(v.vertex);
+		o.vertex = TransformObjectToHClip(v.vertex.xyz);
 		o.color = 1;
 		o.texcoord = TRANSFORM_TEX(v.texcoord,_MainTex);
 		float3 worldPos = v.vertex * float3(length(unity_ObjectToWorld[0].xyz), length(unity_ObjectToWorld[1].xyz), length(unity_ObjectToWorld[2].xyz));
 		o.worldPosScaled = worldPos.xyz *  _MainTex_ST.x;
 		o.normal = abs(v.normal);
-
-		UNITY_TRANSFER_FOG(o, o.vertex);
+		o.fogFactor = ComputeFogFactor(o.vertex.z);
 		return o;
 	}
 
@@ -83,13 +81,13 @@ Shader "KriptoFX/ME/GlowCutout" {
 	}
 
 	half4 frag(v2f i) : COLOR
-	{	 
+	{
 		UNITY_SETUP_INSTANCE_ID(i);
 		half2 mask = tex2DTriplanar(_MainTex, _Time.xx * _TimeScale.xy, i.worldPosScaled, i.normal);
 		half2 tex = tex2DTriplanar(_MainTex, mask + _Time.xx * _TimeScale.zw, i.worldPosScaled, i.normal);
 		float4 res = 0;
 #if (!UNITY_COLORSPACE_GAMMA)
-		//tex = pow(tex, 0.45);
+		tex = pow(tex, 0.45);
 
 #endif
 		res.r = step(tex.r, _BorderScale.x);
@@ -98,13 +96,11 @@ Shader "KriptoFX/ME/GlowCutout" {
 
 		res = res.r * i.color * _TintColor;
 		res.a = saturate(res.a);
-		res =  res * _TintColor.a;
-
-		UNITY_APPLY_FOG(i.fogCoord, res);
-
-		return res;
+		res = res * _TintColor.a;
+		res.rgb = MixFog(res.rgb, i.fogFactor);
+		return  res;
 	}
-		ENDCG
+		ENDHLSL
 	}
 	}
 	}

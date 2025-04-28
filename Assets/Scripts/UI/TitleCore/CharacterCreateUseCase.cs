@@ -1,7 +1,6 @@
 ﻿using System;
 using Common.Data;
 using Manager.DataManager;
-using Unity.Mathematics;
 using UnityEngine;
 using Zenject;
 using Object = UnityEngine.Object;
@@ -55,8 +54,7 @@ namespace Repository
             characterObject = CreateCharacter(createCharacterData);
             CreateWeapon(characterObject, weaponData);
             ChangeAnimatorController(characterObject, weaponData.WeaponType);
-            //todo androidでエフェクトの表示がおかしくなるためコメントアウト
-            //CreateWeaponEffect(createCharacterData, characterObject);
+            //           CreateWeaponEffect(createCharacterData, characterObject);
         }
 
         private GameObject CreateCharacter(CharacterData createCharacterData)
@@ -153,6 +151,13 @@ namespace Repository
             FixWeaponAngle(currentWeapon, weaponMasterData, isLeftHand);
             currentWeapon.tag = GameCommonData.WeaponTag;
             currentWeapon.AddComponent<WeaponObject>();
+            var psUpdater = currentWeapon.GetComponentInChildren<PSMeshRendererUpdater>();
+            if (psUpdater == null)
+            {
+                return;
+            }
+
+            psUpdater.UpdateMeshEffect(currentWeapon);
         }
 
         private void FixWeaponAngle(GameObject currentWeapon, WeaponMasterData weaponMasterData, bool isLeftHand)
@@ -273,6 +278,10 @@ namespace Repository
             if (weaponMasterData.WeaponType == WeaponType.Crow)
             {
                 currentWeapon.transform.localEulerAngles = isLeftHand ? new Vector3(180, 0, 0) : new Vector3(0, 0, 0);
+                if (weaponMasterData.Id == 357)
+                {
+                    currentWeapon.transform.localEulerAngles = isLeftHand ? new Vector3(0, 0, 0) : new Vector3(180, 0, 0);
+                }
             }
 
             if (weaponMasterData.WeaponType == WeaponType.Katana)

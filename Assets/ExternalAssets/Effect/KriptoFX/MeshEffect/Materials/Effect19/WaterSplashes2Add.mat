@@ -2,23 +2,15 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!21 &2100000
 Material:
-  serializedVersion: 8
+  serializedVersion: 6
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: WaterSplashes2Add
   m_Shader: {fileID: 4800000, guid: 3bc67cd3532d0b2429f1a3eddf7f22f7, type: 3}
-  m_ValidKeywords:
-  - _BLENDMODE_BLEND
-  - _FADING_ON
-  m_InvalidKeywords:
-  - BlendAlpha
-  - Clip_OFF
-  - FrameBlend_OFF
-  - FresnelFade_OFF
-  - SoftParticles_ON
-  - VertLight4_ON
+  m_ShaderKeywords: BlendAlpha Clip_OFF FrameBlend_OFF FresnelFade_OFF SoftParticles_ON
+    VertLight4_ON _BLENDMODE_BLEND _FADING_ON
   m_LightmapFlags: 5
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -68,7 +60,6 @@ Material:
         m_Texture: {fileID: 2800000, guid: 5cc28bceff05e1944836e09f360fb6c3, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    m_Ints: []
     m_Floats:
     - CullMode: 2
     - DstMode: 10
@@ -129,4 +120,3 @@ Material:
     - _Test: {r: 7, g: 8, b: 0, a: 1500}
     - _TintColor: {r: 0.5847751, g: 0.6604701, b: 0.7647059, a: 0.2}
     - _UVScrollFadeDistort: {r: 3, g: 6, b: 0, a: 1500}
-  m_BuildTextureStacks: []
