@@ -29,9 +29,11 @@ namespace Repository
             return result;
         }
         
-        public int GetWeaponCount()
+        public int GetWeaponRandomWeaponId()
         {
-            return _weaponDataList.Count;
+            var keys = _weaponDataList.Select(data => data.Id).ToArray();
+            var index = Random.Range(0, keys.Length);
+            return keys[index];
         }
 
         public WeaponMasterData GetWeaponData(int weaponId)

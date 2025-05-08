@@ -37,7 +37,7 @@ namespace Manager.BattleManager
 
             private void OnSubscribe()
             {
-                _BattleStartView.Exit
+                _BattleStartView._Exit
                     .Subscribe(_ => { Owner._stateMachine.Dispatch((int)State.InBattle); })
                     .AddTo(_cts.Token);
             }

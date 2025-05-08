@@ -25,7 +25,7 @@ namespace Manager.BattleManager
         {
             private static readonly Vector3 ColliderCenter = new(0, 0.6f, 0);
             private static readonly Vector3 ColliderSize = new(0.4f, 0.6f, 0.4f);
-            private static readonly float MaxRate = 1f;
+            private const float MaxRate = 1f;
             private PhotonNetworkManager _PhotonNetworkManager => Owner._photonNetworkManager;
             private PlayerGeneratorUseCase _PlayerGeneratorUseCase => Owner._playerGeneratorUseCase;
             private MapManager _MapManager => Owner.mapManager;
@@ -78,15 +78,12 @@ namespace Manager.BattleManager
                 }
 
                 var generateAmount = PhotonNetwork.CurrentRoom.MaxPlayers - PhotonNetwork.CurrentRoom.PlayerCount;
-                Debug.Log("生成数" + generateAmount);
                 for (var i = 1; i <= generateAmount; i++)
                 {
                     var playerIndex = PhotonNetwork.CurrentRoom.PlayerCount + i;
-                    var characterCount = _CharacterMasterDataRepository.GeCharacterCount();
-                    var candidateCharacterId = Random.Range(0, characterCount);
+                    var candidateCharacterId = _CharacterMasterDataRepository.GetRandomCharacterId();
                     var characterData = _CharacterMasterDataRepository.GetCharacterData(candidateCharacterId);
-                    var weaponCount = _WeaponMasterDataRepository.GetWeaponCount();
-                    var candidateWeaponId = Random.Range(0, weaponCount);
+                    var candidateWeaponId = _WeaponMasterDataRepository.GetWeaponRandomWeaponId();
                     var weaponData = _WeaponMasterDataRepository.GetWeaponData(candidateWeaponId);
                     var cpuObj = _PlayerGeneratorUseCase.GenerateCPUCharacter(playerIndex, characterData);
                     _CharacterCreateUseCase.CreateWeapon(cpuObj, weaponData, true);
@@ -101,13 +98,11 @@ namespace Manager.BattleManager
                 _PhotonNetworkManager._PlayerGenerateCompleteSubject.Subscribe(_ =>
                 {
                     var players = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
-                    Debug.Log("プレイヤー数" + players.Length);
                     foreach (var player in players)
                     {
                         var isCPU = player.TryGetComponent<EnemyCore>(out var _);
                         if (isCPU)
                         {
-                            Debug.Log("CPUキャラ");
                             continue;
                         }
 
@@ -120,7 +115,6 @@ namespace Manager.BattleManager
 
             private void InitializePlayerComponent(GameObject player)
             {
-                Debug.Log("PLAYERキャラ");
                 var photonView = player.GetComponent<PhotonView>();
                 var photonAnimator = player.GetComponent<PhotonAnimatorView>();
                 var playerPutBomb = player.AddComponent<PutBomb>();

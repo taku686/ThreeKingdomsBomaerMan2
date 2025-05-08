@@ -28,7 +28,6 @@ namespace Manager.BattleManager
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
             {
                 Initialize();
-                OnSubscribe();
             }
 
             protected override void OnExit(StateMachine<BattleCore>.State nextState)
@@ -42,6 +41,7 @@ namespace Manager.BattleManager
             {
                 _cts = new CancellationTokenSource();
                 _startTime = PhotonNetwork.ServerTimestamp;
+                OnSubscribe();
                 Owner.SwitchUiObject(State.InBattle);
             }
 

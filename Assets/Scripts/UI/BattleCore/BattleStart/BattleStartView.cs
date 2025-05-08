@@ -21,7 +21,7 @@ namespace Manager.BattleManager
             _observableStateMachineTrigger = battleStartAnimator.GetBehaviour<ObservableStateMachineTrigger>();
         }
 
-        public IObservable<Unit> Exit => _observableStateMachineTrigger
+        public IObservable<Unit> _Exit => _observableStateMachineTrigger
             .OnStateExitAsObservable()
             .AsUnitObservable();
     }
