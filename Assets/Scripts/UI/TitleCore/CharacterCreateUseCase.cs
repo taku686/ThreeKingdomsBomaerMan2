@@ -155,6 +155,7 @@ namespace Repository
                     Vector3.zero,
                     quaternion.Euler(0, 0, 0)
                 );
+                currentWeapon.transform.SetParent(weaponParent);
             }
             else
             {

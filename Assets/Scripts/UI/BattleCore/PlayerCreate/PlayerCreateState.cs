@@ -6,8 +6,10 @@ using Enemy;
 using Manager.BattleManager.Camera;
 using Manager.DataManager;
 using Manager.NetworkManager;
+using ModestTree;
 using Photon.Pun;
 using Player.Common;
+using PlayFab.ClientModels;
 using Repository;
 using UI.Battle;
 using Unity.Mathematics;
@@ -44,8 +46,14 @@ namespace Manager.BattleManager
                 OnInitialize();
             }
 
+            protected override void OnExit(StateMachine<BattleCore>.State nextState)
+            {
+                _PhotonNetworkManager.DisposePlayerGenerateCompleteSubject();
+            }
+
             private void OnInitialize()
             {
+                _PhotonNetworkManager.CreatePlayerGenerateCompleteSubject();
                 GeneratePlayer();
                 GenerateCPU();
                 SetPlayerGenerateCompleteSubscribe();
@@ -70,6 +78,7 @@ namespace Manager.BattleManager
                 }
 
                 var generateAmount = PhotonNetwork.CurrentRoom.MaxPlayers - PhotonNetwork.CurrentRoom.PlayerCount;
+                Debug.Log("生成数" + generateAmount);
                 for (var i = 1; i <= generateAmount; i++)
                 {
                     var playerIndex = PhotonNetwork.CurrentRoom.PlayerCount + i;
@@ -92,8 +101,16 @@ namespace Manager.BattleManager
                 _PhotonNetworkManager._PlayerGenerateCompleteSubject.Subscribe(_ =>
                 {
                     var players = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
+                    Debug.Log("プレイヤー数" + players.Length);
                     foreach (var player in players)
                     {
+                        var isCPU = player.TryGetComponent<EnemyCore>(out var _);
+                        if (isCPU)
+                        {
+                            Debug.Log("CPUキャラ");
+                            continue;
+                        }
+
                         InitializePlayerComponent(player);
                     }
 
@@ -103,12 +120,7 @@ namespace Manager.BattleManager
 
             private void InitializePlayerComponent(GameObject player)
             {
-                var isCPU = player.TryGetComponent<EnemyCore>(out _);
-                if (isCPU)
-                {
-                    return;
-                }
-
+                Debug.Log("PLAYERキャラ");
                 var photonView = player.GetComponent<PhotonView>();
                 var photonAnimator = player.GetComponent<PhotonAnimatorView>();
                 var playerPutBomb = player.AddComponent<PutBomb>();

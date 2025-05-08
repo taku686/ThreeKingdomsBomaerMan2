@@ -27,7 +27,7 @@ namespace UI.Title
 
             protected override void OnExit(StateMachine<TitleCore>.State nextState)
             {
-                _PhotonNetworkManager.DisposedSubject();
+                _PhotonNetworkManager.DisposedRoomSubject();
                 GridAllDestroy();
                 Cancel();
             }
@@ -42,7 +42,7 @@ namespace UI.Title
                 _PhotonNetworkManager._isTitle = true;
                 _isInitialize = false;
                 _cts = new CancellationTokenSource();
-                _PhotonNetworkManager.CreateSubject();
+                _PhotonNetworkManager.CreateRoomSubject();
                 InitializeButton();
                 InitializeSubscribe();
                 SetupEvent();
@@ -95,7 +95,6 @@ namespace UI.Title
             private void OnJoinedRoom(Photon.Realtime.Player[] players)
             {
                 GridAllDestroy();
-                Debug.Log(players.Length + "人");
                 foreach (var player in players)
                 {
                     var index = player.ActorNumber;
