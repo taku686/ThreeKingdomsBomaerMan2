@@ -33,7 +33,6 @@ namespace Manager.BattleManager
             private StateMachine<BattleCore> _StateMachineClone => Owner._stateMachine;
             private BombProvider _BombProvider => Owner._bombProvider;
             private AnimatorControllerRepository _AnimatorControllerRepository => Owner.animatorControllerRepository;
-            private WeaponCreateInBattleUseCase _WeaponCreateInBattleUseCase => Owner._weaponCreateInBattleUseCase;
             private EffectActivateUseCase _EffectActivateUseCase => Owner.effectActivator;
             private ApplyStatusSkillUseCase _ApplyStatusSkillUseCase => Owner._applyStatusSkillUseCase;
             private List<PlayerStatusUI> _PlayerStatusUiList => Owner._playerStatusUiList;

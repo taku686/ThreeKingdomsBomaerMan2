@@ -42,6 +42,12 @@ namespace Player.Common
         public IObservable<Unit> _DeadObservable => _deadSubject;
         public IObservable<(StatusType statusType, int speed, bool isBuff, bool isDebuff)> _StatusBuffUiObservable => _statusBuffUiSubject;
 
+        public Subject<Unit> _NormalSkillSubject { get; } = new();
+        public Subject<Unit> _SpecialSkillSubject { get; } = new();
+        public Subject<Unit> _DashSkillSubject { get; } = new();
+        public Subject<Unit> _BombSkillSubject { get; } = new();
+
+
         private enum PLayerState
         {
             Idle,
@@ -70,14 +76,12 @@ namespace Player.Common
 
         private void InitializeComponent()
         {
-            _inputManager = gameObject.AddComponent<InputManager>();
             _putBomb = GetComponent<PutBomb>();
             _animator = GetComponent<Animator>();
             _playerMove = gameObject.AddComponent<PlayerMove>();
             _playerRenderer = GetComponentInChildren<Renderer>();
             _boxCollider = GetComponent<BoxCollider>();
             _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
-            _inputManager.Initialize(photonView, _photonNetworkManager);
             _playerMove.Initialize(_statusBuffSubject, _translateStatusInBattleUseCase._Speed);
             _cancellationToken = gameObject.GetCancellationTokenOnDestroy();
         }
@@ -101,7 +105,6 @@ namespace Player.Common
             }
 
             _stateMachine.Update();
-            _inputManager.UpdateSkillUI();
             OnInvincible();
         }
 
@@ -179,6 +182,10 @@ namespace Player.Common
             _translateStatusInBattleUseCase.Dispose();
             _deadSubject.Dispose();
             _statusBuffSubject.Dispose();
+            _NormalSkillSubject.Dispose();
+            _SpecialSkillSubject.Dispose();
+            _DashSkillSubject.Dispose();
+            _BombSkillSubject.Dispose();
         }
     }
 }

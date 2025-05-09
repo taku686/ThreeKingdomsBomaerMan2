@@ -16,8 +16,13 @@ namespace Player.Common
         {
             private PhotonView _PhotonView => Owner.photonView;
             private PlayerMove _PlayerMove => Owner._playerMove;
-            private InputManager _InputManager => Owner._inputManager;
             private StateMachine<PlayerCore> _StateMachine => Owner._stateMachine;
+            private IObservable<Unit> _OnClickNormalSkill => Owner._NormalSkillSubject;
+            private IObservable<Unit> _OnClickSpecialSkill => Owner._SpecialSkillSubject;
+            private IObservable<Unit> _OnClickDash => Owner._DashSkillSubject;
+            private IObservable<Unit> _OnClickBomb => Owner._BombSkillSubject;
+
+
             private Transform _playerTransform;
             private bool _isSetup;
             private CancellationTokenSource _cancellationTokenSource;
@@ -55,9 +60,18 @@ namespace Player.Common
                 }
 
                 _playerTransform = Owner.transform;
-                _InputManager.OnClickNormalSkill(OnClickNormalSkill, Owner.GetCancellationTokenOnDestroy());
-                _InputManager.OnClickSpecialSkill(OnClickSpecialSkill, Owner.GetCancellationTokenOnDestroy());
-                _InputManager.OnClickDash(OnClickDash, Owner.GetCancellationTokenOnDestroy());
+                _OnClickNormalSkill
+                    .Subscribe(_ => { OnClickNormalSkill(); })
+                    .AddTo(Owner.GetCancellationTokenOnDestroy());
+
+                _OnClickSpecialSkill
+                    .Subscribe(_ => { OnClickSpecialSkill(); })
+                    .AddTo(Owner.GetCancellationTokenOnDestroy());
+
+                _OnClickDash
+                    .Subscribe(_ => { OnClickDash(); })
+                    .AddTo(Owner.GetCancellationTokenOnDestroy());
+
                 _isSetup = true;
             }
 
@@ -68,7 +82,7 @@ namespace Player.Common
 
             private void InitializeButton()
             {
-                _InputManager._BombButton.OnClickAsObservable()
+                _OnClickBomb
                     .Where(_ => Owner._translateStatusInBattleUseCase.CanPutBomb())
                     .Throttle(TimeSpan.FromSeconds(GameCommonData.InputBombInterval))
                     .Subscribe(

@@ -111,7 +111,7 @@ namespace Manager
             WeaponMasterData weaponData
         )
         {
-            var normalSkill = weaponData.NormalSkillMasterData;
+            /*var normalSkill = weaponData.NormalSkillMasterData;
             var specialSkill = weaponData.SpecialSkillMasterData;
             if (normalSkill != null)
             {
@@ -141,7 +141,7 @@ namespace Manager
                 _inputView.specialSkillButton.gameObject.SetActive(false);
             }
 
-            _dashInterval = GameCommonData.DashInterval;
+            _dashInterval = GameCommonData.DashInterval;*/
         }
 
         public void UpdateSkillUI()

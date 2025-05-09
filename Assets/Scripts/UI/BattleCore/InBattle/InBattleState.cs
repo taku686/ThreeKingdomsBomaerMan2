@@ -2,13 +2,11 @@
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
-using Manager.NetworkManager;
 using Photon.Pun;
 using Player.Common;
 using Repository;
 using UI.Battle;
 using UniRx;
-using UnityEngine;
 
 namespace Manager.BattleManager
 {
@@ -21,6 +19,7 @@ namespace Manager.BattleManager
             private StateMachine<BattleCore> _StateMachine => Owner._stateMachine;
             private List<PlayerStatusUI> _PlayerStatusUiList => Owner._playerStatusUiList;
             private BattleResultDataRepository _BattleResultDataRepository => Owner._battleResultDataRepository;
+            private InputViewModelUseCase _InputViewModelUseCase => Owner._inputViewModelUseCase;
             private CancellationTokenSource _cts;
             private int _startTime;
             private int _rank;
@@ -41,8 +40,15 @@ namespace Manager.BattleManager
             {
                 _cts = new CancellationTokenSource();
                 _startTime = PhotonNetwork.ServerTimestamp;
+                InitializeView();
                 OnSubscribe();
                 Owner.SwitchUiObject(State.InBattle);
+            }
+
+            private void InitializeView()
+            {
+                var viewModel = _InputViewModelUseCase.InAsTask();
+                _View.ApplyInputViewModel(viewModel);
             }
 
             private void OnSubscribe()
@@ -61,6 +67,23 @@ namespace Manager.BattleManager
                     .Subscribe(tuple => { _View.ApplyBuffState(tuple.statusType, tuple.speed, tuple.isBuff, tuple.isDebuff); })
                     .AddTo(_cts.Token);
 
+                _View.OnClickNormalSkillButtonAsObservable()
+                    .Subscribe(_ => { _PlayerCore._NormalSkillSubject.OnNext(Unit.Default); })
+                    .AddTo(_cts.Token);
+
+                _View.OnClickSpecialSkillButtonAsObservable()
+                    .Subscribe(_ => { _PlayerCore._SpecialSkillSubject.OnNext(Unit.Default); })
+                    .AddTo(_cts.Token);
+
+                _View.OnClickDashButtonAsObservable()
+                    .Subscribe(_ => { _PlayerCore._DashSkillSubject.OnNext(Unit.Default); })
+                    .AddTo(_cts.Token);
+
+                _View.OnClickBombButtonAsObservable()
+                    .Subscribe(_ => { _PlayerCore._BombSkillSubject.OnNext(Unit.Default); })
+                    .AddTo(_cts.Token);
+
+
                 Observable.EveryUpdate()
                     .Subscribe(_ =>
                     {
@@ -71,6 +94,7 @@ namespace Manager.BattleManager
                         }
 
                         _View.UpdateTime(time);
+                        _View.UpdateSkillUI();
                     })
                     .AddTo(_cts.Token);
             }

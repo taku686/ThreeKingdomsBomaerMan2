@@ -29,10 +29,10 @@ namespace Manager.BattleManager
 
         //UseCase
         [Inject] private PlayerGeneratorUseCase _playerGeneratorUseCase;
-        [Inject] private WeaponCreateInBattleUseCase _weaponCreateInBattleUseCase;
         [Inject] private StatusInBattleViewModelUseCase _statusInBattleViewModelUseCase;
         [Inject] private ApplyStatusSkillUseCase _applyStatusSkillUseCase;
         [Inject] private CharacterCreateUseCase _characterCreateUseCase;
+        [Inject] private InputViewModelUseCase _inputViewModelUseCase;
 
         //Manager
         [Inject] private PhotonNetworkManager _photonNetworkManager;
