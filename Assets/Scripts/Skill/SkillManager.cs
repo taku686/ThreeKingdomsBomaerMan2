@@ -20,14 +20,14 @@ namespace Skill
             _slashFactory = slashFactory;
         }
 
-        public void ActivateSkill(SkillMasterData skillMasterData, Transform playerTransform)
+        public void ActivateSkill(SkillMasterData skillMasterData, Transform playerTransform, Animator animator)
         {
-            var slash = _slashFactory.Create(playerTransform, AbnormalCondition.None, null);
+            var slash = _slashFactory.Create(animator, playerTransform, AbnormalCondition.None, null);
             foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
             {
                 if (abnormalCondition == AbnormalCondition.None)
                     continue;
-                slash = _slashFactory.Create(playerTransform, abnormalCondition, slash);
+                slash = _slashFactory.Create(animator, playerTransform, abnormalCondition, slash);
             }
 
             slash.Attack();

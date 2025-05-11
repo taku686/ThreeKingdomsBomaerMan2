@@ -1,4 +1,5 @@
 ﻿using AttributeAttack;
+using Repository;
 using Zenject;
 
 namespace Skill.Attack

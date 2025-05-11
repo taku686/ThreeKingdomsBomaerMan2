@@ -1,4 +1,7 @@
 using AttributeAttack;
+using Common.Data;
+using UniRx;
+using UniRx.Triggers;
 using UnityEngine;
 using Zenject;
 
@@ -6,8 +9,17 @@ namespace Skill.Attack
 {
     public class NormalSlash : IAttackBehaviour
     {
+        private readonly Animator _animator;
+
+        [Inject]
+        public NormalSlash(Animator animator)
+        {
+            _animator = animator;
+        }
+
         public void Attack()
         {
+            _animator.SetTrigger(GameCommonData.SlashHashKey);
             Debug.Log("Normal Attack");
         }
 
@@ -16,7 +28,7 @@ namespace Skill.Attack
             // TODO マネージリソースをここで解放します
         }
 
-        public class Factory : PlaceholderFactory<NormalSlash>
+        public class Factory : PlaceholderFactory<Animator, NormalSlash>
         {
         }
     }

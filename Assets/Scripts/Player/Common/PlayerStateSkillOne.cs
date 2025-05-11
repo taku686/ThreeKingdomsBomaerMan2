@@ -36,7 +36,7 @@ namespace Player.Common
                 var characterData = _PhotonNetworkManager.GetCharacterData(index);
                 var characterId = characterData.Id;
                 var playerTransform = Owner.transform;
-                _SkillManager.ActivateSkill(normalSkillData, playerTransform);
+                _SkillManager.ActivateSkill(normalSkillData, playerTransform, _Animator);
                 PlayBackAnimation(GameCommonData.NormalHashKey, GameCommonData.NormalKey);
                 //ActivateSkill(normalSkillData, statusSkillData, characterId);
                 PhotonNetwork.LocalPlayer.SetSkillData(normalSkillData.Id);
@@ -44,10 +44,10 @@ namespace Player.Common
 
             private void PlayBackAnimation(int hashKey, string key)
             {
-                _Animator.SetTrigger(hashKey);
+                //_Animator.SetTrigger(hashKey);
                 _ObservableStateMachineTrigger
                     .OnStateExitAsObservable()
-                    .Where(info => info.StateInfo.IsName(key))
+                    //.Where(info => info.StateInfo.IsName(key))
                     .Take(1)
                     .Subscribe(_ => { Owner._stateMachine.Dispatch((int)PLayerState.Idle); })
                     .AddTo(Owner.GetCancellationTokenOnDestroy());

@@ -1,18 +1,26 @@
-using System.Collections;
 using System.Collections.Generic;
+using Common.Data;
+using Sirenix.OdinInspector;
+using Sirenix.Serialization;
+using Skill;
 using UnityEngine;
 
-public class SkillEffectRepository : MonoBehaviour
+namespace Repository
 {
-    // Start is called before the first frame update
-    void Start()
+    public class SkillEffectRepository : SerializedMonoBehaviour
     {
-        
-    }
+        [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Abnormal Condition", ValueLabel = "Skill Effect")]
+        private Dictionary<AbnormalCondition, SkillEffect> _skillEffectDictionary;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        public SkillEffect GetSkillEffect(AbnormalCondition abnormalCondition)
+        {
+            if (_skillEffectDictionary.TryGetValue(abnormalCondition, out var skillEffect))
+            {
+                return skillEffect;
+            }
+
+            Debug.LogError($"Skill effect not found for {abnormalCondition}");
+            return null;
+        }
     }
 }

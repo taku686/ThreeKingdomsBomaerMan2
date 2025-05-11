@@ -141,6 +141,7 @@ namespace UI.Title
             else
             {
                 _stateMachine.Start<LoginState>();
+                _mainManager._isInitialize = true;
             }
 
             _stateMachine.AddAnyTransition<MainState>((int)State.Main);

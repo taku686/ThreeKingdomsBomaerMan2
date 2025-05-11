@@ -36,10 +36,10 @@ namespace Common.Installer
         private void SlashSKillInstaller()
         {
             Container.Bind<SkillManager>().AsCached();
-            Container.BindFactory<Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeSlashFactory.SlashFactory>().FromFactory<AttributeSlashFactory>();
-            Container.BindFactory<NormalSlash, NormalSlash.Factory>().AsCached();
-            Container.BindFactory<IAttackBehaviour, PoisonSlash, PoisonSlash.Factory>().AsCached();
-            Container.BindFactory<IAttackBehaviour, ParalysisSlash, ParalysisSlash.Factory>().AsCached();
+            Container.BindFactory<Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeSlashFactory.SlashFactory>().FromFactory<AttributeSlashFactory>();
+            Container.BindFactory<Animator, NormalSlash, NormalSlash.Factory>().AsCached();
+            Container.BindFactory<Animator, Transform, IAttackBehaviour, PoisonSlash, PoisonSlash.Factory>().AsCached();
+            Container.BindFactory<Animator, Transform, IAttackBehaviour, ParalysisSlash, ParalysisSlash.Factory>().AsCached();
         }
     }
 }

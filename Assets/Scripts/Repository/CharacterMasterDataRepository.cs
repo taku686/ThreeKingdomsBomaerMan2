@@ -9,7 +9,6 @@ namespace Manager.DataManager
 {
     public class CharacterMasterDataRepository : IDisposable
     {
-        [Inject] private MainManager _mainManager;
         [Inject] private UserDataRepository _userDataRepository;
         private static readonly Dictionary<int, CharacterData> CharacterDatum = new();
 
@@ -27,7 +26,7 @@ namespace Manager.DataManager
 
             return id == GameCommonData.InvalidNumber ? null : value;
         }
-        
+
         public int GeCharacterCount()
         {
             return CharacterDatum.Count;

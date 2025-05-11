@@ -45,7 +45,8 @@ namespace UI.Common
                 _normalSkillButtonGameObject.SetActive(isActiveNormalButton);
                 normalSkillIntervalImage.fillAmount = MaxFillAmount;
                 normalSkillImage.sprite = normalSkill.Sprite;
-                _normalSkillInterval = normalSkill.Interval;
+                //_normalSkillInterval = normalSkill.Interval;
+                _normalSkillInterval = 1;
                 _timerNormalSkill = 0;
                 normalSkillIntervalImage.fillAmount = 0f;
                 normalSkillButton.interactable = false;

@@ -5,7 +5,7 @@ using Zenject;
 
 namespace Skill.Attack
 {
-    public class AttributeSlashFactory : IFactory<Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour>
+    public class AttributeSlashFactory : IFactory<Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour>
     {
         private readonly NormalSlash.Factory _normalSlashBehaviourFactory;
         private readonly PoisonSlash.Factory _poisonSlashBehaviourFactory;
@@ -24,23 +24,29 @@ namespace Skill.Attack
             _paralysisSlashBehaviourFactory = paralysisSlashBehaviourFactory;
         }
 
-        public IAttackBehaviour Create(Transform playerTransform, AbnormalCondition attribute, IAttackBehaviour attack)
+        public IAttackBehaviour Create
+        (
+            Animator animator,
+            Transform playerTransform,
+            AbnormalCondition attribute,
+            IAttackBehaviour attack
+        )
         {
             if (attack == null && attribute == AbnormalCondition.None)
             {
-                return _normalSlashBehaviourFactory.Create();
+                return _normalSlashBehaviourFactory.Create(animator);
             }
 
             return attribute switch
             {
-                AbnormalCondition.None => _normalSlashBehaviourFactory.Create(),
-                AbnormalCondition.Poison => _poisonSlashBehaviourFactory.Create(attack),
-                AbnormalCondition.Paralysis => _paralysisSlashBehaviourFactory.Create(attack),
+                AbnormalCondition.None => _normalSlashBehaviourFactory.Create(animator),
+                AbnormalCondition.Poison => _poisonSlashBehaviourFactory.Create(animator, playerTransform, attack),
+                AbnormalCondition.Paralysis => _paralysisSlashBehaviourFactory.Create(animator, playerTransform, attack),
                 _ => throw new System.NotImplementedException()
             };
         }
 
-        public class SlashFactory : PlaceholderFactory<Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour>
+        public class SlashFactory : PlaceholderFactory<Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour>
         {
         }
     }
