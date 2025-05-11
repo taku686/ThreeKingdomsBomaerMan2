@@ -8,7 +8,6 @@ ShaderImporter:
   - _Noise: {instanceID: 0}
   - _texcoord: {instanceID: 0}
   nonModifiableTextures: []
-  preprocessorOverride: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 

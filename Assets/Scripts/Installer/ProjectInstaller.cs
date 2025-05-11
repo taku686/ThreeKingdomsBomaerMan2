@@ -18,6 +18,7 @@ namespace Common.Installer
         [SerializeField] private GameObject _mainManagerGameObject;
         [SerializeField] private GameObject _characterTypeDataGameObject;
         [SerializeField] private GameObject _animatorControllerRepositoryGameObject;
+        [SerializeField] private GameObject _skillEffectRepositoryGameObject;
 
         public override void InstallBindings()
         {
@@ -38,6 +39,7 @@ namespace Common.Installer
             Container.Bind<ApplyStatusSkillUseCase>().AsCached();
             Container.Bind<NormalSkillStatusChangeUseCase>().AsCached();
             Container.Bind<AnimatorControllerRepository>().FromComponentInNewPrefab(_animatorControllerRepositoryGameObject).AsSingle();
+            Container.Bind<SkillEffectRepository>().FromComponentInNewPrefab(_skillEffectRepositoryGameObject).AsSingle();
         }
     }
 }

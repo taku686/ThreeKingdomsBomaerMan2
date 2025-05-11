@@ -23,13 +23,10 @@ https://youtu.be/hZSZ2Q8MF3k
 2)Quality
 2.1) For better sparks quality enable "Anisotropic textures: Forced On" in quality settings.
 
-  SUPPORT ASSET FOR URP or HDRP here --> https://assetstore.unity.com/packages/slug/157764
-  SUPPORT ASSET FOR URP or HDRP here --> https://assetstore.unity.com/packages/slug/157764
-  SUPPORT ASSET FOR URP or HDRP here --> https://assetstore.unity.com/packages/slug/157764
+BiRP, URP or HDRP support is here --> Tools > RP changer for Hovl Studio Assets
 
 Contact me if you have any questions.
-My email: gorobecn2@gmail.com
+My email: hovlstudio1@gmail.com
 
-
-Thank you for reading, I really appreciate it.
-Please rate this asset in the Asset Store ^^
+Contact me if you have any questions.
+My email: hovlstudio1@gmail.com

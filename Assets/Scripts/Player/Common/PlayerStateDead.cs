@@ -1,6 +1,5 @@
 ﻿using Common.Data;
 using Cysharp.Threading.Tasks;
-using Photon.Pun;
 using UniRx;
 using State = StateMachine<Player.Common.PlayerCore>.State;
 

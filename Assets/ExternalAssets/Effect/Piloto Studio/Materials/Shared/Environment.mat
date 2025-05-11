@@ -9,6 +9,8 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Environment
   m_Shader: {fileID: 4800000, guid: d985403ea514e7c46bf7c2fab31b9d95, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords:
   - _DISABLE_DECALS
@@ -23,13 +25,14 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 1
-  m_CustomRenderQueue: 2000
+  m_CustomRenderQueue: 3000
   stringTagMap:
     MotionVector: User
   disabledShaderPasses:
   - DistortionVectors
   - MOTIONVECTORS
   - TransparentBackface
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -338,6 +341,7 @@ Material:
     - _CoatMask: 0
     - _CullMode: 0
     - _CullModeForward: 0
+    - _Culling: 0
     - _Cutoff: 0.5
     - _DepthOffsetEnable: 0
     - _Desaturate: 0
@@ -511,7 +515,10 @@ Material:
     - _PPDMinSamples: 5
     - _PPDPrimitiveLength: 1
     - _PPDPrimitiveWidth: 1
+    - _QueueControl: 0
+    - _QueueOffset: 0
     - _RayTracing: 0
+    - _ReceiveShadows: 1
     - _ReceivesSSR: 0
     - _ReceivesSSRTransparent: 0
     - _RefractionModel: 0
@@ -592,6 +599,7 @@ Material:
     - _UseEmissiveIntensity: 0
     - _UseHeightBasedBlend: 0
     - _UseMainLayerInfluence: 0
+    - _UsePixelation: 0
     - _UseRamp: 0
     - _UseShadowThreshold: 0
     - _UseSoftAlpha: 0
@@ -618,6 +626,7 @@ Material:
     - _DetailDistortionChannel: {r: 0, g: 0, b: 0, a: 1}
     - _DetailMultiplyChannel: {r: 1, g: 1, b: 1, a: 0}
     - _DetailNoisePanning: {r: 0.2, g: 0, b: 0, a: 0}
+    - _DetailVertexOffsetChannel: {r: 1, g: 0, b: 0, a: 0}
     - _DiffusionProfileAsset: {r: 0, g: 0, b: 0, a: 0}
     - _DiffusionProfileAsset0: {r: 0, g: 0, b: 0, a: 0}
     - _DiffusionProfileAsset1: {r: 0, g: 0, b: 0, a: 0}
@@ -635,6 +644,7 @@ Material:
     - _MainTextureChannel: {r: 0.02, g: 0.02, b: 0.02, a: 0}
     - _MainTexturePanning: {r: 0.2522222, g: 0, b: 0, a: 0}
     - _MidColor: {r: 1, g: 0.44479147, b: 0, a: 0}
+    - _Resolution: {r: 64, g: 64, b: 0, a: 0}
     - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
     - _ThicknessRemap: {r: 0, g: 1, b: 0, a: 0}
     - _ThicknessRemap0: {r: 0, g: 1, b: 0, a: 0}

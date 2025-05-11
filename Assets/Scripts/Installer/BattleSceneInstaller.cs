@@ -1,6 +1,11 @@
+using AttributeAttack;
+using AttributeAttack.Sample;
 using Bomb;
+using Common.Data;
 using Manager.BattleManager;
 using Repository;
+using Skill;
+using Skill.Attack;
 using UI.Common;
 using UnityEngine;
 using Zenject;
@@ -24,6 +29,17 @@ namespace Common.Installer
             var dummyTransform = transform;
             Container.Bind<CharacterCreateUseCase>().AsCached().WithArguments(dummyTransform);
             Container.Bind<CharacterObjectRepository>().AsCached();
+
+            SlashSKillInstaller();
+        }
+
+        private void SlashSKillInstaller()
+        {
+            Container.Bind<SkillManager>().AsCached();
+            Container.BindFactory<Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeSlashFactory.SlashFactory>().FromFactory<AttributeSlashFactory>();
+            Container.BindFactory<NormalSlash, NormalSlash.Factory>().AsCached();
+            Container.BindFactory<IAttackBehaviour, PoisonSlash, PoisonSlash.Factory>().AsCached();
+            Container.BindFactory<IAttackBehaviour, ParalysisSlash, ParalysisSlash.Factory>().AsCached();
         }
     }
 }

@@ -9,23 +9,25 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Flare_GlowdotPickbook_Add
   m_Shader: {fileID: 4800000, guid: d985403ea514e7c46bf7c2fab31b9d95, type: 3}
-  m_ValidKeywords:
-  - _SURFACE_TYPE_TRANSPARENT
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
   m_InvalidKeywords:
   - _DISABLE_SSR
   - _DISABLE_SSR_TRANSPARENT
   - _DOUBLESIDED_ON
+  - _SURFACE_TYPE_TRANSPARENT
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 1
   m_CustomRenderQueue: 3000
   stringTagMap:
     MotionVector: User
-    RenderType: Transparent
   disabledShaderPasses:
   - DistortionVectors
   - MOTIONVECTORS
   - TransparentBackface
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -75,6 +77,7 @@ Material:
     - _BlendMode: 1
     - _CullMode: 0
     - _CullModeForward: 0
+    - _Culling: 0
     - _Desaturate: 0
     - _DisableErosion: 0
     - _DistortionEnable: 0
@@ -92,7 +95,7 @@ Material:
     - _MiddlePointPos1: 0.5
     - _MultiplyNoiseDesaturation: 1
     - _OpaqueCullMode: 2
-    - _QueueControl: -1
+    - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _ReceivesSSR: 0
@@ -121,6 +124,7 @@ Material:
     - _TransparentZWrite: 0
     - _UseAlphaDisolve: 0
     - _UseAlphaOverride: 0
+    - _UsePixelation: 0
     - _UseRamp: 0
     - _UseShadowThreshold: 0
     - _UseSoftAlpha: 0
@@ -138,6 +142,7 @@ Material:
     - _DetailDistortionChannel: {r: 1, g: 0, b: 0, a: 0}
     - _DetailMultiplyChannel: {r: 0, g: 0, b: 0, a: 0}
     - _DetailNoisePanning: {r: 0, g: 0, b: 0, a: 0}
+    - _DetailVertexOffsetChannel: {r: 1, g: 0, b: 0, a: 0}
     - _DoubleSidedConstants: {r: 1, g: 1, b: 1, a: 0}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
     - _FlipbooksColumsRows: {r: 1, g: 1, b: 0, a: 0}
@@ -148,6 +153,8 @@ Material:
     - _MainTextureChannel: {r: 1, g: 1, b: 1, a: 0}
     - _MainTexturePanning: {r: 0, g: 0, b: 0, a: 0}
     - _MidColor: {r: 1, g: 0.44479147, b: 0, a: 0}
+    - _Resolution: {r: 64, g: 64, b: 0, a: 0}
+    - _Scrolling: {r: 0, g: 0, b: 0, a: 0}
     - _UnlitColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
     - _WhiteColor: {r: 1, g: 0.8950032, b: 0, a: 0}
   m_BuildTextureStacks: []

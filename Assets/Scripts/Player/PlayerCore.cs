@@ -6,8 +6,8 @@ using Cysharp.Threading.Tasks;
 using Manager;
 using Manager.BattleManager;
 using Manager.NetworkManager;
-using Pathfinding.Examples.RTS;
 using Photon.Pun;
+using Skill;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
@@ -16,32 +16,38 @@ namespace Player.Common
 {
     public partial class PlayerCore : MonoBehaviourPunCallbacks
     {
-        private ApplyStatusSkillUseCase _applyStatusSkillUseCase;
+        private StateMachine<PlayerCore> _stateMachine;
+
+        private bool _isDamage;
+        private bool _isInvincible;
+
+        private string _hpKey;
+
         private PhotonNetworkManager _photonNetworkManager;
         private InputManager _inputManager;
+        private SkillManager _skillManager;
+
+        private ApplyStatusSkillUseCase _applyStatusSkillUseCase;
+        private TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
+
         private PlayerMove _playerMove;
         private PutBomb _putBomb;
         private Animator _animator;
         private ObservableStateMachineTrigger _observableStateMachineTrigger;
-        private TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
+        private Renderer _playerRenderer;
+        private BoxCollider _boxCollider;
+        private CancellationToken _cancellationToken;
+
+        private readonly Subject<Unit> _deadSubject = new();
+        private readonly Subject<(StatusType statusType, float value)> _statusBuffSubject = new();
+        private readonly Subject<(StatusType statusType, int speed, bool isBiff, bool isDebuff)> _statusBuffUiSubject = new();
+
         private const int DeadHp = 0;
         private const int InvincibleDuration = 2;
         private const float WaitDuration = 0.3f;
-        private bool _isDamage;
-        private bool _isInvincible;
-        private Renderer _playerRenderer;
-        private BoxCollider _boxCollider;
-        private SkillBase _skillOne;
-        private SkillBase _skillTwo;
-        private string _hpKey;
-        private readonly Subject<Unit> _deadSubject = new();
-        private StateMachine<PlayerCore> _stateMachine;
-        private CancellationToken _cancellationToken;
-        private readonly Subject<(StatusType statusType, float value)> _statusBuffSubject = new();
-        private readonly Subject<(StatusType statusType, int speed, bool isBiff, bool isDebuff)> _statusBuffUiSubject = new();
+
         public IObservable<Unit> _DeadObservable => _deadSubject;
         public IObservable<(StatusType statusType, int speed, bool isBuff, bool isDebuff)> _StatusBuffUiObservable => _statusBuffUiSubject;
-
         public Subject<Unit> _NormalSkillSubject { get; } = new();
         public Subject<Unit> _SpecialSkillSubject { get; } = new();
         public Subject<Unit> _DashSkillSubject { get; } = new();
@@ -63,6 +69,7 @@ namespace Player.Common
             TranslateStatusInBattleUseCase inBattleUseCase,
             PhotonNetworkManager networkManager,
             ApplyStatusSkillUseCase applyStatusSkill,
+            SkillManager skillManager,
             string key
         )
         {
@@ -70,6 +77,7 @@ namespace Player.Common
             _translateStatusInBattleUseCase = inBattleUseCase;
             _photonNetworkManager = networkManager;
             _applyStatusSkillUseCase = applyStatusSkill;
+            _skillManager = skillManager;
             InitializeComponent();
             InitializeState();
         }

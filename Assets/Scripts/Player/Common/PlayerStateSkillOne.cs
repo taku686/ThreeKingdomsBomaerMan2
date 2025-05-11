@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using Manager.BattleManager;
 using Manager.NetworkManager;
 using Photon.Pun;
+using Skill;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
@@ -15,6 +16,7 @@ namespace Player.Common
     {
         public class PlayerNormalSkillState : State
         {
+            private SkillManager _SkillManager => Owner._skillManager;
             private Animator _Animator => Owner._animator;
             private ObservableStateMachineTrigger _ObservableStateMachineTrigger => Owner._observableStateMachineTrigger;
             private PhotonNetworkManager _PhotonNetworkManager => Owner._photonNetworkManager;
@@ -33,7 +35,9 @@ namespace Player.Common
                 var statusSkillData = weaponData.StatusSkillMasterDatum;
                 var characterData = _PhotonNetworkManager.GetCharacterData(index);
                 var characterId = characterData.Id;
-                //todo　後で治す　 
+                var playerTransform = Owner.transform;
+                _SkillManager.ActivateSkill(normalSkillData, playerTransform);
+                PlayBackAnimation(GameCommonData.NormalHashKey, GameCommonData.NormalKey);
                 //ActivateSkill(normalSkillData, statusSkillData, characterId);
                 PhotonNetwork.LocalPlayer.SetSkillData(normalSkillData.Id);
             }

@@ -10,6 +10,7 @@ using Manager.NetworkManager;
 using Photon.Pun;
 using Player.Common;
 using Repository;
+using Skill;
 using UI.Battle;
 using UI.BattleCore;
 using UnityEngine;
@@ -37,6 +38,7 @@ namespace Manager.BattleManager
         //Manager
         [Inject] private PhotonNetworkManager _photonNetworkManager;
         [Inject] private MissionManager _missionManager;
+        [Inject] private SkillManager _skillManager;
         [SerializeField] private CameraManager cameraManager;
         [SerializeField] private StageManager stageManager;
         [SerializeField] private MapManager mapManager;

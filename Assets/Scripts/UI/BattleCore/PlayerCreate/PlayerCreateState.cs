@@ -6,16 +6,14 @@ using Enemy;
 using Manager.BattleManager.Camera;
 using Manager.DataManager;
 using Manager.NetworkManager;
-using ModestTree;
 using Photon.Pun;
 using Player.Common;
-using PlayFab.ClientModels;
 using Repository;
+using Skill;
 using UI.Battle;
 using Unity.Mathematics;
 using UnityEngine;
 using UniRx;
-using Random = UnityEngine.Random;
 
 namespace Manager.BattleManager
 {
@@ -39,6 +37,7 @@ namespace Manager.BattleManager
             private CharacterMasterDataRepository _CharacterMasterDataRepository => Owner._characterMasterDataRepository;
             private WeaponMasterDataRepository _WeaponMasterDataRepository => Owner._weaponMasterDataRepository;
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
+            private SkillManager _SkillManager => Owner._skillManager;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
             {
@@ -141,6 +140,7 @@ namespace Manager.BattleManager
                     playerStatusManager,
                     _PhotonNetworkManager,
                     _ApplyStatusSkillUseCase,
+                    _SkillManager,
                     hpKey
                 );
             }

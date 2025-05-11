@@ -60,6 +60,7 @@ namespace Player.Common
                 }
 
                 _playerTransform = Owner.transform;
+                
                 _OnClickNormalSkill
                     .Subscribe(_ => { OnClickNormalSkill(); })
                     .AddTo(Owner.GetCancellationTokenOnDestroy());
