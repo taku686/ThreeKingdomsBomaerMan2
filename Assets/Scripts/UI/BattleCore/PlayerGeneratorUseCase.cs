@@ -33,7 +33,7 @@ namespace Manager.BattleManager
         public GameObject GenerateCPUCharacter(int playerIndex, CharacterData characterData)
         {
             var spawnPoint = GetSpawnPoint(playerIndex);
-            _playerObj = PhotonNetwork.Instantiate
+            _playerObj = PhotonNetwork.InstantiateRoomObject
             (
                 GameCommonData.CharacterPrefabPath + characterData.CharaObj,
                 spawnPoint.position,

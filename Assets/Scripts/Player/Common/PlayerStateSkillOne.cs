@@ -16,6 +16,7 @@ namespace Player.Common
     {
         public class PlayerNormalSkillState : State
         {
+            private DC.Scanner.TargetScanner _TargetScanner => Owner._targetScanner;
             private SkillManager _SkillManager => Owner._skillManager;
             private Animator _Animator => Owner._animator;
             private ObservableStateMachineTrigger _ObservableStateMachineTrigger => Owner._observableStateMachineTrigger;
@@ -36,18 +37,26 @@ namespace Player.Common
                 var characterData = _PhotonNetworkManager.GetCharacterData(index);
                 var characterId = characterData.Id;
                 var playerTransform = Owner.transform;
-                _SkillManager.ActivateSkill(normalSkillData, playerTransform, _Animator);
+                var normalSkillId = normalSkillData.Id;
+                SetupTargetScanner();
+                _SkillManager.ActivateSkill(_TargetScanner, normalSkillData, playerTransform, _Animator, normalSkillId);
                 PlayBackAnimation(GameCommonData.NormalHashKey, GameCommonData.NormalKey);
-                //ActivateSkill(normalSkillData, statusSkillData, characterId);
-                PhotonNetwork.LocalPlayer.SetSkillData(normalSkillData.Id);
+                //PhotonNetwork.LocalPlayer.SetSkillData(normalSkillData.Id);
+            }
+
+            private void SetupTargetScanner()
+            {
+                //todo 後で範囲、角度などを調整する
+                _TargetScanner.TargetLayer = LayerMask.GetMask(GameCommonData.EnemyLayer);
+                _TargetScanner._CenterTransform = Owner.transform;
+                _TargetScanner.ViewRadius = 1.5f;
+                _TargetScanner.ViewAngle = 180f;
             }
 
             private void PlayBackAnimation(int hashKey, string key)
             {
-                //_Animator.SetTrigger(hashKey);
                 _ObservableStateMachineTrigger
                     .OnStateExitAsObservable()
-                    //.Where(info => info.StateInfo.IsName(key))
                     .Take(1)
                     .Subscribe(_ => { Owner._stateMachine.Dispatch((int)PLayerState.Idle); })
                     .AddTo(Owner.GetCancellationTokenOnDestroy());

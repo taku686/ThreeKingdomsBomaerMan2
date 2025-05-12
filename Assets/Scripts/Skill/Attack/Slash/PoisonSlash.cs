@@ -3,11 +3,14 @@ using Common.Data;
 using Repository;
 using UnityEngine;
 using Zenject;
+using TargetScanner = DC.Scanner.TargetScanner;
 
 namespace Skill.Attack
 {
     public class PoisonSlash : SlashBase
     {
+        private readonly int _skillId;
+        private readonly TargetScanner _targetScanner;
         private readonly Animator _animator;
         private readonly Transform _playerTransform;
         private readonly IAttackBehaviour _attackBehaviour;
@@ -15,12 +18,16 @@ namespace Skill.Attack
         [Inject]
         public PoisonSlash
         (
+            int skillId,
+            TargetScanner targetScanner,
             Animator animator,
             Transform playerTransform,
             IAttackBehaviour attackBehaviour,
             SkillEffectRepository skillEffectRepository
         ) : base(skillEffectRepository)
         {
+            _skillId = skillId;
+            _targetScanner = targetScanner;
             _animator = animator;
             _playerTransform = playerTransform;
             _attackBehaviour = attackBehaviour;
@@ -31,7 +38,6 @@ namespace Skill.Attack
             _attackBehaviour.Attack();
             var effect = _SkillEffectRepository.GetSkillEffect(AbnormalCondition.Poison);
             var effectClone = Object.Instantiate(effect, _playerTransform.position, Quaternion.identity);
-            Debug.Log("Poison Attack");
         }
 
         public override void Dispose()
@@ -39,7 +45,7 @@ namespace Skill.Attack
             // TODO マネージリソースをここで解放します
         }
 
-        public class Factory : PlaceholderFactory<Animator, Transform, IAttackBehaviour, PoisonSlash>
+        public class Factory : PlaceholderFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, PoisonSlash>
         {
         }
     }

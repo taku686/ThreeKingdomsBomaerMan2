@@ -86,8 +86,13 @@ namespace Manager.BattleManager
                     var cpuObj = _PlayerGeneratorUseCase.GenerateCPUCharacter(playerIndex, characterData);
                     _CharacterCreateUseCase.CreateWeapon(cpuObj, weaponData, true);
                     cpuObj.tag = GameCommonData.PlayerTag;
-                    cpuObj.layer = LayerMask.NameToLayer(GameCommonData.PlayerLayer);
+                    cpuObj.layer = LayerMask.NameToLayer(GameCommonData.EnemyLayer);
                     cpuObj.AddComponent<EnemyCore>();
+                    var userStatusInfo = cpuObj.AddComponent<PlayerStatusInfo>();
+                    userStatusInfo.SetPlayerIndex(playerIndex);
+                    AddBoxCollider(cpuObj);
+                    AddRigidbody(cpuObj);
+                    GenerateEffectActivator(cpuObj, playerIndex);
                 }
             }
 
@@ -113,6 +118,7 @@ namespace Manager.BattleManager
 
             private void InitializePlayerComponent(GameObject player)
             {
+                player.layer = LayerMask.NameToLayer(GameCommonData.EnemyLayer);
                 var photonView = player.GetComponent<PhotonView>();
                 var photonAnimator = player.GetComponent<PhotonAnimatorView>();
                 var playerPutBomb = player.AddComponent<PutBomb>();
@@ -120,18 +126,21 @@ namespace Manager.BattleManager
                 var characterData = _PhotonNetworkManager.GetCharacterData(playerId);
                 var weaponData = _PhotonNetworkManager.GetWeaponData(playerId);
                 var weaponType = weaponData.WeaponType;
+                AddBoxCollider(player);
+                AddRigidbody(player);
                 SetPlayerUI(player, playerId, out var hpKey);
                 SetAnimatorController(player, weaponType, photonAnimator);
                 GenerateEffectActivator(player, playerId);
                 var playerStatusManager = InitializeStatus(characterData, weaponData, photonView.IsMine);
                 playerPutBomb.Initialize(_BombProvider, playerStatusManager, _MapManager);
+                var userStatusInfo = player.AddComponent<PlayerStatusInfo>();
+                userStatusInfo.SetPlayerIndex(playerId);
                 if (!photonView.IsMine)
                 {
                     return;
                 }
 
-                AddBoxCollider(player);
-                AddRigidbody(player);
+                player.layer = LayerMask.NameToLayer(GameCommonData.PlayerLayer);
                 _CameraManager.Initialize(player.transform);
                 var playerCore = player.AddComponent<PlayerCore>();
                 Owner.SetPlayerCore(playerCore);
@@ -192,11 +201,11 @@ namespace Manager.BattleManager
 
             private void GenerateEffectActivator(GameObject playerObj, int playerId)
             {
-                var effect = Instantiate(_EffectActivateUseCase, playerObj.transform);
-                effect.transform.localPosition = new Vector3(0, 0, 0);
-                effect.transform.localRotation = quaternion.identity;
+                var effectActivator = Instantiate(_EffectActivateUseCase, playerObj.transform);
+                effectActivator.transform.localPosition = new Vector3(0, 0, 0);
+                effectActivator.transform.localRotation = quaternion.identity;
                 var subject = _PhotonNetworkManager._ActivateSkillSubject;
-                effect.Initialize(subject, playerId);
+                effectActivator.Initialize(subject, playerId);
             }
 
             private void SetPlayerUI(GameObject player, int playerId, out string hpKey)
@@ -279,7 +288,7 @@ namespace Manager.BattleManager
             private void AddBoxCollider(GameObject player)
             {
                 var collider = player.AddComponent<BoxCollider>();
-                collider.isTrigger = true;
+                collider.isTrigger = false;
                 collider.center = ColliderCenter;
                 collider.size = ColliderSize;
             }

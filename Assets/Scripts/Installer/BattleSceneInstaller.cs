@@ -1,5 +1,4 @@
 using AttributeAttack;
-using AttributeAttack.Sample;
 using Bomb;
 using Common.Data;
 using Manager.BattleManager;
@@ -9,6 +8,7 @@ using Skill.Attack;
 using UI.Common;
 using UnityEngine;
 using Zenject;
+using TargetScanner = DC.Scanner.TargetScanner;
 
 namespace Common.Installer
 {
@@ -36,10 +36,10 @@ namespace Common.Installer
         private void SlashSKillInstaller()
         {
             Container.Bind<SkillManager>().AsCached();
-            Container.BindFactory<Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeSlashFactory.SlashFactory>().FromFactory<AttributeSlashFactory>();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeSlashFactory.SlashFactory>().FromFactory<AttributeSlashFactory>();
             Container.BindFactory<Animator, NormalSlash, NormalSlash.Factory>().AsCached();
-            Container.BindFactory<Animator, Transform, IAttackBehaviour, PoisonSlash, PoisonSlash.Factory>().AsCached();
-            Container.BindFactory<Animator, Transform, IAttackBehaviour, ParalysisSlash, ParalysisSlash.Factory>().AsCached();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, PoisonSlash, PoisonSlash.Factory>().AsCached();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, ParalysisSlash, ParalysisSlash.Factory>().AsCached();
         }
     }
 }

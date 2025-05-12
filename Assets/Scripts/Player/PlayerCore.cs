@@ -37,6 +37,7 @@ namespace Player.Common
         private Renderer _playerRenderer;
         private BoxCollider _boxCollider;
         private CancellationToken _cancellationToken;
+        private DC.Scanner.TargetScanner _targetScanner;
 
         private readonly Subject<Unit> _deadSubject = new();
         private readonly Subject<(StatusType statusType, float value)> _statusBuffSubject = new();
@@ -84,6 +85,7 @@ namespace Player.Common
 
         private void InitializeComponent()
         {
+            _targetScanner = gameObject.GetComponent<TargetScanner>()._targetScanner;
             _putBomb = GetComponent<PutBomb>();
             _animator = GetComponent<Animator>();
             _playerMove = gameObject.AddComponent<PlayerMove>();
@@ -194,6 +196,11 @@ namespace Player.Common
             _SpecialSkillSubject.Dispose();
             _DashSkillSubject.Dispose();
             _BombSkillSubject.Dispose();
+        }
+
+        private void OnDrawGizmos()
+        {
+            _targetScanner.ShowGizmos();
         }
     }
 }

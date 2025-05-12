@@ -26,9 +26,6 @@ namespace Player.Common
                 var statusSkillData = weaponData.StatusSkillMasterDatum;
                 var characterData = _PhotonNetworkManager.GetCharacterData(index);
                 var characterId = characterData.Id;
-                //todo　後で治す
-                //ActivateSkill(specialSkillData, statusSkillData, characterId);
-                PhotonNetwork.LocalPlayer.SetSkillData(specialSkillData.Id);
             }
 
             private void PlayBackAnimation(int hashKey, string key)

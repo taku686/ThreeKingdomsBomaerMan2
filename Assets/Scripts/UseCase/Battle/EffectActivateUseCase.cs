@@ -39,7 +39,11 @@ public class EffectActivateUseCase : MonoBehaviour
         onSkillActivate
             .Where(tuple => tuple.Item1 == actorNumber)
             .Select(tuple => tuple.Item2)
-            .Subscribe(ActivateBuffEffect)
+            .Subscribe(skillData =>
+            {
+                ActivateBuffEffect(skillData);
+                ActivateAbnormalStateEffect(skillData);
+            })
             .AddTo(gameObject.GetCancellationTokenOnDestroy());
 
         ForceAllEffectStop();
@@ -116,7 +120,33 @@ public class EffectActivateUseCase : MonoBehaviour
         }
     }
 
-    private async UniTask PlayEffect(ParticleSystem effect, float duration)
+    private void ActivateAbnormalStateEffect(SkillMasterData skillMasterData)
+    {
+        var abnormalConditions = skillMasterData.AbnormalConditionEnum;
+        foreach (var abnormalCondition in abnormalConditions)
+        {
+            switch (abnormalCondition)
+            {
+                case AbnormalCondition.Poison:
+                    PlayEffect(poisonEffect, skillMasterData.EffectTime).Forget();
+                    break;
+                case AbnormalCondition.Paralysis:
+                    PlayEffect(paralysisEffect, skillMasterData.EffectTime).Forget();
+                    break;
+                case AbnormalCondition.Confusion:
+                    PlayEffect(confusionEffect, skillMasterData.EffectTime).Forget();
+                    break;
+                case AbnormalCondition.Frozen:
+                    PlayEffect(frozenEffect, skillMasterData.EffectTime).Forget();
+                    break;
+                case AbnormalCondition.Fear:
+                    PlayEffect(fearEffect, skillMasterData.EffectTime).Forget();
+                    break;
+            }
+        }
+    }
+
+    private static async UniTask PlayEffect(ParticleSystem effect, float duration)
     {
         if (Mathf.Approximately(duration, GameCommonData.InvalidNumber))
         {

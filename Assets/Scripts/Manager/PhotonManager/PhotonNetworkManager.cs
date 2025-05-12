@@ -7,7 +7,6 @@ using Photon.Pun;
 using Photon.Realtime;
 using Repository;
 using UniRx;
-using Unity.Entities;
 using UnityEngine;
 using Zenject;
 
@@ -65,7 +64,8 @@ namespace Manager.NetworkManager
                 MaxPlayers = 4,
                 IsOpen = true,
                 IsVisible = true,
-                EmptyRoomTtl = 0
+                EmptyRoomTtl = 0,
+                PublishUserId = true
             }, TypedLobby.Default);
         }
 
@@ -116,9 +116,28 @@ namespace Manager.NetworkManager
 
                 if ((string)prop.Key == PlayerPropertiesExtensions.SkillDataKey)
                 {
-                    var skillId = targetPlayer.GetSkillId();
-                    var skillData = _skillMasterDataRepository.GetSkillData(skillId);
-                    _activateSkillSubject.OnNext((targetPlayer.ActorNumber, skillData));
+                    var dic = targetPlayer.GetSkillId();
+                    if (dic == null)
+                    {
+                        return;
+                    }
+
+                    var players = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
+                    foreach (var player in players)
+                    {
+                        var playerStatusInfo = player.GetComponent<PlayerStatusInfo>();
+                        if (playerStatusInfo == null)
+                        {
+                            continue;
+                        }
+
+                        foreach (var keyValue in dic)
+                        {
+                            if (playerStatusInfo.GetPlayerIndex() != keyValue.Key) continue;
+                            var skillData = _skillMasterDataRepository.GetSkillData(keyValue.Value);
+                            _activateSkillSubject.OnNext((playerStatusInfo.GetPlayerIndex(), skillData));
+                        }
+                    }
                 }
             }
         }

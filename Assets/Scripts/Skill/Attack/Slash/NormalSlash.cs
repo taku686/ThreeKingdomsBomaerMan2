@@ -20,7 +20,6 @@ namespace Skill.Attack
         public void Attack()
         {
             _animator.SetTrigger(GameCommonData.SlashHashKey);
-            Debug.Log("Normal Attack");
         }
 
         public void Dispose()
