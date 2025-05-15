@@ -145,6 +145,12 @@ namespace UI.Title
         {
             Destroy(_weaponObject);
             _weaponObject = Instantiate(weaponObject, weaponObjectParent);
+            var psUpdater = _weaponObject.GetComponentInChildren<PSMeshRendererUpdater>();
+            if (psUpdater != null)
+            {
+                psUpdater.UpdateMeshEffect(_weaponObject);
+            }
+
             switch (weaponType)
             {
                 case WeaponType.Spear:

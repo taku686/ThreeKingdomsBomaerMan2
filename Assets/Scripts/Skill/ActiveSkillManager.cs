@@ -1,0 +1,160 @@
+﻿using System;
+using Common.Data;
+using Player.Common;
+using Skill.Attack;
+using Skill.Heal;
+using UniRx;
+using UnityEngine;
+using Zenject;
+
+namespace Skill
+{
+    public class ActiveSkillManager : IDisposable
+    {
+        private readonly AttributeSlashFactory.SlashFactory _slashFactory;
+        private readonly BuffSkill _buffSkill;
+        private readonly HealSkill _healSkill;
+        private Animator _animator;
+        private DC.Scanner.TargetScanner _targetScanner;
+        private Transform _playerTransform;
+        private const int GodSignBuffSkillId = 160;
+        private const int TopThree = 3;
+
+
+        [Inject]
+        public ActiveSkillManager
+        (
+            AttributeSlashFactory.SlashFactory slashFactory,
+            BuffSkill buffSkill,
+            HealSkill healSkill
+        )
+        {
+            _slashFactory = slashFactory;
+            _buffSkill = buffSkill;
+            _healSkill = healSkill;
+        }
+
+        public void Initialize
+        (
+            DC.Scanner.TargetScanner targetScanner,
+            SkillMasterData[] statusSkillMasterDatum,
+            Transform playerTransform,
+            Animator animator,
+            Subject<(StatusType statusType, float value)> statusBuff,
+            Subject<(StatusType statusType, int value, bool isBuff, bool isDebuff)> statusBuffUi,
+            int characterId,
+            TranslateStatusInBattleUseCase translateStatusInBattleUseCase,
+            Func<int, int> hpCalculateFunc
+        )
+        {
+            _targetScanner = targetScanner;
+            _playerTransform = playerTransform;
+            _animator = animator;
+            var playerStatusInfo = playerTransform.GetComponent<PlayerStatusInfo>();
+            _buffSkill.Initialize
+            (
+                statusBuff,
+                statusBuffUi,
+                characterId,
+                statusSkillMasterDatum,
+                translateStatusInBattleUseCase,
+                playerStatusInfo
+            );
+            _healSkill.Initialize
+            (
+                hpCalculateFunc,
+                translateStatusInBattleUseCase,
+                playerStatusInfo
+            );
+        }
+
+        public void ActivateSkill(SkillMasterData skillMasterData)
+        {
+            if (IsSlashSkillActionType(skillMasterData))
+            {
+                SlashSkill(skillMasterData);
+            }
+
+            if (IsBuffSkillActionType(skillMasterData))
+            {
+                BuffSkill(skillMasterData);
+            }
+
+            if (IsHealSkillActionType(skillMasterData))
+            {
+                _animator.SetTrigger(GameCommonData.BuffHashKey);
+                _healSkill.Heal(skillMasterData);
+            }
+
+            if (IsContinuousHealSkillActionType(skillMasterData))
+            {
+                _animator.SetTrigger(GameCommonData.BuffHashKey);
+                _healSkill.ContinuousHeal(skillMasterData);
+            }
+        }
+
+        private void BuffSkill(SkillMasterData skillMasterData)
+        {
+            _animator.SetTrigger(GameCommonData.BuffHashKey);
+            if (skillMasterData.Id == GodSignBuffSkillId)
+            {
+                _buffSkill.Buff(skillMasterData, TopThree).Forget();
+            }
+            else
+            {
+                _buffSkill.Buff(skillMasterData).Forget();
+            }
+        }
+
+        private void SlashSkill(SkillMasterData skillMasterData)
+        {
+            var normalSkillId = skillMasterData.Id;
+            var slash = _slashFactory.Create(normalSkillId, _targetScanner, _animator, _playerTransform, AbnormalCondition.None, null);
+            foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
+            {
+                if (abnormalCondition == AbnormalCondition.None)
+                    continue;
+                slash = _slashFactory.Create(normalSkillId, _targetScanner, _animator, _playerTransform, abnormalCondition, slash);
+            }
+
+            slash.Attack();
+        }
+
+        private bool IsBuffSkillActionType(SkillMasterData skillMasterData)
+        {
+            var skillActionType = skillMasterData._SkillActionTypeEnum;
+            return skillActionType is
+                SkillActionType.HpBuff or
+                SkillActionType.AttackBuff or
+                SkillActionType.SpeedBuff or
+                SkillActionType.BombLimitBuff or
+                SkillActionType.FireRangeBuff or
+                SkillActionType.ResistanceBuff or
+                SkillActionType.DefenseBuff or
+                SkillActionType.AllBuff;
+        }
+
+        private static bool IsSlashSkillActionType(SkillMasterData skillMasterData)
+        {
+            var skillActionType = skillMasterData._SkillActionTypeEnum;
+            return skillActionType is SkillActionType.Slash;
+        }
+
+        private static bool IsHealSkillActionType(SkillMasterData skillMasterData)
+        {
+            var skillActionType = skillMasterData._SkillActionTypeEnum;
+            return skillActionType is SkillActionType.Heal;
+        }
+
+        private static bool IsContinuousHealSkillActionType(SkillMasterData skillMasterData)
+        {
+            var skillActionType = skillMasterData._SkillActionTypeEnum;
+            return skillActionType is SkillActionType.ContinuousHeal;
+        }
+
+        public void Dispose()
+        {
+            // TODO マネージリソースをここで解放します
+        }
+    }
+}

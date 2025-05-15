@@ -34,11 +34,13 @@ namespace Manager.BattleManager
         [Inject] private ApplyStatusSkillUseCase _applyStatusSkillUseCase;
         [Inject] private CharacterCreateUseCase _characterCreateUseCase;
         [Inject] private InputViewModelUseCase _inputViewModelUseCase;
+        [Inject] private ActivatableSkillUseCase _activatableSkillUseCase;
 
         //Manager
         [Inject] private PhotonNetworkManager _photonNetworkManager;
         [Inject] private MissionManager _missionManager;
-        [Inject] private SkillManager _skillManager;
+        [Inject] private ActiveSkillManager _activeSkillManager;
+        [Inject] private PassiveSkillManager _passiveSkillManager;
         [SerializeField] private CameraManager cameraManager;
         [SerializeField] private StageManager stageManager;
         [SerializeField] private MapManager mapManager;

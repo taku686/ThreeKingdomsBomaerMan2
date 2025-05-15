@@ -36,13 +36,11 @@ namespace Skill.Attack
         public override void Attack()
         {
             _attackBehaviour.Attack();
-            var effect = _SkillEffectRepository.GetSkillEffect(AbnormalCondition.Poison);
-            var effectClone = Object.Instantiate(effect, _playerTransform.position, Quaternion.identity);
+            Slash(AbnormalCondition.Poison, _animator, _targetScanner, _skillId, _playerTransform);
         }
 
         public override void Dispose()
         {
-            // TODO マネージリソースをここで解放します
         }
 
         public class Factory : PlaceholderFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, PoisonSlash>

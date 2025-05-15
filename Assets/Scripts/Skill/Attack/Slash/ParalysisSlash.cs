@@ -1,12 +1,8 @@
-﻿using System;
-using AttributeAttack;
+﻿using AttributeAttack;
 using Common.Data;
 using Repository;
-using UniRx;
-using UniRx.Triggers;
 using UnityEngine;
 using Zenject;
-using Object = UnityEngine.Object;
 using TargetScanner = DC.Scanner.TargetScanner;
 
 namespace Skill.Attack
@@ -18,8 +14,6 @@ namespace Skill.Attack
         private readonly Animator _animator;
         private readonly Transform _playerTransform;
         private readonly IAttackBehaviour _attackBehaviour;
-        private const float DelayTime = 0.1f;
-        private const float EffectHeight = 0.5f;
 
         [Inject]
         public ParalysisSlash
@@ -42,26 +36,7 @@ namespace Skill.Attack
         public override void Attack()
         {
             _attackBehaviour.Attack();
-            var observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
-            observableStateMachineTrigger
-                .OnStateEnterAsObservable()
-                .Where(info => info.StateInfo.IsName(GameCommonData.SlashKey))
-                .Take(1)
-                .Delay(TimeSpan.FromSeconds(DelayTime))
-                .Subscribe(_ =>
-                {
-                    ActivateEffect();
-                    HitPlayer(_targetScanner, _skillId);
-                })
-                .AddTo(_playerTransform);
-        }
-
-        private void ActivateEffect()
-        {
-            var effect = _SkillEffectRepository.GetSkillEffect(AbnormalCondition.Paralysis);
-            var playerPosition = _playerTransform.position;
-            var spawnPosition = new Vector3(playerPosition.x, EffectHeight, playerPosition.z);
-            var effectClone = Object.Instantiate(effect, spawnPosition, _playerTransform.rotation);
+            Slash(AbnormalCondition.Paralysis, _animator, _targetScanner, _skillId, _playerTransform);
         }
 
         public override void Dispose()

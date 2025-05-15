@@ -208,7 +208,7 @@ namespace Repository
 
                 if (weaponMasterData.Id == 232)
                 {
-                    currentWeapon.transform.localEulerAngles = new Vector3(0, 0, -90);
+                    currentWeapon.transform.localEulerAngles = new Vector3(0, 90, -90);
                 }
             }
 

@@ -70,19 +70,45 @@ public class ApplyStatusSkillUseCase : IDisposable
         return addValue;
     }
 
-    public int ApplyBuffStatusSkill(int characterId, int skillId, StatusType statusType, int value)
+    public int ApplyBuffStatusSkill(int skillId, StatusType statusType, float value)
     {
-        //todo 後で修正する
-        var levelData = _userDataRepository.GetCurrentLevelData(characterId);
-        if (levelData.Level < GameCommonData.NormalSkillReleaseLevel)
+        var skillData = _skillMasterDataRepository.GetSkillData(skillId);
+        float buffValue;
+        switch (statusType)
         {
-            return value;
+            case StatusType.Hp:
+                buffValue = skillData.HpMul;
+                break;
+            case StatusType.Attack:
+                buffValue = skillData.AttackMul;
+                break;
+            case StatusType.Speed:
+                buffValue = skillData.SpeedMul;
+                break;
+            case StatusType.BombLimit:
+                buffValue = skillData.BombMul;
+                break;
+            case StatusType.FireRange:
+                buffValue = skillData.FireMul;
+                break;
+            case StatusType.Defense:
+                buffValue = skillData.DefenseMul;
+                break;
+            case StatusType.Resistance:
+                buffValue = skillData.ResistanceMul;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(statusType), statusType, null);
         }
 
-        var skillData = _skillMasterDataRepository.GetSkillData(skillId);
-
-
-        return value;
+        if (Mathf.Approximately(buffValue, GameCommonData.InvalidNumber))
+        {
+            return Mathf.FloorToInt(value);
+        }
+        
+        value *= buffValue;
+        var result = Mathf.FloorToInt(value);
+        return result;
     }
 
     public int ApplyLevelStatus(int characterId, StatusType statusType)

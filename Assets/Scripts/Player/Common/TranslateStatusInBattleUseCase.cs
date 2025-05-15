@@ -48,7 +48,7 @@ namespace Player.Common
             switch (statusType)
             {
                 case StatusType.Hp:
-                    _MaxHp = (int)(value * HpRate);
+                    _MaxHp = Mathf.FloorToInt(value * HpRate);
                     return _MaxHp;
                 case StatusType.Attack:
                     _Attack = value;
@@ -60,10 +60,12 @@ namespace Player.Common
                     _maxBombLimit = value;
                     return _maxBombLimit;
                 case StatusType.FireRange:
-                    _FireRange = Mathf.RoundToInt(value / 2f);
+                    _FireRange = Mathf.FloorToInt(value / 2f);
                     return _FireRange;
                 case StatusType.Defense:
+                    return _Defense;
                 case StatusType.Resistance:
+                    return _Resistance;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(statusType), statusType, null);
             }

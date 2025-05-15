@@ -6,6 +6,7 @@ public class HS_CallBackParent : MonoBehaviour
 {
     [SerializeField]protected Transform parentObject;
 
+    //Particle system must have "Stop action - Callback" enabled for normal work.
     protected virtual void OnParticleSystemStopped()
     {
         if (parentObject != null)

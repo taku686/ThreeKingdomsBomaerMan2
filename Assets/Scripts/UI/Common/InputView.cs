@@ -45,6 +45,7 @@ namespace UI.Common
                 _normalSkillButtonGameObject.SetActive(isActiveNormalButton);
                 normalSkillIntervalImage.fillAmount = MaxFillAmount;
                 normalSkillImage.sprite = normalSkill.Sprite;
+                //todo 後でしゅうせいする
                 //_normalSkillInterval = normalSkill.Interval;
                 _normalSkillInterval = 1;
                 _timerNormalSkill = 0;
@@ -63,7 +64,9 @@ namespace UI.Common
                 _specialSkillButtonGameObject.SetActive(isActiveSpecialButton);
                 specialSkillIntervalImage.fillAmount = MaxFillAmount;
                 specialSkillImage.sprite = specialSkill.Sprite;
-                _specialSkillInterval = specialSkill.Interval;
+                //todo 後でしゅうせいする
+                //_specialSkillInterval = specialSkill.Interval;
+                _specialSkillInterval = 1;
                 _timerSpecialSkill = 0;
                 specialSkillIntervalImage.fillAmount = 0f;
                 specialSkillButton.interactable = false;

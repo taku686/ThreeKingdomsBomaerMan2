@@ -9,6 +9,8 @@ public class StatusInBattleView : MonoBehaviour
     [SerializeField] private StatusGridView speedStatusGridView;
     [SerializeField] private StatusGridView bombLimitStatusGridView;
     [SerializeField] private StatusGridView firePowerStatusGridView;
+    [SerializeField] private StatusGridView _defenseStatusGridView;
+    [SerializeField] private StatusGridView _resistanceStatusGridView;
 
     public void ApplyViewModel(ViewModel viewModel)
     {
@@ -17,6 +19,8 @@ public class StatusInBattleView : MonoBehaviour
         speedStatusGridView.SetValueText(viewModel._Speed);
         bombLimitStatusGridView.SetValueText(viewModel._BombLimit);
         firePowerStatusGridView.SetValueText(viewModel._FireRange);
+        _defenseStatusGridView.SetValueText(viewModel._Defense);
+        _resistanceStatusGridView.SetValueText(viewModel._Resistance);
     }
 
     //todo 後で修正　防御と抵抗値を追加する
@@ -39,31 +43,11 @@ public class StatusInBattleView : MonoBehaviour
             case StatusType.FireRange:
                 firePowerStatusGridView.SetBuffState(isBuff, isDebuff, value);
                 break;
-        }
-    }
-
-    public void ApplyDebuffState(StatusType statusType, int value)
-    {
-        switch (statusType)
-        {
-            case StatusType.Hp:
-                hpStatusGridView.SetDebuffState(true, value);
-                break;
-            case StatusType.Attack:
-                attackStatusGridView.SetDebuffState(true, value);
-                break;
-            case StatusType.Speed:
-                speedStatusGridView.SetDebuffState(true, value);
-                break;
-            case StatusType.BombLimit:
-                bombLimitStatusGridView.SetDebuffState(true, value);
-                break;
-            case StatusType.FireRange:
-                firePowerStatusGridView.SetDebuffState(true, value);
-                break;
             case StatusType.Defense:
+                _defenseStatusGridView.SetBuffState(isBuff, isDebuff, value);
                 break;
             case StatusType.Resistance:
+                _resistanceStatusGridView.SetBuffState(isBuff, isDebuff, value);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(statusType), statusType, null);

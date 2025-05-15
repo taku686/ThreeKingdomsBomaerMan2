@@ -73,6 +73,7 @@ namespace Manager.PlayFabManager
                 var explanation = skillData.Explanation;
                 var name = skillData.Name;
                 var sprite = await LoadSkillSprite(skillData.IconID, _cts.Token);
+                var skillActionType = TranslateStringToSkillActionType(skillData._SkillActionType);
                 var skillType = (SkillType)skillData.SkillTypeInt;
                 var hpPlu = skillData.HpPlu;
                 var attackPlu = skillData.AttackPlu;
@@ -96,18 +97,13 @@ namespace Manager.PlayFabManager
                 var gemMul = skillData.GemMul;
                 var skillMul = skillData.SkillMul;
                 var damageMul = skillData.DamageMul;
-                var numberRequirementString = skillData.NumberRequirement;
-                var numberRequirements = TranslateStringToFloatArray(numberRequirementString);
-                var numberRequirementTypeString = skillData.NumberRequirementType;
-                var numberRequirementType = TranslateStringToNumberRequirementType(numberRequirementTypeString);
-                var boolRequirementTypeString = skillData.BoolRequirementType;
-                var boolRequirementType = TranslateStringToBoolRequirementType(boolRequirementTypeString);
-                var skillDirectionString = skillData.SkillDirection;
-                var skillDirection = TranslateStringToSkillDirection(skillDirectionString);
+                var numberRequirements = TranslateStringToFloatArray(skillData.NumberRequirement);
+                var numberRequirementType = TranslateStringToNumberRequirementType(skillData.NumberRequirementType);
+                var boolRequirementType = TranslateStringToBoolRequirementType(skillData._BoolRequirementType);
+                var skillDirection = TranslateStringToSkillDirection(skillData.SkillDirection);
                 var invalidAbnormalCondition = TranslateStringToAbnormalConditions(skillData.InvalidAbnormalCondition);
                 var abnormalCondition = TranslateStringToAbnormalConditions(skillData.AbnormalCondition);
-                var bombTypeString = skillData.BombType;
-                var bombType = TranslateStringToBombType(bombTypeString);
+                var bombType = TranslateStringToBombType(skillData.BombType);
                 var isAll = skillData.IsAll;
                 var range = skillData.Range;
                 var interval = skillData.Interval;
@@ -118,6 +114,7 @@ namespace Manager.PlayFabManager
                     explanation,
                     name,
                     sprite,
+                    skillActionType,
                     skillType,
                     hpPlu,
                     attackPlu,
@@ -272,6 +269,16 @@ namespace Manager.PlayFabManager
             }
 
             return Enum.TryParse<BombType>(value, out var result) ? result : BombType.None;
+        }
+
+        private static SkillActionType TranslateStringToSkillActionType(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return SkillActionType.None;
+            }
+
+            return Enum.TryParse<SkillActionType>(value, out var result) ? result : SkillActionType.None;
         }
 
         private static AbnormalCondition[] TranslateStringToAbnormalConditions(string value)

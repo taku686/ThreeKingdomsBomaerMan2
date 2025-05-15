@@ -3,7 +3,6 @@ using System.Threading;
 using Bomb;
 using Common.Data;
 using Cysharp.Threading.Tasks;
-using Manager;
 using Manager.BattleManager;
 using Manager.NetworkManager;
 using Photon.Pun;
@@ -19,16 +18,17 @@ namespace Player.Common
         private StateMachine<PlayerCore> _stateMachine;
 
         private bool _isDamage;
+        private bool _isDead;
         private bool _isInvincible;
 
         private string _hpKey;
 
         private PhotonNetworkManager _photonNetworkManager;
-        private InputManager _inputManager;
-        private SkillManager _skillManager;
+        private ActiveSkillManager _activeSkillManager;
+        private PassiveSkillManager _passiveSkillManager;
 
-        private ApplyStatusSkillUseCase _applyStatusSkillUseCase;
         private TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
+        private ActivatableSkillUseCase _activatableSkillUseCase;
 
         private PlayerMove _playerMove;
         private PutBomb _putBomb;
@@ -36,8 +36,8 @@ namespace Player.Common
         private ObservableStateMachineTrigger _observableStateMachineTrigger;
         private Renderer _playerRenderer;
         private BoxCollider _boxCollider;
-        private CancellationToken _cancellationToken;
         private DC.Scanner.TargetScanner _targetScanner;
+        private CancellationToken _cancellationToken;
 
         private readonly Subject<Unit> _deadSubject = new();
         private readonly Subject<(StatusType statusType, float value)> _statusBuffSubject = new();
@@ -46,6 +46,7 @@ namespace Player.Common
         private const int DeadHp = 0;
         private const int InvincibleDuration = 2;
         private const float WaitDuration = 0.3f;
+        private const float HpMaxRate = 1f;
 
         public IObservable<Unit> _DeadObservable => _deadSubject;
         public IObservable<(StatusType statusType, int speed, bool isBuff, bool isDebuff)> _StatusBuffUiObservable => _statusBuffUiSubject;
@@ -69,16 +70,18 @@ namespace Player.Common
         (
             TranslateStatusInBattleUseCase inBattleUseCase,
             PhotonNetworkManager networkManager,
-            ApplyStatusSkillUseCase applyStatusSkill,
-            SkillManager skillManager,
+            ActiveSkillManager activeSkillManager,
+            PassiveSkillManager passiveSkillManager,
+            ActivatableSkillUseCase activatableSkillUseCase,
             string key
         )
         {
             _hpKey = key;
             _translateStatusInBattleUseCase = inBattleUseCase;
             _photonNetworkManager = networkManager;
-            _applyStatusSkillUseCase = applyStatusSkill;
-            _skillManager = skillManager;
+            _activeSkillManager = activeSkillManager;
+            _passiveSkillManager = passiveSkillManager;
+            _activatableSkillUseCase = activatableSkillUseCase;
             InitializeComponent();
             InitializeState();
         }
@@ -93,6 +96,32 @@ namespace Player.Common
             _boxCollider = GetComponent<BoxCollider>();
             _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
             _playerMove.Initialize(_statusBuffSubject, _translateStatusInBattleUseCase._Speed);
+            var index = photonView.OwnerActorNr;
+            var weaponData = _photonNetworkManager.GetWeaponData(index);
+            var characterData = _photonNetworkManager.GetCharacterData(index);
+            var characterId = characterData.Id;
+            var statusSkillDatum = weaponData.StatusSkillMasterDatum;
+            _activeSkillManager.Initialize
+            (
+                _targetScanner,
+                statusSkillDatum,
+                transform,
+                _animator,
+                _statusBuffSubject,
+                _statusBuffUiSubject,
+                characterId,
+                _translateStatusInBattleUseCase,
+                CalculateHp
+            );
+            _passiveSkillManager.Initialize
+            (
+                statusSkillDatum,
+                transform,
+                _statusBuffSubject,
+                _statusBuffUiSubject,
+                characterId,
+                _translateStatusInBattleUseCase
+            );
             _cancellationToken = gameObject.GetCancellationTokenOnDestroy();
         }
 
@@ -160,11 +189,11 @@ namespace Player.Common
                 return;
             }
 
+            ActivatePassiveSkillOnDamage();
             var explosion = other.GetComponentInParent<Explosion>();
-            _translateStatusInBattleUseCase._CurrentHp -= explosion.damageAmount;
-            var hpRate = _translateStatusInBattleUseCase._CurrentHp / (float)_translateStatusInBattleUseCase._MaxHp;
-            SynchronizedValue.Instance.SetValue(_hpKey, hpRate);
-            if (_translateStatusInBattleUseCase._CurrentHp <= DeadHp)
+            var hp = CalculateHp(explosion.damageAmount);
+            _isDead = hp <= DeadHp;
+            if (_isDead)
             {
                 Dead().Forget();
                 return;
@@ -173,12 +202,32 @@ namespace Player.Common
             _isDamage = true;
             await UniTask.Delay(TimeSpan.FromSeconds(InvincibleDuration), cancellationToken: _cancellationToken);
             _isDamage = false;
+
             if (_playerRenderer == null)
             {
                 return;
             }
 
             _playerRenderer.enabled = true;
+        }
+
+        private int CalculateHp(int damage)
+        {
+            _translateStatusInBattleUseCase._CurrentHp -= damage;
+            _translateStatusInBattleUseCase._CurrentHp = Mathf.Clamp(_translateStatusInBattleUseCase._CurrentHp, DeadHp, _translateStatusInBattleUseCase._MaxHp);
+            var hpRate = _translateStatusInBattleUseCase._CurrentHp / (float)_translateStatusInBattleUseCase._MaxHp;
+            SynchronizedValue.Instance.SetValue(_hpKey, hpRate);
+            return _translateStatusInBattleUseCase._CurrentHp;
+        }
+
+        private void ActivatePassiveSkillOnDamage()
+        {
+            var index = photonView.OwnerActorNr;
+            var weaponData = _photonNetworkManager.GetWeaponData(index);
+            var normalSkillData = weaponData.NormalSkillMasterData;
+            var specialSkillData = weaponData.SpecialSkillMasterData;
+            _activatableSkillUseCase.OnNextDamageSubject(normalSkillData);
+            _activatableSkillUseCase.OnNextDamageSubject(specialSkillData);
         }
 
         private async UniTask Dead()

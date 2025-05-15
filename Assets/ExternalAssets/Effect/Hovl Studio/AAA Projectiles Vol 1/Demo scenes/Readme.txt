@@ -19,10 +19,13 @@ Using:
     Light strongly loads the game if you don't use light probes or something else.
 
 3)Scripts
-3.1) Use "ParticleCollisionInstance" script with particle system. It works if you turn on "Send Collision Messages " in the particle system (Collision tab).
+3.1) Use "HS_ParticleCollisionInstance" script with particle system. It works if you turn on "Send Collision Messages " in the particle system (Collision tab).
+3.2) Set (Not destroy) in "HS_ProjectileMover" if you want to control projectiles by disabling and activation.
 
 4)Quality
 4.1) For better sparks quality enable "Anisotropic textures: Forced On" in quality settings.
 
-Contact me if you have any problems or questions.
-My email: gorobecn2@gmail.com
+SUPPORT ASSET FOR BiRP, URP or HDRP is here --> Tools > RP changer for Hovl Studio Assets
+
+Contact me if you have any questions.
+My email: hovlstudio1@gmail.com

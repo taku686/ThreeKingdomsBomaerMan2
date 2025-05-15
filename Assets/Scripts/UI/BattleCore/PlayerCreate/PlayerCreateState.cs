@@ -37,7 +37,9 @@ namespace Manager.BattleManager
             private CharacterMasterDataRepository _CharacterMasterDataRepository => Owner._characterMasterDataRepository;
             private WeaponMasterDataRepository _WeaponMasterDataRepository => Owner._weaponMasterDataRepository;
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
-            private SkillManager _SkillManager => Owner._skillManager;
+            private ActiveSkillManager _ActiveSkillManager => Owner._activeSkillManager;
+            private PassiveSkillManager _PassiveSkillManager => Owner._passiveSkillManager;
+            private ActivatableSkillUseCase _ActivatableSkillUseCase => Owner._activatableSkillUseCase;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
             {
@@ -148,8 +150,9 @@ namespace Manager.BattleManager
                 (
                     playerStatusManager,
                     _PhotonNetworkManager,
-                    _ApplyStatusSkillUseCase,
-                    _SkillManager,
+                    _ActiveSkillManager,
+                    _PassiveSkillManager,
+                    _ActivatableSkillUseCase,
                     hpKey
                 );
             }

@@ -23,11 +23,4 @@ public class StatusGridView : MonoBehaviour
         upperArrowImage.gameObject.SetActive(isBuff && !isDebuff);
         lowerArrowImage.gameObject.SetActive(isDebuff && !isBuff);
     }
-
-    public void SetDebuffState(bool isDebuff, int value)
-    {
-        var prefValue = int.Parse(valueText.text);
-        valueText.DOCounter(prefValue, value, 0.5f);
-        lowerArrowImage.gameObject.SetActive(isDebuff);
-    }
 }

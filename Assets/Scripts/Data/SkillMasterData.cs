@@ -10,7 +10,8 @@ namespace Common.Data
         public string Explanation { get; }
         public int IconID { get; set; }
         public Sprite Sprite { get; }
-        public SkillEffectType SkillEffectType { get; }
+        public string _SkillActionType { get; set; }
+        public SkillActionType _SkillActionTypeEnum { get; }
         public float DamagePlu { get; set; }
         public float HpPlu { get; set; }
         public float AttackPlu { get; set; }
@@ -41,13 +42,13 @@ namespace Common.Data
         public BombType BombTypeEnum { get; }
         public string NumberRequirement { get; }
         public float[] NumberRequirements { get; }
-        public string NumberRequirementType { get; }
+        public string NumberRequirementType { get; set; }
         public NumberRequirementType NumberRequirementTypeEnum { get; }
-        public string BoolRequirementType { get; }
+        public string _BoolRequirementType { get; set; }
         public BoolRequirementType BoolRequirementTypeEnum { get; }
-        public string SkillDirection { get; }
+        public string SkillDirection { get; set; }
         public SkillDirection SkillDirectionEnum { get; }
-        public string InvalidAbnormalCondition { get; }
+        public string InvalidAbnormalCondition { get; set; }
         public AbnormalCondition[] InvalidAbnormalConditionEnum { get; }
         public string AbnormalCondition { get; set; }
         public AbnormalCondition[] AbnormalConditionEnum { get; set; }
@@ -60,6 +61,7 @@ namespace Common.Data
             string explanation,
             string name,
             Sprite sprite,
+            SkillActionType skillActionType,
             SkillType skillType,
             float hpPlu,
             float attackPlu,
@@ -100,6 +102,7 @@ namespace Common.Data
             Explanation = explanation;
             Name = name;
             Sprite = sprite;
+            _SkillActionTypeEnum = skillActionType;
             SkillType = skillType;
             HpPlu = hpPlu;
             AttackPlu = attackPlu;
