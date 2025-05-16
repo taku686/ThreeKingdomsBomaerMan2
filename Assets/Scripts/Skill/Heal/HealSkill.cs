@@ -33,47 +33,13 @@ namespace Skill.Heal
 
         public void Heal(SkillMasterData skillMasterData)
         {
-            var playerIndex = _playerStatusInfo.GetPlayerIndex();
-            var skillId = skillMasterData.Id;
-            var dic = new Dictionary<int, int> { { playerIndex, skillId } };
-            PhotonNetwork.LocalPlayer.SetSkillData(dic);
-
-            var healAmount = 0;
-
-            if (!Mathf.Approximately(skillMasterData.HpPlu, GameCommonData.InvalidNumber))
-            {
-                healAmount = Mathf.FloorToInt(skillMasterData.HpPlu);
-            }
-
-            if (!Mathf.Approximately(skillMasterData.HpMul, GameCommonData.InvalidNumber))
-            {
-                var maxHp = _translateStatusInBattleUseCase._MaxHp;
-                healAmount = Mathf.FloorToInt(maxHp * skillMasterData.HpMul);
-            }
-
+            var healAmount = GetHealAmount(skillMasterData);
             _calculateHp.Invoke(-healAmount);
         }
 
         public void ContinuousHeal(SkillMasterData skillMasterData)
         {
-            var playerIndex = _playerStatusInfo.GetPlayerIndex();
-            var skillId = skillMasterData.Id;
-            var dic = new Dictionary<int, int> { { playerIndex, skillId } };
-            PhotonNetwork.LocalPlayer.SetSkillData(dic);
-
-            var healAmount = 0;
-
-            if (!Mathf.Approximately(skillMasterData.HpPlu, GameCommonData.InvalidNumber))
-            {
-                healAmount = Mathf.FloorToInt(skillMasterData.HpPlu);
-            }
-
-            if (!Mathf.Approximately(skillMasterData.HpMul, GameCommonData.InvalidNumber))
-            {
-                var maxHp = _translateStatusInBattleUseCase._MaxHp;
-                healAmount = Mathf.FloorToInt(maxHp * skillMasterData.HpMul);
-            }
-
+            var healAmount = GetHealAmount(skillMasterData);
             var effectTime = skillMasterData.EffectTime;
             var cancellationToken = new CancellationTokenSource();
             Observable.EveryUpdate()
@@ -97,6 +63,47 @@ namespace Skill.Heal
                     }
                 })
                 .AddTo(cancellationToken.Token);
+        }
+
+        public void ContinuousHealInAbnormalCondition(SkillMasterData skillMasterData)
+        {
+            var healAmount = GetHealAmount(skillMasterData);
+            var cancellationToken = new CancellationTokenSource();
+            Observable.EveryUpdate()
+                .Where(_ => _playerStatusInfo.HasAbnormalCondition())
+                .Subscribe(_ =>
+                {
+                    _oneSecondTimer += Time.deltaTime;
+                    if (_oneSecondTimer >= 1f)
+                    {
+                        _calculateHp.Invoke(-healAmount);
+                        _oneSecondTimer = 0f;
+                    }
+                })
+                .AddTo(cancellationToken.Token);
+        }
+
+        private int GetHealAmount(SkillMasterData skillMasterData)
+        {
+            var playerIndex = _playerStatusInfo.GetPlayerIndex();
+            var skillId = skillMasterData.Id;
+            var dic = new Dictionary<int, int> { { playerIndex, skillId } };
+            PhotonNetwork.LocalPlayer.SetSkillData(dic);
+
+            var healAmount = 0;
+
+            if (!Mathf.Approximately(skillMasterData.HpPlu, GameCommonData.InvalidNumber))
+            {
+                healAmount = Mathf.FloorToInt(skillMasterData.HpPlu);
+            }
+
+            if (!Mathf.Approximately(skillMasterData.HpMul, GameCommonData.InvalidNumber))
+            {
+                var maxHp = _translateStatusInBattleUseCase._MaxHp;
+                healAmount = Mathf.FloorToInt(maxHp * skillMasterData.HpMul);
+            }
+
+            return healAmount;
         }
 
         public void Dispose()

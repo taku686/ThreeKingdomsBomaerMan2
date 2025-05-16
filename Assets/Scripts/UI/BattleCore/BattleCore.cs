@@ -34,7 +34,7 @@ namespace Manager.BattleManager
         [Inject] private ApplyStatusSkillUseCase _applyStatusSkillUseCase;
         [Inject] private CharacterCreateUseCase _characterCreateUseCase;
         [Inject] private InputViewModelUseCase _inputViewModelUseCase;
-        [Inject] private ActivatableSkillUseCase _activatableSkillUseCase;
+        [Inject] private SkillActivationConditionsUseCase _skillActivationConditionsUseCase;
 
         //Manager
         [Inject] private PhotonNetworkManager _photonNetworkManager;

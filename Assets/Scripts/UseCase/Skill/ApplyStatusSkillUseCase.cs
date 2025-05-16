@@ -70,7 +70,7 @@ public class ApplyStatusSkillUseCase : IDisposable
         return addValue;
     }
 
-    public int ApplyBuffStatusSkill(int skillId, StatusType statusType, float value)
+    public int ApplyMulBuffStatusSkill(int skillId, StatusType statusType, float value)
     {
         var skillData = _skillMasterDataRepository.GetSkillData(skillId);
         float buffValue;
@@ -105,8 +105,49 @@ public class ApplyStatusSkillUseCase : IDisposable
         {
             return Mathf.FloorToInt(value);
         }
-        
+
         value *= buffValue;
+        var result = Mathf.FloorToInt(value);
+        return result;
+    }
+
+    public int ApplyPluBuffStatusSkill(int skillId, StatusType statusType, float value)
+    {
+        var skillData = _skillMasterDataRepository.GetSkillData(skillId);
+        float buffValue;
+        switch (statusType)
+        {
+            case StatusType.Hp:
+                buffValue = skillData.HpPlu;
+                break;
+            case StatusType.Attack:
+                buffValue = skillData.AttackPlu;
+                break;
+            case StatusType.Speed:
+                buffValue = skillData.SpeedPlu;
+                break;
+            case StatusType.BombLimit:
+                buffValue = skillData.BombPlu;
+                break;
+            case StatusType.FireRange:
+                buffValue = skillData.FirePlu;
+                break;
+            case StatusType.Defense:
+                buffValue = skillData.DefensePlu;
+                break;
+            case StatusType.Resistance:
+                buffValue = skillData.ResistancePlu;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(statusType), statusType, null);
+        }
+
+        if (Mathf.Approximately(buffValue, GameCommonData.InvalidNumber))
+        {
+            return Mathf.FloorToInt(value);
+        }
+
+        value += buffValue;
         var result = Mathf.FloorToInt(value);
         return result;
     }

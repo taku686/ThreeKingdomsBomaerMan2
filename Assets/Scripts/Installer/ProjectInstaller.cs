@@ -5,6 +5,7 @@ using Manager;
 using Manager.DataManager;
 using Manager.NetworkManager;
 using Repository;
+using Skill;
 using UI.Common;
 using UnityEngine;
 using Zenject;
@@ -40,6 +41,7 @@ namespace Common.Installer
             Container.Bind<NormalSkillStatusChangeUseCase>().AsCached();
             Container.Bind<AnimatorControllerRepository>().FromComponentInNewPrefab(_animatorControllerRepositoryGameObject).AsSingle();
             Container.Bind<SkillEffectRepository>().FromComponentInNewPrefab(_skillEffectRepositoryGameObject).AsSingle();
+            Container.Bind<SkillActivationConditionsUseCase>().AsCached();
         }
     }
 }

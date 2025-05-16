@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Bomb;
 using Common.Data;
 using Cysharp.Threading.Tasks;
@@ -39,7 +40,7 @@ namespace Manager.BattleManager
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
             private ActiveSkillManager _ActiveSkillManager => Owner._activeSkillManager;
             private PassiveSkillManager _PassiveSkillManager => Owner._passiveSkillManager;
-            private ActivatableSkillUseCase _ActivatableSkillUseCase => Owner._activatableSkillUseCase;
+            private SkillActivationConditionsUseCase _SkillActivationConditionsUseCase => Owner._skillActivationConditionsUseCase;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
             {
@@ -128,6 +129,8 @@ namespace Manager.BattleManager
                 var characterData = _PhotonNetworkManager.GetCharacterData(playerId);
                 var weaponData = _PhotonNetworkManager.GetWeaponData(playerId);
                 var weaponType = weaponData.WeaponType;
+                var userStatusInfo = player.AddComponent<PlayerStatusInfo>();
+                userStatusInfo.SetPlayerIndex(playerId);
                 AddBoxCollider(player);
                 AddRigidbody(player);
                 SetPlayerUI(player, playerId, out var hpKey);
@@ -135,8 +138,7 @@ namespace Manager.BattleManager
                 GenerateEffectActivator(player, playerId);
                 var playerStatusManager = InitializeStatus(characterData, weaponData, photonView.IsMine);
                 playerPutBomb.Initialize(_BombProvider, playerStatusManager, _MapManager);
-                var userStatusInfo = player.AddComponent<PlayerStatusInfo>();
-                userStatusInfo.SetPlayerIndex(playerId);
+
                 if (!photonView.IsMine)
                 {
                     return;
@@ -152,7 +154,7 @@ namespace Manager.BattleManager
                     _PhotonNetworkManager,
                     _ActiveSkillManager,
                     _PassiveSkillManager,
-                    _ActivatableSkillUseCase,
+                    _SkillActivationConditionsUseCase,
                     hpKey
                 );
             }
@@ -207,8 +209,8 @@ namespace Manager.BattleManager
                 var effectActivator = Instantiate(_EffectActivateUseCase, playerObj.transform);
                 effectActivator.transform.localPosition = new Vector3(0, 0, 0);
                 effectActivator.transform.localRotation = quaternion.identity;
-                var subject = _PhotonNetworkManager._ActivateSkillSubject;
-                effectActivator.Initialize(subject, playerId);
+                var activateSkillSubject = _PhotonNetworkManager._ActivateSkillSubject;
+                effectActivator.Initialize(activateSkillSubject, playerId);
             }
 
             private void SetPlayerUI(GameObject player, int playerId, out string hpKey)
@@ -283,6 +285,12 @@ namespace Manager.BattleManager
                 photonAnimatorView.SetParameterSynchronized
                 (
                     GameCommonData.DeadParameterName,
+                    PhotonAnimatorView.ParameterType.Trigger,
+                    PhotonAnimatorView.SynchronizeType.Discrete
+                );
+                photonAnimatorView.SetParameterSynchronized
+                (
+                    GameCommonData.SlashParameterName,
                     PhotonAnimatorView.ParameterType.Trigger,
                     PhotonAnimatorView.SynchronizeType.Discrete
                 );

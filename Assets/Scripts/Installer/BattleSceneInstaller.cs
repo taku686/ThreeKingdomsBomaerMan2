@@ -41,7 +41,6 @@ namespace Common.Installer
         {
             Container.Bind<ActiveSkillManager>().AsCached();
             Container.Bind<PassiveSkillManager>().AsCached();
-            Container.Bind<ActivatableSkillUseCase>().AsCached();
         }
 
         private void SlashSKillInstaller()

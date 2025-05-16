@@ -28,7 +28,7 @@ namespace Player.Common
         private PassiveSkillManager _passiveSkillManager;
 
         private TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
-        private ActivatableSkillUseCase _activatableSkillUseCase;
+        private SkillActivationConditionsUseCase _skillActivationConditionsUseCase;
 
         private PlayerMove _playerMove;
         private PutBomb _putBomb;
@@ -72,7 +72,7 @@ namespace Player.Common
             PhotonNetworkManager networkManager,
             ActiveSkillManager activeSkillManager,
             PassiveSkillManager passiveSkillManager,
-            ActivatableSkillUseCase activatableSkillUseCase,
+            SkillActivationConditionsUseCase skillActivationConditionsUseCase,
             string key
         )
         {
@@ -81,7 +81,7 @@ namespace Player.Common
             _photonNetworkManager = networkManager;
             _activeSkillManager = activeSkillManager;
             _passiveSkillManager = passiveSkillManager;
-            _activatableSkillUseCase = activatableSkillUseCase;
+            _skillActivationConditionsUseCase = skillActivationConditionsUseCase;
             InitializeComponent();
             InitializeState();
         }
@@ -101,6 +101,8 @@ namespace Player.Common
             var characterData = _photonNetworkManager.GetCharacterData(index);
             var characterId = characterData.Id;
             var statusSkillDatum = weaponData.StatusSkillMasterDatum;
+            var normalSkillData = weaponData.NormalSkillMasterData;
+            var specialSkillData = weaponData.SpecialSkillMasterData;
             _activeSkillManager.Initialize
             (
                 _targetScanner,
@@ -115,6 +117,8 @@ namespace Player.Common
             );
             _passiveSkillManager.Initialize
             (
+                normalSkillData,
+                specialSkillData,
                 statusSkillDatum,
                 transform,
                 _statusBuffSubject,
@@ -226,8 +230,8 @@ namespace Player.Common
             var weaponData = _photonNetworkManager.GetWeaponData(index);
             var normalSkillData = weaponData.NormalSkillMasterData;
             var specialSkillData = weaponData.SpecialSkillMasterData;
-            _activatableSkillUseCase.OnNextDamageSubject(normalSkillData);
-            _activatableSkillUseCase.OnNextDamageSubject(specialSkillData);
+            _skillActivationConditionsUseCase.OnNextDamageSubject(normalSkillData);
+            _skillActivationConditionsUseCase.OnNextDamageSubject(specialSkillData);
         }
 
         private async UniTask Dead()

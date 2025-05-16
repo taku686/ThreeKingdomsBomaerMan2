@@ -6,6 +6,7 @@ using Manager.DataManager;
 using Photon.Pun;
 using Photon.Realtime;
 using Repository;
+using Skill;
 using UniRx;
 using UnityEngine;
 using Zenject;
@@ -19,6 +20,7 @@ namespace Manager.NetworkManager
         [Inject] private LevelMasterDataRepository _levelMasterDataRepository;
         [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
         [Inject] private SkillMasterDataRepository _skillMasterDataRepository;
+        [Inject] private SkillActivationConditionsUseCase _skillActivationConditionsUseCase;
         private Subject<Photon.Realtime.Player[]> _joinedRoomSubject = new();
         private Subject<int> _leftRoomSubject = new();
         private Subject<Unit> _playerGenerateCompleteSubject = new();
@@ -136,6 +138,7 @@ namespace Manager.NetworkManager
                             if (playerStatusInfo.GetPlayerIndex() != keyValue.Key) continue;
                             var skillData = _skillMasterDataRepository.GetSkillData(keyValue.Value);
                             _activateSkillSubject.OnNext((playerStatusInfo.GetPlayerIndex(), skillData));
+                            _skillActivationConditionsUseCase.OnNextAbnormalConditionSubject(playerStatusInfo, skillData).Forget();
                         }
                     }
                 }

@@ -6,7 +6,8 @@ using UnityEngine;
 
 public class EffectActivateUseCase : MonoBehaviour
 {
-    //Buff
+    #region BuffEffect
+
     [SerializeField] private ParticleSystem healEffect;
     [SerializeField] private ParticleSystem hpEffect;
     [SerializeField] private ParticleSystem attackEffect;
@@ -25,7 +26,10 @@ public class EffectActivateUseCase : MonoBehaviour
     [SerializeField] private ParticleSystem prohibitedSkillEffect;
     [SerializeField] private ParticleSystem slowTimeEffect;
 
-    //AbnormalState
+    #endregion
+    
+    #region AbnormalConditionEffect
+
     [Header("Abnormal Condition")] [SerializeField]
     private ParticleSystem paralysisEffect;
 
@@ -45,9 +49,19 @@ public class EffectActivateUseCase : MonoBehaviour
     [SerializeField] private ParticleSystem _soakingWetEffect;
     [SerializeField] private ParticleSystem _burningEffect;
 
-    private const int OneShotEffectDuration = 1;
+    #endregion
 
     public void Initialize
+    (
+        IObservable<(int, SkillMasterData)> onSkillActivate,
+        int actorNumber
+    )
+    {
+        Subscribe(onSkillActivate, actorNumber);
+        ForceAllEffectStop();
+    }
+
+    private void Subscribe
     (
         IObservable<(int, SkillMasterData)> onSkillActivate,
         int actorNumber
@@ -62,8 +76,6 @@ public class EffectActivateUseCase : MonoBehaviour
                 ActivateAbnormalStateEffect(skillData);
             })
             .AddTo(gameObject.GetCancellationTokenOnDestroy());
-
-        ForceAllEffectStop();
     }
 
 
@@ -72,7 +84,7 @@ public class EffectActivateUseCase : MonoBehaviour
         switch (skillMasterData._SkillActionTypeEnum)
         {
             case SkillActionType.Heal:
-                PlayEffect(healEffect, OneShotEffectDuration).Forget();
+                PlayEffect(healEffect, skillMasterData.EffectTime).Forget();
                 break;
             case SkillActionType.ContinuousHeal:
                 PlayEffect(healEffect, skillMasterData.EffectTime).Forget();
@@ -143,6 +155,17 @@ public class EffectActivateUseCase : MonoBehaviour
                 break;
             case SkillActionType.SlowTime:
                 PlayEffect(slowTimeEffect, skillMasterData.EffectTime).Forget();
+                break;
+        }
+    }
+
+    private void ActivateBuffEffectInActive(SkillMasterData skillMasterData, bool isActive)
+    {
+        switch (skillMasterData._SkillActionTypeEnum)
+        {
+            //傲慢の呪い
+            case SkillActionType.AllBuff when skillMasterData.Id == 167:
+                PlayEffectInActive(allStatusBuffEffect4, isActive);
                 break;
         }
     }
@@ -230,6 +253,20 @@ public class EffectActivateUseCase : MonoBehaviour
         effect.Stop();
         effect.gameObject.SetActive(false);
     }
+
+    private void PlayEffectInActive(ParticleSystem effect, bool isActive)
+    {
+        effect.gameObject.SetActive(isActive);
+        if (isActive)
+        {
+            effect.Play();
+        }
+        else
+        {
+            effect.Stop();
+        }
+    }
+
 
     private void ForceAllEffectStop()
     {
