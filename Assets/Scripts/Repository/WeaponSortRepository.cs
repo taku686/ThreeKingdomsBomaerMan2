@@ -45,6 +45,16 @@ namespace Repository
             { WeaponType.None, true }
         };
 
+        private readonly Dictionary<int, bool> _rarityFilterDictionary = new()
+        {
+            { 1, false },
+            { 2, false },
+            { 3, false },
+            { 4, false },
+            { 5, false },
+            { GameCommonData.InvalidNumber, true }
+        };
+
         private bool _isAscending = true;
 
         public void SetSortType(SortType sortType)
@@ -80,6 +90,30 @@ namespace Repository
             }
         }
 
+        public void SetRarity(int rarity)
+        {
+            if (rarity == GameCommonData.InvalidNumber)
+            {
+                var rarityFilterDictionary = new Dictionary<int, bool>(_rarityFilterDictionary);
+                foreach (var filter in rarityFilterDictionary)
+                {
+                    _rarityFilterDictionary[filter.Key] = false;
+                }
+
+                _rarityFilterDictionary[GameCommonData.InvalidNumber] = true;
+                return;
+            }
+
+            var isActive = _rarityFilterDictionary[rarity];
+            _rarityFilterDictionary[rarity] = !isActive;
+            _rarityFilterDictionary[GameCommonData.InvalidNumber] = false;
+
+            if (_rarityFilterDictionary.Values.All(value => !value))
+            {
+                _rarityFilterDictionary[GameCommonData.InvalidNumber] = true;
+            }
+        }
+
         public void ChangeAscendingSwitch(bool isOn)
         {
             _isAscending = isOn;
@@ -98,6 +132,11 @@ namespace Repository
         public IReadOnlyDictionary<WeaponType, bool> GetFilterTypeDictionary()
         {
             return _filterTypeDictionary;
+        }
+        
+        public IReadOnlyDictionary<int, bool> GetRarityFilterTypeDictionary()
+        {
+            return _rarityFilterDictionary;
         }
 
         public enum SortType

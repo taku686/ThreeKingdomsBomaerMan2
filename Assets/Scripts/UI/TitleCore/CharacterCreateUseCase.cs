@@ -185,6 +185,11 @@ namespace Repository
                 {
                     currentWeapon.transform.localEulerAngles = new Vector3(0, 0, 90);
                 }
+
+                if (weaponMasterData.Id == 150)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(180, 180, 90);
+                }
             }
 
             if (weaponMasterData.WeaponType == WeaponType.Sword && weaponMasterData.Id >= 146)
@@ -194,6 +199,11 @@ namespace Repository
                 if (weaponMasterData.Id == 319)
                 {
                     currentWeapon.transform.localEulerAngles = new Vector3(0, 180, 180);
+                }
+
+                if (weaponMasterData.Id == 152)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(0, 0, -90);
                 }
 
                 if (weaponMasterData.Id == 313)
@@ -220,6 +230,16 @@ namespace Repository
                 {
                     currentWeapon.transform.localEulerAngles = new Vector3(180, 0, 0);
                 }
+
+                if (weaponMasterData.Id == 154)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(0, 0, 90);
+                }
+
+                if (weaponMasterData.Id == 234)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(0, 0, 90);
+                }
             }
 
             if (weaponMasterData.WeaponType == WeaponType.Bow && weaponMasterData.Id >= 146)
@@ -230,6 +250,11 @@ namespace Repository
                 {
                     currentWeapon.transform.localEulerAngles = new Vector3(180, 0, 0);
                 }
+
+                if (weaponMasterData.Id == 158)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(0, 0, 0);
+                }
             }
 
             if (weaponMasterData.WeaponType == WeaponType.Shield && weaponMasterData.Id >= 146)
@@ -239,7 +264,7 @@ namespace Repository
                     currentWeapon.transform.localEulerAngles = new Vector3(180, 90, 0);
                 }
 
-                if (weaponMasterData.Id == 236)
+                if (weaponMasterData.Id is 236 or 155)
                 {
                     currentWeapon.transform.localEulerAngles = new Vector3(0, 180, 180);
                 }
@@ -263,6 +288,11 @@ namespace Repository
                 {
                     currentWeapon.transform.localEulerAngles = new Vector3(-90, 90, 0);
                 }
+
+                if (weaponMasterData.Id == 153)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(0, 0, -90);
+                }
             }
 
             if (weaponMasterData.WeaponType == WeaponType.Staff && weaponMasterData.Id >= 146)
@@ -284,6 +314,11 @@ namespace Repository
                 if (weaponMasterData.Id == 146)
                 {
                     currentWeapon.transform.localEulerAngles = new Vector3(180, 0, -180);
+                }
+
+                if (weaponMasterData.Id == 151)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(0, 180, -90);
                 }
 
                 if (weaponMasterData.Id == 312)
@@ -309,6 +344,21 @@ namespace Repository
             if (weaponMasterData.WeaponType == WeaponType.Scythe)
             {
                 currentWeapon.transform.localEulerAngles = new Vector3(90, 180, 180);
+
+                if (weaponMasterData.Id == 317)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(0, 90, 0);
+                }
+
+                if (weaponMasterData.Id == 204)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(90, 90, 0);
+                }
+
+                if (weaponMasterData.Id == 157)
+                {
+                    currentWeapon.transform.localEulerAngles = new Vector3(180, 180, 90);
+                }
             }
         }
 

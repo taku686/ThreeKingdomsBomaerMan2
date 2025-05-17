@@ -25,10 +25,18 @@ namespace UseCase
         {
             var sortType = _weaponSortRepository.GetSortTypeDictionary().Where(keyValue => keyValue.Value).Select(keyValue => keyValue.Key).First();
             var filter = _weaponSortRepository.GetFilterTypeDictionary();
+            var rarity = _weaponSortRepository.GetRarityFilterTypeDictionary();
             if (!filter[WeaponType.None])
             {
                 possessedWeaponDatum = possessedWeaponDatum
                     .Where(weapon => filter[weapon.Key.WeaponType])
+                    .ToDictionary(weapon => weapon.Key, weapon => weapon.Value);
+            }
+
+            if (!rarity[GameCommonData.InvalidNumber])
+            {
+                possessedWeaponDatum = possessedWeaponDatum
+                    .Where(weapon => rarity[weapon.Key.Rare])
                     .ToDictionary(weapon => weapon.Key, weapon => weapon.Value);
             }
 

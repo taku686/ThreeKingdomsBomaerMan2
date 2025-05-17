@@ -109,8 +109,11 @@ namespace UI.Title
             {
                 var sortTypes = _WeaponSortRepository.GetSortTypeDictionary();
                 var filterTypes = _WeaponSortRepository.GetFilterTypeDictionary();
+                var rarityFilters = _WeaponSortRepository.GetRarityFilterTypeDictionary();
                 var sortToggleViews = _View._SortPopupView._SortToggleViews;
                 var filterToggleViews = _View._SortPopupView._FilterToggleViews;
+                var rareToggleViews = _View._SortPopupView._RareFilterToggleViews;
+
                 _View._SortPopupView.ApplyAscendingSwitch(true);
 
                 foreach (var sortToggleView in sortToggleViews)
@@ -137,9 +140,9 @@ namespace UI.Title
 
                 foreach (var filterToggleView in filterToggleViews)
                 {
+                    filterToggleView.Initialize();
                     foreach (var (filter, isDisable) in filterTypes)
                     {
-                        filterToggleView.Initialize();
                         filterToggleView.SetActive(filter, isDisable);
                     }
 
@@ -153,6 +156,30 @@ namespace UI.Title
                                 foreach (var toggleView in filterToggleViews)
                                 {
                                     toggleView.SetActive(filter, isDisable);
+                                }
+                            }
+                        })
+                        .AddTo(_cts.Token);
+                }
+
+                foreach (var rareToggleView in rareToggleViews)
+                {
+                    rareToggleView.Initialize();
+                    foreach (var (rarity, isDisable) in rarityFilters)
+                    {
+                        rareToggleView.SetActive(rarity, isDisable);
+                    }
+
+                    rareToggleView._OnChangedValueFilterToggleAsObservable
+                        .Skip(1)
+                        .Subscribe(rare =>
+                        {
+                            _WeaponSortRepository.SetRarity(rare);
+                            foreach (var toggleView in rareToggleViews)
+                            {
+                                foreach (var (rarity, isDisable) in rarityFilters)
+                                {
+                                    toggleView.SetActive(rarity, isDisable);
                                 }
                             }
                         })
