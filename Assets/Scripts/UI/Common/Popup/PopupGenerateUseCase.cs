@@ -1,5 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
+using UI.Title;
 using UI.TitleCore.UserInfoState;
 using UniRx;
 using Zenject;
@@ -11,6 +12,7 @@ public class PopupGenerateUseCase : IDisposable
     [Inject] private ErrorPopup.Factory _errorPopupFactory;
     [Inject] private UserInfoPopup.Factory _userInfoPopupFactory;
     [Inject] private SkillDetailPopup.Factory _skillDetailPopupFactory;
+    [Inject] private AbnormalConditionPopup.Factory _abnormalConditionPopupFactory;
 
     public IObservable<bool> GenerateConfirmPopup
     (
@@ -64,6 +66,13 @@ public class PopupGenerateUseCase : IDisposable
         var skillDetailPopup = _skillDetailPopupFactory.Create();
         skillDetailPopup.Open(viewModel).Forget();
         return skillDetailPopup._OnClickButton;
+    }
+
+    public IObservable<Unit> GenerateAbnormalConditionPopup(AbnormalConditionPopup.ViewModel viewModel)
+    {
+        var abnormalConditionPopup = _abnormalConditionPopupFactory.Create();
+        abnormalConditionPopup.Open(viewModel).Forget();
+        return abnormalConditionPopup._OnClickButton;
     }
 
     public void Dispose()

@@ -325,9 +325,16 @@ namespace UI.Title
             ApplyRareView(viewModel._Rare);
             ApplyWeaponStatusText(viewModel._StatusSkillMasterDatum);
             _sellPriceText.text = GameCommonData.GetWeaponSellPrice(viewModel._Rare).ToString();
+            Subscribe();
+        }
 
+        private void Subscribe()
+        {
             Observable.EveryUpdate()
-                .Subscribe(_ => { RotateWeapon(viewModel); })
+                .Subscribe(_ =>
+                {
+                    //RotateWeapon(viewModel);
+                })
                 .AddTo(_weaponObject.GetCancellationTokenOnDestroy());
         }
 

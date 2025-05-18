@@ -29,6 +29,7 @@ namespace Manager.PlayFabManager
         [Inject] private SkillMasterDataRepository _skillMasterDataRepository;
         [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
         [Inject] private EntitledMasterDataRepository _entitledMasterDataRepository;
+        [Inject] private AbnormalConditionMasterDataRepository _abnormalConditionMasterDataRepository;
         private CancellationTokenSource _cts;
 
         public void Initialize()
@@ -44,12 +45,15 @@ namespace Manager.PlayFabManager
             var skillDatum = JsonConvert.DeserializeObject<SkillMasterData[]>(titleDatum[SkillMasterKey]);
             var weaponDatum = JsonConvert.DeserializeObject<WeaponMasterData[]>(titleDatum[WeaponMasterKey]);
             var entitledDatum = JsonConvert.DeserializeObject<EntitledMasterData[]>(titleDatum[EntitledMasterKey]);
+            var abnormalConditionDatum = JsonConvert.DeserializeObject<AbnormalConditionMasterData[]>(titleDatum[AbnormalConditionMasterKey]);
+
             await SetCharacterData(characterDatum);
             SetCharacterLevelData(characterLevelDatum);
             SetMissionData(missionDatum);
             await SetSkillData(skillDatum);
             await SetWeaponData(weaponDatum);
             SetEntitledData(entitledDatum);
+            SetAbnormalConditionData(abnormalConditionDatum);
         }
 
         private async UniTask SetCharacterData(CharacterData[] characterDatum)
@@ -319,6 +323,14 @@ namespace Manager.PlayFabManager
             foreach (var missionData in missionDatum)
             {
                 _missionMasterDataRepository.AddMissionData(missionData);
+            }
+        }
+
+        private void SetAbnormalConditionData(AbnormalConditionMasterData[] conditionMasterDatum)
+        {
+            foreach (var missionData in conditionMasterDatum)
+            {
+                _abnormalConditionMasterDataRepository.AddAbnormalConditionMasterData(missionData);
             }
         }
 

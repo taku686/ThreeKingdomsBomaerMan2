@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using TMPro;
 using UI.Common;
 using UI.Common.Popup;
+using UI.Title;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,21 +20,32 @@ public class SkillDetailPopup : PopupBase
     [SerializeField] private TextMeshProUGUI _abnormalConditionText;
     [SerializeField] private TextMeshProUGUI _skillTypeText;
     [SerializeField] private Button closeButton;
+    [SerializeField] private Button _infoButton;
 
     [Inject] private UIAnimation _uiAnimation;
+    [Inject] private PopupGenerateUseCase _popupGenerateUseCase;
+    [Inject] private AbnormalConditionViewModelUseCase _abnormalConditionViewModelUseCase;
+
     private Action<bool> _setActivePanelAction;
-    private IObservable<Unit> _onClickCancel;
-    public IObservable<Unit> _OnClickButton => _onClickCancel;
+    public IObservable<Unit> _OnClickButton { get; private set; }
 
     public async UniTask Open(ViewModel viewModel)
     {
         ApplyViewModel(viewModel);
-        _onClickCancel = closeButton
+        _OnClickButton = closeButton
             .OnClickAsObservable()
             .Take(1)
             .SelectMany(_ => OnClickButtonAnimation(closeButton).ToObservable())
             .SelectMany(_ => Close().ToObservable())
             .Select(_ => Unit.Default);
+
+        _infoButton
+            .OnClickAsObservable()
+            .SelectMany(_ => OnClickButtonAnimation(_infoButton).ToObservable())
+            .Select(_ => _abnormalConditionViewModelUseCase.InAsTask())
+            .SelectMany(abnormalConditionPopupViewModel => _popupGenerateUseCase.GenerateAbnormalConditionPopup(abnormalConditionPopupViewModel))
+            .Subscribe(_ => _setActivePanelAction?.Invoke(true))
+            .AddTo(gameObject);
 
         await base.Open(null);
     }
