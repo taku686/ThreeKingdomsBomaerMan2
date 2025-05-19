@@ -11,7 +11,6 @@ namespace Manager.NetworkManager
         public const string SkillDataKey = "Ski";
         public const string PlayerIndexKey = "Index";
         public const string PlayerGenerateKey = "Gen";
-        public const string AbnormalConditionKey = "Abn";
         private static readonly Hashtable PropsToSet = new();
 
 
@@ -38,11 +37,6 @@ namespace Manager.NetworkManager
         public static int GetPlayerIndex(this Photon.Realtime.Player player)
         {
             return player.CustomProperties[PlayerIndexKey] is int playerIndex ? playerIndex : -1;
-        }
-
-        public static int GetAbnormalCondition(this Photon.Realtime.Player player)
-        {
-            return player.CustomProperties[AbnormalConditionKey] is int abnormalCondition ? abnormalCondition : -1;
         }
 
         public static void SetCharacterData(this Photon.Realtime.Player player, int characterId)
@@ -90,13 +84,6 @@ namespace Manager.NetworkManager
         public static void SetPlayerValue(this Photon.Realtime.Player player, string key, object value)
         {
             PropsToSet[key] = value;
-            player.SetCustomProperties(PropsToSet);
-            PropsToSet.Clear();
-        }
-
-        public static void SetAbnormalCondition(this Photon.Realtime.Player player, object value)
-        {
-            PropsToSet[AbnormalConditionKey] = value;
             player.SetCustomProperties(PropsToSet);
             PropsToSet.Clear();
         }

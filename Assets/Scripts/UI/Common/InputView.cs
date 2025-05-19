@@ -80,7 +80,8 @@ namespace UI.Common
                 _specialSkillButtonGameObject.SetActive(isActiveSpecialButton);
                 specialSkillIntervalImage.fillAmount = MaxFillAmount;
                 specialSkillImage.sprite = specialSkill.Sprite;
-                _specialSkillInterval = specialSkill.Interval;
+                //_specialSkillInterval = specialSkill.Interval;
+                _specialSkillInterval = 1;
                 _timerSpecialSkill = 0;
                 _specialSkillEffectTime = specialSkill.EffectTime;
                 _timerSpecialSkillEffectTime = specialSkill.EffectTime;

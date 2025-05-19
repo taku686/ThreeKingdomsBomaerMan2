@@ -20,7 +20,7 @@ public class PlayerStatusInfo : MonoBehaviour
 
     public void AddAbnormalCondition(AbnormalCondition abnormalCondition)
     {
-        if (_abnormalConditions.Contains(abnormalCondition))
+        if (_abnormalConditions.Contains(abnormalCondition) || abnormalCondition == AbnormalCondition.None)
         {
             return;
         }

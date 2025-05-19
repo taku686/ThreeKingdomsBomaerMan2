@@ -188,7 +188,7 @@ namespace Player.Common
 
         private async UniTaskVoid OnDamage(GameObject other)
         {
-            if (!other.CompareTag(GameCommonData.BombEffectTag) || _isDamage)
+            if (!other.CompareTag(GameCommonData.BombEffectTag) || _isDamage || _isDead)
             {
                 return;
             }
@@ -196,8 +196,7 @@ namespace Player.Common
             ActivatePassiveSkillOnDamage();
             var explosion = other.GetComponentInParent<Explosion>();
             var hp = CalculateHp(explosion.damageAmount);
-            _isDead = hp <= DeadHp;
-            if (_isDead)
+            if (hp <= DeadHp　&& !_isDead)
             {
                 Dead().Forget();
                 return;
@@ -236,6 +235,7 @@ namespace Player.Common
 
         private async UniTask Dead()
         {
+            _isDead = true;
             await UniTask.Delay(500, cancellationToken: _cancellationToken);
             _stateMachine.Dispatch((int)PLayerState.Dead);
         }
