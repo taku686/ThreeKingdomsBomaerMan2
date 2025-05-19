@@ -28,7 +28,7 @@ public class CharacterDetailViewModelUseCase : IDisposable
         _skillMasterDataRepository = skillMasterDataRepository;
     }
 
-    public CharacterDetailView.ViewModel InAsTask(int characterId)
+    public CharacterDetailView.ViewModel InAsTask(int characterId, bool isTeamEdit)
     {
         var characterData = _characterMasterDataRepository.GetCharacterData(characterId);
         var currentLevelData = _userDataRepository.GetCurrentLevelData(characterId);
@@ -37,6 +37,7 @@ public class CharacterDetailViewModelUseCase : IDisposable
         var weaponData = _userDataRepository.GetEquippedWeaponData(characterId);
         var (typeSprite, typeColor) = _characterTypeSpriteManager.GetCharacterTypeData(characterData.Type);
         var passiveSkillData = _skillMasterDataRepository.GetSkillData(characterData.PassiveSkillId);
+        var teamMembers = _userDataRepository.GetTeamMembers();
         return new CharacterDetailView.ViewModel
         (
             characterData,
@@ -46,7 +47,9 @@ public class CharacterDetailViewModelUseCase : IDisposable
             weaponData,
             typeSprite,
             typeColor,
-            passiveSkillData
+            passiveSkillData,
+            isTeamEdit,
+            teamMembers
         );
     }
 

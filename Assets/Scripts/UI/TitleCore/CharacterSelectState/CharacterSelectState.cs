@@ -285,7 +285,7 @@ namespace UI.Title
 
             private void OnClickCharacterGrid(CharacterData characterData)
             {
-                _CharacterCreateUseCase.CreateCharacter(characterData.Id);
+                _CharacterCreateUseCase.CreateTeamMember(characterData.Id);
                 _CharacterSelectRepository.SetSelectedCharacterId(characterData.Id);
                 _StateMachine.Dispatch((int)State.CharacterDetail);
             }

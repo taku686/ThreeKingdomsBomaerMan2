@@ -20,6 +20,7 @@ public class StatusInBattleViewModelUseCase : IDisposable
 
     public StatusInBattleView.ViewModel InAsTask()
     {
+        //todo 後でチームでの処理に修正する
         var characterData = _userDataRepository.GetEquippedCharacterData();
         var characterId = characterData.Id;
         var weaponData = _userDataRepository.GetEquippedWeaponData(characterId);

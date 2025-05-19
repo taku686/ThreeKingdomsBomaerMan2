@@ -22,7 +22,7 @@ namespace UI.Title
             private EntitledMasterDataRepository _EntitledMasterDataRepository => Owner._entitledMasterDataRepository;
             private SkyBoxManager _SkyBoxManager => Owner._skyBoxManager;
             private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
-            private UserInfoViewModelUseCase _userInfoViewModelUseCase => Owner._userInfoViewModelUseCase;
+            private UserInfoViewModelUseCase _UserInfoViewModelUseCase => Owner._userInfoViewModelUseCase;
             private CancellationTokenSource _cts;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
@@ -45,8 +45,17 @@ namespace UI.Title
                     _SkyBoxManager.ChangeSkyBox();
                     ApplySimpleUserInfoView();
                     _View.SetBackgroundEffect(true);
-                    var characterId = _UserDataRepository.GetEquippedCharacterId();
-                    _CharacterCreateUseCase.CreateCharacter(characterId);
+                    var teamMembers = _UserDataRepository.GetTeamMembers();
+                    foreach (var (index, characterId) in teamMembers)
+                    {
+                        if (characterId == GameCommonData.InvalidNumber)
+                        {
+                            continue;
+                        }
+
+                        var createParent = Owner.GetGenerateCharacterCreateParent(index);
+                        _CharacterCreateUseCase.CreateTeam(characterId, index, createParent);
+                    }
                 }).Forget();
                 await InitializeText();
             }
@@ -107,7 +116,7 @@ namespace UI.Title
                 _View._UserInfoButton
                     .OnClickAsObservable()
                     .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._UserInfoButton).ToObservable())
-                    .Select(_ => _userInfoViewModelUseCase.InAsTask())
+                    .Select(_ => _UserInfoViewModelUseCase.InAsTask())
                     .SelectMany(viewModel => _PopupGenerateUseCase.GenerateUserInfoPopup(viewModel))
                     .Subscribe(_ => Owner.SetActiveBlockPanel(false))
                     .AddTo(_cts.Token);

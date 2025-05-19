@@ -43,32 +43,54 @@ namespace Repository
             _animatorControllerRepository = animatorControllerRepository;
         }
 
-        public void CreateCharacter(int characterId)
+        public void CreateTeam(int characterId, int index = 0, Transform createParent = null)
         {
-            var characterObject = _characterObjectRepository.GetCharacterObject();
+            var characterObject = _characterObjectRepository.GetCharacterObject(index);
             if (characterObject != null)
             {
                 Object.Destroy(characterObject);
             }
 
-            var createCharacterData = _characterMasterDataRepository.GetCharacterData(characterId);
-            var weaponData = _userDataRepository.GetEquippedWeaponData(characterId);
-            characterObject = CreateCharacter(createCharacterData);
-            CreateWeapon(characterObject, weaponData);
-            ChangeAnimatorController(characterObject, weaponData.WeaponType);
+            CreateCharacter(characterId, createParent, index);
         }
 
-        private GameObject CreateCharacter(CharacterData createCharacterData)
+        public void CreateTeamMember(int characterId, int index = 0, Transform createParent = null)
         {
+            var characterObjects = _characterObjectRepository.GetCharacterObjects();
+            foreach (var characterObject in characterObjects)
+            {
+                if (characterObject == null)
+                {
+                    continue;
+                }
+
+                Object.Destroy(characterObject);
+            }
+
+            CreateCharacter(characterId, createParent, index);
+        }
+
+        private void CreateCharacter(int characterId, Transform createParent = null, int index = 0)
+        {
+            var createCharacterData = _characterMasterDataRepository.GetCharacterData(characterId);
+            var weaponData = _userDataRepository.GetEquippedWeaponData(characterId);
+
+
+            if (createParent == null)
+            {
+                createParent = _characterGenerateTransform;
+            }
+
             var characterObject = Object.Instantiate
             (
                 createCharacterData.CharacterObject,
-                _characterGenerateTransform.position,
-                _characterGenerateTransform.rotation,
-                _characterGenerateTransform
+                createParent.position,
+                createParent.rotation,
+                createParent
             );
-            _characterObjectRepository.SetCharacterObject(characterObject);
-            return characterObject;
+            _characterObjectRepository.SetCharacterObject(characterObject, index);
+            CreateWeapon(characterObject, weaponData);
+            ChangeAnimatorController(characterObject, weaponData.WeaponType);
         }
 
         public void CreateWeapon

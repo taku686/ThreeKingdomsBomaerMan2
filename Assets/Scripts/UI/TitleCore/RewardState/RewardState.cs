@@ -13,7 +13,6 @@ namespace UI.Title
         public class RewardState : StateMachine<TitleCore>.State
         {
             private RewardView _View => (RewardView)Owner.GetView(State.Reward);
-            private CommonView _CommonView => Owner._commonView;
             private RewardDataRepository _RewardDataRepository => Owner._rewardDataRepository;
             private RewardDataUseCase _RewardDataUseCase => Owner._rewardDataUseCase;
             private StateMachine<TitleCore> _StateMachine => Owner._stateMachine;
@@ -26,16 +25,21 @@ namespace UI.Title
 
             protected override void OnExit(StateMachine<TitleCore>.State nextState)
             {
+                Owner.SetActiveGlobalVolume(true);
                 Cancel();
             }
 
             private void Initialize()
             {
                 _cts = new CancellationTokenSource();
-                var rewardIds = _RewardDataRepository.GetRewardIds().ToArray();
-                var rewardDatum = _RewardDataUseCase.InAsTask(rewardIds).ToArray();
-                Subscribe();
-                Owner.SwitchUiObject(State.Reward, false, () => { _View._LootBoxSystem.Initialize(rewardDatum); }).Forget();
+                Owner.SwitchUiObject(State.Reward, false, () =>
+                {
+                    Subscribe();
+                    var rewardIds = _RewardDataRepository.GetRewardIds().ToArray();
+                    var rewardDatum = _RewardDataUseCase.InAsTask(rewardIds).ToArray();
+                    _View._LootBoxSystem.Initialize(rewardDatum);
+                    Owner.SetActiveGlobalVolume(false);
+                }).Forget();
             }
 
             private void Subscribe()

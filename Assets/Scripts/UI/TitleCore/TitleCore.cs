@@ -69,6 +69,8 @@ namespace UI.Title
         [SerializeField] private CommonView _commonView;
         [SerializeField] private ViewBase[] _views;
         [SerializeField] private GameObject _blockPanel;
+        [SerializeField] private GameObject _globalVolumeObj;
+        [SerializeField] private Transform[] _characterCreateParents;
 
         private StateMachine<TitleCore> _stateMachine;
         private CancellationTokenSource _cts;
@@ -291,6 +293,21 @@ namespace UI.Title
         private void SetActiveBlockPanel(bool isActive)
         {
             _blockPanel.SetActive(isActive);
+        }
+
+        private void SetActiveGlobalVolume(bool isActive)
+        {
+            _globalVolumeObj.SetActive(isActive);
+        }
+
+        private Transform GetGenerateCharacterCreateParent(int index)
+        {
+            if (index < 0 || index >= _characterCreateParents.Length)
+            {
+                return _characterCreateParents[0];
+            }
+
+            return _characterCreateParents[index];
         }
 
         private void Cancel(CancellationTokenSource cancellationTokenSource)

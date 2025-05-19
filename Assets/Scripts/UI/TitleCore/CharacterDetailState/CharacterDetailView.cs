@@ -15,7 +15,9 @@ namespace UI.Title
     {
         [SerializeField] private Button backButton;
         [SerializeField] private TextMeshProUGUI nameText;
-        [SerializeField] private Button selectButton;
+        [SerializeField] private Button _teamEditButton;
+        [SerializeField] private TextMeshProUGUI _teamEditButtonText;
+        [SerializeField] private Image _teamEditImage;
         [SerializeField] private RectTransform leftArrowRect;
         [SerializeField] private RectTransform rightArrowRect;
         [SerializeField] private Button leftArrowButton;
@@ -39,12 +41,17 @@ namespace UI.Title
         [Inject] private ApplyStatusSkillUseCase _applyStatusSkillUseCase;
         private bool _isInitialized;
         private readonly Dictionary<int, (bool, string)> _statusTextDictionary = new();
+        private readonly Color _teamEditTextColor = new(0.746f, 0f, 0f, 1);
+        private readonly Color _teamEditTextDisableColor = new(0.746f, 0f, 0f, 1);
         private const float MoveAmount = 50;
+        private const string TeamEditText = "チーム編集";
+        private const string DecideText = "決定";
+        private const float DisableAlpha = 0.5f;
         public VirtualCurrencyAddPopup _VirtualCurrencyAddPopup => virtualCurrencyAddPopup;
         public PurchaseErrorView _PurchaseErrorView => purchaseErrorView;
         public Button _UpgradeButton => upgradeButton;
         public Button _BackButton => backButton;
-        public Button _SelectButton => selectButton;
+        public Button _TeamEditButton => _teamEditButton;
         public Button _LeftArrowButton => leftArrowButton;
         public Button _RightArrowButton => rightArrowButton;
         public Button _InventoryButton => inventoryButton;
@@ -59,11 +66,14 @@ namespace UI.Title
             var nextLevelData = viewModel._NextLevelMasterData;
             var skillsViewModel = viewModel._SkillsViewModel;
             var weaponMasterData = viewModel._WeaponMasterData;
+            var isTeamEdit = viewModel._IsTeamEdit;
+            var teamMembers = viewModel._TeamMembers;
             SetStatusView(characterData, weaponMasterData);
             ApplySkillsViewModel(skillsViewModel);
             SetLevelView(currentLevelData, nextLevelData);
             purchaseErrorView.gameObject.SetActive(false);
             virtualCurrencyAddPopup.gameObject.SetActive(false);
+            _teamEditButtonText.text = isTeamEdit ? DecideText : TeamEditText;
             _typeImage.color = viewModel._TypeColor;
             _typeIcon.sprite = viewModel._TypeSprite;
             _passiveSkillName.text = viewModel._PassiveSkillMasterData.Name;
@@ -75,6 +85,27 @@ namespace UI.Title
 
             _teamTextObjects[characterData.Team].SetActive(true);
             InitializeArrowAnimation();
+            IsDecideButtonActive(isTeamEdit, characterData.Id, teamMembers);
+        }
+
+        private void IsDecideButtonActive(bool isTeamEdit, int currentCharacterId, IReadOnlyDictionary<int, int> teamMembers)
+        {
+            foreach (var teamMember in teamMembers)
+            {
+                var characterId = teamMember.Value;
+                var isContain = currentCharacterId == characterId;
+                if (isTeamEdit && isContain)
+                {
+                    _teamEditButton.interactable = false;
+                    _teamEditImage.color = new Color(1, 1, 1, DisableAlpha);
+                    _teamEditButtonText.color = _teamEditTextDisableColor;
+                    return;
+                }
+            }
+
+            _teamEditImage.color = Color.white;
+            _teamEditButtonText.color = _teamEditTextColor;
+            _teamEditButton.interactable = true;
         }
 
         private static string TranslateExplanation(SkillMasterData skillMasterData)
@@ -224,6 +255,8 @@ namespace UI.Title
             public Sprite _TypeSprite { get; }
             public Color _TypeColor { get; }
             public SkillMasterData _PassiveSkillMasterData { get; }
+            public bool _IsTeamEdit { get; }
+            public IReadOnlyDictionary<int, int> _TeamMembers { get; }
 
             public ViewModel
             (
@@ -234,7 +267,9 @@ namespace UI.Title
                 WeaponMasterData weaponMasterData,
                 Sprite typeSprite,
                 Color typeColor,
-                SkillMasterData passiveSkillMasterData
+                SkillMasterData passiveSkillMasterData,
+                bool isTeamEdit,
+                IReadOnlyDictionary<int, int> teamMembers
             )
             {
                 _CharacterData = characterData;
@@ -245,6 +280,8 @@ namespace UI.Title
                 _TypeSprite = typeSprite;
                 _TypeColor = typeColor;
                 _PassiveSkillMasterData = passiveSkillMasterData;
+                _IsTeamEdit = isTeamEdit;
+                _TeamMembers = teamMembers;
             }
         }
     }
