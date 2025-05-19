@@ -36,7 +36,7 @@ namespace Skill
             {
                 return;
             }
-            
+
             foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
             {
                 playerStatusInfo.AddAbnormalCondition(abnormalCondition);

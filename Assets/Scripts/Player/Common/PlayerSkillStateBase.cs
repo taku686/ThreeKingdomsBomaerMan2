@@ -19,6 +19,7 @@ namespace Player.Common
             private ObservableStateMachineTrigger _ObservableStateMachineTrigger => Owner._observableStateMachineTrigger;
             protected PhotonView _PhotonView => Owner.photonView;
             protected PhotonNetworkManager _PhotonNetworkManager => Owner._photonNetworkManager;
+            protected StateMachine<PlayerCore> _StateMachine => Owner._stateMachine;
 
             protected override void OnEnter(State prevState)
             {
@@ -45,7 +46,7 @@ namespace Player.Common
                 _ObservableStateMachineTrigger
                     .OnStateExitAsObservable()
                     .Take(1)
-                    .Subscribe(_ => { Owner._stateMachine.Dispatch((int)PLayerState.Idle); })
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.Idle); })
                     .AddTo(Owner.GetCancellationTokenOnDestroy());
             }
         }

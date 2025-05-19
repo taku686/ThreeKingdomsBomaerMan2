@@ -1,7 +1,7 @@
 using System;
-using System.Threading;
+using System.Globalization;
 using Common.Data;
-using Cysharp.Threading.Tasks;
+using TMPro;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -22,15 +22,25 @@ namespace UI.Common
         [SerializeField] private GameObject _dashButtonGameObject;
         [SerializeField] private GameObject _normalSkillButtonGameObject;
         [SerializeField] private GameObject _specialSkillButtonGameObject;
+        [SerializeField] private TextMeshProUGUI _normalSkillActiveCountdownText;
+        [SerializeField] private TextMeshProUGUI _specialSkillActiveCountdownText;
+        [SerializeField] private Image _normalSkillActiveCountdownImage;
+        [SerializeField] private Image _specialSkillActiveCountdownImage;
 
         private const float MaxFillAmount = 1;
         private const float MinFillAmount = 0;
         private float _timerNormalSkill;
         private float _timerSpecialSkill;
         private float _timerDashSkill;
+        private float _timerNormalSkillEffectTime;
+        private float _timerSpecialSkillEffectTime;
         private float _normalSkillInterval;
         private float _specialSkillInterval;
         private float _dashInterval;
+        private float _normalSkillEffectTime;
+        private float _specialSkillEffectTime;
+        private SkillActionType _normalSkillActionType;
+        private SkillActionType _specialSkillActionType;
 
         public void ApplyViewModel(ViewModel viewModel)
         {
@@ -45,12 +55,18 @@ namespace UI.Common
                 _normalSkillButtonGameObject.SetActive(isActiveNormalButton);
                 normalSkillIntervalImage.fillAmount = MaxFillAmount;
                 normalSkillImage.sprite = normalSkill.Sprite;
-                //todo 後でしゅうせいする
                 //_normalSkillInterval = normalSkill.Interval;
                 _normalSkillInterval = 1;
                 _timerNormalSkill = 0;
+                _normalSkillEffectTime = normalSkill.EffectTime;
+                _timerNormalSkillEffectTime = normalSkill.EffectTime;
                 normalSkillIntervalImage.fillAmount = 0f;
+                _normalSkillActiveCountdownImage.fillAmount = 0f;
+                _normalSkillActiveCountdownText.text = string.Empty;
+                _normalSkillActionType = normalSkill._SkillActionTypeEnum;
                 normalSkillButton.interactable = false;
+                _normalSkillActiveCountdownText.gameObject.SetActive(false);
+                _normalSkillActiveCountdownImage.gameObject.SetActive(false);
             }
             else
             {
@@ -64,12 +80,17 @@ namespace UI.Common
                 _specialSkillButtonGameObject.SetActive(isActiveSpecialButton);
                 specialSkillIntervalImage.fillAmount = MaxFillAmount;
                 specialSkillImage.sprite = specialSkill.Sprite;
-                //todo 後でしゅうせいする
-                //_specialSkillInterval = specialSkill.Interval;
-                _specialSkillInterval = 1;
+                _specialSkillInterval = specialSkill.Interval;
                 _timerSpecialSkill = 0;
+                _specialSkillEffectTime = specialSkill.EffectTime;
+                _timerSpecialSkillEffectTime = specialSkill.EffectTime;
                 specialSkillIntervalImage.fillAmount = 0f;
+                _specialSkillActiveCountdownImage.fillAmount = 0f;
+                _specialSkillActiveCountdownText.text = string.Empty;
+                _specialSkillActionType = specialSkill._SkillActionTypeEnum;
                 specialSkillButton.interactable = false;
+                _specialSkillActiveCountdownText.gameObject.SetActive(false);
+                _specialSkillActiveCountdownImage.gameObject.SetActive(false);
             }
             else
             {
@@ -83,28 +104,51 @@ namespace UI.Common
 
         public void UpdateSkillUI()
         {
-            if (_timerNormalSkill < _normalSkillInterval)
+            NormalSkillIntervalTimer();
+            SpecialSkillIntervalTimer();
+            DashIntervalTimer();
+            NormalSkillEffectTimer();
+            SpecialSkillEffectTimer();
+        }
+
+        #region Timer
+
+        private void NormalSkillIntervalTimer()
+        {
+            if (!Mathf.Approximately(_normalSkillInterval, GameCommonData.InvalidNumber))
             {
-                _timerNormalSkill += Time.deltaTime;
-                var rate = _timerNormalSkill / _normalSkillInterval;
-                normalSkillIntervalImage.fillAmount = rate;
-                if (rate >= MaxFillAmount)
+                if (_timerNormalSkill < _normalSkillInterval)
                 {
-                    normalSkillButton.interactable = true;
+                    _timerNormalSkill += Time.deltaTime;
+                    var rate = _timerNormalSkill / _normalSkillInterval;
+                    normalSkillIntervalImage.fillAmount = rate;
+                    if (rate >= MaxFillAmount)
+                    {
+                        normalSkillButton.interactable = true;
+                    }
                 }
             }
+        }
 
-            if (_timerSpecialSkill < _specialSkillInterval)
+        private void SpecialSkillIntervalTimer()
+        {
+            if (!Mathf.Approximately(_specialSkillInterval, GameCommonData.InvalidNumber))
             {
-                _timerSpecialSkill += Time.deltaTime;
-                var rate = _timerSpecialSkill / _specialSkillInterval;
-                specialSkillIntervalImage.fillAmount = rate;
-                if (rate >= MaxFillAmount)
+                if (_timerSpecialSkill < _specialSkillInterval)
                 {
-                    specialSkillButton.interactable = true;
+                    _timerSpecialSkill += Time.deltaTime;
+                    var rate = _timerSpecialSkill / _specialSkillInterval;
+                    specialSkillIntervalImage.fillAmount = rate;
+                    if (rate >= MaxFillAmount)
+                    {
+                        specialSkillButton.interactable = true;
+                    }
                 }
             }
+        }
 
+        private void DashIntervalTimer()
+        {
             if (_timerDashSkill < _dashInterval)
             {
                 _timerDashSkill += Time.deltaTime;
@@ -116,6 +160,50 @@ namespace UI.Common
                 }
             }
         }
+
+        private void NormalSkillEffectTimer()
+        {
+            if (IsEffectTimeActive(_normalSkillEffectTime, _normalSkillActionType))
+            {
+                if (_timerNormalSkillEffectTime < _normalSkillEffectTime)
+                {
+                    _timerNormalSkillEffectTime += Time.deltaTime;
+                    var rate = _timerNormalSkillEffectTime / _normalSkillEffectTime;
+                    _normalSkillActiveCountdownImage.fillAmount = rate;
+                    var count = Mathf.FloorToInt(_normalSkillEffectTime - _timerNormalSkillEffectTime);
+                    _normalSkillActiveCountdownText.text = count.ToString(CultureInfo.InvariantCulture);
+                    if (rate >= MaxFillAmount)
+                    {
+                        _normalSkillActiveCountdownText.gameObject.SetActive(false);
+                        _normalSkillActiveCountdownImage.gameObject.SetActive(false);
+                    }
+                }
+            }
+        }
+
+        private void SpecialSkillEffectTimer()
+        {
+            if (IsEffectTimeActive(_specialSkillEffectTime, _specialSkillActionType))
+            {
+                if (_timerSpecialSkillEffectTime < _specialSkillEffectTime)
+                {
+                    _timerSpecialSkillEffectTime += Time.deltaTime;
+                    var rate = _timerSpecialSkillEffectTime / _specialSkillEffectTime;
+                    _specialSkillActiveCountdownImage.fillAmount = rate;
+                    var count = Mathf.FloorToInt(_specialSkillEffectTime - _timerSpecialSkillEffectTime);
+                    _specialSkillActiveCountdownText.text = count.ToString(CultureInfo.InvariantCulture);
+                    if (rate >= MaxFillAmount)
+                    {
+                        _specialSkillActiveCountdownText.gameObject.SetActive(false);
+                        _specialSkillActiveCountdownImage.gameObject.SetActive(false);
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region OnClick
 
         public IObservable<Unit> OnClickNormalSkillButtonAsObservable()
         {
@@ -151,12 +239,26 @@ namespace UI.Common
                 .Select(_ => Unit.Default);
         }
 
+        #endregion
+
+        #region Reset
 
         private void ResetNormalSkillIntervalImage()
         {
             _timerNormalSkill = 0;
             normalSkillIntervalImage.fillAmount = MinFillAmount;
             normalSkillButton.interactable = false;
+
+            if (!IsEffectTimeActive(_normalSkillEffectTime, _normalSkillActionType))
+            {
+                return;
+            }
+
+            _normalSkillActiveCountdownText.gameObject.SetActive(true);
+            _normalSkillActiveCountdownImage.gameObject.SetActive(true);
+            _normalSkillActiveCountdownText.text = _normalSkillEffectTime.ToString(CultureInfo.InvariantCulture);
+            _normalSkillActiveCountdownImage.fillAmount = MinFillAmount;
+            _timerNormalSkillEffectTime = 0;
         }
 
         private void ResetSpecialSkillIntervalImage()
@@ -164,6 +266,17 @@ namespace UI.Common
             _timerSpecialSkill = 0;
             specialSkillIntervalImage.fillAmount = MinFillAmount;
             specialSkillButton.interactable = false;
+
+            if (!IsEffectTimeActive(_specialSkillEffectTime, _specialSkillActionType))
+            {
+                return;
+            }
+
+            _specialSkillActiveCountdownText.gameObject.SetActive(true);
+            _specialSkillActiveCountdownImage.gameObject.SetActive(true);
+            _specialSkillActiveCountdownText.text = _specialSkillEffectTime.ToString(CultureInfo.InvariantCulture);
+            _specialSkillActiveCountdownImage.fillAmount = MinFillAmount;
+            _timerSpecialSkillEffectTime = 0;
         }
 
         private void ResetDashIntervalImage()
@@ -171,6 +284,35 @@ namespace UI.Common
             _timerDashSkill = 0;
             _dashIntervalImage.fillAmount = MinFillAmount;
             _dashButton.interactable = false;
+        }
+
+        #endregion
+
+        private bool IsEffectTimeActive(float effectTime, SkillActionType skillActionType)
+        {
+            if (Mathf.Approximately(effectTime, GameCommonData.InvalidNumber))
+            {
+                return false;
+            }
+
+            if
+            (
+                skillActionType
+                is SkillActionType.Heal
+                or SkillActionType.ContinuousHeal
+                or SkillActionType.AllBuff
+                or SkillActionType.AttackBuff
+                or SkillActionType.DefenseBuff
+                or SkillActionType.SpeedBuff
+                or SkillActionType.FireRangeBuff
+                or SkillActionType.BombLimitBuff
+                or SkillActionType.ResistanceBuff
+            )
+            {
+                return true;
+            }
+
+            return false;
         }
 
 

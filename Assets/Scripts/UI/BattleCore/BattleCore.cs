@@ -26,6 +26,7 @@ namespace Manager.BattleManager
         [Inject] private BattleResultDataRepository _battleResultDataRepository;
         [Inject] private CharacterMasterDataRepository _characterMasterDataRepository;
         [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
+        [Inject] private AbnormalConditionSpriteRepository _abnormalConditionSpriteRepository;
         [SerializeField] private AnimatorControllerRepository animatorControllerRepository;
 
         //UseCase
@@ -57,6 +58,7 @@ namespace Manager.BattleManager
         private StateMachine<BattleCore> _stateMachine;
         private PlayerCore _playerCore;
         private readonly List<PlayerStatusUI> _playerStatusUiList = new();
+        private PlayerStatusInfo _playerStatusInfo;
 
         public enum State
         {
@@ -125,6 +127,11 @@ namespace Manager.BattleManager
         private void SetPlayerCore(PlayerCore player)
         {
             _playerCore = player;
+        }
+        
+        private void SetPlayerStatusInfo(PlayerStatusInfo playerStatusInfo)
+        {
+            _playerStatusInfo = playerStatusInfo;
         }
     }
 }

@@ -1,11 +1,12 @@
-using System.Collections.Generic;
 using Common.Data;
+using UniRx;
 using UnityEngine;
 
 public class PlayerStatusInfo : MonoBehaviour
 {
     private int _playerIndex;
-    private readonly List<AbnormalCondition> _abnormalConditions = new();
+    private readonly ReactiveCollection<AbnormalCondition> _abnormalConditions = new();
+    public IReadOnlyReactiveCollection<AbnormalCondition> _AbnormalConditions => _abnormalConditions;
 
     public void SetPlayerIndex(int userId)
     {

@@ -250,10 +250,5 @@ namespace Player.Common
             _DashSkillSubject.Dispose();
             _BombSkillSubject.Dispose();
         }
-
-        private void OnDrawGizmos()
-        {
-            _targetScanner.ShowGizmos();
-        }
     }
 }

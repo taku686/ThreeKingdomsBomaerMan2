@@ -27,7 +27,7 @@ public class EffectActivateUseCase : MonoBehaviour
     [SerializeField] private ParticleSystem slowTimeEffect;
 
     #endregion
-    
+
     #region AbnormalConditionEffect
 
     [Header("Abnormal Condition")] [SerializeField]
@@ -50,6 +50,8 @@ public class EffectActivateUseCase : MonoBehaviour
     [SerializeField] private ParticleSystem _burningEffect;
 
     #endregion
+
+    private const float OneSecond = 1f;
 
     public void Initialize
     (
@@ -84,7 +86,7 @@ public class EffectActivateUseCase : MonoBehaviour
         switch (skillMasterData._SkillActionTypeEnum)
         {
             case SkillActionType.Heal:
-                PlayEffect(healEffect, skillMasterData.EffectTime).Forget();
+                PlayEffect(healEffect, OneSecond).Forget();
                 break;
             case SkillActionType.ContinuousHeal:
                 PlayEffect(healEffect, skillMasterData.EffectTime).Forget();

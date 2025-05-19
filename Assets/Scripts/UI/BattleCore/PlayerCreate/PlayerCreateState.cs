@@ -91,8 +91,8 @@ namespace Manager.BattleManager
                     cpuObj.tag = GameCommonData.PlayerTag;
                     cpuObj.layer = LayerMask.NameToLayer(GameCommonData.EnemyLayer);
                     cpuObj.AddComponent<EnemyCore>();
-                    var userStatusInfo = cpuObj.AddComponent<PlayerStatusInfo>();
-                    userStatusInfo.SetPlayerIndex(playerIndex);
+                    var playerStatusInfo = cpuObj.AddComponent<PlayerStatusInfo>();
+                    playerStatusInfo.SetPlayerIndex(playerIndex);
                     AddBoxCollider(cpuObj);
                     AddRigidbody(cpuObj);
                     GenerateEffectActivator(cpuObj, playerIndex);
@@ -129,8 +129,8 @@ namespace Manager.BattleManager
                 var characterData = _PhotonNetworkManager.GetCharacterData(playerId);
                 var weaponData = _PhotonNetworkManager.GetWeaponData(playerId);
                 var weaponType = weaponData.WeaponType;
-                var userStatusInfo = player.AddComponent<PlayerStatusInfo>();
-                userStatusInfo.SetPlayerIndex(playerId);
+                var playerStatusInfo = player.AddComponent<PlayerStatusInfo>();
+                playerStatusInfo.SetPlayerIndex(playerId);
                 AddBoxCollider(player);
                 AddRigidbody(player);
                 SetPlayerUI(player, playerId, out var hpKey);
@@ -144,6 +144,7 @@ namespace Manager.BattleManager
                     return;
                 }
 
+                Owner.SetPlayerStatusInfo(playerStatusInfo);
                 player.layer = LayerMask.NameToLayer(GameCommonData.PlayerLayer);
                 _CameraManager.Initialize(player.transform);
                 var playerCore = player.AddComponent<PlayerCore>();

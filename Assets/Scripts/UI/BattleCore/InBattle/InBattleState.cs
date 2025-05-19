@@ -7,6 +7,7 @@ using Player.Common;
 using Repository;
 using UI.Battle;
 using UniRx;
+using UnityEngine.UI;
 
 namespace Manager.BattleManager
 {
@@ -20,9 +21,12 @@ namespace Manager.BattleManager
             private List<PlayerStatusUI> _PlayerStatusUiList => Owner._playerStatusUiList;
             private BattleResultDataRepository _BattleResultDataRepository => Owner._battleResultDataRepository;
             private InputViewModelUseCase _InputViewModelUseCase => Owner._inputViewModelUseCase;
+            private AbnormalConditionSpriteRepository _AbnormalConditionSpriteRepository => Owner._abnormalConditionSpriteRepository;
+            private PlayerStatusInfo _PlayerStatusInfo => Owner._playerStatusInfo;
             private CancellationTokenSource _cts;
             private int _startTime;
             private int _rank;
+            private readonly Dictionary<AbnormalCondition, Image> _abnormalConditionImages = new();
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
             {
@@ -65,6 +69,30 @@ namespace Manager.BattleManager
 
                 _PlayerCore._StatusBuffUiObservable
                     .Subscribe(tuple => { _View.ApplyBuffState(tuple.statusType, tuple.speed, tuple.isBuff, tuple.isDebuff); })
+                    .AddTo(_cts.Token);
+
+                _PlayerStatusInfo._AbnormalConditions
+                    .ObserveAdd()
+                    .Subscribe(value =>
+                    {
+                        var abnormalCondition = value.Value;
+                        var sprite = _AbnormalConditionSpriteRepository.GetAbnormalConditionSprite(abnormalCondition);
+                        var icon = _View.GenerateAbnormalConditionImage(sprite);
+                        _abnormalConditionImages[abnormalCondition] = icon;
+                    })
+                    .AddTo(_cts.Token);
+
+                _PlayerStatusInfo._AbnormalConditions
+                    .ObserveRemove()
+                    .Subscribe(value =>
+                    {
+                        var abnormalCondition = value.Value;
+                        if (_abnormalConditionImages.TryGetValue(abnormalCondition, out var icon))
+                        {
+                            Destroy(icon.gameObject);
+                            _abnormalConditionImages.Remove(abnormalCondition);
+                        }
+                    })
                     .AddTo(_cts.Token);
 
                 _View.OnClickNormalSkillButtonAsObservable()

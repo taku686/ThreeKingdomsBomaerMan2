@@ -1,4 +1,6 @@
-﻿namespace Player.Common
+﻿using Common.Data;
+
+namespace Player.Common
 {
     public partial class PlayerCore
     {
@@ -11,6 +13,10 @@
                 var weaponData = _PhotonNetworkManager.GetWeaponData(index);
                 var specialSkillData = weaponData.SpecialSkillMasterData;
                 _ActiveSkillManager.ActivateSkill(specialSkillData);
+                if (specialSkillData._SkillActionTypeEnum == SkillActionType.None)
+                {
+                    _StateMachine.Dispatch((int)PLayerState.Idle);
+                }
             }
         }
     }

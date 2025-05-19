@@ -5,12 +5,15 @@ using UI.BattleCore;
 using UI.Common;
 using UniRx;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class InBattleView : BattleViewBase
 {
     [SerializeField] private TextMeshProUGUI timerText;
     [SerializeField] private StatusInBattleView statusInBattleView;
     [SerializeField] private InputView _inputView;
+    [SerializeField] private Transform _abnormalConditionParent;
+    [SerializeField] private Image _abnormalConditionImage;
 
     public void ApplyStatusViewModel(StatusInBattleView.ViewModel viewModel)
     {
@@ -25,6 +28,14 @@ public class InBattleView : BattleViewBase
     public void ApplyInputViewModel(InputView.ViewModel viewModel)
     {
         _inputView.ApplyViewModel(viewModel);
+    }
+
+    public Image GenerateAbnormalConditionImage(Sprite abnormalConditionSprite)
+    {
+        var iconObj = Instantiate(_abnormalConditionImage.gameObject, _abnormalConditionParent);
+        var image = iconObj.GetComponent<Image>();
+        image.sprite = abnormalConditionSprite;
+        return image;
     }
 
     public void UpdateTime(int time)
