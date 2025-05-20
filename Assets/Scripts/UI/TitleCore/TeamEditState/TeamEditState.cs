@@ -40,7 +40,18 @@ namespace UI.Title
             {
                 _View._BackButton.OnClickAsObservable()
                     .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._BackButton).ToObservable())
-                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.Main); })
+                    .Subscribe(_ =>
+                    {
+                        var prevState = _StateMachine._PreviousState;
+                        if (prevState != GameCommonData.InvalidNumber)
+                        {
+                            _StateMachine.Dispatch(prevState, (int)State.TeamEdit);
+                        }
+                        else
+                        {
+                            _StateMachine.Dispatch((int)State.Main);
+                        }
+                    })
                     .AddTo(_cts.Token);
 
                 _View._DecideButton.OnClickAsObservable()

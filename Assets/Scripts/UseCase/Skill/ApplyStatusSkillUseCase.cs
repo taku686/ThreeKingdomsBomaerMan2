@@ -23,9 +23,9 @@ public class ApplyStatusSkillUseCase : IDisposable
         _characterMasterDataRepository = characterMasterDataRepository;
     }
 
-    public int ApplyStatusSkill(int characterId, int skillId, StatusType statusType)
+    public int ApplyStatusSkill(int characterId, int skillId, StatusType statusType, LevelMasterData levelData = null)
     {
-        var appliedLevelValue = ApplyLevelStatus(characterId, statusType);
+        var appliedLevelValue = ApplyLevelStatus(characterId, statusType, levelData);
         var skillData = _skillMasterDataRepository.GetSkillData(skillId);
         if (skillData.SkillType != SkillType.Status)
         {
@@ -152,9 +152,9 @@ public class ApplyStatusSkillUseCase : IDisposable
         return result;
     }
 
-    public int ApplyLevelStatus(int characterId, StatusType statusType)
+    public int ApplyLevelStatus(int characterId, StatusType statusType, LevelMasterData levelData = null)
     {
-        var levelData = _userDataRepository.GetCurrentLevelData(characterId);
+        levelData ??= _userDataRepository.GetCurrentLevelData(characterId);
         var characterData = _characterMasterDataRepository.GetCharacterData(characterId);
         var statusValue = GetStatus(characterData, statusType);
         return Mathf.FloorToInt(levelData.StatusRate * statusValue);

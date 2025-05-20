@@ -31,7 +31,7 @@ namespace UI.Title
         {
             _teamGridViewModels.Clear();
             var teamMembers = _userDataRepository.GetTeamMembers();
-            for (var i = 0; i < GameCommonData.TeamMemberCount; i++)
+            for (var i = 0; i < GameCommonData.MaxTeamMember; i++)
             {
                 var characterId = teamMembers[i];
                 var characterData = _characterMasterDataRepository.GetCharacterData(characterId);

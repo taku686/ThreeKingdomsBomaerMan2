@@ -72,7 +72,7 @@ namespace Manager.BattleManager
         void Start()
         {
             _photonNetworkManager._isTitle = false;
-            InitializeUi();
+            // InitializeUi();
             InitializeState();
             InitializeComponent();
         }
@@ -82,7 +82,7 @@ namespace Manager.BattleManager
             _stateMachine.Update();
         }
 
-        private void InitializeUi()
+        /*private void InitializeUi()
         {
             var inBattleView = _views.FirstOrDefault(view => view._State == State.InBattle) as InBattleView;
             if (inBattleView == null)
@@ -94,7 +94,7 @@ namespace Manager.BattleManager
             inBattleView.UpdateTime(GameCommonData.BattleTime);
             var viewModel = _statusInBattleViewModelUseCase.InAsTask();
             inBattleView.ApplyStatusViewModel(viewModel);
-        }
+        }*/
 
         private void InitializeState()
         {
@@ -128,7 +128,7 @@ namespace Manager.BattleManager
         {
             _playerCore = player;
         }
-        
+
         private void SetPlayerStatusInfo(PlayerStatusInfo playerStatusInfo)
         {
             _playerStatusInfo = playerStatusInfo;

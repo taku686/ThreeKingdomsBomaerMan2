@@ -58,6 +58,11 @@ public class InBattleView : BattleViewBase
         return _inputView.OnClickBombButtonAsObservable();
     }
 
+    public IObservable<Unit> OnClickCharacterChangeButtonAsObservable()
+    {
+        return _inputView.OnClickCharacterChangeButtonAsObservable();
+    }
+
     public IObservable<Unit> OnClickDashButtonAsObservable()
     {
         return _inputView.OnClickDashButtonAsObservable();

@@ -134,7 +134,7 @@ namespace UI.Title
         {
             _stateMachine = new StateMachine<TitleCore>(this)
             {
-                _PreviousState = -1
+                _PreviousState = GameCommonData.InvalidNumber
             };
             if (_mainManager._isInitialize)
             {
@@ -152,6 +152,7 @@ namespace UI.Title
             _stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)State.CharacterDetail);
             _stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)State.CharacterSelect);
             _stateMachine.AddTransition<TeamEditState, CharacterSelectState>((int)State.CharacterSelect);
+            _stateMachine.AddTransition<TeamEditState, CharacterDetailState>((int)State.CharacterDetail);
             _stateMachine.AddTransition<CharacterDetailState, InventoryState>((int)State.Inventory);
             _stateMachine.AddTransition<InventoryState, CharacterDetailState>((int)State.CharacterDetail);
             _stateMachine.AddTransition<MainState, BattleReadyState>((int)State.BattleReady);

@@ -14,6 +14,7 @@ namespace UI.Common
         public Button normalSkillButton;
         public Button specialSkillButton;
         public Button _dashButton;
+        public Button _characterChangeButton;
         public Image normalSkillIntervalImage;
         public Image specialSkillIntervalImage;
         public Image _dashIntervalImage;
@@ -29,6 +30,7 @@ namespace UI.Common
 
         private const float MaxFillAmount = 1;
         private const float MinFillAmount = 0;
+        private const float DashInterval = GameCommonData.DashInterval;
         private float _timerNormalSkill;
         private float _timerSpecialSkill;
         private float _timerDashSkill;
@@ -36,7 +38,6 @@ namespace UI.Common
         private float _timerSpecialSkillEffectTime;
         private float _normalSkillInterval;
         private float _specialSkillInterval;
-        private float _dashInterval;
         private float _normalSkillEffectTime;
         private float _specialSkillEffectTime;
         private SkillActionType _normalSkillActionType;
@@ -98,9 +99,7 @@ namespace UI.Common
                 _specialSkillButtonGameObject.SetActive(false);
             }
 
-            _dashInterval = GameCommonData.DashInterval;
-            _dashIntervalImage.fillAmount = 0f;
-            _dashButton.interactable = false;
+            ResetDashIntervalImage();
         }
 
         public void UpdateSkillUI()
@@ -150,10 +149,10 @@ namespace UI.Common
 
         private void DashIntervalTimer()
         {
-            if (_timerDashSkill < _dashInterval)
+            if (_timerDashSkill < DashInterval)
             {
                 _timerDashSkill += Time.deltaTime;
-                var rate = _timerDashSkill / _dashInterval;
+                var rate = _timerDashSkill / DashInterval;
                 _dashIntervalImage.fillAmount = rate;
                 if (rate >= MaxFillAmount)
                 {
@@ -231,11 +230,18 @@ namespace UI.Common
                 .Select(_ => Unit.Default);
         }
 
+        public IObservable<Unit> OnClickCharacterChangeButtonAsObservable()
+        {
+            return _characterChangeButton
+                .OnClickAsObservable()
+                .Select(_ => Unit.Default);
+        }
+
         public IObservable<Unit> OnClickDashButtonAsObservable()
         {
             return _dashButton
                 .OnClickAsObservable()
-                .ThrottleFirst(TimeSpan.FromSeconds(_dashInterval))
+                .ThrottleFirst(TimeSpan.FromSeconds(DashInterval))
                 .Do(_ => ResetDashIntervalImage())
                 .Select(_ => Unit.Default);
         }

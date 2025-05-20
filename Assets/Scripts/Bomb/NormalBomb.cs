@@ -81,8 +81,7 @@ namespace Bomb
                 colliderObj.layer = LayerMask.NameToLayer(GameCommonData.ExplosionLayer);
                 explosion._explosionMoveDirection = moveDirection;
                 explosion.damageAmount = damageAmount;
-                await UniTask.Delay(TimeSpan.FromSeconds(ExplosionMoveDuration / fireRange),
-                    cancellationToken: Cts.Token);
+                await UniTask.Delay(TimeSpan.FromSeconds(ExplosionMoveDuration / fireRange), cancellationToken: Cts.Token);
             }
         }
 

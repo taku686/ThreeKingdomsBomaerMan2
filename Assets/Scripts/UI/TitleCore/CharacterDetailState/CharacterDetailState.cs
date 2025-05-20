@@ -288,11 +288,11 @@ namespace UI.Title
                 if (prevState >= 0)
                 {
                     _StateMachine.Dispatch(prevState);
-                    _StateMachine._PreviousState = -1;
+                    _StateMachine._PreviousState = GameCommonData.InvalidNumber;
                 }
                 else
                 {
-                    _StateMachine.Dispatch((int)State.TeamEdit);
+                    _StateMachine.Dispatch((int)State.TeamEdit, (int)State.CharacterDetail);
                 }
             }
 
@@ -312,7 +312,6 @@ namespace UI.Title
                 var purchaseErrorView = _View._PurchaseErrorView;
                 if (coin < nextLevelData.NeedCoin)
                 {
-                    Debug.LogError("コイン足りない");
                     virtualCurrencyAddView.transform.localScale = Vector3.zero;
                     virtualCurrencyAddView.gameObject.SetActive(true);
                     await _uiAnimation.Open(virtualCurrencyAddView.transform, GameCommonData.OpenDuration);

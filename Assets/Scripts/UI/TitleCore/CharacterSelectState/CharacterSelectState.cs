@@ -85,7 +85,7 @@ namespace UI.Title
                         if (prevState >= 0)
                         {
                             _StateMachine.Dispatch(prevState);
-                            _StateMachine._PreviousState = -1;
+                            _StateMachine._PreviousState = GameCommonData.InvalidNumber;
                         }
                         else
                         {

@@ -37,11 +37,6 @@ namespace Manager.DataManager
             return CharacterDatum.Count;
         }
 
-        public CharacterData GetUserEquippedCharacterData()
-        {
-            return GetCharacterData(_userDataRepository.GetUserData().EquippedCharacterId);
-        }
-
         public int GetRandomCharacterId()
         {
             var keys = CharacterDatum.Keys.ToArray();

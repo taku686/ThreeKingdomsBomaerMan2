@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
@@ -7,6 +8,7 @@ using Player.Common;
 using Repository;
 using UI.Battle;
 using UniRx;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Manager.BattleManager
@@ -23,6 +25,8 @@ namespace Manager.BattleManager
             private InputViewModelUseCase _InputViewModelUseCase => Owner._inputViewModelUseCase;
             private AbnormalConditionSpriteRepository _AbnormalConditionSpriteRepository => Owner._abnormalConditionSpriteRepository;
             private PlayerStatusInfo _PlayerStatusInfo => Owner._playerStatusInfo;
+            private StatusInBattleViewModelUseCase _StatusInBattleViewModelUseCase => Owner._statusInBattleViewModelUseCase;
+
             private CancellationTokenSource _cts;
             private int _startTime;
             private int _rank;
@@ -44,15 +48,15 @@ namespace Manager.BattleManager
             {
                 _cts = new CancellationTokenSource();
                 _startTime = PhotonNetwork.ServerTimestamp;
-                InitializeView();
+                _View.UpdateTime(GameCommonData.BattleTime);
                 OnSubscribe();
                 Owner.SwitchUiObject(State.InBattle);
             }
 
-            private void InitializeView()
+            private void ApplyStatusInBattleViewModel(int playerKey)
             {
-                var viewModel = _InputViewModelUseCase.InAsTask();
-                _View.ApplyInputViewModel(viewModel);
+                var viewModel = _StatusInBattleViewModelUseCase.InAsTask(playerKey);
+                _View.ApplyStatusViewModel(viewModel);
             }
 
             private void OnSubscribe()
@@ -64,6 +68,15 @@ namespace Manager.BattleManager
                         _BattleResultDataRepository.SetRank(_rank);
                         PhotonNetwork.LeaveRoom();
                         _StateMachine.Dispatch((int)State.Result);
+                    })
+                    .AddTo(_cts.Token);
+
+                _PlayerCore._TeamMemberReactiveProperty
+                    .Subscribe(playerKey =>
+                    {
+                        var viewModel = _InputViewModelUseCase.InAsTask(playerKey);
+                        _View.ApplyInputViewModel(viewModel);
+                        ApplyStatusInBattleViewModel(playerKey);
                     })
                     .AddTo(_cts.Token);
 
@@ -109,6 +122,10 @@ namespace Manager.BattleManager
 
                 _View.OnClickBombButtonAsObservable()
                     .Subscribe(_ => { _PlayerCore._BombSkillSubject.OnNext(Unit.Default); })
+                    .AddTo(_cts.Token);
+
+                _View.OnClickCharacterChangeButtonAsObservable()
+                    .Subscribe(_ => { _PlayerCore.ChangeTeamMember(); })
                     .AddTo(_cts.Token);
 
 

@@ -9,8 +9,8 @@ namespace Player.Common
             protected override void Initialize()
             {
                 base.Initialize();
-                var index = _PhotonView.OwnerActorNr;
-                var weaponData = _PhotonNetworkManager.GetWeaponData(index);
+                var playerKey = Owner.GetPlayerKey();
+                var weaponData = _PhotonNetworkManager.GetWeaponData(playerKey);
                 var normalSkillData = weaponData.NormalSkillMasterData;
                 _ActiveSkillManager.ActivateSkill(normalSkillData);
                 if (normalSkillData._SkillActionTypeEnum == SkillActionType.None)

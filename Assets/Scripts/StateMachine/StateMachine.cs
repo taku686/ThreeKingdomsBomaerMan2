@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Common.Data;
 using Cysharp.Threading.Tasks;
 
 /// <summary>
@@ -235,7 +236,8 @@ public class StateMachine<TOwner>
     /// イベントを発行する
     /// </summary>
     /// <param name="eventId">イベントID</param>
-    public void Dispatch(int eventId, int prevEventId = -1)
+    /// <param name="prevEventId"></param>
+    public void Dispatch(int eventId, int prevEventId = GameCommonData.InvalidNumber)
     {
         State to;
         if (!_CurrentState.transitions.TryGetValue(eventId, out to))
@@ -247,7 +249,7 @@ public class StateMachine<TOwner>
             }
         }
 
-        if (prevEventId != -1)
+        if (prevEventId != GameCommonData.InvalidNumber)
         {
             _PreviousState = prevEventId;
         }

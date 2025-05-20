@@ -14,11 +14,13 @@ namespace UI.Title
     {
         public class BattleReadyState : StateMachine<TitleCore>.State
         {
+            private BattleReadyView _View => (BattleReadyView)Owner.GetView(State.BattleReady);
+            private PhotonNetworkManager _PhotonNetworkManager => Owner._photonNetworkManager;
+
             private readonly Dictionary<int, GameObject> _gridDictionary = new();
             private bool _isInitialize;
             private CancellationTokenSource _cts;
-            private BattleReadyView _View => (BattleReadyView)Owner.GetView(State.BattleReady);
-            private PhotonNetworkManager _PhotonNetworkManager => Owner._photonNetworkManager;
+
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -74,7 +76,7 @@ namespace UI.Title
             {
                 _PhotonNetworkManager._JoinedRoomSubject
                     .Subscribe(OnJoinedRoom)
-                    .AddTo(_cts.Token);
+                    .AddTo(Owner.GetCancellationTokenOnDestroy());
                 _PhotonNetworkManager._LeftRoomSubject
                     .Subscribe(OnLeftRoom)
                     .AddTo(_cts.Token);
@@ -94,11 +96,17 @@ namespace UI.Title
 
             private void OnJoinedRoom(Photon.Realtime.Player[] players)
             {
+                if (!_PhotonNetworkManager._isTitle)
+                {
+                    return;
+                }
+
                 GridAllDestroy();
                 foreach (var player in players)
                 {
                     var index = player.ActorNumber;
-                    CreateGrid(index);
+                    var playerKey = PhotonNetworkManager.GetPlayerKey(index, 0);
+                    CreateGrid(playerKey);
                 }
 
                 if (_isInitialize)
@@ -111,13 +119,13 @@ namespace UI.Title
                 _isInitialize = true;
             }
 
-            private void CreateGrid(int index)
+            private void CreateGrid(int playerKey)
             {
-                var characterData = _PhotonNetworkManager.GetCharacterData(index);
-                var levelData = _PhotonNetworkManager.GetLevelMasterData(index);
+                var characterData = _PhotonNetworkManager.GetCharacterData(playerKey);
+                var levelData = _PhotonNetworkManager.GetLevelMasterData(playerKey);
                 var grid = Instantiate(_View._BattleReadyGrid.gameObject, _View._GridParent);
                 var battleReadyGrid = grid.GetComponent<BattleReadyGrid>();
-                _gridDictionary[index] = grid;
+                _gridDictionary[playerKey] = grid;
                 battleReadyGrid.characterImage.sprite = characterData.SelfPortraitSprite;
                 battleReadyGrid.backGroundImage.sprite = characterData.ColorSprite;
                 battleReadyGrid.nameText.text = characterData.Name;
@@ -141,7 +149,7 @@ namespace UI.Title
                 _View._BattleStartButton.interactable = PhotonNetwork.IsMasterClient;
             }
 
-            private void SceneTransition()
+            private static void SceneTransition()
             {
                 if
                 (

@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Threading;
+using Common.Data;
 using Cysharp.Threading.Tasks;
 using PUROPORO;
 using Repository;
@@ -49,10 +50,11 @@ namespace UI.Title
                     .Subscribe(_ =>
                     {
                         var prevState = _StateMachine._PreviousState;
-                        _StateMachine._PreviousState = -1;
+                        _StateMachine._PreviousState = GameCommonData.InvalidNumber;
                         if (prevState < 0)
                         {
                             Debug.LogError("Invalid previous state");
+                            _StateMachine.Dispatch((int)State.Main);
                         }
 
                         _StateMachine.Dispatch(prevState);

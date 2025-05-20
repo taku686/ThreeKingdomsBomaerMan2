@@ -54,6 +54,7 @@ namespace Player.Common
         public Subject<Unit> _SpecialSkillSubject { get; } = new();
         public Subject<Unit> _DashSkillSubject { get; } = new();
         public Subject<Unit> _BombSkillSubject { get; } = new();
+        public ReactiveProperty<int> _TeamMemberReactiveProperty { get; } = new();
 
 
         private enum PLayerState
@@ -96,9 +97,9 @@ namespace Player.Common
             _boxCollider = GetComponent<BoxCollider>();
             _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
             _playerMove.Initialize(_statusBuffSubject, _translateStatusInBattleUseCase._Speed);
-            var index = photonView.OwnerActorNr;
-            var weaponData = _photonNetworkManager.GetWeaponData(index);
-            var characterData = _photonNetworkManager.GetCharacterData(index);
+            _TeamMemberReactiveProperty.Value = PhotonNetworkManager.GetPlayerKey(photonView.InstantiationId, 0);
+            var weaponData = _photonNetworkManager.GetWeaponData(_TeamMemberReactiveProperty.Value);
+            var characterData = _photonNetworkManager.GetCharacterData(_TeamMemberReactiveProperty.Value);
             var characterId = characterData.Id;
             var statusSkillDatum = weaponData.StatusSkillMasterDatum;
             var normalSkillData = weaponData.NormalSkillMasterData;
@@ -240,6 +241,24 @@ namespace Player.Common
             _stateMachine.Dispatch((int)PLayerState.Dead);
         }
 
+        public void ChangeTeamMember()
+        {
+            var teamMemberIndex = _TeamMemberReactiveProperty.Value - photonView.InstantiationId * 10;
+            teamMemberIndex += 1;
+            if (teamMemberIndex >= GameCommonData.MaxTeamMember)
+            {
+                teamMemberIndex = 0;
+            }
+
+            var playerKey = PhotonNetworkManager.GetPlayerKey(photonView.InstantiationId, teamMemberIndex);
+            _TeamMemberReactiveProperty.Value = playerKey;
+        }
+        
+        private int GetPlayerKey()
+        {
+            return _TeamMemberReactiveProperty.Value;
+        }
+
         private void OnDestroy()
         {
             _translateStatusInBattleUseCase.Dispose();
@@ -249,6 +268,7 @@ namespace Player.Common
             _SpecialSkillSubject.Dispose();
             _DashSkillSubject.Dispose();
             _BombSkillSubject.Dispose();
+            _TeamMemberReactiveProperty.Dispose();
         }
     }
 }

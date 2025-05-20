@@ -177,6 +177,11 @@ namespace Repository
                     Vector3.zero,
                     quaternion.Euler(0, 0, 0)
                 );
+                var transformView = currentWeapon.GetComponent<PhotonTransformView>();
+                transformView.m_SynchronizeScale = true;
+                transformView.m_SynchronizePosition = true;
+                transformView.m_SynchronizeRotation = true;
+                transformView.m_UseLocal = true;
                 currentWeapon.transform.SetParent(weaponParent);
             }
             else

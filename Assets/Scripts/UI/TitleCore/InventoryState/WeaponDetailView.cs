@@ -172,6 +172,10 @@ namespace UI.Title
                 new[] { 316 },
                 new[] { (TransformEnum.Rotation, new Vector3(180, 0, -90)), (TransformEnum.Position, new Vector3(0, 0.15f, -0.47f)) }
             },
+            {
+                new[] { 165 },
+                new[] { (TransformEnum.Rotation, new Vector3(0, 90, 0)), (TransformEnum.Position, new Vector3(0, 0.19f, -0.47f)) }
+            },
         };
 
         private Dictionary<int[], (TransformEnum, Vector3)[]> _axeWeaponIdTransform = new()

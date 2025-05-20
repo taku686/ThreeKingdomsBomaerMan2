@@ -5,7 +5,7 @@ namespace Common.Data
 {
     public class UserData : IDisposable
     {
-        public int EquippedCharacterId;
+        //public int EquippedCharacterId;
         public string UserIconFileName;
         public int Level;
         public string Name;
@@ -42,7 +42,7 @@ namespace Common.Data
         public UserData Create()
         {
             var user = this;
-            user.EquippedCharacterId = 0;
+            //user.EquippedCharacterId = 0;
             user.Level = 1;
             user.Name = "";
             user.EntitledId = 0;

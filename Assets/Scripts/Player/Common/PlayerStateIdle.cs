@@ -21,6 +21,7 @@ namespace Player.Common
             private IObservable<Unit> _OnClickSpecialSkill => Owner._SpecialSkillSubject;
             private IObservable<Unit> _OnClickDash => Owner._DashSkillSubject;
             private IObservable<Unit> _OnClickBomb => Owner._BombSkillSubject;
+            private IObservable<int> _OnClickCharacterChange => Owner._TeamMemberReactiveProperty;
 
 
             private Transform _playerTransform;
@@ -32,7 +33,6 @@ namespace Player.Common
                 base.OnEnter(prevState);
                 InitializeCancellationToken();
                 InitialiseIdleState();
-                InitializeButton();
             }
 
             protected override void OnExit(State nextState)
@@ -60,7 +60,7 @@ namespace Player.Common
                 }
 
                 _playerTransform = Owner.transform;
-                
+
                 _OnClickNormalSkill
                     .Subscribe(_ => { OnClickNormalSkill(); })
                     .AddTo(Owner.GetCancellationTokenOnDestroy());
@@ -73,39 +73,40 @@ namespace Player.Common
                     .Subscribe(_ => { OnClickDash(); })
                     .AddTo(Owner.GetCancellationTokenOnDestroy());
 
+                _OnClickCharacterChange
+                    .Throttle(TimeSpan.FromSeconds(GameCommonData.CharacterChangeInterval))
+                    .Subscribe(_ => { })
+                    .AddTo(Owner.GetCancellationTokenOnDestroy());
+
+                _OnClickBomb
+                    .Where(_ => Owner._translateStatusInBattleUseCase.CanPutBomb())
+                    .Throttle(TimeSpan.FromSeconds(GameCommonData.InputBombInterval))
+                    .Subscribe(_ =>
+                    {
+                        var playerId = _PhotonView.ViewID;
+                        var explosionTime = PhotonNetwork.ServerTimestamp + GameCommonData.ThreeMilliSecondsBeforeExplosion;
+                        var damageAmount = Owner._translateStatusInBattleUseCase._Attack;
+                        var fireRange = Owner._translateStatusInBattleUseCase._FireRange;
+                        var boxCollider = Owner._boxCollider;
+                        Owner._putBomb.SetBomb
+                        (
+                            boxCollider,
+                            _PhotonView,
+                            _playerTransform,
+                            (int)BombType.Normal,
+                            damageAmount,
+                            fireRange,
+                            explosionTime,
+                            playerId
+                        );
+                    }).AddTo(Owner.GetCancellationTokenOnDestroy());
+
                 _isSetup = true;
             }
 
             private void InitializeCancellationToken()
             {
                 _cancellationTokenSource ??= new CancellationTokenSource();
-            }
-
-            private void InitializeButton()
-            {
-                _OnClickBomb
-                    .Where(_ => Owner._translateStatusInBattleUseCase.CanPutBomb())
-                    .Throttle(TimeSpan.FromSeconds(GameCommonData.InputBombInterval))
-                    .Subscribe(
-                        _ =>
-                        {
-                            var playerId = _PhotonView.ViewID;
-                            var explosionTime = PhotonNetwork.ServerTimestamp + GameCommonData.ThreeMilliSecondsBeforeExplosion;
-                            var damageAmount = Owner._translateStatusInBattleUseCase._Attack;
-                            var fireRange = Owner._translateStatusInBattleUseCase._FireRange;
-                            var boxCollider = Owner._boxCollider;
-                            Owner._putBomb.SetBomb
-                            (
-                                boxCollider,
-                                _PhotonView,
-                                _playerTransform,
-                                (int)BombType.Normal,
-                                damageAmount,
-                                fireRange,
-                                explosionTime,
-                                playerId
-                            );
-                        }).AddTo(_cancellationTokenSource.Token);
             }
 
             private void OnClickNormalSkill()

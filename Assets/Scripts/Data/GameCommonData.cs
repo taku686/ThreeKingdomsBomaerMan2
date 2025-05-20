@@ -8,6 +8,7 @@ namespace Common.Data
         public const int WeaponBuyPrice = 100;
         public const float TurnDuration = 0.3f;
         public const float InputBombInterval = 0.05f;
+        public const float CharacterChangeInterval = 0.05f;
         public const float DashInterval = 0.5f;
         public const string TitleID = "92AF5";
         public const string ChatGptApiKey = "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";
@@ -96,7 +97,7 @@ namespace Common.Data
         public const int NormalSkillReleaseLevel = 3;
         public const int SpecialSkillReleaseLevel = 5;
         public const int InvalidNumber = -9999;
-        public const int TeamMemberCount = 3;
+        public const int MaxTeamMember = 3;
 
         public static class Terms
         {

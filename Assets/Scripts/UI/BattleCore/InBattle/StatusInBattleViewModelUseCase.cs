@@ -1,29 +1,33 @@
 using System;
 using Common.Data;
+using Manager.NetworkManager;
 using Zenject;
 
 public class StatusInBattleViewModelUseCase : IDisposable
 {
     private readonly UserDataRepository _userDataRepository;
     private readonly ApplyStatusSkillUseCase _applyStatusSkillUseCase;
+    private readonly PhotonNetworkManager _photonNetworkManager;
 
     [Inject]
     public StatusInBattleViewModelUseCase
     (
         UserDataRepository userDataRepository,
-        ApplyStatusSkillUseCase applyStatusSkillUseCase
+        ApplyStatusSkillUseCase applyStatusSkillUseCase,
+        PhotonNetworkManager photonNetworkManager
     )
     {
         _userDataRepository = userDataRepository;
         _applyStatusSkillUseCase = applyStatusSkillUseCase;
+        _photonNetworkManager = photonNetworkManager;
     }
 
-    public StatusInBattleView.ViewModel InAsTask()
+    public StatusInBattleView.ViewModel InAsTask(int playerKey)
     {
         //todo 後でチームでの処理に修正する
-        var characterData = _userDataRepository.GetEquippedCharacterData();
+        var characterData = _photonNetworkManager.GetCharacterData(playerKey);
         var characterId = characterData.Id;
-        var weaponData = _userDataRepository.GetEquippedWeaponData(characterId);
+        var weaponData = _photonNetworkManager.GetWeaponData(playerKey);
         var statusSkillDatum = weaponData.StatusSkillMasterDatum;
         var hp = 0;
         var attack = 0;

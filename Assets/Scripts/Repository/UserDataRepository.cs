@@ -88,15 +88,10 @@ namespace Common.Data
             return GameCommonData.GetLoginBonusStatus(status);
         }
 
-        public int GetEquippedCharacterId()
-        {
-            return _characterMasterDataRepository.GetCharacterData(_userData.EquippedCharacterId).Id;
-        }
-
-        public CharacterData GetEquippedCharacterData()
+        /*public CharacterData GetEquippedCharacterData()
         {
             return _characterMasterDataRepository.GetCharacterData(_userData.EquippedCharacterId);
-        }
+        }*/
 
         public LevelMasterData GetCurrentLevelData(int characterId)
         {
@@ -339,6 +334,11 @@ namespace Common.Data
         public IReadOnlyDictionary<int, int> GetTeamMembers()
         {
             return _userData.TeamMembers;
+        }
+        
+        public int GetTeamMember(int index)
+        {
+            return _userData.TeamMembers.GetValueOrDefault(index, GameCommonData.InvalidNumber);
         }
 
         public void SetTeamMember(int characterId)
