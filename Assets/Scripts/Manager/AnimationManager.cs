@@ -1,50 +1,42 @@
 using System;
 using Common.Data;
 using UnityEngine;
-using Zenject;
 
 namespace Manager
 {
     public class AnimationManager : IDisposable
     {
-        private Animator animator;
-        private static readonly string MoveKey = "speedv";
+        private Animator _animator;
+        private const string MoveKey = "speedv";
 
-        public AnimationManager(Animator animator)
+        public void SetAnimator(Animator animator)
         {
-            this.animator = animator;
-        }
-
-        [Inject]
-        private void Initialize(Animator animator)
-        {
-            this.animator = animator;
+            _animator = animator;
         }
 
         public void Move(MoveDirection moveDirection)
         {
             var vec3Dir = DirectionToVector3(moveDirection);
             var speed = Mathf.Max(Mathf.Abs(vec3Dir.x), Mathf.Abs(vec3Dir.z));
-            animator.SetFloat(MoveKey, speed);
+            if (_animator == null)
+            {
+                return;
+            }
+
+            _animator.SetFloat(MoveKey, speed);
         }
 
-        private Vector3 DirectionToVector3(MoveDirection moveDirection)
+        private static Vector3 DirectionToVector3(MoveDirection moveDirection)
         {
-            switch (moveDirection)
+            return moveDirection switch
             {
-                case MoveDirection.Forward:
-                    return Vector3.forward;
-                case MoveDirection.Back:
-                    return Vector3.back;
-                case MoveDirection.Left:
-                    return Vector3.left;
-                case MoveDirection.Right:
-                    return Vector3.right;
-                case MoveDirection.None:
-                    return Vector3.zero;
-                default:
-                    return Vector3.zero;
-            }
+                MoveDirection.Forward => Vector3.forward,
+                MoveDirection.Back => Vector3.back,
+                MoveDirection.Left => Vector3.left,
+                MoveDirection.Right => Vector3.right,
+                MoveDirection.None => Vector3.zero,
+                _ => Vector3.zero
+            };
         }
 
         public void Dispose()

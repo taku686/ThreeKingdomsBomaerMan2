@@ -4,6 +4,7 @@ using Assets.Scripts.Common.Data;
 using Assets.Scripts.Common.PlayFab;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Data;
 using DG.Tweening;
 using Manager;
 using Manager.NetworkManager;
@@ -143,6 +144,7 @@ namespace UI.Title
             else
             {
                 _stateMachine.Start<LoginState>();
+                PhotonCustomTypes.Register();
                 _mainManager._isInitialize = true;
             }
 

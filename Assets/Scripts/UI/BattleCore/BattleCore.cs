@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Bomb;
 using Common.Data;
-using Cysharp.Threading.Tasks;
 using Manager.BattleManager.Camera;
 using Manager.BattleManager.Environment;
 using Manager.DataManager;
@@ -54,7 +53,6 @@ namespace Manager.BattleManager
         [SerializeField] private Transform playerUIParent;
         [SerializeField] private GameObject playerUI;
         [SerializeField] private EffectActivateUseCase effectActivator;
-
         private StateMachine<BattleCore> _stateMachine;
         private PlayerCore _playerCore;
         private readonly List<PlayerStatusUI> _playerStatusUiList = new();
@@ -81,20 +79,6 @@ namespace Manager.BattleManager
         {
             _stateMachine.Update();
         }
-
-        /*private void InitializeUi()
-        {
-            var inBattleView = _views.FirstOrDefault(view => view._State == State.InBattle) as InBattleView;
-            if (inBattleView == null)
-            {
-                Debug.LogError("InBattleView is null");
-                return;
-            }
-
-            inBattleView.UpdateTime(GameCommonData.BattleTime);
-            var viewModel = _statusInBattleViewModelUseCase.InAsTask();
-            inBattleView.ApplyStatusViewModel(viewModel);
-        }*/
 
         private void InitializeState()
         {

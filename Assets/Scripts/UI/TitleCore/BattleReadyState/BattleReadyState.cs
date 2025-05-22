@@ -77,6 +77,7 @@ namespace UI.Title
                 _PhotonNetworkManager._JoinedRoomSubject
                     .Subscribe(OnJoinedRoom)
                     .AddTo(Owner.GetCancellationTokenOnDestroy());
+                
                 _PhotonNetworkManager._LeftRoomSubject
                     .Subscribe(OnLeftRoom)
                     .AddTo(_cts.Token);

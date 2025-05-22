@@ -37,24 +37,29 @@ namespace Player.Common
         )
         {
             _cts = new CancellationTokenSource();
-            _blockingLayer = LayerMask.GetMask(GameCommonData.ObstacleLayer) |
-                             LayerMask.GetMask(GameCommonData.BombLayer);
+            _blockingLayer = LayerMask.GetMask(GameCommonData.ObstacleLayer) | LayerMask.GetMask(GameCommonData.BombLayer);
             _playerTransform = transform;
             _initRotation = _playerTransform.rotation.eulerAngles;
             _moveSpeed = moveSpeed;
-            if (!gameObject.TryGetComponent(typeof(Animator), out Component animator))
-            {
-                Debug.LogError("Animatorがついてない！！");
-                return;
-            }
+            _animator = GetComponentInChildren<Animator>();
+            _animationManager = new AnimationManager();
+            _animationManager.SetAnimator(_animator);
+            SetupCharacterController();
+            Subscribe(speedBuffObservable);
+        }
 
-            _animator = (Animator)animator;
-            _animationManager = new AnimationManager(_animator);
+        public void SetAnimator(GameObject playerObj)
+        {
+            _animator = playerObj.GetComponentInChildren<Animator>();
+            _animationManager.SetAnimator(_animator);
+        }
+
+        private void Subscribe(IObservable<(StatusType statusType, float value)> speedBuffObservable)
+        {
             speedBuffObservable
                 .Where(tuple => tuple.statusType == StatusType.Speed)
                 .Subscribe(tuple => { _moveSpeed = tuple.value; })
-                .AddTo(this);
-            SetupCharacterController();
+                .AddTo(gameObject);
         }
 
         private void SetupCharacterController()

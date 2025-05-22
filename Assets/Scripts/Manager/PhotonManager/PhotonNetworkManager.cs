@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Common.Data;
 using ExitGames.Client.Photon;
 using Manager.DataManager;
@@ -29,6 +28,8 @@ namespace Manager.NetworkManager
         private readonly Dictionary<int, CharacterData> _currentRoomCharacterDatum = new();
         private readonly Dictionary<int, WeaponMasterData> _currentRoomWeaponDatum = new();
         private readonly Dictionary<int, LevelMasterData> _currentRoomLevelDatum = new();
+        private readonly Dictionary<int, int> _playerCoreInfos = new();
+        private readonly Dictionary<int, int> _weaponViewInfos = new();
         private int _playerCount;
         public bool _isTitle;
 
@@ -68,7 +69,8 @@ namespace Manager.NetworkManager
                 IsOpen = true,
                 IsVisible = true,
                 EmptyRoomTtl = 0,
-                PublishUserId = true
+                PublishUserId = true,
+                CleanupCacheOnLeave = true,
             }, TypedLobby.Default);
         }
 
@@ -78,12 +80,14 @@ namespace Manager.NetworkManager
             SetTeamMembersInfo(actorNumber);
         }
 
-        public void SetTeamMembersInfo(int playerIndex)
+        public void SetTeamMembersInfo(int playerIndex, int playerObjInstantiationId = 0, int weaponInstantiationId = 0)
         {
             var characterIds = _userDataRepository.GetTeamMembers();
             var characterDic = new Dictionary<int, int>();
             var weaponDic = new Dictionary<int, int>();
             var levelDic = new Dictionary<int, int>();
+            var playerCoreInfo = new KeyValuePair<int, int>(playerIndex, playerObjInstantiationId);
+            var weaponViewInfo = new KeyValuePair<int, int>(playerIndex, weaponInstantiationId);
             foreach (var (teamNumber, characterId) in characterIds)
             {
                 var playerKey = GetPlayerKey(playerIndex, teamNumber);
@@ -97,6 +101,8 @@ namespace Manager.NetworkManager
             PhotonNetwork.LocalPlayer.SetCharacterId(characterDic);
             PhotonNetwork.LocalPlayer.SetCharacterLevel(levelDic);
             PhotonNetwork.LocalPlayer.SetWeaponId(weaponDic);
+            PhotonNetwork.LocalPlayer.SetPlayerCoreInfo(playerCoreInfo);
+            PhotonNetwork.LocalPlayer.SetWeaponViewInfo(weaponViewInfo);
             PhotonNetwork.LocalPlayer.SetPlayerIndex(playerIndex); //indexを参照にデータを取得するため最後に値を入れないといけない
         }
 
@@ -175,6 +181,8 @@ namespace Manager.NetworkManager
                 var characterDic = player.GetCharacterId();
                 var weaponDic = player.GetWeaponId();
                 var levelDic = player.GetCharacterLevel();
+                var playerCoreInfo = player.GetPlayerCoreInfo();
+                var weaponViewInfo = player.GetWeaponViewInfo();
                 foreach (var character in characterDic)
                 {
                     _currentRoomCharacterDatum[character.Key] = _characterMasterDataRepository.GetCharacterData(character.Value);
@@ -189,6 +197,9 @@ namespace Manager.NetworkManager
                 {
                     _currentRoomLevelDatum[level.Key] = _levelMasterDataRepository.GetLevelMasterData(level.Value);
                 }
+
+                _playerCoreInfos[playerCoreInfo.Key] = playerCoreInfo.Value;
+                _weaponViewInfos[weaponViewInfo.Key] = weaponViewInfo.Value;
             }
 
             _joinedRoomSubject.OnNext(players);
@@ -207,6 +218,16 @@ namespace Manager.NetworkManager
         public LevelMasterData GetLevelMasterData(int playerId)
         {
             return _currentRoomLevelDatum.GetValueOrDefault(playerId);
+        }
+
+        public int GetPlayerCoreInfo(int playerCoreInstantiationId)
+        {
+            return _playerCoreInfos.GetValueOrDefault(playerCoreInstantiationId);
+        }
+
+        public int GetWeaponViewInfo(int playerCoreInstantiationId)
+        {
+            return _weaponViewInfos.GetValueOrDefault(playerCoreInstantiationId);
         }
 
         private void CheckPlayerGenerateComplete(int count)

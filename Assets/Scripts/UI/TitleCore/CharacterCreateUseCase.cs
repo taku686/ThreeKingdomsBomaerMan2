@@ -89,18 +89,14 @@ namespace Repository
                 createParent
             );
             _characterObjectRepository.SetCharacterObject(characterObject, index);
-            CreateWeapon(characterObject, weaponData);
+            var weaponObj = InstantiateWeapon(characterObject, weaponData);
+            FixedWeaponTransform(characterObject, weaponObj, weaponData);
             ChangeAnimatorController(characterObject, weaponData.WeaponType);
         }
 
-        public void CreateWeapon
-        (
-            GameObject characterObject,
-            WeaponMasterData weaponData,
-            bool isPhotonObject = false
-        )
+        private void DestroyWeaponObj(GameObject playerObj)
         {
-            var weaponObjects = characterObject.GetComponentsInChildren<WeaponObject>();
+            var weaponObjects = playerObj.GetComponentsInChildren<WeaponObject>();
             foreach (var weaponObject in weaponObjects)
             {
                 if (weaponObject.gameObject == null)
@@ -108,51 +104,15 @@ namespace Repository
                     continue;
                 }
 
-                Object.Destroy(weaponObject.gameObject);
-            }
-
-            var weaponRightParent = characterObject.GetComponentInChildren<WeaponRightParentObject>();
-            var weaponLeftParent = characterObject.GetComponentInChildren<WeaponLeftParentObject>();
-            if (IsLeftHand(weaponData.WeaponType))
-            {
-                if (WeaponType.Bow == weaponData.WeaponType)
+                var isPhotonObject = weaponObject.gameObject.GetComponent<PhotonView>() != null;
+                if (isPhotonObject)
                 {
-                    weaponLeftParent.transform.localPosition = _bowPosition;
-                    weaponLeftParent.transform.localEulerAngles = _bowLeftRotation;
-                }
-                else if (WeaponType.Knife == weaponData.WeaponType)
-                {
-                    weaponLeftParent.transform.localPosition = _knifePosition;
-                    weaponLeftParent.transform.localEulerAngles = _knifeLeftRotation;
-                }
-                else if (WeaponType.Crow == weaponData.WeaponType)
-                {
-                    weaponLeftParent.transform.localPosition = _othersPosition;
-                    weaponLeftParent.transform.localEulerAngles = _crowLeftRotation;
+                    PhotonNetwork.Destroy(weaponObject.gameObject);
                 }
                 else
                 {
-                    weaponLeftParent.transform.localPosition = _othersPosition;
-                    weaponLeftParent.transform.localEulerAngles = _othersLeftRotation;
+                    Object.Destroy(weaponObject.gameObject);
                 }
-
-                InstantiateWeapon(weaponData, weaponLeftParent.transform, true, isPhotonObject);
-            }
-
-            if (IsRightHand(weaponData.WeaponType))
-            {
-                if (WeaponType.Bow == weaponData.WeaponType)
-                {
-                    weaponRightParent.transform.localPosition = _bowPosition;
-                    weaponRightParent.transform.localEulerAngles = _bowRightRotation;
-                }
-                else
-                {
-                    weaponRightParent.transform.localPosition = _othersPosition;
-                    weaponRightParent.transform.localEulerAngles = _othersRightRotation;
-                }
-
-                InstantiateWeapon(weaponData, weaponRightParent.transform, isPhotonObject);
             }
         }
 
@@ -166,34 +126,105 @@ namespace Repository
             return weaponType is WeaponType.Bow or WeaponType.Knife or WeaponType.Shield or WeaponType.Crow;
         }
 
-        private void InstantiateWeapon(WeaponMasterData weaponMasterData, Transform weaponParent, bool isLeftHand = false, bool isPhotonObject = false)
+        public GameObject InstantiateWeapon
+        (
+            GameObject playerObj,
+            WeaponMasterData weaponMasterData,
+            bool isPhotonObject = false,
+            bool isCpu = false
+        )
         {
             GameObject currentWeapon;
+            DestroyWeaponObj(playerObj);
             if (isPhotonObject)
             {
-                currentWeapon = PhotonNetwork.Instantiate
-                (
-                    GameCommonData.WeaponPrefabPath + weaponMasterData.WeaponObject.name,
-                    Vector3.zero,
-                    quaternion.Euler(0, 0, 0)
-                );
-                var transformView = currentWeapon.GetComponent<PhotonTransformView>();
-                transformView.m_SynchronizeScale = true;
-                transformView.m_SynchronizePosition = true;
-                transformView.m_SynchronizeRotation = true;
-                transformView.m_UseLocal = true;
-                currentWeapon.transform.SetParent(weaponParent);
+                if (isCpu)
+                {
+                    currentWeapon = PhotonNetwork.InstantiateRoomObject
+                    (
+                        GameCommonData.WeaponPrefabPath + weaponMasterData.Id,
+                        Vector3.zero,
+                        quaternion.Euler(0, 0, 0)
+                    );
+                }
+                else
+                {
+                    currentWeapon = PhotonNetwork.Instantiate
+                    (
+                        GameCommonData.WeaponPrefabPath + weaponMasterData.Id,
+                        Vector3.zero,
+                        quaternion.Euler(0, 0, 0)
+                    );
+                }
             }
             else
             {
-                currentWeapon = Object.Instantiate(weaponMasterData.WeaponObject, weaponParent.transform);
+                currentWeapon = Object.Instantiate(weaponMasterData.WeaponObject);
+                FixedWeaponTransform(playerObj, currentWeapon, weaponMasterData);
             }
+
+            return currentWeapon;
+        }
+
+        public void FixedWeaponTransform
+        (
+            GameObject characterObject,
+            GameObject currentWeapon,
+            WeaponMasterData weaponMasterData
+        )
+        {
+            var weaponRightParent = characterObject.GetComponentInChildren<WeaponRightParentObject>();
+            var weaponLeftParent = characterObject.GetComponentInChildren<WeaponLeftParentObject>();
+            var isLeftHand = false;
+            if (IsLeftHand(weaponMasterData.WeaponType))
+            {
+                if (WeaponType.Bow == weaponMasterData.WeaponType)
+                {
+                    weaponLeftParent.transform.localPosition = _bowPosition;
+                    weaponLeftParent.transform.localEulerAngles = _bowLeftRotation;
+                }
+                else if (WeaponType.Knife == weaponMasterData.WeaponType)
+                {
+                    weaponLeftParent.transform.localPosition = _knifePosition;
+                    weaponLeftParent.transform.localEulerAngles = _knifeLeftRotation;
+                }
+                else if (WeaponType.Crow == weaponMasterData.WeaponType)
+                {
+                    weaponLeftParent.transform.localPosition = _othersPosition;
+                    weaponLeftParent.transform.localEulerAngles = _crowLeftRotation;
+                }
+                else
+                {
+                    weaponLeftParent.transform.localPosition = _othersPosition;
+                    weaponLeftParent.transform.localEulerAngles = _othersLeftRotation;
+                }
+
+                isLeftHand = true;
+                currentWeapon.transform.SetParent(weaponLeftParent.transform);
+            }
+
+            if (IsRightHand(weaponMasterData.WeaponType))
+            {
+                if (WeaponType.Bow == weaponMasterData.WeaponType)
+                {
+                    weaponRightParent.transform.localPosition = _bowPosition;
+                    weaponRightParent.transform.localEulerAngles = _bowRightRotation;
+                }
+                else
+                {
+                    weaponRightParent.transform.localPosition = _othersPosition;
+                    weaponRightParent.transform.localEulerAngles = _othersRightRotation;
+                }
+
+                isLeftHand = false;
+                currentWeapon.transform.SetParent(weaponRightParent.transform);
+            }
+
 
             currentWeapon.transform.localPosition = Vector3.zero;
             currentWeapon.transform.localEulerAngles = weaponMasterData.Id >= 146 ? new Vector3(-90, 0, 0) : new Vector3(0, 0, 0);
             currentWeapon.transform.localScale *= weaponMasterData.Scale;
             FixWeaponAngle(currentWeapon, weaponMasterData, isLeftHand);
-            currentWeapon.tag = GameCommonData.WeaponTag;
             currentWeapon.AddComponent<WeaponObject>();
             var psUpdater = currentWeapon.GetComponentInChildren<PSMeshRendererUpdater>();
             if (psUpdater == null)
@@ -398,31 +429,6 @@ namespace Repository
             }
 
             animator.runtimeAnimatorController = _animatorControllerRepository.GetAnimatorController(weaponType);
-        }
-
-        private void CreateWeaponEffect(CharacterData createCharacterData, GameObject characterObject)
-        {
-            var currentCharacterLevel = _userDataRepository.GetCurrentLevelData(createCharacterData.Id);
-            if (currentCharacterLevel.Level < GameCommonData.MaxCharacterLevel)
-            {
-                return;
-            }
-
-            var weaponObjects = characterObject.GetComponentsInChildren<WeaponObject>();
-            foreach (var weapon in weaponObjects)
-            {
-                var effectObj = Object.Instantiate(createCharacterData.WeaponEffectObj, weapon.transform);
-                var particleSystems = effectObj.GetComponentsInChildren<ParticleSystem>();
-                foreach (var system in particleSystems)
-                {
-                    var systemMain = system.main;
-                    systemMain.startColor = GameCommonData.GetWeaponColor(createCharacterData.Id);
-                }
-
-                var effect = effectObj.GetComponentInChildren<PSMeshRendererUpdater>();
-                effect.Color = GameCommonData.GetWeaponColor(createCharacterData.Id);
-                effect.UpdateMeshEffect(weapon.gameObject);
-            }
         }
 
         public void Dispose()

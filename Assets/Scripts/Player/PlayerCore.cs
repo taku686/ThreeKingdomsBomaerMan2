@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 using Manager.BattleManager;
 using Manager.NetworkManager;
 using Photon.Pun;
+using Repository;
 using Skill;
 using UniRx;
 using UniRx.Triggers;
@@ -29,6 +30,8 @@ namespace Player.Common
 
         private TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
         private SkillActivationConditionsUseCase _skillActivationConditionsUseCase;
+        private PlayerGeneratorUseCase _playerGeneratorUseCase;
+        private CharacterCreateUseCase _characterCreateUseCase;
 
         private PlayerMove _playerMove;
         private PutBomb _putBomb;
@@ -74,6 +77,8 @@ namespace Player.Common
             ActiveSkillManager activeSkillManager,
             PassiveSkillManager passiveSkillManager,
             SkillActivationConditionsUseCase skillActivationConditionsUseCase,
+            PlayerGeneratorUseCase playerGeneratorUseCase,
+            CharacterCreateUseCase characterCreateUseCase,
             string key
         )
         {
@@ -83,15 +88,18 @@ namespace Player.Common
             _activeSkillManager = activeSkillManager;
             _passiveSkillManager = passiveSkillManager;
             _skillActivationConditionsUseCase = skillActivationConditionsUseCase;
+            _playerGeneratorUseCase = playerGeneratorUseCase;
+            _characterCreateUseCase = characterCreateUseCase;
             InitializeComponent();
             InitializeState();
+            Subscribe();
         }
 
         private void InitializeComponent()
         {
             _targetScanner = gameObject.GetComponent<TargetScanner>()._targetScanner;
             _putBomb = GetComponent<PutBomb>();
-            _animator = GetComponent<Animator>();
+            _animator = GetComponentInChildren<Animator>();
             _playerMove = gameObject.AddComponent<PlayerMove>();
             _playerRenderer = GetComponentInChildren<Renderer>();
             _boxCollider = GetComponent<BoxCollider>();
@@ -139,6 +147,32 @@ namespace Player.Common
             _stateMachine.AddTransition<PlayerIdleState, PlayerNormalSkillState>((int)PLayerState.NormalSkill);
             _stateMachine.AddTransition<PlayerIdleState, PlayerSpecialSkillState>((int)PLayerState.SpecialSkill);
             _stateMachine.AddTransition<PlayerIdleState, PlayerStateDash>((int)PLayerState.Dash);
+        }
+
+        private void Subscribe()
+        {
+            _TeamMemberReactiveProperty
+                .Skip(1)
+                .Subscribe(playerKey =>
+                {
+                    var characterData = _photonNetworkManager.GetCharacterData(playerKey);
+                    var weaponData = _photonNetworkManager.GetWeaponData(playerKey);
+                    DestroyWeaponObj(gameObject);
+                    _playerGeneratorUseCase.DestroyPlayerObj();
+                    var playerObj = _playerGeneratorUseCase.InstantiatePlayerObj(characterData, transform, false);
+                    var weaponObj = _characterCreateUseCase.InstantiateWeapon(playerObj, weaponData, true);
+                    _characterCreateUseCase.FixedWeaponTransform(playerObj, weaponObj, weaponData);
+                })
+                .AddTo(gameObject);
+        }
+
+        private void DestroyWeaponObj(GameObject playerObj)
+        {
+            var weapons = playerObj.GetComponentsInChildren<WeaponObject>();
+            foreach (var weapon in weapons)
+            {
+                PhotonNetwork.Destroy(weapon.gameObject);
+            }
         }
 
         private void Update()
@@ -226,8 +260,8 @@ namespace Player.Common
 
         private void ActivatePassiveSkillOnDamage()
         {
-            var index = photonView.OwnerActorNr;
-            var weaponData = _photonNetworkManager.GetWeaponData(index);
+            var playerKey = _TeamMemberReactiveProperty.Value;
+            var weaponData = _photonNetworkManager.GetWeaponData(playerKey);
             var normalSkillData = weaponData.NormalSkillMasterData;
             var specialSkillData = weaponData.SpecialSkillMasterData;
             _skillActivationConditionsUseCase.OnNextDamageSubject(normalSkillData);
@@ -253,7 +287,7 @@ namespace Player.Common
             var playerKey = PhotonNetworkManager.GetPlayerKey(photonView.InstantiationId, teamMemberIndex);
             _TeamMemberReactiveProperty.Value = playerKey;
         }
-        
+
         private int GetPlayerKey()
         {
             return _TeamMemberReactiveProperty.Value;
