@@ -24,7 +24,7 @@ namespace Player.Common
 
             protected override void OnUpdate()
             {
-                _PlayerMove.Dodge();
+                _PlayerMove.Dash();
             }
 
             private void PlayBackAnimation(int hashKey, string key)

@@ -1,4 +1,5 @@
-﻿using Player.Common;
+﻿using Photon.Pun;
+using Player.Common;
 using UniRx.Toolkit;
 using UnityEngine;
 
@@ -40,8 +41,13 @@ namespace Bomb
 
         protected override void OnBeforeRent(BombBase instance)
         {
-            _translateStatusInBattleUseCase.IncrementBombCount();
             base.OnBeforeRent(instance);
+            if (!PhotonNetwork.LocalPlayer.IsLocal)
+            {
+                return;
+            }
+
+            _translateStatusInBattleUseCase.IncrementBombCount();
         }
 
         protected override void OnBeforeReturn(BombBase instance)
@@ -56,8 +62,15 @@ namespace Bomb
                 _mapManager.RemoveMap(position.x, position.z - i);
             }
 
-            _translateStatusInBattleUseCase.DecrementBombCount();
             base.OnBeforeReturn(instance);
+
+
+            if (!PhotonNetwork.LocalPlayer.IsLocal)
+            {
+                return;
+            }
+
+            _translateStatusInBattleUseCase.DecrementBombCount();
         }
 
         private void AddCollider(GameObject bomb)

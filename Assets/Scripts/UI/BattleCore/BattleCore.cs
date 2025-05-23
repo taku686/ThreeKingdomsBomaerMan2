@@ -13,6 +13,7 @@ using Skill;
 using UI.Battle;
 using UI.BattleCore;
 using UnityEngine;
+using UseCase.Battle;
 using Zenject;
 
 namespace Manager.BattleManager
@@ -35,6 +36,8 @@ namespace Manager.BattleManager
         [Inject] private CharacterCreateUseCase _characterCreateUseCase;
         [Inject] private InputViewModelUseCase _inputViewModelUseCase;
         [Inject] private SkillActivationConditionsUseCase _skillActivationConditionsUseCase;
+        [Inject] private SetupAnimatorUseCase _setupAnimatorUseCase;
+        [Inject] private TranslateStatusInBattleUseCase.Factory _translateStatusInBattleUseCaseFactory;
 
         //Manager
         [Inject] private PhotonNetworkManager _photonNetworkManager;

@@ -19,9 +19,9 @@ namespace Common.Installer
         [SerializeField] private GameObject _photonNetworkGameObject;
         [SerializeField] private GameObject _mainManagerGameObject;
         [SerializeField] private GameObject _characterTypeDataGameObject;
-        [SerializeField] private GameObject _animatorControllerRepositoryGameObject;
         [SerializeField] private GameObject _skillEffectRepositoryGameObject;
         [SerializeField] private GameObject _abnormalConditionSpriteRepositoryGameObject;
+        [SerializeField] private GameObject _resourcesObjectRepositoryGameObject;
 
         public override void InstallBindings()
         {
@@ -45,8 +45,8 @@ namespace Common.Installer
             Container.Bind<MainManager>().FromComponentsInNewPrefab(_mainManagerGameObject).AsSingle();
             Container.Bind<CharacterTypeSpriteManager>().FromComponentInNewPrefab(_characterTypeDataGameObject).AsSingle();
             Container.Bind<AbnormalConditionSpriteRepository>().FromComponentInNewPrefab(_abnormalConditionSpriteRepositoryGameObject).AsSingle();
-            Container.Bind<AnimatorControllerRepository>().FromComponentInNewPrefab(_animatorControllerRepositoryGameObject).AsSingle();
             Container.Bind<SkillEffectRepository>().FromComponentInNewPrefab(_skillEffectRepositoryGameObject).AsSingle();
+            Container.Bind<ResourcesObjectRepository>().FromComponentInNewPrefab(_resourcesObjectRepositoryGameObject).AsSingle();
         }
     }
 }

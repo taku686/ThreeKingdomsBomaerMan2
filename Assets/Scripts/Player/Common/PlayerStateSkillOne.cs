@@ -11,12 +11,8 @@ namespace Player.Common
                 base.Initialize();
                 var playerKey = Owner.GetPlayerKey();
                 var weaponData = _PhotonNetworkManager.GetWeaponData(playerKey);
-                var normalSkillData = weaponData.NormalSkillMasterData;
-                _ActiveSkillManager.ActivateSkill(normalSkillData);
-                if (normalSkillData._SkillActionTypeEnum == SkillActionType.None)
-                {
-                    _StateMachine.Dispatch((int)PLayerState.Idle);
-                }
+                _SkillMasterData = weaponData.NormalSkillMasterData;
+                _ActiveSkillManager.ActivateSkill(_SkillMasterData);
             }
         }
     }

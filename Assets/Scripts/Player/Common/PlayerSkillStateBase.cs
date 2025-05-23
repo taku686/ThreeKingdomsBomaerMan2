@@ -1,7 +1,6 @@
 ﻿using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.NetworkManager;
-using Photon.Pun;
 using Skill;
 using UniRx;
 using UniRx.Triggers;
@@ -17,13 +16,22 @@ namespace Player.Common
             private DC.Scanner.TargetScanner _TargetScanner => Owner._targetScanner;
             protected ActiveSkillManager _ActiveSkillManager => Owner._activeSkillManager;
             private ObservableStateMachineTrigger _ObservableStateMachineTrigger => Owner._observableStateMachineTrigger;
-            protected PhotonView _PhotonView => Owner.photonView;
             protected PhotonNetworkManager _PhotonNetworkManager => Owner._photonNetworkManager;
-            protected StateMachine<PlayerCore> _StateMachine => Owner._stateMachine;
+            private StateMachine<PlayerCore> _StateMachine => Owner._stateMachine;
+
+            protected SkillMasterData _SkillMasterData;
 
             protected override void OnEnter(State prevState)
             {
                 Initialize();
+            }
+
+            protected override void OnUpdate()
+            {
+                if (_SkillMasterData._SkillActionTypeEnum == SkillActionType.None)
+                {
+                    _StateMachine.Dispatch((int)PLayerState.Idle);
+                }
             }
 
             protected virtual void Initialize()

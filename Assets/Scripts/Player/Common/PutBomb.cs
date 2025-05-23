@@ -12,10 +12,20 @@ namespace Player.Common
         private const float RayDistance = 1f;
         private const float ModifiedValue = 2f;
 
-        public void Initialize(BombProvider bombProvider, TranslateStatusInBattleUseCase translateStatusInBattleUseCase, MapManager mapManager)
+        public void Initialize(BombProvider bombProvider, MapManager mapManager, TranslateStatusInBattleUseCase translateStatusInBattleUseCase)
         {
-            _mapManager = mapManager;
             _bombProvider = bombProvider;
+            _mapManager = mapManager;
+            SetupBombProvider(translateStatusInBattleUseCase);
+        }
+
+        public void SetupBombProvider(TranslateStatusInBattleUseCase translateStatusInBattleUseCase)
+        {
+            if (_bombProvider == null)
+            {
+                return;
+            }
+
             _bombProvider.Initialize(translateStatusInBattleUseCase);
         }
 
@@ -56,7 +66,7 @@ namespace Player.Common
             }
 
             var bomb = _bombProvider.GetBomb(bombType, damageAmount, fireRange, explosionTime, playerId);
-            bomb.transform.position = playerPos;
+            bomb.transform.position = new Vector3(playerPos.x, 0f, playerPos.z);
         }
 
         private Vector3 CalculatePlayerPos(Vector3 playerPos)

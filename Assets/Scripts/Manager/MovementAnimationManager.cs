@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Manager
 {
-    public class AnimationManager : IDisposable
+    public class MovementAnimationManager : IDisposable
     {
         private Animator _animator;
         private const string MoveKey = "speedv";

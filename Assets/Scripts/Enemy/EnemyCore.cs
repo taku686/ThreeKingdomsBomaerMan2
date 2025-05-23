@@ -69,7 +69,7 @@ namespace Enemy
         private void SetupPutBomb()
         {
             _putBomb = gameObject.AddComponent<PutBomb>();
-            _putBomb.Initialize(bombProvider, _translateStatusInBattleUseCase, mapManager);
+            //_putBomb.Initialize(bombProvider, _translateStatusInBattleUseCase, mapManager);
         }
 
         private void InitializeState()

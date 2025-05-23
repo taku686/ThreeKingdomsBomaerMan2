@@ -11,8 +11,8 @@ namespace Manager.NetworkManager
         public const string SkillDataKey = "Ski";
         public const string PlayerIndexKey = "Index";
         public const string PlayerGenerateKey = "Gen";
-        private const string PlayerCoreInfoKey = "Core";
-        private const string WeaponViewInfoKey = "WView";
+        public const string PlayerCoreInfoKey = "Core";
+        public const string WeaponCoreInfoKey = "WCore";
         private static readonly Hashtable PropsToSet = new();
 
 
@@ -46,9 +46,9 @@ namespace Manager.NetworkManager
             return (KeyValuePair<int, int>)player.CustomProperties[PlayerCoreInfoKey];
         }
 
-        public static KeyValuePair<int, int> GetWeaponViewInfo(this Photon.Realtime.Player player)
+        public static KeyValuePair<int, int> GetWeaponCoreInfo(this Photon.Realtime.Player player)
         {
-            return (KeyValuePair<int, int>)player.CustomProperties[WeaponViewInfoKey];
+            return (KeyValuePair<int, int>)player.CustomProperties[WeaponCoreInfoKey];
         }
 
         public static void SetCharacterId(this Photon.Realtime.Player player, Dictionary<int, int> characterId)
@@ -100,9 +100,9 @@ namespace Manager.NetworkManager
             PropsToSet.Clear();
         }
 
-        public static void SetWeaponViewInfo(this Photon.Realtime.Player player, KeyValuePair<int, int> weaponViewInfo)
+        public static void SetWeaponCoreInfo(this Photon.Realtime.Player player, KeyValuePair<int, int> weaponViewInfo)
         {
-            PropsToSet[WeaponViewInfoKey] = weaponViewInfo;
+            PropsToSet[WeaponCoreInfoKey] = weaponViewInfo;
             player.SetCustomProperties(PropsToSet);
             PropsToSet.Clear();
         }

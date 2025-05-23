@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Bomb;
 using Common.Data;
@@ -11,6 +12,7 @@ using Skill;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
+using UseCase.Battle;
 
 namespace Player.Common
 {
@@ -28,10 +30,12 @@ namespace Player.Common
         private ActiveSkillManager _activeSkillManager;
         private PassiveSkillManager _passiveSkillManager;
 
+        private TranslateStatusInBattleUseCase.Factory _translateStatusInBattleUseCaseFactory;
         private TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
         private SkillActivationConditionsUseCase _skillActivationConditionsUseCase;
         private PlayerGeneratorUseCase _playerGeneratorUseCase;
         private CharacterCreateUseCase _characterCreateUseCase;
+        private SetupAnimatorUseCase _setupAnimatorUseCase;
 
         private PlayerMove _playerMove;
         private PutBomb _putBomb;
@@ -72,24 +76,28 @@ namespace Player.Common
 
         public void Initialize
         (
-            TranslateStatusInBattleUseCase inBattleUseCase,
+            TranslateStatusInBattleUseCase.Factory translateStatusInBattleUseCaseFactory,
             PhotonNetworkManager networkManager,
             ActiveSkillManager activeSkillManager,
             PassiveSkillManager passiveSkillManager,
             SkillActivationConditionsUseCase skillActivationConditionsUseCase,
             PlayerGeneratorUseCase playerGeneratorUseCase,
             CharacterCreateUseCase characterCreateUseCase,
+            SetupAnimatorUseCase setupAnimatorUseCase,
+            PlayerMove playerMove,
             string key
         )
         {
             _hpKey = key;
-            _translateStatusInBattleUseCase = inBattleUseCase;
+            _translateStatusInBattleUseCaseFactory = translateStatusInBattleUseCaseFactory;
             _photonNetworkManager = networkManager;
             _activeSkillManager = activeSkillManager;
             _passiveSkillManager = passiveSkillManager;
             _skillActivationConditionsUseCase = skillActivationConditionsUseCase;
             _playerGeneratorUseCase = playerGeneratorUseCase;
             _characterCreateUseCase = characterCreateUseCase;
+            _setupAnimatorUseCase = setupAnimatorUseCase;
+            _playerMove = playerMove;
             InitializeComponent();
             InitializeState();
             Subscribe();
@@ -100,18 +108,25 @@ namespace Player.Common
             _targetScanner = gameObject.GetComponent<TargetScanner>()._targetScanner;
             _putBomb = GetComponent<PutBomb>();
             _animator = GetComponentInChildren<Animator>();
-            _playerMove = gameObject.AddComponent<PlayerMove>();
             _playerRenderer = GetComponentInChildren<Renderer>();
             _boxCollider = GetComponent<BoxCollider>();
-            _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
-            _playerMove.Initialize(_statusBuffSubject, _translateStatusInBattleUseCase._Speed);
             _TeamMemberReactiveProperty.Value = PhotonNetworkManager.GetPlayerKey(photonView.InstantiationId, 0);
-            var weaponData = _photonNetworkManager.GetWeaponData(_TeamMemberReactiveProperty.Value);
-            var characterData = _photonNetworkManager.GetCharacterData(_TeamMemberReactiveProperty.Value);
-            var characterId = characterData.Id;
-            var statusSkillDatum = weaponData.StatusSkillMasterDatum;
-            var normalSkillData = weaponData.NormalSkillMasterData;
-            var specialSkillData = weaponData.SpecialSkillMasterData;
+            SetupTranslateStatusInBattleUseCase();
+            _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
+            _playerMove.Initialize(_animator, _statusBuffSubject, _translateStatusInBattleUseCase._Speed);
+            _cancellationToken = gameObject.GetCancellationTokenOnDestroy();
+        }
+
+        private void InitializeSkillManager
+        (
+            WeaponMasterData weaponMasterData,
+            int characterId
+        )
+        {
+            var normalSkillData = weaponMasterData.NormalSkillMasterData;
+            var specialSkillData = weaponMasterData.SpecialSkillMasterData;
+            var statusSkillDatum = weaponMasterData.StatusSkillMasterDatum;
+
             _activeSkillManager.Initialize
             (
                 _targetScanner,
@@ -124,6 +139,7 @@ namespace Player.Common
                 _translateStatusInBattleUseCase,
                 CalculateHp
             );
+
             _passiveSkillManager.Initialize
             (
                 normalSkillData,
@@ -135,7 +151,6 @@ namespace Player.Common
                 characterId,
                 _translateStatusInBattleUseCase
             );
-            _cancellationToken = gameObject.GetCancellationTokenOnDestroy();
         }
 
         private void InitializeState()
@@ -153,20 +168,53 @@ namespace Player.Common
         {
             _TeamMemberReactiveProperty
                 .Skip(1)
-                .Subscribe(playerKey =>
-                {
-                    var characterData = _photonNetworkManager.GetCharacterData(playerKey);
-                    var weaponData = _photonNetworkManager.GetWeaponData(playerKey);
-                    DestroyWeaponObj(gameObject);
-                    _playerGeneratorUseCase.DestroyPlayerObj();
-                    var playerObj = _playerGeneratorUseCase.InstantiatePlayerObj(characterData, transform, false);
-                    var weaponObj = _characterCreateUseCase.InstantiateWeapon(playerObj, weaponData, true);
-                    _characterCreateUseCase.FixedWeaponTransform(playerObj, weaponObj, weaponData);
-                })
+                .Subscribe(SetupOnChangeCharacter)
                 .AddTo(gameObject);
         }
 
-        private void DestroyWeaponObj(GameObject playerObj)
+        private void SetupOnChangeCharacter(int playerKey)
+        {
+            var characterData = _photonNetworkManager.GetCharacterData(playerKey);
+            var weaponData = _photonNetworkManager.GetWeaponData(playerKey);
+            DestroyWeaponObj(gameObject);
+            _playerGeneratorUseCase.DestroyPlayerObj();
+            var playerObj = _playerGeneratorUseCase.InstantiatePlayerObj(characterData, transform, false);
+            var weaponObj = _characterCreateUseCase.InstantiateWeapon(playerObj, weaponData, true);
+            _characterCreateUseCase.FixedWeaponTransform(playerObj, weaponObj, weaponData);
+            _animator = gameObject.GetComponentInChildren<Animator>();
+            _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
+            SetupTranslateStatusInBattleUseCase(playerKey);
+            var fixedSpeed = _translateStatusInBattleUseCase._Speed;
+            _playerMove.ChangeCharacter(_animator, fixedSpeed);
+            _putBomb.SetupBombProvider(_translateStatusInBattleUseCase);
+
+            //キャラクターを変更したことを全プレイヤーに通知する
+            var playerObjPhotonView = playerObj.GetComponent<PhotonView>();
+            var weaponObjPhotonView = weaponObj.GetComponent<PhotonView>();
+            var playerCoreInfo = new KeyValuePair<int, int>(photonView.InstantiationId, playerObjPhotonView.InstantiationId);
+            var weaponCoreInfo = new KeyValuePair<int, int>(photonView.InstantiationId, weaponObjPhotonView.InstantiationId);
+            PhotonNetwork.LocalPlayer.SetPlayerCoreInfo(playerCoreInfo);
+            PhotonNetwork.LocalPlayer.SetWeaponCoreInfo(weaponCoreInfo);
+            PhotonNetwork.LocalPlayer.SetPlayerIndex(photonView.InstantiationId);
+        }
+
+        private void SetupTranslateStatusInBattleUseCase(int playerKey = GameCommonData.InvalidNumber)
+        {
+            if (playerKey == GameCommonData.InvalidNumber)
+            {
+                playerKey = _TeamMemberReactiveProperty.Value;
+            }
+
+            var weaponData = _photonNetworkManager.GetWeaponData(playerKey);
+            var characterData = _photonNetworkManager.GetCharacterData(playerKey);
+            var levelData = _photonNetworkManager.GetLevelMasterData(playerKey);
+            _translateStatusInBattleUseCase = _translateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
+            _translateStatusInBattleUseCase.InitializeStatus();
+            InitializeSkillManager(weaponData, characterData.Id);
+            _setupAnimatorUseCase.SetAnimatorController(gameObject, weaponData.WeaponType, _animator);
+        }
+
+        private static void DestroyWeaponObj(GameObject playerObj)
         {
             var weapons = playerObj.GetComponentsInChildren<WeaponObject>();
             foreach (var weapon in weapons)

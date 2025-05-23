@@ -4,7 +4,6 @@ using Manager;
 using Manager.NetworkManager;
 using Manager.PlayFabManager;
 using Manager.ResourceManager;
-using PlayFab.MultiplayerModels;
 using Repository;
 using UI.Common;
 using UI.Title;
@@ -21,6 +20,7 @@ namespace Common.Installer
         [SerializeField] private Transform characterGenerateParent;
         [SerializeField] private GameObject _skyBoxManager;
         [SerializeField] private GameObject _statusSpriteManager;
+        [SerializeField] private GameObject _animatorControllerRepositoryGameObject;
 
         public override void InstallBindings()
         {
@@ -40,6 +40,7 @@ namespace Common.Installer
             Container.Bind<StatusSpriteManager>().FromComponentOn(_statusSpriteManager).AsCached();
             Container.Bind<ResourceManager>().AsCached();
             Container.Bind<MissionSpriteDataRepository>().AsCached();
+            Container.Bind<AnimatorControllerRepository>().FromComponentInNewPrefab(_animatorControllerRepositoryGameObject).AsSingle();
 
 
             InstallCharacterSelect();

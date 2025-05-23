@@ -49,8 +49,8 @@ namespace Skill
         {
             _targetScanner = targetScanner;
             _playerTransform = playerTransform;
-            _animator = animator;
             var playerStatusInfo = playerTransform.GetComponent<PlayerStatusInfo>();
+            SetupAnimator(animator);
             _buffSkill.Initialize
             (
                 statusBuff,
@@ -66,6 +66,11 @@ namespace Skill
                 translateStatusInBattleUseCase,
                 playerStatusInfo
             );
+        }
+
+        public void SetupAnimator(Animator animator)
+        {
+            _animator = animator;
         }
 
         public void ActivateSkill(SkillMasterData skillMasterData)
@@ -108,13 +113,13 @@ namespace Skill
 
         private void SlashSkill(SkillMasterData skillMasterData)
         {
-            var normalSkillId = skillMasterData.Id;
-            var slash = _slashFactory.Create(normalSkillId, _targetScanner, _animator, _playerTransform, AbnormalCondition.None, null);
+            var skillId = skillMasterData.Id;
+            var slash = _slashFactory.Create(skillId, _targetScanner, _animator, _playerTransform, AbnormalCondition.None, null);
             foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
             {
                 if (abnormalCondition == AbnormalCondition.None)
                     continue;
-                slash = _slashFactory.Create(normalSkillId, _targetScanner, _animator, _playerTransform, abnormalCondition, slash);
+                slash = _slashFactory.Create(skillId, _targetScanner, _animator, _playerTransform, abnormalCondition, slash);
             }
 
             slash.Attack();

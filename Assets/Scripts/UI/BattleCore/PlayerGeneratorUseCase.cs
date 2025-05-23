@@ -91,7 +91,6 @@ namespace Manager.BattleManager
                 return;
             }
 
-            Debug.Log("Destroy PlayerObj");
             PhotonNetwork.Destroy(_playerObj);
             _playerObj = null;
         }

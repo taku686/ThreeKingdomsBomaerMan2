@@ -54,14 +54,14 @@ namespace UI.Title
 
             private async UniTask Initialize()
             {
-                SetupCancellationToken();
-                _playFabUserDataManager = Owner._playFabUserDataManager;
-                _playFabShopManager = Owner._playFabShopManager;
-                _playFabVirtualCurrencyManager = Owner._playFabVirtualCurrencyManager;
-                _uiAnimation = Owner._uiAnimation;
-                _characterSelectRepository = Owner._characterSelectRepository;
                 await Owner.SwitchUiObject(State.CharacterDetail, true, () =>
                 {
+                    SetupCancellationToken();
+                    _playFabUserDataManager = Owner._playFabUserDataManager;
+                    _playFabShopManager = Owner._playFabShopManager;
+                    _playFabVirtualCurrencyManager = Owner._playFabVirtualCurrencyManager;
+                    _uiAnimation = Owner._uiAnimation;
+                    _characterSelectRepository = Owner._characterSelectRepository;
                     _isTeamEdit = _StateMachine._PreviousState == (int)State.TeamEdit;
                     var userData = _UserDataRepository.GetUserData();
                     if (userData.Characters.Count <= 1)
@@ -260,26 +260,6 @@ namespace UI.Title
                 {
                     ChangeState();
                 }
-
-
-                /*var userData = _UserDataRepository.GetUserData();
-                 _UserDataRepository.SetTeamMember(characterId);
-                userData.EquippedCharacterId = characterId;
-                var characterId = _sortedCharacters[_candidateIndex].Id;
-                var result = await _playFabUserDataManager.TryUpdateUserDataAsync(userData);
-                if (result)
-                {
-                    var prevState = _StateMachine._PreviousState;
-                    if (prevState >= 0)
-                    {
-                        _StateMachine.Dispatch(prevState);
-                        _StateMachine._PreviousState = -1;
-                    }
-                    else
-                    {
-                        _StateMachine.Dispatch((int)State.Main);
-                    }
-                }*/
             }
 
             private void ChangeState()
@@ -412,67 +392,6 @@ namespace UI.Title
                 _cts.Dispose();
                 _cts = null;
             }
-
-            #region chatGpt
-
-/*private async UniTask OnClickSendQuestion()
-            {
-                View.QuestionView.sendButton.interactable = false;
-                CommonView.waitPopup.SetActive(true);
-                var question = View.QuestionView.questionField.text;
-                var commentTransform = View.QuestionView.commentObj.transform;
-                var commentText = View.QuestionView.commentText;
-                var errorText = CommonView.errorView.errorInfoText;
-                if (question.Length > GameCommonData.CharacterLimit)
-                {
-                    CommonView.waitPopup.SetActive(false);
-                    View.QuestionView.sendButton.interactable = true;
-                    await OpenErrorView();
-                    return;
-                }
-
-                var result = await playFabShopManager.TryPurchaseItem(GameCommonData.QuestionItemKey,
-                    GameCommonData.TicketKey, 1, errorText);
-                if (!result)
-                {
-                    CommonView.waitPopup.SetActive(false);
-                    View.QuestionView.sendButton.interactable = true;
-                    await OpenErrorView();
-                    return;
-                }
-
-                await chatGptManager.Request(question, commentText);
-                CommonView.waitPopup.SetActive(false);
-                await Owner.SetTicketText();
-                commentText.pageToDisplay = DefaultPage;
-                commentTransform.localScale = Vector3.zero;
-                commentTransform.gameObject.SetActive(true);
-                await uiAnimation.Open(commentTransform, GameCommonData.OpenDuration);
-                View.QuestionView.sendButton.interactable = true;
-            }*/
-
-            /*private void OnClickCloseComment()
-            {
-                var button = View.QuestionView.closeButton.gameObject;
-                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
-                    {
-                        var comment = View.QuestionView.commentObj.transform;
-                        await uiAnimation.Close(comment, GameCommonData.CloseDuration);
-                        comment.gameObject.SetActive(false);
-                    }
-                )).SetLink(button);
-
-                 private async UniTask OpenErrorView()
-            {
-                var errorView = CommonView.errorView;
-                var errorViewObj = CommonView.errorView.gameObject;
-                errorView.transform.localScale = Vector3.zero;
-                errorViewObj.SetActive(true);
-                await uiAnimation.Open(errorView.transform, GameCommonData.OpenDuration);
-            }
-            }*/
-
-            #endregion
         }
     }
 }

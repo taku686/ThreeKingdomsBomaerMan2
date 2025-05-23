@@ -96,7 +96,7 @@ public class BuffSkill : IDisposable
         foreach (var (statusType, (applyStatusSkill, applyBuffSkill)) in fixedBuffStatus)
         {
             var isBuff = applyBuffSkill > applyStatusSkill;
-            var translatedValue = _translateStatusInBattleUseCase.TranslateStatusValue(statusType, applyBuffSkill);
+            var translatedValue = _translateStatusInBattleUseCase.TranslateStatusValueForBattle(statusType, applyBuffSkill);
             _statusBuff.OnNext((statusType, translatedValue));
             _statusBuffUi.OnNext((statusType, value: applyBuffSkill, isBuff, !isBuff));
         }
@@ -105,7 +105,7 @@ public class BuffSkill : IDisposable
 
         foreach (var (statusType, (applyStatusSkill, _)) in fixedBuffStatus)
         {
-            var translatedPrefValue = _translateStatusInBattleUseCase.TranslateStatusValue(statusType, applyStatusSkill);
+            var translatedPrefValue = _translateStatusInBattleUseCase.TranslateStatusValueForBattle(statusType, applyStatusSkill);
             _statusBuff.OnNext((statusType, translatedPrefValue));
             _statusBuffUi.OnNext((statusType, applyStatusSkill, isBuff: false, isDebuff: false));
         }
@@ -159,7 +159,7 @@ public class BuffSkill : IDisposable
             foreach (var (statusType, (applyStatusSkill, applyBuffSkill)) in fixedBuffStatus)
             {
                 var isBuff = applyBuffSkill > applyStatusSkill;
-                var translatedValue = _translateStatusInBattleUseCase.TranslateStatusValue(statusType, applyBuffSkill);
+                var translatedValue = _translateStatusInBattleUseCase.TranslateStatusValueForBattle(statusType, applyBuffSkill);
                 _statusBuff.OnNext((statusType, translatedValue));
                 _statusBuffUi.OnNext((statusType, value: applyBuffSkill, isBuff, !isBuff));
             }
@@ -168,7 +168,7 @@ public class BuffSkill : IDisposable
         {
             foreach (var (statusType, (applyStatusSkill, _)) in buffStatuses)
             {
-                var translatedPrefValue = _translateStatusInBattleUseCase.TranslateStatusValue(statusType, applyStatusSkill);
+                var translatedPrefValue = _translateStatusInBattleUseCase.TranslateStatusValueForBattle(statusType, applyStatusSkill);
                 _statusBuff.OnNext((statusType, translatedPrefValue));
                 _statusBuffUi.OnNext((statusType, applyStatusSkill, isBuff: false, isDebuff: false));
             }

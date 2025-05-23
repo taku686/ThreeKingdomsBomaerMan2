@@ -223,6 +223,7 @@ namespace Repository
 
             currentWeapon.transform.localPosition = Vector3.zero;
             currentWeapon.transform.localEulerAngles = weaponMasterData.Id >= 146 ? new Vector3(-90, 0, 0) : new Vector3(0, 0, 0);
+            currentWeapon.transform.localScale = Vector3.one;
             currentWeapon.transform.localScale *= weaponMasterData.Scale;
             FixWeaponAngle(currentWeapon, weaponMasterData, isLeftHand);
             currentWeapon.AddComponent<WeaponObject>();

@@ -2,12 +2,14 @@ using AttributeAttack;
 using Bomb;
 using Common.Data;
 using Manager.BattleManager;
+using Player.Common;
 using Repository;
 using Skill;
 using Skill.Attack;
 using Skill.Heal;
 using UI.Common;
 using UnityEngine;
+using UseCase.Battle;
 using Zenject;
 using TargetScanner = DC.Scanner.TargetScanner;
 
@@ -18,6 +20,7 @@ namespace Common.Installer
         [SerializeField] private GameObject playerManagerGameObject;
         [SerializeField] private GameObject bombProviderGameObject;
         [SerializeField] private GameObject buttonsGameObject;
+        [SerializeField] private GameObject _animatorControllerRepositoryGameObject;
 
         public override void InstallBindings()
         {
@@ -30,6 +33,9 @@ namespace Common.Installer
             var dummyTransform = transform;
             Container.Bind<CharacterCreateUseCase>().AsCached().WithArguments(dummyTransform);
             Container.Bind<CharacterObjectRepository>().AsCached();
+            Container.Bind<SetupAnimatorUseCase>().AsCached();
+            Container.BindFactory<CharacterData, WeaponMasterData, LevelMasterData, TranslateStatusInBattleUseCase, TranslateStatusInBattleUseCase.Factory>().AsCached();
+            Container.Bind<AnimatorControllerRepository>().FromComponentInNewPrefab(_animatorControllerRepositoryGameObject).AsSingle();
 
             SkillInstaller();
             SlashSKillInstaller();
