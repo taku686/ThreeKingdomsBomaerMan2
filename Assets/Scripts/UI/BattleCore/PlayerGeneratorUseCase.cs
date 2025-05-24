@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Common.Data;
 using Photon.Pun;
+using Player.Common;
 using UnityEngine;
 
 namespace Manager.BattleManager
@@ -51,10 +52,16 @@ namespace Manager.BattleManager
             }
         }
 
-        public GameObject InstantiatePlayerObj(CharacterData characterData, Transform parent, bool isCpu)
+        public GameObject InstantiatePlayerObj
+        (
+            CharacterData characterData,
+            Transform parent,
+            int weaponId,
+            bool isCpu
+        )
         {
             var photonView = parent.GetComponent<PhotonView>();
-            var myCustomInitData = new object[] { photonView.InstantiationId };
+            var myCustomInitData = new object[] { photonView.InstantiationId, weaponId };
             if (!isCpu)
             {
                 _playerObj = PhotonNetwork.Instantiate
@@ -78,9 +85,6 @@ namespace Manager.BattleManager
                 );
             }
 
-            _playerObj.transform.SetParent(parent);
-            _playerObj.transform.localPosition = Vector3.zero;
-            _playerObj.transform.localEulerAngles = Vector3.zero;
             return _playerObj;
         }
 

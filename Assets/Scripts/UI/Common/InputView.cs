@@ -18,6 +18,7 @@ namespace UI.Common
         public Image normalSkillIntervalImage;
         public Image specialSkillIntervalImage;
         public Image _dashIntervalImage;
+        public Image _changeCharacterIntervalImage;
         public Image normalSkillImage;
         public Image specialSkillImage;
         [SerializeField] private GameObject _dashButtonGameObject;
@@ -31,9 +32,11 @@ namespace UI.Common
         private const float MaxFillAmount = 1;
         private const float MinFillAmount = 0;
         private const float DashInterval = GameCommonData.DashInterval;
+        private const float ChangeCharacterInterval = GameCommonData.CharacterChangeInterval;
         private float _timerNormalSkill;
         private float _timerSpecialSkill;
         private float _timerDashSkill;
+        private float _timerChangeCharacterSkill;
         private float _timerNormalSkillEffectTime;
         private float _timerSpecialSkillEffectTime;
         private float _normalSkillInterval;
@@ -56,8 +59,7 @@ namespace UI.Common
                 _normalSkillButtonGameObject.SetActive(isActiveNormalButton);
                 normalSkillIntervalImage.fillAmount = MaxFillAmount;
                 normalSkillImage.sprite = normalSkill.Sprite;
-                //_normalSkillInterval = normalSkill.Interval;
-                _normalSkillInterval = 1;
+                _normalSkillInterval = normalSkill.Interval;
                 _timerNormalSkill = 0;
                 _normalSkillEffectTime = normalSkill.EffectTime;
                 _timerNormalSkillEffectTime = normalSkill.EffectTime;
@@ -81,8 +83,7 @@ namespace UI.Common
                 _specialSkillButtonGameObject.SetActive(isActiveSpecialButton);
                 specialSkillIntervalImage.fillAmount = MaxFillAmount;
                 specialSkillImage.sprite = specialSkill.Sprite;
-                //_specialSkillInterval = specialSkill.Interval;
-                _specialSkillInterval = 1;
+                _specialSkillInterval = specialSkill.Interval;
                 _timerSpecialSkill = 0;
                 _specialSkillEffectTime = specialSkill.EffectTime;
                 _timerSpecialSkillEffectTime = specialSkill.EffectTime;
@@ -100,6 +101,7 @@ namespace UI.Common
             }
 
             ResetDashIntervalImage();
+            ResetChangeCharacterIntervalImage();
         }
 
         public void UpdateSkillUI()
@@ -107,6 +109,7 @@ namespace UI.Common
             NormalSkillIntervalTimer();
             SpecialSkillIntervalTimer();
             DashIntervalTimer();
+            ChangeCharacterIntervalTimer();
             NormalSkillEffectTimer();
             SpecialSkillEffectTimer();
         }
@@ -157,6 +160,20 @@ namespace UI.Common
                 if (rate >= MaxFillAmount)
                 {
                     _dashButton.interactable = true;
+                }
+            }
+        }
+
+        private void ChangeCharacterIntervalTimer()
+        {
+            if (_timerChangeCharacterSkill < ChangeCharacterInterval)
+            {
+                _timerChangeCharacterSkill += Time.deltaTime;
+                var rate = _timerChangeCharacterSkill / ChangeCharacterInterval;
+                _changeCharacterIntervalImage.fillAmount = rate;
+                if (rate >= MaxFillAmount)
+                {
+                    _characterChangeButton.interactable = true;
                 }
             }
         }
@@ -234,6 +251,8 @@ namespace UI.Common
         {
             return _characterChangeButton
                 .OnClickAsObservable()
+                .ThrottleFirst(TimeSpan.FromSeconds(ChangeCharacterInterval))
+                .Do(_ => ResetChangeCharacterIntervalImage())
                 .Select(_ => Unit.Default);
         }
 
@@ -291,6 +310,13 @@ namespace UI.Common
             _timerDashSkill = 0;
             _dashIntervalImage.fillAmount = MinFillAmount;
             _dashButton.interactable = false;
+        }
+
+        private void ResetChangeCharacterIntervalImage()
+        {
+            _timerChangeCharacterSkill = 0;
+            _changeCharacterIntervalImage.fillAmount = MinFillAmount;
+            _characterChangeButton.interactable = false;
         }
 
         #endregion

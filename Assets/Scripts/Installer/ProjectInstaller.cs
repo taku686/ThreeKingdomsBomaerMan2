@@ -9,6 +9,7 @@ using Skill;
 using UI.Common;
 using UI.Title;
 using UnityEngine;
+using UseCase.Battle;
 using Zenject;
 
 namespace Common.Installer

@@ -1,15 +1,21 @@
 ﻿using Assets.Scripts.Common.PlayFab;
+using AttributeAttack;
 using Common.Data;
+using DC.Scanner;
 using Manager;
 using Manager.NetworkManager;
 using Manager.PlayFabManager;
 using Manager.ResourceManager;
 using Repository;
+using Skill;
+using Skill.Attack;
+using Skill.Heal;
 using UI.Common;
 using UI.Title;
 using UI.TitleCore.UserInfoState;
 using UnityEngine;
 using UseCase;
+using UseCase.Battle;
 using Zenject;
 
 namespace Common.Installer
@@ -41,13 +47,18 @@ namespace Common.Installer
             Container.Bind<ResourceManager>().AsCached();
             Container.Bind<MissionSpriteDataRepository>().AsCached();
             Container.Bind<AnimatorControllerRepository>().FromComponentInNewPrefab(_animatorControllerRepositoryGameObject).AsSingle();
-
+            Container.Bind<SetupAnimatorUseCase>().AsCached();
+            Container.Bind<ActiveSkillManager>().AsCached();
+            Container.Bind<PassiveSkillManager>().AsCached();
 
             InstallCharacterSelect();
             InstallInventory();
             InstallCharacterDetail();
             InstallMain();
             InstallTeamEdit();
+            InstallSlashSKill();
+            BuffSkillInstaller();
+            HealSkillInstaller();
         }
 
         private void InstallCharacterSelect()
@@ -81,6 +92,39 @@ namespace Common.Installer
             Container.Bind<TeamEditViewModelUseCase>().AsCached();
             Container.Bind<TeamGridViewModelUseCase>().AsCached();
             Container.Bind<TeamStatusGridViewModelUseCase>().AsCached();
+        }
+
+        private void InstallSlashSKill()
+        {
+            Container.BindFactory<int, TargetScanner, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeSlashFactory.SlashFactory>().FromFactory<AttributeSlashFactory>();
+            Container.BindFactory<Animator, NormalSlash, NormalSlash.Factory>().AsCached();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, PoisonSlash, PoisonSlash.Factory>().AsCached();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, ParalysisSlash, ParalysisSlash.Factory>().AsCached();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, FrozenSlash, FrozenSlash.Factory>().AsCached();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, ConfusionSlash, ConfusionSlash.Factory>().AsCached();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, NockBackSlash, NockBackSlash.Factory>().AsCached();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, CharmSlash, CharmSlash.Factory>().AsCached();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, MiasmaSlash, MiasmaSlash.Factory>().AsCached();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, DarknessSlash, DarknessSlash.Factory>().AsCached();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, SealedSlash, SealedSlash.Factory>().AsCached();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, LifeStealSlash, LifeStealSlash.Factory>().AsCached();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, CurseSlash, CurseSlash.Factory>().AsCached();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, HellFireSlash, HellFireSlash.Factory>().AsCached();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, FearSlash, FearSlash.Factory>().AsCached();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, TimeStopSlash, TimeStopSlash.Factory>().AsCached();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, ApraxiaSlash, ApraxiaSlash.Factory>().AsCached();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, SoakingWetSlash, SoakingWetSlash.Factory>().AsCached();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, BurningSlash, BurningSlash.Factory>().AsCached();
+        }
+
+        private void BuffSkillInstaller()
+        {
+            Container.Bind<BuffSkill>().AsCached();
+        }
+
+        private void HealSkillInstaller()
+        {
+            Container.Bind<HealSkill>().AsCached();
         }
     }
 }

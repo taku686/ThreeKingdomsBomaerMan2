@@ -8,7 +8,7 @@ namespace Common.Data
         public const int WeaponBuyPrice = 100;
         public const float TurnDuration = 0.3f;
         public const float InputBombInterval = 0.05f;
-        public const float CharacterChangeInterval = 0.05f;
+        public const float CharacterChangeInterval = 5f;
         public const float DashInterval = 0.5f;
         public const string TitleID = "92AF5";
         public const string ChatGptApiKey = "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";

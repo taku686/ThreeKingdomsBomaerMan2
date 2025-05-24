@@ -2,7 +2,6 @@
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
-using Manager.NetworkManager;
 using Photon.Pun;
 using Player.Common;
 using Repository;
@@ -10,7 +9,6 @@ using UI.Battle;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
-using UseCase.Battle;
 
 namespace Manager.BattleManager
 {
@@ -27,9 +25,6 @@ namespace Manager.BattleManager
             private AbnormalConditionSpriteRepository _AbnormalConditionSpriteRepository => Owner._abnormalConditionSpriteRepository;
             private PlayerStatusInfo _PlayerStatusInfo => Owner._playerStatusInfo;
             private StatusInBattleViewModelUseCase _StatusInBattleViewModelUseCase => Owner._statusInBattleViewModelUseCase;
-            private PhotonNetworkManager _PhotonNetworkManager => Owner._photonNetworkManager;
-            private SetupAnimatorUseCase _SetupAnimatorUseCase => Owner._setupAnimatorUseCase;
-            private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
 
             private CancellationTokenSource _cts;
             private int _startTime;
@@ -68,7 +63,6 @@ namespace Manager.BattleManager
                 PlayerCoreSubscribe();
                 PlayerStatusInfoSubscribe();
                 ViewSubscribe();
-                PhotonNetworkManagerSubscribe();
 
                 Observable.EveryUpdate()
                     .Subscribe(_ =>
@@ -83,60 +77,6 @@ namespace Manager.BattleManager
                         _View.UpdateSkillUI();
                     })
                     .AddTo(_cts.Token);
-            }
-
-            private void PhotonNetworkManagerSubscribe()
-            {
-                _PhotonNetworkManager._ChangeCharacterSubject
-                    .Subscribe(tuple =>
-                    {
-                        var playerCoreInstantiationId = tuple.Item1;
-                        var characterInstantiationId = tuple.Item2;
-                        var playerKey = tuple.Item3;
-                        var weaponData = _PhotonNetworkManager.GetWeaponData(playerKey);
-                        var playerCore = GetPhotonViewOwnerObj(playerCoreInstantiationId);
-                        var playerObj = GetPhotonViewOwnerObj(characterInstantiationId);
-                        playerObj.transform.SetParent(playerCore.transform);
-                        playerObj.transform.localPosition = Vector3.zero;
-                        playerObj.transform.localEulerAngles = Vector3.zero;
-                        var animator = playerObj.GetComponent<Animator>();
-                        _SetupAnimatorUseCase.SetAnimatorController(playerObj, weaponData.WeaponType, animator);
-                    })
-                    .AddTo(_cts.Token);
-
-                _PhotonNetworkManager._ChangeWeaponSubject
-                    .Subscribe(tuple =>
-                    {
-                        var playerCoreInstantiationId = tuple.Item1;
-                        var weaponInstantiationId = tuple.Item2;
-                        var playerKey = tuple.Item3;
-                        var playerCore = GetPhotonViewOwnerObj(playerCoreInstantiationId);
-                        var weaponObj = GetPhotonViewOwnerObj(weaponInstantiationId, true);
-                        var weaponData = _PhotonNetworkManager.GetWeaponData(playerKey);
-                        _CharacterCreateUseCase.FixedWeaponTransform(playerCore, weaponObj, weaponData);
-                    })
-                    .AddTo(_cts.Token);
-            }
-
-            private static GameObject GetPhotonViewOwnerObj(int instantiationId, bool isWeapon = false)
-            {
-                var tag = isWeapon ? GameCommonData.WeaponTag : GameCommonData.PlayerTag;
-                var players = GameObject.FindGameObjectsWithTag(tag);
-                foreach (var player in players)
-                {
-                    var photonView = player.GetComponent<PhotonView>();
-                    if (photonView == null)
-                    {
-                        continue;
-                    }
-
-                    if (photonView.InstantiationId == instantiationId)
-                    {
-                        return player;
-                    }
-                }
-
-                return null;
             }
 
             private void PlayerCoreSubscribe()

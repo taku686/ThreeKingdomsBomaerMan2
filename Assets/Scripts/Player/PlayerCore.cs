@@ -178,23 +178,15 @@ namespace Player.Common
             var weaponData = _photonNetworkManager.GetWeaponData(playerKey);
             DestroyWeaponObj(gameObject);
             _playerGeneratorUseCase.DestroyPlayerObj();
-            var playerObj = _playerGeneratorUseCase.InstantiatePlayerObj(characterData, transform, false);
-            var weaponObj = _characterCreateUseCase.InstantiateWeapon(playerObj, weaponData, true);
-            _characterCreateUseCase.FixedWeaponTransform(playerObj, weaponObj, weaponData);
+            var playerObj = _playerGeneratorUseCase.InstantiatePlayerObj(characterData, transform, weaponData.Id, false);
+            var weaponObjs = _characterCreateUseCase.CreateWeapon(playerObj, weaponData, true);
+
             _animator = gameObject.GetComponentInChildren<Animator>();
             _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
             SetupTranslateStatusInBattleUseCase(playerKey);
             var fixedSpeed = _translateStatusInBattleUseCase._Speed;
             _playerMove.ChangeCharacter(_animator, fixedSpeed);
             _putBomb.SetupBombProvider(_translateStatusInBattleUseCase);
-
-            //キャラクターを変更したことを全プレイヤーに通知する
-            var playerObjPhotonView = playerObj.GetComponent<PhotonView>();
-            var weaponObjPhotonView = weaponObj.GetComponent<PhotonView>();
-            var playerCoreInfo = new KeyValuePair<int, int>(photonView.InstantiationId, playerObjPhotonView.InstantiationId);
-            var weaponCoreInfo = new KeyValuePair<int, int>(photonView.InstantiationId, weaponObjPhotonView.InstantiationId);
-            PhotonNetwork.LocalPlayer.SetPlayerCoreInfo(playerCoreInfo);
-            PhotonNetwork.LocalPlayer.SetWeaponCoreInfo(weaponCoreInfo);
             PhotonNetwork.LocalPlayer.SetPlayerIndex(photonView.InstantiationId);
         }
 
@@ -211,7 +203,6 @@ namespace Player.Common
             _translateStatusInBattleUseCase = _translateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
             _translateStatusInBattleUseCase.InitializeStatus();
             InitializeSkillManager(weaponData, characterData.Id);
-            _setupAnimatorUseCase.SetAnimatorController(gameObject, weaponData.WeaponType, _animator);
         }
 
         private static void DestroyWeaponObj(GameObject playerObj)
