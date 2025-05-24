@@ -11,8 +11,6 @@ namespace Manager.NetworkManager
         public const string SkillDataKey = "Ski";
         public const string PlayerIndexKey = "Index";
         public const string PlayerGenerateKey = "Gen";
-        public const string PlayerCoreInfoKey = "Core";
-        public const string WeaponCoreInfoKey = "WCore";
         private static readonly Hashtable PropsToSet = new();
 
 
@@ -39,16 +37,6 @@ namespace Manager.NetworkManager
         public static int GetPlayerIndex(this Photon.Realtime.Player player)
         {
             return player.CustomProperties[PlayerIndexKey] is int playerIndex ? playerIndex : -1;
-        }
-
-        public static KeyValuePair<int, int> GetPlayerCoreInfo(this Photon.Realtime.Player player)
-        {
-            return (KeyValuePair<int, int>)player.CustomProperties[PlayerCoreInfoKey];
-        }
-
-        public static KeyValuePair<int, int> GetWeaponCoreInfo(this Photon.Realtime.Player player)
-        {
-            return (KeyValuePair<int, int>)player.CustomProperties[WeaponCoreInfoKey];
         }
 
         public static void SetCharacterId(this Photon.Realtime.Player player, Dictionary<int, int> characterId)
@@ -89,20 +77,6 @@ namespace Manager.NetworkManager
         public static void SetPlayerGenerate(this Photon.Realtime.Player player, int playerGenerate)
         {
             PropsToSet[PlayerGenerateKey] = playerGenerate;
-            player.SetCustomProperties(PropsToSet);
-            PropsToSet.Clear();
-        }
-
-        public static void SetPlayerCoreInfo(this Photon.Realtime.Player player, KeyValuePair<int, int> playerCoreInfo)
-        {
-            PropsToSet[PlayerCoreInfoKey] = playerCoreInfo;
-            player.SetCustomProperties(PropsToSet);
-            PropsToSet.Clear();
-        }
-
-        public static void SetWeaponCoreInfo(this Photon.Realtime.Player player, KeyValuePair<int, int> weaponViewInfo)
-        {
-            PropsToSet[WeaponCoreInfoKey] = weaponViewInfo;
             player.SetCustomProperties(PropsToSet);
             PropsToSet.Clear();
         }

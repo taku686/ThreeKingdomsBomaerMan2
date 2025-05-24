@@ -86,19 +86,11 @@ namespace Manager.BattleManager
                 var characterData = _PhotonNetworkManager.GetCharacterData(playerKey);
                 var weaponData = _PhotonNetworkManager.GetWeaponData(playerKey);
                 var playerCore = _PlayerGeneratorUseCase.InstantiatePlayerCore(spawnPointIndex: index, false);
-                _photonView = playerCore.GetComponent<PhotonView>();
                 var playerObj = _PlayerGeneratorUseCase.InstantiatePlayerObj(characterData, playerCore.transform, weaponData.Id, false);
-                var weaponObjs = _CharacterCreateUseCase.CreateWeapon(playerObj, weaponData, true);
-                var playerObjPhotonView = playerObj.GetComponent<PhotonView>();
-                var weaponInstantiationIds = new List<int>();
-                foreach (var weaponObj in weaponObjs)
-                {
-                    var weaponObjPhotonView = weaponObj.GetComponent<PhotonView>();
-                    weaponInstantiationIds.Add(weaponObjPhotonView.InstantiationId);
-                }
-
+                _CharacterCreateUseCase.CreateWeapon(playerObj, weaponData, true);
+                _photonView = playerCore.GetComponent<PhotonView>();
                 var instantiationId = _photonView.InstantiationId;
-                _PhotonNetworkManager.SetTeamMembersInfo(instantiationId, playerObjPhotonView.InstantiationId, weaponInstantiationIds.ToArray());
+                _PhotonNetworkManager.SetTeamMembersInfo(instantiationId);
             }
 
             private void GenerateCPU()
@@ -112,36 +104,25 @@ namespace Manager.BattleManager
                 for (var i = 1; i <= generateAmount; i++)
                 {
                     //CPUのチームメンバーを3人してもいいが、現段階では1人に設定する
-                    var masterActorNr = PhotonNetwork.LocalPlayer.ActorNumber;
+                    var masterActorNr = PhotonNetwork.MasterClient.ActorNumber;
                     var cpuActorNr = PhotonNetwork.CurrentRoom.PlayerCount + i;
-                    var candidateCharacterId = _CharacterMasterDataRepository.GetRandomCharacterId();
-                    var candidateWeaponId = _WeaponMasterDataRepository.GetWeaponRandomWeaponId();
-                    var characterData = _CharacterMasterDataRepository.GetCharacterData(candidateCharacterId);
-                    var weaponData = _WeaponMasterDataRepository.GetWeaponData(candidateWeaponId);
-                    var cpuCore = _PlayerGeneratorUseCase.InstantiatePlayerCore(cpuActorNr, true);
-                    var cpuCorePhotonView = cpuCore.GetComponent<PhotonView>();
-                    var instantiationId = cpuCorePhotonView.InstantiationId;
+                    var characterId = _CharacterMasterDataRepository.GetRandomCharacterId();
+                    var weaponId = _WeaponMasterDataRepository.GetWeaponRandomWeaponId();
+                    var characterData = _CharacterMasterDataRepository.GetCharacterData(characterId);
+                    var weaponData = _WeaponMasterDataRepository.GetWeaponData(weaponId);
+                    var playerCore = _PlayerGeneratorUseCase.InstantiatePlayerCore(cpuActorNr, true);
+                    var photonView = playerCore.GetComponent<PhotonView>();
+                    var instantiationId = photonView.InstantiationId;
                     var playerKey = PhotonNetworkManager.GetPlayerKey(instantiationId, 0);
-                    var cpuObj = _PlayerGeneratorUseCase.InstantiatePlayerObj(characterData, cpuCore.transform, weaponData.Id, true);
-                    var cpuObjPhotonView = cpuObj.GetComponent<PhotonView>();
-                    var weaponObjs = _CharacterCreateUseCase.CreateWeapon(cpuObj, weaponData, true, true);
-                    foreach (var weaponObj in weaponObjs)
-                    {
-                        var weaponObjPhotonView = weaponObj.GetComponent<PhotonView>();
-                        var weaponInstantiationId = weaponObjPhotonView.InstantiationId;
-                        var weaponCoreInfo = new KeyValuePair<int, int>(instantiationId, weaponInstantiationId);
-                        PhotonNetwork.LocalPlayer.SetWeaponCoreInfo(weaponCoreInfo);
-                    }
-
-                    var characterDic = new Dictionary<int, int> { { playerKey, candidateCharacterId } };
-                    var weaponDic = new Dictionary<int, int> { { playerKey, candidateWeaponId } };
+                    var playerObj = _PlayerGeneratorUseCase.InstantiatePlayerObj(characterData, playerCore.transform, weaponData.Id, true);
+                    _CharacterCreateUseCase.CreateWeapon(playerObj, weaponData, true, true);
+                    var characterDic = new Dictionary<int, int> { { playerKey, characterId } };
+                    var weaponDic = new Dictionary<int, int> { { playerKey, weaponId } };
                     var levelDic = new Dictionary<int, int> { { playerKey, GameCommonData.MaxCharacterLevel } };
-                    var cpuCoreInfo = new KeyValuePair<int, int>(instantiationId, cpuObjPhotonView.InstantiationId);
 
                     PhotonNetwork.LocalPlayer.SetCharacterId(characterDic);
                     PhotonNetwork.LocalPlayer.SetWeaponId(weaponDic);
                     PhotonNetwork.LocalPlayer.SetCharacterLevel(levelDic);
-                    PhotonNetwork.LocalPlayer.SetPlayerCoreInfo(cpuCoreInfo);
                     PhotonNetwork.LocalPlayer.SetPlayerIndex(masterActorNr);
                 }
             }
@@ -180,11 +161,9 @@ namespace Manager.BattleManager
                 AddRigidbody(playerCore);
 
 
-                if (IsCpu(creatorNr))
-                {
-                    var enemyCore = playerCore.AddComponent<EnemyCore>();
-                    enemyCore.enabled = PhotonNetwork.IsMasterClient;
-                }
+                if (!IsCpu(creatorNr)) return;
+                var enemyCore = playerCore.AddComponent<EnemyCore>();
+                enemyCore.enabled = PhotonNetwork.IsMasterClient;
             }
 
             #region GetDatum

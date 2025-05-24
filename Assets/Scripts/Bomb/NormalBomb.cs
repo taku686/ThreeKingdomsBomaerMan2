@@ -81,19 +81,14 @@ namespace Bomb
                 colliderObj.layer = LayerMask.NameToLayer(GameCommonData.ExplosionLayer);
                 explosion._explosionMoveDirection = moveDirection;
                 explosion.damageAmount = damageAmount;
-                await UniTask.Delay(TimeSpan.FromSeconds(ExplosionMoveDuration / fireRange), cancellationToken: Cts.Token);
+                await UniTask.Delay(TimeSpan.FromSeconds(ExplosionMoveDuration / fireRange));
             }
         }
 
         private Vector3 CalculateGeneratePos(Vector3 startPos, Vector3 direction, int index)
         {
             var isX = direction.x != 0;
-            if (isX)
-            {
-                return new Vector3(startPos.x + direction.x * index, startPos.y, startPos.z);
-            }
-
-            return new Vector3(startPos.x, startPos.y, startPos.z + direction.z * index);
+            return isX ? new Vector3(startPos.x + direction.x * index, startPos.y, startPos.z) : new Vector3(startPos.x, startPos.y, startPos.z + direction.z * index);
         }
 
         private Vector3 CalculateEndPos(bool isHit, RaycastHit hit, Vector3 startPos, int fireRange, Vector3 dir)

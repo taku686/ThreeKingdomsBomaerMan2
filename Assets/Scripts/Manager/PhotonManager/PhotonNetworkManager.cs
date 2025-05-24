@@ -78,20 +78,13 @@ namespace Manager.NetworkManager
             var actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
             SetTeamMembersInfo(actorNumber);
         }
-
-        public void SetTeamMembersInfo(int playerIndex, int playerObjInstantiationId = 0, int[] weaponInstantiationIds = null)
+        
+        public void SetTeamMembersInfo(int playerIndex)
         {
             var characterIds = _userDataRepository.GetTeamMembers();
             var characterDic = new Dictionary<int, int>();
             var weaponDic = new Dictionary<int, int>();
             var levelDic = new Dictionary<int, int>();
-            var playerCoreInfo = new KeyValuePair<int, int>(playerIndex, playerObjInstantiationId);
-            weaponInstantiationIds ??= new int[1];
-            foreach (var weaponInstantiationId in weaponInstantiationIds)
-            {
-                var weaponViewInfo = new KeyValuePair<int, int>(playerIndex, weaponInstantiationId);
-                PhotonNetwork.LocalPlayer.SetWeaponCoreInfo(weaponViewInfo);
-            }
 
             foreach (var (teamNumber, characterId) in characterIds)
             {
@@ -106,7 +99,6 @@ namespace Manager.NetworkManager
             PhotonNetwork.LocalPlayer.SetCharacterId(characterDic);
             PhotonNetwork.LocalPlayer.SetCharacterLevel(levelDic);
             PhotonNetwork.LocalPlayer.SetWeaponId(weaponDic);
-            PhotonNetwork.LocalPlayer.SetPlayerCoreInfo(playerCoreInfo);
             PhotonNetwork.LocalPlayer.SetPlayerIndex(playerIndex); //indexを参照にデータを取得するため最後に値を入れないといけない
         }
 
