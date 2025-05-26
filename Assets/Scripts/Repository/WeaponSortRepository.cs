@@ -23,6 +23,8 @@ namespace Repository
             { SortType.Favorite, false },
             { SortType.BombCount, false },
             { SortType.Fire, false },
+            { SortType.Id, false },
+            { SortType.Name, false },
             { SortType.None, true },
         };
 
@@ -63,6 +65,7 @@ namespace Repository
             foreach (var sort in sortTypeDictionary)
             {
                 _sortTypeDictionary[sort.Key] = sort.Key == sortType;
+                
             }
         }
 
@@ -133,7 +136,7 @@ namespace Repository
         {
             return _filterTypeDictionary;
         }
-        
+
         public IReadOnlyDictionary<int, bool> GetRarityFilterTypeDictionary()
         {
             return _rarityFilterDictionary;
@@ -155,7 +158,9 @@ namespace Repository
             Set,
             Favorite,
             BombCount,
-            Fire
+            Fire,
+            Name,
+            Id
         }
 
         public void Dispose()

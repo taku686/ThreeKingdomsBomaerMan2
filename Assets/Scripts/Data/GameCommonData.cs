@@ -76,8 +76,6 @@ namespace Common.Data
         public const string CharacterPrefabPath = "Prefabs/Character/";
         public const string PlayerCorePath = "Prefabs/Character/PlayerCore";
         public const string StagePrefabPath = "Prefabs/Stage/";
-        public const string SkillSpritePath = "Sprites/Skill/";
-        public const string WeaponSpritePath = "Sprites/Weapon/";
         public const string WeaponPrefabPath = "Prefabs/Weapon/";
         public const string VirtualCurrencySpritePath = "Sprites/VirtualCurrency/";
         public const string RewardSpritePath = "Sprites/Reward/";
@@ -93,7 +91,7 @@ namespace Common.Data
         public const int MaxMissionCount = 20;
         public const int NetworkErrorCode = int.MaxValue;
         public const int BattleTime = 180;
-        public const int DefaultWeaponId = 71;
+        public const int DefaultWeaponId = 0;
         public const int NormalSkillReleaseLevel = 3;
         public const int SpecialSkillReleaseLevel = 5;
         public const int InvalidNumber = -9999;

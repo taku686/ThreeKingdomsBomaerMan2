@@ -17,7 +17,6 @@ namespace Common.Data
         public bool IsBothHands { get; set; }
         public int Rare { get; }
         public GameObject WeaponObject { get; }
-        public GameObject WeaponEffectObj { get; }
         public Sprite WeaponIcon { get; }
         public WeaponType WeaponType { get; }
         public int WeaponTypeInt { get; set; }
@@ -27,7 +26,6 @@ namespace Common.Data
             string name,
             int id,
             GameObject weaponObject,
-            GameObject weaponEffectObj,
             Sprite weaponIcon,
             WeaponType weaponType,
             SkillMasterData normalSkillMasterData,
@@ -41,7 +39,6 @@ namespace Common.Data
             Name = name;
             Id = id;
             WeaponObject = weaponObject;
-            WeaponEffectObj = weaponEffectObj;
             WeaponIcon = weaponIcon;
             WeaponType = weaponType;
             NormalSkillMasterData = normalSkillMasterData;

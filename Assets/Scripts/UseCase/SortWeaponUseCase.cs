@@ -46,16 +46,43 @@ namespace UseCase
                 .OrderBy(weapon => weapon.Key.WeaponType)
                 .ThenBy(weapon => weapon.Key.Rare)
                 .ThenBy(weapon => weapon.Key.Id);
-            var result = isAscending
-                ? sortDatum
-                    .OrderBy(weapon => WhichSortType(sortType, weapon))
-                    .ToDictionary(weapon => weapon.Key, weapon => weapon.Value)
-                : sortDatum
-                    .OrderByDescending(weapon => WhichSortType(sortType, weapon))
-                    .ToDictionary(weapon => weapon.Key, weapon => weapon.Value);
+
+            Dictionary<WeaponMasterData, int> result;
+
+            if (isAscending)
+            {
+                if (sortType == WeaponSortRepository.SortType.Name)
+                {
+                    result = sortDatum
+                        .OrderBy(weapon => WhichSortNameType(sortType, weapon))
+                        .ToDictionary(weapon => weapon.Key, weapon => weapon.Value);
+                }
+                else
+                {
+                    result = sortDatum
+                        .OrderBy(weapon => WhichSortType(sortType, weapon))
+                        .ToDictionary(weapon => weapon.Key, weapon => weapon.Value);
+                }
+            }
+            else
+            {
+                if (sortType == WeaponSortRepository.SortType.Name)
+                {
+                    result = sortDatum
+                        .OrderByDescending(weapon => WhichSortNameType(sortType, weapon))
+                        .ToDictionary(weapon => weapon.Key, weapon => weapon.Value);
+                }
+                else
+                {
+                    result = sortDatum
+                        .OrderByDescending(weapon => WhichSortType(sortType, weapon))
+                        .ToDictionary(weapon => weapon.Key, weapon => weapon.Value);
+                }
+            }
 
             return result;
         }
+
 
         private static float WhichSortType(WeaponSortRepository.SortType sortType, KeyValuePair<WeaponMasterData, int> weapon)
         {
@@ -72,6 +99,20 @@ namespace UseCase
                 WeaponSortRepository.SortType.BombCount => GetStatus(weapon.Key.StatusSkillMasterDatum, StatusType.BombLimit),
                 WeaponSortRepository.SortType.Fire => GetStatus(weapon.Key.StatusSkillMasterDatum, StatusType.FireRange),
                 WeaponSortRepository.SortType.None => weapon.Key.Rare,
+                WeaponSortRepository.SortType.Skill => weapon.Key.Rare,
+                WeaponSortRepository.SortType.Slot => weapon.Key.Rare,
+                WeaponSortRepository.SortType.Set => weapon.Key.Rare,
+                WeaponSortRepository.SortType.Favorite => weapon.Key.Rare,
+                WeaponSortRepository.SortType.Id => weapon.Key.Id,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+
+        private static string WhichSortNameType(WeaponSortRepository.SortType sortType, KeyValuePair<WeaponMasterData, int> weapon)
+        {
+            return sortType switch
+            {
+                WeaponSortRepository.SortType.Name => weapon.Key.Name,
                 _ => throw new ArgumentOutOfRangeException()
             };
         }

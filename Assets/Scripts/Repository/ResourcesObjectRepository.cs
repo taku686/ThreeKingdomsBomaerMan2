@@ -9,23 +9,34 @@ namespace Repository
     public class ResourcesObjectRepository : SerializedMonoBehaviour
     {
         [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Id", ValueLabel = "Prefab")]
-        private Dictionary<int, GameObject> _characterPrefab = new();
+        private Dictionary<int, GameObject> _characterPrefab;
 
         [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Id", ValueLabel = "Prefab")]
-        private Dictionary<int, GameObject> _weaponPrefab = new();
+        private Dictionary<int, GameObject> _weaponPrefab;
 
         [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Id", ValueLabel = "Prefab")]
-        private Dictionary<int, Sprite> _characterIcon = new();
+        private Dictionary<int, Sprite> _characterIcon;
 
         [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Id", ValueLabel = "Prefab")]
-        private Dictionary<CharacterColor, Sprite> _characterColor = new();
+        private Dictionary<CharacterColor, Sprite> _characterColor;
 
-        [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Id", ValueLabel = "Prefab")] [SerializeField]
-        private Dictionary<int, Sprite> _weaponIcon = new();
+        [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Id", ValueLabel = "Prefab")]
+        private Dictionary<int, Sprite> _weaponIcon;
 
-        [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Id", ValueLabel = "Prefab")] [SerializeField]
-        private Dictionary<int, Sprite> _skillIcon = new();
+        [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Id", ValueLabel = "Prefab")]
+        private Dictionary<int, Sprite> _skillIcon;
 
+        [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Id", ValueLabel = "Prefab")]
+        private Dictionary<string, GameObject> _weaponPrefabByName;
+
+        [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Id", ValueLabel = "Prefab")]
+        private Dictionary<string, Sprite> _weaponSpriteByName;
+
+        public void SetWeaponData(int weaponId)
+        {
+            _weaponPrefab[weaponId].name = $"Weapon_{weaponId}";
+            _weaponIcon[weaponId].name = $"WeaponIcon_{weaponId}";
+        }
 
         public GameObject GetCharacterPrefab(int index)
         {
@@ -81,7 +92,7 @@ namespace Repository
 
             return icon;
         }
-        
+
         public Sprite GetCharacterColor(CharacterColor index)
         {
             if (!_characterColor.TryGetValue(index, value: out var color))

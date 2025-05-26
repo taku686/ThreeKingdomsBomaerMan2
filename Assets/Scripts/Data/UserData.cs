@@ -42,7 +42,6 @@ namespace Common.Data
         public UserData Create()
         {
             var user = this;
-            //user.EquippedCharacterId = 0;
             user.Level = 1;
             user.Name = "";
             user.EntitledId = 0;

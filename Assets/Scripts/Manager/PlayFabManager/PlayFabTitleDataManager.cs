@@ -176,13 +176,12 @@ namespace Manager.PlayFabManager
                 var scale = weaponData.Scale;
                 var isBothHands = weaponData.IsBothHands;
                 var rare = weaponData.Rare;
+                _resourcesObjectRepository.SetWeaponData(id);
                 var newWeaponData = new WeaponMasterData
                 (
                     name,
                     id,
                     weaponObject,
-                    weaponEffectObj:
-                    null,
                     weaponIcon,
                     weaponType,
                     normalSkillData,
@@ -335,6 +334,14 @@ namespace Manager.PlayFabManager
                 _abnormalConditionMasterDataRepository.AddAbnormalConditionMasterData(missionData);
             }
         }
+
+        /*private async UniTask LoadResources(int id, string name)
+        {
+            var prefab = await Resources.LoadAsync<GameObject>(GameCommonData.WeaponPrefabPath + id);
+            _resourcesObjectRepository.SetWeapon(name, prefab as GameObject);
+            var icon = await Resources.LoadAsync<Sprite>(GameCommonData.WeaponSpritePath + id);
+            _resourcesObjectRepository.SetWeaponSprite(name, icon as Sprite);
+        }*/
 
         public void Dispose()
         {
