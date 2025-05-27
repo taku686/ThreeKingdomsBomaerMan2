@@ -125,6 +125,7 @@ namespace UI.Title
             view.SetBackgroundEffect(false);
             _missionSpriteDataRepository.Initialize().Forget();
             _commonView.Initialize();
+            _weaponSortRepository.InitializeData();
             InitializeState();
             InitializeButton();
             SetActiveBlockPanel(false);

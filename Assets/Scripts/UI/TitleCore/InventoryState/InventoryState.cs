@@ -110,11 +110,12 @@ namespace UI.Title
                 var sortTypes = _WeaponSortRepository.GetSortTypeDictionary();
                 var filterTypes = _WeaponSortRepository.GetFilterTypeDictionary();
                 var rarityFilters = _WeaponSortRepository.GetRarityFilterTypeDictionary();
+                var isAscending = _WeaponSortRepository.GetAscendingSwitch();
                 var sortToggleViews = _View._SortPopupView._SortToggleViews;
                 var filterToggleViews = _View._SortPopupView._FilterToggleViews;
                 var rareToggleViews = _View._SortPopupView._RareFilterToggleViews;
 
-                _View._SortPopupView.ApplyAscendingSwitch(true);
+                _View._SortPopupView.ApplyAscendingSwitch(isAscending);
 
                 foreach (var sortToggleView in sortToggleViews)
                 {
@@ -202,7 +203,7 @@ namespace UI.Title
                     .Subscribe(isOn =>
                     {
                         _View._SortPopupView.ApplyAscendingSwitch(isOn);
-                        _WeaponSortRepository.ChangeAscendingSwitch(isOn);
+                        _WeaponSortRepository.SetAscending(isOn);
                     })
                     .AddTo(_cts.Token);
             }

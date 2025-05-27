@@ -50,6 +50,7 @@ namespace Common.Installer
             Container.Bind<SetupAnimatorUseCase>().AsCached();
             Container.Bind<ActiveSkillManager>().AsCached();
             Container.Bind<PassiveSkillManager>().AsCached();
+            Container.Bind<SaveLocalDataUseCase>().AsCached();
 
             InstallCharacterSelect();
             InstallInventory();

@@ -80,6 +80,7 @@ namespace Common.Data
         public const string VirtualCurrencySpritePath = "Sprites/VirtualCurrency/";
         public const string RewardSpritePath = "Sprites/Reward/";
         public const string MissionActionPath = "Sprites/MissionAction/";
+        public static readonly string _SortWeaponDataPath = Application.persistentDataPath + "/data.json";
         public const string LevelText = "Lv.";
         public const string TitleScene = "Title";
         public const string BattleScene = "Battle";
