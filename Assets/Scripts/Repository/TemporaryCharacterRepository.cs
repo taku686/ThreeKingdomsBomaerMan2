@@ -3,11 +3,12 @@ using UnityEngine;
 
 namespace UI.Title
 {
-    public class CharacterSelectRepository : IDisposable
+    public class TemporaryCharacterRepository : IDisposable
     {
-        private OrderType orderType;
+        private OrderType _orderType;
+        private int _selectedCharacterId;
         private const string OrderTypeKey = "OrderType";
-        private int selectedCharacterId;
+
 
         public enum OrderType
         {
@@ -26,25 +27,25 @@ namespace UI.Title
 
         public void SetOrderType(OrderType type)
         {
-            orderType = type;
+            _orderType = type;
             PlayerPrefs.SetInt(OrderTypeKey, (int)type);
         }
 
         public OrderType GetOrderType()
         {
             var type = PlayerPrefs.GetInt(OrderTypeKey, 0);
-            orderType = (OrderType)type;
-            return orderType;
+            _orderType = (OrderType)type;
+            return _orderType;
         }
 
         public void SetSelectedCharacterId(int id)
         {
-            selectedCharacterId = id;
+            _selectedCharacterId = id;
         }
 
         public int GetSelectedCharacterId()
         {
-            return selectedCharacterId;
+            return _selectedCharacterId;
         }
 
         public void Dispose()

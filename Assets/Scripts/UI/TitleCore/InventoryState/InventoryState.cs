@@ -14,13 +14,14 @@ namespace UI.Title
         {
             private InventoryView _View => (InventoryView)Owner.GetView(State.Inventory);
             private InventoryViewModelUseCase _InventoryViewModelUseCase => Owner._inventoryViewModelUseCase;
-            private CharacterSelectRepository _CharacterSelectRepository => Owner._characterSelectRepository;
+            private TemporaryCharacterRepository _TemporaryCharacterRepository => Owner._temporaryCharacterRepository;
             private UserDataRepository _UserDataRepository => Owner._userDataRepository;
             private SkillDetailViewModelUseCase _SkillDetailViewModelUseCase => Owner._skillDetailViewModelUseCase;
             private UIAnimation _UIAnimation => Owner._uiAnimation;
             private PlayFabShopManager _PlayFabShopManager => Owner._playFabShopManager;
             private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
             private WeaponSortRepository _WeaponSortRepository => Owner._weaponSortRepository;
+            private WeaponCautionRepository _WeaponCautionRepository => Owner._weaponCautionRepository;
             private CancellationTokenSource _cts;
             private Subject<int> _onChangeSelectedWeaponSubject;
             private const int SkillOne = 1;
@@ -50,7 +51,18 @@ namespace UI.Title
             {
                 _View._BackButton.OnClickAsObservable()
                     .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._BackButton).ToObservable())
-                    .Subscribe(_ => StateMachine.Dispatch((int)State.CharacterDetail))
+                    .Subscribe(_ =>
+                    {
+                        var preState = StateMachine._PreviousState;
+                        if (preState == GameCommonData.InvalidNumber)
+                        {
+                            StateMachine.Dispatch((int)State.CharacterDetail);
+                            return;
+                        }
+
+                        StateMachine._PreviousState = GameCommonData.InvalidNumber;
+                        StateMachine.Dispatch(preState);
+                    })
                     .AddTo(_cts.Token);
 
                 _onChangeSelectedWeaponSubject
@@ -61,7 +73,11 @@ namespace UI.Title
                         foreach (var gridView in _View._WeaponGridViews)
                         {
                             gridView._OnClickObservable
-                                .Subscribe(weaponId => { _onChangeSelectedWeaponSubject.OnNext(weaponId); })
+                                .Subscribe(weaponId =>
+                                {
+                                    _WeaponCautionRepository.SetWeaponCautionData(weaponId, false);
+                                    _onChangeSelectedWeaponSubject.OnNext(weaponId);
+                                })
                                 .AddTo(_cts.Token);
                         }
                     })
@@ -70,7 +86,7 @@ namespace UI.Title
                 _View._EquipButton.OnClickAsObservable()
                     .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._EquipButton).ToObservable())
                     .WithLatestFrom(_onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
-                    .Select(selectedWeaponId => (selectedWeaponId, selectedCharacterId: _CharacterSelectRepository.GetSelectedCharacterId()))
+                    .Select(selectedWeaponId => (selectedWeaponId, selectedCharacterId: _TemporaryCharacterRepository.GetSelectedCharacterId()))
                     .SelectMany(tuple => _UserDataRepository.SetEquippedWeapon(tuple.selectedCharacterId, tuple.selectedWeaponId).ToObservable())
                     .Subscribe(_ => { stateMachine.Dispatch((int)State.CharacterDetail); })
                     .AddTo(_cts.Token);
@@ -83,7 +99,7 @@ namespace UI.Title
 
             private void OnNextSelectedWeapon()
             {
-                var selectedCharacterId = _CharacterSelectRepository.GetSelectedCharacterId();
+                var selectedCharacterId = _TemporaryCharacterRepository.GetSelectedCharacterId();
                 var selectedWeaponId = _UserDataRepository.GetEquippedWeaponId(selectedCharacterId);
                 _onChangeSelectedWeaponSubject.OnNext(selectedWeaponId);
             }

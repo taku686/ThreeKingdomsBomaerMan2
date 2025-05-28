@@ -16,12 +16,10 @@ namespace UI.Title.ShopState
         [SerializeField] private Button twoHundredGemButton;
         [SerializeField] private Button adsButton;
         [SerializeField] private Button gachaButton;
-        [SerializeField] private RewardGetView rewardGetView;
         [SerializeField] private PurchaseErrorView purchaseErrorView;
         [SerializeField] private ShopWeaponGridView _shopWeaponGridView;
 
         public PurchaseErrorView _PurchaseErrorView => purchaseErrorView;
-        public RewardGetView _RewardGetView => rewardGetView;
         public ShopWeaponGridView _ShopWeaponGridView => _shopWeaponGridView;
         public Button _AdsButton => adsButton;
         public Button _GachaButton => gachaButton;

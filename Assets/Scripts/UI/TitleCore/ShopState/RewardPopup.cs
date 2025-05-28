@@ -8,17 +8,19 @@ using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
-public class SingleButtonPopup : PopupBase
+public class RewardPopup : PopupBase
 {
     [SerializeField] private Button _okButton;
-    [SerializeField] private TextMeshProUGUI _okText;
     [Inject] private UIAnimation _uiAnimation;
-    public IObservable<Unit> _OnClickButton { get; private set; }
+    public Image rewardImage;
+    public TextMeshProUGUI rewardText;
+    private IObservable<Unit> _onClickOk;
+    public IObservable<Unit> _OnClickButton => _onClickOk;
 
     public async UniTask Open(ViewModel viewModel)
     {
         ApplyViewModel(viewModel);
-        _OnClickButton = _okButton
+        _onClickOk = _okButton
             .OnClickAsObservable()
             .Take(1)
             .SelectMany(_ => OnClickButtonAnimation(_okButton).ToObservable())
@@ -30,7 +32,8 @@ public class SingleButtonPopup : PopupBase
 
     private void ApplyViewModel(ViewModel viewModel)
     {
-        _okText.text = viewModel._OkText;
+        rewardImage.sprite = viewModel._RewardImage;
+        rewardText.text = viewModel._RewardCount.ToString();
     }
 
     private async UniTask OnClickButtonAnimation(Button button)
@@ -40,16 +43,23 @@ public class SingleButtonPopup : PopupBase
 
     public class ViewModel : PopupBase.ViewModel
     {
-        public string _OkText { get; }
+        public Sprite _RewardImage { get; }
+        public int _RewardCount { get; }
 
         public ViewModel
         (
             string titleText,
             string explanationText,
-            string okText
+            Sprite rewardImage,
+            int rewardCount
         ) : base(titleText, explanationText)
         {
-            _OkText = okText;
+            _RewardImage = rewardImage;
+            _RewardCount = rewardCount;
         }
+    }
+
+    public class Factory : PlaceholderFactory<RewardPopup>
+    {
     }
 }

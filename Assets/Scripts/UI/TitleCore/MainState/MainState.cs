@@ -3,7 +3,6 @@ using Assets.Scripts.Common.PlayFab;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager;
-using Manager.DataManager;
 using Repository;
 using UI.TitleCore.UserInfoState;
 using UniRx;
@@ -15,7 +14,6 @@ namespace UI.Title
         public class MainState : StateMachine<TitleCore>.State
         {
             private StateMachine<TitleCore> _StateMachine => Owner._stateMachine;
-            private PlayFabLoginManager _PlayFabLoginManager => Owner._playFabLoginManager;
             private MainView _View => (MainView)Owner.GetView(State.Main);
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
             private UserDataRepository _UserDataRepository => Owner._userDataRepository;
@@ -23,6 +21,9 @@ namespace UI.Title
             private SkyBoxManager _SkyBoxManager => Owner._skyBoxManager;
             private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
             private UserInfoViewModelUseCase _UserInfoViewModelUseCase => Owner._userInfoViewModelUseCase;
+            private MainViewModelUseCase _MainViewModelUseCase => Owner._mainViewModelUseCase;
+            private TemporaryCharacterRepository _TemporaryCharacterRepository => Owner._temporaryCharacterRepository;
+
             private CancellationTokenSource _cts;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
@@ -39,25 +40,37 @@ namespace UI.Title
             private async UniTaskVoid Initialize()
             {
                 _cts = new CancellationTokenSource();
-                Subscribe();
                 Owner.SwitchUiObject(State.Main, true, () =>
                 {
+                    Subscribe();
                     _SkyBoxManager.ChangeSkyBox();
                     ApplySimpleUserInfoView();
+                    ApplyMainViewModel();
                     _View.SetBackgroundEffect(true);
-                    var teamMembers = _UserDataRepository.GetTeamMembers();
-                    foreach (var (index, characterId) in teamMembers)
-                    {
-                        if (characterId == GameCommonData.InvalidNumber)
-                        {
-                            continue;
-                        }
-
-                        var createParent = Owner.GetGenerateCharacterCreateParent(index);
-                        _CharacterCreateUseCase.CreateTeam(characterId, index, createParent);
-                    }
+                    GenerateTeamMembers();
                 }).Forget();
                 await InitializeText();
+            }
+
+            private void ApplyMainViewModel()
+            {
+                var viewModel = _MainViewModelUseCase.InAsTask();
+                _View.ApplyViewModel(viewModel);
+            }
+
+            private void GenerateTeamMembers()
+            {
+                var teamMembers = _UserDataRepository.GetTeamMembers();
+                foreach (var (index, characterId) in teamMembers)
+                {
+                    if (characterId == GameCommonData.InvalidNumber)
+                    {
+                        continue;
+                    }
+
+                    var createParent = Owner.GetGenerateCharacterCreateParent(index);
+                    _CharacterCreateUseCase.CreateTeam(characterId, index, createParent);
+                }
             }
 
             private void ApplySimpleUserInfoView()
@@ -126,6 +139,17 @@ namespace UI.Title
                     .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._TeamEditButton).ToObservable())
                     .Subscribe(_ => { _StateMachine.Dispatch((int)State.TeamEdit); })
                     .AddTo(_cts.Token);
+
+                _View._InventoryButton
+                    .OnClickAsObservable()
+                    .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._InventoryButton).ToObservable())
+                    .Subscribe(_ =>
+                    {
+                        var characterId = _UserDataRepository.GetTeamMember(0);
+                        _TemporaryCharacterRepository.SetSelectedCharacterId(characterId);
+                        _StateMachine.Dispatch((int)State.Inventory, (int)State.Main);
+                    })
+                    .AddTo(_cts.Token);
             }
 
             private async UniTask InitializeText()
@@ -134,18 +158,6 @@ namespace UI.Title
                 await Owner.SetGemText();
                 await Owner.SetTicketText();
                 Owner._commonView.virtualCurrencyView.gameObject.SetActive(true);
-            }
-
-            //todo 後で使う
-            private void TransitionLoginBonus()
-            {
-                if (!_PlayFabLoginManager._haveLoginBonus)
-                {
-                    return;
-                }
-
-                _PlayFabLoginManager._haveLoginBonus = false;
-                Owner._stateMachine.Dispatch((int)State.LoginBonus);
             }
 
             private void Cancel()

@@ -48,9 +48,13 @@ namespace Common.Data
             _userData = data;
         }
 
-        public async UniTask UpdateUserData(UserData data)
+        public async UniTask UpdateUserData(UserData data = null)
         {
-            _userData = data;
+            if (data != null)
+            {
+                _userData = data;
+            }
+
             await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
         }
 
@@ -87,11 +91,6 @@ namespace Common.Data
             var status = _userData.LoginBonus[index];
             return GameCommonData.GetLoginBonusStatus(status);
         }
-
-        /*public CharacterData GetEquippedCharacterData()
-        {
-            return _characterMasterDataRepository.GetCharacterData(_userData.EquippedCharacterId);
-        }*/
 
         public LevelMasterData GetCurrentLevelData(int characterId)
         {
@@ -152,6 +151,22 @@ namespace Common.Data
             }
 
             return result;
+        }
+
+        public bool HaveClearMission()
+        {
+            var missionDatum = _userData.MissionDatum;
+            foreach (var missionData in missionDatum)
+            {
+                var masterData = _missionMasterDataRepository.GetMissionData(missionData.Key);
+                var progress = GetMissionProgress(missionData.Key);
+                if (progress >= masterData.ActionCount)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public int GetMissionProgress(int missionId)
@@ -306,7 +321,7 @@ namespace Common.Data
             }
         }
 
-        public void SubtractWeaponData(int weaponId, int amount)
+        public void RemoveWeaponData(int weaponId, int amount)
         {
             if (!_userData.PossessedWeapons.ContainsKey(weaponId))
             {
@@ -335,7 +350,7 @@ namespace Common.Data
         {
             return _userData.TeamMembers;
         }
-        
+
         public int GetTeamMember(int index)
         {
             return _userData.TeamMembers.GetValueOrDefault(index, GameCommonData.InvalidNumber);

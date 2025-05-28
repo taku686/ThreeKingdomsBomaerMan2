@@ -30,6 +30,19 @@ namespace Common.Installer
 
         public override void InstallBindings()
         {
+            InstallCommon();
+            InstallMain();
+            InstallCharacterSelect();
+            InstallInventory();
+            InstallCharacterDetail();
+            InstallTeamEdit();
+            InstallSlashSKill();
+            InstallBuffSkill();
+            InstallHealSkill();
+        }
+
+        private void InstallCommon()
+        {
             Container.Bind<PlayFabLoginManager>().FromComponentOn(playFabManagerGameObject).AsCached();
             Container.Bind<SkyBoxManager>().FromComponentOn(_skyBoxManager).AsCached();
             Container.Bind<UIAnimation>().AsCached();
@@ -42,7 +55,6 @@ namespace Common.Installer
             Container.Bind<CharacterCreateUseCase>().AsCached().WithArguments(characterGenerateParent);
             Container.Bind<CharacterObjectRepository>().AsCached();
             Container.Bind<RewardDataUseCase>().AsCached();
-            Container.Bind<RewardDataRepository>().AsCached();
             Container.Bind<StatusSpriteManager>().FromComponentOn(_statusSpriteManager).AsCached();
             Container.Bind<ResourceManager>().AsCached();
             Container.Bind<MissionSpriteDataRepository>().AsCached();
@@ -51,22 +63,14 @@ namespace Common.Installer
             Container.Bind<ActiveSkillManager>().AsCached();
             Container.Bind<PassiveSkillManager>().AsCached();
             Container.Bind<SaveLocalDataUseCase>().AsCached();
-
-            InstallCharacterSelect();
-            InstallInventory();
-            InstallCharacterDetail();
-            InstallMain();
-            InstallTeamEdit();
-            InstallSlashSKill();
-            BuffSkillInstaller();
-            HealSkillInstaller();
+            Container.Bind<GetRewardUseCase>().AsCached();
         }
 
         private void InstallCharacterSelect()
         {
             Container.Bind<SortCharactersUseCase>().AsCached();
             Container.Bind<CharacterSelectViewModelUseCase>().AsCached();
-            Container.Bind<CharacterSelectRepository>().AsCached();
+            Container.Bind<TemporaryCharacterRepository>().AsCached();
         }
 
         private void InstallCharacterDetail()
@@ -81,11 +85,13 @@ namespace Common.Installer
             Container.Bind<SkillDetailViewModelUseCase>().AsCached();
             Container.Bind<WeaponSortRepository>().AsCached();
             Container.Bind<SortWeaponUseCase>().AsCached();
+            Container.Bind<WeaponCautionRepository>().AsCached();
         }
 
         private void InstallMain()
         {
             Container.Bind<UserInfoViewModelUseCase>().AsCached();
+            Container.Bind<MainViewModelUseCase>().AsCached();
         }
 
         private void InstallTeamEdit()
@@ -118,12 +124,12 @@ namespace Common.Installer
             Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, BurningSlash, BurningSlash.Factory>().AsCached();
         }
 
-        private void BuffSkillInstaller()
+        private void InstallBuffSkill()
         {
             Container.Bind<BuffSkill>().AsCached();
         }
 
-        private void HealSkillInstaller()
+        private void InstallHealSkill()
         {
             Container.Bind<HealSkill>().AsCached();
         }

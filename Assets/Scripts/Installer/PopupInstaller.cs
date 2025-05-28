@@ -13,6 +13,7 @@ public class PopupInstaller : MonoInstaller<PopupInstaller>
     [SerializeField] private GameObject _userInfoPopupPrefab;
     [SerializeField] private GameObject _skillDetailPopupPrefab;
     [SerializeField] private GameObject _abnormalConditionPopupPrefab;
+    [SerializeField] private GameObject _rewardPopupPrefab;
 
     public override void InstallBindings()
     {
@@ -30,5 +31,7 @@ public class PopupInstaller : MonoInstaller<PopupInstaller>
             .FromComponentInNewPrefab(_skillDetailPopupPrefab).UnderTransform(_popupParent).AsTransient();
         Container.BindFactory<AbnormalConditionPopup, AbnormalConditionPopup.Factory>()
             .FromComponentInNewPrefab(_abnormalConditionPopupPrefab).UnderTransform(_popupParent).AsTransient();
+        Container.BindFactory<RewardPopup, RewardPopup.Factory>()
+            .FromComponentInNewPrefab(_rewardPopupPrefab).UnderTransform(_popupParent).AsTransient();
     }
 }

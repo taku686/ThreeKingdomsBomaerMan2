@@ -4,20 +4,12 @@ using System.Linq;
 using Common.Data;
 using Data;
 using UseCase;
-using Zenject;
 
 namespace Repository
 {
     public class WeaponSortRepository : IDisposable
     {
-        private readonly SaveLocalDataUseCase _saveLocalDataUseCase;
         private SortWeaponData _sortWeaponData;
-
-        [Inject]
-        public WeaponSortRepository(SaveLocalDataUseCase saveLocalDataUseCase)
-        {
-            _saveLocalDataUseCase = saveLocalDataUseCase;
-        }
 
         public void InitializeData()
         {
@@ -212,7 +204,6 @@ namespace Repository
 
         public void Dispose()
         {
-            _saveLocalDataUseCase?.Dispose();
         }
     }
 }

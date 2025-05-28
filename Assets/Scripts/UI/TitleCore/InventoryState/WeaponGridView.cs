@@ -14,6 +14,7 @@ public class WeaponGridView : MonoBehaviour
     [SerializeField] private TextMeshProUGUI countText;
     [SerializeField] private Button button;
     [SerializeField] private GameObject focusObject;
+    [SerializeField] private GameObject _cautionObject;
     private int _weaponId;
     private UIAnimation _uiAnimation;
     private readonly Subject<int> _onClickObservableSubject = new();
@@ -27,6 +28,7 @@ public class WeaponGridView : MonoBehaviour
         countText.text = viewModel._Count.ToString();
         _weaponId = viewModel._GridId;
         _gridImage.sprite = _rareGridSprites[viewModel._Rare - 1];
+        _cautionObject.SetActive(viewModel._IsCaution);
         if (viewModel._IsFocus)
         {
             focusObject.SetActive(viewModel._SelectedWeaponId == viewModel._GridId);
@@ -60,6 +62,7 @@ public class WeaponGridView : MonoBehaviour
         public int _SelectedWeaponId { get; }
         public int _Rare { get; }
         public bool _IsFocus { get; }
+        public bool _IsCaution { get; }
 
         public ViewModel
         (
@@ -68,7 +71,8 @@ public class WeaponGridView : MonoBehaviour
             int gridId,
             int selectedWeaponId,
             int rare,
-            bool isFocus
+            bool isFocus,
+            bool isCaution
         )
         {
             _Icon = icon;
@@ -77,6 +81,7 @@ public class WeaponGridView : MonoBehaviour
             _SelectedWeaponId = selectedWeaponId;
             _Rare = rare;
             _IsFocus = isFocus;
+            _IsCaution = isCaution;
         }
     }
 }

@@ -31,7 +31,7 @@ namespace UI.Title
             private PlayFabUserDataManager _playFabUserDataManager;
             private PlayFabShopManager _playFabShopManager;
             private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
-            private CharacterSelectRepository _characterSelectRepository;
+            private TemporaryCharacterRepository _temporaryCharacterRepository;
             private UIAnimation _uiAnimation;
 
             private CancellationTokenSource _cts;
@@ -61,7 +61,7 @@ namespace UI.Title
                     _playFabShopManager = Owner._playFabShopManager;
                     _playFabVirtualCurrencyManager = Owner._playFabVirtualCurrencyManager;
                     _uiAnimation = Owner._uiAnimation;
-                    _characterSelectRepository = Owner._characterSelectRepository;
+                    _temporaryCharacterRepository = Owner._temporaryCharacterRepository;
                     _isTeamEdit = _StateMachine._PreviousState == (int)State.TeamEdit;
                     var userData = _UserDataRepository.GetUserData();
                     if (userData.Characters.Count <= 1)
@@ -183,8 +183,8 @@ namespace UI.Title
 
             private void GenerateCharacter()
             {
-                var selectedCharacterId = _characterSelectRepository.GetSelectedCharacterId();
-                var orderType = _characterSelectRepository.GetOrderType();
+                var selectedCharacterId = _temporaryCharacterRepository.GetSelectedCharacterId();
+                var orderType = _temporaryCharacterRepository.GetOrderType();
                 _sortedCharacters = _SortCharactersUseCase.InAsTask(orderType).ToArray();
                 _candidateIndex = Array.FindIndex(_sortedCharacters, x => x.Id == selectedCharacterId);
                 var selectedCharacter = _sortedCharacters[_candidateIndex];
@@ -213,7 +213,7 @@ namespace UI.Title
                 }
 
                 var candidateCharacter = _sortedCharacters[_candidateIndex];
-                _characterSelectRepository.SetSelectedCharacterId(candidateCharacter.Id);
+                _temporaryCharacterRepository.SetSelectedCharacterId(candidateCharacter.Id);
                 CreateCharacter(candidateCharacter);
                 _onChangeViewModel.OnNext(candidateCharacter.Id);
                 PlayBackAnimation();
@@ -236,7 +236,7 @@ namespace UI.Title
                 }
 
                 var candidateCharacter = _sortedCharacters[_candidateIndex];
-                _characterSelectRepository.SetSelectedCharacterId(candidateCharacter.Id);
+                _temporaryCharacterRepository.SetSelectedCharacterId(candidateCharacter.Id);
                 CreateCharacter(candidateCharacter);
                 _onChangeViewModel.OnNext(candidateCharacter.Id);
                 PlayBackAnimation();

@@ -22,11 +22,11 @@ namespace UseCase
             _applyStatusSkillUseCase = applyStatusSkillUseCase;
         }
 
-        public IReadOnlyCollection<CharacterData> InAsTask(CharacterSelectRepository.OrderType orderType)
+        public IReadOnlyCollection<CharacterData> InAsTask(TemporaryCharacterRepository.OrderType orderType)
         {
             var result = new List<CharacterData>();
             var characterDatum = _userDataRepository.GetAvailableCharacters();
-            if (orderType == CharacterSelectRepository.OrderType.Id)
+            if (orderType == TemporaryCharacterRepository.OrderType.Id)
             {
                 return characterDatum.OrderBy(data => data.Id).ToArray();
             }
@@ -69,19 +69,19 @@ namespace UseCase
                 .ToArray();
         }
 
-        private static int TranslateOrderType(CharacterSelectRepository.OrderType orderType, CharacterData data)
+        private static int TranslateOrderType(TemporaryCharacterRepository.OrderType orderType, CharacterData data)
         {
             return orderType switch
             {
-                CharacterSelectRepository.OrderType.Id => data.Id,
-                CharacterSelectRepository.OrderType.Level => data.Level,
-                CharacterSelectRepository.OrderType.Hp => data.Hp,
-                CharacterSelectRepository.OrderType.Attack => data.Attack,
-                CharacterSelectRepository.OrderType.Speed => data.Speed,
-                CharacterSelectRepository.OrderType.Bomb => data.BombLimit,
-                CharacterSelectRepository.OrderType.Fire => data.FireRange,
-                CharacterSelectRepository.OrderType.Defense => data.Defense,
-                CharacterSelectRepository.OrderType.Resistance => data.Resistance,
+                TemporaryCharacterRepository.OrderType.Id => data.Id,
+                TemporaryCharacterRepository.OrderType.Level => data.Level,
+                TemporaryCharacterRepository.OrderType.Hp => data.Hp,
+                TemporaryCharacterRepository.OrderType.Attack => data.Attack,
+                TemporaryCharacterRepository.OrderType.Speed => data.Speed,
+                TemporaryCharacterRepository.OrderType.Bomb => data.BombLimit,
+                TemporaryCharacterRepository.OrderType.Fire => data.FireRange,
+                TemporaryCharacterRepository.OrderType.Defense => data.Defense,
+                TemporaryCharacterRepository.OrderType.Resistance => data.Resistance,
                 _ => 0
             };
         }

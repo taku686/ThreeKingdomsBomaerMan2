@@ -10,6 +10,8 @@ using Manager.NetworkManager;
 using Repository;
 using UniRx;
 using UnityEngine;
+using UnityEngine.UI;
+using UseCase;
 
 namespace UI.Title
 {
@@ -19,14 +21,13 @@ namespace UI.Title
         {
             private MissionMasterDataRepository _MissionMasterDataRepository => Owner._missionMasterDataRepository;
             private UserDataRepository _UserDataRepository => Owner._userDataRepository;
-            private CatalogDataRepository _CatalogDataRepository => Owner._catalogDataRepository;
-            private PlayFabShopManager _PlayFabShopManager => Owner._playFabShopManager;
             private CharacterMasterDataRepository _CharacterMasterDataRepository => Owner._characterMasterDataRepository;
             private WeaponMasterDataRepository _WeaponMasterDataRepository => Owner._weaponMasterDataRepository;
             private MissionView _View => (MissionView)Owner.GetView(State.Mission);
-            private CommonView _CommonView => Owner._commonView;
             private MissionSpriteDataRepository _MissionSpriteDataRepository => Owner._missionSpriteDataRepository;
-            private PlayFabVirtualCurrencyManager _PlayFabVirtualCurrencyManager => Owner._playFabVirtualCurrencyManager;
+            private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
+            private RewardDataRepository _RewardDataRepository => Owner._rewardDataRepository;
+            private GetRewardUseCase _GetRewardUseCase => Owner._getRewardUseCase;
 
             private readonly Dictionary<int, MissionGrid> _missionGrids = new();
             private bool _isProgress;
@@ -40,15 +41,23 @@ namespace UI.Title
 
             private void Initialize()
             {
-                _token = _View.GetCancellationTokenOnDestroy();
-                GenerateMissionGrid();
-                InitializeButton();
-                Owner.SwitchUiObject(State.Mission, true).Forget();
+                Owner.SwitchUiObject(State.Mission, true, () =>
+                {
+                    _token = _View.GetCancellationTokenOnDestroy();
+                    GenerateMissionGrid();
+                    Subscribe();
+                    InitializeVirtualCurrencyText().Forget();
+                }).Forget();
             }
 
-            private void InitializeButton()
+            private async UniTask InitializeVirtualCurrencyText()
             {
-                _View.backButton.onClick.RemoveAllListeners();
+                await Owner.SetGemText();
+                await Owner.SetCoinText();
+            }
+
+            private void Subscribe()
+            {
                 _View.backButton.OnClickAsObservable()
                     .Take(1)
                     .SelectMany(_ => OnClickBack().ToObservable())
@@ -59,10 +68,10 @@ namespace UI.Title
             private void GenerateMissionGrid()
             {
                 DestroyMissionGrids();
-                var missionDatum = _UserDataRepository.GetMissionDatum();
-                missionDatum = missionDatum
+                var missionDatum = _UserDataRepository.GetMissionDatum()
                     .OrderBy(x => x.Key)
                     .ToDictionary(x => x.Key, x => x.Value);
+
                 foreach (var (index, missionData) in missionDatum)
                 {
                     var masterData = _MissionMasterDataRepository.GetMissionData(index);
@@ -76,70 +85,34 @@ namespace UI.Title
                     var rewardSprite = _MissionSpriteDataRepository.GetRewardSprite((GameCommonData.RewardType)rewardId);
                     var grid = _View.GenerateGrid(missionData, masterData, characterData, weaponData, missionSprite, rewardSprite);
                     _missionGrids[masterData.Index] = grid;
-                    grid.getButton.onClick.AddListener(() => OnClickGetMissionReward(masterData, grid.getButton.gameObject));
+                    MissionGridSubscribe(masterData, grid.getButton);
                 }
             }
 
-
-            private void OnClickGetMissionReward(MissionMasterData missionMasterData, GameObject button)
+            private void MissionGridSubscribe(MissionMasterData missionMasterData, Button button)
             {
-                if (_isProgress)
-                {
-                    return;
-                }
-
-                _isProgress = true;
-                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
-                {
-                    var errorText = _CommonView.purchaseErrorView.errorInfoText;
-                    var rewardId = missionMasterData.RewardId;
-                    var rewardAmount = missionMasterData.RewardAmount;
-                    var result = await GetRewardAsync(rewardId, rewardAmount);
-
-                    if (result)
-                    {
-                        var rewardSprite = _MissionSpriteDataRepository.GetRewardSprite((GameCommonData.RewardType)missionMasterData.RewardId);
-                        await Owner.SetRewardUI(rewardAmount, rewardSprite);
-                        await RemoveMission(missionMasterData.Index);
-                        await AddMission();
-                        await Owner.SetGemText();
-                        await Owner.SetCoinText();
-                    }
-                    else
-                    {
-                        errorText.text = "報酬の取得に失敗しました";
-                        _CommonView.purchaseErrorView.gameObject.SetActive(true);
-                    }
-
-                    _isProgress = false;
-                })).SetLink(button);
+                button.OnClickAsObservable()
+                    .Select(_ => GetRewardViewModel(missionMasterData))
+                    .SelectMany(viewModel => _PopupGenerateUseCase.GenerateRewardPopup(viewModel))
+                    .SelectMany(_ => GetRewardAsync(missionMasterData).ToObservable())
+                    .Subscribe(_ => { stateMachine.Dispatch((int)State.Reward, (int)State.Mission); })
+                    .AddTo(button.gameObject);
             }
 
-            private async UniTask<bool> GetRewardAsync(int rewardId, int rewardAmount)
+            private async UniTask GetRewardAsync(MissionMasterData missionMasterData)
             {
-                if (rewardId == (int)GameCommonData.RewardType.Coin)
-                {
-                    return await _PlayFabVirtualCurrencyManager.AddVirtualCurrency(GameCommonData.CoinKey, rewardAmount);
-                }
+                var rewardResults = _RewardDataRepository.SetMissionReward(missionMasterData);
+                await _GetRewardUseCase.InAsTask(rewardResults);
+                await _UserDataRepository.RemoveMissionData(missionMasterData.Index);
+                await _UserDataRepository.AddMissionData();
+            }
 
-                if (rewardId == (int)GameCommonData.RewardType.Gem)
-                {
-                    return await _PlayFabVirtualCurrencyManager.AddVirtualCurrency(GameCommonData.GemKey, rewardAmount);
-                }
-
-                if (rewardId == (int)GameCommonData.RewardType.Weapon)
-                {
-                    const int free = 0;
-                    var result = await _PlayFabShopManager.AddRandomWeaponAsync(rewardAmount, free);
-                    return result.Item1;
-                }
-
-                if (rewardId == (int)GameCommonData.RewardType.Character)
-                {
-                    return await _PlayFabShopManager.TryPurchaseRandomCharacters(rewardAmount);
-                }
-
-                return false;
+            private RewardPopup.ViewModel GetRewardViewModel(MissionMasterData masterData)
+            {
+                var rewardAmount = masterData.RewardAmount;
+                var rewardType = (GameCommonData.RewardType)masterData.RewardId;
+                var rewardSprite = _MissionSpriteDataRepository.GetRewardSprite(rewardType);
+                return new RewardPopup.ViewModel("", "", rewardSprite, rewardAmount);
             }
 
             private async UniTask OnClickBack()
@@ -147,24 +120,6 @@ namespace UI.Title
                 Owner._stateMachine.Dispatch((int)State.Main);
                 var button = _View.backButton.gameObject;
                 await Owner._uiAnimation.ClickScaleColor(button).ToUniTask(cancellationToken: _token);
-            }
-
-            private async UniTask RemoveMission(int missionId)
-            {
-                if (!_missionGrids.TryGetValue(missionId, out var grid))
-                {
-                    return;
-                }
-
-                Destroy(grid.gameObject);
-                _missionGrids.Remove(missionId);
-                await _UserDataRepository.RemoveMissionData(missionId);
-            }
-
-            private async UniTask AddMission()
-            {
-                await _UserDataRepository.AddMissionData();
-                GenerateMissionGrid();
             }
 
             private void DestroyMissionGrids()

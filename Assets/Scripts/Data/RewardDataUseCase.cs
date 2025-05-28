@@ -13,16 +13,19 @@ namespace UI.Title
     {
         private readonly CharacterMasterDataRepository _characterMasterDataRepository;
         private readonly WeaponMasterDataRepository _weaponMasterDataRepository;
+        private readonly MissionSpriteDataRepository _missionSpriteDataRepository;
 
         [Inject]
         public RewardDataUseCase
         (
             CharacterMasterDataRepository characterMasterDataRepository,
-            WeaponMasterDataRepository weaponMasterDataRepository
+            WeaponMasterDataRepository weaponMasterDataRepository,
+            MissionSpriteDataRepository missionSpriteDataRepository
         )
         {
             _characterMasterDataRepository = characterMasterDataRepository;
             _weaponMasterDataRepository = weaponMasterDataRepository;
+            _missionSpriteDataRepository = missionSpriteDataRepository;
         }
 
         public IReadOnlyCollection<RewardData> InAsTask((int, GameCommonData.RewardType)[] rewards)
@@ -39,7 +42,8 @@ namespace UI.Title
                             Color.white,
                             characterData.SelfPortraitSprite,
                             characterData.Name,
-                            1
+                            1,
+                            GameCommonData.RewardType.Character
                         );
                         rewardDataList.Add(characterReward);
                         break;
@@ -50,13 +54,32 @@ namespace UI.Title
                             Color.white,
                             weaponData.WeaponIcon,
                             weaponData.Name,
-                            weaponData.Rare
+                            weaponData.Rare,
+                            GameCommonData.RewardType.Weapon
                         );
                         rewardDataList.Add(weaponReward);
                         break;
                     case GameCommonData.RewardType.Coin:
+                        var coinReward = new RewardData
+                        (
+                            Color.white,
+                            _missionSpriteDataRepository.GetRewardSprite(GameCommonData.RewardType.Coin),
+                            rewardId.ToString(),
+                            1,
+                            GameCommonData.RewardType.Coin
+                        );
+                        rewardDataList.Add(coinReward);
                         break;
                     case GameCommonData.RewardType.Gem:
+                        var gemReward = new RewardData
+                        (
+                            Color.white,
+                            _missionSpriteDataRepository.GetRewardSprite(GameCommonData.RewardType.Coin),
+                            rewardId.ToString(),
+                            1,
+                            GameCommonData.RewardType.Gem
+                        );
+                        rewardDataList.Add(gemReward);
                         break;
                     case GameCommonData.RewardType.Consumable:
                         break;
@@ -72,33 +95,19 @@ namespace UI.Title
             return rewardDataList;
         }
 
-        private Color GetRarityColor(Rarity r)
-        {
-            switch (r)
-            {
-                case Rarity.Common:
-                    return new Color32(188, 188, 188, 255);
-                case Rarity.Uncommon:
-                    return new Color32(165, 226, 57, 255);
-                case Rarity.Rare:
-                    return new Color32(74, 160, 241, 255);
-                case Rarity.Epic:
-                    return new Color32(202, 67, 250, 255);
-                case Rarity.Legendary:
-                    return new Color32(255, 225, 0, 255);
-                default:
-                    return new Color32(188, 188, 188, 255);
-            }
-        }
 
         public void Dispose()
         {
+            _characterMasterDataRepository?.Dispose();
+            _weaponMasterDataRepository?.Dispose();
+            _missionSpriteDataRepository?.Dispose();
         }
 
 
         public class RewardData : IDisposable
         {
             public int _Rarity { get; }
+            public GameCommonData.RewardType _RewardType { get; }
             public string _Name { get; }
             public Sprite _Icon { get; }
             public Color _Color { get; }
@@ -108,13 +117,15 @@ namespace UI.Title
                 Color color,
                 Sprite icon,
                 string name,
-                int rarity
+                int rarity,
+                GameCommonData.RewardType rewardType
             )
             {
                 _Color = color;
                 _Icon = icon;
                 _Name = name;
                 _Rarity = rarity;
+                _RewardType = rewardType;
             }
 
             public void Dispose()

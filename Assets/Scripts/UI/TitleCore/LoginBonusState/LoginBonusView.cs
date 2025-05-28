@@ -10,6 +10,6 @@ namespace TitleCore.LoginBonusState
         public Button closeButton;
         public GameObject focusObj;
         public PurchaseErrorView purchaseErrorView;
-        public RewardGetView rewardGetView;
+        public RewardPopup _rewardPopup;
     }
 }

@@ -68,8 +68,14 @@ namespace Manager.NetworkManager
             _storeController.InitiatePurchase(itemName);
         }
 
-        public async UniTask<bool> TryPurchaseGacha(string itemName, string virtualCurrencyKey, int price,
-            string shopKey, RewardGetView rewardView, TextMeshProUGUI errorText)
+        public async UniTask<bool> TryPurchaseGacha
+        (
+            string itemName,
+            string virtualCurrencyKey,
+            int price,
+            string shopKey,
+            TextMeshProUGUI errorText
+        )
         {
             var request = new PurchaseItemRequest()
             {
@@ -93,8 +99,6 @@ namespace Manager.NetworkManager
                 if (item.ItemClass.Equals(GameCommonData.CharacterClassKey))
                 {
                     var index = int.Parse(item.ItemId);
-                    var characterData = _characterMasterDataRepository.GetCharacterData(index);
-                    rewardView.rewardImage.sprite = characterData.SelfPortraitSprite;
                     var userData = _userDataRepository.AddCharacterData(index);
                     await _playFabUserDataManager.TryUpdateUserDataAsync(userData);
                 }
@@ -105,18 +109,6 @@ namespace Manager.NetworkManager
                     if (loginBonusItemData == null)
                     {
                         return false;
-                    }
-
-                    if (loginBonusItemData.vc == GameCommonData.CoinKey)
-                    {
-                        rewardView.rewardImage.sprite = _coinSprite;
-                        rewardView.rewardText.text = loginBonusItemData.price.ToString("D");
-                    }
-
-                    if (loginBonusItemData.vc == GameCommonData.GemKey)
-                    {
-                        rewardView.rewardImage.sprite = _gemSprite;
-                        rewardView.rewardText.text = loginBonusItemData.price.ToString("D");
                     }
 
                     await _playFabVirtualCurrencyManager.SetVirtualCurrency();
@@ -184,7 +176,7 @@ namespace Manager.NetworkManager
         }
 
         public async UniTask<bool> TryPurchaseLoginBonusItem(int day, string virtualCurrencyKey, int price,
-            RewardGetView rewardView, TextMeshProUGUI errorText)
+            RewardPopup rewardPopup, TextMeshProUGUI errorText)
         {
             var request = new PurchaseItemRequest
             {
@@ -212,14 +204,14 @@ namespace Manager.NetworkManager
 
                 if (loginBonusItemData.vc == GameCommonData.CoinKey)
                 {
-                    rewardView.rewardImage.sprite = _coinSprite;
-                    rewardView.rewardText.text = loginBonusItemData.price.ToString("D");
+                    rewardPopup.rewardImage.sprite = _coinSprite;
+                    rewardPopup.rewardText.text = loginBonusItemData.price.ToString("D");
                 }
 
                 if (loginBonusItemData.vc == GameCommonData.GemKey)
                 {
-                    rewardView.rewardImage.sprite = _gemSprite;
-                    rewardView.rewardText.text = loginBonusItemData.price.ToString("D");
+                    rewardPopup.rewardImage.sprite = _gemSprite;
+                    rewardPopup.rewardText.text = loginBonusItemData.price.ToString("D");
                 }
             }
 
@@ -379,29 +371,6 @@ namespace Manager.NetworkManager
             _extensionProvider = extensions;
         }
 
-        public async UniTask<(bool, IReadOnlyList<int>)> AddRandomWeaponAsync(int createCount, int cost)
-        {
-            var weaponMasterDatum = _weaponMasterDataRepository.GetAllWeaponData().ToArray();
-            var result = new List<int>();
-
-            /*for (var i = 0; i < createCount; i++)
-            {
-                var weaponId = weaponMasterDatum[UnityEngine.Random.Range(0, weaponMasterDatum.Length)].Id;
-                _userDataRepository.AddWeaponData(weaponId);
-                result.Add(weaponId);
-            }*/
-            //todo: 1回の購入で全ての武器を購入できるようにする
-            foreach (var masterData in weaponMasterDatum)
-            {
-                _userDataRepository.AddWeaponData(masterData.Id);
-                result.Add(masterData.Id);
-            }
-
-            await _playFabUserDataManager.TryUpdateUserDataAsync();
-            await _playFabVirtualCurrencyManager.SubtractVirtualCurrency(GameCommonData.GemKey, cost);
-            return (false, result);
-        }
-
         public async UniTask<(bool, string, int)> SellWeaponAsync(int weaponId, int sellAmount)
         {
             var userData = _userDataRepository.GetUserData();
@@ -435,7 +404,7 @@ namespace Manager.NetworkManager
                 return (false, GameCommonData.Terms.ErrorAddVirtualCurrency, weaponId);
             }
 
-            _userDataRepository.SubtractWeaponData(weaponId, sellAmount);
+            _userDataRepository.RemoveWeaponData(weaponId, sellAmount);
             var userUpdateResponse = await _playFabUserDataManager.TryUpdateUserDataAsync();
             if (!userUpdateResponse)
             {

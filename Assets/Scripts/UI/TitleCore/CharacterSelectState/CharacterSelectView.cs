@@ -44,7 +44,7 @@ namespace UI.Title
             contentsTransform.anchoredPosition = new Vector2(contentsTransform.anchoredPosition.x, 0);
         }
 
-        public void ApplyToggleView(CharacterSelectRepository.OrderType orderType)
+        public void ApplyToggleView(TemporaryCharacterRepository.OrderType orderType)
         {
             toggleView.ApplyView(orderType);
         }
@@ -53,14 +53,14 @@ namespace UI.Title
         {
             public int _AvailableAmount { get; }
             public int _TotalAmount { get; }
-            public CharacterSelectRepository.OrderType _OrderType { get; }
+            public TemporaryCharacterRepository.OrderType _OrderType { get; }
 
 
             public ViewModel
             (
                 int availableAmount,
                 int totalAmount,
-                CharacterSelectRepository.OrderType orderType
+                TemporaryCharacterRepository.OrderType orderType
             )
             {
                 _AvailableAmount = availableAmount;

@@ -9,6 +9,7 @@ using UI.Common;
 using UI.Title.ShopState;
 using UniRx;
 using UnityEngine;
+using UseCase;
 
 namespace UI.Title
 {
@@ -24,10 +25,13 @@ namespace UI.Title
             private ShopView _View => (ShopView)Owner.GetView(State.Shop);
             private UserDataRepository _UserDataRepository => Owner._userDataRepository;
             private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
+            private WeaponCautionRepository _WeaponCautionRepository => Owner._weaponCautionRepository;
             private StateMachine<TitleCore> _StateMachine => Owner._stateMachine;
-            private Sprite _gemSprite;
+            private GetRewardUseCase _GetRewardUseCase => Owner._getRewardUseCase;
+
             private CancellationTokenSource _cts;
-            private const int CreateWeaponCount = 10;
+            private const int WeaponRewardAmount = 10;
+            private const int CharacterRewardAmount = 1;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -42,13 +46,11 @@ namespace UI.Title
             private async UniTaskVoid Initialize()
             {
                 _cts = new CancellationTokenSource();
-                _View._RewardGetView.gameObject.SetActive(false);
                 _View._PurchaseErrorView.gameObject.SetActive(false);
                 _View._PurchaseErrorView.errorInfoText.text = "";
-                _View._ShopWeaponGridView.ApplyView(CreateWeaponCount, GameCommonData.WeaponBuyPrice);
+                _View._ShopWeaponGridView.ApplyView(WeaponRewardAmount, GameCommonData.WeaponBuyPrice);
                 InitializeButton();
                 await SetVirtualCurrencyText();
-                _gemSprite = (Sprite)await Resources.LoadAsync<Sprite>(GameCommonData.VirtualCurrencySpritePath + "gem");
                 Owner.SwitchUiObject(State.Shop, true).Forget();
             }
 
@@ -61,8 +63,6 @@ namespace UI.Title
                 _View._HundredGemButton.onClick.RemoveAllListeners();
                 _View._TwoHundredGemButton.onClick.RemoveAllListeners();
                 _View._AdsButton.onClick.RemoveAllListeners();
-                _View._GachaButton.onClick.RemoveAllListeners();
-                _View._RewardGetView.okButton.onClick.RemoveAllListeners();
                 _View._PurchaseErrorView.okButton.onClick.RemoveAllListeners();
                 _View._BackButton.onClick.AddListener(OnCLickBack);
                 _View._FiveThousandCoinButton.onClick.AddListener(() => OnClickBuyItem(GameCommonData.FiveThousandCoinItemKey, _View._FiveThousandCoinButton.gameObject));
@@ -71,26 +71,45 @@ namespace UI.Title
                 _View._HundredGemButton.onClick.AddListener(() => OnClickBuyItem(GameCommonData.HundredGemItemKey, _View._HundredGemButton.gameObject));
                 _View._TwoHundredGemButton.onClick.AddListener(() => OnClickBuyItem(GameCommonData.TwoHundredGemItemKey, _View._TwoHundredGemButton.gameObject));
                 _View._AdsButton.onClick.AddListener(OnClickAds);
-                _View._GachaButton.onClick.AddListener(OnClickCharacterGacha);
-                _View._RewardGetView.okButton.onClick.AddListener(OnClickCloseRewardView);
                 _View._PurchaseErrorView.okButton.onClick.AddListener(OnClickCloseErrorView);
                 _View._OnClickAddThousandCoin
                     .SelectMany(_ => _PlayFabVirtualCurrencyManager.Add1000CoinAsync().ToObservable())
                     .SelectMany(_ => SetVirtualCurrencyText().ToObservable())
                     .Subscribe()
                     .AddTo(_cts.Token);
-                WeaponGridSubscribe();
 
-
-                Owner.SubscribeRewardOkButton();
+                CharacterSubscribe();
+                WeaponSubscribe();
             }
 
-            private void WeaponGridSubscribe()
+            private void CharacterSubscribe()
             {
-                var addWeapon =
-                    _View._ShopWeaponGridView._OnClickWeaponButton
-                        .Select(_ => EnoughGem(10))
-                        .Publish();
+                var addCharacter = _View._GachaButton
+                    .OnClickAsObservable()
+                    .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._GachaButton).ToObservable())
+                    .Select(_ => EnoughVirtualCurrency(WeaponRewardAmount, GameCommonData.GemKey))
+                    .Publish();
+
+                addCharacter
+                    .Where(enoughGem => !enoughGem)
+                    .SelectMany(_ => _PopupGenerateUseCase.GenerateErrorPopup(GameCommonData.Terms.AddGemPopupTile))
+                    .Subscribe()
+                    .AddTo(_cts.Token);
+
+                addCharacter
+                    .Where(enoughGem => enoughGem)
+                    .SelectMany(_ => GetRewardAsync(CharacterRewardAmount, GameCommonData.RewardType.Character, GameCommonData.CharacterPrice * CharacterRewardAmount, GameCommonData.GemKey).ToObservable())
+                    .Subscribe(_ => { stateMachine.Dispatch((int)State.Reward, (int)State.Shop); })
+                    .AddTo(_cts.Token);
+
+                addCharacter.Connect().AddTo(_cts.Token);
+            }
+
+            private void WeaponSubscribe()
+            {
+                var addWeapon = _View._ShopWeaponGridView._OnClickWeaponButton
+                    .Select(_ => EnoughVirtualCurrency(WeaponRewardAmount, GameCommonData.GemKey))
+                    .Publish();
 
                 addWeapon
                     .Where(enoughGem => !enoughGem)
@@ -100,30 +119,55 @@ namespace UI.Title
 
                 addWeapon
                     .Where(enoughGem => enoughGem)
-                    .SelectMany(_ => _PlayFabShopManager.AddRandomWeaponAsync(CreateWeaponCount, CreateWeaponCount * GameCommonData.WeaponBuyPrice).ToObservable())
-                    .Subscribe(tuple =>
-                    {
-                        var isError = tuple.Item1;
-                        if (isError)
-                        {
-                            return;
-                        }
-
-                        var weaponIds = tuple.Item2.ToArray();
-                        _RewardDataRepository.SetRewardIds(weaponIds.Select(id => (id, GameCommonData.RewardType.Weapon)).ToArray());
-                        _StateMachine.Dispatch((int)State.Reward, (int)State.Shop);
-                    })
+                    .SelectMany(_ => GetRewardAsync(WeaponRewardAmount, GameCommonData.RewardType.Weapon, GameCommonData.WeaponBuyPrice * WeaponRewardAmount, GameCommonData.GemKey).ToObservable())
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.Reward, (int)State.Shop); })
                     .AddTo(_cts.Token);
 
                 addWeapon.Connect().AddTo(_cts.Token);
             }
 
-            private bool EnoughGem(int buyCount)
+            private async UniTask GetRewardAsync
+            (
+                int rewardAmount,
+                GameCommonData.RewardType rewardType,
+                int cost,
+                string currencyKey
+            )
+            {
+                if (rewardType == GameCommonData.RewardType.Weapon)
+                {
+                    var rewards = _RewardDataRepository.GetRandomWeaponReward(rewardAmount).ToArray();
+                    await _GetRewardUseCase.InAsTask(rewards, cost, currencyKey);
+                    var weaponIds = rewards.Select(reward => reward.Item1).ToArray();
+                    _WeaponCautionRepository.AddWeaponCautionData(weaponIds);
+                }
+
+                if (rewardType == GameCommonData.RewardType.Character)
+                {
+                    var reward = _RewardDataRepository.GetRandomCharacterReward(rewardAmount).ToArray();
+                    await _GetRewardUseCase.InAsTask(reward, cost, currencyKey);
+                }
+                
+                await SetVirtualCurrencyText();
+            }
+
+            private bool EnoughVirtualCurrency(int buyCount, string key)
             {
                 var cost = GameCommonData.WeaponBuyPrice * buyCount;
                 var userData = _UserDataRepository.GetUserData();
-                var gem = userData.Gem;
-                return gem >= cost;
+                if (GameCommonData.CoinKey == key)
+                {
+                    var coin = userData.Coin;
+                    return coin >= cost;
+                }
+
+                if (GameCommonData.GemKey == key)
+                {
+                    var gem = userData.Gem;
+                    return gem >= cost;
+                }
+
+                return false;
             }
 
             private void OnCLickBack()
@@ -153,46 +197,7 @@ namespace UI.Title
                     }
 
                     await SetVirtualCurrencyText();
-                    await Owner.SetRewardUI(AddRewardValue, _gemSprite);
-                })).SetLink(button);
-            }
-
-            private void OnClickCharacterGacha()
-            {
-                var button = _View._GachaButton.gameObject;
-                var rewardViewTransform = _View._RewardGetView.transform;
-                var rewardView = _View._RewardGetView;
-                var errorView = _View._PurchaseErrorView.transform;
-                var errorInfoText = _View._PurchaseErrorView.errorInfoText;
-                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
-                {
-                    var isSucceed = await Owner._playFabShopManager.TryPurchaseGacha(
-                        GameCommonData.CharacterGachaItemKey, GameCommonData.GemKey, 100, GameCommonData.GachaShopKey,
-                        rewardView, errorInfoText);
-                    if (isSucceed)
-                    {
-                        rewardViewTransform.localScale = Vector3.zero;
-                        rewardViewTransform.gameObject.SetActive(true);
-                        await SetVirtualCurrencyText();
-                        await _UiAnimation.Open(rewardViewTransform, GameCommonData.OpenDuration);
-                    }
-                    else
-                    {
-                        errorView.localScale = Vector3.zero;
-                        errorView.gameObject.SetActive(true);
-                        await _UiAnimation.Open(errorView, GameCommonData.OpenDuration);
-                    }
-                })).SetLink(button);
-            }
-
-            private void OnClickCloseRewardView()
-            {
-                var button = _View._RewardGetView.okButton.gameObject;
-                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
-                {
-                    var rewardView = _View._RewardGetView.transform;
-                    await _UiAnimation.Close(rewardView, GameCommonData.CloseDuration);
-                    rewardView.gameObject.SetActive(false);
+                    //await Owner.SetRewardUI(AddRewardValue, _gemSprite);
                 })).SetLink(button);
             }
 

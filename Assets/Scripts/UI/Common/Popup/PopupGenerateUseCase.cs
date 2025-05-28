@@ -13,6 +13,7 @@ public class PopupGenerateUseCase : IDisposable
     [Inject] private UserInfoPopup.Factory _userInfoPopupFactory;
     [Inject] private SkillDetailPopup.Factory _skillDetailPopupFactory;
     [Inject] private AbnormalConditionPopup.Factory _abnormalConditionPopupFactory;
+    [Inject] private RewardPopup.Factory _rewardPopupFactory;
 
     public IObservable<bool> GenerateConfirmPopup
     (
@@ -73,6 +74,13 @@ public class PopupGenerateUseCase : IDisposable
         var abnormalConditionPopup = _abnormalConditionPopupFactory.Create();
         abnormalConditionPopup.Open(viewModel).Forget();
         return abnormalConditionPopup._OnClickButton;
+    }
+
+    public IObservable<Unit> GenerateRewardPopup(RewardPopup.ViewModel viewModel)
+    {
+        var rewardPopup = _rewardPopupFactory.Create();
+        rewardPopup.Open(viewModel).Forget();
+        return rewardPopup._OnClickButton;
     }
 
     public void Dispose()

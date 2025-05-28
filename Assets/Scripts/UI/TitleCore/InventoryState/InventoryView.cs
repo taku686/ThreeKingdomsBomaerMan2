@@ -70,10 +70,16 @@ public class InventoryView : ViewBase
         foreach (var (weaponMasterData, possessedAmount) in sortedWeaponDatum)
         {
             var weaponGridView = Instantiate(weaponGridViewPrefab, weaponGridParent);
-            var weaponGridViewModel = TranslateWeaponDataToViewModel(weaponMasterData, possessedAmount, viewModel._SelectedWeaponMasterData.Id, viewModel._IsFocus);
+            var isCaution = GetCaution(viewModel._WeaponCautionDictionary, weaponMasterData.Id);
+            var weaponGridViewModel = TranslateWeaponDataToViewModel(weaponMasterData, possessedAmount, viewModel._SelectedWeaponMasterData.Id, viewModel._IsFocus, isCaution);
             weaponGridView.ApplyViewModel(weaponGridViewModel, _uiAnimation, _setActivePanelAction);
             _weaponGridViews.Add(weaponGridView);
         }
+    }
+
+    private static bool GetCaution(IReadOnlyDictionary<int, bool> cautionDictionary, int weaponId)
+    {
+        return cautionDictionary.GetValueOrDefault(weaponId, false);
     }
 
     private WeaponGridView.ViewModel TranslateWeaponDataToViewModel
@@ -81,7 +87,8 @@ public class InventoryView : ViewBase
         WeaponMasterData weaponMasterData,
         int possessedAmount,
         int selectedWeaponId,
-        bool isFocus
+        bool isFocus,
+        bool isCaution
     )
     {
         return new WeaponGridView.ViewModel
@@ -91,7 +98,8 @@ public class InventoryView : ViewBase
             weaponMasterData.Id,
             selectedWeaponId,
             weaponMasterData.Rare,
-            isFocus
+            isFocus,
+            isCaution
         );
     }
 
@@ -135,6 +143,7 @@ public class InventoryView : ViewBase
 
     public class ViewModel
     {
+        public IReadOnlyDictionary<int, bool> _WeaponCautionDictionary;
         public IReadOnlyDictionary<WeaponMasterData, int> _SortedWeaponDatum { get; }
         public WeaponMasterData _SelectedWeaponMasterData { get; }
         public bool _IsFocus { get; }
@@ -143,9 +152,11 @@ public class InventoryView : ViewBase
         (
             IReadOnlyDictionary<WeaponMasterData, int> sortedWeaponDatum,
             WeaponMasterData selectedWeaponMasterData,
-            bool isFocus
+            bool isFocus,
+            IReadOnlyDictionary<int, bool> weaponCautionDictionary
         )
         {
+            _WeaponCautionDictionary = weaponCautionDictionary;
             _SortedWeaponDatum = sortedWeaponDatum;
             _SelectedWeaponMasterData = selectedWeaponMasterData;
             _IsFocus = isFocus;

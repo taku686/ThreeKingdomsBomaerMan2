@@ -20,7 +20,7 @@ namespace UI.Title
             private CharacterSelectView _View => (CharacterSelectView)Owner.GetView(State.CharacterSelect);
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
             private CharacterSelectViewModelUseCase _CharacterSelectViewModelUseCase => Owner._characterSelectViewModelUseCase;
-            private CharacterSelectRepository _CharacterSelectRepository => Owner._characterSelectRepository;
+            private TemporaryCharacterRepository _TemporaryCharacterRepository => Owner._temporaryCharacterRepository;
             private PlayFabVirtualCurrencyManager _PlayFabVirtualCurrencyManager => Owner._playFabVirtualCurrencyManager;
             private SortCharactersUseCase _SortCharactersUseCase => Owner._sortCharactersUseCase;
             private UserDataRepository _UserDataRepository => Owner._userDataRepository;
@@ -106,7 +106,7 @@ namespace UI.Title
                         {
                             Owner.SetActiveBlockPanel(true);
                             _View.ApplyToggleView(type);
-                            _CharacterSelectRepository.SetOrderType(type);
+                            _TemporaryCharacterRepository.SetOrderType(type);
                             CreateUIContents(type);
                             Owner.SetActiveBlockPanel(false);
                         })
@@ -115,7 +115,7 @@ namespace UI.Title
             }
 
 
-            private void CreateUIContents(CharacterSelectRepository.OrderType orderType)
+            private void CreateUIContents(TemporaryCharacterRepository.OrderType orderType)
             {
                 foreach (var gridGroupList in _gridGroupLists)
                 {
@@ -159,7 +159,7 @@ namespace UI.Title
                 }
             }
 
-            private void CreateActiveGrid(CharacterData fixedCharacterData, Transform parent, CharacterSelectRepository.OrderType orderType)
+            private void CreateActiveGrid(CharacterData fixedCharacterData, Transform parent, TemporaryCharacterRepository.OrderType orderType)
             {
                 var grid = Instantiate(_View._Grid, parent);
                 var characterGrid = grid.GetComponentInChildren<CharacterGridView>();
@@ -286,7 +286,7 @@ namespace UI.Title
             private void OnClickCharacterGrid(CharacterData characterData)
             {
                 _CharacterCreateUseCase.CreateTeamMember(characterData.Id);
-                _CharacterSelectRepository.SetSelectedCharacterId(characterData.Id);
+                _TemporaryCharacterRepository.SetSelectedCharacterId(characterData.Id);
                 _StateMachine.Dispatch((int)State.CharacterDetail);
             }
 

@@ -26,6 +26,7 @@ namespace Common.Installer
 
         public override void InstallBindings()
         {
+            Container.Bind<RewardDataRepository>().AsCached();
             Container.Bind<CharacterMasterDataRepository>().AsSingle();
             Container.Bind<AbnormalConditionMasterDataRepository>().AsSingle();
             Container.Bind<CatalogDataRepository>().AsSingle();

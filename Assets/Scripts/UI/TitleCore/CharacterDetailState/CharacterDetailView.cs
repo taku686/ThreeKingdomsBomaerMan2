@@ -32,6 +32,7 @@ namespace UI.Title
         [SerializeField] private PurchaseErrorView purchaseErrorView;
         [SerializeField] private VirtualCurrencyAddPopup virtualCurrencyAddPopup;
         [SerializeField] private Button inventoryButton;
+        [SerializeField] private GameObject _inventoryCautionObj;
         [SerializeField] private GameObject[] _teamTextObjects;
         [SerializeField] private Image _typeImage;
         [SerializeField] private Image _typeIcon;
@@ -78,6 +79,7 @@ namespace UI.Title
             _typeIcon.sprite = viewModel._TypeSprite;
             _passiveSkillName.text = viewModel._PassiveSkillMasterData.Name;
             _passiveSkillExplanation.text = TranslateExplanation(viewModel._PassiveSkillMasterData);
+            _inventoryCautionObj.SetActive(viewModel._IsInventoryCaution);
             foreach (var teamText in _teamTextObjects)
             {
                 teamText.SetActive(false);
@@ -257,6 +259,7 @@ namespace UI.Title
             public SkillMasterData _PassiveSkillMasterData { get; }
             public bool _IsTeamEdit { get; }
             public IReadOnlyDictionary<int, int> _TeamMembers { get; }
+            public bool _IsInventoryCaution { get; }
 
             public ViewModel
             (
@@ -269,7 +272,8 @@ namespace UI.Title
                 Color typeColor,
                 SkillMasterData passiveSkillMasterData,
                 bool isTeamEdit,
-                IReadOnlyDictionary<int, int> teamMembers
+                IReadOnlyDictionary<int, int> teamMembers,
+                bool isInventoryCaution
             )
             {
                 _CharacterData = characterData;
@@ -282,6 +286,7 @@ namespace UI.Title
                 _PassiveSkillMasterData = passiveSkillMasterData;
                 _IsTeamEdit = isTeamEdit;
                 _TeamMembers = teamMembers;
+                _IsInventoryCaution = isInventoryCaution;
             }
         }
     }
