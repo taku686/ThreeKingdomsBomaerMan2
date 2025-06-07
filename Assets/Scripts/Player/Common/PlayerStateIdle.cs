@@ -62,15 +62,15 @@ namespace Player.Common
                 _playerTransform = Owner.transform;
 
                 _OnClickNormalSkill
-                    .Subscribe(_ => { OnClickNormalSkill(); })
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.NormalSkill); })
                     .AddTo(Owner.GetCancellationTokenOnDestroy());
 
                 _OnClickSpecialSkill
-                    .Subscribe(_ => { OnClickSpecialSkill(); })
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.SpecialSkill); })
                     .AddTo(Owner.GetCancellationTokenOnDestroy());
 
                 _OnClickDash
-                    .Subscribe(_ => { OnClickDash(); })
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.Dash); })
                     .AddTo(Owner.GetCancellationTokenOnDestroy());
 
                 _OnClickCharacterChange
@@ -107,21 +107,6 @@ namespace Player.Common
             private void InitializeCancellationToken()
             {
                 _cancellationTokenSource ??= new CancellationTokenSource();
-            }
-
-            private void OnClickNormalSkill()
-            {
-                _StateMachine.Dispatch((int)PLayerState.NormalSkill);
-            }
-
-            private void OnClickSpecialSkill()
-            {
-                _StateMachine.Dispatch((int)PLayerState.SpecialSkill);
-            }
-
-            private void OnClickDash()
-            {
-                _StateMachine.Dispatch((int)PLayerState.Dash);
             }
 
             private void Cancel()

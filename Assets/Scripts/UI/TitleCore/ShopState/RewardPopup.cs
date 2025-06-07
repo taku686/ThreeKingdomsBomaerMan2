@@ -14,13 +14,12 @@ public class RewardPopup : PopupBase
     [Inject] private UIAnimation _uiAnimation;
     public Image rewardImage;
     public TextMeshProUGUI rewardText;
-    private IObservable<Unit> _onClickOk;
-    public IObservable<Unit> _OnClickButton => _onClickOk;
+    public IObservable<Unit> _OnClickButton { get; private set; }
 
     public async UniTask Open(ViewModel viewModel)
     {
         ApplyViewModel(viewModel);
-        _onClickOk = _okButton
+        _OnClickButton = _okButton
             .OnClickAsObservable()
             .Take(1)
             .SelectMany(_ => OnClickButtonAnimation(_okButton).ToObservable())

@@ -67,17 +67,14 @@ namespace Common.Data
         public const string BuffParameterName = "Buff";
         public const string DeadParameterName = "Dead";
         public const string SlashParameterName = "Slash";
-        public const string GameID = "5089859";
-        public const string RewardAdsKey = "ca-app-pub-3759795642939239/2878540700";
-        public const string PlacementName = "testReward";
         public const string CharacterSpritePath = "Sprites/Character/";
         public const string UserIconSpritePath = "Sprites/UserIcon/";
+        public const string SkillIconSpritePath = "Sprites/Skill/";
         public const string CharacterColorPath = "Sprites/CharacterColor/";
         public const string CharacterPrefabPath = "Prefabs/Character/";
         public const string PlayerCorePath = "Prefabs/Character/PlayerCore";
         public const string StagePrefabPath = "Prefabs/Stage/";
         public const string WeaponPrefabPath = "Prefabs/Weapon/";
-        public const string VirtualCurrencySpritePath = "Sprites/VirtualCurrency/";
         public const string RewardSpritePath = "Sprites/Reward/";
         public const string MissionActionPath = "Sprites/MissionAction/";
         public static readonly string _SortWeaponDataPath = Application.persistentDataPath + "/weaponSortData.json";
@@ -98,6 +95,12 @@ namespace Common.Data
         public const int SpecialSkillReleaseLevel = 5;
         public const int InvalidNumber = -9999;
         public const int MaxTeamMember = 3;
+        public const string Item1000CoinKey = "1000_coin";
+        public const string Item5000CoinKey = "5000_coin";
+        public const string Item12000CoinKey = "12000_coin";
+        public const string Item20GemKey = "20_gem";
+        public const string Item100GemKey = "100_gem";
+        public const string Item200GemKey = "200_gem";
 
         public static class Terms
         {
@@ -395,10 +398,20 @@ namespace Common.Data
         Frozen = 5,
         Confusion = 6,
         Sealed = 7,
-        DeadlyPoison = 8,
         GreatFire = 9,
         LifeSteal = 10,
         Holy = 11,
+        Apraxia = 12,
+        Burning = 13,
+        Charm = 14,
+        Curse = 15,
+        Darkness = 16,
+        Fear = 17,
+        HellFire = 18,
+        Miasma = 19,
+        ParalyzingThunder = 20,
+        SoakingWet = 21,
+        TimeStop = 22,
         None = 999
     }
 
@@ -421,6 +434,7 @@ namespace Common.Data
         Apraxia = 14,
         SoakingWet = 15,
         Burning = 16,
+        ParalyzingThunder = 17,
         All = 99,
         None = 999
     }
@@ -581,6 +595,15 @@ namespace Common.Data
         DefenseBuff = 79,
         Slash = 80,
         Shot = 83,
+        Resistance = 84,
+        Bomb = 85,
+        Dash = 86,
+        DashAttack = 87,
+        FlyingSlash = 88,
+        Impact = 89,
+        JumpSmash = 90,
+        SlashSpin = 91,
+        ThrowEdge = 92,
         None = 999
     }
 }

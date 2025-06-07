@@ -20,10 +20,16 @@ namespace Common.Data
         private int resistance;
         private int type;
         private int passiveSkillId;
+        private int normalSkillId;
+        private int specialSkillId;
         private string charaColor;
+        private int rarity;
         public Sprite SelfPortraitSprite;
         public Sprite ColorSprite;
-        public GameObject WeaponEffectObj;
+        public SkillMasterData _PassiveSkillMasterData;
+        public SkillMasterData _NormalSkillMasterData;
+        public SkillMasterData _SpecialSkillMasterData;
+
 
         public string CharaObj
         {
@@ -113,6 +119,24 @@ namespace Common.Data
         {
             get => passiveSkillId;
             set => passiveSkillId = value;
+        }
+        
+        public int NormalSkillId
+        {
+            get => normalSkillId;
+            set => normalSkillId = value;
+        }
+        
+        public int SpecialSkillId
+        {
+            get => specialSkillId;
+            set => specialSkillId = value;
+        }
+        
+        public int Rarity
+        {
+            get => rarity;
+            set => rarity = value;
         }
 
         public CharacterData Clone()

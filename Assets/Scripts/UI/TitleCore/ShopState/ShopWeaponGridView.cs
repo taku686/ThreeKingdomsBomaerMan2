@@ -11,7 +11,7 @@ public class ShopWeaponGridView : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _costText;
     [SerializeField] private Button _weaponButton;
 
-    public IObservable<Unit> _OnClickWeaponButton => _weaponButton.OnClickAsObservable();
+    public Button _WeaponButton => _weaponButton;
 
     public void ApplyView(int createCount, int cost)
     {

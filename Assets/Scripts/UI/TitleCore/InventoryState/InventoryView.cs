@@ -45,11 +45,6 @@ public class InventoryView : ViewBase
             .OnClickNormalSkillDetailButtonAsObservable()
             .SelectMany(_ => _uiAnimation.ClickScaleColor(weaponDetailView._NormalSkillDetailButton.gameObject).ToUniTask().ToObservable());
 
-    public IObservable<AsyncUnit> _OnClickSpecialSkillDetailButtonAsObservable
-        => weaponDetailView
-            .OnClickSpecialSkillDetailButtonAsObservable()
-            .SelectMany(_ => _uiAnimation.ClickScaleColor(weaponDetailView._SpecialSkillDetailButton.gameObject).ToUniTask().ToObservable());
-
     public void ApplyViewModel(ViewModel viewModel, UIAnimation uiAnimation, Action<bool> setActivePanelAction)
     {
         _uiAnimation = uiAnimation;
@@ -119,19 +114,22 @@ public class InventoryView : ViewBase
         _sortPopupView.gameObject.SetActive(false);
     }
 
-    private WeaponDetailView.ViewModel TranslateWeaponDataToViewModel(WeaponMasterData weaponMasterData)
+    private static WeaponDetailView.ViewModel TranslateWeaponDataToViewModel(WeaponMasterData weaponMasterData)
     {
         return new WeaponDetailView.ViewModel
         (
             weaponMasterData.WeaponIcon,
             weaponMasterData.Name,
             weaponMasterData.NormalSkillMasterData,
-            weaponMasterData.SpecialSkillMasterData,
             weaponMasterData.StatusSkillMasterDatum,
             weaponMasterData.WeaponObject,
             weaponMasterData.WeaponType,
             weaponMasterData.Scale,
             weaponMasterData.Rare,
+            weaponMasterData.CoinMul,
+            weaponMasterData.GemMul,
+            weaponMasterData.SkillMul,
+            weaponMasterData.RangeMul,
             weaponMasterData.Id
         );
     }
@@ -143,10 +141,10 @@ public class InventoryView : ViewBase
 
     public class ViewModel
     {
-        public IReadOnlyDictionary<int, bool> _WeaponCautionDictionary;
         public IReadOnlyDictionary<WeaponMasterData, int> _SortedWeaponDatum { get; }
         public WeaponMasterData _SelectedWeaponMasterData { get; }
         public bool _IsFocus { get; }
+        public IReadOnlyDictionary<int, bool> _WeaponCautionDictionary { get; }
 
         public ViewModel
         (
@@ -156,10 +154,10 @@ public class InventoryView : ViewBase
             IReadOnlyDictionary<int, bool> weaponCautionDictionary
         )
         {
-            _WeaponCautionDictionary = weaponCautionDictionary;
             _SortedWeaponDatum = sortedWeaponDatum;
             _SelectedWeaponMasterData = selectedWeaponMasterData;
             _IsFocus = isFocus;
+            _WeaponCautionDictionary = weaponCautionDictionary;
         }
     }
 }

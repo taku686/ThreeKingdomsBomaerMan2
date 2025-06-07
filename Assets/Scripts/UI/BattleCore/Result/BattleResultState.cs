@@ -55,6 +55,11 @@ namespace Manager.BattleManager
                 //todo あとで修正が必要
                 foreach (var (_, characterId) in teamMembers)
                 {
+                    if (characterId == GameCommonData.InvalidNumber)
+                    {
+                        continue;
+                    }
+
                     var weaponId = _UserDataRepository.GetEquippedWeaponId(characterId);
                     _MissionManager.CheckMission(GameCommonData.MissionActionId.BattleCount, 1);
                     _MissionManager.CheckMission(GameCommonData.MissionActionId.CharacterBattleCount, 1, characterId, weaponId);

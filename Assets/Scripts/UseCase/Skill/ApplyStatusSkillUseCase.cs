@@ -160,7 +160,7 @@ public class ApplyStatusSkillUseCase : IDisposable
         return Mathf.FloorToInt(levelData.StatusRate * statusValue);
     }
 
-    private int GetStatus(CharacterData characterData, StatusType statusType)
+    private static int GetStatus(CharacterData characterData, StatusType statusType)
     {
         return statusType switch
         {
@@ -169,6 +169,8 @@ public class ApplyStatusSkillUseCase : IDisposable
             StatusType.Speed => characterData.Speed,
             StatusType.FireRange => characterData.FireRange,
             StatusType.BombLimit => characterData.BombLimit,
+            StatusType.Defense => characterData.Defense,
+            StatusType.Resistance => characterData.Resistance,
             _ => 0
         };
     }

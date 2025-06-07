@@ -34,14 +34,14 @@ namespace Common.Data
         public float CoinMul { get; set; }
         public float GemMul { get; set; }
         public float SkillMul { get; set; }
-        public float Range { get; }
-        public float Interval { get; }
-        public float EffectTime { get; }
-        public bool IsAll { get; }
-        public string BombType { get; }
-        public BombType BombTypeEnum { get; }
-        public string NumberRequirement { get; }
-        public float[] NumberRequirements { get; }
+        public float Range { get; set; }
+        public float Interval { get; set; }
+        public float EffectTime { get; set; }
+        public bool IsAll { get; set; }
+        public string BombType { get; set; }
+        public BombType BombTypeEnum { get; set; }
+        public string NumberRequirement { get; set; }
+        public float[] NumberRequirements { get; set; }
         public string NumberRequirementType { get; set; }
         public NumberRequirementType NumberRequirementTypeEnum { get; }
         public string _BoolRequirementType { get; set; }

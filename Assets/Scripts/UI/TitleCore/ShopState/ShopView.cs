@@ -21,14 +21,14 @@ namespace UI.Title.ShopState
 
         public PurchaseErrorView _PurchaseErrorView => purchaseErrorView;
         public ShopWeaponGridView _ShopWeaponGridView => _shopWeaponGridView;
-        public Button _AdsButton => adsButton;
+        public IObservable<Unit> _AdsButton => adsButton.OnClickAsObservable();
         public Button _GachaButton => gachaButton;
         public Button _BackButton => backButton;
         public IObservable<Unit> _OnClickAddThousandCoin => thousandCoinButton.OnClickAsObservable();
-        public Button _FiveThousandCoinButton => fiveThousandCoinButton;
-        public Button _TwelveThousandCoinButton => twelveThousandCoinButton;
-        public Button _TwentyGemButton => twentyGemButton;
-        public Button _HundredGemButton => hundredGemButton;
-        public Button _TwoHundredGemButton => twoHundredGemButton;
+        public IObservable<Unit> _FiveThousandCoinButton => fiveThousandCoinButton.OnClickAsObservable();
+        public IObservable<Unit> _TwelveThousandCoinButton => twelveThousandCoinButton.OnClickAsObservable();
+        public IObservable<Unit> _TwentyGemButton => twentyGemButton.OnClickAsObservable();
+        public IObservable<Unit> _HundredGemButton => hundredGemButton.OnClickAsObservable();
+        public IObservable<Unit> _TwoHundredGemButton => twoHundredGemButton.OnClickAsObservable();
     }
 }

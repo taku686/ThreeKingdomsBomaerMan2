@@ -38,6 +38,11 @@ namespace Repository
             _weaponIcon[weaponId].name = $"WeaponIcon_{weaponId}";
         }
 
+        public void SetSkillSprite(int skillId, Sprite sprite)
+        {
+            _skillIcon[skillId] = sprite;
+        }
+
         public GameObject GetCharacterPrefab(int index)
         {
             if (!_characterPrefab.TryGetValue(index, value: out var prefab))

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Data;
 
 namespace Common.Data
 {
@@ -20,6 +21,7 @@ namespace Common.Data
         public readonly Dictionary<int, int> EquippedWeapons = new();
         public Dictionary<int, string> MissionDatum = new();
         public readonly Dictionary<int, int> TeamMembers = new();
+        public SettingData _SettingData = new();
 
         [Serializable]
         public class MissionData
@@ -29,7 +31,7 @@ namespace Common.Data
             public int _weaponId;
         }
 
-        public MissionData CreateMissionData()
+        public static MissionData CreateMissionData()
         {
             return new MissionData
             {
@@ -62,6 +64,7 @@ namespace Common.Data
             }
 
             user.MissionDatum = new Dictionary<int, string>();
+            user._SettingData = new SettingData();
             return user;
         }
 

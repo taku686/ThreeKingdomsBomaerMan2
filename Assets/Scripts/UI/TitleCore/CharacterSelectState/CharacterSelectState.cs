@@ -27,7 +27,7 @@ namespace UI.Title
             private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
             private StateMachine<TitleCore> _StateMachine => Owner._stateMachine;
             private RewardDataRepository _RewardDataRepository => Owner._rewardDataRepository;
-            private CharacterTypeSpriteManager _CharacterTypeSpriteManager => Owner._characterTypeSpriteManager;
+            private CharacterTypeSpriteRepository _CharacterTypeSpriteRepository => Owner._characterTypeSpriteRepository;
 
             private CancellationTokenSource _cancellationTokenSource;
             private readonly Subject<Unit> _onChangeViewModel = new();
@@ -85,7 +85,6 @@ namespace UI.Title
                         if (prevState >= 0)
                         {
                             _StateMachine.Dispatch(prevState);
-                            _StateMachine._PreviousState = GameCommonData.InvalidNumber;
                         }
                         else
                         {
@@ -163,7 +162,7 @@ namespace UI.Title
             {
                 var grid = Instantiate(_View._Grid, parent);
                 var characterGrid = grid.GetComponentInChildren<CharacterGridView>();
-                var (typeSprite, typeColor) = _CharacterTypeSpriteManager.GetCharacterTypeData(fixedCharacterData.Type);
+                var (typeSprite, typeColor) = _CharacterTypeSpriteRepository.GetCharacterTypeData(fixedCharacterData.Type);
                 characterGrid.ApplyStatusGridViews(orderType, fixedCharacterData, (typeSprite, typeColor));
 
                 characterGrid.gridButton
@@ -210,7 +209,7 @@ namespace UI.Title
 
                 addGem
                     .Where(isOk => isOk)
-                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.Shop); })
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.Shop,(int)State.CharacterSelect); })
                     .AddTo(disableGrid.GetCancellationTokenOnDestroy());
 
                 var purchaseCharacter =

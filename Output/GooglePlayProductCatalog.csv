@@ -1,0 +1,7 @@
+Product ID,Published State,Purchase Type,Auto Translate,Locale; Title; Description,Auto Fill Prices,Price,Pricing Template ID
+1000_coin,published,managed_by_android,false,ja_JP;コイン1000枚;コイン1000枚を獲得できる,true,100000000,
+5000_coin,published,managed_by_android,false,ja_JP;コイン5000枚;コイン5000枚を獲得できる,true,480000000,
+12000_coin,published,managed_by_android,false,ja_JP;コイン12000枚;コイン12000枚を獲得できる,true,980000000,
+20_gem,published,managed_by_android,false,ja_JP;ジェム20個;ジェム20個を獲得できる,true,100000000,
+100_gem,published,managed_by_android,false,ja_JP;ジェム100個;ジェム100個を獲得できる,true,480000000,
+200_gem,published,managed_by_android,false,ja_JP;ジェム200個;ジェム200個を獲得できる,true,980000000,

@@ -45,7 +45,7 @@ namespace Common.Installer
             Container.Bind<AbnormalConditionViewModelUseCase>().AsCached();
             Container.Bind<PhotonNetworkManager>().FromComponentInNewPrefab(_photonNetworkGameObject).AsSingle();
             Container.Bind<MainManager>().FromComponentsInNewPrefab(_mainManagerGameObject).AsSingle();
-            Container.Bind<CharacterTypeSpriteManager>().FromComponentInNewPrefab(_characterTypeDataGameObject).AsSingle();
+            Container.Bind<CharacterTypeSpriteRepository>().FromComponentInNewPrefab(_characterTypeDataGameObject).AsSingle();
             Container.Bind<AbnormalConditionSpriteRepository>().FromComponentInNewPrefab(_abnormalConditionSpriteRepositoryGameObject).AsSingle();
             Container.Bind<SkillEffectRepository>().FromComponentInNewPrefab(_skillEffectRepositoryGameObject).AsSingle();
             Container.Bind<ResourcesObjectRepository>().FromComponentInNewPrefab(_resourcesObjectRepositoryGameObject).AsSingle();

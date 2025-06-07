@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Data;
 using Manager.DataManager;
 using Manager.NetworkManager;
 using Newtonsoft.Json;
@@ -213,7 +214,7 @@ namespace Common.Data
                 var masterData = masterDatum[index];
                 var missionIndex = masterData.Index;
                 var actionId = masterData.Action;
-                var missionData = _userData.CreateMissionData();
+                var missionData = UserData.CreateMissionData();
 
                 if (_userData.MissionDatum.ContainsKey(missionIndex))
                 {
@@ -369,6 +370,16 @@ namespace Common.Data
         public void SetCandidateTeamMemberIndex(int index)
         {
             _candidateTeamMemberIndex = index;
+        }
+
+        public SettingData GetSettingData()
+        {
+            return _userData._SettingData;
+        }
+
+        public void SetSettingData(SettingData settingData)
+        {
+            _userData._SettingData = settingData;
         }
 
         public void Dispose()

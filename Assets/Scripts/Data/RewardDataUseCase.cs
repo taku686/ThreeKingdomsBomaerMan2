@@ -42,7 +42,7 @@ namespace UI.Title
                             Color.white,
                             characterData.SelfPortraitSprite,
                             characterData.Name,
-                            1,
+                            characterData.Rarity,
                             GameCommonData.RewardType.Character
                         );
                         rewardDataList.Add(characterReward);

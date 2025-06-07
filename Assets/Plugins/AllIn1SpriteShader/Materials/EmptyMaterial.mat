@@ -48,7 +48,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _FadeTex:
-        m_Texture: {fileID: 2800000, guid: ef201c33fdf859743b90f8c823d32fb1, type: 3}
+        m_Texture: {fileID: 2800000, guid: b4fdec593184b1c43874c3002f4ba16c, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _GlowTex:

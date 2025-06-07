@@ -30,8 +30,10 @@ namespace UI.Title
             private GetRewardUseCase _GetRewardUseCase => Owner._getRewardUseCase;
 
             private readonly Dictionary<int, MissionGrid> _missionGrids = new();
+
             private bool _isProgress;
-            private CancellationToken _token;
+
+            private CancellationTokenSource _cts;
 
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
@@ -39,11 +41,16 @@ namespace UI.Title
                 Initialize();
             }
 
+            protected override void OnExit(StateMachine<TitleCore>.State nextState)
+            {
+                Cancel();
+            }
+
             private void Initialize()
             {
                 Owner.SwitchUiObject(State.Mission, true, () =>
                 {
-                    _token = _View.GetCancellationTokenOnDestroy();
+                    _cts = new CancellationTokenSource();
                     GenerateMissionGrid();
                     Subscribe();
                     InitializeVirtualCurrencyText().Forget();
@@ -60,9 +67,9 @@ namespace UI.Title
             {
                 _View.backButton.OnClickAsObservable()
                     .Take(1)
-                    .SelectMany(_ => OnClickBack().ToObservable())
-                    .Subscribe()
-                    .AddTo(_token);
+                    .SelectMany(_ => Owner.OnClickScaleAnimation(_View.backButton).ToObservable())
+                    .Subscribe(_ => Owner._stateMachine.Dispatch((int)State.Main))
+                    .AddTo(_cts.Token);
             }
 
             private void GenerateMissionGrid()
@@ -92,10 +99,15 @@ namespace UI.Title
             private void MissionGridSubscribe(MissionMasterData missionMasterData, Button button)
             {
                 button.OnClickAsObservable()
+                    .Do(_ => Owner.SetActiveBlockPanel(true))
                     .Select(_ => GetRewardViewModel(missionMasterData))
                     .SelectMany(viewModel => _PopupGenerateUseCase.GenerateRewardPopup(viewModel))
                     .SelectMany(_ => GetRewardAsync(missionMasterData).ToObservable())
-                    .Subscribe(_ => { stateMachine.Dispatch((int)State.Reward, (int)State.Mission); })
+                    .Subscribe(_ =>
+                    {
+                        stateMachine.Dispatch((int)State.Reward, (int)State.Mission);
+                        Owner.SetActiveBlockPanel(false);
+                    })
                     .AddTo(button.gameObject);
             }
 
@@ -115,13 +127,6 @@ namespace UI.Title
                 return new RewardPopup.ViewModel("", "", rewardSprite, rewardAmount);
             }
 
-            private async UniTask OnClickBack()
-            {
-                Owner._stateMachine.Dispatch((int)State.Main);
-                var button = _View.backButton.gameObject;
-                await Owner._uiAnimation.ClickScaleColor(button).ToUniTask(cancellationToken: _token);
-            }
-
             private void DestroyMissionGrids()
             {
                 foreach (var missionGrid in _missionGrids)
@@ -130,6 +135,16 @@ namespace UI.Title
                 }
 
                 _missionGrids.Clear();
+            }
+
+            private void Cancel()
+            {
+                if (_cts != null)
+                {
+                    _cts.Cancel();
+                    _cts.Dispose();
+                    _cts = null;
+                }
             }
         }
     }

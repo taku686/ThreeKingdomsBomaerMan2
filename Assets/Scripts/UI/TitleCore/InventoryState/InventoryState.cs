@@ -1,6 +1,7 @@
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Manager.DataManager;
 using Manager.NetworkManager;
 using Repository;
 using UI.Common;
@@ -22,10 +23,9 @@ namespace UI.Title
             private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
             private WeaponSortRepository _WeaponSortRepository => Owner._weaponSortRepository;
             private WeaponCautionRepository _WeaponCautionRepository => Owner._weaponCautionRepository;
+            private WeaponMasterDataRepository _WeaponMasterDataRepository => Owner._weaponMasterDataRepository;
             private CancellationTokenSource _cts;
             private Subject<int> _onChangeSelectedWeaponSubject;
-            private const int SkillOne = 1;
-            private const int SkillTwo = 2;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -108,14 +108,8 @@ namespace UI.Title
             {
                 _View._OnClickNormalSkillDetailButtonAsObservable
                     .WithLatestFrom(_onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
-                    .Select(weaponId => _SkillDetailViewModelUseCase.InAsTask(weaponId, SkillOne))
-                    .SelectMany(viewModel => _PopupGenerateUseCase.GenerateSkillDetailPopup(viewModel))
-                    .Subscribe(_ => { Owner.SetActiveBlockPanel(false); })
-                    .AddTo(_cts.Token);
-
-                _View._OnClickSpecialSkillDetailButtonAsObservable
-                    .WithLatestFrom(_onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
-                    .Select(weaponId => _SkillDetailViewModelUseCase.InAsTask(weaponId, SkillTwo))
+                    .Select(weaponId => _WeaponMasterDataRepository.GetWeaponData(weaponId).NormalSkillMasterData.Id)
+                    .Select(skillId => _SkillDetailViewModelUseCase.InAsTask(skillId))
                     .SelectMany(viewModel => _PopupGenerateUseCase.GenerateSkillDetailPopup(viewModel))
                     .Subscribe(_ => { Owner.SetActiveBlockPanel(false); })
                     .AddTo(_cts.Token);

@@ -53,10 +53,10 @@ namespace Player.Common
         private const int DeadHp = 0;
         private const int InvincibleDuration = 2;
         private const float WaitDuration = 0.3f;
-        private const float HpMaxRate = 1f;
 
         public IObservable<Unit> _DeadObservable => _deadSubject;
         public IObservable<(StatusType statusType, int speed, bool isBuff, bool isDebuff)> _StatusBuffUiObservable => _statusBuffUiSubject;
+        public Subject<Unit> _WeaponSkillSubject { get; } = new();
         public Subject<Unit> _NormalSkillSubject { get; } = new();
         public Subject<Unit> _SpecialSkillSubject { get; } = new();
         public Subject<Unit> _DashSkillSubject { get; } = new();
@@ -124,7 +124,6 @@ namespace Player.Common
         )
         {
             var normalSkillData = weaponMasterData.NormalSkillMasterData;
-            var specialSkillData = weaponMasterData.SpecialSkillMasterData;
             var statusSkillDatum = weaponMasterData.StatusSkillMasterDatum;
 
             _activeSkillManager.Initialize
@@ -143,7 +142,7 @@ namespace Player.Common
             _passiveSkillManager.Initialize
             (
                 normalSkillData,
-                specialSkillData,
+                null,
                 statusSkillDatum,
                 transform,
                 _statusBuffSubject,
@@ -302,9 +301,9 @@ namespace Player.Common
             var playerKey = _TeamMemberReactiveProperty.Value;
             var weaponData = _photonNetworkManager.GetWeaponData(playerKey);
             var normalSkillData = weaponData.NormalSkillMasterData;
-            var specialSkillData = weaponData.SpecialSkillMasterData;
+            //var specialSkillData = weaponData.SpecialSkillMasterData;
             _skillActivationConditionsUseCase.OnNextDamageSubject(normalSkillData);
-            _skillActivationConditionsUseCase.OnNextDamageSubject(specialSkillData);
+            _skillActivationConditionsUseCase.OnNextDamageSubject(null);
         }
 
         private async UniTask Dead()

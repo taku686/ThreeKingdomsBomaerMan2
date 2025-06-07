@@ -62,9 +62,8 @@ namespace Assets.Scripts.Common.PlayFab
 
         public async UniTask<bool> InitializeGameData(PlayFabResult<LoginResult> response)
         {
-            await _playFabCatalogManager.Initialize();
-            await _playFabShopManager.InitializePurchasing();
             await _playFabTitleDataManager.SetTitleData(response.Result.InfoResultPayload.TitleData);
+            await _playFabCatalogManager.Initialize();
             await _userDataRepository.AddMissionData();
             if (!response.Result.InfoResultPayload.UserData.TryGetValue(GameCommonData.UserKey, value: out var value))
             {

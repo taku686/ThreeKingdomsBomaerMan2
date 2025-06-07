@@ -30,6 +30,8 @@ namespace Manager.NetworkManager
         private int _playerCount;
         public bool _isTitle;
 
+        private const int MinPlayerCount = 1;
+
         public Subject<int> _LeftRoomSubject { get; private set; } = new();
 
         public IObservable<Photon.Realtime.Player[]> _JoinedRoomSubject => _joinedRoomSubject;
@@ -78,7 +80,7 @@ namespace Manager.NetworkManager
             var actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
             SetTeamMembersInfo(actorNumber);
         }
-        
+
         public void SetTeamMembersInfo(int playerIndex)
         {
             var characterIds = _userDataRepository.GetTeamMembers();
@@ -88,6 +90,11 @@ namespace Manager.NetworkManager
 
             foreach (var (teamNumber, characterId) in characterIds)
             {
+                if (characterId == GameCommonData.InvalidNumber)
+                {
+                    continue; // キャラクターが選択されていない場合はスキップ
+                }
+
                 var playerKey = GetPlayerKey(playerIndex, teamNumber);
                 var characterLevel = _userDataRepository.GetCurrentLevelData(characterId).Level;
                 var weaponId = _userDataRepository.GetEquippedWeaponData(characterId).Id;
@@ -210,6 +217,21 @@ namespace Manager.NetworkManager
         public LevelMasterData GetLevelMasterData(int playerId)
         {
             return _currentRoomLevelDatum.GetValueOrDefault(playerId);
+        }
+
+        public bool CanChangeCharacter()
+        {
+            var teamMembers = _userDataRepository.GetTeamMembers();
+            var teamMemberCount = 0;
+            foreach (var (_, characterId) in teamMembers)
+            {
+                if (characterId != GameCommonData.InvalidNumber)
+                {
+                    teamMemberCount++;
+                }
+            }
+
+            return teamMemberCount != MinPlayerCount;
         }
 
         private void CheckPlayerGenerateComplete(int count)

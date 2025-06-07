@@ -42,6 +42,16 @@ public class InBattleView : BattleViewBase
     {
         timerText.text = time.ToString();
     }
+    
+    public void UpdateInputViewTimer()
+    {
+        _inputView.UpdateTimer();
+    }
+
+    public IObservable<Unit> OnClickWeaponSkillButtonAsObservable()
+    {
+        return _inputView.OnClickWeaponSkillButtonAsObservable();
+    }
 
     public IObservable<Unit> OnClickNormalSkillButtonAsObservable()
     {
@@ -66,10 +76,5 @@ public class InBattleView : BattleViewBase
     public IObservable<Unit> OnClickDashButtonAsObservable()
     {
         return _inputView.OnClickDashButtonAsObservable();
-    }
-
-    public void UpdateSkillUI()
-    {
-        _inputView.UpdateSkillUI();
     }
 }

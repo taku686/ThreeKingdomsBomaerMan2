@@ -1,14 +1,15 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Manager;
 using Manager.NetworkManager;
 using Repository;
 using UI.Common;
 using UI.Title.ShopState;
 using UniRx;
-using UnityEngine;
 using UseCase;
 
 namespace UI.Title
@@ -17,10 +18,8 @@ namespace UI.Title
     {
         public class ShopState : StateMachine<TitleCore>.State
         {
-            private const int AddRewardValue = 5;
             private UIAnimation _UiAnimation => Owner._uiAnimation;
             private PlayFabVirtualCurrencyManager _PlayFabVirtualCurrencyManager => Owner._playFabVirtualCurrencyManager;
-            private PlayFabShopManager _PlayFabShopManager => Owner._playFabShopManager;
             private RewardDataRepository _RewardDataRepository => Owner._rewardDataRepository;
             private ShopView _View => (ShopView)Owner.GetView(State.Shop);
             private UserDataRepository _UserDataRepository => Owner._userDataRepository;
@@ -28,6 +27,9 @@ namespace UI.Title
             private WeaponCautionRepository _WeaponCautionRepository => Owner._weaponCautionRepository;
             private StateMachine<TitleCore> _StateMachine => Owner._stateMachine;
             private GetRewardUseCase _GetRewardUseCase => Owner._getRewardUseCase;
+            private PlayStoreShopManager _PlayStoreShopManager => Owner._playStoreShopManager;
+            private MissionSpriteDataRepository _MissionSpriteDataRepository => Owner._missionSpriteDataRepository;
+            private AdMobManager _AdMobManager => Owner._adMobManager;
 
             private CancellationTokenSource _cts;
             private const int WeaponRewardAmount = 10;
@@ -57,38 +59,122 @@ namespace UI.Title
             private void InitializeButton()
             {
                 _View._BackButton.onClick.RemoveAllListeners();
-                _View._FiveThousandCoinButton.onClick.RemoveAllListeners();
-                _View._TwelveThousandCoinButton.onClick.RemoveAllListeners();
-                _View._TwentyGemButton.onClick.RemoveAllListeners();
-                _View._HundredGemButton.onClick.RemoveAllListeners();
-                _View._TwoHundredGemButton.onClick.RemoveAllListeners();
-                _View._AdsButton.onClick.RemoveAllListeners();
                 _View._PurchaseErrorView.okButton.onClick.RemoveAllListeners();
                 _View._BackButton.onClick.AddListener(OnCLickBack);
-                _View._FiveThousandCoinButton.onClick.AddListener(() => OnClickBuyItem(GameCommonData.FiveThousandCoinItemKey, _View._FiveThousandCoinButton.gameObject));
-                _View._TwelveThousandCoinButton.onClick.AddListener(() => OnClickBuyItem(GameCommonData.TwelveThousandCoinItemKey, _View._TwelveThousandCoinButton.gameObject));
-                _View._TwentyGemButton.onClick.AddListener(() => OnClickBuyItem(GameCommonData.TwentyGemItemKey, _View._TwentyGemButton.gameObject));
-                _View._HundredGemButton.onClick.AddListener(() => OnClickBuyItem(GameCommonData.HundredGemItemKey, _View._HundredGemButton.gameObject));
-                _View._TwoHundredGemButton.onClick.AddListener(() => OnClickBuyItem(GameCommonData.TwoHundredGemItemKey, _View._TwoHundredGemButton.gameObject));
-                _View._AdsButton.onClick.AddListener(OnClickAds);
                 _View._PurchaseErrorView.okButton.onClick.AddListener(OnClickCloseErrorView);
-                _View._OnClickAddThousandCoin
-                    .SelectMany(_ => _PlayFabVirtualCurrencyManager.Add1000CoinAsync().ToObservable())
+
+                PurchaseInPlayStoreSubscribe(_View._OnClickAddThousandCoin, GameCommonData.Item1000CoinKey);
+                PurchaseInPlayStoreSubscribe(_View._FiveThousandCoinButton, GameCommonData.Item5000CoinKey);
+                PurchaseInPlayStoreSubscribe(_View._TwelveThousandCoinButton, GameCommonData.Item12000CoinKey);
+                PurchaseInPlayStoreSubscribe(_View._TwentyGemButton, GameCommonData.Item20GemKey);
+                PurchaseInPlayStoreSubscribe(_View._HundredGemButton, GameCommonData.Item100GemKey);
+                PurchaseInPlayStoreSubscribe(_View._TwoHundredGemButton, GameCommonData.Item200GemKey);
+                CharacterSubscribe();
+                WeaponSubscribe();
+                ErrorSubscribe();
+                AdMobSubscribe();
+            }
+
+            private void AdMobSubscribe()
+            {
+                _View._AdsButton
+                    .Do(_ => Owner.SetActiveBlockPanel(true))
+                    .Do(_ => OnClickAds())
+                    .Subscribe()
+                    .AddTo(_cts.Token);
+
+                _AdMobManager
+                    ._RewardSubject
+                    .Select(tuple => (tuple.Item1, GetRewardKey(tuple.Item2)))
+                    .SelectMany(tuple => _PlayFabVirtualCurrencyManager.AddVirtualCurrency(tuple.Item2, tuple.Item1).ToObservable())
                     .SelectMany(_ => SetVirtualCurrencyText().ToObservable())
                     .Subscribe()
                     .AddTo(_cts.Token);
 
-                CharacterSubscribe();
-                WeaponSubscribe();
+                _AdMobManager
+                    ._RewardSubject
+                    .Select(tuple => GetRewardPopupViewModel(amount: tuple.Item1, rewardType: tuple.Item2))
+                    .SelectMany(popupViewModel => _PopupGenerateUseCase.GenerateRewardPopup(popupViewModel))
+                    .Subscribe(_ => Owner.SetActiveBlockPanel(false))
+                    .AddTo(_cts.Token);
+            }
+
+            private void PurchaseInPlayStoreSubscribe(IObservable<Unit> onClickObservable, string itemId)
+            {
+                onClickObservable
+                    .Do(_ => Owner.SetActiveBlockPanel(true))
+                    .Do(_ => _PlayStoreShopManager.BuyItem(itemId))
+                    .Subscribe()
+                    .AddTo(_cts.Token);
+
+                _PlayStoreShopManager
+                    ._OnSuccessPurchase
+                    .Where(tuple => tuple.Item4 == itemId)
+                    .SelectMany(tuple => _PlayFabVirtualCurrencyManager.AddVirtualCurrency(tuple.Item1, tuple.Item2).ToObservable())
+                    .SelectMany(_ => SetVirtualCurrencyText().ToObservable())
+                    .Subscribe()
+                    .AddTo(_cts.Token);
+
+                _PlayStoreShopManager
+                    ._OnSuccessPurchase
+                    .Where(tuple => tuple.Item4 == itemId)
+                    .Select(tuple => GetRewardPopupViewModel(amount: tuple.Item2, rewardType: tuple.Item3))
+                    .SelectMany(popupViewModel => _PopupGenerateUseCase.GenerateRewardPopup(popupViewModel))
+                    .Subscribe(_ => Owner.SetActiveBlockPanel(false))
+                    .AddTo(_cts.Token);
+            }
+
+            private void ErrorSubscribe()
+            {
+                _PlayStoreShopManager
+                    ._OnFailedPurchase
+                    .SelectMany(message => _PopupGenerateUseCase.GenerateErrorPopup(message))
+                    .Subscribe(_ => Owner.SetActiveBlockPanel(false))
+                    .AddTo(_cts.Token);
+
+                _AdMobManager
+                    ._ErrorSubject
+                    .SelectMany(message => _PopupGenerateUseCase.GenerateErrorPopup(message))
+                    .Subscribe(_ => Owner.SetActiveBlockPanel(false))
+                    .AddTo(_cts.Token);
+            }
+
+            private string GetRewardKey(GameCommonData.RewardType rewardType)
+            {
+                return rewardType switch
+                {
+                    GameCommonData.RewardType.Gem => GameCommonData.GemKey,
+                    GameCommonData.RewardType.Coin => GameCommonData.CoinKey,
+                    _ => throw new ArgumentOutOfRangeException(nameof(rewardType), rewardType, null)
+                };
+            }
+
+            private RewardPopup.ViewModel GetRewardPopupViewModel
+            (
+                int amount,
+                GameCommonData.RewardType rewardType
+            )
+            {
+                var rewardSprite = _MissionSpriteDataRepository.GetRewardSprite(rewardType);
+                var popupViewModel = new RewardPopup.ViewModel
+                (
+                    "購入完了",
+                    $"{amount}コインを獲得しました。",
+                    rewardSprite,
+                    amount
+                );
+
+                return popupViewModel;
             }
 
             private void CharacterSubscribe()
             {
-                var addCharacter = _View._GachaButton
-                    .OnClickAsObservable()
-                    .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._GachaButton).ToObservable())
-                    .Select(_ => EnoughVirtualCurrency(WeaponRewardAmount, GameCommonData.GemKey))
-                    .Publish();
+                var addCharacter =
+                    _View._GachaButton
+                        .OnClickAsObservable()
+                        .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._GachaButton).ToObservable())
+                        .Select(_ => EnoughVirtualCurrency(WeaponRewardAmount, GameCommonData.GemKey))
+                        .Publish();
 
                 addCharacter
                     .Where(enoughGem => !enoughGem)
@@ -107,20 +193,28 @@ namespace UI.Title
 
             private void WeaponSubscribe()
             {
-                var addWeapon = _View._ShopWeaponGridView._OnClickWeaponButton
-                    .Select(_ => EnoughVirtualCurrency(WeaponRewardAmount, GameCommonData.GemKey))
-                    .Publish();
+                var addWeapon =
+                    _View._ShopWeaponGridView._WeaponButton
+                        .OnClickAsObservable()
+                        .Do(_ => Owner.SetActiveBlockPanel(true))
+                        .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._ShopWeaponGridView._WeaponButton).ToObservable())
+                        .Select(_ => EnoughVirtualCurrency(WeaponRewardAmount, GameCommonData.GemKey))
+                        .Publish();
 
                 addWeapon
                     .Where(enoughGem => !enoughGem)
                     .SelectMany(_ => _PopupGenerateUseCase.GenerateErrorPopup(GameCommonData.Terms.AddGemPopupTile))
-                    .Subscribe()
+                    .Subscribe(_ => Owner.SetActiveBlockPanel(false))
                     .AddTo(_cts.Token);
 
                 addWeapon
                     .Where(enoughGem => enoughGem)
                     .SelectMany(_ => GetRewardAsync(WeaponRewardAmount, GameCommonData.RewardType.Weapon, GameCommonData.WeaponBuyPrice * WeaponRewardAmount, GameCommonData.GemKey).ToObservable())
-                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.Reward, (int)State.Shop); })
+                    .Subscribe(_ =>
+                    {
+                        Owner.SetActiveBlockPanel(false);
+                        _StateMachine.Dispatch((int)State.Reward, (int)State.Shop);
+                    })
                     .AddTo(_cts.Token);
 
                 addWeapon.Connect().AddTo(_cts.Token);
@@ -147,7 +241,7 @@ namespace UI.Title
                     var reward = _RewardDataRepository.GetRandomCharacterReward(rewardAmount).ToArray();
                     await _GetRewardUseCase.InAsTask(reward, cost, currencyKey);
                 }
-                
+
                 await SetVirtualCurrencyText();
             }
 
@@ -176,29 +270,9 @@ namespace UI.Title
                 _UiAnimation.ClickScaleColor(backButton).OnComplete(() => { Owner._stateMachine.Dispatch((int)State.Main); }).SetLink(backButton);
             }
 
-            private void OnClickBuyItem(string itemKey, GameObject button)
-            {
-                _UiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
-                {
-                    await _PlayFabShopManager.TryPurchaseItemByRealMoney(itemKey);
-                    await SetVirtualCurrencyText();
-                })).SetLink(button);
-            }
-
             private void OnClickAds()
             {
-                var button = _View._AdsButton.gameObject;
-                Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
-                {
-                    var result = await Owner._playFabAdsManager.GetAdPlacementAsync(Owner.GetCancellationTokenOnDestroy());
-                    if (!result)
-                    {
-                        return;
-                    }
-
-                    await SetVirtualCurrencyText();
-                    //await Owner.SetRewardUI(AddRewardValue, _gemSprite);
-                })).SetLink(button);
+                _AdMobManager.ShowRewardedAd();
             }
 
             private void OnClickCloseErrorView()

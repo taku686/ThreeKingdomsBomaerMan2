@@ -14,6 +14,7 @@ public class PopupGenerateUseCase : IDisposable
     [Inject] private SkillDetailPopup.Factory _skillDetailPopupFactory;
     [Inject] private AbnormalConditionPopup.Factory _abnormalConditionPopupFactory;
     [Inject] private RewardPopup.Factory _rewardPopupFactory;
+    [Inject] private SettingPopup.Factory _settingPopupFactory;
 
     public IObservable<bool> GenerateConfirmPopup
     (
@@ -81,6 +82,13 @@ public class PopupGenerateUseCase : IDisposable
         var rewardPopup = _rewardPopupFactory.Create();
         rewardPopup.Open(viewModel).Forget();
         return rewardPopup._OnClickButton;
+    }
+
+    public IObservable<Unit> GenerateSettingPopup(SettingPopup.ViewModel viewModel)
+    {
+        var settingPopup = _settingPopupFactory.Create();
+        settingPopup.Open(viewModel).Forget();
+        return settingPopup._OnClickButton;
     }
 
     public void Dispose()

@@ -19,8 +19,6 @@ namespace UI.Title
             private RewardDataUseCase _RewardDataUseCase => Owner._rewardDataUseCase;
             private StateMachine<TitleCore> _StateMachine => Owner._stateMachine;
             private CancellationTokenSource _cts;
-            private const int ResultWaitDuration = 1;
-            private const float TouchWaitDuration = 0.3f;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {

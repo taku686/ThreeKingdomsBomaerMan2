@@ -39,6 +39,8 @@ namespace Common.Installer
             InstallSlashSKill();
             InstallBuffSkill();
             InstallHealSkill();
+            InstallShop();
+            InstallSetting();
         }
 
         private void InstallCommon()
@@ -132,6 +134,17 @@ namespace Common.Installer
         private void InstallHealSkill()
         {
             Container.Bind<HealSkill>().AsCached();
+        }
+
+        private void InstallShop()
+        {
+            Container.Bind<PlayStoreShopManager>().AsCached();
+            Container.Bind<AdMobManager>().AsCached();
+        }
+
+        private void InstallSetting()
+        {
+            Container.Bind<SettingViewModelUseCase>().AsCached();
         }
     }
 }

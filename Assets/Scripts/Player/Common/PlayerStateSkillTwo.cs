@@ -1,6 +1,4 @@
-﻿using Common.Data;
-
-namespace Player.Common
+﻿namespace Player.Common
 {
     public partial class PlayerCore
     {
@@ -10,8 +8,8 @@ namespace Player.Common
             {
                 base.Initialize();
                 var playerKey = Owner.GetPlayerKey();
-                var weaponData = _PhotonNetworkManager.GetWeaponData(playerKey);
-                _SkillMasterData = weaponData.SpecialSkillMasterData;
+                var characterData = _PhotonNetworkManager.GetCharacterData(playerKey);
+                _SkillMasterData = characterData._SpecialSkillMasterData;
                 _ActiveSkillManager.ActivateSkill(_SkillMasterData);
             }
         }

@@ -74,7 +74,7 @@ namespace Manager.BattleManager
                         }
 
                         _View.UpdateTime(time);
-                        _View.UpdateSkillUI();
+                        _View.UpdateInputViewTimer();
                     })
                     .AddTo(_cts.Token);
             }
@@ -134,6 +134,10 @@ namespace Manager.BattleManager
 
             private void ViewSubscribe()
             {
+                _View.OnClickWeaponSkillButtonAsObservable()
+                    .Subscribe(_ => { _PlayerCore._WeaponSkillSubject.OnNext(Unit.Default); })
+                    .AddTo(_cts.Token);
+
                 _View.OnClickNormalSkillButtonAsObservable()
                     .Subscribe(_ => { _PlayerCore._NormalSkillSubject.OnNext(Unit.Default); })
                     .AddTo(_cts.Token);

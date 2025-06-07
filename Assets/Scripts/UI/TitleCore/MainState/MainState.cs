@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using Assets.Scripts.Common.PlayFab;
 using Common.Data;
 using Cysharp.Threading.Tasks;
@@ -23,6 +24,7 @@ namespace UI.Title
             private UserInfoViewModelUseCase _UserInfoViewModelUseCase => Owner._userInfoViewModelUseCase;
             private MainViewModelUseCase _MainViewModelUseCase => Owner._mainViewModelUseCase;
             private TemporaryCharacterRepository _TemporaryCharacterRepository => Owner._temporaryCharacterRepository;
+            private SettingViewModelUseCase _SettingViewModelUseCase => Owner._settingViewModelUseCase;
 
             private CancellationTokenSource _cts;
 
@@ -105,13 +107,6 @@ namespace UI.Title
                     .Subscribe(_ => { _StateMachine.Dispatch((int)State.Shop); })
                     .AddTo(_cts.Token);
 
-                _View._SettingButton
-                    .OnClickAsObservable()
-                    .Take(1)
-                    .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._SettingButton).ToObservable())
-                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.Setting); })
-                    .AddTo(_cts.Token);
-
                 _View._BattleReadyButton
                     .OnClickAsObservable()
                     .Take(1)
@@ -131,6 +126,14 @@ namespace UI.Title
                     .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._UserInfoButton).ToObservable())
                     .Select(_ => _UserInfoViewModelUseCase.InAsTask())
                     .SelectMany(viewModel => _PopupGenerateUseCase.GenerateUserInfoPopup(viewModel))
+                    .Subscribe(_ => Owner.SetActiveBlockPanel(false))
+                    .AddTo(_cts.Token);
+
+                _View._SettingButton
+                    .OnClickAsObservable()
+                    .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._SettingButton).ToObservable())
+                    .Select(_ => _SettingViewModelUseCase.InAsTask())
+                    .SelectMany(viewModel => _PopupGenerateUseCase.GenerateSettingPopup(viewModel))
                     .Subscribe(_ => Owner.SetActiveBlockPanel(false))
                     .AddTo(_cts.Token);
 

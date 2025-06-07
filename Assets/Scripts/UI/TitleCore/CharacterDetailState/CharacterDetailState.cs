@@ -97,17 +97,19 @@ namespace UI.Title
 
                 _View._BackButton
                     .OnClickAsObservable()
-                    .Take(1)
                     .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._BackButton).ToObservable())
                     .Subscribe(_ => OnClickBackButton())
                     .AddTo(_cts.Token);
 
                 _View._TeamEditButton
                     .OnClickAsObservable()
-                    .Take(1)
                     .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._TeamEditButton).ToObservable())
                     .SelectMany(_ => OnClickDecideButton().ToObservable())
-                    .Subscribe()
+                    .Subscribe(_ =>
+                    {
+                        ChangeState();
+                        Owner.SetActiveBlockPanel(false);
+                    })
                     .AddTo(_cts.Token);
 
                 _View._LeftArrowButton.OnClickAsObservable()
@@ -148,7 +150,7 @@ namespace UI.Title
                     .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._InventoryButton).ToObservable())
                     .Subscribe(_ =>
                     {
-                        stateMachine.Dispatch((int)State.Inventory);
+                        stateMachine.Dispatch((int)State.Inventory, (int)State.CharacterDetail);
                         Owner.SetActiveBlockPanel(false);
                     })
                     .AddTo(_cts.Token);
@@ -163,7 +165,7 @@ namespace UI.Title
                     .SelectMany(button => Owner.OnClickScaleColorAnimation(button).ToObservable())
                     .WithLatestFrom(_onChangeViewModel, (_, onChange) => onChange)
                     .Select(characterId => _CharacterDetailViewModelUseCase.InAsTask(characterId, _isTeamEdit))
-                    .Select(viewModel => _SkillDetailViewModelUseCase.InAsTask(viewModel._WeaponMasterData.Id, SkillOne))
+                    .Select(viewModel => _SkillDetailViewModelUseCase.InAsTask(viewModel._CharacterData.NormalSkillId))
                     .SelectMany(viewModel => _PopupGenerateUseCase.GenerateSkillDetailPopup(viewModel))
                     .Subscribe(_ => { Owner.SetActiveBlockPanel(false); })
                     .AddTo(_cts.Token);
@@ -172,7 +174,17 @@ namespace UI.Title
                     .SelectMany(button => Owner.OnClickScaleColorAnimation(button).ToObservable())
                     .WithLatestFrom(_onChangeViewModel, (_, onChange) => onChange)
                     .Select(characterId => _CharacterDetailViewModelUseCase.InAsTask(characterId, _isTeamEdit))
-                    .Select(viewModel => _SkillDetailViewModelUseCase.InAsTask(viewModel._WeaponMasterData.Id, SkillTwo))
+                    .Select(viewModel => _SkillDetailViewModelUseCase.InAsTask(viewModel._CharacterData.SpecialSkillId))
+                    .SelectMany(viewModel => _PopupGenerateUseCase.GenerateSkillDetailPopup(viewModel))
+                    .Subscribe(_ => { Owner.SetActiveBlockPanel(false); })
+                    .AddTo(_cts.Token);
+
+                _View._OnClickWeaponSkillButtonAsObservable
+                    .SelectMany(button => Owner.OnClickScaleColorAnimation(button).ToObservable())
+                    .WithLatestFrom(_onChangeViewModel, (_, onChange) => onChange)
+                    .Select(characterId => _CharacterDetailViewModelUseCase.InAsTask(characterId, _isTeamEdit))
+                    .Where(viewModel => viewModel._WeaponMasterData.NormalSkillMasterData != null)
+                    .Select(viewModel => _SkillDetailViewModelUseCase.InAsTask(viewModel._WeaponMasterData.NormalSkillMasterData.Id))
                     .SelectMany(viewModel => _PopupGenerateUseCase.GenerateSkillDetailPopup(viewModel))
                     .Subscribe(_ => { Owner.SetActiveBlockPanel(false); })
                     .AddTo(_cts.Token);
@@ -250,15 +262,7 @@ namespace UI.Title
                     var userData = _UserDataRepository.GetUserData();
                     var characterId = _sortedCharacters[_candidateIndex].Id;
                     _UserDataRepository.SetTeamMember(characterId);
-                    var result = await _playFabUserDataManager.TryUpdateUserDataAsync(userData);
-                    if (result)
-                    {
-                        ChangeState();
-                    }
-                }
-                else
-                {
-                    ChangeState();
+                    await _playFabUserDataManager.TryUpdateUserDataAsync(userData);
                 }
             }
 
@@ -268,7 +272,6 @@ namespace UI.Title
                 if (prevState >= 0)
                 {
                     _StateMachine.Dispatch(prevState);
-                    _StateMachine._PreviousState = GameCommonData.InvalidNumber;
                 }
                 else
                 {

@@ -59,6 +59,7 @@ namespace UI.Title
 
         public IObservable<Button> _OnClickNormalSkillButtonAsObservable => skillsView._OnClickNormalSkillButtonAsObservable;
         public IObservable<Button> _OnClickSpecialSkillButtonAsObservable => skillsView._OnClickSpecialSkillButtonAsObservable;
+        public IObservable<Button> _OnClickWeaponSkillButtonAsObservable => skillsView._OnClickWeaponSkillButtonAsObservable;
 
         public void ApplyViewModel(ViewModel viewModel)
         {
@@ -70,7 +71,7 @@ namespace UI.Title
             var isTeamEdit = viewModel._IsTeamEdit;
             var teamMembers = viewModel._TeamMembers;
             SetStatusView(characterData, weaponMasterData);
-            ApplySkillsViewModel(skillsViewModel);
+            skillsView.ApplyViewModel(skillsViewModel);
             SetLevelView(currentLevelData, nextLevelData);
             purchaseErrorView.gameObject.SetActive(false);
             virtualCurrencyAddPopup.gameObject.SetActive(false);
@@ -170,11 +171,6 @@ namespace UI.Title
             statusView._FireRangeText.text = _statusTextDictionary.First(x => x.Key == (int)StatusType.FireRange).Value.Item2;
             statusView._DefenseText.text = _statusTextDictionary.First(x => x.Key == (int)StatusType.Defense).Value.Item2;
             statusView._ResistanceText.text = _statusTextDictionary.First(x => x.Key == (int)StatusType.Resistance).Value.Item2;
-        }
-
-        private void ApplySkillsViewModel(SkillsView.ViewModel viewModel)
-        {
-            skillsView.ApplyViewModel(viewModel);
         }
 
         private void SetLevelView(LevelMasterData currentLevelMasterData, LevelMasterData nextLevelMasterData)
