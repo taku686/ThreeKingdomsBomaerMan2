@@ -13,7 +13,7 @@ public class RFX4_DeactivateByTime : MonoBehaviour {
 	{
         currentTime = 0;
         isActiveState = true;
-	    DeactivatedGameObject.SetActive(true);
+	    //DeactivatedGameObject.SetActive(true);
     }
 
     private void Update()

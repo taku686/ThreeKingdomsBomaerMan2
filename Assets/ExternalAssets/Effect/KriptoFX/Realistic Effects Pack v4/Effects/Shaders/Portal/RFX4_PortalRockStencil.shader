@@ -1,4 +1,4 @@
-Shader "KriptoFX/RFX4/Portal/RockStencil" 
+Shader "KriptoFX/RFX4/Portal/RockStencil"
 {
 	Properties
 	{
@@ -13,7 +13,7 @@ Shader "KriptoFX/RFX4/Portal/RockStencil"
 	}
 
 		Category{
-			
+
 			SubShader{
 
 			Stencil{
@@ -37,7 +37,7 @@ Shader "KriptoFX/RFX4/Portal/RockStencil"
 
 		sampler2D _MainTex;
 		sampler2D _EmissionTex;
-		sampler2D _CameraDepthTexture;
+		UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
 
 		float4 _MainTex_ST;
 		float4 _EmissionTex_ST;
@@ -60,7 +60,7 @@ Shader "KriptoFX/RFX4/Portal/RockStencil"
 			float4 vertex : POSITION;
 			float4 normal : NORMAL;
 			float2 texcoord : TEXCOORD0;
-			UNITY_VERTEX_INPUT_INSTANCE_ID
+			UNITY_VERTEX_INPUT_INSTANCE_ID //Insert
 		};
 
 		struct v2f {
@@ -70,9 +70,9 @@ Shader "KriptoFX/RFX4/Portal/RockStencil"
 			float fresnel : TEXCOORD2;
 			half3 color : COLOR;
 			UNITY_FOG_COORDS(3)
-
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
+
 		};
 
 		half3 ShadeCustomLights(float4 vertex, float3 normal, int lightCount)
@@ -99,11 +99,10 @@ Shader "KriptoFX/RFX4/Portal/RockStencil"
 		v2f vert(appdata_t v)
 		{
 			v2f o;
-			
 
-			UNITY_SETUP_INSTANCE_ID(v);
-			UNITY_TRANSFER_INSTANCE_ID(v, o);
-			UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+			UNITY_SETUP_INSTANCE_ID(v); //Insert
+			UNITY_INITIALIZE_OUTPUT(v2f, o); //Insert
+			UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o); //Insert
 			o.vertex = UnityObjectToClipPos(v.vertex);
 			o.texcoord.xy = TRANSFORM_TEX(v.texcoord, _MainTex);
 			o.texcoord2.xy = TRANSFORM_TEX(v.texcoord, _EmissionTex);
@@ -115,17 +114,16 @@ Shader "KriptoFX/RFX4/Portal/RockStencil"
 			o.color.rgb = ShadeCustomLights(v.vertex, v.normal, 4);
 
 			UNITY_TRANSFER_FOG(o,o.vertex);
-		
+
 			return o;
 		}
 
 
 		half4 frag(v2f i) : SV_Target
 		{
-			UNITY_SETUP_INSTANCE_ID(i);
 			half4 tex = tex2D(_MainTex, i.texcoord);
 			half4 emission = tex2D(_EmissionTex, i.texcoord2) * _EmissionColor;
-		
+
 			half4 res = 2 * tex *  _TintColor;
 			res.rgb *= i.color.rgb;
 

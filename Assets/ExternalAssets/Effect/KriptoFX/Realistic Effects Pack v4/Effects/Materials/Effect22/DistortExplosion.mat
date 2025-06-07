@@ -4,15 +4,16 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_Name: DistortExplosion
   m_Shader: {fileID: 4800000, guid: 3b5eaa5a09e6b204085004ea02b03e38, type: 3}
   m_ShaderKeywords: USE_ALPHA_CLIPING
   m_LightmapFlags: 5
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 2985
   stringTagMap: {}
   disabledShaderPasses: []
   m_SavedProperties:
@@ -117,3 +118,4 @@ Material:
     - _HeightUVScrollDistort: {r: 8, g: 12, b: 0, a: 0}
     - _MainColor: {r: 1, g: 1, b: 1, a: 1}
     - _TintColor: {r: 0, g: 0, b: 0, a: 1}
+  m_BuildTextureStacks: []

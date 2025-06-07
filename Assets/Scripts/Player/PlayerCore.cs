@@ -178,7 +178,7 @@ namespace Player.Common
             DestroyWeaponObj(gameObject);
             _playerGeneratorUseCase.DestroyPlayerObj();
             var playerObj = _playerGeneratorUseCase.InstantiatePlayerObj(characterData, transform, weaponData.Id, false);
-            var weaponObjs = _characterCreateUseCase.CreateWeapon(playerObj, weaponData, true);
+            _characterCreateUseCase.CreateWeapon(playerObj, weaponData, true);
 
             _animator = gameObject.GetComponentInChildren<Animator>();
             _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();

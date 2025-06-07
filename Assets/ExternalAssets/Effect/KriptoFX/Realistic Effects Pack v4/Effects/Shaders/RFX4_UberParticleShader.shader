@@ -1,10 +1,11 @@
+
 Shader "KriptoFX/RFX4/Particle"
 {
 	Properties
 	{
 		[Header(Main Settings)]
 	[Space]
-	[PerRendererData] [HDR] _TintColor("Tint Color", Color) = (1,1,1,1)
+	[PerRendererData] [HDR]_TintColor("Tint Color", Color) = (1,1,1,1)
 		_MainTex("Main Texture", 2D) = "white" {}
 
 	[Header(Fading)]
@@ -74,7 +75,6 @@ Shader "KriptoFX/RFX4/Particle"
 #pragma fragment frag
 		//#pragma target 3.0
 
-#pragma multi_compile_particles
 #pragma multi_compile_fog
 #pragma multi_compile_instancing
 #pragma shader_feature USE_NOISE_DISTORTION
@@ -170,9 +170,9 @@ Shader "KriptoFX/RFX4/Particle"
 		UNITY_FOG_COORDS(4)
 
 #ifdef _FADING_ON
-	#ifdef SOFTPARTICLES_ON
+
 			float4 projPos : TEXCOORD5;
-	#endif
+
 #endif
 
 #if defined (USE_FRESNEL_FADING) || defined (USE_FRESNEL)
@@ -197,10 +197,10 @@ Shader "KriptoFX/RFX4/Particle"
 
 		o.vertex = UnityObjectToClipPos(v.vertex);
 #ifdef _FADING_ON
-	#ifdef SOFTPARTICLES_ON
+
 		o.projPos = ComputeScreenPos(o.vertex);
 		COMPUTE_EYEDEPTH(o.projPos.z);
-	#endif
+
 #endif
 		o.color = v.color;
 
@@ -253,14 +253,14 @@ Shader "KriptoFX/RFX4/Particle"
 		UNITY_SETUP_INSTANCE_ID(i);
 
 #ifdef _FADING_ON
-	#ifdef SOFTPARTICLES_ON
-		float z = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.projPos.xy / i.projPos.w).r;
+
+		float z = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.projPos.xy/ i.projPos.w).r;
 		float sceneZ = LinearEyeDepth(UNITY_SAMPLE_DEPTH(z));
 		float partZ = i.projPos.z;
 		float fade = saturate(_InvFade * (sceneZ - partZ));
 		fade = lerp(fade, 1 - fade, _SoftInverted);
 		i.color.a *= fade;
-	#endif
+
 #endif
 
 #ifdef USE_NOISE_DISTORTION
@@ -299,7 +299,7 @@ Shader "KriptoFX/RFX4/Particle"
 
 	half4 tintColor = UNITY_ACCESS_INSTANCED_PROP(_TintColor_arr, _TintColor);
 	tintColor.rgb = tintColor.rgb * tintColor.rgb * 2;
-	half4 res = 2 * tex * tintColor;
+	half4 res = 2 * tex *  tintColor;
 
 #ifdef USE_CUTOUT
 	fixed cutout = UNITY_ACCESS_INSTANCED_PROP(_Cutout_arr, _Cutout);
@@ -332,7 +332,7 @@ Shader "KriptoFX/RFX4/Particle"
 #endif
 
 #ifdef USE_FRESNEL
-	res.rgb += i.fresnel * _FresnelColor;
+	res.rgb += i.fresnel *  _FresnelColor.rgb * _FresnelColor.rgb * 2;
 #endif
 
 	res.a = saturate(res.a);
