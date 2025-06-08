@@ -25,10 +25,12 @@ namespace Manager.BattleManager
             private AbnormalConditionSpriteRepository _AbnormalConditionSpriteRepository => Owner._abnormalConditionSpriteRepository;
             private PlayerStatusInfo _PlayerStatusInfo => Owner._playerStatusInfo;
             private StatusInBattleViewModelUseCase _StatusInBattleViewModelUseCase => Owner._statusInBattleViewModelUseCase;
+            private ArrowSkillIndicatorView _ArrowSkillIndicatorView => Owner._arrowSkillIndicatorView;
 
             private CancellationTokenSource _cts;
             private int _startTime;
             private int _rank;
+            private float _range;
             private readonly Dictionary<AbnormalCondition, Image> _abnormalConditionImages = new();
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
@@ -134,18 +136,6 @@ namespace Manager.BattleManager
 
             private void ViewSubscribe()
             {
-                _View.OnClickWeaponSkillButtonAsObservable()
-                    .Subscribe(_ => { _PlayerCore._WeaponSkillSubject.OnNext(Unit.Default); })
-                    .AddTo(_cts.Token);
-
-                _View.OnClickNormalSkillButtonAsObservable()
-                    .Subscribe(_ => { _PlayerCore._NormalSkillSubject.OnNext(Unit.Default); })
-                    .AddTo(_cts.Token);
-
-                _View.OnClickSpecialSkillButtonAsObservable()
-                    .Subscribe(_ => { _PlayerCore._SpecialSkillSubject.OnNext(Unit.Default); })
-                    .AddTo(_cts.Token);
-
                 _View.OnClickDashButtonAsObservable()
                     .Subscribe(_ => { _PlayerCore._DashSkillSubject.OnNext(Unit.Default); })
                     .AddTo(_cts.Token);
@@ -157,6 +147,82 @@ namespace Manager.BattleManager
                 _View.OnClickCharacterChangeButtonAsObservable()
                     .Subscribe(_ => { _PlayerCore.ChangeTeamMember(); })
                     .AddTo(_cts.Token);
+
+                _View.OnTouchWeaponSkillButtonAsObservable()
+                    .Subscribe(tuple =>
+                    {
+                        var isActive = tuple.Item1;
+                        var range = tuple.Item2;
+                        ActivateSkill(isActive, range, _PlayerCore._WeaponSkillSubject);
+                    })
+                    .AddTo(_cts.Token);
+
+                _View.OnTouchNormalSkillButtonAsObservable()
+                    .Subscribe(tuple =>
+                    {
+                        var isActive = tuple.Item1;
+                        var range = tuple.Item2;
+                        ActivateSkill(isActive, range, _PlayerCore._NormalSkillSubject);
+                    })
+                    .AddTo(_cts.Token);
+
+                _View.OnTouchSpecialSkillButtonAsObservable()
+                    .Subscribe(tuple =>
+                    {
+                        var isActive = tuple.Item1;
+                        var range = tuple.Item2;
+                        ActivateSkill(isActive, range, _PlayerCore._SpecialSkillSubject);
+                    })
+                    .AddTo(_cts.Token);
+                
+                Observable
+                    .EveryFixedUpdate()
+                    .Subscribe(_ => { SearchEnemy(_range); })
+                    .AddTo(_cts.Token);
+            }
+
+            private void SearchEnemy(float range)
+            {
+                if (Mathf.Approximately(range, GameCommonData.InvalidNumber) || _ArrowSkillIndicatorView == null)
+                {
+                    return;
+                }
+
+                var position = _PlayerCore.transform.position;
+                var origin = new Vector3(position.x, 0.5f, position.z);
+                var direction = _PlayerCore.transform.forward;
+                var layerMask = GameCommonData.GetObstaclesLayerMask();
+
+                if (Physics.Raycast(origin, direction, out var hitInfo, range, layerMask))
+                {
+                    _ArrowSkillIndicatorView.EnemyHit();
+                    _ArrowSkillIndicatorView.UpdateIndicatorLength(hitInfo.distance);
+                }
+                else
+                {
+                    _ArrowSkillIndicatorView.NoEnemyHit();
+                    _ArrowSkillIndicatorView.UpdateIndicatorLength(range);
+                }
+            }
+
+
+            private void ActivateSkill(bool isActive, float range, Subject<Unit> skillSubject)
+            {
+                _range = range;
+
+                if (!isActive)
+                {
+                    skillSubject.OnNext(Unit.Default);
+                }
+
+                if (Mathf.Approximately(range, GameCommonData.InvalidNumber))
+                {
+                    Owner._arrowSkillIndicatorView.gameObject.SetActive(false);
+                    return;
+                }
+
+                Owner._arrowSkillIndicatorView.gameObject.SetActive(isActive);
+                Owner._arrowSkillIndicatorView.Setup(range);
             }
 
             private void DestroyPlayerListUi()

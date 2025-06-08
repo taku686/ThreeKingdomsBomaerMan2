@@ -56,10 +56,13 @@ namespace Manager.BattleManager
         [SerializeField] private Transform playerUIParent;
         [SerializeField] private GameObject playerUI;
         [SerializeField] private EffectActivateUseCase effectActivator;
+        [SerializeField] private GameObject _arrowSkillIndicatorPrefab;
+        [SerializeField] private GameObject _circleSkillIndicatorPrefab;
         private StateMachine<BattleCore> _stateMachine;
         private PlayerCore _playerCore;
         private readonly List<PlayerStatusUI> _playerStatusUiList = new();
         private PlayerStatusInfo _playerStatusInfo;
+        private ArrowSkillIndicatorView _arrowSkillIndicatorView;
 
         public enum State
         {
@@ -119,6 +122,11 @@ namespace Manager.BattleManager
         private void SetPlayerStatusInfo(PlayerStatusInfo playerStatusInfo)
         {
             _playerStatusInfo = playerStatusInfo;
+        }
+        
+        private void SetArrowSkillIndicatorView(ArrowSkillIndicatorView arrowSkillIndicatorView)
+        {
+            _arrowSkillIndicatorView = arrowSkillIndicatorView;
         }
     }
 }

@@ -3,7 +3,9 @@ using System.Globalization;
 using Common.Data;
 using TMPro;
 using UniRx;
+using UniRx.Triggers;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class SkillButtonView : MonoBehaviour
@@ -19,6 +21,7 @@ public class SkillButtonView : MonoBehaviour
     private float _timerSkillEffectTime;
     private float _skillInterval;
     private float _skillEffectTime;
+    private float _skillRange;
     private bool _isActive;
     private SkillActionType _skillActionType;
     private const float MaxFillAmount = 1;
@@ -31,6 +34,21 @@ public class SkillButtonView : MonoBehaviour
         SpecialSkillButton,
         JumpSkillButton,
         CharacterChangeSkillButton
+    }
+
+    public IObservable<(bool, float)> OnTouchSkillButtonAsObservable()
+    {
+        return _skillButton
+            .OnPointerDownAsObservable()
+            .Select(_ => (true, _skillRange))
+            .Merge(_skillButton.OnPointerUpAsObservable().Select(_ => (false, _skillRange)));
+    }
+
+    public IObservable<float> OnDragSkillButtonAsObservable()
+    {
+        return _skillButton
+            .OnDragAsObservable()
+            .Select(_ => _skillRange);
     }
 
     public void UpdateTimer()
@@ -69,6 +87,7 @@ public class SkillButtonView : MonoBehaviour
         _skillIconImage.gameObject.SetActive(isSkillActive);
         _skillActiveCountdownText.gameObject.SetActive(isSkillActive);
         _disableImage.gameObject.SetActive(!isSkillActive);
+        _skillRange = skillMasterData.Range;
 
         _skillActiveCountdownText.gameObject.SetActive(false);
         _skillActiveCountdownImage.gameObject.SetActive(false);

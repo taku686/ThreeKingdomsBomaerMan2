@@ -14,15 +14,15 @@ namespace Bomb
 
         protected override async UniTask Explosion(int damageAmount)
         {
-            if (IsExplosion)
+            if (_IsExplosion)
             {
                 return;
             }
 
-            IsExplosion = true;
-            BlockShakeAction.Invoke();
+            _IsExplosion = true;
+            _BlockShakeAction.Invoke();
             var position = transform.position;
-            Vector3 startPos = new Vector3(position.x, 0.5f, position.z);
+            var startPos = new Vector3(position.x, 0.5f, position.z);
             await UniTask.WhenAll(
                 Explosion(startPos, MoveDirection.Forward, damageAmount),
                 Explosion(startPos, MoveDirection.Back, damageAmount),
@@ -36,9 +36,9 @@ namespace Bomb
         {
             var dir = GameCommonData.DirectionToVector3(moveDirection);
             var index = (int)moveDirection;
-            BombRenderer.enabled = false;
-            BoxColliderComponent.enabled = false;
-            var isHit = TryGetObstacles(_fireRange, dir, startPos, ObstaclesLayerMask, out var hit);
+            _BombRenderer.enabled = false;
+            _BoxColliderComponent.enabled = false;
+            var isHit = TryGetObstacles(_fireRange, dir, startPos, _ObstaclesLayerMask, out var hit);
             var fireRange = isHit ? CalculateFireRange(hit, startPos) : _fireRange;
             var endPos = CalculateEndPos(isHit, hit, startPos, fireRange, dir);
             var distance = (endPos - startPos).magnitude;
@@ -115,7 +115,7 @@ namespace Bomb
             explosionEffect.localPosition = EffectOriginPosition;
             explosionEffect.gameObject.SetActive(true);
             explosionEffect.DOMove(endPos, moveDuration).SetLink(gameObject);
-            await UniTask.Delay(TimeSpan.FromSeconds(ExplosionDisplayDuration), cancellationToken: Cts.Token);
+            await UniTask.Delay(TimeSpan.FromSeconds(ExplosionDisplayDuration), cancellationToken: _Cts.Token);
             explosionEffect.gameObject.SetActive(false);
         }
     }

@@ -14,15 +14,15 @@ namespace Bomb
     public abstract class BombBase : MonoBehaviour
     {
         [SerializeField] protected List<GameObject> explosionList;
-        protected static readonly float ExplosionDisplayDuration = 0.9f;
-        protected static readonly float MinDistance = 1.0f;
-        protected CancellationTokenSource Cts;
+        protected const float ExplosionDisplayDuration = 0.9f;
+        protected const float MinDistance = 1.0f;
+        protected CancellationTokenSource _Cts;
         public int _fireRange;
-        protected LayerMask ObstaclesLayerMask;
-        protected bool IsExplosion;
-        protected Renderer BombRenderer;
-        protected BoxCollider BoxColliderComponent;
-        protected Action BlockShakeAction;
+        protected LayerMask _ObstaclesLayerMask;
+        protected bool _IsExplosion;
+        protected Renderer _BombRenderer;
+        protected BoxCollider _BoxColliderComponent;
+        protected Action _BlockShakeAction;
         private int _damageAmount;
         private int _playerId;
         private int _explosionTime;
@@ -34,11 +34,11 @@ namespace Bomb
 
         public void Initialize()
         {
-            BombRenderer = GetComponent<Renderer>();
-            BoxColliderComponent = GetComponent<BoxCollider>();
-            Cts = new CancellationTokenSource();
+            _BombRenderer = GetComponent<Renderer>();
+            _BoxColliderComponent = GetComponent<BoxCollider>();
+            _Cts = new CancellationTokenSource();
             _token = this.GetCancellationTokenOnDestroy();
-            ObstaclesLayerMask = LayerMask.GetMask(GameCommonData.ObstacleLayer);
+            _ObstaclesLayerMask = LayerMask.GetMask(GameCommonData.ObstacleLayer);
             gameObject.layer = LayerMask.NameToLayer(GameCommonData.BombLayer);
         }
 
@@ -52,25 +52,25 @@ namespace Bomb
         )
         {
             gameObject.tag = GameCommonData.BombTag;
-            BombRenderer.enabled = true;
-            BoxColliderComponent.enabled = true;
+            _BombRenderer.enabled = true;
+            _BoxColliderComponent.enabled = true;
             _damageAmount = damageAmount;
             _playerId = playerId;
             _explosionTime = explosionTime;
             _fireRange = fireRange;
-            BlockShakeAction = stageOrnamentsBlock.Shake;
-            IsExplosion = false;
+            _BlockShakeAction = stageOrnamentsBlock.Shake;
+            _IsExplosion = false;
             foreach (var bombEffect in explosionList)
             {
                 bombEffect.SetActive(false);
             }
 
-            gameObject.UpdateAsObservable().Subscribe(_ => { CountDown(_explosionTime); }).AddTo(Cts.Token);
+            gameObject.UpdateAsObservable().Subscribe(_ => { CountDown(_explosionTime); }).AddTo(_Cts.Token);
         }
 
         private void CountDown(int explosionTime)
         {
-            if (IsExplosion)
+            if (_IsExplosion)
             {
                 return;
             }
@@ -94,15 +94,15 @@ namespace Bomb
 
         private void Cancel()
         {
-            Cts ??= new CancellationTokenSource();
-            Cts.Cancel();
-            Cts.Dispose();
-            Cts = new CancellationTokenSource();
+            _Cts ??= new CancellationTokenSource();
+            _Cts.Cancel();
+            _Cts.Dispose();
+            _Cts = new CancellationTokenSource();
         }
 
         private void OnTriggerEnter(Collider other)
         {
-            if (!other.CompareTag(GameCommonData.BombEffectTag) || IsExplosion)
+            if (!other.CompareTag(GameCommonData.BombEffectTag) || _IsExplosion)
             {
                 return;
             }
@@ -117,7 +117,7 @@ namespace Bomb
                 return;
             }
 
-            BoxColliderComponent.isTrigger = false;
+            _BoxColliderComponent.isTrigger = false;
         }
 
         private void OnDestroy()

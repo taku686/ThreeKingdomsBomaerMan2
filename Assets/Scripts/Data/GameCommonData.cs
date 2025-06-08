@@ -102,6 +102,11 @@ namespace Common.Data
         public const string Item100GemKey = "100_gem";
         public const string Item200GemKey = "200_gem";
 
+        public static int GetObstaclesLayerMask()
+        {
+            return LayerMask.GetMask(EnemyLayer) | LayerMask.GetMask(ObstacleLayer) | LayerMask.GetMask(BombLayer);
+        }
+
         public static class Terms
         {
             public const string AddGemPopupTile = "ジェムの数が足りません";

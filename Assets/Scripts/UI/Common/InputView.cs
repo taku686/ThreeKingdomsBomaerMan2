@@ -1,6 +1,7 @@
 using System;
 using Common.Data;
 using UniRx;
+using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -88,6 +89,25 @@ namespace UI.Common
         public IObservable<Unit> OnClickDashButtonAsObservable()
         {
             return _jumpSkillButtonView.OnClickSkillButtonAsObservable();
+        }
+
+        #endregion
+
+        #region OnTouch
+
+        public IObservable<(bool, float)> OnTouchWeaponSkillButtonAsObservable()
+        {
+            return _weaponSkillButtonView.OnTouchSkillButtonAsObservable();
+        }
+
+        public IObservable<(bool, float)> OnTouchNormalSkillButtonAsObservable()
+        {
+            return _weaponSkillButtonView.OnTouchSkillButtonAsObservable();
+        }
+
+        public IObservable<(bool, float)> OnTouchSpecialSkillButtonAsObservable()
+        {
+            return _weaponSkillButtonView.OnTouchSkillButtonAsObservable();
         }
 
         #endregion

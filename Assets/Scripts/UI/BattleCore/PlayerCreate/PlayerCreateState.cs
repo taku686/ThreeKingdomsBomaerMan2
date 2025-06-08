@@ -38,6 +38,8 @@ namespace Manager.BattleManager
             private SkillActivationConditionsUseCase _SkillActivationConditionsUseCase => Owner._skillActivationConditionsUseCase;
             private SetupAnimatorUseCase _SetupAnimatorUseCase => Owner._setupAnimatorUseCase;
             private TranslateStatusInBattleUseCase.Factory _TranslateStatusInBattleUseCaseFactory => Owner._translateStatusInBattleUseCaseFactory;
+            private GameObject _ArrowIndicatorPrefab => Owner._arrowSkillIndicatorPrefab;
+            private GameObject _CircleIndicatorPrefab => Owner._circleSkillIndicatorPrefab;
 
             private PhotonView _photonView;
 
@@ -250,6 +252,7 @@ namespace Manager.BattleManager
                 var playerCore = player.AddComponent<PlayerCore>();
                 Owner.SetPlayerCore(playerCore);
                 Owner.SetPlayerStatusInfo(playerStatusInfo);
+                InstantiateSkillIndicator(playerCore.transform);
                 playerCore.Initialize
                 (
                     _TranslateStatusInBattleUseCaseFactory,
@@ -263,6 +266,17 @@ namespace Manager.BattleManager
                     playerMove,
                     hpKey
                 );
+            }
+
+            private void InstantiateSkillIndicator(Transform playerTransform)
+            {
+                var arrowIndicator = Instantiate(_ArrowIndicatorPrefab, playerTransform);
+                var arrowIndicatorView = arrowIndicator.GetComponent<ArrowSkillIndicatorView>();
+                arrowIndicator.SetActive(false);
+                Owner.SetArrowSkillIndicatorView(arrowIndicatorView);
+                /*var circleIndicator = Instantiate(_CircleIndicatorPrefab, playerTransform);
+                circleIndicator.transform.localPosition = new Vector3(0, 0.2f, 0);
+                circleIndicator.transform.localEulerAngles = new Vector3(90, 90, 0);*/
             }
 
             private void GenerateEffectActivator(GameObject playerObj, int playerId)
