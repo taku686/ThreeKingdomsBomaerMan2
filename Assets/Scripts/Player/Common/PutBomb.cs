@@ -19,14 +19,13 @@ namespace Player.Common
             SetupBombProvider(translateStatusInBattleUseCase);
         }
 
-        public void SetupBombProvider(TranslateStatusInBattleUseCase translateStatusInBattleUseCase)
+        //todo BombType毎に処理を分けるように修正する
+        public void SetupBombProvider
+        (
+            TranslateStatusInBattleUseCase translateStatusInBattleUseCase
+        )
         {
-            if (_bombProvider == null)
-            {
-                return;
-            }
-
-            _bombProvider.Initialize(translateStatusInBattleUseCase);
+            _bombProvider.Initialize(translateStatusInBattleUseCase, BombType.Normal);
         }
 
 
@@ -48,13 +47,19 @@ namespace Player.Common
                 return;
             }
 
-            photonView.RPC(nameof(RpcPutBomb), RpcTarget.All, playerPos, bombType, damageAmount,
-                fireRange, explosionTime, playerId);
+            photonView.RPC(nameof(RpcPutBomb), RpcTarget.All, playerPos, bombType, damageAmount, fireRange, explosionTime, playerId);
         }
 
         [PunRPC]
-        private void RpcPutBomb(Vector3 playerPos, int bombType, int damageAmount, int fireRange,
-            int explosionTime, int playerId)
+        private void RpcPutBomb
+        (
+            Vector3 playerPos,
+            int bombType,
+            int damageAmount,
+            int fireRange,
+            int explosionTime,
+            int playerId
+        )
         {
             _mapManager.AddMap(MapManager.Area.Bomb, playerPos.x, playerPos.z);
             for (var i = 0; i <= fireRange; i++)
@@ -69,20 +74,17 @@ namespace Player.Common
             bomb.transform.position = new Vector3(playerPos.x, 0f, playerPos.z);
         }
 
-        private Vector3 CalculatePlayerPos(Vector3 playerPos)
-        {
-            var modifiedPlayerPos =
-                new Vector3(Mathf.RoundToInt(playerPos.x), playerPos.y, Mathf.RoundToInt(playerPos.z));
-            return modifiedPlayerPos;
-        }
-
-        private bool CanPutBomb(Vector3 startPos, BoxCollider boxCollider)
+        private static bool CanPutBomb(Vector3 startPos, BoxCollider boxCollider)
         {
             var pos = new Vector3(startPos.x, startPos.y + ModifiedValue, startPos.z);
             boxCollider.enabled = false;
-            var hasBomb = Physics.Raycast(pos, Vector3.down, RayDistance,
+            var hasBomb = Physics.Raycast
+            (
+                pos,
+                Vector3.down, RayDistance,
                 LayerMask.GetMask(GameCommonData.BombLayer),
-                QueryTriggerInteraction.Collide);
+                QueryTriggerInteraction.Collide
+            );
             boxCollider.enabled = true;
             return hasBomb;
         }

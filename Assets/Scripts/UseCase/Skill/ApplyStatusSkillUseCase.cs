@@ -23,7 +23,13 @@ public class ApplyStatusSkillUseCase : IDisposable
         _characterMasterDataRepository = characterMasterDataRepository;
     }
 
-    public int ApplyStatusSkill(int characterId, int skillId, StatusType statusType, LevelMasterData levelData = null)
+    public int ApplyStatusSkill
+    (
+        int characterId,
+        int skillId,
+        StatusType statusType,
+        LevelMasterData levelData = null
+    )
     {
         var appliedLevelValue = ApplyLevelStatus(characterId, statusType, levelData);
         var skillData = _skillMasterDataRepository.GetSkillData(skillId);

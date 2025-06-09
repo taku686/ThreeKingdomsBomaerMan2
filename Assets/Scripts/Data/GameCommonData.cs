@@ -57,6 +57,7 @@ namespace Common.Data
         public const string BuffKey = "Base Layer.Buff";
         public const string DeadKey = "Base Layer.Dead";
         public const string SlashKey = "Base Layer.Slash";
+        public const string ImpactKey = "Base Layer.Impact";
         public const string SpeedhParameterName = "speedh";
         public const string SpeedvParameterName = "speedv";
         public const string NormalParameterName = "Normal";
@@ -67,6 +68,7 @@ namespace Common.Data
         public const string BuffParameterName = "Buff";
         public const string DeadParameterName = "Dead";
         public const string SlashParameterName = "Slash";
+        public const string ImpactParameterName = "Impact";
         public const string CharacterSpritePath = "Sprites/Character/";
         public const string UserIconSpritePath = "Sprites/UserIcon/";
         public const string SkillIconSpritePath = "Sprites/Skill/";

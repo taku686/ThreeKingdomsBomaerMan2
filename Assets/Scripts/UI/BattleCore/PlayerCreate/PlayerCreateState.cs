@@ -11,6 +11,7 @@ using Player.Common;
 using Repository;
 using Skill;
 using UI.Battle;
+using UI.BattleCore.InBattle;
 using Unity.Mathematics;
 using UnityEngine;
 using UniRx;
@@ -28,7 +29,7 @@ namespace Manager.BattleManager
             private CameraManager _CameraManager => Owner.cameraManager;
             private StateMachine<BattleCore> _StateMachineClone => Owner._stateMachine;
             private BombProvider _BombProvider => Owner._bombProvider;
-            private EffectActivateUseCase _EffectActivateUseCase => Owner.effectActivator;
+            private SkillEffectActivateUseCase _SkillEffectActivateUseCase => Owner._skillEffectActivateUseCase;
             private List<PlayerStatusUI> _PlayerStatusUiList => Owner._playerStatusUiList;
             private CharacterMasterDataRepository _CharacterMasterDataRepository => Owner._characterMasterDataRepository;
             private WeaponMasterDataRepository _WeaponMasterDataRepository => Owner._weaponMasterDataRepository;
@@ -149,14 +150,15 @@ namespace Manager.BattleManager
                 var levelData = levelDatum[0];
                 var weaponType = weaponData.WeaponType;
 
-                var playerPutBomb = playerCore.AddComponent<PutBomb>();
+                
                 SetPlayerUI(playerCore, instantiationId, out hpKey);
                 playerMove = playerCore.AddComponent<PlayerMove>();
                 _SetupAnimatorUseCase.SetAnimatorController(playerCore, weaponType);
                 GenerateEffectActivator(playerCore, instantiationId);
                 var translateStatusInBattleUseCase = _TranslateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
                 translateStatusInBattleUseCase.InitializeStatus();
-                playerPutBomb.Initialize(_BombProvider, _MapManager, translateStatusInBattleUseCase);
+                var putBomb = playerCore.AddComponent<PutBomb>();
+                putBomb.Initialize(_BombProvider, _MapManager, translateStatusInBattleUseCase);
                 playerStatusInfo = playerCore.AddComponent<PlayerStatusInfo>();
                 playerStatusInfo.SetPlayerIndex(instantiationId);
                 AddBoxCollider(playerCore);
@@ -262,7 +264,6 @@ namespace Manager.BattleManager
                     _SkillActivationConditionsUseCase,
                     _PlayerGeneratorUseCase,
                     _CharacterCreateUseCase,
-                    _SetupAnimatorUseCase,
                     playerMove,
                     hpKey
                 );
@@ -274,14 +275,15 @@ namespace Manager.BattleManager
                 var arrowIndicatorView = arrowIndicator.GetComponent<ArrowSkillIndicatorView>();
                 arrowIndicator.SetActive(false);
                 Owner.SetArrowSkillIndicatorView(arrowIndicatorView);
-                /*var circleIndicator = Instantiate(_CircleIndicatorPrefab, playerTransform);
-                circleIndicator.transform.localPosition = new Vector3(0, 0.2f, 0);
-                circleIndicator.transform.localEulerAngles = new Vector3(90, 90, 0);*/
+                var circleIndicator = Instantiate(_CircleIndicatorPrefab, playerTransform);
+                var circleIndicatorView = circleIndicator.GetComponent<CircleSkillIndicatorView>();
+                circleIndicator.SetActive(false);
+                Owner.SetCircleSkillIndicatorView(circleIndicatorView);
             }
 
             private void GenerateEffectActivator(GameObject playerObj, int playerId)
             {
-                var effectActivator = Instantiate(_EffectActivateUseCase, playerObj.transform);
+                var effectActivator = Instantiate(_SkillEffectActivateUseCase, playerObj.transform);
                 effectActivator.transform.localPosition = new Vector3(0, 0, 0);
                 effectActivator.transform.localRotation = quaternion.identity;
                 var activateSkillSubject = _PhotonNetworkManager._ActivateSkillSubject;

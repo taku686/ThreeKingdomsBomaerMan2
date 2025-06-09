@@ -2,7 +2,6 @@
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
-using Manager;
 using Photon.Pun;
 using UniRx;
 using UnityEngine;
@@ -17,6 +16,7 @@ namespace Player.Common
             private PhotonView _PhotonView => Owner.photonView;
             private PlayerMove _PlayerMove => Owner._playerMove;
             private StateMachine<PlayerCore> _StateMachine => Owner._stateMachine;
+            private IObservable<Unit> _OnClickWeaponSkill => Owner._WeaponSkillSubject;
             private IObservable<Unit> _OnClickNormalSkill => Owner._NormalSkillSubject;
             private IObservable<Unit> _OnClickSpecialSkill => Owner._SpecialSkillSubject;
             private IObservable<Unit> _OnClickDash => Owner._DashSkillSubject;
@@ -25,19 +25,17 @@ namespace Player.Common
 
 
             private Transform _playerTransform;
-            private bool _isSetup;
-            private CancellationTokenSource _cancellationTokenSource;
+            private CancellationTokenSource _cts;
 
             protected override void OnEnter(State prevState)
             {
-                base.OnEnter(prevState);
-                InitializeCancellationToken();
-                InitialiseIdleState();
+                _playerTransform = Owner.transform;
+                _cts = new CancellationTokenSource();
+                Subscribe();
             }
 
             protected override void OnExit(State nextState)
             {
-                base.OnExit(nextState);
                 Cancel();
             }
 
@@ -52,31 +50,28 @@ namespace Player.Common
                 _PlayerMove.Run(direction);
             }
 
-            private void InitialiseIdleState()
+            private void Subscribe()
             {
-                if (_isSetup)
-                {
-                    return;
-                }
-
-                _playerTransform = Owner.transform;
+                _OnClickWeaponSkill
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.WeaponSkill); })
+                    .AddTo(_cts.Token);
 
                 _OnClickNormalSkill
                     .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.NormalSkill); })
-                    .AddTo(Owner.GetCancellationTokenOnDestroy());
+                    .AddTo(_cts.Token);
 
                 _OnClickSpecialSkill
                     .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.SpecialSkill); })
-                    .AddTo(Owner.GetCancellationTokenOnDestroy());
+                    .AddTo(_cts.Token);
 
                 _OnClickDash
                     .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.Dash); })
-                    .AddTo(Owner.GetCancellationTokenOnDestroy());
+                    .AddTo(_cts.Token);
 
                 _OnClickCharacterChange
                     .Throttle(TimeSpan.FromSeconds(GameCommonData.CharacterChangeInterval))
                     .Subscribe(_ => { })
-                    .AddTo(Owner.GetCancellationTokenOnDestroy());
+                    .AddTo(_cts.Token);
 
                 _OnClickBomb
                     .Where(_ => Owner._translateStatusInBattleUseCase.CanPutBomb())
@@ -99,21 +94,19 @@ namespace Player.Common
                             explosionTime,
                             playerId
                         );
-                    }).AddTo(Owner.GetCancellationTokenOnDestroy());
-
-                _isSetup = true;
-            }
-
-            private void InitializeCancellationToken()
-            {
-                _cancellationTokenSource ??= new CancellationTokenSource();
+                    }).AddTo(_cts.Token);
             }
 
             private void Cancel()
             {
-                _cancellationTokenSource?.Cancel();
-                _cancellationTokenSource?.Dispose();
-                _cancellationTokenSource = null;
+                if (_cts == null)
+                {
+                    return;
+                }
+
+                _cts.Cancel();
+                _cts.Dispose();
+                _cts = null;
             }
         }
     }

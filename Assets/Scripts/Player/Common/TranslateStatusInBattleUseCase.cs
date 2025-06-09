@@ -11,7 +11,6 @@ namespace Player.Common
         private readonly WeaponMasterData _weaponData;
         private readonly LevelMasterData _levelData;
         private readonly ApplyStatusSkillUseCase _applyStatusSkillUseCase;
-        private const float HpRate = 1.8f;
         private int _maxBombLimit;
         private int _currentBombLimit;
         public int _CurrentHp { get; set; }
@@ -78,7 +77,7 @@ namespace Player.Common
             switch (statusType)
             {
                 case StatusType.Hp:
-                    _MaxHp = Mathf.FloorToInt(value * HpRate);
+                    _MaxHp = value;
                     return _MaxHp;
                 case StatusType.Attack:
                     _Attack = value;
@@ -102,20 +101,9 @@ namespace Player.Common
             }
         }
 
-        public float Heal(int value)
-        {
-            _CurrentHp += value;
-            var rate = (float)_CurrentHp / _MaxHp;
-            if (!(rate > 1)) return rate;
-            _CurrentHp = _MaxHp;
-            rate = 1;
-
-            return rate;
-        }
-
         public bool CanPutBomb()
         {
-            return _currentBombLimit <= _maxBombLimit;
+            return _currentBombLimit < _maxBombLimit;
         }
 
         public void IncrementBombCount()

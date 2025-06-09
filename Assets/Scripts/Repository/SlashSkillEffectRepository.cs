@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Repository
 {
-    public class SkillEffectRepository : SerializedMonoBehaviour
+    public class SlashSkillEffectRepository : SerializedMonoBehaviour
     {
         [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Abnormal Condition", ValueLabel = "Skill Effect")]
         private Dictionary<AbnormalCondition, SkillEffect> _skillEffectDictionary;

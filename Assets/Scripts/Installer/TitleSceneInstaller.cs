@@ -9,6 +9,7 @@ using Manager.ResourceManager;
 using Repository;
 using Skill;
 using Skill.Attack;
+using Skill.Attack.FlyingSlash;
 using Skill.Heal;
 using UI.Common;
 using UI.Title;
@@ -37,6 +38,7 @@ namespace Common.Installer
             InstallCharacterDetail();
             InstallTeamEdit();
             InstallSlashSKill();
+            InstallFlyingSlashSkill();
             InstallBuffSkill();
             InstallHealSkill();
             InstallShop();
@@ -105,7 +107,7 @@ namespace Common.Installer
 
         private void InstallSlashSKill()
         {
-            Container.BindFactory<int, TargetScanner, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeSlashFactory.SlashFactory>().FromFactory<AttributeSlashFactory>();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeSlashFactory.Factory>().FromFactory<AttributeSlashFactory>();
             Container.BindFactory<Animator, NormalSlash, NormalSlash.Factory>().AsCached();
             Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, PoisonSlash, PoisonSlash.Factory>().AsCached();
             Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, ParalysisSlash, ParalysisSlash.Factory>().AsCached();
@@ -124,6 +126,12 @@ namespace Common.Installer
             Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, ApraxiaSlash, ApraxiaSlash.Factory>().AsCached();
             Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, SoakingWetSlash, SoakingWetSlash.Factory>().AsCached();
             Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, BurningSlash, BurningSlash.Factory>().AsCached();
+        }
+
+        private void InstallFlyingSlashSkill()
+        {
+            Container.BindFactory<Animator, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeFlyingSlashFactory.Factory>().FromFactory<AttributeFlyingSlashFactory>();
+            Container.BindFactory<Animator, NormalFlyingSlash, NormalFlyingSlash.Factory>().AsCached();
         }
 
         private void InstallBuffSkill()

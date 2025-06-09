@@ -77,7 +77,6 @@ namespace Manager.PlayFabManager
         {
             foreach (var skillData in skillDatum)
             {
-                //await LoadResources(skillData.Id, skillData.IconID);
                 var id = skillData.Id;
                 var explanation = skillData.Explanation;
                 var name = skillData.Name;
@@ -109,7 +108,7 @@ namespace Manager.PlayFabManager
                 var numberRequirements = TranslateStringToFloatArray(skillData.NumberRequirement);
                 var numberRequirementType = TranslateStringToNumberRequirementType(skillData.NumberRequirementType);
                 var boolRequirementType = TranslateStringToBoolRequirementType(skillData._BoolRequirementType);
-                var skillDirection = TranslateStringToSkillDirection(skillData.SkillDirection);
+                var skillDirection = TranslateStringToSkillDirection(skillData._SkillDirection);
                 var invalidAbnormalCondition = TranslateStringToAbnormalConditions(skillData.InvalidAbnormalCondition);
                 var abnormalCondition = TranslateStringToAbnormalConditions(skillData.AbnormalCondition);
                 var bombType = TranslateStringToBombType(skillData.BombType);

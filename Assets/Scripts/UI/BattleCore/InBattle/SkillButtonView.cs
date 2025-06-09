@@ -2,10 +2,10 @@ using System;
 using System.Globalization;
 using Common.Data;
 using TMPro;
+using UI.BattleCore.InBattle;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class SkillButtonView : MonoBehaviour
@@ -23,7 +23,9 @@ public class SkillButtonView : MonoBehaviour
     private float _skillEffectTime;
     private float _skillRange;
     private bool _isActive;
+    private bool _isInteractive;
     private SkillActionType _skillActionType;
+    private SkillDirection _skillDirection;
     private const float MaxFillAmount = 1;
     private const float MinFillAmount = 0;
 
@@ -34,21 +36,6 @@ public class SkillButtonView : MonoBehaviour
         SpecialSkillButton,
         JumpSkillButton,
         CharacterChangeSkillButton
-    }
-
-    public IObservable<(bool, float)> OnTouchSkillButtonAsObservable()
-    {
-        return _skillButton
-            .OnPointerDownAsObservable()
-            .Select(_ => (true, _skillRange))
-            .Merge(_skillButton.OnPointerUpAsObservable().Select(_ => (false, _skillRange)));
-    }
-
-    public IObservable<float> OnDragSkillButtonAsObservable()
-    {
-        return _skillButton
-            .OnDragAsObservable()
-            .Select(_ => _skillRange);
     }
 
     public void UpdateTimer()
@@ -67,6 +54,7 @@ public class SkillButtonView : MonoBehaviour
     {
         _timerSkill = 0;
         _skillIntervalImage.fillAmount = MinFillAmount;
+        _isInteractive = false;
         _skillButton.interactable = false;
         _disableImage.gameObject.SetActive(false);
         _skillInterval = GetIntervalTime(skillMasterData);
@@ -88,6 +76,7 @@ public class SkillButtonView : MonoBehaviour
         _skillActiveCountdownText.gameObject.SetActive(isSkillActive);
         _disableImage.gameObject.SetActive(!isSkillActive);
         _skillRange = skillMasterData.Range;
+        _skillDirection = skillMasterData._SkillDirectionEnum;
 
         _skillActiveCountdownText.gameObject.SetActive(false);
         _skillActiveCountdownImage.gameObject.SetActive(false);
@@ -95,6 +84,7 @@ public class SkillButtonView : MonoBehaviour
 
     public void ActivateButton(bool isActivate)
     {
+        _isInteractive = isActivate;
         _skillButton.interactable = isActivate;
         _disableImage.gameObject.SetActive(!isActivate);
         _isActive = isActivate;
@@ -152,6 +142,7 @@ public class SkillButtonView : MonoBehaviour
         if (rate >= MaxFillAmount)
         {
             _skillButton.interactable = true;
+            _isInteractive = true;
         }
     }
 
@@ -199,20 +190,12 @@ public class SkillButtonView : MonoBehaviour
         return false;
     }
 
-    public IObservable<Unit> OnClickSkillButtonAsObservable()
-    {
-        return _skillButton
-            .OnClickAsObservable()
-            .ThrottleFirst(TimeSpan.FromSeconds(_skillInterval))
-            .Do(_ => ResetSkillIntervalImage())
-            .Select(_ => Unit.Default);
-    }
-
     private void ResetSkillIntervalImage()
     {
         _timerSkill = 0;
         _skillIntervalImage.fillAmount = MinFillAmount;
         _skillButton.interactable = false;
+        _isInteractive = false;
         if (IsRequiredType())
         {
             return;
@@ -233,5 +216,42 @@ public class SkillButtonView : MonoBehaviour
     private bool IsRequiredType()
     {
         return _skillButtonType is not (SkillButtonType.NormalSkillButton or SkillButtonType.SpecialSkillButton or SkillButtonType.WeaponSkillButton);
+    }
+
+    public IObservable<Unit> OnClickSkillButtonAsObservable()
+    {
+        return _skillButton
+            .OnClickAsObservable()
+            .ThrottleFirst(TimeSpan.FromSeconds(_skillInterval))
+            .Do(_ => ResetSkillIntervalImage())
+            .Select(_ => Unit.Default);
+    }
+
+    public IObservable<SkillIndicatorViewBase.SkillIndicatorInfo> OnTouchSkillButtonAsObservable()
+    {
+        return _skillButton
+            .OnPointerDownAsObservable()
+            .Where(_ => _isInteractive)
+            .Select(_ => TranslateToSkillIndicatorInfo(true, _isInteractive))
+            .Merge(_skillButton
+                .OnPointerUpAsObservable()
+                .Where(_ => _isInteractive)
+                .Select(_ => TranslateToSkillIndicatorInfo(false, _isInteractive))
+                .Do(_ => ResetSkillIntervalImage())
+            );
+    }
+
+    private SkillIndicatorViewBase.SkillIndicatorInfo TranslateToSkillIndicatorInfo(bool isActive, bool isInteractive)
+    {
+        //todo 角度は後で調整する
+        var angle = _skillDirection == SkillDirection.All ? 360 : 180;
+        return new SkillIndicatorViewBase.SkillIndicatorInfo
+        (
+            _skillRange,
+            angle,
+            isActive,
+            isInteractive,
+            _skillDirection
+        );
     }
 }

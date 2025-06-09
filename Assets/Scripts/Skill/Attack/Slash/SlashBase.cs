@@ -16,17 +16,17 @@ namespace Skill.Attack
 {
     public class SlashBase : IAttackBehaviour
     {
-        private readonly SkillEffectRepository _skillEffectRepository;
+        private readonly SlashSkillEffectRepository _slashSkillEffectRepository;
         private const float DelayTime = 0.1f;
         private const float EffectHeight = 0.5f;
 
         [Inject]
         public SlashBase
         (
-            SkillEffectRepository skillEffectRepository
+            SlashSkillEffectRepository slashSkillEffectRepository
         )
         {
-            _skillEffectRepository = skillEffectRepository;
+            _slashSkillEffectRepository = slashSkillEffectRepository;
         }
 
         public virtual void Attack()
@@ -58,14 +58,14 @@ namespace Skill.Attack
 
         protected virtual void ActivateEffect(Transform playerTransform, AbnormalCondition abnormalCondition)
         {
-            var effect = _skillEffectRepository.GetSkillEffect(abnormalCondition);
+            var effect = _slashSkillEffectRepository.GetSkillEffect(abnormalCondition);
             var playerPosition = playerTransform.position;
             var spawnPosition = new Vector3(playerPosition.x, EffectHeight, playerPosition.z);
             var spawnRotation = FixedRotation(abnormalCondition, playerTransform) + playerTransform.eulerAngles;
             Object.Instantiate(effect, spawnPosition, Quaternion.Euler(spawnRotation), playerTransform);
         }
 
-        private Vector3 FixedRotation(AbnormalCondition abnormalCondition, Transform playerTransform)
+        private static Vector3 FixedRotation(AbnormalCondition abnormalCondition, Transform playerTransform)
         {
             var spawnRotation = playerTransform.localEulerAngles;
 

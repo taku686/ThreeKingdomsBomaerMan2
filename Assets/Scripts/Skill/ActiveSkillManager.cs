@@ -2,6 +2,7 @@
 using Common.Data;
 using Player.Common;
 using Skill.Attack;
+using Skill.Attack.FlyingSlash;
 using Skill.Heal;
 using UniRx;
 using UnityEngine;
@@ -11,7 +12,8 @@ namespace Skill
 {
     public class ActiveSkillManager : IDisposable
     {
-        private readonly AttributeSlashFactory.SlashFactory _slashFactory;
+        private readonly AttributeSlashFactory.Factory _slashFactory;
+        private readonly AttributeFlyingSlashFactory.Factory _flyingSlashFactory;
         private readonly BuffSkill _buffSkill;
         private readonly HealSkill _healSkill;
         private Animator _animator;
@@ -24,12 +26,14 @@ namespace Skill
         [Inject]
         public ActiveSkillManager
         (
-            AttributeSlashFactory.SlashFactory slashFactory,
+            AttributeSlashFactory.Factory slashFactory,
+            AttributeFlyingSlashFactory.Factory flyingSlashFactory,
             BuffSkill buffSkill,
             HealSkill healSkill
         )
         {
             _slashFactory = slashFactory;
+            _flyingSlashFactory = flyingSlashFactory;
             _buffSkill = buffSkill;
             _healSkill = healSkill;
         }
@@ -78,6 +82,12 @@ namespace Skill
             if (IsSlashSkillActionType(skillMasterData))
             {
                 SlashSkill(skillMasterData);
+            }
+
+            if (IsFlyingSlashSkillActionType(skillMasterData))
+            {
+                var flyingSlash = _flyingSlashFactory.Create(_animator, AbnormalCondition.None, null);
+                flyingSlash.Attack();
             }
 
             if (IsBuffSkillActionType(skillMasterData))
@@ -143,6 +153,12 @@ namespace Skill
         {
             var skillActionType = skillMasterData._SkillActionTypeEnum;
             return skillActionType is SkillActionType.Slash;
+        }
+
+        private bool IsFlyingSlashSkillActionType(SkillMasterData skillMasterData)
+        {
+            var skillActionType = skillMasterData._SkillActionTypeEnum;
+            return skillActionType is SkillActionType.FlyingSlash;
         }
 
         private static bool IsHealSkillActionType(SkillMasterData skillMasterData)

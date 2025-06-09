@@ -105,11 +105,12 @@ namespace Skill.Attack
                 AbnormalCondition.Apraxia => _apraxiaSlashBehaviourFactory.Create(skillId, targetScanner, animator, playerTransform, attack),
                 AbnormalCondition.SoakingWet => _soakingWetSlashBehaviourFactory.Create(skillId, targetScanner, animator, playerTransform, attack),
                 AbnormalCondition.Burning => _burningSlashBehaviourFactory.Create(skillId, targetScanner, animator, playerTransform, attack),
+                AbnormalCondition.ParalyzingThunder => throw new System.NotImplementedException(),
                 _ => throw new System.NotImplementedException()
             };
         }
 
-        public class SlashFactory : PlaceholderFactory<int, TargetScanner, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour>
+        public class Factory : PlaceholderFactory<int, TargetScanner, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour>
         {
         }
     }

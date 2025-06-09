@@ -1,7 +1,5 @@
 using AttributeAttack;
 using Common.Data;
-using UniRx;
-using UniRx.Triggers;
 using UnityEngine;
 using Zenject;
 

@@ -2,6 +2,7 @@ using System;
 using Common.Data;
 using TMPro;
 using UI.BattleCore;
+using UI.BattleCore.InBattle;
 using UI.Common;
 using UniRx;
 using UnityEngine;
@@ -48,21 +49,6 @@ public class InBattleView : BattleViewBase
         _inputView.UpdateTimer();
     }
 
-    public IObservable<Unit> OnClickWeaponSkillButtonAsObservable()
-    {
-        return _inputView.OnClickWeaponSkillButtonAsObservable();
-    }
-
-    public IObservable<Unit> OnClickNormalSkillButtonAsObservable()
-    {
-        return _inputView.OnClickNormalSkillButtonAsObservable();
-    }
-
-    public IObservable<Unit> OnClickSpecialSkillButtonAsObservable()
-    {
-        return _inputView.OnClickSpecialSkillButtonAsObservable();
-    }
-
     public IObservable<Unit> OnClickBombButtonAsObservable()
     {
         return _inputView.OnClickBombButtonAsObservable();
@@ -78,17 +64,17 @@ public class InBattleView : BattleViewBase
         return _inputView.OnClickDashButtonAsObservable();
     }
 
-    public IObservable<(bool, float)> OnTouchWeaponSkillButtonAsObservable()
+    public IObservable<SkillIndicatorViewBase.SkillIndicatorInfo> OnTouchWeaponSkillButtonAsObservable()
     {
         return _inputView.OnTouchWeaponSkillButtonAsObservable();
     }
 
-    public IObservable<(bool, float)> OnTouchNormalSkillButtonAsObservable()
+    public IObservable<SkillIndicatorViewBase.SkillIndicatorInfo> OnTouchNormalSkillButtonAsObservable()
     {
         return _inputView.OnTouchNormalSkillButtonAsObservable();
     }
 
-    public IObservable<(bool, float)> OnTouchSpecialSkillButtonAsObservable()
+    public IObservable<SkillIndicatorViewBase.SkillIndicatorInfo> OnTouchSpecialSkillButtonAsObservable()
     {
         return _inputView.OnTouchSpecialSkillButtonAsObservable();
     }

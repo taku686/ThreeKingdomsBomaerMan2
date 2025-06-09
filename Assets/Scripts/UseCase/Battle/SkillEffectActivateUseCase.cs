@@ -4,7 +4,7 @@ using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 
-public class EffectActivateUseCase : MonoBehaviour
+public class SkillEffectActivateUseCase : MonoBehaviour
 {
     #region BuffEffect
 

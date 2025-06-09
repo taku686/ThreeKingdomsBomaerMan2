@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using Bomb;
 using Common.Data;
@@ -12,7 +11,6 @@ using Skill;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
-using UseCase.Battle;
 
 namespace Player.Common
 {
@@ -35,7 +33,6 @@ namespace Player.Common
         private SkillActivationConditionsUseCase _skillActivationConditionsUseCase;
         private PlayerGeneratorUseCase _playerGeneratorUseCase;
         private CharacterCreateUseCase _characterCreateUseCase;
-        private SetupAnimatorUseCase _setupAnimatorUseCase;
 
         private PlayerMove _playerMove;
         private PutBomb _putBomb;
@@ -70,7 +67,8 @@ namespace Player.Common
             Dead,
             NormalSkill,
             SpecialSkill,
-            Dash
+            Dash,
+            WeaponSkill
         }
 
 
@@ -83,7 +81,6 @@ namespace Player.Common
             SkillActivationConditionsUseCase skillActivationConditionsUseCase,
             PlayerGeneratorUseCase playerGeneratorUseCase,
             CharacterCreateUseCase characterCreateUseCase,
-            SetupAnimatorUseCase setupAnimatorUseCase,
             PlayerMove playerMove,
             string key
         )
@@ -96,7 +93,6 @@ namespace Player.Common
             _skillActivationConditionsUseCase = skillActivationConditionsUseCase;
             _playerGeneratorUseCase = playerGeneratorUseCase;
             _characterCreateUseCase = characterCreateUseCase;
-            _setupAnimatorUseCase = setupAnimatorUseCase;
             _playerMove = playerMove;
             InitializeComponent();
             InitializeState();
@@ -158,6 +154,7 @@ namespace Player.Common
             _stateMachine.Start<PlayerIdleState>();
             _stateMachine.AddAnyTransition<PlayerDeadState>((int)PLayerState.Dead);
             _stateMachine.AddAnyTransition<PlayerIdleState>((int)PLayerState.Idle);
+            _stateMachine.AddTransition<PlayerIdleState, PlayerWeaponSkillState>((int)PLayerState.WeaponSkill);
             _stateMachine.AddTransition<PlayerIdleState, PlayerNormalSkillState>((int)PLayerState.NormalSkill);
             _stateMachine.AddTransition<PlayerIdleState, PlayerSpecialSkillState>((int)PLayerState.SpecialSkill);
             _stateMachine.AddTransition<PlayerIdleState, PlayerStateDash>((int)PLayerState.Dash);
@@ -183,9 +180,6 @@ namespace Player.Common
             _animator = gameObject.GetComponentInChildren<Animator>();
             _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
             SetupTranslateStatusInBattleUseCase(playerKey);
-            var fixedSpeed = _translateStatusInBattleUseCase._Speed;
-            _playerMove.ChangeCharacter(_animator, fixedSpeed);
-            _putBomb.SetupBombProvider(_translateStatusInBattleUseCase);
             PhotonNetwork.LocalPlayer.SetPlayerIndex(photonView.InstantiationId);
         }
 
@@ -201,6 +195,9 @@ namespace Player.Common
             var levelData = _photonNetworkManager.GetLevelMasterData(playerKey);
             _translateStatusInBattleUseCase = _translateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
             _translateStatusInBattleUseCase.InitializeStatus();
+            var fixedSpeed = _translateStatusInBattleUseCase._Speed;
+            _playerMove.ChangeCharacter(_animator, fixedSpeed);
+            _putBomb.SetupBombProvider(_translateStatusInBattleUseCase);
             InitializeSkillManager(weaponData, characterData.Id);
         }
 
@@ -336,6 +333,7 @@ namespace Player.Common
             _translateStatusInBattleUseCase.Dispose();
             _deadSubject.Dispose();
             _statusBuffSubject.Dispose();
+            _WeaponSkillSubject.Dispose();
             _NormalSkillSubject.Dispose();
             _SpecialSkillSubject.Dispose();
             _DashSkillSubject.Dispose();

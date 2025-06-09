@@ -1,5 +1,6 @@
 using System;
 using Common.Data;
+using UI.BattleCore.InBattle;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
@@ -66,21 +67,6 @@ namespace UI.Common
                 .Select(_ => Unit.Default);
         }
 
-        public IObservable<Unit> OnClickWeaponSkillButtonAsObservable()
-        {
-            return _weaponSkillButtonView.OnClickSkillButtonAsObservable();
-        }
-
-        public IObservable<Unit> OnClickNormalSkillButtonAsObservable()
-        {
-            return _normalSkillButtonView.OnClickSkillButtonAsObservable();
-        }
-
-        public IObservable<Unit> OnClickSpecialSkillButtonAsObservable()
-        {
-            return _specialSkillButtonView.OnClickSkillButtonAsObservable();
-        }
-
         public IObservable<Unit> OnClickCharacterChangeButtonAsObservable()
         {
             return _changeCharacterButtonView.OnClickSkillButtonAsObservable();
@@ -95,19 +81,19 @@ namespace UI.Common
 
         #region OnTouch
 
-        public IObservable<(bool, float)> OnTouchWeaponSkillButtonAsObservable()
+        public IObservable<SkillIndicatorViewBase.SkillIndicatorInfo> OnTouchWeaponSkillButtonAsObservable()
         {
             return _weaponSkillButtonView.OnTouchSkillButtonAsObservable();
         }
 
-        public IObservable<(bool, float)> OnTouchNormalSkillButtonAsObservable()
+        public IObservable<SkillIndicatorViewBase.SkillIndicatorInfo> OnTouchNormalSkillButtonAsObservable()
         {
-            return _weaponSkillButtonView.OnTouchSkillButtonAsObservable();
+            return _normalSkillButtonView.OnTouchSkillButtonAsObservable();
         }
 
-        public IObservable<(bool, float)> OnTouchSpecialSkillButtonAsObservable()
+        public IObservable<SkillIndicatorViewBase.SkillIndicatorInfo> OnTouchSpecialSkillButtonAsObservable()
         {
-            return _weaponSkillButtonView.OnTouchSkillButtonAsObservable();
+            return _specialSkillButtonView.OnTouchSkillButtonAsObservable();
         }
 
         #endregion

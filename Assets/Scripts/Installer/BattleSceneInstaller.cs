@@ -6,6 +6,7 @@ using Player.Common;
 using Repository;
 using Skill;
 using Skill.Attack;
+using Skill.Attack.FlyingSlash;
 using Skill.Heal;
 using UI.Common;
 using UnityEngine;
@@ -21,6 +22,7 @@ namespace Common.Installer
         [SerializeField] private GameObject bombProviderGameObject;
         [SerializeField] private GameObject buttonsGameObject;
         [SerializeField] private GameObject _animatorControllerRepositoryGameObject;
+        [SerializeField] private GameObject _skillEffectActivateGameObject;
 
         public override void InstallBindings()
         {
@@ -36,9 +38,11 @@ namespace Common.Installer
             Container.Bind<SetupAnimatorUseCase>().AsCached();
             Container.BindFactory<CharacterData, WeaponMasterData, LevelMasterData, TranslateStatusInBattleUseCase, TranslateStatusInBattleUseCase.Factory>().AsCached();
             Container.Bind<AnimatorControllerRepository>().FromComponentInNewPrefab(_animatorControllerRepositoryGameObject).AsSingle();
+            Container.Bind<SkillEffectActivateUseCase>().FromComponentOn(_skillEffectActivateGameObject).AsCached();
 
             SkillInstaller();
             SlashSKillInstaller();
+            FlyingSlashSkillInstaller();
             BuffSkillInstaller();
             HealSkillInstaller();
         }
@@ -51,7 +55,7 @@ namespace Common.Installer
 
         private void SlashSKillInstaller()
         {
-            Container.BindFactory<int, TargetScanner, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeSlashFactory.SlashFactory>().FromFactory<AttributeSlashFactory>();
+            Container.BindFactory<int, TargetScanner, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeSlashFactory.Factory>().FromFactory<AttributeSlashFactory>();
             Container.BindFactory<Animator, NormalSlash, NormalSlash.Factory>().AsCached();
             Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, PoisonSlash, PoisonSlash.Factory>().AsCached();
             Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, ParalysisSlash, ParalysisSlash.Factory>().AsCached();
@@ -70,6 +74,12 @@ namespace Common.Installer
             Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, ApraxiaSlash, ApraxiaSlash.Factory>().AsCached();
             Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, SoakingWetSlash, SoakingWetSlash.Factory>().AsCached();
             Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, BurningSlash, BurningSlash.Factory>().AsCached();
+        }
+
+        private void FlyingSlashSkillInstaller()
+        {
+            Container.BindFactory<Animator, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeFlyingSlashFactory.Factory>().FromFactory<AttributeFlyingSlashFactory>();
+            Container.BindFactory<Animator, NormalFlyingSlash, NormalFlyingSlash.Factory>().AsCached();
         }
 
         private void BuffSkillInstaller()

@@ -23,8 +23,8 @@ namespace Skill.Attack
             Animator animator,
             Transform playerTransform,
             IAttackBehaviour attackBehaviour,
-            SkillEffectRepository skillEffectRepository
-        ) : base(skillEffectRepository)
+            SlashSkillEffectRepository slashSkillEffectRepository
+        ) : base(slashSkillEffectRepository)
         {
             _skillId = skillId;
             _targetScanner = targetScanner;

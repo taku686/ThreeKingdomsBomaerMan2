@@ -12,6 +12,7 @@ using Repository;
 using Skill;
 using UI.Battle;
 using UI.BattleCore;
+using UI.BattleCore.InBattle;
 using UnityEngine;
 using UseCase.Battle;
 using Zenject;
@@ -27,7 +28,7 @@ namespace Manager.BattleManager
         [Inject] private CharacterMasterDataRepository _characterMasterDataRepository;
         [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
         [Inject] private AbnormalConditionSpriteRepository _abnormalConditionSpriteRepository;
-        [SerializeField] private AnimatorControllerRepository animatorControllerRepository;
+        [Inject] private AnimatorControllerRepository _animatorControllerRepository;
 
         //UseCase
         [Inject] private PlayerGeneratorUseCase _playerGeneratorUseCase;
@@ -37,6 +38,7 @@ namespace Manager.BattleManager
         [Inject] private InputViewModelUseCase _inputViewModelUseCase;
         [Inject] private SkillActivationConditionsUseCase _skillActivationConditionsUseCase;
         [Inject] private SetupAnimatorUseCase _setupAnimatorUseCase;
+        [Inject] private SkillEffectActivateUseCase _skillEffectActivateUseCase;
         [Inject] private TranslateStatusInBattleUseCase.Factory _translateStatusInBattleUseCaseFactory;
 
         //Manager
@@ -55,7 +57,6 @@ namespace Manager.BattleManager
         [Inject] private BombProvider _bombProvider;
         [SerializeField] private Transform playerUIParent;
         [SerializeField] private GameObject playerUI;
-        [SerializeField] private EffectActivateUseCase effectActivator;
         [SerializeField] private GameObject _arrowSkillIndicatorPrefab;
         [SerializeField] private GameObject _circleSkillIndicatorPrefab;
         private StateMachine<BattleCore> _stateMachine;
@@ -63,6 +64,7 @@ namespace Manager.BattleManager
         private readonly List<PlayerStatusUI> _playerStatusUiList = new();
         private PlayerStatusInfo _playerStatusInfo;
         private ArrowSkillIndicatorView _arrowSkillIndicatorView;
+        private CircleSkillIndicatorView _circleSkillIndicatorView;
 
         public enum State
         {
@@ -76,7 +78,6 @@ namespace Manager.BattleManager
         void Start()
         {
             _photonNetworkManager._isTitle = false;
-            // InitializeUi();
             InitializeState();
             InitializeComponent();
         }
@@ -123,10 +124,15 @@ namespace Manager.BattleManager
         {
             _playerStatusInfo = playerStatusInfo;
         }
-        
+
         private void SetArrowSkillIndicatorView(ArrowSkillIndicatorView arrowSkillIndicatorView)
         {
             _arrowSkillIndicatorView = arrowSkillIndicatorView;
+        }
+
+        private void SetCircleSkillIndicatorView(CircleSkillIndicatorView circleSkillIndicatorView)
+        {
+            _circleSkillIndicatorView = circleSkillIndicatorView;
         }
     }
 }

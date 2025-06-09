@@ -46,8 +46,8 @@ namespace Common.Data
         public NumberRequirementType NumberRequirementTypeEnum { get; }
         public string _BoolRequirementType { get; set; }
         public BoolRequirementType BoolRequirementTypeEnum { get; }
-        public string SkillDirection { get; set; }
-        public SkillDirection SkillDirectionEnum { get; }
+        public string _SkillDirection { get; set; }
+        public SkillDirection _SkillDirectionEnum { get; }
         public string InvalidAbnormalCondition { get; set; }
         public AbnormalCondition[] InvalidAbnormalConditionEnum { get; }
         public string AbnormalCondition { get; set; }
@@ -129,7 +129,7 @@ namespace Common.Data
             NumberRequirements = numberRequirements;
             NumberRequirementTypeEnum = numberRequirementType;
             BoolRequirementTypeEnum = boolRequirementType;
-            SkillDirectionEnum = skillDirection;
+            _SkillDirectionEnum = skillDirection;
             InvalidAbnormalConditionEnum = invalidAbnormalConditionEnum;
             AbnormalConditionEnum = abnormalConditionEnum;
             BombTypeEnum = bombType;

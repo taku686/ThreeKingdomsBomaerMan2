@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using ModestTree;
 using Photon.Pun;
 using Player.Common;
 using Repository;
 using UI.Battle;
+using UI.BattleCore.InBattle;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,11 +29,12 @@ namespace Manager.BattleManager
             private PlayerStatusInfo _PlayerStatusInfo => Owner._playerStatusInfo;
             private StatusInBattleViewModelUseCase _StatusInBattleViewModelUseCase => Owner._statusInBattleViewModelUseCase;
             private ArrowSkillIndicatorView _ArrowSkillIndicatorView => Owner._arrowSkillIndicatorView;
+            private CircleSkillIndicatorView _CircleSkillIndicatorView => Owner._circleSkillIndicatorView;
 
             private CancellationTokenSource _cts;
             private int _startTime;
             private int _rank;
-            private float _range;
+            private SkillIndicatorViewBase.SkillIndicatorInfo _skillIndicatorInfo;
             private readonly Dictionary<AbnormalCondition, Image> _abnormalConditionImages = new();
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
@@ -149,80 +153,142 @@ namespace Manager.BattleManager
                     .AddTo(_cts.Token);
 
                 _View.OnTouchWeaponSkillButtonAsObservable()
-                    .Subscribe(tuple =>
-                    {
-                        var isActive = tuple.Item1;
-                        var range = tuple.Item2;
-                        ActivateSkill(isActive, range, _PlayerCore._WeaponSkillSubject);
-                    })
+                    .Subscribe(skillIndicatorInfo => { ActivateSkillIndicator(skillIndicatorInfo, _PlayerCore._WeaponSkillSubject); })
                     .AddTo(_cts.Token);
 
                 _View.OnTouchNormalSkillButtonAsObservable()
-                    .Subscribe(tuple =>
-                    {
-                        var isActive = tuple.Item1;
-                        var range = tuple.Item2;
-                        ActivateSkill(isActive, range, _PlayerCore._NormalSkillSubject);
-                    })
+                    .Subscribe(skillIndicatorInfo => { ActivateSkillIndicator(skillIndicatorInfo, _PlayerCore._NormalSkillSubject); })
                     .AddTo(_cts.Token);
 
                 _View.OnTouchSpecialSkillButtonAsObservable()
-                    .Subscribe(tuple =>
-                    {
-                        var isActive = tuple.Item1;
-                        var range = tuple.Item2;
-                        ActivateSkill(isActive, range, _PlayerCore._SpecialSkillSubject);
-                    })
+                    .Subscribe(skillIndicatorInfo => { ActivateSkillIndicator(skillIndicatorInfo, _PlayerCore._SpecialSkillSubject); })
                     .AddTo(_cts.Token);
-                
+
                 Observable
                     .EveryFixedUpdate()
-                    .Subscribe(_ => { SearchEnemy(_range); })
+                    .Where(_ => CanUpdateSkillIndicator())
+                    .Where(_ => !IsInvalidNumber(_skillIndicatorInfo._Range))
+                    .Where(_ => _skillIndicatorInfo._IsInteractable)
+                    .Subscribe(_ => { SearchEnemy(); })
                     .AddTo(_cts.Token);
             }
 
-            private void SearchEnemy(float range)
+            private static bool IsInvalidSkillDirection(SkillDirection skillDirection)
             {
-                if (Mathf.Approximately(range, GameCommonData.InvalidNumber) || _ArrowSkillIndicatorView == null)
-                {
-                    return;
-                }
+                return skillDirection is not (SkillDirection.Forward or SkillDirection.All);
+            }
 
+            private bool CanUpdateSkillIndicator()
+            {
+                return _ArrowSkillIndicatorView != null &&
+                       _CircleSkillIndicatorView != null &&
+                       _skillIndicatorInfo != null;
+            }
+
+            private static bool IsInvalidNumber(float value)
+            {
+                return Mathf.Approximately(value, GameCommonData.InvalidNumber);
+            }
+
+            private void SearchEnemy()
+            {
                 var position = _PlayerCore.transform.position;
                 var origin = new Vector3(position.x, 0.5f, position.z);
-                var direction = _PlayerCore.transform.forward;
                 var layerMask = GameCommonData.GetObstaclesLayerMask();
+                var range = _skillIndicatorInfo._Range;
+                var skillDirection = _skillIndicatorInfo._SkillDirection;
+                var direction = _PlayerCore.transform.forward;
 
-                if (Physics.Raycast(origin, direction, out var hitInfo, range, layerMask))
+                switch (skillDirection)
                 {
-                    _ArrowSkillIndicatorView.EnemyHit();
-                    _ArrowSkillIndicatorView.UpdateIndicatorLength(hitInfo.distance);
-                }
-                else
-                {
-                    _ArrowSkillIndicatorView.NoEnemyHit();
-                    _ArrowSkillIndicatorView.UpdateIndicatorLength(range);
+                    case SkillDirection.Forward:
+                        _ArrowSkillIndicatorView.UpdateArrowIndicator(origin, range, layerMask, direction);
+                        break;
+                    case SkillDirection.Back:
+                        break;
+                    case SkillDirection.Left:
+                        break;
+                    case SkillDirection.Right:
+                        break;
+                    case SkillDirection.ForwardBack:
+                        break;
+                    case SkillDirection.LeftRight:
+                        break;
+                    case SkillDirection.All:
+                        _CircleSkillIndicatorView.UpdateCircleIndicator(origin, range, layerMask);
+                        break;
+                    case SkillDirection.Random:
+                        break;
+                    case SkillDirection.Specified:
+                        break;
+                    case SkillDirection.Everywhere:
+                        break;
+                    case SkillDirection.None:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
             }
 
-
-            private void ActivateSkill(bool isActive, float range, Subject<Unit> skillSubject)
+            private void ActivateSkillIndicator
+            (
+                SkillIndicatorViewBase.SkillIndicatorInfo skillIndicatorInfo,
+                Subject<Unit> skillSubject
+            )
             {
-                _range = range;
+                _skillIndicatorInfo = skillIndicatorInfo;
+                var isActive = skillIndicatorInfo._IsTouch;
+                var range = skillIndicatorInfo._Range;
+                var skillDirection = skillIndicatorInfo._SkillDirection;
+                var angle = skillIndicatorInfo._Angle;
 
                 if (!isActive)
                 {
                     skillSubject.OnNext(Unit.Default);
                 }
 
-                if (Mathf.Approximately(range, GameCommonData.InvalidNumber))
+                if
+                (
+                    Mathf.Approximately(range, GameCommonData.InvalidNumber) ||
+                    IsInvalidSkillDirection(skillDirection)
+                )
                 {
-                    Owner._arrowSkillIndicatorView.gameObject.SetActive(false);
+                    _ArrowSkillIndicatorView.gameObject.SetActive(false);
+                    _CircleSkillIndicatorView.gameObject.SetActive(false);
                     return;
                 }
 
-                Owner._arrowSkillIndicatorView.gameObject.SetActive(isActive);
-                Owner._arrowSkillIndicatorView.Setup(range);
+                switch (skillDirection)
+                {
+                    case SkillDirection.Forward:
+                        _ArrowSkillIndicatorView.gameObject.SetActive(isActive);
+                        _ArrowSkillIndicatorView.Setup(range);
+                        break;
+                    case SkillDirection.Back:
+                        break;
+                    case SkillDirection.Left:
+                        break;
+                    case SkillDirection.Right:
+                        break;
+                    case SkillDirection.ForwardBack:
+                        break;
+                    case SkillDirection.LeftRight:
+                        break;
+                    case SkillDirection.All:
+                        _CircleSkillIndicatorView.gameObject.SetActive(isActive);
+                        _CircleSkillIndicatorView.Setup(range, angle);
+                        break;
+                    case SkillDirection.Random:
+                        break;
+                    case SkillDirection.Specified:
+                        break;
+                    case SkillDirection.Everywhere:
+                        break;
+                    case SkillDirection.None:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
 
             private void DestroyPlayerListUi()

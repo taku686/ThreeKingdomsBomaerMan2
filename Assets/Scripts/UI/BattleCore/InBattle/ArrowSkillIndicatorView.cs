@@ -1,59 +1,49 @@
 using UnityEngine;
 
-public class ArrowSkillIndicatorView : MonoBehaviour
+namespace UI.BattleCore.InBattle
 {
-    private Material _material;
-    private const float ArrowWidthRate = 0.2f;
-    private float _defaultOffsetY;
-
-    public void Setup(float range)
+    public class ArrowSkillIndicatorView : SkillIndicatorViewBase
     {
-        if (_material == null)
+        private const float ArrowWidthRate = 0.2f;
+        private float _defaultOffsetY;
+
+        public void Setup(float range)
         {
-            _material = GetComponent<Renderer>().material;
-            _defaultOffsetY = _material.mainTextureOffset.y;
+            if (_Material == null)
+            {
+                _Material = GetComponent<Renderer>().material;
+                _defaultOffsetY = _Material.mainTextureOffset.y;
+            }
+
+            transform.localPosition = new Vector3(0, 0.2f, range * 0.5f);
+            transform.localEulerAngles = new Vector3(90, 0, 0);
+            transform.localScale = new Vector3(range * ArrowWidthRate, range, 1);
+            NoHit();
         }
 
-        transform.localPosition = new Vector3(0, 0.2f, range * 0.5f);
-        transform.localEulerAngles = new Vector3(90, 0, 0);
-        transform.localScale = new Vector3(range * ArrowWidthRate, range, 1);
-        NoEnemyHit();
-    }
-
-    public void UpdateIndicatorLength(float range)
-    {
-        if (_material == null)
+        public void UpdateArrowIndicator(Vector3 origin, float range, int layerMask, Vector3 direction)
         {
-            return;
+            if (Physics.Raycast(origin, direction, out var hitInfo, range, layerMask))
+            {
+                Hit();
+                UpdateIndicatorLength(hitInfo.distance);
+            }
+            else
+            {
+                NoHit();
+                UpdateIndicatorLength(range);
+            }
         }
 
-        var length = range * _defaultOffsetY / transform.localScale.y;
-        _material.mainTextureOffset = new Vector2(0, length);
-    }
-
-    public void NoEnemyHit()
-    {
-        SetColor(Color.red);
-    }
-
-    public void EnemyHit()
-    {
-        SetColor(Color.green);
-    }
-
-    private void SetColor(Color color)
-    {
-        if (_material != null)
+        private void UpdateIndicatorLength(float range)
         {
-            _material.color = color;
-        }
-    }
+            if (_Material == null)
+            {
+                return;
+            }
 
-    private void OnDestroy()
-    {
-        if (_material != null)
-        {
-            Destroy(_material);
+            var length = range * _defaultOffsetY / transform.localScale.y;
+            _Material.mainTextureOffset = new Vector2(0, length);
         }
     }
 }
