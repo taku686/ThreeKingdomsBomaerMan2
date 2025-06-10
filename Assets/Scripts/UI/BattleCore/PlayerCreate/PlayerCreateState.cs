@@ -150,7 +150,7 @@ namespace Manager.BattleManager
                 var levelData = levelDatum[0];
                 var weaponType = weaponData.WeaponType;
 
-                
+
                 SetPlayerUI(playerCore, instantiationId, out hpKey);
                 playerMove = playerCore.AddComponent<PlayerMove>();
                 _SetupAnimatorUseCase.SetAnimatorController(playerCore, weaponType);
@@ -313,8 +313,9 @@ namespace Manager.BattleManager
             private static void AddRigidbody(GameObject player)
             {
                 var rigid = player.AddComponent<Rigidbody>();
-                rigid.useGravity = false;
-                rigid.constraints = RigidbodyConstraints.FreezeAll;
+                rigid.useGravity = true;
+                rigid.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
+                rigid.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
             }
 
             private static bool IsCpu(int creatorNr)

@@ -1,3 +1,4 @@
+using System;
 using Bomb;
 using Common.Data;
 using Photon.Pun;
@@ -71,17 +72,17 @@ namespace Player.Common
             }
 
             var bomb = _bombProvider.GetBomb(bombType, damageAmount, fireRange, explosionTime, playerId);
-            bomb.transform.position = new Vector3(playerPos.x, 0f, playerPos.z);
+            bomb.transform.position = new Vector3(playerPos.x, playerPos.y, playerPos.z);
         }
 
         private static bool CanPutBomb(Vector3 startPos, BoxCollider boxCollider)
         {
-            var pos = new Vector3(startPos.x, startPos.y + ModifiedValue, startPos.z);
+            var pos = new Vector3(startPos.x, startPos.y, startPos.z);
             boxCollider.enabled = false;
-            var hasBomb = Physics.Raycast
+            var hasBomb = Physics.CheckSphere
             (
                 pos,
-                Vector3.down, RayDistance,
+                0.4f,
                 LayerMask.GetMask(GameCommonData.BombLayer),
                 QueryTriggerInteraction.Collide
             );

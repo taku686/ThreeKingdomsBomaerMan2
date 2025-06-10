@@ -11,7 +11,6 @@ namespace Manager.BattleManager
         [SerializeField] private List<Transform> startPointList;
         [SerializeField] private Transform playerParent;
         private GameObject _playerObj;
-        private const float PlayerSize = 0.8f;
 
         public GameObject InstantiatePlayerCore(int spawnPointIndex, bool isCpu)
         {
@@ -37,19 +36,6 @@ namespace Manager.BattleManager
             }
 
             return playerCore;
-        }
-
-        public void SetupPlayerCore(GameObject playerCore)
-        {
-            playerCore.transform.SetParent(playerParent);
-            var photonTransformView = playerCore.GetComponent<PhotonTransformView>();
-            if (photonTransformView != null)
-            {
-                photonTransformView.m_SynchronizePosition = true;
-                photonTransformView.m_SynchronizeRotation = true;
-                photonTransformView.m_SynchronizeScale = true;
-                photonTransformView.m_UseLocal = false;
-            }
         }
 
         public GameObject InstantiatePlayerObj

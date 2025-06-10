@@ -78,6 +78,7 @@ namespace Manager.BattleManager
         void Start()
         {
             _photonNetworkManager._isTitle = false;
+            InitializeUI();
             InitializeState();
             InitializeComponent();
         }
@@ -85,6 +86,18 @@ namespace Manager.BattleManager
         private void Update()
         {
             _stateMachine.Update();
+        }
+
+        private void InitializeUI()
+        {
+            var battleStartView = GetView(State.BattleStart);
+            foreach (Transform child in battleStartView.transform)
+            {
+                child.gameObject.SetActive(true);
+            }
+
+            var inBattleView = GetView(State.InBattle);
+            inBattleView.gameObject.SetActive(false);
         }
 
         private void InitializeState()

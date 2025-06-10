@@ -39,19 +39,18 @@ namespace Player.Common
                 Cancel();
             }
 
-            protected override void OnUpdate()
-            {
-                if (_PlayerMove == null)
-                {
-                    return;
-                }
-
-                var direction = new Vector3(UltimateJoystick.GetHorizontalAxis(GameCommonData.JoystickName), 0, UltimateJoystick.GetVerticalAxis(GameCommonData.JoystickName));
-                _PlayerMove.Run(direction);
-            }
-
             private void Subscribe()
             {
+                Observable
+                    .EveryFixedUpdate()
+                    .Where(_ => _PlayerMove != null)
+                    .Subscribe(_ =>
+                    {
+                        var direction = new Vector3(UltimateJoystick.GetHorizontalAxis(GameCommonData.JoystickName), 0, UltimateJoystick.GetVerticalAxis(GameCommonData.JoystickName));
+                        _PlayerMove.Run(direction);
+                    })
+                    .AddTo(_cts.Token);
+
                 _OnClickWeaponSkill
                     .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.WeaponSkill); })
                     .AddTo(_cts.Token);
