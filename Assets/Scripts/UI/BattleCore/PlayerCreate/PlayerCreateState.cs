@@ -41,11 +41,12 @@ namespace Manager.BattleManager
             private TranslateStatusInBattleUseCase.Factory _TranslateStatusInBattleUseCaseFactory => Owner._translateStatusInBattleUseCaseFactory;
             private GameObject _ArrowIndicatorPrefab => Owner._arrowSkillIndicatorPrefab;
             private GameObject _CircleIndicatorPrefab => Owner._circleSkillIndicatorPrefab;
+            private StartPointsRepository _StartPointsRepository => Owner._startPointsRepository;
 
             private PhotonView _photonView;
 
             private static readonly Vector3 ColliderCenter = new(0, 0.6f, 0);
-            private static readonly Vector3 ColliderSize = new(0.4f, 0.6f, 0.4f);
+            private static readonly Vector3 ColliderSize = new(0.6f, 0.6f, 0.6f);
             private const float MaxRate = 1f;
             private const int PlayerNotification = 1;
 
@@ -88,7 +89,8 @@ namespace Manager.BattleManager
                 var playerKey = PhotonNetworkManager.GetPlayerKey(index, 0);
                 var characterData = _PhotonNetworkManager.GetCharacterData(playerKey);
                 var weaponData = _PhotonNetworkManager.GetWeaponData(playerKey);
-                var playerCore = _PlayerGeneratorUseCase.InstantiatePlayerCore(spawnPointIndex: index, false);
+                var spawnPoint = _StartPointsRepository.GetSpawnPoint(index);
+                var playerCore = _PlayerGeneratorUseCase.InstantiatePlayerCore(false, spawnPoint);
                 var playerObj = _PlayerGeneratorUseCase.InstantiatePlayerObj(characterData, playerCore.transform, weaponData.Id, false);
                 _CharacterCreateUseCase.CreateWeapon(playerObj, weaponData, true);
                 _photonView = playerCore.GetComponent<PhotonView>();
@@ -113,7 +115,8 @@ namespace Manager.BattleManager
                     var weaponId = _WeaponMasterDataRepository.GetWeaponRandomWeaponId();
                     var characterData = _CharacterMasterDataRepository.GetCharacterData(characterId);
                     var weaponData = _WeaponMasterDataRepository.GetWeaponData(weaponId);
-                    var playerCore = _PlayerGeneratorUseCase.InstantiatePlayerCore(cpuActorNr, true);
+                    var spawnPoint = _StartPointsRepository.GetSpawnPoint(cpuActorNr);
+                    var playerCore = _PlayerGeneratorUseCase.InstantiatePlayerCore(true, spawnPoint);
                     var photonView = playerCore.GetComponent<PhotonView>();
                     var instantiationId = photonView.InstantiationId;
                     var playerKey = PhotonNetworkManager.GetPlayerKey(instantiationId, 0);

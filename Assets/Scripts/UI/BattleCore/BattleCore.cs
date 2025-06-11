@@ -59,10 +59,13 @@ namespace Manager.BattleManager
         [SerializeField] private GameObject playerUI;
         [SerializeField] private GameObject _arrowSkillIndicatorPrefab;
         [SerializeField] private GameObject _circleSkillIndicatorPrefab;
+        [SerializeField] private StageCreate _stageCreate;
         private StateMachine<BattleCore> _stateMachine;
         private PlayerCore _playerCore;
         private readonly List<PlayerStatusUI> _playerStatusUiList = new();
+        private Transform[] _startPositionArray;
         private PlayerStatusInfo _playerStatusInfo;
+        private StartPointsRepository _startPointsRepository;
         private ArrowSkillIndicatorView _arrowSkillIndicatorView;
         private CircleSkillIndicatorView _circleSkillIndicatorView;
 
@@ -146,6 +149,11 @@ namespace Manager.BattleManager
         private void SetCircleSkillIndicatorView(CircleSkillIndicatorView circleSkillIndicatorView)
         {
             _circleSkillIndicatorView = circleSkillIndicatorView;
+        }
+        
+        private void SetStartPointsRepository(StartPointsRepository startPointsRepository)
+        {
+            _startPointsRepository = startPointsRepository;
         }
     }
 }

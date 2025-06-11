@@ -22,7 +22,7 @@ namespace Bomb
             _IsExplosion = true;
             _BlockShakeAction.Invoke();
             var position = transform.position;
-            var startPos = new Vector3(position.x, 0.5f, position.z);
+            var startPos = new Vector3(position.x, transform.position.y + 0.5f, position.z);
             await UniTask.WhenAll(
                 Explosion(startPos, MoveDirection.Forward, damageAmount),
                 Explosion(startPos, MoveDirection.Back, damageAmount),
@@ -37,7 +37,7 @@ namespace Bomb
             var dir = GameCommonData.DirectionToVector3(moveDirection);
             var index = (int)moveDirection;
             _BombRenderer.enabled = false;
-            _BoxColliderComponent.enabled = false;
+            _BoxCollider.enabled = false;
             var isHit = TryGetObstacles(_fireRange, dir, startPos, _ObstaclesLayerMask, out var hit);
             var fireRange = isHit ? CalculateFireRange(hit, startPos) : _fireRange;
             var endPos = CalculateEndPos(isHit, hit, startPos, fireRange, dir);
@@ -52,7 +52,7 @@ namespace Bomb
             await UniTask.WhenAll(SetupExplosionEffect(ExplosionMoveDuration, endPos, explosionList[index].transform));
         }
 
-        private bool TryGetObstacles
+        private static bool TryGetObstacles
         (
             int fireRange,
             Vector3 direction,
@@ -64,7 +64,7 @@ namespace Bomb
             return Physics.Raycast(startPos, direction, out obstacle, fireRange, obstaclesLayer, QueryTriggerInteraction.Collide);
         }
 
-        private int CalculateFireRange(RaycastHit hit, Vector3 startPos)
+        private static int CalculateFireRange(RaycastHit hit, Vector3 startPos)
         {
             var position = hit.transform.position;
             var endPos = new Vector3(position.x, 0.5f, position.z);
@@ -85,13 +85,13 @@ namespace Bomb
             }
         }
 
-        private Vector3 CalculateGeneratePos(Vector3 startPos, Vector3 direction, int index)
+        private static Vector3 CalculateGeneratePos(Vector3 startPos, Vector3 direction, int index)
         {
             var isX = direction.x != 0;
             return isX ? new Vector3(startPos.x + direction.x * index, startPos.y, startPos.z) : new Vector3(startPos.x, startPos.y, startPos.z + direction.z * index);
         }
 
-        private Vector3 CalculateEndPos(bool isHit, RaycastHit hit, Vector3 startPos, int fireRange, Vector3 dir)
+        private static Vector3 CalculateEndPos(bool isHit, RaycastHit hit, Vector3 startPos, int fireRange, Vector3 dir)
         {
             var endPos = Vector3.zero;
             if (isHit && !hit.collider.CompareTag(GameCommonData.BreakingWallTag))

@@ -10,8 +10,6 @@ namespace Player.Common
     {
         private MapManager _mapManager;
         private BombProvider _bombProvider;
-        private const float RayDistance = 1f;
-        private const float ModifiedValue = 2f;
 
         public void Initialize(BombProvider bombProvider, MapManager mapManager, TranslateStatusInBattleUseCase translateStatusInBattleUseCase)
         {
@@ -28,8 +26,7 @@ namespace Player.Common
         {
             _bombProvider.Initialize(translateStatusInBattleUseCase, BombType.Normal);
         }
-
-
+        
         public void SetBomb
         (
             BoxCollider boxCollider,

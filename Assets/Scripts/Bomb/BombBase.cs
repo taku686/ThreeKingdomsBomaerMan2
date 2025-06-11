@@ -14,30 +14,27 @@ namespace Bomb
     public abstract class BombBase : MonoBehaviour
     {
         [SerializeField] protected List<GameObject> explosionList;
-        protected const float ExplosionDisplayDuration = 0.9f;
-        protected const float MinDistance = 1.0f;
-        protected CancellationTokenSource _Cts;
-        public int _fireRange;
-        protected LayerMask _ObstaclesLayerMask;
-        protected bool _IsExplosion;
-        protected Renderer _BombRenderer;
-        protected BoxCollider _BoxColliderComponent;
-        protected Action _BlockShakeAction;
         private int _damageAmount;
         private int _playerId;
         private int _explosionTime;
+        public int _fireRange;
+        protected bool _IsExplosion;
+        protected LayerMask _ObstaclesLayerMask;
+        protected Action _BlockShakeAction;
+        protected Renderer _BombRenderer;
+        protected BoxCollider _BoxCollider;
+        protected CancellationTokenSource _Cts;
+        protected const float ExplosionDisplayDuration = 0.9f;
+        protected const float MinDistance = 1.0f;
         private readonly Subject<Unit> _onExplosionSubject = new();
         private readonly Subject<Unit> _onFinishSubject = new();
-
-        private CancellationToken _token;
         public IObservable<Unit> _OnFinishIObservable => _onFinishSubject.Take(1);
 
         public void Initialize()
         {
             _BombRenderer = GetComponent<Renderer>();
-            _BoxColliderComponent = GetComponent<BoxCollider>();
+            _BoxCollider = GetComponent<BoxCollider>();
             _Cts = new CancellationTokenSource();
-            _token = this.GetCancellationTokenOnDestroy();
             _ObstaclesLayerMask = LayerMask.GetMask(GameCommonData.ObstacleLayer);
             gameObject.layer = LayerMask.NameToLayer(GameCommonData.BombLayer);
         }
@@ -53,7 +50,8 @@ namespace Bomb
         {
             gameObject.tag = GameCommonData.BombTag;
             _BombRenderer.enabled = true;
-            _BoxColliderComponent.enabled = true;
+            _BoxCollider.enabled = true;
+            _BoxCollider.isTrigger = true;
             _damageAmount = damageAmount;
             _playerId = playerId;
             _explosionTime = explosionTime;
@@ -88,16 +86,19 @@ namespace Bomb
 
         private void OnDisableBomb()
         {
-            Cancel();
             _onFinishSubject.OnNext(Unit.Default);
+            Cancel();
         }
 
         private void Cancel()
         {
-            _Cts ??= new CancellationTokenSource();
+            if (_Cts == null)
+            {
+                return;
+            }
+
             _Cts.Cancel();
             _Cts.Dispose();
-            _Cts = new CancellationTokenSource();
         }
 
         private void OnTriggerEnter(Collider other)
@@ -117,7 +118,7 @@ namespace Bomb
                 return;
             }
 
-            _BoxColliderComponent.isTrigger = false;
+            _BoxCollider.isTrigger = false;
         }
 
         private void OnDestroy()

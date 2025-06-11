@@ -1,20 +1,16 @@
-using System.Collections.Generic;
 using Common.Data;
 using Photon.Pun;
-using Player.Common;
 using UnityEngine;
 
 namespace Manager.BattleManager
 {
     public class PlayerGeneratorUseCase : MonoBehaviour
     {
-        [SerializeField] private List<Transform> startPointList;
         [SerializeField] private Transform playerParent;
         private GameObject _playerObj;
 
-        public GameObject InstantiatePlayerCore(int spawnPointIndex, bool isCpu)
+        public GameObject InstantiatePlayerCore(bool isCpu,Transform spawnPoint)
         {
-            var spawnPoint = GetSpawnPoint(spawnPointIndex);
             GameObject playerCore;
             if (!isCpu)
             {
@@ -83,11 +79,6 @@ namespace Manager.BattleManager
 
             PhotonNetwork.Destroy(_playerObj);
             _playerObj = null;
-        }
-
-        private Transform GetSpawnPoint(int index)
-        {
-            return startPointList[index - 1];
         }
     }
 }

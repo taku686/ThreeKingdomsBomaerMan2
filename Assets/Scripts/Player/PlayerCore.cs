@@ -298,7 +298,6 @@ namespace Player.Common
             var playerKey = _TeamMemberReactiveProperty.Value;
             var weaponData = _photonNetworkManager.GetWeaponData(playerKey);
             var normalSkillData = weaponData.NormalSkillMasterData;
-            //var specialSkillData = weaponData.SpecialSkillMasterData;
             _skillActivationConditionsUseCase.OnNextDamageSubject(normalSkillData);
             _skillActivationConditionsUseCase.OnNextDamageSubject(null);
         }
