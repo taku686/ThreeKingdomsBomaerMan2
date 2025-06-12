@@ -153,7 +153,8 @@ namespace Manager.BattleManager
                 var levelData = levelDatum[0];
                 var weaponType = weaponData.WeaponType;
 
-
+                playerCore.tag = GameCommonData.PlayerTag;
+                playerCore.layer = LayerMask.NameToLayer(GameCommonData.EnemyLayer);
                 SetPlayerUI(playerCore, instantiationId, out hpKey);
                 playerMove = playerCore.AddComponent<PlayerMove>();
                 _SetupAnimatorUseCase.SetAnimatorController(playerCore, weaponType);
@@ -167,8 +168,7 @@ namespace Manager.BattleManager
                 AddBoxCollider(playerCore);
                 AddRigidbody(playerCore);
 
-
-                if (!IsCpu(creatorNr)) return;
+                if (!PhotonNetworkManager.IsCpu(creatorNr)) return;
                 var enemyCore = playerCore.AddComponent<EnemyCore>();
                 enemyCore.enabled = PhotonNetwork.IsMasterClient;
             }
@@ -254,6 +254,7 @@ namespace Manager.BattleManager
                 }
 
                 _CameraManager.Initialize(player.transform);
+                player.layer = LayerMask.NameToLayer(GameCommonData.PlayerLayer);
                 var playerCore = player.AddComponent<PlayerCore>();
                 Owner.SetPlayerCore(playerCore);
                 Owner.SetPlayerStatusInfo(playerStatusInfo);
@@ -319,11 +320,6 @@ namespace Manager.BattleManager
                 rigid.useGravity = true;
                 rigid.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
                 rigid.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
-            }
-
-            private static bool IsCpu(int creatorNr)
-            {
-                return creatorNr == 0;
             }
 
             private bool IsMine(PhotonView photonView)

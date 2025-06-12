@@ -16,17 +16,17 @@ namespace Skill.Attack
 {
     public class SlashBase : IAttackBehaviour
     {
-        private readonly SlashSkillEffectRepository _slashSkillEffectRepository;
+        private readonly SkillEffectRepository _skillEffectRepository;
         private const float DelayTime = 0.1f;
         private const float EffectHeight = 0.5f;
 
         [Inject]
         public SlashBase
         (
-            SlashSkillEffectRepository slashSkillEffectRepository
+            SkillEffectRepository skillEffectRepository
         )
         {
-            _slashSkillEffectRepository = slashSkillEffectRepository;
+            _skillEffectRepository = skillEffectRepository;
         }
 
         public virtual void Attack()
@@ -58,7 +58,7 @@ namespace Skill.Attack
 
         protected virtual void ActivateEffect(Transform playerTransform, AbnormalCondition abnormalCondition)
         {
-            var effect = _slashSkillEffectRepository.GetSkillEffect(abnormalCondition);
+            var effect = _skillEffectRepository.GetSlashEffect(abnormalCondition);
             var playerPosition = playerTransform.position;
             var spawnPosition = new Vector3(playerPosition.x, EffectHeight, playerPosition.z);
             var spawnRotation = FixedRotation(abnormalCondition, playerTransform) + playerTransform.eulerAngles;

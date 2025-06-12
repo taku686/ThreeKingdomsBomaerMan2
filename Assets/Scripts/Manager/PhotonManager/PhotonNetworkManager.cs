@@ -257,6 +257,11 @@ namespace Manager.NetworkManager
             _LeftRoomSubject = new Subject<int>();
         }
 
+        public static bool IsCpu(int creatorNr)
+        {
+            return creatorNr == 0;
+        }
+
         public void CreatePlayerGenerateCompleteSubject()
         {
             _playerGenerateCompleteSubject = new Subject<Unit>();

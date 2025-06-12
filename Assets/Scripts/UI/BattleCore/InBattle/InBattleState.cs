@@ -193,7 +193,6 @@ namespace Manager.BattleManager
             private void SearchEnemy()
             {
                 var position = _PlayerCore.transform.position;
-                var origin = new Vector3(position.x, 0.5f, position.z);
                 var layerMask = GameCommonData.GetObstaclesLayerMask();
                 var range = _skillIndicatorInfo._Range;
                 var skillDirection = _skillIndicatorInfo._SkillDirection;
@@ -202,6 +201,7 @@ namespace Manager.BattleManager
                 switch (skillDirection)
                 {
                     case SkillDirection.Forward:
+                        var origin = new Vector3(position.x, position.y + 0.5f, position.z);
                         _ArrowSkillIndicatorView.UpdateArrowIndicator(origin, range, layerMask, direction);
                         break;
                     case SkillDirection.Back:
@@ -215,7 +215,7 @@ namespace Manager.BattleManager
                     case SkillDirection.LeftRight:
                         break;
                     case SkillDirection.All:
-                        _CircleSkillIndicatorView.UpdateCircleIndicator(origin, range, layerMask);
+                        _CircleSkillIndicatorView.UpdateCircleIndicator(position, range, layerMask);
                         break;
                     case SkillDirection.Random:
                         break;

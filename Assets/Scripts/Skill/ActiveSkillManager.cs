@@ -86,8 +86,7 @@ namespace Skill
 
             if (IsFlyingSlashSkillActionType(skillMasterData))
             {
-                var flyingSlash = _flyingSlashFactory.Create(_animator, AbnormalCondition.None, null);
-                flyingSlash.Attack();
+                FlyingSlashSkill(skillMasterData);
             }
 
             if (IsBuffSkillActionType(skillMasterData))
@@ -135,7 +134,21 @@ namespace Skill
             slash.Attack();
         }
 
-        private bool IsBuffSkillActionType(SkillMasterData skillMasterData)
+        private void FlyingSlashSkill(SkillMasterData skillMasterData)
+        {
+            var skillId = skillMasterData.Id;
+            var flyingSlash = _flyingSlashFactory.Create(skillId, _animator, _playerTransform, AbnormalCondition.None, null);
+            foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
+            {
+                if (abnormalCondition == AbnormalCondition.None)
+                    continue;
+                flyingSlash = _flyingSlashFactory.Create(skillId, _animator, _playerTransform, abnormalCondition, flyingSlash);
+            }
+
+            flyingSlash.Attack();
+        }
+
+        private static bool IsBuffSkillActionType(SkillMasterData skillMasterData)
         {
             var skillActionType = skillMasterData._SkillActionTypeEnum;
             return skillActionType is

@@ -36,6 +36,7 @@ namespace Player.Common
 
             protected override void OnExit(State nextState)
             {
+                _PlayerMove.Stop();
                 Cancel();
             }
 

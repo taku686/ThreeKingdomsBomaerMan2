@@ -6,7 +6,6 @@ namespace Common.Data
     {
         public const int CharacterPrice = 200;
         public const int WeaponBuyPrice = 100;
-        public const float TurnDuration = 0.3f;
         public const float InputBombInterval = 0.05f;
         public const float CharacterChangeInterval = 5f;
         public const float DashInterval = 0.5f;
@@ -17,12 +16,14 @@ namespace Common.Data
         public const string BombTag = "Bomb";
         public const string BombEffectTag = "BombEffect";
         public const string BreakingWallTag = "BreakingWall";
+        public const string BushTag = "Bush";
         public const string WeaponTag = "Weapon";
+        public const string WallTag = "Wall";
         public const string ObstacleLayer = "Obstacles";
         public const string ExplosionLayer = "Explosion";
         public const string BombLayer = "Bomb";
         public const string PlayerLayer = "Player";
-        public const string EnemyLayer = "Enemies";
+        public const string EnemyLayer = "Enemy";
         public const string UserKey = "User";
         public const string GemKey = "MS";
         public const string CoinKey = "CO";
@@ -31,12 +32,6 @@ namespace Common.Data
         public const string ConsumableClassKey = "Consumable";
         public const string CharacterClassKey = "Character";
         public const string LoginBonusClassKey = "Consumable";
-        public const string CharacterGachaItemKey = "bundle01";
-        public const string FiveThousandCoinItemKey = "coin5000";
-        public const string TwelveThousandCoinItemKey = "coin12000";
-        public const string TwentyGemItemKey = "gem20";
-        public const string HundredGemItemKey = "gem100";
-        public const string TwoHundredGemItemKey = "gem200";
         public const string LoginBonusNotificationItemKey = "LoginBonusNotification";
         public const string LevelItemKey = "level";
         public const string LoginBonusItemKey = "day";

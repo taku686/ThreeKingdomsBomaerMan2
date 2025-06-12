@@ -130,8 +130,20 @@ namespace Common.Installer
 
         private void InstallFlyingSlashSkill()
         {
-            Container.BindFactory<Animator, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeFlyingSlashFactory.Factory>().FromFactory<AttributeFlyingSlashFactory>();
+            Container.BindFactory<int, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeFlyingSlashFactory.Factory>().FromFactory<AttributeFlyingSlashFactory>();
             Container.BindFactory<Animator, NormalFlyingSlash, NormalFlyingSlash.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, PoisonFlyingSlash, PoisonFlyingSlash.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, ParalysisFlyingSlash, ParalysisFlyingSlash.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, FrozenFlyingSlash, FrozenFlyingSlash.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, ConfusionFlyingSlash, ConfusionFlyingSlash.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, CharmFlyingSlash, CharmFlyingSlash.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, MiasmaFlyingSlash, MiasmaFlyingSlash.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, DarknessFlyingSlash, DarknessFlyingSlash.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, LifeStealFlyingSlash, LifeStealFlyingSlash.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, HellFireFlyingSlash, HellFireFlyingSlash.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, StigmataFlyingSlash, StigmataFlyingSlash.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, SoakingWetFlyingSlash, SoakingWetFlyingSlash.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, BurningFlyingSlash, BurningFlyingSlash.Factory>().AsCached();
         }
 
         private void InstallBuffSkill()

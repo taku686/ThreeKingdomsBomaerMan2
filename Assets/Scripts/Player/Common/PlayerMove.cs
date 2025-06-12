@@ -85,6 +85,16 @@ namespace Player.Common
             transform.localRotation = Quaternion.LookRotation(inputValue);
         }
 
+        public void Stop()
+        {
+            if (!PhotonNetwork.LocalPlayer.IsLocal)
+            {
+                return;
+            }
+
+            _rigidbody.velocity = Vector3.zero;
+        }
+
         public void Dash()
         {
             if (!PhotonNetwork.LocalPlayer.IsLocal)
@@ -93,7 +103,7 @@ namespace Player.Common
             }
 
             var dodgeDirection = transform.forward * 0.1f;
-            _rigidbody.AddForce(dodgeDirection, ForceMode.VelocityChange);
+            _rigidbody.AddForce(dodgeDirection, ForceMode.Acceleration);
         }
 
         private static MoveDirection GetDirection(Vector3 direction)

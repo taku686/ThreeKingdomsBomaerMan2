@@ -321,7 +321,6 @@ public class PSMeshRendererUpdater : MonoBehaviour
                 {
                     sh.shapeType = ParticleSystemShapeType.SkinnedMeshRenderer;
                     sh.skinnedMeshRenderer = skinMeshRend;
-
                 }
             }
 

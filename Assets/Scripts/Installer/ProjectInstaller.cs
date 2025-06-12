@@ -46,7 +46,7 @@ namespace Common.Installer
             Container.Bind<MainManager>().FromComponentsInNewPrefab(_mainManagerGameObject).AsSingle();
             Container.Bind<CharacterTypeSpriteRepository>().FromComponentInNewPrefab(_characterTypeDataGameObject).AsSingle();
             Container.Bind<AbnormalConditionSpriteRepository>().FromComponentInNewPrefab(_abnormalConditionSpriteRepositoryGameObject).AsSingle();
-            Container.Bind<SlashSkillEffectRepository>().FromComponentInNewPrefab(_skillEffectRepositoryGameObject).AsSingle();
+            Container.Bind<SkillEffectRepository>().FromComponentInNewPrefab(_skillEffectRepositoryGameObject).AsSingle();
             Container.Bind<ResourcesObjectRepository>().FromComponentInNewPrefab(_resourcesObjectRepositoryGameObject).AsSingle();
         }
     }

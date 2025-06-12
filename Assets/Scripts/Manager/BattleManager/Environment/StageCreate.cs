@@ -1,3 +1,5 @@
+using Common.Data;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace Manager.BattleManager.Environment
@@ -51,8 +53,20 @@ namespace Manager.BattleManager.Environment
             {
                 if (child == stage.transform) continue;
 
+                if (child.name.Contains("Grass"))
+                {
+                    child.tag = GameCommonData.BushTag;
+                }
+
+                if (child.name.Contains("Crystal"))
+                {
+                    child.tag = GameCommonData.BreakingWallTag;
+                }
+
                 if (child.CompareTag("BreakingWall"))
                 {
+                    SetupObstacles(child.gameObject);
+                    child.gameObject.tag = GameCommonData.BreakingWallTag;
                     child.SetParent(breakingWall.transform);
                 }
                 else if (child.CompareTag("Floor"))
@@ -65,6 +79,7 @@ namespace Manager.BattleManager.Environment
                 }
                 else if (child.CompareTag("Wall"))
                 {
+                    SetupObstacles(child.gameObject);
                     child.SetParent(walls.transform);
                 }
                 else if (child.CompareTag("Rock"))
@@ -77,6 +92,7 @@ namespace Manager.BattleManager.Environment
                 }
                 else if (child.CompareTag("Bush"))
                 {
+                    child.gameObject.tag = GameCommonData.BushTag;
                     child.SetParent(bush.transform);
                 }
                 else if (child.CompareTag("Water"))
@@ -84,6 +100,25 @@ namespace Manager.BattleManager.Environment
                     child.SetParent(water.transform);
                 }
             }
+        }
+
+        private static void SetupObstacles(GameObject obstacle)
+        {
+            var collider = obstacle.GetComponent<Collider>();
+            if (collider != null)
+            {
+                collider.isTrigger = false;
+            }
+            else
+            {
+                obstacle.AddComponent<BoxCollider>().isTrigger = false;
+            }
+
+            obstacle.layer = LayerMask.NameToLayer(GameCommonData.ObstacleLayer);
+            var rigidBody = obstacle.AddComponent<Rigidbody>();
+            rigidBody.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+            rigidBody.isKinematic = false;
+            rigidBody.constraints = RigidbodyConstraints.FreezeAll;
         }
     }
 }
