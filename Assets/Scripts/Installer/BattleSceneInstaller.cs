@@ -7,6 +7,8 @@ using Repository;
 using Skill;
 using Skill.Attack;
 using Skill.Attack.FlyingSlash;
+using Skill.CrushImpact;
+using Skill.DashAttack;
 using Skill.Heal;
 using UI.Common;
 using UnityEngine;
@@ -40,20 +42,22 @@ namespace Common.Installer
             Container.Bind<AnimatorControllerRepository>().FromComponentInNewPrefab(_animatorControllerRepositoryGameObject).AsSingle();
             Container.Bind<SkillEffectActivateUseCase>().FromComponentOn(_skillEffectActivateGameObject).AsCached();
 
-            SkillInstaller();
-            SlashSKillInstaller();
-            FlyingSlashSkillInstaller();
-            BuffSkillInstaller();
-            HealSkillInstaller();
+            InstallSkill();
+            InstallSlashSKill();
+            InstallFlyingSlashSkill();
+            InstallBuffSkill();
+            InstallHealSkill();
+            InstallDashAttack();
+            InstallCrushImpact();
         }
 
-        private void SkillInstaller()
+        private void InstallSkill()
         {
             Container.Bind<ActiveSkillManager>().AsCached();
             Container.Bind<PassiveSkillManager>().AsCached();
         }
 
-        private void SlashSKillInstaller()
+        private void InstallSlashSKill()
         {
             Container.BindFactory<int, TargetScanner, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeSlashFactory.Factory>().FromFactory<AttributeSlashFactory>();
             Container.BindFactory<Animator, NormalSlash, NormalSlash.Factory>().AsCached();
@@ -76,7 +80,7 @@ namespace Common.Installer
             Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, BurningSlash, BurningSlash.Factory>().AsCached();
         }
 
-        private void FlyingSlashSkillInstaller()
+        private void InstallFlyingSlashSkill()
         {
             Container.BindFactory<int, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeFlyingSlashFactory.Factory>().FromFactory<AttributeFlyingSlashFactory>();
             Container.BindFactory<Animator, NormalFlyingSlash, NormalFlyingSlash.Factory>().AsCached();
@@ -94,12 +98,36 @@ namespace Common.Installer
             Container.BindFactory<int, Animator, Transform, IAttackBehaviour, BurningFlyingSlash, BurningFlyingSlash.Factory>().AsCached();
         }
 
-        private void BuffSkillInstaller()
+        private void InstallDashAttack()
+        {
+            Container.BindFactory<int, Animator, PlayerDash, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeDashAttackFactory.Factory>().FromFactory<AttributeDashAttackFactory>();
+            Container.BindFactory<Animator, PlayerDash, NormalDashAttack, NormalDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, PoisonDashAttack, PoisonDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, ParalysisDashAttack, ParalysisDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, FrozenDashAttack, FrozenDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, ConfusionDashAttack, ConfusionDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, CharmDashAttack, CharmDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, MiasmaDashAttack, MiasmaDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, DarknessDashAttack, DarknessDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, LifeStealDashAttack, LifeStealDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, HellFireDashAttack, HellFireDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, StigmataDashAttack, StigmataDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, SoakingWetDashAttack, SoakingWetDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, BurningDashAttack, BurningDashAttack.Factory>().AsCached();
+        }
+
+        private void InstallCrushImpact()
+        {
+            Container.BindFactory<int, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeCrushImpactFactory.Factory>().FromFactory<AttributeCrushImpactFactory>();
+            Container.BindFactory<Animator, NormalCrushImpact, NormalCrushImpact.Factory>().AsCached();
+        }
+
+        private void InstallBuffSkill()
         {
             Container.Bind<BuffSkill>().AsCached();
         }
 
-        private void HealSkillInstaller()
+        private void InstallHealSkill()
         {
             Container.Bind<HealSkill>().AsCached();
         }

@@ -38,8 +38,6 @@ namespace UI.Title
             private int _candidateIndex;
             private CharacterData[] _sortedCharacters;
             private readonly Subject<int> _onChangeViewModel = new();
-            private const int SkillOne = 1;
-            private const int SkillTwo = 2;
             private bool _isTeamEdit;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
@@ -104,7 +102,7 @@ namespace UI.Title
                 _View._TeamEditButton
                     .OnClickAsObservable()
                     .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._TeamEditButton).ToObservable())
-                    .SelectMany(_ => OnClickDecideButton().ToObservable())
+                    .SelectMany(_ => OnClickTeamEditButton().ToObservable())
                     .Subscribe(_ =>
                     {
                         ChangeState();
@@ -255,7 +253,7 @@ namespace UI.Title
                 Owner.SetActiveBlockPanel(false);
             }
 
-            private async UniTask OnClickDecideButton()
+            private async UniTask OnClickTeamEditButton()
             {
                 if (_isTeamEdit)
                 {
@@ -269,7 +267,7 @@ namespace UI.Title
             private void ChangeState()
             {
                 var prevState = _StateMachine._PreviousState;
-                if (prevState >= 0)
+                if (prevState != GameCommonData.InvalidNumber)
                 {
                     _StateMachine.Dispatch(prevState);
                 }

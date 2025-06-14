@@ -249,10 +249,7 @@ public class StateMachine<TOwner>
             }
         }
 
-        if (prevEventId != GameCommonData.InvalidNumber)
-        {
-            _PreviousState = prevEventId;
-        }
+        _PreviousState = prevEventId;
 
         Change(to).Forget();
     }

@@ -109,12 +109,21 @@ namespace Repository
         {
             var result = new List<(int, GameCommonData.RewardType)>();
             var weaponMasterDatum = _weaponMasterDataRepository.GetAllWeaponData().ToArray();
+# if UNITY_EDITOR
+            foreach (var weaponMasterData in weaponMasterDatum)
+            {
+                _userDataRepository.AddWeaponData(weaponMasterData.Id);
+                result.Add((weaponMasterData.Id, GameCommonData.RewardType.Weapon));
+            }
+#else
             for (var i = 0; i < rewardAmount; i++)
             {
                 var weaponId = weaponMasterDatum[UnityEngine.Random.Range(0, weaponMasterDatum.Length)].Id;
                 _userDataRepository.AddWeaponData(weaponId);
                 result.Add((weaponId, GameCommonData.RewardType.Weapon));
             }
+#endif
+
 
             _rewards = result;
             return result;

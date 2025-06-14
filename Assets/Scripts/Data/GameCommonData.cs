@@ -43,12 +43,15 @@ namespace Common.Data
         public static readonly int BuffHashKey = Animator.StringToHash("Buff");
         public static readonly int DeadHashKey = Animator.StringToHash("Dead");
         public static readonly int SlashHashKey = Animator.StringToHash("Slash");
+        public static readonly int DashAttackHashKey = Animator.StringToHash("DashAttack");
+        public static readonly int ImpactHashKey = Animator.StringToHash("Impact");
         public static readonly int PerformanceHashKey = Animator.StringToHash("Performance");
         public const string NormalKey = "Base Layer.Normal";
         public const string SpecialKey = "Base Layer.Special";
         public const string KickKey = "Base Layer.Kick";
         public const string JumpKey = "Base Layer.Jump";
         public const string DashKey = "Base Layer.Dash";
+        public const string DashAttackKey = "Base Layer.DashAttack";
         public const string BuffKey = "Base Layer.Buff";
         public const string DeadKey = "Base Layer.Dead";
         public const string SlashKey = "Base Layer.Slash";
@@ -86,7 +89,7 @@ namespace Common.Data
         public const int MinCharacterLevel = 1;
         public const int MaxMissionCount = 20;
         public const int NetworkErrorCode = int.MaxValue;
-        public const int BattleTime = 180;
+        public const int BattleTime = 300;
         public const int DefaultWeaponId = 0;
         public const int NormalSkillReleaseLevel = 3;
         public const int SpecialSkillReleaseLevel = 5;

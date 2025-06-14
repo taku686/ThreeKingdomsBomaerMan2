@@ -1,5 +1,4 @@
 using Common.Data;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace Manager.BattleManager.Environment
@@ -10,7 +9,8 @@ namespace Manager.BattleManager.Environment
 
         public StartPointsRepository StageGenerate()
         {
-            var stageIndex = Random.Range(0, _stages.Length);
+            //var stageIndex = Random.Range(0, _stages.Length);
+            var stageIndex = 1; // For testing purposes, always use the first stage
             var candidateStage = _stages[stageIndex];
             for (var i = 0; i < _stages.Length; i++)
             {

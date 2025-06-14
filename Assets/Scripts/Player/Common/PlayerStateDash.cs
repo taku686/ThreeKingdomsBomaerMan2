@@ -1,4 +1,5 @@
-﻿using Common.Data;
+﻿using System.Threading;
+using Common.Data;
 using Cysharp.Threading.Tasks;
 using UniRx;
 using UniRx.Triggers;
@@ -13,18 +14,23 @@ namespace Player.Common
         public class PlayerStateDash : State
         {
             private Animator _Animator => Owner._animator;
-            private PlayerMove _PlayerMove => Owner._playerMove;
+            private PlayerDash _PlayerDash => Owner._playerDash;
             private ObservableStateMachineTrigger _ObservableStateMachineTrigger => Owner._observableStateMachineTrigger;
             private StateMachine<PlayerCore> _StateMachine => Owner._stateMachine;
 
+            private CancellationTokenSource _cts;
+            private const float DashForce = 5f;
+
             protected override void OnEnter(State prevState)
             {
+                _cts = new CancellationTokenSource();
+                _PlayerDash.Dash(DashForce);
                 PlayBackAnimation(GameCommonData.DashHashKey, GameCommonData.DashKey);
             }
 
-            protected override void OnUpdate()
+            protected override void OnExit(State nextState)
             {
-                _PlayerMove.Dash();
+                Cancel();
             }
 
             private void PlayBackAnimation(int hashKey, string key)
@@ -35,7 +41,19 @@ namespace Player.Common
                     .Where(info => info.StateInfo.IsName(key))
                     .Take(1)
                     .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.Idle); })
-                    .AddTo(Owner.GetCancellationTokenOnDestroy());
+                    .AddTo(_cts.Token);
+            }
+
+            private void Cancel()
+            {
+                if (_cts == null)
+                {
+                    return;
+                }
+
+                _cts.Cancel();
+                _cts.Dispose();
+                _cts = null;
             }
         }
     }

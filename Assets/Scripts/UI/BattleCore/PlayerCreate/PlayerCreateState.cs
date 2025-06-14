@@ -138,8 +138,7 @@ namespace Manager.BattleManager
                 GameObject playerCore,
                 out string hpKey,
                 out PlayerStatusInfo playerStatusInfo,
-                out PhotonView photonView,
-                out PlayerMove playerMove
+                out PhotonView photonView
             )
             {
                 photonView = playerCore.GetComponent<PhotonView>();
@@ -156,7 +155,8 @@ namespace Manager.BattleManager
                 playerCore.tag = GameCommonData.PlayerTag;
                 playerCore.layer = LayerMask.NameToLayer(GameCommonData.EnemyLayer);
                 SetPlayerUI(playerCore, instantiationId, out hpKey);
-                playerMove = playerCore.AddComponent<PlayerMove>();
+                playerCore.AddComponent<PlayerMove>();
+                playerCore.AddComponent<PlayerDash>();
                 _SetupAnimatorUseCase.SetAnimatorController(playerCore, weaponType);
                 GenerateEffectActivator(playerCore, instantiationId);
                 var translateStatusInBattleUseCase = _TranslateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
@@ -244,8 +244,7 @@ namespace Manager.BattleManager
                     player,
                     out var hpKey,
                     out var playerStatusInfo,
-                    out var photonView,
-                    out var playerMove
+                    out var photonView
                 );
 
                 if (!IsMine(photonView))
@@ -268,7 +267,6 @@ namespace Manager.BattleManager
                     _SkillActivationConditionsUseCase,
                     _PlayerGeneratorUseCase,
                     _CharacterCreateUseCase,
-                    playerMove,
                     hpKey
                 );
             }

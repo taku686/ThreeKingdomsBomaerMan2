@@ -59,8 +59,7 @@ namespace UI.Title
                             StateMachine.Dispatch((int)State.CharacterDetail);
                             return;
                         }
-
-                        StateMachine._PreviousState = GameCommonData.InvalidNumber;
+                        
                         StateMachine.Dispatch(preState);
                     })
                     .AddTo(_cts.Token);
@@ -88,7 +87,16 @@ namespace UI.Title
                     .WithLatestFrom(_onChangeSelectedWeaponSubject, (_, weaponId) => weaponId)
                     .Select(selectedWeaponId => (selectedWeaponId, selectedCharacterId: _TemporaryCharacterRepository.GetSelectedCharacterId()))
                     .SelectMany(tuple => _UserDataRepository.SetEquippedWeapon(tuple.selectedCharacterId, tuple.selectedWeaponId).ToObservable())
-                    .Subscribe(_ => { stateMachine.Dispatch((int)State.CharacterDetail); })
+                    .Subscribe(_ =>
+                    {
+                        var prevState = StateMachine._PreviousState;
+                        if(prevState == GameCommonData.InvalidNumber)
+                        {
+                            StateMachine.Dispatch((int)State.CharacterDetail);
+                            return;
+                        }
+                        stateMachine.Dispatch(prevState);
+                    })
                     .AddTo(_cts.Token);
 
                 DetailSkillSubscribe();

@@ -400,13 +400,22 @@ namespace Repository
             currentWeapon.transform.localScale *= weaponMasterData.Scale;
             FixWeaponAngle(currentWeapon, weaponMasterData, isLeftHand);
             currentWeapon.AddComponent<WeaponObject>();
-            var psUpdater = currentWeapon.GetComponentInChildren<PSMeshRendererUpdater>();
-            if (psUpdater == null)
+            SetUpWeaponEffect(currentWeapon);
+        }
+
+        private static void SetUpWeaponEffect(GameObject weapon)
+        {
+            var psUpdater = weapon.GetComponentInChildren<PSMeshRendererUpdater>();
+            if (psUpdater != null)
             {
-                return;
+                psUpdater.UpdateMeshEffect(weapon);
             }
 
-            psUpdater.UpdateMeshEffect(currentWeapon);
+            var weaponEffect = weapon.GetComponentInChildren<WeaponMeshEffect>();
+            if (weaponEffect != null)
+            {
+                weaponEffect.Initialize();
+            }
         }
 
         private void FixWeaponAngle(GameObject currentWeapon, WeaponMasterData weaponMasterData, bool isLeftHand)

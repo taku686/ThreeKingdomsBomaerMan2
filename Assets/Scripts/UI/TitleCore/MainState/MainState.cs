@@ -139,12 +139,14 @@ namespace UI.Title
 
                 _View._TeamEditButton
                     .OnClickAsObservable()
+                    .Take(1)
                     .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._TeamEditButton).ToObservable())
                     .Subscribe(_ => { _StateMachine.Dispatch((int)State.TeamEdit); })
                     .AddTo(_cts.Token);
 
                 _View._InventoryButton
                     .OnClickAsObservable()
+                    .Take(1)
                     .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._InventoryButton).ToObservable())
                     .Subscribe(_ =>
                     {

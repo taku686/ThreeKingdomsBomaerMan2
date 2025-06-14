@@ -3,6 +3,8 @@ using Common.Data;
 using Player.Common;
 using Skill.Attack;
 using Skill.Attack.FlyingSlash;
+using Skill.CrushImpact;
+using Skill.DashAttack;
 using Skill.Heal;
 using UniRx;
 using UnityEngine;
@@ -14,9 +16,12 @@ namespace Skill
     {
         private readonly AttributeSlashFactory.Factory _slashFactory;
         private readonly AttributeFlyingSlashFactory.Factory _flyingSlashFactory;
+        private readonly AttributeDashAttackFactory.Factory _dashAttackFactory;
+        private readonly AttributeCrushImpactFactory.Factory _crushImpactFactory;
         private readonly BuffSkill _buffSkill;
         private readonly HealSkill _healSkill;
         private Animator _animator;
+        private PlayerDash _playerDash;
         private DC.Scanner.TargetScanner _targetScanner;
         private Transform _playerTransform;
         private const int GodSignBuffSkillId = 160;
@@ -28,12 +33,16 @@ namespace Skill
         (
             AttributeSlashFactory.Factory slashFactory,
             AttributeFlyingSlashFactory.Factory flyingSlashFactory,
+            AttributeDashAttackFactory.Factory dashAttackFactory,
+            AttributeCrushImpactFactory.Factory crushImpactFactory,
             BuffSkill buffSkill,
             HealSkill healSkill
         )
         {
             _slashFactory = slashFactory;
             _flyingSlashFactory = flyingSlashFactory;
+            _dashAttackFactory = dashAttackFactory;
+            _crushImpactFactory = crushImpactFactory;
             _buffSkill = buffSkill;
             _healSkill = healSkill;
         }
@@ -48,11 +57,13 @@ namespace Skill
             Subject<(StatusType statusType, int value, bool isBuff, bool isDebuff)> statusBuffUi,
             int characterId,
             TranslateStatusInBattleUseCase translateStatusInBattleUseCase,
-            Func<int, int> hpCalculateFunc
+            Func<int, int> hpCalculateFunc,
+            PlayerDash playerDash
         )
         {
             _targetScanner = targetScanner;
             _playerTransform = playerTransform;
+            _playerDash = playerDash;
             var playerStatusInfo = playerTransform.GetComponent<PlayerStatusInfo>();
             SetupAnimator(animator);
             _buffSkill.Initialize
@@ -87,6 +98,16 @@ namespace Skill
             if (IsFlyingSlashSkillActionType(skillMasterData))
             {
                 FlyingSlashSkill(skillMasterData);
+            }
+
+            if (IsDashAttackSkillActionType(skillMasterData))
+            {
+                DashAttackSkill(skillMasterData);
+            }
+
+            if (IsCrushImpactSkillActionType(skillMasterData))
+            {
+                CrushImpactSkill(skillMasterData);
             }
 
             if (IsBuffSkillActionType(skillMasterData))
@@ -148,6 +169,34 @@ namespace Skill
             flyingSlash.Attack();
         }
 
+        private void DashAttackSkill(SkillMasterData skillMasterData)
+        {
+            var skillId = skillMasterData.Id;
+            var dashAttack = _dashAttackFactory.Create(skillId, _animator, _playerDash, _playerTransform, AbnormalCondition.None, null);
+            foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
+            {
+                if (abnormalCondition == AbnormalCondition.None)
+                    continue;
+                dashAttack = _dashAttackFactory.Create(skillId, _animator, _playerDash, _playerTransform, abnormalCondition, dashAttack);
+            }
+
+            dashAttack.Attack();
+        }
+
+        private void CrushImpactSkill(SkillMasterData skillMasterData)
+        {
+            var skillId = skillMasterData.Id;
+            var dashAttack = _crushImpactFactory.Create(skillId, _animator, _playerTransform, AbnormalCondition.None, null);
+            /*foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
+            {
+                if (abnormalCondition == AbnormalCondition.None)
+                    continue;
+                dashAttack = _crushImpactFactory.Create(skillId, _animator, _playerTransform, abnormalCondition, dashAttack);
+            }*/
+
+            dashAttack.Attack();
+        }
+
         private static bool IsBuffSkillActionType(SkillMasterData skillMasterData)
         {
             var skillActionType = skillMasterData._SkillActionTypeEnum;
@@ -168,10 +217,22 @@ namespace Skill
             return skillActionType is SkillActionType.Slash;
         }
 
-        private bool IsFlyingSlashSkillActionType(SkillMasterData skillMasterData)
+        private static bool IsFlyingSlashSkillActionType(SkillMasterData skillMasterData)
         {
             var skillActionType = skillMasterData._SkillActionTypeEnum;
             return skillActionType is SkillActionType.FlyingSlash;
+        }
+
+        private static bool IsDashAttackSkillActionType(SkillMasterData skillMasterData)
+        {
+            var skillActionType = skillMasterData._SkillActionTypeEnum;
+            return skillActionType is SkillActionType.DashAttack;
+        }
+
+        private static bool IsCrushImpactSkillActionType(SkillMasterData skillMasterData)
+        {
+            var skillActionType = skillMasterData._SkillActionTypeEnum;
+            return skillActionType is SkillActionType.Impact;
         }
 
         private static bool IsHealSkillActionType(SkillMasterData skillMasterData)

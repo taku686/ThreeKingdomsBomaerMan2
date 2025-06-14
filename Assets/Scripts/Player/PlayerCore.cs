@@ -35,6 +35,7 @@ namespace Player.Common
         private CharacterCreateUseCase _characterCreateUseCase;
 
         private PlayerMove _playerMove;
+        private PlayerDash _playerDash;
         private PutBomb _putBomb;
         private Animator _animator;
         private ObservableStateMachineTrigger _observableStateMachineTrigger;
@@ -81,7 +82,6 @@ namespace Player.Common
             SkillActivationConditionsUseCase skillActivationConditionsUseCase,
             PlayerGeneratorUseCase playerGeneratorUseCase,
             CharacterCreateUseCase characterCreateUseCase,
-            PlayerMove playerMove,
             string key
         )
         {
@@ -93,7 +93,6 @@ namespace Player.Common
             _skillActivationConditionsUseCase = skillActivationConditionsUseCase;
             _playerGeneratorUseCase = playerGeneratorUseCase;
             _characterCreateUseCase = characterCreateUseCase;
-            _playerMove = playerMove;
             InitializeComponent();
             InitializeState();
             Subscribe();
@@ -101,6 +100,8 @@ namespace Player.Common
 
         private void InitializeComponent()
         {
+            _playerDash = GetComponent<PlayerDash>();
+            _playerMove = GetComponent<PlayerMove>();
             _targetScanner = gameObject.GetComponent<TargetScanner>()._targetScanner;
             _putBomb = GetComponent<PutBomb>();
             _animator = GetComponentInChildren<Animator>();
@@ -110,6 +111,7 @@ namespace Player.Common
             SetupTranslateStatusInBattleUseCase();
             _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
             _playerMove.Initialize(_animator, _statusBuffSubject, _translateStatusInBattleUseCase._Speed);
+            _playerDash.Initialize();
             _cancellationToken = gameObject.GetCancellationTokenOnDestroy();
         }
 
@@ -132,7 +134,8 @@ namespace Player.Common
                 _statusBuffUiSubject,
                 characterId,
                 _translateStatusInBattleUseCase,
-                CalculateHp
+                CalculateHp,
+                _playerDash
             );
 
             _passiveSkillManager.Initialize

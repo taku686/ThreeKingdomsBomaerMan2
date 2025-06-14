@@ -1,4 +1,5 @@
 ﻿using AttributeAttack;
+using Common.Data;
 using UnityEngine;
 using Zenject;
 
@@ -16,6 +17,11 @@ public class WaterAttackBehaviour : IAttackBehaviour
     {
         _attackBehaviour.Attack();
         Debug.Log("水属性攻撃！");
+    }
+
+    public void Attack(AbnormalCondition attribute)
+    {
+        throw new System.NotImplementedException();
     }
 
     public void Dispose()
