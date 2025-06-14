@@ -10,7 +10,7 @@ namespace Skill.DashAttack
     {
         private readonly Animator _animator;
         private readonly PlayerDash _playerDash;
-        private const float DashForce = 6f;
+        private const float DashForce = 2.5f;
 
         [Inject]
         public NormalDashAttack

@@ -260,27 +260,22 @@ namespace Repository
             }
         }
 
-        public GameObject[] CreateWeapon
-        (
-            GameObject playerObj,
+        public void CreateWeapon
+        (GameObject playerObj,
             WeaponMasterData weaponMasterData,
             bool isPhotonObject = false,
-            bool isCpu = false
-        )
+            bool isCpu = false)
         {
-            var currentWeapons = new List<GameObject>();
             DestroyWeaponObj(playerObj);
 
             if (IsLeftHand(weaponMasterData.WeaponType))
             {
-                var weaponObj = InstantiateWeapon(playerObj, weaponMasterData, isPhotonObject, isCpu);
-                currentWeapons.Add(weaponObj);
+                InstantiateWeapon(playerObj, weaponMasterData, isPhotonObject, isCpu);
             }
 
             if (IsRightHand(weaponMasterData.WeaponType))
             {
-                var weaponObj = InstantiateWeapon(playerObj, weaponMasterData, isPhotonObject, isCpu);
-                currentWeapons.Add(weaponObj);
+                InstantiateWeapon(playerObj, weaponMasterData, isPhotonObject, isCpu);
             }
 
             if (IsBothHand(weaponMasterData.WeaponType))
@@ -288,15 +283,12 @@ namespace Repository
                 for (var i = 0; i < 2; i++)
                 {
                     var isLeftHand = i == 0;
-                    var weaponObj = InstantiateWeapon(playerObj, weaponMasterData, isPhotonObject, isCpu, isLeftHand);
-                    currentWeapons.Add(weaponObj);
+                    InstantiateWeapon(playerObj, weaponMasterData, isPhotonObject, isCpu, isLeftHand);
                 }
             }
-
-            return currentWeapons.ToArray();
         }
 
-        private GameObject InstantiateWeapon
+        private void InstantiateWeapon
         (
             GameObject playerObj,
             WeaponMasterData weaponMasterData,
@@ -305,15 +297,14 @@ namespace Repository
             bool isLeftHand = false
         )
         {
-            GameObject currentWeapon;
-
             if (isPhotonObject)
             {
                 var photonView = playerObj.GetComponent<PhotonView>();
+                GameObject weapon;
                 var myCustomInitData = new object[] { photonView.InstantiationId, weaponMasterData.Id, isLeftHand };
                 if (isCpu)
                 {
-                    currentWeapon = PhotonNetwork.InstantiateRoomObject
+                    weapon = PhotonNetwork.InstantiateRoomObject
                     (
                         GameCommonData.WeaponPrefabPath + weaponMasterData.Id,
                         Vector3.zero,
@@ -324,7 +315,7 @@ namespace Repository
                 }
                 else
                 {
-                    currentWeapon = PhotonNetwork.Instantiate
+                    weapon = PhotonNetwork.Instantiate
                     (
                         GameCommonData.WeaponPrefabPath + weaponMasterData.Id,
                         Vector3.zero,
@@ -333,14 +324,25 @@ namespace Repository
                         myCustomInitData
                     );
                 }
+
+                FixPhotonWeaponTransform(weapon, weaponMasterData.WeaponType);
             }
             else
             {
-                currentWeapon = Object.Instantiate(weaponMasterData.WeaponObject);
+                var currentWeapon = Object.Instantiate(weaponMasterData.WeaponObject);
                 FixWeaponTransform(playerObj, currentWeapon, weaponMasterData, isLeftHand);
             }
+        }
 
-            return currentWeapon;
+        private static void FixPhotonWeaponTransform
+        (
+            GameObject weapon,
+            WeaponType weaponType
+        )
+        {
+            if (weaponType == WeaponType.Hammer)
+            {
+            }
         }
 
         public void FixWeaponTransform
@@ -411,7 +413,7 @@ namespace Repository
                 psUpdater.UpdateMeshEffect(weapon);
             }
 
-            var weaponEffect = weapon.GetComponentInChildren<WeaponMeshEffect>();
+            var weaponEffect = weapon.GetComponent<WeaponMeshEffect>();
             if (weaponEffect != null)
             {
                 weaponEffect.Initialize();

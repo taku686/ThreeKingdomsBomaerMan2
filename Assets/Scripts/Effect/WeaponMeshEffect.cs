@@ -3,7 +3,8 @@ using UnityEngine;
 public class WeaponMeshEffect : MonoBehaviour
 {
     [SerializeField] private float _startScaleMultiplier = 1;
-    
+    private ParticleSystem[] _particles;
+
     public void Initialize()
     {
         var meshRenderer = GetComponent<MeshRenderer>();
@@ -15,14 +16,14 @@ public class WeaponMeshEffect : MonoBehaviour
             transformMax = meshRenderer.transform.lossyScale.magnitude;
         }
 
-        var particles = GetComponentsInChildren<ParticleSystem>();
-        if (particles == null || particles.Length == 0)
+        _particles = GetComponentsInChildren<ParticleSystem>();
+        if (_particles == null || _particles.Length == 0)
         {
             Debug.LogWarning("No ParticleSystem found in children.");
             return;
         }
 
-        foreach (var particle in particles)
+        foreach (var particle in _particles)
         {
             SetupShape(particle, meshRenderer);
             var main = particle.main;
@@ -38,6 +39,22 @@ public class WeaponMeshEffect : MonoBehaviour
                 main.startSpeed,
                 (realBound / transformMax) * _startScaleMultiplier
             );
+        }
+    }
+
+    public void Stop()
+    {
+        if (_particles == null || _particles.Length == 0)
+        {
+            _particles = GetComponentsInChildren<ParticleSystem>();
+        }
+
+        foreach (var particle in _particles)
+        {
+            if (particle.isPlaying)
+            {
+                particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
         }
     }
 

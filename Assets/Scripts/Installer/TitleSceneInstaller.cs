@@ -172,7 +172,19 @@ namespace Common.Installer
         private void InstallCrushImpact()
         {
             Container.BindFactory<int, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeCrushImpactFactory.Factory>().FromFactory<AttributeCrushImpactFactory>();
-            Container.BindFactory<Animator, NormalCrushImpact, NormalCrushImpact.Factory>().AsCached();
+            Container.BindFactory<Animator, Transform, NormalCrushImpact, NormalCrushImpact.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, PoisonCrushImpact, PoisonCrushImpact.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, ParalysisCrushImpact, ParalysisCrushImpact.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, FrozenCrushImpact, FrozenCrushImpact.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, ConfusionCrushImpact, ConfusionCrushImpact.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, CharmCrushImpact, CharmCrushImpact.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, MiasmaCrushImpact, MiasmaCrushImpact.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, DarknessCrushImpact, DarknessCrushImpact.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, LifeStealCrushImpact, LifeStealCrushImpact.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, HellFireCrushImpact, HellFireCrushImpact.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, StigmataCrushImpact, StigmataCrushImpact.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, SoakingWetCrushImpact, SoakingWetCrushImpact.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, BurningCrushImpact, BurningCrushImpact.Factory>().AsCached();
         }
 
         private void InstallBuffSkill()

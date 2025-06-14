@@ -14,10 +14,6 @@ namespace Skill.DashAttack
     {
         private readonly SkillEffectRepository _skillEffectRepository;
         private const float DelayTime = 0.1f;
-        private const float EffectHeight = 0.5f;
-        private const float EffectScale = 0.3f;
-        private const float EffectDuration = 0.5f;
-        private const float WaitDuration = 0.1f;
 
         [Inject]
         public DashAttackBase
@@ -59,7 +55,7 @@ namespace Skill.DashAttack
         {
             var effect = _skillEffectRepository.GetDashAttackEffect(abnormalCondition);
             var effectClone = Object.Instantiate(effect, playerTransform);
-            effectClone.transform.localPosition = new Vector3(0.3f, 0.5f, 2f);
+            effectClone.transform.localPosition = new Vector3(0.3f, 0.5f, 3f);
             effectClone.transform.localEulerAngles = new Vector3(0, 90, 0);
             var boxCollider = effectClone.GetComponent<BoxCollider>();
             boxCollider.isTrigger = true;

@@ -972,6 +972,12 @@ namespace UI.Title
                 psUpdater.IsActive = false;
             }
 
+            var weaponEffect = _weaponObject.GetComponent<WeaponMeshEffect>();
+            if (weaponEffect != null)
+            {
+                weaponEffect.Stop();
+            }
+
             FixedWeaponTransform(weaponType, weaponId, scale);
         }
 

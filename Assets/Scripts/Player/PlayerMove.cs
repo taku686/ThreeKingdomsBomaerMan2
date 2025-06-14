@@ -18,7 +18,7 @@ namespace Player.Common
         private Vector3 _currentDestination;
         private LayerMask _blockingLayer;
         private MoveDirection _currentMoveDirection;
-        
+
 
         public void Initialize
         (
@@ -58,6 +58,7 @@ namespace Player.Common
 
         public void Run(Vector3 inputValue)
         {
+            Debug.Log("Run inputValue: " + inputValue);
             if (!PhotonNetwork.LocalPlayer.IsLocal)
             {
                 return;

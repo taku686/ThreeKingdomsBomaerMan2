@@ -186,15 +186,15 @@ namespace Skill
         private void CrushImpactSkill(SkillMasterData skillMasterData)
         {
             var skillId = skillMasterData.Id;
-            var dashAttack = _crushImpactFactory.Create(skillId, _animator, _playerTransform, AbnormalCondition.None, null);
-            /*foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
+            var crushImpact = _crushImpactFactory.Create(skillId, _animator, _playerTransform, AbnormalCondition.None, null);
+            foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
             {
                 if (abnormalCondition == AbnormalCondition.None)
                     continue;
-                dashAttack = _crushImpactFactory.Create(skillId, _animator, _playerTransform, abnormalCondition, dashAttack);
-            }*/
+                crushImpact = _crushImpactFactory.Create(skillId, _animator, _playerTransform, abnormalCondition, crushImpact);
+            }
 
-            dashAttack.Attack();
+            crushImpact.Attack();
         }
 
         private static bool IsBuffSkillActionType(SkillMasterData skillMasterData)

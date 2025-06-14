@@ -100,7 +100,8 @@ public class SkillButtonView : MonoBehaviour
     {
         return _skillButtonType switch
         {
-            SkillButtonType.WeaponSkillButton => skillMasterData.Interval,
+            //SkillButtonType.WeaponSkillButton => skillMasterData.Interval,
+            SkillButtonType.WeaponSkillButton => 1,
             SkillButtonType.NormalSkillButton => skillMasterData.Interval,
             SkillButtonType.SpecialSkillButton => skillMasterData.Interval,
             SkillButtonType.JumpSkillButton => GameCommonData.DashInterval,
