@@ -5,7 +5,7 @@ namespace UI.Title
 {
     public class LoginView : ViewBase
     {
-        [SerializeField] private Button loginButton;
-        public Button _LoginButton => loginButton;
+        [SerializeField] private Button _loginButton;
+        public Button _LoginButton => _loginButton;
     }
 }

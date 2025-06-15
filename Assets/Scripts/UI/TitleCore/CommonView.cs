@@ -21,18 +21,32 @@ public class CommonView : MonoBehaviour
         purchaseErrorView.gameObject.SetActive(false);
         errorView.gameObject.SetActive(false);
         virtualCurrencyView.gameObject.SetActive(false);
-        _popupParent.SetActive(true);
+        if (_popupParent != null)
+        {
+            _popupParent.SetActive(true);
+        }
+
         SetCharacterStageActive(true);
         SetGachaStageActive(false);
     }
 
     public void SetCharacterStageActive(bool isActive)
     {
+        if (_characterStage == null)
+        {
+            return;
+        }
+
         _characterStage.SetActive(isActive);
     }
 
     public void SetGachaStageActive(bool isActive)
     {
+        if (_gachaStage == null)
+        {
+            return;
+        }
+
         _gachaStage.SetActive(isActive);
     }
 }

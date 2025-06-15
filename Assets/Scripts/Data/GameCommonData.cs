@@ -80,7 +80,7 @@ namespace Common.Data
         public static readonly string _SortWeaponDataPath = Application.persistentDataPath + "/weaponSortData.json";
         public static readonly string _WeaponCautionDataPath = Application.persistentDataPath + "/weaponCautionData.json";
         public const string LevelText = "Lv.";
-        public const string TitleScene = "Title";
+        public const string MainScene = "Main";
         public const string BattleScene = "Battle";
         public const float CloseDuration = 0.5f;
         public const float OpenDuration = 1.0f;

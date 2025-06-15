@@ -60,7 +60,6 @@ namespace UI.Title
         //Manager
         [Inject] private PhotonNetworkManager _photonNetworkManager;
         [Inject] private MainManager _mainManager;
-        [Inject] private PlayFabLoginManager _playFabLoginManager;
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private PlayFabShopManager _playFabShopManager;
         [Inject] private PlayFabAdsManager _playFabAdsManager;
@@ -125,7 +124,9 @@ namespace UI.Title
         private void Initialize()
         {
             _cts = new CancellationTokenSource();
+            _mainManager._changingScene = true;
             _fadeView.Initialize();
+            PhotonCustomTypes.Register();
             var view = (MainView)GetView(State.Main);
             view.SetBackgroundEffect(false);
             InitializeOthers();
@@ -152,16 +153,7 @@ namespace UI.Title
             {
                 _PreviousState = GameCommonData.InvalidNumber
             };
-            if (_mainManager._isInitialize)
-            {
-                _stateMachine.Start<MainState>();
-            }
-            else
-            {
-                _stateMachine.Start<LoginState>();
-                PhotonCustomTypes.Register();
-                _mainManager._isInitialize = true;
-            }
+            _stateMachine.Start<MainState>();
 
             _stateMachine.AddAnyTransition<MainState>((int)State.Main);
             _stateMachine.AddAnyTransition<ShopState>((int)State.Shop);
@@ -253,7 +245,7 @@ namespace UI.Title
             UnityAction<Scene, Scene> action = (previousScene, newScene) =>
             {
                 Debug.Log("Scene changed from " + previousScene.name + " to " + newScene.name);
-                if (newScene.name == GameCommonData.TitleScene)
+                if (newScene.name == GameCommonData.MainScene)
                 {
                     _mainManager._changingScene = true;
                 }

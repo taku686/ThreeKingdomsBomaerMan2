@@ -52,21 +52,17 @@ namespace Common.Installer
 
         private void InstallCommon()
         {
-            Container.Bind<PlayFabLoginManager>().FromComponentOn(playFabManagerGameObject).AsCached();
+           // Container.Bind<PlayFabLoginManager>().AsCached();
+            Container.Bind<PlayFabShopManager>().AsCached();
             Container.Bind<SkyBoxManager>().FromComponentOn(_skyBoxManager).AsCached();
             Container.Bind<UIAnimation>().AsCached();
             Container.Bind<UserData>().AsCached();
-            Container.Bind<PlayFabShopManager>().AsCached();
             Container.Bind<PlayFabAdsManager>().AsCached();
-            Container.Bind<PlayFabVirtualCurrencyManager>().AsCached();
-            Container.Bind<PlayFabTitleDataManager>().AsCached();
             Container.Bind<ChatGPTManager>().AsCached();
             Container.Bind<CharacterCreateUseCase>().AsCached().WithArguments(characterGenerateParent);
             Container.Bind<CharacterObjectRepository>().AsCached();
             Container.Bind<RewardDataUseCase>().AsCached();
             Container.Bind<StatusSpriteManager>().FromComponentOn(_statusSpriteManager).AsCached();
-            Container.Bind<ResourceManager>().AsCached();
-            Container.Bind<MissionSpriteDataRepository>().AsCached();
             Container.Bind<AnimatorControllerRepository>().FromComponentInNewPrefab(_animatorControllerRepositoryGameObject).AsSingle();
             Container.Bind<SetupAnimatorUseCase>().AsCached();
             Container.Bind<ActiveSkillManager>().AsCached();

@@ -44,7 +44,7 @@ namespace Manager.BattleManager
             {
                 _BattleResultView
                     ._ClaimButtonObservable
-                    .Subscribe(_ => { MMSceneLoadingManager.LoadScene(GameCommonData.TitleScene); })
+                    .Subscribe(_ => { MMSceneLoadingManager.LoadScene(GameCommonData.MainScene); })
                     .AddTo(_cts.Token);
             }
 

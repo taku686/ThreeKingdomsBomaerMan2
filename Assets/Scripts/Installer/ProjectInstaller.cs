@@ -1,9 +1,12 @@
 using Assets.Scripts.Common.Data;
+using Assets.Scripts.Common.PlayFab;
 using Assets.Scripts.Common.ResourceManager;
 using Common.Data;
 using Manager;
 using Manager.DataManager;
 using Manager.NetworkManager;
+using Manager.PlayFabManager;
+using Manager.ResourceManager;
 using Repository;
 using Skill;
 using UI.Common;
@@ -14,7 +17,6 @@ using Zenject;
 namespace Common.Installer
 {
     public class ProjectInstaller : MonoInstaller
-
     {
         [SerializeField] private GameObject _photonNetworkGameObject;
         [SerializeField] private GameObject _mainManagerGameObject;
@@ -25,6 +27,10 @@ namespace Common.Installer
 
         public override void InstallBindings()
         {
+            Container.Bind<PlayFabVirtualCurrencyManager>().AsCached();
+            Container.Bind<MissionSpriteDataRepository>().AsCached();
+            Container.Bind<ResourceManager>().AsCached();
+            Container.Bind<PlayFabTitleDataManager>().AsCached();
             Container.Bind<RewardDataRepository>().AsCached();
             Container.Bind<CharacterMasterDataRepository>().AsSingle();
             Container.Bind<AbnormalConditionMasterDataRepository>().AsSingle();

@@ -12,13 +12,15 @@ namespace UI.Title
         public class LoginState : StateMachine<TitleCore>.State
         {
             private CancellationTokenSource _cancellationTokenSource;
+
             private PlayFabUserDataManager _playFabUserDataManager;
-            private PlayFabLoginManager _PlayFabLoginManager => Owner._playFabLoginManager;
+
+            // private PlayFabLoginManager _PlayFabLoginManager => Owner._playFabLoginManager;
             private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
             private LoginView _View => (LoginView)Owner.GetView(State.Login);
             private CommonView _commonView;
 
-            protected override void OnEnter(StateMachine<TitleCore>.State prevState)
+            /*protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
                 Initialize();
             }
@@ -46,8 +48,9 @@ namespace UI.Title
                     .Subscribe()
                     .AddTo(_cancellationTokenSource.Token);
             }
+            */
 
-            private async UniTask Login()
+            /*private async UniTask Login()
             {
                 _commonView.waitPopup.SetActive(true);
                 _PlayFabLoginManager.Initialize();
@@ -109,7 +112,7 @@ namespace UI.Title
                 _commonView.waitPopup.SetActive(true);
                 var result = await _playFabUserDataManager.UpdateUserDisplayNameAsync(displayName);
                 return result;
-            }
+            }*/
         }
     }
 }
