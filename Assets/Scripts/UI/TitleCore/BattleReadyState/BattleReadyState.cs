@@ -2,6 +2,7 @@
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Manager;
 using Manager.NetworkManager;
 using MoreMountains.Tools;
 using UnityEngine;
@@ -16,7 +17,7 @@ namespace UI.Title
         {
             private BattleReadyView _View => (BattleReadyView)Owner.GetView(State.BattleReady);
             private PhotonNetworkManager _PhotonNetworkManager => Owner._photonNetworkManager;
-
+            private MainManager _MainManager => Owner._mainManager;
             private readonly Dictionary<int, GameObject> _gridDictionary = new();
             private bool _isInitialize;
             private CancellationTokenSource _cts;
@@ -76,8 +77,8 @@ namespace UI.Title
             {
                 _PhotonNetworkManager._JoinedRoomSubject
                     .Subscribe(OnJoinedRoom)
-                    .AddTo(Owner.GetCancellationTokenOnDestroy());
-                
+                    .AddTo(_cts.Token);
+
                 _PhotonNetworkManager._LeftRoomSubject
                     .Subscribe(OnLeftRoom)
                     .AddTo(_cts.Token);
@@ -150,7 +151,7 @@ namespace UI.Title
                 _View._BattleStartButton.interactable = PhotonNetwork.IsMasterClient;
             }
 
-            private static void SceneTransition()
+            private void SceneTransition()
             {
                 if
                 (

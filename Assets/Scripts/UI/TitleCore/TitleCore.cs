@@ -16,6 +16,8 @@ using Manager.DataManager;
 using Repository;
 using UI.TitleCore.UserInfoState;
 using UniRx;
+using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using UseCase;
 using Button = UnityEngine.UI.Button;
@@ -102,13 +104,9 @@ namespace UI.Title
             TeamEdit
         }
 
-        private void Awake()
-        {
-            SetActiveBlockPanel(true);
-        }
-
         private void Start()
         {
+            SetActiveBlockPanel(true);
             Application.targetFrameRate = 60;
             Initialize();
         }
@@ -133,6 +131,7 @@ namespace UI.Title
             InitializeOthers();
             InitializeState();
             InitializeButton();
+            InitializeSceneCallBack();
             SetActiveBlockPanel(false);
         }
 
@@ -229,11 +228,38 @@ namespace UI.Title
 
         private async UniTask TransitionUiAnimation(Action action)
         {
-            SetActiveBlockPanel(true);
-            await _fadeView.FadeInAsync();
+            if (!_mainManager._changingScene)
+            {
+                SetActiveBlockPanel(true);
+                await _fadeView.FadeInAsync();
+            }
+
             action.Invoke();
-            await _fadeView.FadeOutAsync();
-            SetActiveBlockPanel(false);
+
+            if (!_mainManager._changingScene)
+            {
+                await _fadeView.FadeOutAsync();
+                SetActiveBlockPanel(false);
+            }
+
+            if (_mainManager._changingScene)
+            {
+                _mainManager._changingScene = false;
+            }
+        }
+
+        private void InitializeSceneCallBack()
+        {
+            UnityAction<Scene, Scene> action = (previousScene, newScene) =>
+            {
+                Debug.Log("Scene changed from " + previousScene.name + " to " + newScene.name);
+                if (newScene.name == GameCommonData.TitleScene)
+                {
+                    _mainManager._changingScene = true;
+                }
+            };
+            SceneManager.activeSceneChanged -= action;
+            SceneManager.activeSceneChanged += action;
         }
 
         private async UniTask SetCoinText()

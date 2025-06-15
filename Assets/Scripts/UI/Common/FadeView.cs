@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
@@ -31,7 +32,7 @@ public class FadeView : MonoBehaviour
         _fadeMaterial = _fadeImage.material;
         _fadeImage.sprite = GetRandomBackgroundSprite();
         _fadeMaterial.SetTexture(FadeTexture, GetRandomMaskTexture());
-        _Range =  1.1f;
+        _Range = 0f; // Start with a fully faded state
     }
 
 

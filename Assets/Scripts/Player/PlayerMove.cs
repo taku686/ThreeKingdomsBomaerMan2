@@ -58,7 +58,6 @@ namespace Player.Common
 
         public void Run(Vector3 inputValue)
         {
-            Debug.Log("Run inputValue: " + inputValue);
             if (!PhotonNetwork.LocalPlayer.IsLocal)
             {
                 return;

@@ -29,15 +29,14 @@ namespace Player.Common
 
             protected override void OnEnter(State prevState)
             {
-                Debug.Log("PlayerIdleState OnEnter");
                 _playerTransform = Owner.transform;
                 _cts = new CancellationTokenSource();
                 Subscribe();
             }
 
             protected override void OnExit(State nextState)
+            
             {
-                Debug.Log("PlayerIdleState OnExit");
                 _PlayerMove.Stop();
                 Cancel();
             }
