@@ -42,6 +42,7 @@ namespace Manager.BattleManager
             private GameObject _ArrowIndicatorPrefab => Owner._arrowSkillIndicatorPrefab;
             private GameObject _CircleIndicatorPrefab => Owner._circleSkillIndicatorPrefab;
             private StartPointsRepository _StartPointsRepository => Owner._startPointsRepository;
+            private PhysicMaterial _CharacterPhysicMaterial => Owner._characterPhysicMaterial;
 
             private PhotonView _photonView;
 
@@ -304,12 +305,13 @@ namespace Manager.BattleManager
                 _PlayerStatusUiList.Add(playerStatusUI);
             }
 
-            private static void AddBoxCollider(GameObject player)
+            private void AddBoxCollider(GameObject player)
             {
                 var collider = player.AddComponent<BoxCollider>();
                 collider.isTrigger = false;
                 collider.center = ColliderCenter;
                 collider.size = ColliderSize;
+                //collider.material = _CharacterPhysicMaterial;
             }
 
             private static void AddRigidbody(GameObject player)

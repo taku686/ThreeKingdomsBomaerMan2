@@ -59,16 +59,19 @@ namespace Player.Common
 
             private void PlayBackAnimation()
             {
-                _ObservableStateMachineTrigger
-                    .OnStateExitAsObservable()
+                var onStateExit = _ObservableStateMachineTrigger
+                    .OnStateExitAsObservable();
+
+                onStateExit
                     .Where(IsAnimationState)
                     .Take(1)
-                    .Subscribe(_ =>
-                    {
-                        Debug.Log("Skill Animation Ended");
-                        _StateMachine.Dispatch((int)PLayerState.Idle);
-                    })
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.Idle); })
                     .AddTo(_cts.Token);
+            }
+
+            private static bool IsApplyRootMotion(SkillActionType actionType)
+            {
+                return actionType is SkillActionType.SlashSpin;
             }
 
             private bool IsAnimationState(ObservableStateMachineTrigger.OnStateInfo stateInfo)
@@ -233,6 +236,7 @@ namespace Player.Common
                     case SkillActionType.JumpSmash:
                         break;
                     case SkillActionType.SlashSpin:
+                        stateName = GameCommonData.SlashSpinKey;
                         break;
                     case SkillActionType.ThrowEdge:
                         break;

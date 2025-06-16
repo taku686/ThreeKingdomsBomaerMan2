@@ -6,6 +6,7 @@ using Skill.Attack.FlyingSlash;
 using Skill.CrushImpact;
 using Skill.DashAttack;
 using Skill.Heal;
+using Skill.SlashSpin;
 using UniRx;
 using UnityEngine;
 using Zenject;
@@ -18,6 +19,7 @@ namespace Skill
         private readonly AttributeFlyingSlashFactory.Factory _flyingSlashFactory;
         private readonly AttributeDashAttackFactory.Factory _dashAttackFactory;
         private readonly AttributeCrushImpactFactory.Factory _crushImpactFactory;
+        private readonly AttributeSlashSpinFactory.Factory _slashSpinFactory;
         private readonly BuffSkill _buffSkill;
         private readonly HealSkill _healSkill;
         private Animator _animator;
@@ -35,6 +37,7 @@ namespace Skill
             AttributeFlyingSlashFactory.Factory flyingSlashFactory,
             AttributeDashAttackFactory.Factory dashAttackFactory,
             AttributeCrushImpactFactory.Factory crushImpactFactory,
+            AttributeSlashSpinFactory.Factory slashSpinFactory,
             BuffSkill buffSkill,
             HealSkill healSkill
         )
@@ -43,6 +46,7 @@ namespace Skill
             _flyingSlashFactory = flyingSlashFactory;
             _dashAttackFactory = dashAttackFactory;
             _crushImpactFactory = crushImpactFactory;
+            _slashSpinFactory = slashSpinFactory;
             _buffSkill = buffSkill;
             _healSkill = healSkill;
         }
@@ -108,6 +112,11 @@ namespace Skill
             if (IsCrushImpactSkillActionType(skillMasterData))
             {
                 CrushImpactSkill(skillMasterData);
+            }
+
+            if (IsSlashSpinSkillActionType(skillMasterData))
+            {
+                SlashSpinSkill(skillMasterData);
             }
 
             if (IsBuffSkillActionType(skillMasterData))
@@ -183,6 +192,20 @@ namespace Skill
             dashAttack.Attack();
         }
 
+        private void SlashSpinSkill(SkillMasterData skillMasterData)
+        {
+            var skillId = skillMasterData.Id;
+            var slashSpin = _slashSpinFactory.Create(skillId, _animator, _playerTransform, AbnormalCondition.None, null);
+            foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
+            {
+                if (abnormalCondition == AbnormalCondition.None)
+                    continue;
+                slashSpin = _slashSpinFactory.Create(skillId, _animator, _playerTransform, abnormalCondition, slashSpin);
+            }
+
+            slashSpin.Attack();
+        }
+
         private void CrushImpactSkill(SkillMasterData skillMasterData)
         {
             var skillId = skillMasterData.Id;
@@ -221,6 +244,12 @@ namespace Skill
         {
             var skillActionType = skillMasterData._SkillActionTypeEnum;
             return skillActionType is SkillActionType.FlyingSlash;
+        }
+
+        private static bool IsSlashSpinSkillActionType(SkillMasterData skillMasterData)
+        {
+            var skillActionType = skillMasterData._SkillActionTypeEnum;
+            return skillActionType is SkillActionType.SlashSpin;
         }
 
         private static bool IsDashAttackSkillActionType(SkillMasterData skillMasterData)

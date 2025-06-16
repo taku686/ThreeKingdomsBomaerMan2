@@ -244,7 +244,6 @@ namespace UI.Title
         {
             UnityAction<Scene, Scene> action = (previousScene, newScene) =>
             {
-                Debug.Log("Scene changed from " + previousScene.name + " to " + newScene.name);
                 if (newScene.name == GameCommonData.MainScene)
                 {
                     _mainManager._changingScene = true;

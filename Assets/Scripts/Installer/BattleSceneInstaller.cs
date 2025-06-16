@@ -2,6 +2,7 @@ using AttributeAttack;
 using Bomb;
 using Common.Data;
 using Manager.BattleManager;
+using Manager.DataManager;
 using Player.Common;
 using Repository;
 using Skill;
@@ -10,6 +11,7 @@ using Skill.Attack.FlyingSlash;
 using Skill.CrushImpact;
 using Skill.DashAttack;
 using Skill.Heal;
+using Skill.SlashSpin;
 using UI.Common;
 using UnityEngine;
 using UseCase.Battle;
@@ -49,6 +51,7 @@ namespace Common.Installer
             InstallHealSkill();
             InstallDashAttack();
             InstallCrushImpact();
+            InstallSlashSpin();
         }
 
         private void InstallSkill()
@@ -78,6 +81,24 @@ namespace Common.Installer
             Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, ApraxiaSlash, ApraxiaSlash.Factory>().AsCached();
             Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, SoakingWetSlash, SoakingWetSlash.Factory>().AsCached();
             Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, BurningSlash, BurningSlash.Factory>().AsCached();
+        }
+
+        private void InstallSlashSpin()
+        {
+            Container.BindFactory<int, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeSlashSpinFactory.Factory>().FromFactory<AttributeSlashSpinFactory>();
+            Container.BindFactory<Animator, NormalSlashSpin, NormalSlashSpin.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, PoisonSlashSpin, PoisonSlashSpin.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, ParalysisSlashSpin, ParalysisSlashSpin.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, FrozenSlashSpin, FrozenSlashSpin.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, ConfusionSlashSpin, ConfusionSlashSpin.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, CharmSlashSpin, CharmSlashSpin.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, MiasmaSlashSpin, MiasmaSlashSpin.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, DarknessSlashSpin, DarknessSlashSpin.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, LifeStealSlashSpin, LifeStealSlashSpin.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, HellFireSlashSpin, HellFireSlashSpin.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, StigmataSlashSpin, StigmataSlashSpin.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, SoakingWetSlashSpin, SoakingWetSlashSpin.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, BurningSlashSpin, BurningSlashSpin.Factory>().AsCached();
         }
 
         private void InstallFlyingSlashSkill()

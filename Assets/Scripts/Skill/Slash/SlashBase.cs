@@ -33,11 +33,6 @@ namespace Skill.Attack
         {
         }
 
-        public void Attack(AbnormalCondition attribute)
-        {
-            throw new NotImplementedException();
-        }
-
         protected void Slash
         (
             AbnormalCondition abnormalCondition,

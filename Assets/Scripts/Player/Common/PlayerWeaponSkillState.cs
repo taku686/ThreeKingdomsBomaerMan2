@@ -4,6 +4,8 @@ namespace Player.Common
     {
         public class PlayerWeaponSkillState : PlayerSkillStateBase
         {
+            
+            
             protected override void Initialize()
             {
                 base.Initialize();

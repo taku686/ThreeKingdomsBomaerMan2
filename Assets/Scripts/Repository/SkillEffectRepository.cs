@@ -21,6 +21,9 @@ namespace Repository
         [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Abnormal Condition", ValueLabel = "CrushImpact Effect")]
         private Dictionary<AbnormalCondition, SkillEffect> _crushImpactEffectDictionary;
 
+        [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Abnormal Condition", ValueLabel = "SlashSpin Effect")]
+        private Dictionary<AbnormalCondition, SkillEffect> _slashSpinEffectDictionary;
+
 
         public SkillEffect GetSlashEffect(AbnormalCondition abnormalCondition)
         {
@@ -58,6 +61,17 @@ namespace Repository
         public SkillEffect GetCrushImpactEffect(AbnormalCondition abnormalCondition)
         {
             if (_crushImpactEffectDictionary.TryGetValue(abnormalCondition, out var skillEffect))
+            {
+                return skillEffect;
+            }
+
+            Debug.LogError($"Skill effect not found for {abnormalCondition}");
+            return null;
+        }
+
+        public SkillEffect GetSlashSpinEffect(AbnormalCondition abnormalCondition)
+        {
+            if (_slashSpinEffectDictionary.TryGetValue(abnormalCondition, out var skillEffect))
             {
                 return skillEffect;
             }

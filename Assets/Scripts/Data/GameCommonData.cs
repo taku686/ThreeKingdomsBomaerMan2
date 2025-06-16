@@ -43,6 +43,7 @@ namespace Common.Data
         public static readonly int BuffHashKey = Animator.StringToHash("Buff");
         public static readonly int DeadHashKey = Animator.StringToHash("Dead");
         public static readonly int SlashHashKey = Animator.StringToHash("Slash");
+        public static readonly int SlashSpinHashKey = Animator.StringToHash("SlashSpin");
         public static readonly int DashAttackHashKey = Animator.StringToHash("DashAttack");
         public static readonly int ImpactHashKey = Animator.StringToHash("Impact");
         public static readonly int PerformanceHashKey = Animator.StringToHash("Performance");
@@ -55,6 +56,7 @@ namespace Common.Data
         public const string BuffKey = "Base Layer.Buff";
         public const string DeadKey = "Base Layer.Dead";
         public const string SlashKey = "Base Layer.Slash";
+        public const string SlashSpinKey = "Base Layer.SlashSpin";
         public const string ImpactKey = "Base Layer.Impact";
         public const string SpeedhParameterName = "speedh";
         public const string SpeedvParameterName = "speedv";
