@@ -17,7 +17,7 @@ namespace UI.Title
         {
             private BattleReadyView _View => (BattleReadyView)Owner.GetView(State.BattleReady);
             private PhotonNetworkManager _PhotonNetworkManager => Owner._photonNetworkManager;
-            private MainManager _MainManager => Owner._mainManager;
+            private DataAcrossStates _DataAcrossStates => Owner._dataAcrossStates;
             private readonly Dictionary<int, GameObject> _gridDictionary = new();
             private bool _isInitialize;
             private CancellationTokenSource _cts;

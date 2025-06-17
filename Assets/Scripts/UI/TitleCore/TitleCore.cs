@@ -59,7 +59,7 @@ namespace UI.Title
 
         //Manager
         [Inject] private PhotonNetworkManager _photonNetworkManager;
-        [Inject] private MainManager _mainManager;
+        [Inject] private DataAcrossStates _dataAcrossStates;
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private PlayFabShopManager _playFabShopManager;
         [Inject] private PlayFabAdsManager _playFabAdsManager;
@@ -124,7 +124,7 @@ namespace UI.Title
         private void Initialize()
         {
             _cts = new CancellationTokenSource();
-            _mainManager._changingScene = true;
+            _dataAcrossStates._changingScene = true;
             _fadeView.Initialize();
             PhotonCustomTypes.Register();
             var view = (MainView)GetView(State.Main);
@@ -220,7 +220,7 @@ namespace UI.Title
 
         private async UniTask TransitionUiAnimation(Action action)
         {
-            if (!_mainManager._changingScene)
+            if (!_dataAcrossStates._changingScene)
             {
                 SetActiveBlockPanel(true);
                 await _fadeView.FadeInAsync();
@@ -228,15 +228,15 @@ namespace UI.Title
 
             action.Invoke();
 
-            if (!_mainManager._changingScene)
+            if (!_dataAcrossStates._changingScene)
             {
                 await _fadeView.FadeOutAsync();
                 SetActiveBlockPanel(false);
             }
 
-            if (_mainManager._changingScene)
+            if (_dataAcrossStates._changingScene)
             {
-                _mainManager._changingScene = false;
+                _dataAcrossStates._changingScene = false;
             }
         }
 
@@ -246,7 +246,7 @@ namespace UI.Title
             {
                 if (newScene.name == GameCommonData.MainScene)
                 {
-                    _mainManager._changingScene = true;
+                    _dataAcrossStates._changingScene = true;
                 }
             };
             SceneManager.activeSceneChanged -= action;

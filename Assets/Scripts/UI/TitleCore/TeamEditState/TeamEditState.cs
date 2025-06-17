@@ -1,6 +1,7 @@
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Manager;
 using UniRx;
 
 namespace UI.Title
@@ -13,6 +14,7 @@ namespace UI.Title
             private TeamEditViewModelUseCase _ViewModelUseCase => Owner._teamEditViewModelUseCase;
             private TeamEditView _View => (TeamEditView)Owner.GetView(State.TeamEdit);
             private UserDataRepository _UserDataRepository => Owner._userDataRepository;
+            private DataAcrossStates _DataAcrossStates => Owner._dataAcrossStates;
             private CancellationTokenSource _cts;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
@@ -30,6 +32,7 @@ namespace UI.Title
                 _cts = new CancellationTokenSource();
                 Owner.SwitchUiObject(State.TeamEdit, true, () =>
                 {
+                    _DataAcrossStates.SetCanEditTeam(false);
                     var viewModel = _ViewModelUseCase.InAsTask();
                     _View.ApplyViewModel(viewModel);
                     Subscribe();
@@ -65,13 +68,21 @@ namespace UI.Title
                     teamGridView._ChangeButton
                         .Do(tuple => _UserDataRepository.SetCandidateTeamMemberIndex(tuple.Item1))
                         .SelectMany(tuple => Owner.OnClickScaleColorAnimation(tuple.Item2).ToObservable())
-                        .Subscribe(_ => { _StateMachine.Dispatch((int)State.CharacterSelect, (int)State.TeamEdit); })
+                        .Subscribe(_ =>
+                        {
+                            _DataAcrossStates.SetCanEditTeam(true);
+                            _StateMachine.Dispatch((int)State.CharacterSelect, (int)State.TeamEdit);
+                        })
                         .AddTo(_cts.Token);
 
                     teamGridView._NoSelectButton
                         .Do(tuple => _UserDataRepository.SetCandidateTeamMemberIndex(tuple.Item1))
                         .SelectMany(tuple => Owner.OnClickScaleColorAnimation(tuple.Item2).ToObservable())
-                        .Subscribe(_ => { _StateMachine.Dispatch((int)State.CharacterSelect, (int)State.TeamEdit); })
+                        .Subscribe(_ =>
+                        {
+                            _DataAcrossStates.SetCanEditTeam(true);
+                            _StateMachine.Dispatch((int)State.CharacterSelect, (int)State.TeamEdit);
+                        })
                         .AddTo(_cts.Token);
                 }
             }

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Manager;
 using Manager.NetworkManager;
 using Repository;
 using UI.Common;
@@ -27,18 +28,18 @@ namespace UI.Title
             private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
             private SkillDetailViewModelUseCase _SkillDetailViewModelUseCase => Owner._skillDetailViewModelUseCase;
             private MissionManager _MissionManager => Owner._missionManager;
+            private DataAcrossStates _DataAcrossStates => Owner._dataAcrossStates;
             private StateMachine<TitleCore> _StateMachine => Owner._stateMachine;
             private PlayFabUserDataManager _playFabUserDataManager;
             private PlayFabShopManager _playFabShopManager;
             private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
             private TemporaryCharacterRepository _temporaryCharacterRepository;
             private UIAnimation _uiAnimation;
-
+            private bool _isTeamEdit;
             private CancellationTokenSource _cts;
             private int _candidateIndex;
             private CharacterData[] _sortedCharacters;
             private readonly Subject<int> _onChangeViewModel = new();
-            private bool _isTeamEdit;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -60,7 +61,7 @@ namespace UI.Title
                     _playFabVirtualCurrencyManager = Owner._playFabVirtualCurrencyManager;
                     _uiAnimation = Owner._uiAnimation;
                     _temporaryCharacterRepository = Owner._temporaryCharacterRepository;
-                    _isTeamEdit = _StateMachine._PreviousState == (int)State.TeamEdit;
+                    _isTeamEdit = _DataAcrossStates.GetCanEditTeam();
                     var userData = _UserDataRepository.GetUserData();
                     if (userData.Characters.Count <= 1)
                     {

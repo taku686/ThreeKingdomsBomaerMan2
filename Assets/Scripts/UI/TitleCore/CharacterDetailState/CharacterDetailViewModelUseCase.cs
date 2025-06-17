@@ -12,7 +12,6 @@ public class CharacterDetailViewModelUseCase : IDisposable
     private readonly UserDataRepository _userDataRepository;
     private readonly CharacterMasterDataRepository _characterMasterDataRepository;
     private readonly CharacterTypeSpriteRepository _characterTypeSpriteRepository;
-    private readonly SkillMasterDataRepository _skillMasterDataRepository;
     private readonly WeaponCautionRepository _weaponCautionRepository;
 
     [Inject]
@@ -21,14 +20,12 @@ public class CharacterDetailViewModelUseCase : IDisposable
         UserDataRepository userDataRepository,
         CharacterMasterDataRepository characterMasterDataRepository,
         CharacterTypeSpriteRepository characterTypeSpriteRepository,
-        SkillMasterDataRepository skillMasterDataRepository,
         WeaponCautionRepository weaponCautionRepository
     )
     {
         _userDataRepository = userDataRepository;
         _characterMasterDataRepository = characterMasterDataRepository;
         _characterTypeSpriteRepository = characterTypeSpriteRepository;
-        _skillMasterDataRepository = skillMasterDataRepository;
         _weaponCautionRepository = weaponCautionRepository;
     }
 
@@ -43,6 +40,7 @@ public class CharacterDetailViewModelUseCase : IDisposable
         var passiveSkillData = characterData._PassiveSkillMasterData;
         var teamMembers = _userDataRepository.GetTeamMembers();
         var isCaution = _weaponCautionRepository.HaveCaution();
+        
         return new CharacterDetailView.ViewModel
         (
             characterData,
