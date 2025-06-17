@@ -109,6 +109,11 @@ namespace Common.Data
             return LayerMask.GetMask(EnemyLayer) | LayerMask.GetMask(ObstacleLayer) | LayerMask.GetMask(BombLayer);
         }
 
+        public static int GetLayerAffectedByTheBlast()
+        {
+            return LayerMask.GetMask(EnemyLayer) | LayerMask.GetMask(ObstacleLayer) | LayerMask.GetMask(BombLayer) | LayerMask.GetMask(PlayerLayer);
+        }
+
         public static class Terms
         {
             public const string AddGemPopupTile = "ジェムの数が足りません";

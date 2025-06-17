@@ -21,7 +21,6 @@ namespace Player.Common
         private bool _isDamage;
         private bool _isDead;
         private bool _isInvincible;
-
         private string _hpKey;
 
         private PhotonNetworkManager _photonNetworkManager;
@@ -175,6 +174,7 @@ namespace Player.Common
         {
             var characterData = _photonNetworkManager.GetCharacterData(playerKey);
             var weaponData = _photonNetworkManager.GetWeaponData(playerKey);
+            
             DestroyWeaponObj(gameObject);
             _playerGeneratorUseCase.DestroyPlayerObj();
             var playerObj = _playerGeneratorUseCase.InstantiatePlayerObj(characterData, transform, weaponData.Id, false);

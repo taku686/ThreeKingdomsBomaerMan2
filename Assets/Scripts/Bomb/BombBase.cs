@@ -35,7 +35,7 @@ namespace Bomb
             _BombRenderer = GetComponent<Renderer>();
             _BoxCollider = GetComponent<BoxCollider>();
             _Cts = new CancellationTokenSource();
-            _ObstaclesLayerMask = LayerMask.GetMask(GameCommonData.ObstacleLayer);
+            _ObstaclesLayerMask = GameCommonData.GetLayerAffectedByTheBlast();
             gameObject.layer = LayerMask.NameToLayer(GameCommonData.BombLayer);
         }
 
