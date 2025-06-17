@@ -3,11 +3,7 @@ using UnityEngine;
 public class CommonView : MonoBehaviour
 {
     public GameObject commonCanvas;
-
     public GameObject waitPopup;
-
-    // public RewardPopup _rewardPopup;
-    public PurchaseErrorView purchaseErrorView;
     public ErrorView errorView;
     public VirtualCurrencyView virtualCurrencyView;
     [SerializeField] private GameObject _popupParent;
@@ -18,9 +14,12 @@ public class CommonView : MonoBehaviour
     {
         commonCanvas.gameObject.SetActive(true);
         waitPopup.SetActive(false);
-        purchaseErrorView.gameObject.SetActive(false);
         errorView.gameObject.SetActive(false);
-        virtualCurrencyView.gameObject.SetActive(false);
+        if (virtualCurrencyView != null)
+        {
+            virtualCurrencyView.gameObject.SetActive(false);
+        }
+
         if (_popupParent != null)
         {
             _popupParent.SetActive(true);

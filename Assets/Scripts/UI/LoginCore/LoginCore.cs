@@ -31,6 +31,7 @@ public class LoginCore : MonoBehaviour
     private void Initialize()
     {
         _blockPanel.SetActive(false);
+        _commonView.Initialize();
         _cancellationTokenSource = new CancellationTokenSource();
         Subscribe();
     }
