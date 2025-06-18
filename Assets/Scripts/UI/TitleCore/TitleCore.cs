@@ -149,12 +149,8 @@ namespace UI.Title
 
         private void InitializeState()
         {
-            _stateMachine = new StateMachine<TitleCore>(this)
-            {
-                _PreviousState = GameCommonData.InvalidNumber
-            };
+            _stateMachine = new StateMachine<TitleCore>(this);
             _stateMachine.Start<MainState>();
-
             _stateMachine.AddAnyTransition<MainState>((int)State.Main);
             _stateMachine.AddAnyTransition<ShopState>((int)State.Shop);
             _stateMachine.AddTransition<MainState, CharacterSelectState>((int)State.CharacterSelect);

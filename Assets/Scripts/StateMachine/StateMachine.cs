@@ -127,7 +127,7 @@ public class StateMachine<TOwner>
     /// <summary>
     /// 現在のステート
     /// </summary>
-    public State _CurrentState { get; private set; }
+    private State _CurrentState { get; set; }
 
     public int _PreviousState { get; set; }
 
@@ -148,8 +148,10 @@ public class StateMachine<TOwner>
     /// </summary>
     public T Add<T>() where T : State, new()
     {
-        var state = new T();
-        state.stateMachine = this;
+        var state = new T
+        {
+            stateMachine = this
+        };
         _states.AddLast(state);
         return state;
     }

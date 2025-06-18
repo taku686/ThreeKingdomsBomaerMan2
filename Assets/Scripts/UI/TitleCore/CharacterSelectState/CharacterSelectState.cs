@@ -84,7 +84,7 @@ namespace UI.Title
                     .Subscribe(_ =>
                     {
                         var prevState = _StateMachine._PreviousState;
-                        if (prevState >= 0)
+                        if (prevState == GameCommonData.InvalidNumber)
                         {
                             _StateMachine.Dispatch(prevState);
                         }
