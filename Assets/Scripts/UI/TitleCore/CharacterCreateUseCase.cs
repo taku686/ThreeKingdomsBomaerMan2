@@ -220,7 +220,6 @@ namespace Repository
             var createCharacterData = _characterMasterDataRepository.GetCharacterData(characterId);
             var weaponData = _userDataRepository.GetEquippedWeaponData(characterId);
 
-
             if (createParent == null)
             {
                 createParent = _characterGenerateTransform;

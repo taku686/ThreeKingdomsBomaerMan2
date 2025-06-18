@@ -14,31 +14,38 @@ namespace UI.Title
     public class CharacterDetailView : ViewBase
     {
         [SerializeField] private Button backButton;
-        [SerializeField] private TextMeshProUGUI nameText;
-        [SerializeField] private Button _teamEditButton;
-        [SerializeField] private TextMeshProUGUI _teamEditButtonText;
-        [SerializeField] private Image _teamEditImage;
-        [SerializeField] private RectTransform leftArrowRect;
-        [SerializeField] private RectTransform rightArrowRect;
         [SerializeField] private Button leftArrowButton;
         [SerializeField] private Button rightArrowButton;
-        [SerializeField] private StatusView statusView;
-        [SerializeField] private SkillsView skillsView;
+        [SerializeField] private Button _teamEditButton;
         [SerializeField] private Button upgradeButton;
+        [SerializeField] private Button inventoryButton;
+
+        [SerializeField] private TextMeshProUGUI nameText;
+        [SerializeField] private TextMeshProUGUI _teamEditButtonText;
         [SerializeField] private TextMeshProUGUI upgradeText;
         [SerializeField] private TextMeshProUGUI upgradeInfoText;
-        [SerializeField] private GameObject upgradeInfoGameObject;
         [SerializeField] private TextMeshProUGUI levelText;
-        [SerializeField] private PurchaseErrorView purchaseErrorView;
-        [SerializeField] private VirtualCurrencyAddPopup virtualCurrencyAddPopup;
-        [SerializeField] private Button inventoryButton;
-        [SerializeField] private GameObject _inventoryCautionObj;
-        [SerializeField] private GameObject[] _teamTextObjects;
-        [SerializeField] private Image _typeImage;
-        [SerializeField] private Image _typeIcon;
         [SerializeField] private TextMeshProUGUI _passiveSkillName;
         [SerializeField] private TextMeshProUGUI _passiveSkillExplanation;
+
+        [SerializeField] private Image _teamEditImage;
+        [SerializeField] private Image _typeImage;
+        [SerializeField] private Image _typeIcon;
         [SerializeField] private Image _levelIcon;
+
+        [SerializeField] private RectTransform leftArrowRect;
+        [SerializeField] private RectTransform rightArrowRect;
+
+        [SerializeField] private GameObject upgradeInfoGameObject;
+        [SerializeField] private GameObject _inventoryCautionObj;
+        [SerializeField] private GameObject[] _teamTextObjects;
+
+        [SerializeField] private StatusView statusView;
+        [SerializeField] private SkillsView skillsView;
+        [SerializeField] private PurchaseErrorView purchaseErrorView;
+        [SerializeField] private VirtualCurrencyAddPopup virtualCurrencyAddPopup;
+        [SerializeField] private LevelUpView _levelUpView;
+
         [Inject] private ApplyStatusSkillUseCase _applyStatusSkillUseCase;
         private bool _isInitialized;
         private readonly Dictionary<int, (bool, string)> _statusTextDictionary = new();
@@ -50,6 +57,7 @@ namespace UI.Title
         private const float DisableAlpha = 0.5f;
         public VirtualCurrencyAddPopup _VirtualCurrencyAddPopup => virtualCurrencyAddPopup;
         public PurchaseErrorView _PurchaseErrorView => purchaseErrorView;
+        public LevelUpView _LevelUpView => _levelUpView;
         public Button _UpgradeButton => upgradeButton;
         public Button _BackButton => backButton;
         public Button _TeamEditButton => _teamEditButton;

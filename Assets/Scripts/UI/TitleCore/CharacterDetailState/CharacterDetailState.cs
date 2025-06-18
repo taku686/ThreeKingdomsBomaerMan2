@@ -252,13 +252,12 @@ namespace UI.Title
 
             private async UniTask OnClickTeamEditButton()
             {
-                if (_isTeamEdit)
-                {
-                    var userData = _UserDataRepository.GetUserData();
-                    var characterId = _sortedCharacters[_candidateIndex].Id;
-                    _UserDataRepository.SetTeamMember(characterId);
-                    await _PlayFabUserDataManager.TryUpdateUserDataAsync(userData);
-                }
+                if (!_isTeamEdit) return;
+
+                var userData = _UserDataRepository.GetUserData();
+                var characterId = _sortedCharacters[_candidateIndex].Id;
+                _UserDataRepository.SetTeamMember(characterId);
+                await _PlayFabUserDataManager.TryUpdateUserDataAsync(userData);
             }
 
             private void ChangeState()
@@ -321,6 +320,7 @@ namespace UI.Title
                     CreateCharacter(selectedCharacterData);
                 }
 
+                _View._LevelUpView.ShowLevelUpEffect().Forget();
                 Owner.SetActiveBlockPanel(false);
             }
 
