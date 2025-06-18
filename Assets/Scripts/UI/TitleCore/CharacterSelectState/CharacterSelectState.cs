@@ -3,6 +3,7 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Manager;
 using Manager.NetworkManager;
 using Repository;
 using UI.Common;
@@ -28,6 +29,7 @@ namespace UI.Title
             private StateMachine<TitleCore> _StateMachine => Owner._stateMachine;
             private RewardDataRepository _RewardDataRepository => Owner._rewardDataRepository;
             private CharacterTypeSpriteRepository _CharacterTypeSpriteRepository => Owner._characterTypeSpriteRepository;
+            private DataAcrossStates _DataAcrossStates => Owner._dataAcrossStates;
 
             private CancellationTokenSource _cancellationTokenSource;
             private readonly Subject<Unit> _onChangeViewModel = new();
@@ -64,7 +66,7 @@ namespace UI.Title
 
             private void Subscribe()
             {
-                SubscribeToggleView();
+                SubscribeSortToggleView();
 
                 _onChangeViewModel
                     .Select(_ => _CharacterSelectViewModelUseCase.InAsTask())
@@ -96,7 +98,7 @@ namespace UI.Title
                 _onChangeViewModel.OnNext(Unit.Default);
             }
 
-            private void SubscribeToggleView()
+            private void SubscribeSortToggleView()
             {
                 foreach (var element in _View._ToggleElements)
                 {
@@ -209,7 +211,7 @@ namespace UI.Title
 
                 addGem
                     .Where(isOk => isOk)
-                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.Shop,(int)State.CharacterSelect); })
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.Shop, (int)State.CharacterSelect); })
                     .AddTo(disableGrid.GetCancellationTokenOnDestroy());
 
                 var purchaseCharacter =
@@ -286,7 +288,14 @@ namespace UI.Title
             {
                 _CharacterCreateUseCase.CreateTeamMember(characterData.Id);
                 _TemporaryCharacterRepository.SetSelectedCharacterId(characterData.Id);
-                _StateMachine.Dispatch((int)State.CharacterDetail);
+                if (_DataAcrossStates.GetCanEditTeam())
+                {
+                    _StateMachine.Dispatch((int)State.CharacterDetail, (int)State.TeamEdit);
+                }
+                else
+                {
+                    _StateMachine.Dispatch((int)State.CharacterDetail);
+                }
             }
 
 

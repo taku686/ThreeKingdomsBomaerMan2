@@ -30,11 +30,12 @@ namespace UI.Title
             private MissionManager _MissionManager => Owner._missionManager;
             private DataAcrossStates _DataAcrossStates => Owner._dataAcrossStates;
             private StateMachine<TitleCore> _StateMachine => Owner._stateMachine;
-            private PlayFabUserDataManager _playFabUserDataManager;
-            private PlayFabShopManager _playFabShopManager;
-            private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
-            private TemporaryCharacterRepository _temporaryCharacterRepository;
-            private UIAnimation _uiAnimation;
+            private PlayFabUserDataManager _PlayFabUserDataManager => Owner._playFabUserDataManager;
+            private PlayFabShopManager _PlayFabShopManager => Owner._playFabShopManager;
+            private PlayFabVirtualCurrencyManager _PlayFabVirtualCurrencyManager　=> Owner._playFabVirtualCurrencyManager;
+            private TemporaryCharacterRepository _TemporaryCharacterRepository　=> Owner._temporaryCharacterRepository;
+            private UIAnimation _UIAnimation　=> Owner._uiAnimation;
+
             private bool _isTeamEdit;
             private CancellationTokenSource _cts;
             private int _candidateIndex;
@@ -56,11 +57,6 @@ namespace UI.Title
                 await Owner.SwitchUiObject(State.CharacterDetail, true, () =>
                 {
                     SetupCancellationToken();
-                    _playFabUserDataManager = Owner._playFabUserDataManager;
-                    _playFabShopManager = Owner._playFabShopManager;
-                    _playFabVirtualCurrencyManager = Owner._playFabVirtualCurrencyManager;
-                    _uiAnimation = Owner._uiAnimation;
-                    _temporaryCharacterRepository = Owner._temporaryCharacterRepository;
                     _isTeamEdit = _DataAcrossStates.GetCanEditTeam();
                     var userData = _UserDataRepository.GetUserData();
                     if (userData.Characters.Count <= 1)
@@ -106,8 +102,8 @@ namespace UI.Title
                     .SelectMany(_ => OnClickTeamEditButton().ToObservable())
                     .Subscribe(_ =>
                     {
-                        ChangeState();
                         Owner.SetActiveBlockPanel(false);
+                        ChangeState();
                     })
                     .AddTo(_cts.Token);
 
@@ -194,8 +190,8 @@ namespace UI.Title
 
             private void GenerateCharacter()
             {
-                var selectedCharacterId = _temporaryCharacterRepository.GetSelectedCharacterId();
-                var orderType = _temporaryCharacterRepository.GetOrderType();
+                var selectedCharacterId = _TemporaryCharacterRepository.GetSelectedCharacterId();
+                var orderType = _TemporaryCharacterRepository.GetOrderType();
                 _sortedCharacters = _SortCharactersUseCase.InAsTask(orderType).ToArray();
                 _candidateIndex = Array.FindIndex(_sortedCharacters, x => x.Id == selectedCharacterId);
                 var selectedCharacter = _sortedCharacters[_candidateIndex];
@@ -224,7 +220,7 @@ namespace UI.Title
                 }
 
                 var candidateCharacter = _sortedCharacters[_candidateIndex];
-                _temporaryCharacterRepository.SetSelectedCharacterId(candidateCharacter.Id);
+                _TemporaryCharacterRepository.SetSelectedCharacterId(candidateCharacter.Id);
                 CreateCharacter(candidateCharacter);
                 _onChangeViewModel.OnNext(candidateCharacter.Id);
                 PlayBackAnimation();
@@ -247,7 +243,7 @@ namespace UI.Title
                 }
 
                 var candidateCharacter = _sortedCharacters[_candidateIndex];
-                _temporaryCharacterRepository.SetSelectedCharacterId(candidateCharacter.Id);
+                _TemporaryCharacterRepository.SetSelectedCharacterId(candidateCharacter.Id);
                 CreateCharacter(candidateCharacter);
                 _onChangeViewModel.OnNext(candidateCharacter.Id);
                 PlayBackAnimation();
@@ -261,7 +257,7 @@ namespace UI.Title
                     var userData = _UserDataRepository.GetUserData();
                     var characterId = _sortedCharacters[_candidateIndex].Id;
                     _UserDataRepository.SetTeamMember(characterId);
-                    await _playFabUserDataManager.TryUpdateUserDataAsync(userData);
+                    await _PlayFabUserDataManager.TryUpdateUserDataAsync(userData);
                 }
             }
 
@@ -281,7 +277,7 @@ namespace UI.Title
             private async UniTask OnClickUpgrade()
             {
                 var selectedCharacterData = _sortedCharacters[_candidateIndex];
-                var coin = await _playFabVirtualCurrencyManager.GetCoin();
+                var coin = await _PlayFabVirtualCurrencyManager.GetCoin();
                 if (coin == GameCommonData.NetworkErrorCode)
                 {
                     Owner.SetActiveBlockPanel(false);
@@ -296,12 +292,12 @@ namespace UI.Title
                 {
                     virtualCurrencyAddView.transform.localScale = Vector3.zero;
                     virtualCurrencyAddView.gameObject.SetActive(true);
-                    await _uiAnimation.Open(virtualCurrencyAddView.transform, GameCommonData.OpenDuration);
+                    await _UIAnimation.Open(virtualCurrencyAddView.transform, GameCommonData.OpenDuration);
                     Owner.SetActiveBlockPanel(false);
                     return;
                 }
 
-                var result = await _playFabShopManager.TryPurchaseLevelUpItem(nextLevelData.Level,
+                var result = await _PlayFabShopManager.TryPurchaseLevelUpItem(nextLevelData.Level,
                     GameCommonData.CoinKey, nextLevelData.NeedCoin, selectedCharacterData.Id, purchaseErrorView);
 
                 if (!result)
@@ -309,7 +305,7 @@ namespace UI.Title
                     Debug.LogError("購入処理エラー");
                     purchaseErrorView.transform.localScale = Vector3.zero;
                     purchaseErrorView.gameObject.SetActive(true);
-                    await _uiAnimation.Open(purchaseErrorView.transform, GameCommonData.OpenDuration);
+                    await _UIAnimation.Open(purchaseErrorView.transform, GameCommonData.OpenDuration);
                     Owner.SetActiveBlockPanel(false);
                     return;
                 }
@@ -331,7 +327,7 @@ namespace UI.Title
             private async UniTask OnClickCloseVirtualCurrencyAddView()
             {
                 var virtualCurrencyAddView = _View._VirtualCurrencyAddPopup;
-                await _uiAnimation.Close(virtualCurrencyAddView.transform, GameCommonData.CloseDuration);
+                await _UIAnimation.Close(virtualCurrencyAddView.transform, GameCommonData.CloseDuration);
                 virtualCurrencyAddView.gameObject.SetActive(false);
                 Owner.SetActiveBlockPanel(false);
             }
@@ -345,7 +341,7 @@ namespace UI.Title
             private async UniTask OnClickClosePurchaseErrorView()
             {
                 var purchaseErrorView = _View._PurchaseErrorView;
-                await _uiAnimation.Close(purchaseErrorView.transform, GameCommonData.CloseDuration);
+                await _UIAnimation.Close(purchaseErrorView.transform, GameCommonData.CloseDuration);
                 purchaseErrorView.gameObject.SetActive(false);
             }
 
@@ -353,7 +349,7 @@ namespace UI.Title
             private async UniTask OnClickCloseErrorView()
             {
                 var errorView = _CommonView.errorView.transform;
-                await _uiAnimation.Close(errorView, GameCommonData.CloseDuration);
+                await _UIAnimation.Close(errorView, GameCommonData.CloseDuration);
                 errorView.gameObject.SetActive(false);
                 Owner.SetActiveBlockPanel(false);
             }
