@@ -23,7 +23,6 @@ namespace Skill.Attack.FlyingSlash
         private const float EffectDuration = 0.5f;
         private const float WaitDuration = 0.1f;
 
-
         [Inject]
         public FlyingSlashBase
         (

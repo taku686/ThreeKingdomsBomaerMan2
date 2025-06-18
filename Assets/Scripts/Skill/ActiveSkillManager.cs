@@ -6,6 +6,7 @@ using Skill.Attack.FlyingSlash;
 using Skill.CrushImpact;
 using Skill.DashAttack;
 using Skill.Heal;
+using Skill.MagicShot;
 using Skill.SlashSpin;
 using UniRx;
 using UnityEngine;
@@ -20,6 +21,7 @@ namespace Skill
         private readonly AttributeDashAttackFactory.Factory _dashAttackFactory;
         private readonly AttributeCrushImpactFactory.Factory _crushImpactFactory;
         private readonly AttributeSlashSpinFactory.Factory _slashSpinFactory;
+        private readonly AttributeMagicShotFactory.Factory _magicShotFactory;
         private readonly BuffSkill _buffSkill;
         private readonly HealSkill _healSkill;
         private Animator _animator;
@@ -38,6 +40,7 @@ namespace Skill
             AttributeDashAttackFactory.Factory dashAttackFactory,
             AttributeCrushImpactFactory.Factory crushImpactFactory,
             AttributeSlashSpinFactory.Factory slashSpinFactory,
+            AttributeMagicShotFactory.Factory magicShotFactory,
             BuffSkill buffSkill,
             HealSkill healSkill
         )
@@ -47,6 +50,7 @@ namespace Skill
             _dashAttackFactory = dashAttackFactory;
             _crushImpactFactory = crushImpactFactory;
             _slashSpinFactory = slashSpinFactory;
+            _magicShotFactory = magicShotFactory;
             _buffSkill = buffSkill;
             _healSkill = healSkill;
         }
@@ -102,6 +106,11 @@ namespace Skill
             if (IsFlyingSlashSkillActionType(skillMasterData))
             {
                 FlyingSlashSkill(skillMasterData);
+            }
+
+            if (IsMagicShotSkillActionType(skillMasterData))
+            {
+                MagicShotSkill(skillMasterData);
             }
 
             if (IsDashAttackSkillActionType(skillMasterData))
@@ -178,6 +187,20 @@ namespace Skill
             flyingSlash.Attack();
         }
 
+        private void MagicShotSkill(SkillMasterData skillMasterData)
+        {
+            var skillId = skillMasterData.Id;
+            var magicShot = _magicShotFactory.Create(skillId, _animator, _playerTransform, AbnormalCondition.None, null);
+            foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
+            {
+                if (abnormalCondition == AbnormalCondition.None)
+                    continue;
+                magicShot = _magicShotFactory.Create(skillId, _animator, _playerTransform, abnormalCondition, magicShot);
+            }
+
+            magicShot.Attack();
+        }
+
         private void DashAttackSkill(SkillMasterData skillMasterData)
         {
             var skillId = skillMasterData.Id;
@@ -238,6 +261,12 @@ namespace Skill
         {
             var skillActionType = skillMasterData._SkillActionTypeEnum;
             return skillActionType is SkillActionType.Slash;
+        }
+
+        private static bool IsMagicShotSkillActionType(SkillMasterData skillMasterData)
+        {
+            var skillActionType = skillMasterData._SkillActionTypeEnum;
+            return skillActionType is SkillActionType.Shot;
         }
 
         private static bool IsFlyingSlashSkillActionType(SkillMasterData skillMasterData)

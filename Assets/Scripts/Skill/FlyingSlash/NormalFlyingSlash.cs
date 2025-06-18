@@ -20,11 +20,6 @@ namespace Skill.Attack.FlyingSlash
             _animator.SetTrigger(GameCommonData.SlashHashKey);
         }
 
-        public void Attack(AbnormalCondition attribute)
-        {
-            throw new System.NotImplementedException();
-        }
-
         public void Dispose()
         {
         }

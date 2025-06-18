@@ -13,6 +13,7 @@ using Skill.Attack.FlyingSlash;
 using Skill.CrushImpact;
 using Skill.DashAttack;
 using Skill.Heal;
+using Skill.MagicShot;
 using Skill.SlashSpin;
 using UI.Common;
 using UI.Title;
@@ -50,6 +51,7 @@ namespace Common.Installer
             InstallShop();
             InstallSetting();
             InstallCrushImpact();
+            InstallMagicShot();
         }
 
         private void InstallCommon()
@@ -146,6 +148,13 @@ namespace Common.Installer
             Container.BindFactory<int, Animator, Transform, IAttackBehaviour, StigmataSlashSpin, StigmataSlashSpin.Factory>().AsCached();
             Container.BindFactory<int, Animator, Transform, IAttackBehaviour, SoakingWetSlashSpin, SoakingWetSlashSpin.Factory>().AsCached();
             Container.BindFactory<int, Animator, Transform, IAttackBehaviour, BurningSlashSpin, BurningSlashSpin.Factory>().AsCached();
+        }
+
+        private void InstallMagicShot()
+        {
+            Container.BindFactory<int, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeMagicShotFactory.Factory>().FromFactory<AttributeMagicShotFactory>();
+            Container.BindFactory<Animator, NormalMagicShot, NormalMagicShot.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, PoisonMagicShot, PoisonMagicShot.Factory>().AsCached();
         }
 
         private void InstallFlyingSlashSkill()

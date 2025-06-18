@@ -11,6 +11,7 @@ using Skill.Attack.FlyingSlash;
 using Skill.CrushImpact;
 using Skill.DashAttack;
 using Skill.Heal;
+using Skill.MagicShot;
 using Skill.SlashSpin;
 using UI.Common;
 using UnityEngine;
@@ -30,14 +31,14 @@ namespace Common.Installer
 
         public override void InstallBindings()
         {
+            var dummyTransform = transform;
+            Container.Bind<CharacterCreateUseCase>().AsCached().WithArguments(dummyTransform);
             Container.Bind<PlayerGeneratorUseCase>().FromComponentOn(playerManagerGameObject).AsCached();
             Container.Bind<BombProvider>().FromComponentOn(bombProviderGameObject).AsCached();
             Container.Bind<InputView>().FromComponentOn(buttonsGameObject).AsCached();
             Container.Bind<StatusInBattleViewModelUseCase>().AsCached();
             Container.Bind<InputViewModelUseCase>().AsCached();
             Container.Bind<BattleResultDataRepository>().AsCached();
-            var dummyTransform = transform;
-            Container.Bind<CharacterCreateUseCase>().AsCached().WithArguments(dummyTransform);
             Container.Bind<CharacterObjectRepository>().AsCached();
             Container.Bind<SetupAnimatorUseCase>().AsCached();
             Container.BindFactory<CharacterData, WeaponMasterData, LevelMasterData, TranslateStatusInBattleUseCase, TranslateStatusInBattleUseCase.Factory>().AsCached();
@@ -52,6 +53,7 @@ namespace Common.Installer
             InstallDashAttack();
             InstallCrushImpact();
             InstallSlashSpin();
+            InstallMagicShot();
         }
 
         private void InstallSkill()
@@ -81,6 +83,13 @@ namespace Common.Installer
             Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, ApraxiaSlash, ApraxiaSlash.Factory>().AsCached();
             Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, SoakingWetSlash, SoakingWetSlash.Factory>().AsCached();
             Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, BurningSlash, BurningSlash.Factory>().AsCached();
+        }
+
+        private void InstallMagicShot()
+        {
+            Container.BindFactory<int, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeMagicShotFactory.Factory>().FromFactory<AttributeMagicShotFactory>();
+            Container.BindFactory<Animator, NormalMagicShot, NormalMagicShot.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, PoisonMagicShot, PoisonMagicShot.Factory>().AsCached();
         }
 
         private void InstallSlashSpin()
