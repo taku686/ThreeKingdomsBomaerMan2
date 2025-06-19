@@ -11,7 +11,6 @@ Material:
   m_Shader: {fileID: 4800000, guid: d985403ea514e7c46bf7c2fab31b9d95, type: 3}
   m_ValidKeywords:
   - _SURFACE_TYPE_TRANSPARENT
-  - _USESOFTALPHA_ON
   m_InvalidKeywords:
   - _DISABLE_SSR
   - _DISABLE_SSR_TRANSPARENT
@@ -78,7 +77,7 @@ Material:
     - _ReceivesSSRTransparent: 0
     - _RenderQueueType: 4
     - _RequireSplitLighting: 0
-    - _SoftFadeFactor: 0.2
+    - _SoftFadeFactor: 0.1
     - _SourceBlendRGB: 1
     - _SrcBlend: 1
     - _StencilRef: 0
@@ -103,7 +102,7 @@ Material:
     - _UsePixelation: 0
     - _UseRamp: 0
     - _UseShadowThreshold: 0
-    - _UseSoftAlpha: 1
+    - _UseSoftAlpha: 0
     - _UseUVOffset: 0
     - _ZTestDepthEqualForOpaque: 4
     - _ZTestGBuffer: 4

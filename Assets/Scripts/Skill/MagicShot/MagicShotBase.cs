@@ -101,7 +101,7 @@ namespace Skill.MagicShot
                 .SetLink(effectClone.gameObject);
         }
 
-        private void HitEffect(GameObject effectClone, ParticleSystem particle, Transform playerTransform, int skillId)
+        private static void HitEffect(GameObject effectClone, ParticleSystem particle, Transform playerTransform, int skillId)
         {
             var boxCollider = effectClone.GetComponent<BoxCollider>();
             boxCollider.isTrigger = true;

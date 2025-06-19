@@ -3,7 +3,19 @@ using UnityEngine;
 public class WeaponMeshEffect : MonoBehaviour
 {
     [SerializeField] private float _startScaleMultiplier = 1;
-    private ParticleSystem[] _particles;
+    [SerializeField] private bool _playOnStart;
+    [SerializeField] private ParticleSystem[] _particles;
+
+
+    private void Start()
+    {
+        if (!_playOnStart)
+        {
+            return;
+        }
+
+        Initialize();
+    }
 
     public void Initialize()
     {
@@ -25,6 +37,7 @@ public class WeaponMeshEffect : MonoBehaviour
 
         foreach (var particle in _particles)
         {
+            particle.Stop(true);
             SetupShape(particle, meshRenderer);
             var main = particle.main;
             main.startSize = UpdateParticleParam
@@ -39,6 +52,8 @@ public class WeaponMeshEffect : MonoBehaviour
                 main.startSpeed,
                 (realBound / transformMax) * _startScaleMultiplier
             );
+
+            particle.Play(true);
         }
     }
 
