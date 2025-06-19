@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using Cysharp.Threading.Tasks;
 using Player.Common;
 using UniRx;
@@ -26,6 +25,7 @@ namespace Bomb
         {
             if (_normalBombPool != null)
             {
+                //破棄の処理を入れるべきか？
                 _normalBombPool.Clear();
                 Initialize(translateStatusInBattleUseCase);
                 return _normalBombPool;

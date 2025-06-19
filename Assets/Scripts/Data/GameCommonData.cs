@@ -10,7 +10,6 @@ namespace Common.Data
         public const float CharacterChangeInterval = 5f;
         public const float DashInterval = 0.5f;
         public const string TitleID = "92AF5";
-        public const string ChatGptApiKey = "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";
         public const string JoystickName = "JoyStickMove";
         public const string PlayerTag = "Player";
         public const string BombTag = "Bomb";
@@ -116,7 +115,7 @@ namespace Common.Data
 
         public static int GetLayerAffectedByTheBlast()
         {
-            return LayerMask.GetMask(EnemyLayer) | LayerMask.GetMask(ObstacleLayer) | LayerMask.GetMask(BombLayer) | LayerMask.GetMask(PlayerLayer);
+            return LayerMask.GetMask(ObstacleLayer);
         }
 
         public static class Terms

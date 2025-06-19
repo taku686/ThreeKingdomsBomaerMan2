@@ -48,6 +48,7 @@ namespace Bomb
             StageOrnamentsBlock stageOrnamentsBlock
         )
         {
+            _Cts ??= new CancellationTokenSource();
             gameObject.tag = GameCommonData.BombTag;
             _BombRenderer.enabled = true;
             _BoxCollider.enabled = true;
@@ -99,6 +100,7 @@ namespace Bomb
 
             _Cts.Cancel();
             _Cts.Dispose();
+            _Cts = null;
         }
 
         private void OnTriggerEnter(Collider other)
@@ -125,6 +127,7 @@ namespace Bomb
         {
             _onFinishSubject.Dispose();
             _onExplosionSubject.Dispose();
+            Cancel();
         }
     }
 }

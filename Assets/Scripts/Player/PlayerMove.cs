@@ -19,7 +19,6 @@ namespace Player.Common
         private LayerMask _blockingLayer;
         private MoveDirection _currentMoveDirection;
 
-
         public void Initialize
         (
             Animator animator,

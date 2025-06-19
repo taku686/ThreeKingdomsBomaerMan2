@@ -30,7 +30,7 @@ namespace Bomb
                 Explosion(startPos, MoveDirection.Left, damageAmount),
                 Explosion(startPos, MoveDirection.Right, damageAmount));
 
-            await base.Explosion(damageAmount);
+            base.Explosion(damageAmount);
         }
 
         private async UniTask Explosion(Vector3 startPos, MoveDirection moveDirection, int damageAmount)
