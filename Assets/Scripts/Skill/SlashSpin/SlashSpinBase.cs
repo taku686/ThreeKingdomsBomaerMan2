@@ -15,7 +15,6 @@ namespace Skill.SlashSpin
 {
     public class SlashSpinBase : AttackSkillBase, IAttackBehaviour
     {
-        private CancellationTokenSource _cts;
         private bool _isSpawnEffect;
         private GameObject _effectClone;
         private readonly SkillEffectRepository _skillEffectRepository;
@@ -43,19 +42,18 @@ namespace Skill.SlashSpin
         protected void SlashSpin
         (
             AbnormalCondition abnormalCondition,
-            Animator animator,
             int skillId,
             Transform playerTransform
         )
         {
-            _cts = new CancellationTokenSource();
+            _Cts = new CancellationTokenSource();
             var rigid = playerTransform.GetComponent<Rigidbody>();
             var skillData = _skillMasterDataRepository.GetSkillData(skillId);
             var range = skillData.Range;
 
             Observable
                 .EveryFixedUpdate()
-                .Where(_ => _cts is { IsCancellationRequested: false })
+                .Where(_ => _Cts is { IsCancellationRequested: false })
                 .SelectMany(_ => UniTask.Delay(TimeSpan.FromSeconds(WaitDurationForStart), DelayType.DeltaTime, PlayerLoopTiming.FixedUpdate).ToObservable())
                 .Subscribe(_ =>
                 {
@@ -63,7 +61,7 @@ namespace Skill.SlashSpin
                     rigid.velocity = playerTransform.forward * (range / moveDuration);
                     ActivateEffect(playerTransform, abnormalCondition, skillId);
                 })
-                .AddTo(_cts.Token);
+                .AddTo(_Cts.Token);
 
             Observable.Timer(TimeSpan.FromSeconds(WaitDurationForEnd))
                 .Subscribe(_ =>
@@ -81,7 +79,7 @@ namespace Skill.SlashSpin
                     Object.Destroy(_effectClone);
                     Cancel();
                 })
-                .AddTo(_cts.Token);
+                .AddTo(_Cts.Token);
         }
 
         protected virtual void ActivateEffect
@@ -109,18 +107,6 @@ namespace Skill.SlashSpin
                 .Where(collider => IsObstaclesTag(collider.gameObject))
                 .Subscribe(collider => HitPlayer(player, collider.gameObject, skillId))
                 .AddTo(_effectClone);
-        }
-
-        private void Cancel()
-        {
-            if (_cts == null)
-            {
-                return;
-            }
-
-            _cts.Cancel();
-            _cts.Dispose();
-            _cts = null;
         }
 
         public void Dispose()

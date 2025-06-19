@@ -33,7 +33,7 @@ namespace Skill.SlashSpin
         public override void Attack()
         {
             _attackBehaviour.Attack();
-            SlashSpin(AbnormalCondition.LifeSteal, _animator, _skillId, _playerTransform);
+            SlashSpin(AbnormalCondition.LifeSteal, _skillId, _playerTransform);
         }
 
         public class Factory : PlaceholderFactory

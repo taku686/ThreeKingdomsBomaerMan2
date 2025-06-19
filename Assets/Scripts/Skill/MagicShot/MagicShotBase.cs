@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using AttributeAttack;
 using Common.Data;
 using Cysharp.Threading.Tasks;
@@ -18,10 +19,10 @@ namespace Skill.MagicShot
     {
         private readonly SkillEffectRepository _skillEffectRepository;
         private readonly SkillMasterDataRepository _skillMasterDataRepository;
-        private const float DelayTime = 0.1f;
+        private const float EffectInstantiateDelayTime = 0.4f;
         private const float EffectHeight = 0.5f;
-        private const float EffectScale = 0.3f;
-        private const float EffectDuration = 0.5f;
+        private const float EffectScale = 0.4f;
+        private const float EffectLifeTime = 1f;
         private const float WaitDuration = 0.1f;
         private const int ShotCount = 1;
 
@@ -44,22 +45,17 @@ namespace Skill.MagicShot
         protected void MagicShot
         (
             AbnormalCondition abnormalCondition,
-            Animator animator,
             int skillId,
             Transform playerTransform
         )
         {
-            var observableStateMachineTrigger = animator.GetBehaviour<ObservableStateMachineTrigger>();
-            observableStateMachineTrigger
-                .OnStateEnterAsObservable()
-                .Where(info => info.StateInfo.IsName(GameCommonData.SlashKey))
-                .Take(1)
-                .Delay(TimeSpan.FromSeconds(DelayTime))
+            _Cts = new CancellationTokenSource();
+            Observable.Timer(TimeSpan.FromSeconds(EffectInstantiateDelayTime))
                 .Subscribe(_ => { ActivateEffect(playerTransform, abnormalCondition, skillId); })
-                .AddTo(playerTransform);
+                .AddTo(_Cts.Token);
         }
 
-        protected virtual void ActivateEffect
+        protected void ActivateEffect
         (
             Transform playerTransform,
             AbnormalCondition abnormalCondition,
@@ -68,20 +64,19 @@ namespace Skill.MagicShot
         {
             for (var i = 0; i < ShotCount; i++)
             {
-                var effectClone = InstantiateEffect(abnormalCondition, playerTransform, i);
+                var effectClone = InstantiateEffect(abnormalCondition, playerTransform);
                 MoveEffect(playerTransform, effectClone, skillId);
                 var particle = effectClone.GetComponent<ParticleSystem>();
-                HitEffect(effectClone, particle, playerTransform, skillId);
+                SetUpCollider(effectClone, particle, playerTransform, skillId);
             }
         }
 
-        private GameObject InstantiateEffect(AbnormalCondition abnormalCondition, Transform playerTransform, int index)
+        private GameObject InstantiateEffect(AbnormalCondition abnormalCondition, Transform playerTransform)
         {
-            var effect = _skillEffectRepository.GetFlyingSlashEffect(abnormalCondition);
-            var playerPosition = playerTransform.position;
-            var spawnPosition = new Vector3(playerPosition.x + index, playerPosition.y + EffectHeight, playerPosition.z);
+            var effect = _skillEffectRepository.GetMagicShotEffect(abnormalCondition);
+            var spawnPosition = GetSpawnPosition(playerTransform);
             var effectClone = Object.Instantiate(effect, spawnPosition, quaternion.identity);
-            effectClone.transform.position -= effectClone.transform.forward * 2;
+            effectClone.transform.position += playerTransform.forward;
             effectClone.transform.localScale *= EffectScale;
 
             return effectClone.gameObject;
@@ -91,43 +86,61 @@ namespace Skill.MagicShot
         {
             var skillMasterData = _skillMasterDataRepository.GetSkillData(skillId);
             var range = skillMasterData.Range;
-            var playerPosition = playerTransform.position;
-            var spawnPosition = new Vector3(playerPosition.x, playerPosition.y + EffectHeight, playerPosition.z);
+            var spawnPosition = GetSpawnPosition(playerTransform);
             var endPos = spawnPosition + playerTransform.forward * range;
             var particle = effectClone.GetComponent<ParticleSystem>();
-            effectClone.transform.DOMove(endPos, EffectDuration)
+            effectClone.transform.DOMove(endPos, EffectLifeTime)
                 .SetEase(Ease.Linear)
-                .OnComplete(() => particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear))
+                .OnComplete(() => { DestroyEffect(particle.gameObject); })
                 .SetLink(effectClone.gameObject);
         }
 
-        private static void HitEffect(GameObject effectClone, ParticleSystem particle, Transform playerTransform, int skillId)
+        private void SetUpCollider(GameObject effectClone, ParticleSystem particle, Transform playerTransform, int skillId)
         {
-            var boxCollider = effectClone.GetComponent<BoxCollider>();
-            boxCollider.isTrigger = true;
-            boxCollider.OnTriggerEnterAsObservable()
+            var effectCollider = effectClone.GetComponent<Collider>();
+            effectCollider.isTrigger = true;
+            effectCollider.OnTriggerEnterAsObservable()
                 .Where(collider => IsObstaclesTag(collider.gameObject))
-                .SelectMany(collider => HitEffectAsync(particle, collider.gameObject, playerTransform.gameObject, skillId).ToObservable())
-                .Subscribe()
+                .Delay(TimeSpan.FromSeconds(WaitDuration))
+                .Subscribe(collider => { HitEffect(particle, collider.gameObject, playerTransform.gameObject, skillId); })
                 .AddTo(effectClone);
         }
 
-        private static async UniTask HitEffectAsync
+        private void HitEffect
         (
             ParticleSystem particle,
-            GameObject collider,
+            GameObject hitObject,
             GameObject player,
             int skillId
         )
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(WaitDuration));
-            particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            if (!collider.CompareTag(GameCommonData.PlayerTag))
+            if (!hitObject.CompareTag(GameCommonData.PlayerTag))
+            {
+                DestroyEffect(particle.gameObject);
+                return;
+            }
+
+            DestroyEffect(particle.gameObject);
+            HitPlayer(player, hitObject, skillId);
+        }
+
+        private void DestroyEffect(GameObject effectClone)
+        {
+            if (effectClone == null)
             {
                 return;
             }
 
-            HitPlayer(player, collider, skillId);
+            var particle = effectClone.GetComponent<ParticleSystem>();
+            particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            Object.Destroy(effectClone);
+            Cancel();
+        }
+
+        private static Vector3 GetSpawnPosition(Transform playerTransform)
+        {
+            var playerPosition = playerTransform.position;
+            return new Vector3(playerPosition.x, playerPosition.y + EffectHeight, playerPosition.z);
         }
 
         public void Dispose()

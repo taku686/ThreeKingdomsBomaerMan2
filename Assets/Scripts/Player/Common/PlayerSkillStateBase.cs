@@ -69,11 +69,6 @@ namespace Player.Common
                     .AddTo(_cts.Token);
             }
 
-            private static bool IsApplyRootMotion(SkillActionType actionType)
-            {
-                return actionType is SkillActionType.SlashSpin;
-            }
-
             private bool IsAnimationState(ObservableStateMachineTrigger.OnStateInfo stateInfo)
             {
                 var stateName = "";
@@ -216,6 +211,7 @@ namespace Player.Common
                         stateName = GameCommonData.SlashKey;
                         break;
                     case SkillActionType.Shot:
+                        stateName = GameCommonData.MagicShotKey;
                         break;
                     case SkillActionType.Resistance:
                         break;

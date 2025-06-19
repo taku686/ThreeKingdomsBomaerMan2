@@ -30,7 +30,7 @@ namespace Skill.CrushImpact
         {
         }
 
-        public void CrushImpact
+        protected void CrushImpact
         (
             AbnormalCondition abnormalCondition,
             Animator animator,
@@ -62,7 +62,6 @@ namespace Skill.CrushImpact
             var effectObj = effectClone.gameObject;
             FixTransform(effectTransform, playerTransform);
             SetupCollider(effectObj, playerTransform, skillId);
-            SetupParticleSystem(effectObj);
         }
 
         private static void FixTransform(Transform effectTransform, Transform playerTransform)
@@ -84,13 +83,6 @@ namespace Skill.CrushImpact
                 .AddTo(effectClone);
 
             DisableCollider(effectCollider).Forget();
-        }
-
-        private static void SetupParticleSystem(GameObject effectClone)
-        {
-            var particle = effectClone.GetComponent<ParticleSystem>();
-            var main = particle.main;
-            main.stopAction = ParticleSystemStopAction.Callback;
         }
 
         private static async UniTask DisableCollider(Collider collider)

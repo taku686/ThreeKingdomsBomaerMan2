@@ -10,7 +10,6 @@ namespace Skill.MagicShot
     public class PoisonMagicShot : MagicShotBase
     {
         private readonly IAttackBehaviour _attackBehaviour;
-        private readonly Animator _animator;
         private readonly Transform _playerTransform;
         private readonly int _skillId;
 
@@ -25,7 +24,6 @@ namespace Skill.MagicShot
         ) : base(skillEffectRepository, skillMasterDataRepository)
         {
             _attackBehaviour = attackBehaviour;
-            _animator = animator;
             _playerTransform = playerTransform;
             _skillId = skillId;
         }
@@ -33,7 +31,7 @@ namespace Skill.MagicShot
         public override void Attack()
         {
             _attackBehaviour.Attack();
-            MagicShot(AbnormalCondition.Burning, _animator, _skillId, _playerTransform);
+            MagicShot(AbnormalCondition.Poison, _skillId, _playerTransform);
         }
 
         public class Factory : PlaceholderFactory

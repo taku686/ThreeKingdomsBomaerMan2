@@ -4,14 +4,12 @@ namespace Player.Common
     {
         public class PlayerWeaponSkillState : PlayerSkillStateBase
         {
-            
-            
             protected override void Initialize()
             {
                 base.Initialize();
                 var playerKey = Owner.GetPlayerKey();
-                var characterData = _PhotonNetworkManager.GetWeaponData(playerKey);
-                _SkillMasterData = characterData.NormalSkillMasterData;
+                var weaponData = _PhotonNetworkManager.GetWeaponData(playerKey);
+                _SkillMasterData = weaponData.NormalSkillMasterData;
                 _ActiveSkillManager.ActivateSkill(_SkillMasterData);
             }
         }

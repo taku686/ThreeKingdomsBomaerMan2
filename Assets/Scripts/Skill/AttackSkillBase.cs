@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using Common.Data;
 using Manager.NetworkManager;
 using Photon.Pun;
@@ -8,6 +9,8 @@ namespace Skill
 {
     public class AttackSkillBase
     {
+        protected CancellationTokenSource _Cts;
+
         protected static bool IsObstaclesTag(GameObject hitObject)
         {
             return hitObject.CompareTag(GameCommonData.BushTag) ||
@@ -39,6 +42,18 @@ namespace Skill
             var playerIndex = statusInfo.GetPlayerIndex();
             var dic = new Dictionary<int, int> { { playerIndex, skillId } };
             PhotonNetwork.LocalPlayer.SetSkillData(dic);
+        }
+
+        protected void Cancel()
+        {
+            if (_Cts == null)
+            {
+                return;
+            }
+
+            _Cts.Cancel();
+            _Cts.Dispose();
+            _Cts = null;
         }
     }
 }

@@ -90,6 +90,17 @@ namespace Common.Installer
             Container.BindFactory<int, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeMagicShotFactory.Factory>().FromFactory<AttributeMagicShotFactory>();
             Container.BindFactory<Animator, NormalMagicShot, NormalMagicShot.Factory>().AsCached();
             Container.BindFactory<int, Animator, Transform, IAttackBehaviour, PoisonMagicShot, PoisonMagicShot.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, ParalysisMagicShot, ParalysisMagicShot.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, FrozenMagicShot, FrozenMagicShot.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, ConfusionMagicShot, ConfusionMagicShot.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, CharmMagicShot, CharmMagicShot.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, MiasmaMagicShot, MiasmaMagicShot.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, DarknessMagicShot, DarknessMagicShot.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, LifeStealMagicShot, LifeStealMagicShot.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, HellFireMagicShot, HellFireMagicShot.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, StigmataMagicShot, StigmataMagicShot.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, SoakingWetMagicShot, SoakingWetMagicShot.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, BurningMagicShot, BurningMagicShot.Factory>().AsCached();
         }
 
         private void InstallSlashSpin()
