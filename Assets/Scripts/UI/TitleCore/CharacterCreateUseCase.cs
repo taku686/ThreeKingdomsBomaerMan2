@@ -232,6 +232,16 @@ namespace Repository
                 createParent.rotation,
                 createParent
             );
+            if (index == 1)
+            {
+                characterObject.transform.localEulerAngles = new Vector3(0, -23.58f, 0);
+            }
+
+            if (index == 2)
+            {
+                characterObject.transform.localEulerAngles = new Vector3(0, 20.8f, 0);
+            }
+
             _characterObjectRepository.SetCharacterObject(characterObject, index);
             CreateWeapon(characterObject, weaponData);
             ChangeAnimatorController(characterObject, weaponData.WeaponType);

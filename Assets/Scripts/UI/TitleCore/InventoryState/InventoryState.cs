@@ -34,6 +34,7 @@ namespace UI.Title
 
             protected override void OnExit(StateMachine<TitleCore>.State nextState)
             {
+                _View.DestroyWeapon();
                 _onChangeSelectedWeaponSubject.Dispose();
                 Cancel();
             }
@@ -59,7 +60,7 @@ namespace UI.Title
                             StateMachine.Dispatch((int)State.CharacterDetail);
                             return;
                         }
-                        
+
                         StateMachine.Dispatch(preState);
                     })
                     .AddTo(_cts.Token);
@@ -90,11 +91,12 @@ namespace UI.Title
                     .Subscribe(_ =>
                     {
                         var prevState = StateMachine._PreviousState;
-                        if(prevState == GameCommonData.InvalidNumber)
+                        if (prevState == GameCommonData.InvalidNumber)
                         {
                             StateMachine.Dispatch((int)State.CharacterDetail);
                             return;
                         }
+
                         stateMachine.Dispatch(prevState);
                     })
                     .AddTo(_cts.Token);

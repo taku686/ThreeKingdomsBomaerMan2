@@ -72,6 +72,11 @@ public class InventoryView : ViewBase
         }
     }
 
+    public void DestroyWeapon()
+    {
+        weaponDetailView.DestroyWeapon();
+    }
+
     private static bool GetCaution(IReadOnlyDictionary<int, bool> cautionDictionary, int weaponId)
     {
         return cautionDictionary.GetValueOrDefault(weaponId, false);

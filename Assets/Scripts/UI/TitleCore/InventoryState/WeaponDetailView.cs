@@ -1176,6 +1176,15 @@ namespace UI.Title
                     throw new ArgumentOutOfRangeException(nameof(weaponType), weaponType, null);
             }
         }
+        
+        public void DestroyWeapon()
+        {
+            if (_weaponObject != null)
+            {
+                Destroy(_weaponObject);
+                _weaponObject = null;
+            }
+        }
 
         private void OnDestroy()
         {

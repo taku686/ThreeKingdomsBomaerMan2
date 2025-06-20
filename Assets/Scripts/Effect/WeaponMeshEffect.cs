@@ -61,7 +61,7 @@ public class WeaponMeshEffect : MonoBehaviour
     {
         if (_particles == null || _particles.Length == 0)
         {
-            return;
+            _particles = GetComponentsInChildren<ParticleSystem>(true);
         }
 
         foreach (var particle in _particles)
