@@ -25,7 +25,6 @@ namespace Bomb
         {
             if (_normalBombPool != null)
             {
-                //破棄の処理を入れるべきか？
                 _normalBombPool.Clear();
                 Initialize(translateStatusInBattleUseCase);
                 return _normalBombPool;
