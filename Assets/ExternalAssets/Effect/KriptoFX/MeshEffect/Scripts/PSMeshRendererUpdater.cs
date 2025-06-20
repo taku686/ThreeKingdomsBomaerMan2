@@ -315,7 +315,6 @@ public class PSMeshRendererUpdater : MonoBehaviour
                 {
                     sh.shapeType = ParticleSystemShapeType.MeshRenderer;
                     sh.meshRenderer = meshRend;
-
                 }
                 if (skinMeshRend != null)
                 {

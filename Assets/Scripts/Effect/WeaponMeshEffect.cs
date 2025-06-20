@@ -19,7 +19,7 @@ public class WeaponMeshEffect : MonoBehaviour
 
     public void Initialize()
     {
-        var meshRenderer = GetComponent<MeshRenderer>();
+        var meshRenderer = GetComponentInChildren<MeshRenderer>(true);
         var realBound = 1f;
         var transformMax = 1f;
         if (meshRenderer != null)
@@ -28,7 +28,7 @@ public class WeaponMeshEffect : MonoBehaviour
             transformMax = meshRenderer.transform.lossyScale.magnitude;
         }
 
-        _particles = GetComponentsInChildren<ParticleSystem>();
+        _particles = GetComponentsInChildren<ParticleSystem>(true);
         if (_particles == null || _particles.Length == 0)
         {
             Debug.LogWarning("No ParticleSystem found in children.");
@@ -61,7 +61,7 @@ public class WeaponMeshEffect : MonoBehaviour
     {
         if (_particles == null || _particles.Length == 0)
         {
-            _particles = GetComponentsInChildren<ParticleSystem>();
+            return;
         }
 
         foreach (var particle in _particles)
