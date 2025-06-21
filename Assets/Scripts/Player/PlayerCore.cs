@@ -29,10 +29,11 @@ namespace Player.Common
 
         private TranslateStatusInBattleUseCase.Factory _translateStatusInBattleUseCaseFactory;
         private TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
-        private SkillActivationConditionsUseCase _skillActivationConditionsUseCase;
+        private UnderAbnormalConditionsBySkillUseCase _underAbnormalConditionsBySkillUseCase;
         private PlayerGeneratorUseCase _playerGeneratorUseCase;
         private CharacterCreateUseCase _characterCreateUseCase;
 
+        private PlayerStatus _playerStatus;
         private PlayerMove _playerMove;
         private PlayerDash _playerDash;
         private PutBomb _putBomb;
@@ -78,7 +79,7 @@ namespace Player.Common
             PhotonNetworkManager networkManager,
             ActiveSkillManager activeSkillManager,
             PassiveSkillManager passiveSkillManager,
-            SkillActivationConditionsUseCase skillActivationConditionsUseCase,
+            UnderAbnormalConditionsBySkillUseCase underAbnormalConditionsBySkillUseCase,
             PlayerGeneratorUseCase playerGeneratorUseCase,
             CharacterCreateUseCase characterCreateUseCase,
             string key
@@ -89,7 +90,7 @@ namespace Player.Common
             _photonNetworkManager = networkManager;
             _activeSkillManager = activeSkillManager;
             _passiveSkillManager = passiveSkillManager;
-            _skillActivationConditionsUseCase = skillActivationConditionsUseCase;
+            _underAbnormalConditionsBySkillUseCase = underAbnormalConditionsBySkillUseCase;
             _playerGeneratorUseCase = playerGeneratorUseCase;
             _characterCreateUseCase = characterCreateUseCase;
             InitializeComponent();
@@ -120,7 +121,6 @@ namespace Player.Common
             int characterId
         )
         {
-            var normalSkillData = weaponMasterData.NormalSkillMasterData;
             var statusSkillDatum = weaponMasterData.StatusSkillMasterDatum;
 
             _activeSkillManager.Initialize
@@ -139,8 +139,6 @@ namespace Player.Common
 
             _passiveSkillManager.Initialize
             (
-                normalSkillData,
-                null,
                 statusSkillDatum,
                 transform,
                 _statusBuffSubject,
@@ -174,7 +172,7 @@ namespace Player.Common
         {
             var characterData = _photonNetworkManager.GetCharacterData(playerKey);
             var weaponData = _photonNetworkManager.GetWeaponData(playerKey);
-            
+
             DestroyWeaponObj(gameObject);
             _playerGeneratorUseCase.DestroyPlayerObj();
             var playerObj = _playerGeneratorUseCase.InstantiatePlayerObj(characterData, transform, weaponData.Id, false);
@@ -301,8 +299,8 @@ namespace Player.Common
             var playerKey = _TeamMemberReactiveProperty.Value;
             var weaponData = _photonNetworkManager.GetWeaponData(playerKey);
             var normalSkillData = weaponData.NormalSkillMasterData;
-            _skillActivationConditionsUseCase.OnNextDamageSubject(normalSkillData);
-            _skillActivationConditionsUseCase.OnNextDamageSubject(null);
+            _underAbnormalConditionsBySkillUseCase.OnNextDamageSubject(normalSkillData);
+            _underAbnormalConditionsBySkillUseCase.OnNextDamageSubject(null);
         }
 
         private async UniTask Dead()
@@ -341,6 +339,39 @@ namespace Player.Common
             _DashSkillSubject.Dispose();
             _BombSkillSubject.Dispose();
             _TeamMemberReactiveProperty.Dispose();
+        }
+
+        public class PlayerStatus
+        {
+            private ReactiveProperty<int> _currentHp;
+            private ReactiveProperty<float> _speed;
+            private ReactiveProperty<int> _maxHp;
+            private ReactiveProperty<int> _attack;
+            private ReactiveProperty<int> _defense;
+            private ReactiveProperty<int> _resistance;
+            private ReactiveProperty<int> _fireRange;
+            private ReactiveProperty<int> _bombLimit;
+
+            public PlayerStatus
+            (
+                int currentHp,
+                float speed,
+                int maxHp,
+                int attack,
+                int defense,
+                int resistance,
+                int fireRange,
+                int bombLimit)
+            {
+                _bombLimit = new ReactiveProperty<int>(bombLimit);
+                _currentHp = new ReactiveProperty<int>(currentHp);
+                _speed = new ReactiveProperty<float>(speed);
+                _maxHp = new ReactiveProperty<int>(maxHp);
+                _attack = new ReactiveProperty<int>(attack);
+                _defense = new ReactiveProperty<int>(defense);
+                _resistance = new ReactiveProperty<int>(resistance);
+                _fireRange = new ReactiveProperty<int>(fireRange);
+            }
         }
     }
 }

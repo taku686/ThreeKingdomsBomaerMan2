@@ -14,11 +14,9 @@ namespace Skill
 {
     public class PassiveSkillManager : IDisposable
     {
-        private SkillMasterData _normalSkillMasterData;
-        private SkillMasterData _specialSkillMasterData;
         private readonly BuffSkill _buffSkill;
         private readonly HealSkill _healSkill;
-        private readonly SkillActivationConditionsUseCase _skillActivationConditionsUseCase;
+        private readonly UnderAbnormalConditionsBySkillUseCase _underAbnormalConditionsBySkillUseCase;
         private CancellationTokenSource _cancellationTokenSource;
 
         [Inject]
@@ -26,18 +24,16 @@ namespace Skill
         (
             BuffSkill buffSkill,
             HealSkill healSkill,
-            SkillActivationConditionsUseCase skillActivationConditionsUseCase
+            UnderAbnormalConditionsBySkillUseCase underAbnormalConditionsBySkillUseCase
         )
         {
             _buffSkill = buffSkill;
             _healSkill = healSkill;
-            _skillActivationConditionsUseCase = skillActivationConditionsUseCase;
+            _underAbnormalConditionsBySkillUseCase = underAbnormalConditionsBySkillUseCase;
         }
 
         public void Initialize
         (
-            SkillMasterData normalSkillMasterData,
-            SkillMasterData specialSkillMasterData,
             SkillMasterData[] statusSkillMasterDatum,
             Transform playerTransform,
             Subject<(StatusType statusType, float value)> statusBuff,
@@ -46,9 +42,9 @@ namespace Skill
             TranslateStatusInBattleUseCase translateStatusInBattleUseCase
         )
         {
-            _normalSkillMasterData = normalSkillMasterData;
-            _specialSkillMasterData = specialSkillMasterData;
-            _cancellationTokenSource = new CancellationTokenSource();
+            Cancel();
+            
+            _cancellationTokenSource ??= new CancellationTokenSource();
             var playerStatusInfo = playerTransform.GetComponent<PlayerStatusInfo>();
             _buffSkill.Initialize
             (
@@ -64,7 +60,7 @@ namespace Skill
 
         private void PassiveSkill()
         {
-            _skillActivationConditionsUseCase
+            _underAbnormalConditionsBySkillUseCase
                 .OnDamageAsObservable()
                 .Where(skillData => skillData.SkillType == SkillType.Passive)
                 .Where(skillData => skillData.BoolRequirementTypeEnum == BoolRequirementType.ReceiveDamage)
@@ -79,45 +75,21 @@ namespace Skill
                 })
                 .AddTo(_cancellationTokenSource.Token);
 
-            _skillActivationConditionsUseCase
+            _underAbnormalConditionsBySkillUseCase
                 .OnAbnormalConditionAsObservable()
                 .Where(tuple => tuple.Item1 != null)
                 .Where(tuple => tuple.Item1.SkillType != SkillType.Passive)
                 .Subscribe(tuple =>
                 {
-                    if (_normalSkillMasterData != null)
+                    var skillMasterData = tuple.Item1;
+                    var isActive = tuple.Item2;
+                    if (skillMasterData.BoolRequirementTypeEnum != BoolRequirementType.AbnormalCondition)
                     {
-                        if (_normalSkillMasterData.SkillType != SkillType.Passive)
-                        {
-                            return;
-                        }
-
-                        if (_normalSkillMasterData.BoolRequirementTypeEnum != BoolRequirementType.AbnormalCondition)
-                        {
-                            return;
-                        }
-
-                        var isActive = tuple.Item2;
-                        _buffSkill.BuffInAbnormalCondition(_normalSkillMasterData, isActive);
-                        _healSkill.ContinuousHealInAbnormalCondition(_normalSkillMasterData);
+                        return;
                     }
 
-                    if (_specialSkillMasterData != null)
-                    {
-                        if (_specialSkillMasterData.SkillType != SkillType.Passive)
-                        {
-                            return;
-                        }
-
-                        if (_specialSkillMasterData.BoolRequirementTypeEnum != BoolRequirementType.AbnormalCondition)
-                        {
-                            return;
-                        }
-
-                        var isActive = tuple.Item2;
-                        _buffSkill.BuffInAbnormalCondition(_specialSkillMasterData, isActive);
-                        _healSkill.ContinuousHealInAbnormalCondition(_specialSkillMasterData);
-                    }
+                    _buffSkill.BuffInAbnormalCondition(skillMasterData, isActive);
+                    _healSkill.ContinuousHealInAbnormalCondition(skillMasterData);
                 })
                 .AddTo(_cancellationTokenSource.Token);
         }

@@ -36,7 +36,7 @@ namespace Manager.BattleManager
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
             private ActiveSkillManager _ActiveSkillManager => Owner._activeSkillManager;
             private PassiveSkillManager _PassiveSkillManager => Owner._passiveSkillManager;
-            private SkillActivationConditionsUseCase _SkillActivationConditionsUseCase => Owner._skillActivationConditionsUseCase;
+            private UnderAbnormalConditionsBySkillUseCase _UnderAbnormalConditionsBySkillUseCase => Owner._underAbnormalConditionsBySkillUseCase;
             private SetupAnimatorUseCase _SetupAnimatorUseCase => Owner._setupAnimatorUseCase;
             private TranslateStatusInBattleUseCase.Factory _TranslateStatusInBattleUseCaseFactory => Owner._translateStatusInBattleUseCaseFactory;
             private GameObject _ArrowIndicatorPrefab => Owner._arrowSkillIndicatorPrefab;
@@ -265,7 +265,7 @@ namespace Manager.BattleManager
                     _PhotonNetworkManager,
                     _ActiveSkillManager,
                     _PassiveSkillManager,
-                    _SkillActivationConditionsUseCase,
+                    _UnderAbnormalConditionsBySkillUseCase,
                     _PlayerGeneratorUseCase,
                     _CharacterCreateUseCase,
                     hpKey

@@ -37,7 +37,7 @@ namespace Player.Common
             _applyStatusSkillUseCase = applyStatusSkillUseCase;
         }
 
-        public void InitializeStatus()
+        public PlayerCore.PlayerStatus InitializeStatus()
         {
             var statusSkillDatum = _weaponData.StatusSkillMasterDatum;
             var characterId = _characterData.Id;
@@ -61,6 +61,7 @@ namespace Player.Common
                 resistance = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Resistance, _levelData);
             }
 
+
             _CurrentHp = (int)TranslateStatusValueForBattle(StatusType.Hp, hp);
             _MaxHp = (int)TranslateStatusValueForBattle(StatusType.Hp, hp);
             _Speed = TranslateStatusValueForBattle(StatusType.Speed, speed);
@@ -70,6 +71,18 @@ namespace Player.Common
             _Defense = (int)TranslateStatusValueForBattle(StatusType.Defense, defense);
             _Resistance = (int)TranslateStatusValueForBattle(StatusType.Resistance, resistance);
             _FireRange = (int)TranslateStatusValueForBattle(StatusType.FireRange, fireRange);
+
+            return new PlayerCore.PlayerStatus
+            (
+                _CurrentHp,
+                _Speed,
+                _MaxHp,
+                _Attack,
+                _Defense,
+                _Resistance,
+                _FireRange,
+                _maxBombLimit
+            );
         }
 
         public float TranslateStatusValueForBattle(StatusType statusType, int value)

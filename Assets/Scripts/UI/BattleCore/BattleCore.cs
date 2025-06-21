@@ -36,7 +36,7 @@ namespace Manager.BattleManager
         [Inject] private ApplyStatusSkillUseCase _applyStatusSkillUseCase;
         [Inject] private CharacterCreateUseCase _characterCreateUseCase;
         [Inject] private InputViewModelUseCase _inputViewModelUseCase;
-        [Inject] private SkillActivationConditionsUseCase _skillActivationConditionsUseCase;
+        [Inject] private UnderAbnormalConditionsBySkillUseCase _underAbnormalConditionsBySkillUseCase;
         [Inject] private SetupAnimatorUseCase _setupAnimatorUseCase;
         [Inject] private SkillEffectActivateUseCase _skillEffectActivateUseCase;
         [Inject] private TranslateStatusInBattleUseCase.Factory _translateStatusInBattleUseCaseFactory;

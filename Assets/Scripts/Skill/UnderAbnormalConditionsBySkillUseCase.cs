@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Skill
 {
-    public class SkillActivationConditionsUseCase : IDisposable
+    public class UnderAbnormalConditionsBySkillUseCase : IDisposable
     {
         private readonly Subject<SkillMasterData> _onDamageSubject = new();
         private readonly Subject<(SkillMasterData, bool)> _onAbnormalConditionSubject = new();

@@ -20,7 +20,7 @@ namespace Manager.NetworkManager
         [Inject] private LevelMasterDataRepository _levelMasterDataRepository;
         [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
         [Inject] private SkillMasterDataRepository _skillMasterDataRepository;
-        [Inject] private SkillActivationConditionsUseCase _skillActivationConditionsUseCase;
+        [Inject] private UnderAbnormalConditionsBySkillUseCase _underAbnormalConditionsBySkillUseCase;
         private Subject<Photon.Realtime.Player[]> _joinedRoomSubject = new();
         private Subject<Unit> _playerGenerateCompleteSubject = new();
         private readonly Subject<(int, SkillMasterData)> _activateSkillSubject = new();
@@ -170,7 +170,7 @@ namespace Manager.NetworkManager
                             if (playerStatusInfo.GetPlayerIndex() != keyValue.Key) continue;
                             var skillData = _skillMasterDataRepository.GetSkillData(keyValue.Value);
                             _activateSkillSubject.OnNext((playerStatusInfo.GetPlayerIndex(), skillData));
-                            _skillActivationConditionsUseCase.OnNextAbnormalConditionSubject(playerStatusInfo, skillData).Forget();
+                            _underAbnormalConditionsBySkillUseCase.OnNextAbnormalConditionSubject(playerStatusInfo, skillData).Forget();
                         }
                     }
                 }

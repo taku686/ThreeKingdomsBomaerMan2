@@ -46,7 +46,7 @@ namespace Common.Installer
             Container.Bind<WeaponMasterDataRepository>().AsCached();
             Container.Bind<ApplyStatusSkillUseCase>().AsCached();
             Container.Bind<NormalSkillStatusChangeUseCase>().AsCached();
-            Container.Bind<SkillActivationConditionsUseCase>().AsCached();
+            Container.Bind<UnderAbnormalConditionsBySkillUseCase>().AsCached();
             Container.Bind<AbnormalConditionViewModelUseCase>().AsCached();
             Container.Bind<PhotonNetworkManager>().FromComponentInNewPrefab(_photonNetworkGameObject).AsSingle();
             Container.Bind<DataAcrossStates>().FromComponentsInNewPrefab(_mainManagerGameObject).AsSingle();
