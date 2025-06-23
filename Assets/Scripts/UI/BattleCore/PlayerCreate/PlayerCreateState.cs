@@ -138,7 +138,7 @@ namespace Manager.BattleManager
             (
                 GameObject playerCore,
                 out string hpKey,
-                out PlayerStatusInfo playerStatusInfo,
+                out PlayerConditionInfo playerConditionInfo,
                 out PhotonView photonView
             )
             {
@@ -164,8 +164,8 @@ namespace Manager.BattleManager
                 translateStatusInBattleUseCase.InitializeStatus();
                 var putBomb = playerCore.AddComponent<PutBomb>();
                 putBomb.Initialize(_BombProvider, _MapManager, translateStatusInBattleUseCase);
-                playerStatusInfo = playerCore.AddComponent<PlayerStatusInfo>();
-                playerStatusInfo.SetPlayerIndex(instantiationId);
+                playerConditionInfo = playerCore.AddComponent<PlayerConditionInfo>();
+                playerConditionInfo.SetPlayerIndex(instantiationId);
                 AddBoxCollider(playerCore);
                 AddRigidbody(playerCore);
 
@@ -311,7 +311,6 @@ namespace Manager.BattleManager
                 collider.isTrigger = false;
                 collider.center = ColliderCenter;
                 collider.size = ColliderSize;
-                //collider.material = _CharacterPhysicMaterial;
             }
 
             private static void AddRigidbody(GameObject player)

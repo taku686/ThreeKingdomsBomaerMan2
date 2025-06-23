@@ -3,6 +3,7 @@ using System.Threading;
 using Common.Data;
 using Manager.NetworkManager;
 using Photon.Pun;
+using Player.Common;
 using UnityEngine;
 
 namespace Skill
@@ -33,7 +34,7 @@ namespace Skill
                 return;
             }
 
-            var statusInfo = hitPlayer.GetComponent<PlayerStatusInfo>();
+            var statusInfo = hitPlayer.GetComponent<PlayerConditionInfo>();
             if (statusInfo == null)
             {
                 return;

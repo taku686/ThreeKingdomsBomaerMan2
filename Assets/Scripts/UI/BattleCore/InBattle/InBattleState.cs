@@ -26,7 +26,7 @@ namespace Manager.BattleManager
             private BattleResultDataRepository _BattleResultDataRepository => Owner._battleResultDataRepository;
             private InputViewModelUseCase _InputViewModelUseCase => Owner._inputViewModelUseCase;
             private AbnormalConditionSpriteRepository _AbnormalConditionSpriteRepository => Owner._abnormalConditionSpriteRepository;
-            private PlayerStatusInfo _PlayerStatusInfo => Owner._playerStatusInfo;
+            private PlayerConditionInfo _PlayerConditionInfo => Owner._playerConditionInfo;
             private StatusInBattleViewModelUseCase _StatusInBattleViewModelUseCase => Owner._statusInBattleViewModelUseCase;
             private ArrowSkillIndicatorView _ArrowSkillIndicatorView => Owner._arrowSkillIndicatorView;
             private CircleSkillIndicatorView _CircleSkillIndicatorView => Owner._circleSkillIndicatorView;
@@ -113,7 +113,7 @@ namespace Manager.BattleManager
 
             private void PlayerStatusInfoSubscribe()
             {
-                _PlayerStatusInfo._AbnormalConditions
+                _PlayerConditionInfo._AbnormalConditions
                     .ObserveAdd()
                     .Subscribe(value =>
                     {
@@ -124,7 +124,7 @@ namespace Manager.BattleManager
                     })
                     .AddTo(_cts.Token);
 
-                _PlayerStatusInfo._AbnormalConditions
+                _PlayerConditionInfo._AbnormalConditions
                     .ObserveRemove()
                     .Subscribe(value =>
                     {

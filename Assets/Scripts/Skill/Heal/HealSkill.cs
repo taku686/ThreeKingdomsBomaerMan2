@@ -13,21 +13,21 @@ namespace Skill.Heal
 {
     public class HealSkill : IDisposable
     {
-        private Func<int, int> _calculateHp;
-        private TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
-        private PlayerStatusInfo _playerStatusInfo;
+        private Action<int> _calculateHp;
+        private PlayerConditionInfo _playerConditionInfo;
+        private PlayerCore.PlayerStatusInfo _playerStatusInfo;
         private float _timer;
         private float _oneSecondTimer;
 
         public void Initialize
         (
-            Func<int, int> calculateHp,
-            TranslateStatusInBattleUseCase translateStatusInBattleUseCase,
-            PlayerStatusInfo playerStatusInfo
+            Action<int> calculateHp,
+            PlayerConditionInfo playerConditionInfo,
+            PlayerCore.PlayerStatusInfo playerStatusInfo
         )
         {
             _calculateHp = calculateHp;
-            _translateStatusInBattleUseCase = translateStatusInBattleUseCase;
+            _playerConditionInfo = playerConditionInfo;
             _playerStatusInfo = playerStatusInfo;
         }
 
@@ -70,7 +70,7 @@ namespace Skill.Heal
             var healAmount = GetHealAmount(skillMasterData);
             var cancellationToken = new CancellationTokenSource();
             Observable.EveryUpdate()
-                .Where(_ => _playerStatusInfo.HasAbnormalCondition())
+                .Where(_ => _playerConditionInfo.HasAbnormalCondition())
                 .Subscribe(_ =>
                 {
                     _oneSecondTimer += Time.deltaTime;
@@ -85,7 +85,7 @@ namespace Skill.Heal
 
         private int GetHealAmount(SkillMasterData skillMasterData)
         {
-            var playerIndex = _playerStatusInfo.GetPlayerIndex();
+            var playerIndex = _playerConditionInfo.GetPlayerIndex();
             var skillId = skillMasterData.Id;
             var dic = new Dictionary<int, int> { { playerIndex, skillId } };
             PhotonNetwork.LocalPlayer.SetSkillData(dic);
@@ -99,7 +99,7 @@ namespace Skill.Heal
 
             if (!Mathf.Approximately(skillMasterData.HpMul, GameCommonData.InvalidNumber))
             {
-                var maxHp = _translateStatusInBattleUseCase._MaxHp;
+                var maxHp = _playerStatusInfo._CurrentHp.Value.Item1;
                 healAmount = Mathf.FloorToInt(maxHp * skillMasterData.HpMul);
             }
 

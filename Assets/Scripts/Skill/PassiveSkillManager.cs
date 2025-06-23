@@ -45,7 +45,7 @@ namespace Skill
             Cancel();
             
             _cancellationTokenSource ??= new CancellationTokenSource();
-            var playerStatusInfo = playerTransform.GetComponent<PlayerStatusInfo>();
+            var playerStatusInfo = playerTransform.GetComponent<PlayerConditionInfo>();
             _buffSkill.Initialize
             (
                 statusBuff,

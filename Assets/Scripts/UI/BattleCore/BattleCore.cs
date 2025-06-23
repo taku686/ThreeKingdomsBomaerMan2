@@ -65,7 +65,7 @@ namespace Manager.BattleManager
         private PlayerCore _playerCore;
         private readonly List<PlayerStatusUI> _playerStatusUiList = new();
         private Transform[] _startPositionArray;
-        private PlayerStatusInfo _playerStatusInfo;
+        private PlayerConditionInfo _playerConditionInfo;
         private StartPointsRepository _startPointsRepository;
         private ArrowSkillIndicatorView _arrowSkillIndicatorView;
         private CircleSkillIndicatorView _circleSkillIndicatorView;
@@ -137,9 +137,9 @@ namespace Manager.BattleManager
             _playerCore = player;
         }
 
-        private void SetPlayerStatusInfo(PlayerStatusInfo playerStatusInfo)
+        private void SetPlayerStatusInfo(PlayerConditionInfo playerConditionInfo)
         {
-            _playerStatusInfo = playerStatusInfo;
+            _playerConditionInfo = playerConditionInfo;
         }
 
         private void SetArrowSkillIndicatorView(ArrowSkillIndicatorView arrowSkillIndicatorView)

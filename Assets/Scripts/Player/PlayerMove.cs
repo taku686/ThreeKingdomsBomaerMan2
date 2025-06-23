@@ -19,28 +19,21 @@ namespace Player.Common
         private LayerMask _blockingLayer;
         private MoveDirection _currentMoveDirection;
 
-        public void Initialize
-        (
-            Animator animator,
-            IObservable<(StatusType statusType, float value)> speedBuffObservable,
-            float moveSpeed
-        )
+        public void Initialize(Animator animator, IObservable<(StatusType statusType, float value)> speedBuffObservable)
         {
             _blockingLayer = LayerMask.GetMask(GameCommonData.ObstacleLayer) | LayerMask.GetMask(GameCommonData.BombLayer);
             _playerTransform = transform;
-            _moveSpeed = moveSpeed;
             _rigidbody = GetComponent<Rigidbody>();
-            SetAnimator(animator);
             Subscribe(speedBuffObservable);
+            SetAnimator(animator);
         }
 
-        public void ChangeCharacter(Animator animator, float moveSpeed)
+        public void ChangeSpeed(float moveSpeed)
         {
-            SetAnimator(animator);
             _moveSpeed = moveSpeed;
         }
 
-        private void SetAnimator(Animator animator)
+        public void SetAnimator(Animator animator)
         {
             _animator = animator;
             _movementAnimationManager ??= new MovementAnimationManager();

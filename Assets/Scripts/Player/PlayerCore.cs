@@ -33,7 +33,7 @@ namespace Player.Common
         private PlayerGeneratorUseCase _playerGeneratorUseCase;
         private CharacterCreateUseCase _characterCreateUseCase;
 
-        private PlayerStatus _playerStatus;
+        private PlayerStatusInfo _playerStatusInfo;
         private PlayerMove _playerMove;
         private PlayerDash _playerDash;
         private PutBomb _putBomb;
@@ -110,7 +110,7 @@ namespace Player.Common
             _TeamMemberReactiveProperty.Value = PhotonNetworkManager.GetPlayerKey(photonView.InstantiationId, 0);
             SetupTranslateStatusInBattleUseCase();
             _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
-            _playerMove.Initialize(_animator, _statusBuffSubject, _translateStatusInBattleUseCase._Speed);
+            _playerMove.Initialize(_animator, _statusBuffSubject);
             _playerDash.Initialize();
             _cancellationToken = gameObject.GetCancellationTokenOnDestroy();
         }
@@ -134,7 +134,8 @@ namespace Player.Common
                 characterId,
                 _translateStatusInBattleUseCase,
                 CalculateHp,
-                _playerDash
+                _playerDash,
+                _playerStatusInfo
             );
 
             _passiveSkillManager.Initialize
@@ -162,26 +163,60 @@ namespace Player.Common
 
         private void Subscribe()
         {
-            _TeamMemberReactiveProperty
-                .Skip(1)
-                .Subscribe(SetupOnChangeCharacter)
-                .AddTo(gameObject);
+            ChangeMemberSubscribe();
+            PlayerStatusSubscribe();
         }
 
-        private void SetupOnChangeCharacter(int playerKey)
+        private void ChangeMemberSubscribe()
         {
-            var characterData = _photonNetworkManager.GetCharacterData(playerKey);
-            var weaponData = _photonNetworkManager.GetWeaponData(playerKey);
+            _TeamMemberReactiveProperty
+                .Skip(1)
+                .Subscribe
+                (playerKey =>
+                    {
+                        var characterData = _photonNetworkManager.GetCharacterData(playerKey);
+                        var weaponData = _photonNetworkManager.GetWeaponData(playerKey);
 
-            DestroyWeaponObj(gameObject);
-            _playerGeneratorUseCase.DestroyPlayerObj();
-            var playerObj = _playerGeneratorUseCase.InstantiatePlayerObj(characterData, transform, weaponData.Id, false);
-            _characterCreateUseCase.CreateWeapon(playerObj, weaponData, true);
+                        DestroyWeaponObj(gameObject);
+                        _playerGeneratorUseCase.DestroyPlayerObj();
+                        var playerObj = _playerGeneratorUseCase.InstantiatePlayerObj(characterData, transform, weaponData.Id, false);
+                        _characterCreateUseCase.CreateWeapon(playerObj, weaponData, true);
+                        _animator = gameObject.GetComponentInChildren<Animator>();
+                        _playerMove.SetAnimator(_animator);
+                        _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
+                        SetupTranslateStatusInBattleUseCase(playerKey);
+                        PhotonNetwork.LocalPlayer.SetPlayerIndex(photonView.InstantiationId);
+                    }
+                ).AddTo(_cancellationToken);
+        }
 
-            _animator = gameObject.GetComponentInChildren<Animator>();
-            _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
-            SetupTranslateStatusInBattleUseCase(playerKey);
-            PhotonNetwork.LocalPlayer.SetPlayerIndex(photonView.InstantiationId);
+        private void PlayerStatusSubscribe()
+        {
+            _playerStatusInfo._CurrentHp
+                .Subscribe(tuple =>
+                {
+                    if (_isDead)
+                    {
+                        return;
+                    }
+
+                    var maxHp = tuple.Item1;
+                    var hp = tuple.Item2;
+                    var hpRate = hp / maxHp;
+                    hpRate = Mathf.Clamp(hpRate, 0, 1);
+                    SynchronizedValue.Instance.SetValue(_hpKey, hpRate);
+
+                    if (hp > DeadHp)
+                    {
+                        return;
+                    }
+
+                    Dead().Forget();
+                }).AddTo(_cancellationToken);
+
+            _playerStatusInfo._Speed
+                .Subscribe(speed => { _playerMove.ChangeSpeed(speed); })
+                .AddTo(_cancellationToken);
         }
 
         private void SetupTranslateStatusInBattleUseCase(int playerKey = GameCommonData.InvalidNumber)
@@ -195,11 +230,24 @@ namespace Player.Common
             var characterData = _photonNetworkManager.GetCharacterData(playerKey);
             var levelData = _photonNetworkManager.GetLevelMasterData(playerKey);
             _translateStatusInBattleUseCase = _translateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
-            _translateStatusInBattleUseCase.InitializeStatus();
-            var fixedSpeed = _translateStatusInBattleUseCase._Speed;
-            _playerMove.ChangeCharacter(_animator, fixedSpeed);
+            var newPlayerStatusInfo = _translateStatusInBattleUseCase.InitializeStatus();
+            SetupPlayerStatusInfo(newPlayerStatusInfo);
             _putBomb.SetupBombProvider(_translateStatusInBattleUseCase);
             InitializeSkillManager(weaponData, characterData.Id);
+        }
+
+        private void SetupPlayerStatusInfo(PlayerStatusInfo newPlayerStatusInfo)
+        {
+            _playerStatusInfo ??= newPlayerStatusInfo;
+            var currentHp = _playerStatusInfo._CurrentHp.Value.Item2;
+            var maxHp = newPlayerStatusInfo._CurrentHp.Value.Item1;
+            _playerStatusInfo._CurrentHp.Value = (maxHp, currentHp);
+            _playerStatusInfo._Speed.Value = newPlayerStatusInfo._Speed.Value;
+            _playerStatusInfo._Attack.Value = newPlayerStatusInfo._Attack.Value;
+            _playerStatusInfo._Defense.Value = newPlayerStatusInfo._Defense.Value;
+            _playerStatusInfo._Resistance.Value = newPlayerStatusInfo._Resistance.Value;
+            _playerStatusInfo._FireRange.Value = newPlayerStatusInfo._FireRange.Value;
+            _playerStatusInfo._BombLimit.Value = newPlayerStatusInfo._BombLimit.Value;
         }
 
         private static void DestroyWeaponObj(GameObject playerObj)
@@ -266,12 +314,7 @@ namespace Player.Common
 
             ActivatePassiveSkillOnDamage();
             var explosion = other.GetComponentInParent<Explosion>();
-            var hp = CalculateHp(explosion.damageAmount);
-            if (hp <= DeadHp　&& !_isDead)
-            {
-                Dead().Forget();
-                return;
-            }
+            CalculateHp(explosion.damageAmount);
 
             _isDamage = true;
             await UniTask.Delay(TimeSpan.FromSeconds(InvincibleDuration), cancellationToken: _cancellationToken);
@@ -285,13 +328,14 @@ namespace Player.Common
             _playerRenderer.enabled = true;
         }
 
-        private int CalculateHp(int damage)
+        private void CalculateHp(int damage)
         {
-            _translateStatusInBattleUseCase._CurrentHp -= damage;
-            _translateStatusInBattleUseCase._CurrentHp = Mathf.Clamp(_translateStatusInBattleUseCase._CurrentHp, DeadHp, _translateStatusInBattleUseCase._MaxHp);
-            var hpRate = _translateStatusInBattleUseCase._CurrentHp / (float)_translateStatusInBattleUseCase._MaxHp;
-            SynchronizedValue.Instance.SetValue(_hpKey, hpRate);
-            return _translateStatusInBattleUseCase._CurrentHp;
+            var tuple = _playerStatusInfo._CurrentHp.Value;
+            var maxHp = tuple.Item1;
+            var hp = tuple.Item2;
+            hp -= damage;
+            hp = Mathf.Clamp(hp, DeadHp, maxHp);
+            _playerStatusInfo._CurrentHp.Value = (maxHp, hp);
         }
 
         private void ActivatePassiveSkillOnDamage()
@@ -341,18 +385,17 @@ namespace Player.Common
             _TeamMemberReactiveProperty.Dispose();
         }
 
-        public class PlayerStatus
+        public class PlayerStatusInfo
         {
-            private ReactiveProperty<int> _currentHp;
-            private ReactiveProperty<float> _speed;
-            private ReactiveProperty<int> _maxHp;
-            private ReactiveProperty<int> _attack;
-            private ReactiveProperty<int> _defense;
-            private ReactiveProperty<int> _resistance;
-            private ReactiveProperty<int> _fireRange;
-            private ReactiveProperty<int> _bombLimit;
+            public readonly ReactiveProperty<(float, float)> _CurrentHp;
+            public readonly ReactiveProperty<float> _Speed;
+            public readonly ReactiveProperty<int> _Attack;
+            public readonly ReactiveProperty<int> _Defense;
+            public readonly ReactiveProperty<int> _Resistance;
+            public readonly ReactiveProperty<int> _FireRange;
+            public readonly ReactiveProperty<int> _BombLimit;
 
-            public PlayerStatus
+            public PlayerStatusInfo
             (
                 int currentHp,
                 float speed,
@@ -361,16 +404,16 @@ namespace Player.Common
                 int defense,
                 int resistance,
                 int fireRange,
-                int bombLimit)
+                int bombLimit
+            )
             {
-                _bombLimit = new ReactiveProperty<int>(bombLimit);
-                _currentHp = new ReactiveProperty<int>(currentHp);
-                _speed = new ReactiveProperty<float>(speed);
-                _maxHp = new ReactiveProperty<int>(maxHp);
-                _attack = new ReactiveProperty<int>(attack);
-                _defense = new ReactiveProperty<int>(defense);
-                _resistance = new ReactiveProperty<int>(resistance);
-                _fireRange = new ReactiveProperty<int>(fireRange);
+                _BombLimit = new ReactiveProperty<int>(bombLimit);
+                _CurrentHp = new ReactiveProperty<(float, float)>((maxHp, currentHp));
+                _Speed = new ReactiveProperty<float>(speed);
+                _Attack = new ReactiveProperty<int>(attack);
+                _Defense = new ReactiveProperty<int>(defense);
+                _Resistance = new ReactiveProperty<int>(resistance);
+                _FireRange = new ReactiveProperty<int>(fireRange);
             }
         }
     }

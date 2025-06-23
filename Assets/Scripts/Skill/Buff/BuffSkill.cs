@@ -19,7 +19,7 @@ public class BuffSkill : IDisposable
     private int _characterId;
     private SkillMasterData[] _statusSKillMasterDatum;
     private TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
-    private PlayerStatusInfo _playerStatusInfo;
+    private PlayerConditionInfo _playerConditionInfo;
     private const int StatusAmount = 7;
 
     [Inject]
@@ -38,7 +38,7 @@ public class BuffSkill : IDisposable
         int characterId,
         SkillMasterData[] statusSKillMasterDatum,
         TranslateStatusInBattleUseCase translateStatusInBattleUseCase,
-        PlayerStatusInfo playerStatusInfo
+        PlayerConditionInfo playerConditionInfo
     )
     {
         _statusBuff = statusBuff;
@@ -46,14 +46,14 @@ public class BuffSkill : IDisposable
         _characterId = characterId;
         _statusSKillMasterDatum = statusSKillMasterDatum;
         _translateStatusInBattleUseCase = translateStatusInBattleUseCase;
-        _playerStatusInfo = playerStatusInfo;
+        _playerConditionInfo = playerConditionInfo;
     }
 
     public async UniTaskVoid Buff(SkillMasterData skillMasterData, int buffCount = StatusAmount)
     {
         var skillId = skillMasterData.Id;
         var effectTime = skillMasterData.EffectTime;
-        var playerIndex = _playerStatusInfo.GetPlayerIndex();
+        var playerIndex = _playerConditionInfo.GetPlayerIndex();
 
         var dic = new Dictionary<int, int> { { playerIndex, skillId } };
         PhotonNetwork.LocalPlayer.SetSkillData(dic);
@@ -114,7 +114,7 @@ public class BuffSkill : IDisposable
     public void BuffInAbnormalCondition(SkillMasterData skillMasterData, bool isActive, int buffCount = StatusAmount)
     {
         var skillId = skillMasterData.Id;
-        var playerIndex = _playerStatusInfo.GetPlayerIndex();
+        var playerIndex = _playerConditionInfo.GetPlayerIndex();
 
         var dic = new Dictionary<int, int> { { playerIndex, skillId } };
         PhotonNetwork.LocalPlayer.SetSkillData(dic);

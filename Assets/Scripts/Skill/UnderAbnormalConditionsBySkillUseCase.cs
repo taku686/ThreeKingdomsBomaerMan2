@@ -1,6 +1,7 @@
 ﻿using System;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Player.Common;
 using UniRx;
 using UnityEngine;
 
@@ -30,7 +31,7 @@ namespace Skill
             _onDamageSubject.OnNext(skillMasterData);
         }
 
-        public async UniTaskVoid OnNextAbnormalConditionSubject(PlayerStatusInfo playerStatusInfo, SkillMasterData skillMasterData)
+        public async UniTaskVoid OnNextAbnormalConditionSubject(PlayerConditionInfo playerConditionInfo, SkillMasterData skillMasterData)
         {
             if (Mathf.Approximately(skillMasterData.EffectTime, GameCommonData.InvalidNumber))
             {
@@ -39,19 +40,19 @@ namespace Skill
 
             foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
             {
-                playerStatusInfo.AddAbnormalCondition(abnormalCondition);
+                playerConditionInfo.AddAbnormalCondition(abnormalCondition);
             }
 
-            var isActive = playerStatusInfo.HasAbnormalCondition();
+            var isActive = playerConditionInfo.HasAbnormalCondition();
             _onAbnormalConditionSubject.OnNext((skillMasterData, isActive));
             await UniTask.Delay(TimeSpan.FromSeconds(skillMasterData.EffectTime));
 
             foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
             {
-                playerStatusInfo.RemoveAbnormalCondition(abnormalCondition);
+                playerConditionInfo.RemoveAbnormalCondition(abnormalCondition);
             }
 
-            isActive = playerStatusInfo.HasAbnormalCondition();
+            isActive = playerConditionInfo.HasAbnormalCondition();
             _onAbnormalConditionSubject.OnNext((skillMasterData, isActive));
         }
 

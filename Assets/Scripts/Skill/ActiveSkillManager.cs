@@ -65,14 +65,15 @@ namespace Skill
             Subject<(StatusType statusType, int value, bool isBuff, bool isDebuff)> statusBuffUi,
             int characterId,
             TranslateStatusInBattleUseCase translateStatusInBattleUseCase,
-            Func<int, int> hpCalculateFunc,
-            PlayerDash playerDash
+            Action<int> hpCalculateFunc,
+            PlayerDash playerDash,
+            PlayerCore.PlayerStatusInfo playerStatusInfo
         )
         {
             _targetScanner = targetScanner;
             _playerTransform = playerTransform;
             _playerDash = playerDash;
-            var playerStatusInfo = playerTransform.GetComponent<PlayerStatusInfo>();
+            var playerConditionInfo = playerTransform.GetComponent<PlayerConditionInfo>();
             SetupAnimator(animator);
             _buffSkill.Initialize
             (
@@ -81,12 +82,13 @@ namespace Skill
                 characterId,
                 statusSkillMasterDatum,
                 translateStatusInBattleUseCase,
-                playerStatusInfo
+                playerConditionInfo
             );
+
             _healSkill.Initialize
             (
                 hpCalculateFunc,
-                translateStatusInBattleUseCase,
+                playerConditionInfo,
                 playerStatusInfo
             );
         }

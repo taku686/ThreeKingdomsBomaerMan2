@@ -5,6 +5,7 @@ using ExitGames.Client.Photon;
 using Manager.DataManager;
 using Photon.Pun;
 using Photon.Realtime;
+using Player.Common;
 using Repository;
 using Skill;
 using UniRx;
@@ -159,7 +160,7 @@ namespace Manager.NetworkManager
 
                     foreach (var player in players)
                     {
-                        var playerStatusInfo = player.GetComponent<PlayerStatusInfo>();
+                        var playerStatusInfo = player.GetComponent<PlayerConditionInfo>();
                         if (playerStatusInfo == null)
                         {
                             continue;

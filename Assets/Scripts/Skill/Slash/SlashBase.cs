@@ -4,6 +4,7 @@ using AttributeAttack;
 using Common.Data;
 using Manager.NetworkManager;
 using Photon.Pun;
+using Player.Common;
 using Repository;
 using UniRx;
 using UniRx.Triggers;
@@ -101,7 +102,7 @@ namespace Skill.Attack
 
             foreach (var hitPlayer in hitPlayers)
             {
-                var statusInfo = hitPlayer.GetComponent<PlayerStatusInfo>();
+                var statusInfo = hitPlayer.GetComponent<PlayerConditionInfo>();
                 var playerIndex = statusInfo.GetPlayerIndex();
                 var dic = new Dictionary<int, int> { { playerIndex, skillId } };
                 PhotonNetwork.LocalPlayer.SetSkillData(dic);

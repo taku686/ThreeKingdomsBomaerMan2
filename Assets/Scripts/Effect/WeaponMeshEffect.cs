@@ -4,8 +4,7 @@ public class WeaponMeshEffect : MonoBehaviour
 {
     [SerializeField] private float _startScaleMultiplier = 1;
     [SerializeField] private bool _playOnStart;
-    [SerializeField] private ParticleSystem[] _particles;
-
+    private ParticleSystem[] _particles;
 
     private void Start()
     {

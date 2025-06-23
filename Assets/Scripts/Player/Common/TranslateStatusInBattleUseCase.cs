@@ -11,11 +11,11 @@ namespace Player.Common
         private readonly WeaponMasterData _weaponData;
         private readonly LevelMasterData _levelData;
         private readonly ApplyStatusSkillUseCase _applyStatusSkillUseCase;
+        private PlayerCore.PlayerStatusInfo _playerStatusInfo;
         private int _maxBombLimit;
+
         private int _currentBombLimit;
-        public int _CurrentHp { get; set; }
-        public int _MaxHp { get; private set; }
-        public float _Speed { get; private set; }
+
         public int _Attack { get; private set; }
         public int _Defense { get; private set; }
         public int _Resistance { get; private set; }
@@ -37,13 +37,13 @@ namespace Player.Common
             _applyStatusSkillUseCase = applyStatusSkillUseCase;
         }
 
-        public PlayerCore.PlayerStatus InitializeStatus()
+        public PlayerCore.PlayerStatusInfo InitializeStatus()
         {
             var statusSkillDatum = _weaponData.StatusSkillMasterDatum;
             var characterId = _characterData.Id;
             var hp = 0;
             var attack = 0;
-            var speed = 0;
+            var speed = 0f;
             var bombLimit = 0;
             var fireRange = 0;
             var defense = 0;
@@ -62,9 +62,8 @@ namespace Player.Common
             }
 
 
-            _CurrentHp = (int)TranslateStatusValueForBattle(StatusType.Hp, hp);
-            _MaxHp = (int)TranslateStatusValueForBattle(StatusType.Hp, hp);
-            _Speed = TranslateStatusValueForBattle(StatusType.Speed, speed);
+            hp = (int)TranslateStatusValueForBattle(StatusType.Hp, hp);
+            speed = TranslateStatusValueForBattle(StatusType.Speed, speed);
             _currentBombLimit = 0;
             _maxBombLimit = (int)TranslateStatusValueForBattle(StatusType.BombLimit, bombLimit);
             _Attack = (int)TranslateStatusValueForBattle(StatusType.Attack, attack);
@@ -72,11 +71,11 @@ namespace Player.Common
             _Resistance = (int)TranslateStatusValueForBattle(StatusType.Resistance, resistance);
             _FireRange = (int)TranslateStatusValueForBattle(StatusType.FireRange, fireRange);
 
-            return new PlayerCore.PlayerStatus
+            return new PlayerCore.PlayerStatusInfo
             (
-                _CurrentHp,
-                _Speed,
-                _MaxHp,
+                hp,
+                speed,
+                hp,
                 _Attack,
                 _Defense,
                 _Resistance,
@@ -85,22 +84,18 @@ namespace Player.Common
             );
         }
 
-        public float TranslateStatusValueForBattle(StatusType statusType, int value)
+        public float TranslateStatusValueForBattle(StatusType statusType, float value)
         {
             switch (statusType)
             {
                 case StatusType.Hp:
-                    _MaxHp = value;
-                    return _MaxHp;
+                    return value;
                 case StatusType.Attack:
-                    _Attack = value;
-                    return _Attack;
+                    return value;
                 case StatusType.Speed:
-                    _Speed = Mathf.Sqrt(value * 0.1f);
-                    return _Speed;
+                    return Mathf.Sqrt(value * 0.1f);
                 case StatusType.BombLimit:
-                    _maxBombLimit = value;
-                    return _maxBombLimit;
+                    return value;
                 case StatusType.FireRange:
                     _FireRange = Mathf.FloorToInt(value / 2f);
                     return _FireRange;
