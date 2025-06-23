@@ -48,11 +48,21 @@ namespace Enemy
                 var playerId = _photonView.ViewID;
                 var explosionTime = PhotonNetwork.ServerTimestamp + GameCommonData.ThreeMilliSecondsBeforeExplosion;
                 var photonView = _photonView;
-                var damageAmount = _translateStatusInBattleUseCase._Attack;
-                var fireRange = _translateStatusInBattleUseCase._FireRange;
+                //todo 後で修正
+                //var damageAmount = _translateStatusInBattleUseCase._Attack;
+                //var fireRange = _translateStatusInBattleUseCase._FireRange;
                 var boxCollider = _boxCollider;
-                _putBomb.SetBomb(boxCollider, photonView, Owner.transform,
-                    (int)BombType.Normal, damageAmount, fireRange, explosionTime, playerId);
+                _putBomb.SetBomb
+                (
+                    boxCollider,
+                    photonView,
+                    Owner.transform,
+                    (int)BombType.Normal,
+                    50,
+                    5,
+                    explosionTime,
+                    playerId
+                );
                 _isPutBomb = true;
             }
         }

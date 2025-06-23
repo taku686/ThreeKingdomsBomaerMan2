@@ -182,7 +182,7 @@ namespace Manager.PlayFabManager
                 var gemMul = weaponData.GemMul;
                 var skillMul = weaponData.SkillMul;
                 var rangeMul = weaponData.RangeMul;
-                _resourcesObjectRepository.SetWeaponData(id);
+                
                 var newWeaponData = new WeaponMasterData
                 (
                     name,

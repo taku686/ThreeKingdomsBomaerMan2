@@ -32,11 +32,11 @@ namespace Repository
         [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Id", ValueLabel = "Prefab")]
         private Dictionary<string, Sprite> _weaponSpriteByName;
 
-        public void SetWeaponData(int weaponId)
+        /*public void SetWeaponData(int weaponId)
         {
             _weaponPrefab[weaponId].name = $"Weapon_{weaponId}";
             _weaponIcon[weaponId].name = $"WeaponIcon_{weaponId}";
-        }
+        }*/
 
         public void SetSkillSprite(int skillId, Sprite sprite)
         {

@@ -22,6 +22,7 @@ namespace Player.Common
             private IObservable<Unit> _OnClickDash => Owner._DashSkillSubject;
             private IObservable<Unit> _OnClickBomb => Owner._BombSkillSubject;
             private IObservable<int> _OnClickCharacterChange => Owner._TeamMemberReactiveProperty;
+            private PlayerStatusInfo _PlayerStatusInfo => Owner._playerStatusInfo;
 
 
             private Transform _playerTransform;
@@ -81,8 +82,8 @@ namespace Player.Common
                     {
                         var playerId = _PhotonView.ViewID;
                         var explosionTime = PhotonNetwork.ServerTimestamp + GameCommonData.ThreeMilliSecondsBeforeExplosion;
-                        var damageAmount = Owner._translateStatusInBattleUseCase._Attack;
-                        var fireRange = Owner._translateStatusInBattleUseCase._FireRange;
+                        var damageAmount = _PlayerStatusInfo._Attack.Value;
+                        var fireRange = _PlayerStatusInfo._FireRange.Value;
                         var boxCollider = Owner._boxCollider;
                         Owner._putBomb.SetBomb
                         (

@@ -13,13 +13,7 @@ namespace Player.Common
         private readonly ApplyStatusSkillUseCase _applyStatusSkillUseCase;
         private PlayerCore.PlayerStatusInfo _playerStatusInfo;
         private int _maxBombLimit;
-
         private int _currentBombLimit;
-
-        public int _Attack { get; private set; }
-        public int _Defense { get; private set; }
-        public int _Resistance { get; private set; }
-        public int _FireRange { get; private set; }
 
 
         [Inject]
@@ -55,31 +49,34 @@ namespace Player.Common
                 hp = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Hp, _levelData);
                 speed = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Speed, _levelData);
                 attack = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Attack, _levelData);
-                fireRange = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.FireRange, _levelData);
-                bombLimit = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.BombLimit, _levelData);
-                defense = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Defense, _levelData);
-                resistance = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Resistance, _levelData);
+                fireRange = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.FireRange,
+                    _levelData);
+                bombLimit = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.BombLimit,
+                    _levelData);
+                defense = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Defense,
+                    _levelData);
+                resistance =
+                    _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Resistance, _levelData);
             }
-
 
             hp = (int)TranslateStatusValueForBattle(StatusType.Hp, hp);
             speed = TranslateStatusValueForBattle(StatusType.Speed, speed);
             _currentBombLimit = 0;
             _maxBombLimit = (int)TranslateStatusValueForBattle(StatusType.BombLimit, bombLimit);
-            _Attack = (int)TranslateStatusValueForBattle(StatusType.Attack, attack);
-            _Defense = (int)TranslateStatusValueForBattle(StatusType.Defense, defense);
-            _Resistance = (int)TranslateStatusValueForBattle(StatusType.Resistance, resistance);
-            _FireRange = (int)TranslateStatusValueForBattle(StatusType.FireRange, fireRange);
+            attack = (int)TranslateStatusValueForBattle(StatusType.Attack, attack);
+            defense = (int)TranslateStatusValueForBattle(StatusType.Defense, defense);
+            resistance = (int)TranslateStatusValueForBattle(StatusType.Resistance, resistance);
+            fireRange = (int)TranslateStatusValueForBattle(StatusType.FireRange, fireRange);
 
             return new PlayerCore.PlayerStatusInfo
             (
                 hp,
                 speed,
                 hp,
-                _Attack,
-                _Defense,
-                _Resistance,
-                _FireRange,
+                attack,
+                defense,
+                resistance,
+                fireRange,
                 _maxBombLimit
             );
         }
@@ -97,12 +94,12 @@ namespace Player.Common
                 case StatusType.BombLimit:
                     return value;
                 case StatusType.FireRange:
-                    _FireRange = Mathf.FloorToInt(value / 2f);
-                    return _FireRange;
+                    value = Mathf.FloorToInt(value / 2f);
+                    return value;
                 case StatusType.Defense:
                     return value / 2f;
                 case StatusType.Resistance:
-                    return _Resistance;
+                    return value;
                 case StatusType.None:
                 default:
                     throw new ArgumentOutOfRangeException(nameof(statusType), statusType, null);
@@ -134,7 +131,8 @@ namespace Player.Common
         {
         }
 
-        public class Factory : PlaceholderFactory<CharacterData, WeaponMasterData, LevelMasterData, TranslateStatusInBattleUseCase>
+        public class Factory : PlaceholderFactory<CharacterData, WeaponMasterData, LevelMasterData,
+            TranslateStatusInBattleUseCase>
         {
         }
     }
