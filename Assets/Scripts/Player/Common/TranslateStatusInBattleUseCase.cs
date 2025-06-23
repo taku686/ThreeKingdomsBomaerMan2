@@ -49,14 +49,10 @@ namespace Player.Common
                 hp = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Hp, _levelData);
                 speed = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Speed, _levelData);
                 attack = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Attack, _levelData);
-                fireRange = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.FireRange,
-                    _levelData);
-                bombLimit = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.BombLimit,
-                    _levelData);
-                defense = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Defense,
-                    _levelData);
-                resistance =
-                    _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Resistance, _levelData);
+                fireRange = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.FireRange, _levelData);
+                bombLimit = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.BombLimit, _levelData);
+                defense = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Defense, _levelData);
+                resistance = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Resistance, _levelData);
             }
 
             hp = (int)TranslateStatusValueForBattle(StatusType.Hp, hp);

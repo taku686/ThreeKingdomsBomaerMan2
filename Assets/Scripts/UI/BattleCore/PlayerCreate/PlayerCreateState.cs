@@ -31,18 +31,29 @@ namespace Manager.BattleManager
             private BombProvider _BombProvider => Owner._bombProvider;
             private SkillEffectActivateUseCase _SkillEffectActivateUseCase => Owner._skillEffectActivateUseCase;
             private List<PlayerStatusUI> _PlayerStatusUiList => Owner._playerStatusUiList;
-            private CharacterMasterDataRepository _CharacterMasterDataRepository => Owner._characterMasterDataRepository;
+
+            private CharacterMasterDataRepository _CharacterMasterDataRepository =>
+                Owner._characterMasterDataRepository;
+
             private WeaponMasterDataRepository _WeaponMasterDataRepository => Owner._weaponMasterDataRepository;
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
             private ActiveSkillManager _ActiveSkillManager => Owner._activeSkillManager;
             private PassiveSkillManager _PassiveSkillManager => Owner._passiveSkillManager;
-            private UnderAbnormalConditionsBySkillUseCase _UnderAbnormalConditionsBySkillUseCase => Owner._underAbnormalConditionsBySkillUseCase;
+
+            private UnderAbnormalConditionsBySkillUseCase _UnderAbnormalConditionsBySkillUseCase =>
+                Owner._underAbnormalConditionsBySkillUseCase;
+
             private SetupAnimatorUseCase _SetupAnimatorUseCase => Owner._setupAnimatorUseCase;
-            private TranslateStatusInBattleUseCase.Factory _TranslateStatusInBattleUseCaseFactory => Owner._translateStatusInBattleUseCaseFactory;
+
+            private TranslateStatusInBattleUseCase.Factory _TranslateStatusInBattleUseCaseFactory =>
+                Owner._translateStatusInBattleUseCaseFactory;
+
             private GameObject _ArrowIndicatorPrefab => Owner._arrowSkillIndicatorPrefab;
             private GameObject _CircleIndicatorPrefab => Owner._circleSkillIndicatorPrefab;
             private StartPointsRepository _StartPointsRepository => Owner._startPointsRepository;
-            private PhysicMaterial _CharacterPhysicMaterial => Owner._characterPhysicMaterial;
+
+            private AbnormalConditionEffectUseCase _AbnormalConditionEffectUseCase =>
+                Owner._abnormalConditionEffectUseCase;
 
             private PhotonView _photonView;
 
@@ -92,7 +103,9 @@ namespace Manager.BattleManager
                 var weaponData = _PhotonNetworkManager.GetWeaponData(playerKey);
                 var spawnPoint = _StartPointsRepository.GetSpawnPoint(index);
                 var playerCore = _PlayerGeneratorUseCase.InstantiatePlayerCore(false, spawnPoint);
-                var playerObj = _PlayerGeneratorUseCase.InstantiatePlayerObj(characterData, playerCore.transform, weaponData.Id, false);
+                var playerObj =
+                    _PlayerGeneratorUseCase.InstantiatePlayerObj(characterData, playerCore.transform, weaponData.Id,
+                        false);
                 _CharacterCreateUseCase.CreateWeapon(playerObj, weaponData, true);
                 _photonView = playerCore.GetComponent<PhotonView>();
                 var instantiationId = _photonView.InstantiationId;
@@ -121,7 +134,8 @@ namespace Manager.BattleManager
                     var photonView = playerCore.GetComponent<PhotonView>();
                     var instantiationId = photonView.InstantiationId;
                     var playerKey = PhotonNetworkManager.GetPlayerKey(instantiationId, 0);
-                    var playerObj = _PlayerGeneratorUseCase.InstantiatePlayerObj(characterData, playerCore.transform, weaponData.Id, true);
+                    var playerObj = _PlayerGeneratorUseCase.InstantiatePlayerObj(characterData, playerCore.transform,
+                        weaponData.Id, true);
                     _CharacterCreateUseCase.CreateWeapon(playerObj, weaponData, true, true);
                     var characterDic = new Dictionary<int, int> { { playerKey, characterId } };
                     var weaponDic = new Dictionary<int, int> { { playerKey, weaponId } };
@@ -160,7 +174,8 @@ namespace Manager.BattleManager
                 playerCore.AddComponent<PlayerDash>();
                 _SetupAnimatorUseCase.SetAnimatorController(playerCore, weaponType);
                 GenerateEffectActivator(playerCore, instantiationId);
-                var translateStatusInBattleUseCase = _TranslateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
+                var translateStatusInBattleUseCase =
+                    _TranslateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
                 translateStatusInBattleUseCase.InitializeStatus();
                 var putBomb = playerCore.AddComponent<PutBomb>();
                 putBomb.Initialize(_BombProvider, _MapManager, translateStatusInBattleUseCase);
@@ -268,6 +283,7 @@ namespace Manager.BattleManager
                     _UnderAbnormalConditionsBySkillUseCase,
                     _PlayerGeneratorUseCase,
                     _CharacterCreateUseCase,
+                    _AbnormalConditionEffectUseCase,
                     hpKey
                 );
             }
@@ -287,8 +303,9 @@ namespace Manager.BattleManager
             private void GenerateEffectActivator(GameObject playerObj, int playerId)
             {
                 var effectActivator = Instantiate(_SkillEffectActivateUseCase, playerObj.transform);
-                effectActivator.transform.localPosition = new Vector3(0, 0, 0);
-                effectActivator.transform.localRotation = quaternion.identity;
+                var effectActivatorTransform = effectActivator.transform;
+                effectActivatorTransform.localPosition = new Vector3(0, 0, 0);
+                effectActivatorTransform.localRotation = quaternion.identity;
                 var activateSkillSubject = _PhotonNetworkManager._ActivateSkillSubject;
                 effectActivator.Initialize(activateSkillSubject, playerId);
             }

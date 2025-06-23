@@ -40,6 +40,7 @@ namespace Manager.BattleManager
         [Inject] private SetupAnimatorUseCase _setupAnimatorUseCase;
         [Inject] private SkillEffectActivateUseCase _skillEffectActivateUseCase;
         [Inject] private TranslateStatusInBattleUseCase.Factory _translateStatusInBattleUseCaseFactory;
+        [Inject] private AbnormalConditionEffectUseCase _abnormalConditionEffectUseCase;
 
         //Manager
         [Inject] private PhotonNetworkManager _photonNetworkManager;

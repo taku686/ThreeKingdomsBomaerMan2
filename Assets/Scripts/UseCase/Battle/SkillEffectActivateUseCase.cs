@@ -52,6 +52,7 @@ public class SkillEffectActivateUseCase : MonoBehaviour
     #endregion
 
     private const float OneSecond = 1f;
+    private const float EffectScaleAdjustedValue = 2f;
 
     public void Initialize
     (
@@ -245,6 +246,7 @@ public class SkillEffectActivateUseCase : MonoBehaviour
         }
 
         effect.gameObject.SetActive(true);
+        effect.transform.localScale *= EffectScaleAdjustedValue;
         effect.Play();
         await UniTask.Delay(TimeSpan.FromSeconds(duration));
         if (effect == null)

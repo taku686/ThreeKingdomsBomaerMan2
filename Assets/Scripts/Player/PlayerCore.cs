@@ -32,6 +32,7 @@ namespace Player.Common
         private UnderAbnormalConditionsBySkillUseCase _underAbnormalConditionsBySkillUseCase;
         private PlayerGeneratorUseCase _playerGeneratorUseCase;
         private CharacterCreateUseCase _characterCreateUseCase;
+        private AbnormalConditionEffectUseCase _abnormalConditionEffectUseCase;
 
         private PlayerStatusInfo _playerStatusInfo;
         private PlayerMove _playerMove;
@@ -46,14 +47,19 @@ namespace Player.Common
 
         private readonly Subject<Unit> _deadSubject = new();
         private readonly Subject<(StatusType statusType, float value)> _statusBuffSubject = new();
-        private readonly Subject<(StatusType statusType, int speed, bool isBiff, bool isDebuff)> _statusBuffUiSubject = new();
+
+        private readonly Subject<(StatusType statusType, int speed, bool isBiff, bool isDebuff)> _statusBuffUiSubject =
+            new();
 
         private const int DeadHp = 0;
         private const int InvincibleDuration = 2;
         private const float WaitDuration = 0.3f;
 
         public IObservable<Unit> _DeadObservable => _deadSubject;
-        public IObservable<(StatusType statusType, int speed, bool isBuff, bool isDebuff)> _StatusBuffUiObservable => _statusBuffUiSubject;
+
+        public IObservable<(StatusType statusType, int speed, bool isBuff, bool isDebuff)> _StatusBuffUiObservable =>
+            _statusBuffUiSubject;
+
         public Subject<Unit> _WeaponSkillSubject { get; } = new();
         public Subject<Unit> _NormalSkillSubject { get; } = new();
         public Subject<Unit> _SpecialSkillSubject { get; } = new();
@@ -82,6 +88,7 @@ namespace Player.Common
             UnderAbnormalConditionsBySkillUseCase underAbnormalConditionsBySkillUseCase,
             PlayerGeneratorUseCase playerGeneratorUseCase,
             CharacterCreateUseCase characterCreateUseCase,
+            AbnormalConditionEffectUseCase abnormalConditionEffectUseCase,
             string key
         )
         {
@@ -93,6 +100,7 @@ namespace Player.Common
             _underAbnormalConditionsBySkillUseCase = underAbnormalConditionsBySkillUseCase;
             _playerGeneratorUseCase = playerGeneratorUseCase;
             _characterCreateUseCase = characterCreateUseCase;
+            _abnormalConditionEffectUseCase = abnormalConditionEffectUseCase;
             InitializeComponent();
             InitializeState();
             Subscribe();
@@ -165,6 +173,7 @@ namespace Player.Common
         {
             ChangeMemberSubscribe();
             PlayerStatusSubscribe();
+            PhotonNetWorkManagerSubscribe();
         }
 
         private void ChangeMemberSubscribe()
@@ -179,7 +188,9 @@ namespace Player.Common
 
                         DestroyWeaponObj(gameObject);
                         _playerGeneratorUseCase.DestroyPlayerObj();
-                        var playerObj = _playerGeneratorUseCase.InstantiatePlayerObj(characterData, transform, weaponData.Id, false);
+                        var playerObj =
+                            _playerGeneratorUseCase.InstantiatePlayerObj(characterData, transform, weaponData.Id,
+                                false);
                         _characterCreateUseCase.CreateWeapon(playerObj, weaponData, true);
                         _animator = gameObject.GetComponentInChildren<Animator>();
                         _playerMove.SetAnimator(_animator);
@@ -219,6 +230,25 @@ namespace Player.Common
                 .AddTo(_cancellationToken);
         }
 
+        private void PhotonNetWorkManagerSubscribe()
+        {
+            var actorNumber = photonView.InstantiationId;
+
+            _photonNetworkManager
+                ._ActivateSkillSubject
+                .Where(tuple => tuple.Item1 == actorNumber)
+                .Select(tuple => tuple.Item2)
+                .Subscribe(skillData =>
+                {
+                    var abnormalConditions = skillData.InvalidAbnormalConditionEnum;
+                    foreach (var abnormalCondition in abnormalConditions)
+                    {
+                        _abnormalConditionEffectUseCase.InAsTask(abnormalCondition, skillData.EffectTime);
+                    }
+                })
+                .AddTo(_cancellationToken);
+        }
+
         private void SetupTranslateStatusInBattleUseCase(int playerKey = GameCommonData.InvalidNumber)
         {
             if (playerKey == GameCommonData.InvalidNumber)
@@ -229,7 +259,8 @@ namespace Player.Common
             var weaponData = _photonNetworkManager.GetWeaponData(playerKey);
             var characterData = _photonNetworkManager.GetCharacterData(playerKey);
             var levelData = _photonNetworkManager.GetLevelMasterData(playerKey);
-            _translateStatusInBattleUseCase = _translateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
+            _translateStatusInBattleUseCase =
+                _translateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
             var newPlayerStatusInfo = _translateStatusInBattleUseCase.InitializeStatus();
             SetupPlayerStatusInfo(newPlayerStatusInfo);
             _putBomb.SetupBombProvider(_translateStatusInBattleUseCase);
