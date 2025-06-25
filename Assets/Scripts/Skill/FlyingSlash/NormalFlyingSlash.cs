@@ -17,7 +17,6 @@ namespace Skill.Attack.FlyingSlash
 
         public void Attack()
         {
-            _animator.SetTrigger(GameCommonData.SlashHashKey);
         }
 
         public void Dispose()

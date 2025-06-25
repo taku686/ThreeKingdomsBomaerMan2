@@ -24,8 +24,8 @@ namespace Player.Common
         private string _hpKey;
 
         private PhotonNetworkManager _photonNetworkManager;
-        private ActiveSkillManager _activeSkillManager;
         private PassiveSkillManager _passiveSkillManager;
+        private ActiveSkillManager _activeSkillManager;
 
         private TranslateStatusInBattleUseCase.Factory _translateStatusInBattleUseCaseFactory;
         private TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
@@ -34,7 +34,7 @@ namespace Player.Common
         private CharacterCreateUseCase _characterCreateUseCase;
         private AbnormalConditionEffectUseCase _abnormalConditionEffectUseCase;
 
-        private PlayerStatusInfo _playerStatusInfo;
+        private PlayerConditionInfo _playerConditionInfo;
         private PlayerMove _playerMove;
         private PlayerDash _playerDash;
         private PutBomb _putBomb;
@@ -42,31 +42,21 @@ namespace Player.Common
         private ObservableStateMachineTrigger _observableStateMachineTrigger;
         private Renderer _playerRenderer;
         private BoxCollider _boxCollider;
-        private DC.Scanner.TargetScanner _targetScanner;
         private CancellationToken _cancellationToken;
 
         private readonly Subject<Unit> _deadSubject = new();
-        private readonly Subject<(StatusType statusType, float value)> _statusBuffSubject = new();
-
-        private readonly Subject<(StatusType statusType, int speed, bool isBiff, bool isDebuff)> _statusBuffUiSubject =
-            new();
-
         private const int DeadHp = 0;
         private const int InvincibleDuration = 2;
         private const float WaitDuration = 0.3f;
 
         public IObservable<Unit> _DeadObservable => _deadSubject;
-
-        public IObservable<(StatusType statusType, int speed, bool isBuff, bool isDebuff)> _StatusBuffUiObservable =>
-            _statusBuffUiSubject;
-
         public Subject<Unit> _WeaponSkillSubject { get; } = new();
         public Subject<Unit> _NormalSkillSubject { get; } = new();
         public Subject<Unit> _SpecialSkillSubject { get; } = new();
         public Subject<Unit> _DashSkillSubject { get; } = new();
         public Subject<Unit> _BombSkillSubject { get; } = new();
         public ReactiveProperty<int> _TeamMemberReactiveProperty { get; } = new();
-
+        public PlayerStatusInfo _PlayerStatusInfo { get; private set; }
 
         private enum PLayerState
         {
@@ -110,7 +100,7 @@ namespace Player.Common
         {
             _playerDash = GetComponent<PlayerDash>();
             _playerMove = GetComponent<PlayerMove>();
-            _targetScanner = gameObject.GetComponent<TargetScanner>()._targetScanner;
+            _playerConditionInfo = GetComponent<PlayerConditionInfo>();
             _putBomb = GetComponent<PutBomb>();
             _animator = GetComponentInChildren<Animator>();
             _playerRenderer = GetComponentInChildren<Renderer>();
@@ -118,7 +108,7 @@ namespace Player.Common
             _TeamMemberReactiveProperty.Value = PhotonNetworkManager.GetPlayerKey(photonView.InstantiationId, 0);
             SetupTranslateStatusInBattleUseCase();
             _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
-            _playerMove.Initialize(_animator, _statusBuffSubject);
+            _playerMove.Initialize(_animator);
             _playerDash.Initialize();
             _cancellationToken = gameObject.GetCancellationTokenOnDestroy();
         }
@@ -133,27 +123,18 @@ namespace Player.Common
 
             _activeSkillManager.Initialize
             (
-                _targetScanner,
                 statusSkillDatum,
                 transform,
-                _animator,
-                _statusBuffSubject,
-                _statusBuffUiSubject,
                 characterId,
-                _translateStatusInBattleUseCase,
-                CalculateHp,
-                _playerDash,
-                _playerStatusInfo
+                _PlayerStatusInfo
             );
 
             _passiveSkillManager.Initialize
             (
                 statusSkillDatum,
                 transform,
-                _statusBuffSubject,
-                _statusBuffUiSubject,
-                characterId,
-                _translateStatusInBattleUseCase
+                _PlayerStatusInfo,
+                characterId
             );
         }
 
@@ -188,9 +169,7 @@ namespace Player.Common
 
                         DestroyWeaponObj(gameObject);
                         _playerGeneratorUseCase.DestroyPlayerObj();
-                        var playerObj =
-                            _playerGeneratorUseCase.InstantiatePlayerObj(characterData, transform, weaponData.Id,
-                                false);
+                        var playerObj = _playerGeneratorUseCase.InstantiatePlayerObj(characterData, transform, weaponData.Id, false);
                         _characterCreateUseCase.CreateWeapon(playerObj, weaponData, true);
                         _animator = gameObject.GetComponentInChildren<Animator>();
                         _playerMove.SetAnimator(_animator);
@@ -203,7 +182,7 @@ namespace Player.Common
 
         private void PlayerStatusSubscribe()
         {
-            _playerStatusInfo._CurrentHp
+            _PlayerStatusInfo._Hp
                 .Subscribe(tuple =>
                 {
                     if (_isDead)
@@ -213,7 +192,7 @@ namespace Player.Common
 
                     var maxHp = tuple.Item1;
                     var hp = tuple.Item2;
-                    var hpRate = hp / maxHp;
+                    var hpRate = hp / (float)maxHp;
                     hpRate = Mathf.Clamp(hpRate, 0, 1);
                     SynchronizedValue.Instance.SetValue(_hpKey, hpRate);
 
@@ -225,8 +204,12 @@ namespace Player.Common
                     Dead().Forget();
                 }).AddTo(_cancellationToken);
 
-            _playerStatusInfo._Speed
-                .Subscribe(speed => { _playerMove.ChangeSpeed(speed); })
+            _PlayerStatusInfo._Speed
+                .Subscribe(speed =>
+                {
+                    var translatedValue = TranslateStatusInBattleUseCase.Translate(StatusType.Speed, speed);
+                    _playerMove.ChangeSpeed(translatedValue);
+                })
                 .AddTo(_cancellationToken);
         }
 
@@ -235,7 +218,7 @@ namespace Player.Common
             var actorNumber = photonView.InstantiationId;
 
             _photonNetworkManager
-                ._ActivateSkillSubject
+                ._ActivateSkillObservable
                 .Where(tuple => tuple.Item1 == actorNumber)
                 .Select(tuple => tuple.Item2)
                 .Subscribe(skillData =>
@@ -259,8 +242,7 @@ namespace Player.Common
             var weaponData = _photonNetworkManager.GetWeaponData(playerKey);
             var characterData = _photonNetworkManager.GetCharacterData(playerKey);
             var levelData = _photonNetworkManager.GetLevelMasterData(playerKey);
-            _translateStatusInBattleUseCase =
-                _translateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
+            _translateStatusInBattleUseCase = _translateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
             var newPlayerStatusInfo = _translateStatusInBattleUseCase.InitializeStatus();
             SetupPlayerStatusInfo(newPlayerStatusInfo);
             _putBomb.SetupBombProvider(_translateStatusInBattleUseCase);
@@ -269,16 +251,16 @@ namespace Player.Common
 
         private void SetupPlayerStatusInfo(PlayerStatusInfo newPlayerStatusInfo)
         {
-            _playerStatusInfo ??= newPlayerStatusInfo;
-            var currentHp = _playerStatusInfo._CurrentHp.Value.Item2;
-            var maxHp = newPlayerStatusInfo._CurrentHp.Value.Item1;
-            _playerStatusInfo._CurrentHp.Value = (maxHp, currentHp);
-            _playerStatusInfo._Speed.Value = newPlayerStatusInfo._Speed.Value;
-            _playerStatusInfo._Attack.Value = newPlayerStatusInfo._Attack.Value;
-            _playerStatusInfo._Defense.Value = newPlayerStatusInfo._Defense.Value;
-            _playerStatusInfo._Resistance.Value = newPlayerStatusInfo._Resistance.Value;
-            _playerStatusInfo._FireRange.Value = newPlayerStatusInfo._FireRange.Value;
-            _playerStatusInfo._BombLimit.Value = newPlayerStatusInfo._BombLimit.Value;
+            _PlayerStatusInfo ??= newPlayerStatusInfo;
+            var currentHp = _PlayerStatusInfo._Hp.Value.Item2;
+            var maxHp = newPlayerStatusInfo._Hp.Value.Item1;
+            _PlayerStatusInfo._Hp.Value = (maxHp, currentHp);
+            _PlayerStatusInfo._Speed.Value = newPlayerStatusInfo._Speed.Value;
+            _PlayerStatusInfo._Attack.Value = newPlayerStatusInfo._Attack.Value;
+            _PlayerStatusInfo._Defense.Value = newPlayerStatusInfo._Defense.Value;
+            _PlayerStatusInfo._Resistance.Value = newPlayerStatusInfo._Resistance.Value;
+            _PlayerStatusInfo._FireRange.Value = newPlayerStatusInfo._FireRange.Value;
+            _PlayerStatusInfo._BombLimit.Value = newPlayerStatusInfo._BombLimit.Value;
         }
 
         private static void DestroyWeaponObj(GameObject playerObj)
@@ -361,12 +343,12 @@ namespace Player.Common
 
         private void CalculateHp(int damage)
         {
-            var tuple = _playerStatusInfo._CurrentHp.Value;
-            var maxHp = tuple.Item1;
-            var hp = tuple.Item2;
+            var tuple = _PlayerStatusInfo._Hp.Value;
+            var maxHp = Mathf.FloorToInt(TranslateStatusInBattleUseCase.Translate(StatusType.Hp, tuple.Item1));
+            var hp = Mathf.FloorToInt(TranslateStatusInBattleUseCase.Translate(StatusType.Hp, tuple.Item2));
             hp -= damage;
             hp = Mathf.Clamp(hp, DeadHp, maxHp);
-            _playerStatusInfo._CurrentHp.Value = (maxHp, hp);
+            _PlayerStatusInfo._Hp.Value = (maxHp, hp);
         }
 
         private void ActivatePassiveSkillOnDamage()
@@ -407,7 +389,6 @@ namespace Player.Common
         {
             _translateStatusInBattleUseCase.Dispose();
             _deadSubject.Dispose();
-            _statusBuffSubject.Dispose();
             _WeaponSkillSubject.Dispose();
             _NormalSkillSubject.Dispose();
             _SpecialSkillSubject.Dispose();
@@ -418,8 +399,8 @@ namespace Player.Common
 
         public class PlayerStatusInfo
         {
-            public readonly ReactiveProperty<(float, float)> _CurrentHp;
-            public readonly ReactiveProperty<float> _Speed;
+            public readonly ReactiveProperty<(int, int)> _Hp;
+            public readonly ReactiveProperty<int> _Speed;
             public readonly ReactiveProperty<int> _Attack;
             public readonly ReactiveProperty<int> _Defense;
             public readonly ReactiveProperty<int> _Resistance;
@@ -429,7 +410,7 @@ namespace Player.Common
             public PlayerStatusInfo
             (
                 int currentHp,
-                float speed,
+                int speed,
                 int maxHp,
                 int attack,
                 int defense,
@@ -439,8 +420,8 @@ namespace Player.Common
             )
             {
                 _BombLimit = new ReactiveProperty<int>(bombLimit);
-                _CurrentHp = new ReactiveProperty<(float, float)>((maxHp, currentHp));
-                _Speed = new ReactiveProperty<float>(speed);
+                _Hp = new ReactiveProperty<(int, int)>((maxHp, currentHp));
+                _Speed = new ReactiveProperty<int>(speed);
                 _Attack = new ReactiveProperty<int>(attack);
                 _Defense = new ReactiveProperty<int>(defense);
                 _Resistance = new ReactiveProperty<int>(resistance);

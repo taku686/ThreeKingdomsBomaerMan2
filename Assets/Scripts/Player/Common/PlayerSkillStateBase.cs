@@ -3,7 +3,6 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.NetworkManager;
-using Skill;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
@@ -15,11 +14,11 @@ namespace Player.Common
     {
         public class PlayerSkillStateBase : State
         {
-            private DC.Scanner.TargetScanner _TargetScanner => Owner._targetScanner;
-            protected ActiveSkillManager _ActiveSkillManager => Owner._activeSkillManager;
             private ObservableStateMachineTrigger _ObservableStateMachineTrigger => Owner._observableStateMachineTrigger;
             protected PhotonNetworkManager _PhotonNetworkManager => Owner._photonNetworkManager;
+            protected PlayerConditionInfo _PlayerConditionInfo => Owner._playerConditionInfo;
             private StateMachine<PlayerCore> _StateMachine => Owner._stateMachine;
+            private Animator _Animator => Owner._animator;
             private CancellationTokenSource _cts;
             protected SkillMasterData _SkillMasterData;
 
@@ -44,20 +43,20 @@ namespace Player.Common
             protected virtual void Initialize()
             {
                 _cts = new CancellationTokenSource();
-                SetupTargetScanner();
-                PlayBackAnimation();
+                AnimationSubscribe();
             }
 
-            private void SetupTargetScanner()
+            protected void PlayBackAnimation(SkillMasterData skillMasterData)
             {
-                //todo 後で範囲、角度などを調整する
-                _TargetScanner.TargetLayer = LayerMask.GetMask(GameCommonData.EnemyLayer);
-                _TargetScanner._CenterTransform = Owner.transform;
-                _TargetScanner.ViewRadius = 1.5f;
-                _TargetScanner.ViewAngle = 180f;
+                if (skillMasterData._SkillActionTypeEnum == SkillActionType.None)
+                {
+                    return;
+                }
+
+                _Animator.SetTrigger(GameCommonData.GetAnimatorHashKey(skillMasterData._SkillActionTypeEnum));
             }
 
-            private void PlayBackAnimation()
+            private void AnimationSubscribe()
             {
                 var onStateExit = _ObservableStateMachineTrigger
                     .OnStateExitAsObservable();
@@ -65,7 +64,11 @@ namespace Player.Common
                 onStateExit
                     .Where(IsAnimationState)
                     .Take(1)
-                    .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.Idle); })
+                    .Subscribe(_ =>
+                    {
+                        Debug.Log("Animation State Exit: " + _SkillMasterData._SkillActionTypeEnum);
+                        _StateMachine.Dispatch((int)PLayerState.Idle);
+                    })
                     .AddTo(_cts.Token);
             }
 

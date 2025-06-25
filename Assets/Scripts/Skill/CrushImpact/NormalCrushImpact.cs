@@ -26,7 +26,6 @@ namespace Skill.CrushImpact
         public void Attack()
         {
             _playerTransform.GetComponentInChildren<WeaponObject>();
-            _animator.SetTrigger(GameCommonData.ImpactHashKey);
             _playerTransform.DOJump(_playerTransform.position, 3f, 1, AnimationTime)
                 .SetEase(Ease.InOutQuad)
                 .SetLink(_playerTransform.gameObject);

@@ -1,24 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using AttributeAttack;
 using Common.Data;
-using Manager.NetworkManager;
-using Photon.Pun;
-using Player.Common;
 using Repository;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
 using Zenject;
 using Object = UnityEngine.Object;
-using TargetScanner = DC.Scanner.TargetScanner;
 
 namespace Skill.Attack
 {
-    public class SlashBase : IAttackBehaviour
+    public class SlashBase : AttackSkillBase, IAttackBehaviour
     {
+        private GameObject _effectClone;
         private readonly SkillEffectRepository _skillEffectRepository;
         private const float DelayTime = 0.1f;
+        private const float WaitDurationForEnd = 1.5f;
         private const float EffectHeight = 0.5f;
 
         [Inject]
@@ -37,75 +34,43 @@ namespace Skill.Attack
         protected void Slash
         (
             AbnormalCondition abnormalCondition,
-            Animator animator,
-            TargetScanner targetScanner,
             int skillId,
             Transform playerTransform
         )
         {
-            var observableStateMachineTrigger = animator.GetBehaviour<ObservableStateMachineTrigger>();
-            observableStateMachineTrigger
-                .OnStateEnterAsObservable()
-                .Where(info => info.StateInfo.IsName(GameCommonData.SlashKey))
-                .Take(1)
-                .Delay(TimeSpan.FromSeconds(DelayTime))
-                .Subscribe(_ =>
-                {
-                    ActivateEffect(playerTransform, abnormalCondition);
-                    HitPlayer(targetScanner, skillId);
-                })
+            Observable
+                .Timer(TimeSpan.FromSeconds(DelayTime))
+                .Subscribe(_ => { ActivateEffect(playerTransform, abnormalCondition, skillId); })
+                .AddTo(playerTransform);
+
+            Observable
+                .Timer(TimeSpan.FromSeconds(WaitDurationForEnd))
+                .Subscribe(_ => { Object.Destroy(_effectClone); })
                 .AddTo(playerTransform);
         }
 
-        protected virtual void ActivateEffect(Transform playerTransform, AbnormalCondition abnormalCondition)
+        protected virtual void ActivateEffect
+        (
+            Transform playerTransform,
+            AbnormalCondition abnormalCondition,
+            int skillId
+        )
         {
             var effect = _skillEffectRepository.GetSlashEffect(abnormalCondition);
-            var playerPosition = playerTransform.position;
-            var spawnPosition = new Vector3(playerPosition.x, EffectHeight, playerPosition.z);
-            var spawnRotation = FixedRotation(abnormalCondition, playerTransform) + playerTransform.eulerAngles;
-            Object.Instantiate(effect, spawnPosition, Quaternion.Euler(spawnRotation), playerTransform);
-        }
+            _effectClone = Object.Instantiate(effect, playerTransform).gameObject;
+            var spawnPosition = new Vector3(0, EffectHeight, 0);
+            var spawnRotation = new Vector3(180, 34.3f, 0);
+            _effectClone.transform.localPosition = spawnPosition;
+            _effectClone.transform.localEulerAngles = spawnRotation;
+            var colliders = _effectClone.GetComponents<SphereCollider>();
+            var player = playerTransform.gameObject;
 
-        private static Vector3 FixedRotation(AbnormalCondition abnormalCondition, Transform playerTransform)
-        {
-            var spawnRotation = playerTransform.localEulerAngles;
-
-            switch (abnormalCondition)
+            foreach (var sphereCollider in colliders)
             {
-                case AbnormalCondition.HellFire:
-                    spawnRotation = new Vector3(0, 0, 180);
-                    break;
-                case AbnormalCondition.Poison:
-                    spawnRotation = new Vector3(0, 0, 180);
-                    break;
-                case AbnormalCondition.Confusion:
-                    spawnRotation = new Vector3(0, 0, 180);
-                    break;
-                case AbnormalCondition.Curse:
-                    spawnRotation = new Vector3(0, 180, 180);
-                    break;
-                case AbnormalCondition.Apraxia:
-                    spawnRotation = new Vector3(0, -90, 180);
-                    break;
-            }
-
-            return spawnRotation;
-        }
-
-        private static void HitPlayer(TargetScanner targetScanner, int skillId)
-        {
-            var hitPlayers = targetScanner.GetTargetList();
-            if (hitPlayers == null || hitPlayers.Count == 0)
-            {
-                return;
-            }
-
-            foreach (var hitPlayer in hitPlayers)
-            {
-                var statusInfo = hitPlayer.GetComponent<PlayerConditionInfo>();
-                var playerIndex = statusInfo.GetPlayerIndex();
-                var dic = new Dictionary<int, int> { { playerIndex, skillId } };
-                PhotonNetwork.LocalPlayer.SetSkillData(dic);
+                sphereCollider.OnTriggerEnterAsObservable()
+                    .Where(collider => IsObstaclesTag(collider.gameObject))
+                    .Subscribe(collider => HitPlayer(player, collider.gameObject, skillId))
+                    .AddTo(_effectClone);
             }
         }
 

@@ -37,7 +37,7 @@ namespace Player.Common
             var characterId = _characterData.Id;
             var hp = 0;
             var attack = 0;
-            var speed = 0f;
+            var speed = 0;
             var bombLimit = 0;
             var fireRange = 0;
             var defense = 0;
@@ -55,14 +55,8 @@ namespace Player.Common
                 resistance = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Resistance, _levelData);
             }
 
-            hp = (int)TranslateStatusValueForBattle(StatusType.Hp, hp);
-            speed = TranslateStatusValueForBattle(StatusType.Speed, speed);
             _currentBombLimit = 0;
-            _maxBombLimit = (int)TranslateStatusValueForBattle(StatusType.BombLimit, bombLimit);
-            attack = (int)TranslateStatusValueForBattle(StatusType.Attack, attack);
-            defense = (int)TranslateStatusValueForBattle(StatusType.Defense, defense);
-            resistance = (int)TranslateStatusValueForBattle(StatusType.Resistance, resistance);
-            fireRange = (int)TranslateStatusValueForBattle(StatusType.FireRange, fireRange);
+            _maxBombLimit = bombLimit;
 
             return new PlayerCore.PlayerStatusInfo
             (
@@ -77,7 +71,7 @@ namespace Player.Common
             );
         }
 
-        public float TranslateStatusValueForBattle(StatusType statusType, float value)
+        public static float Translate(StatusType statusType, float value)
         {
             switch (statusType)
             {

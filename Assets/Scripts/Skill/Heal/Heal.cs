@@ -11,33 +11,31 @@ using UnityEngine;
 
 namespace Skill.Heal
 {
-    public class HealSkill : IDisposable
+    public class Heal : IDisposable
     {
-        private Action<int> _calculateHp;
         private PlayerConditionInfo _playerConditionInfo;
         private PlayerCore.PlayerStatusInfo _playerStatusInfo;
         private float _timer;
         private float _oneSecondTimer;
+        private const int DeadHp = 0;
 
         public void Initialize
         (
-            Action<int> calculateHp,
             PlayerConditionInfo playerConditionInfo,
             PlayerCore.PlayerStatusInfo playerStatusInfo
         )
         {
-            _calculateHp = calculateHp;
             _playerConditionInfo = playerConditionInfo;
             _playerStatusInfo = playerStatusInfo;
         }
 
-        public void Heal(SkillMasterData skillMasterData)
+        public void HealSkill(SkillMasterData skillMasterData)
         {
             var healAmount = GetHealAmount(skillMasterData);
-            _calculateHp.Invoke(-healAmount);
+            CalculateHp(healAmount);
         }
 
-        public void ContinuousHeal(SkillMasterData skillMasterData)
+        public void ContinuousHealSkill(SkillMasterData skillMasterData)
         {
             var healAmount = GetHealAmount(skillMasterData);
             var effectTime = skillMasterData.EffectTime;
@@ -49,7 +47,7 @@ namespace Skill.Heal
                     _oneSecondTimer += Time.deltaTime;
                     if (_oneSecondTimer >= 1f)
                     {
-                        _calculateHp.Invoke(-healAmount);
+                        CalculateHp(healAmount);
                         _oneSecondTimer = 0f;
                     }
 
@@ -65,7 +63,7 @@ namespace Skill.Heal
                 .AddTo(cancellationToken.Token);
         }
 
-        public void ContinuousHealInAbnormalCondition(SkillMasterData skillMasterData)
+        public void ContinuousHealSkillInAbnormalCondition(SkillMasterData skillMasterData)
         {
             var healAmount = GetHealAmount(skillMasterData);
             var cancellationToken = new CancellationTokenSource();
@@ -76,20 +74,25 @@ namespace Skill.Heal
                     _oneSecondTimer += Time.deltaTime;
                     if (_oneSecondTimer >= 1f)
                     {
-                        _calculateHp.Invoke(-healAmount);
+                        CalculateHp(healAmount);
                         _oneSecondTimer = 0f;
                     }
                 })
                 .AddTo(cancellationToken.Token);
         }
 
+        private void CalculateHp(int healAmount)
+        {
+            var tuple = _playerStatusInfo._Hp.Value;
+            var maxHp = Mathf.FloorToInt(TranslateStatusInBattleUseCase.Translate(StatusType.Hp, tuple.Item1));
+            var hp = Mathf.FloorToInt(TranslateStatusInBattleUseCase.Translate(StatusType.Hp, tuple.Item2));
+            hp += healAmount;
+            hp = Mathf.Clamp(hp, DeadHp, maxHp);
+            _playerStatusInfo._Hp.Value = (maxHp, hp);
+        }
+
         private int GetHealAmount(SkillMasterData skillMasterData)
         {
-            var playerIndex = _playerConditionInfo.GetPlayerIndex();
-            var skillId = skillMasterData.Id;
-            var dic = new Dictionary<int, int> { { playerIndex, skillId } };
-            PhotonNetwork.LocalPlayer.SetSkillData(dic);
-
             var healAmount = 0;
 
             if (!Mathf.Approximately(skillMasterData.HpPlu, GameCommonData.InvalidNumber))
@@ -99,7 +102,7 @@ namespace Skill.Heal
 
             if (!Mathf.Approximately(skillMasterData.HpMul, GameCommonData.InvalidNumber))
             {
-                var maxHp = _playerStatusInfo._CurrentHp.Value.Item1;
+                var maxHp = _playerStatusInfo._Hp.Value.Item1;
                 healAmount = Mathf.FloorToInt(maxHp * skillMasterData.HpMul);
             }
 

@@ -1,14 +1,12 @@
 ﻿using System;
 using AttributeAttack;
 using Common.Data;
-using Player.Common;
-using Skill.Attack;
 using UnityEngine;
 using Zenject;
 
 namespace Skill.DashAttack
 {
-    public class AttributeDashAttackFactory : IFactory<int, Animator, PlayerDash, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour>
+    public class AttributeDashAttackFactory : IFactory<int, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour>
     {
         private readonly NormalDashAttack.Factory _normalDashAttackFactory;
         private readonly PoisonDashAttack.Factory _poisonDashAttackFactory;
@@ -61,7 +59,6 @@ namespace Skill.DashAttack
         (
             int skillId,
             Animator animator,
-            PlayerDash playerDash,
             Transform playerTransform,
             AbnormalCondition attribute,
             IAttackBehaviour attack
@@ -69,28 +66,28 @@ namespace Skill.DashAttack
         {
             if (attack == null || attribute == AbnormalCondition.None)
             {
-                return _normalDashAttackFactory.Create(animator, playerDash);
+                return _normalDashAttackFactory.Create(animator);
             }
 
             return attribute switch
             {
-                AbnormalCondition.Poison => _poisonDashAttackFactory.Create(skillId, animator, playerTransform, attack),
-                AbnormalCondition.Paralysis => _paralysisDashAttackFactory.Create(skillId, animator, playerTransform, attack),
-                AbnormalCondition.Frozen => _frozenDashAttackFactory.Create(skillId, animator, playerTransform, attack),
-                AbnormalCondition.Confusion => _confusionDashAttackFactory.Create(skillId, animator, playerTransform, attack),
-                AbnormalCondition.Charm => _charmDashAttackFactory.Create(skillId, animator, playerTransform, attack),
-                AbnormalCondition.Miasma => _miasmaDashAttackFactory.Create(skillId, animator, playerTransform, attack),
-                AbnormalCondition.Darkness => _darknessDashAttackFactory.Create(skillId, animator, playerTransform, attack),
-                AbnormalCondition.LifeSteal => _lifeStealDashAttackFactory.Create(skillId, animator, playerTransform, attack),
-                AbnormalCondition.HellFire => _hellFireSlashFactory.Create(skillId, animator, playerTransform, attack),
-                AbnormalCondition.TimeStop => _stigmataDashAttackFactory.Create(skillId, animator, playerTransform, attack),
-                AbnormalCondition.SoakingWet => _soakingWetDashAttackFactory.Create(skillId, animator, playerTransform, attack),
-                AbnormalCondition.Burning => _burningDashAttackFactory.Create(skillId, animator, playerTransform, attack),
+                AbnormalCondition.Poison => _poisonDashAttackFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.Paralysis => _paralysisDashAttackFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.Frozen => _frozenDashAttackFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.Confusion => _confusionDashAttackFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.Charm => _charmDashAttackFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.Miasma => _miasmaDashAttackFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.Darkness => _darknessDashAttackFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.LifeSteal => _lifeStealDashAttackFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.HellFire => _hellFireSlashFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.TimeStop => _stigmataDashAttackFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.SoakingWet => _soakingWetDashAttackFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.Burning => _burningDashAttackFactory.Create(skillId, playerTransform, attack),
                 _ => throw new ArgumentOutOfRangeException(nameof(attribute), attribute, null)
             };
         }
 
-        public class Factory : PlaceholderFactory<int, Animator, PlayerDash, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour>
+        public class Factory : PlaceholderFactory<int, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour>
         {
         }
     }

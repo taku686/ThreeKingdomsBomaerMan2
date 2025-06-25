@@ -71,7 +71,7 @@ namespace Skill.CrushImpact
             effectTransform.localPosition += playerTransform.forward * 2f;
         }
 
-        private static void SetupCollider(GameObject effectClone, Transform playerTransform, int skillId)
+        private void SetupCollider(GameObject effectClone, Transform playerTransform, int skillId)
         {
             var effectCollider = effectClone.GetComponent<Collider>();
             effectCollider.isTrigger = true;

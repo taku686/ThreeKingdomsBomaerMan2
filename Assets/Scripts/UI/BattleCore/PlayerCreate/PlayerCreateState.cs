@@ -31,10 +31,7 @@ namespace Manager.BattleManager
             private BombProvider _BombProvider => Owner._bombProvider;
             private SkillEffectActivateUseCase _SkillEffectActivateUseCase => Owner._skillEffectActivateUseCase;
             private List<PlayerStatusUI> _PlayerStatusUiList => Owner._playerStatusUiList;
-
-            private CharacterMasterDataRepository _CharacterMasterDataRepository =>
-                Owner._characterMasterDataRepository;
-
+            private CharacterMasterDataRepository _CharacterMasterDataRepository => Owner._characterMasterDataRepository;
             private WeaponMasterDataRepository _WeaponMasterDataRepository => Owner._weaponMasterDataRepository;
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
             private ActiveSkillManager _ActiveSkillManager => Owner._activeSkillManager;
@@ -83,7 +80,7 @@ namespace Manager.BattleManager
 
             private void PlayerGenerateCompleteSubscribe()
             {
-                _PhotonNetworkManager._PlayerGenerateCompleteSubject.Subscribe(_ =>
+                _PhotonNetworkManager._PlayerGenerateCompleteObservable.Subscribe(_ =>
                 {
                     var players = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
                     foreach (var player in players)
@@ -174,8 +171,7 @@ namespace Manager.BattleManager
                 playerCore.AddComponent<PlayerDash>();
                 _SetupAnimatorUseCase.SetAnimatorController(playerCore, weaponType);
                 GenerateEffectActivator(playerCore, instantiationId);
-                var translateStatusInBattleUseCase =
-                    _TranslateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
+                var translateStatusInBattleUseCase = _TranslateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
                 translateStatusInBattleUseCase.InitializeStatus();
                 var putBomb = playerCore.AddComponent<PutBomb>();
                 putBomb.Initialize(_BombProvider, _MapManager, translateStatusInBattleUseCase);
@@ -183,6 +179,7 @@ namespace Manager.BattleManager
                 playerConditionInfo.SetPlayerIndex(instantiationId);
                 AddBoxCollider(playerCore);
                 AddRigidbody(playerCore);
+                AddPlayerSkill(playerCore);
 
                 if (!PhotonNetworkManager.IsCpu(creatorNr)) return;
                 var enemyCore = playerCore.AddComponent<EnemyCore>();
@@ -300,14 +297,14 @@ namespace Manager.BattleManager
                 Owner.SetCircleSkillIndicatorView(circleIndicatorView);
             }
 
-            private void GenerateEffectActivator(GameObject playerObj, int playerId)
+            private void GenerateEffectActivator(GameObject playerObj, int instantiationId)
             {
                 var effectActivator = Instantiate(_SkillEffectActivateUseCase, playerObj.transform);
                 var effectActivatorTransform = effectActivator.transform;
                 effectActivatorTransform.localPosition = new Vector3(0, 0, 0);
                 effectActivatorTransform.localRotation = quaternion.identity;
-                var activateSkillSubject = _PhotonNetworkManager._ActivateSkillSubject;
-                effectActivator.Initialize(activateSkillSubject, playerId);
+                var activateSkillSubject = _PhotonNetworkManager._ActivateSkillObservable;
+                effectActivator.Initialize(activateSkillSubject, instantiationId);
             }
 
             private void SetPlayerUI(GameObject player, int playerId, out string hpKey)
@@ -336,6 +333,12 @@ namespace Manager.BattleManager
                 rigid.useGravity = true;
                 rigid.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
                 rigid.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+            }
+
+            private void AddPlayerSkill(GameObject playerCore)
+            {
+                var playerSkill = playerCore.AddComponent<PlayerSkill>();
+                playerSkill.Initialize(_ActiveSkillManager, _PhotonNetworkManager, playerCore);
             }
 
             private bool IsMine(PhotonView photonView)

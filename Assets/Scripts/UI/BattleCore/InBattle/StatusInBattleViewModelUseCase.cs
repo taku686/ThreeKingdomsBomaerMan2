@@ -24,7 +24,6 @@ public class StatusInBattleViewModelUseCase : IDisposable
 
     public StatusInBattleView.ViewModel InAsTask(int playerKey)
     {
-        //todo 後でチームでの処理に修正する
         var characterData = _photonNetworkManager.GetCharacterData(playerKey);
         var characterId = characterData.Id;
         var weaponData = _photonNetworkManager.GetWeaponData(playerKey);

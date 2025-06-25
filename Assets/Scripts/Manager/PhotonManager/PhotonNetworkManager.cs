@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Common.Data;
-using ExitGames.Client.Photon;
 using Manager.DataManager;
 using Photon.Pun;
 using Photon.Realtime;
@@ -11,6 +11,7 @@ using Skill;
 using UniRx;
 using UnityEngine;
 using Zenject;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 namespace Manager.NetworkManager
 {
@@ -32,12 +33,10 @@ namespace Manager.NetworkManager
         public bool _isTitle;
 
         private const int MinPlayerCount = 1;
-
         public Subject<int> _LeftRoomSubject { get; private set; } = new();
-
         public IObservable<Photon.Realtime.Player[]> _JoinedRoomSubject => _joinedRoomSubject;
-        public IObservable<Unit> _PlayerGenerateCompleteSubject => _playerGenerateCompleteSubject;
-        public IObservable<(int, SkillMasterData)> _ActivateSkillSubject => _activateSkillSubject;
+        public IObservable<Unit> _PlayerGenerateCompleteObservable => _playerGenerateCompleteSubject;
+        public IObservable<(int, SkillMasterData)> _ActivateSkillObservable => _activateSkillSubject;
 
 
         private void Awake()
@@ -137,49 +136,87 @@ namespace Manager.NetworkManager
         {
             foreach (var prop in changedProps)
             {
-                if ((string)prop.Key == PlayerPropertiesExtensions.PlayerIndexKey)
+                CheckPlayerGenerateComplete(prop);
+                SetupPlayerInfo(prop);
+                HitAttack(targetPlayer, prop);
+                ActivateSkill(targetPlayer, prop);
+            }
+        }
+
+
+        private void HitAttack(Photon.Realtime.Player targetPlayer, DictionaryEntry prop)
+        {
+            if ((string)prop.Key != PlayerPropertiesExtensions.HitAttackDataKey)
+            {
+                return;
+            }
+
+            var dic = targetPlayer.GetHitAttack();
+            if (dic == null)
+            {
+                return;
+            }
+
+            var players = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
+
+            foreach (var player in players)
+            {
+                var playerConditionInfo = player.GetComponent<PlayerConditionInfo>();
+                if (playerConditionInfo == null)
                 {
-                    SetupPlayerInfo(PhotonNetwork.PlayerList);
+                    continue;
                 }
 
-                if ((string)prop.Key == PlayerPropertiesExtensions.PlayerGenerateKey)
+                foreach (var keyValue in dic)
                 {
-                    _playerCount++;
-                    CheckPlayerGenerateComplete(_playerCount);
-                }
-
-                if ((string)prop.Key == PlayerPropertiesExtensions.SkillDataKey)
-                {
-                    var dic = targetPlayer.GetSkillId();
-                    if (dic == null)
-                    {
-                        return;
-                    }
-
-                    var players = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
-
-                    foreach (var player in players)
-                    {
-                        var playerStatusInfo = player.GetComponent<PlayerConditionInfo>();
-                        if (playerStatusInfo == null)
-                        {
-                            continue;
-                        }
-
-                        foreach (var keyValue in dic)
-                        {
-                            if (playerStatusInfo.GetPlayerIndex() != keyValue.Key) continue;
-                            var skillData = _skillMasterDataRepository.GetSkillData(keyValue.Value);
-                            _activateSkillSubject.OnNext((playerStatusInfo.GetPlayerIndex(), skillData));
-                            _underAbnormalConditionsBySkillUseCase.OnNextAbnormalConditionSubject(playerStatusInfo, skillData).Forget();
-                        }
-                    }
+                    if (playerConditionInfo.GetPlayerIndex() != keyValue.Key) continue;
+                    var skillData = _skillMasterDataRepository.GetSkillData(keyValue.Value);
+                    _underAbnormalConditionsBySkillUseCase.OnNextAbnormalConditionSubject(playerConditionInfo, skillData);
                 }
             }
         }
 
-        private void SetupPlayerInfo(Photon.Realtime.Player[] players)
+        private void ActivateSkill(Photon.Realtime.Player targetPlayer, DictionaryEntry prop)
         {
+            if ((string)prop.Key != PlayerPropertiesExtensions.SkillDataKey)
+            {
+                return;
+            }
+
+            var dic = targetPlayer.GetSkillId();
+            if (dic == null)
+            {
+                return;
+            }
+
+            var players = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
+
+            foreach (var player in players)
+            {
+                var playerConditionInfo = player.GetComponent<PlayerConditionInfo>();
+                if (playerConditionInfo == null)
+                {
+                    continue;
+                }
+
+                foreach (var keyValue in dic)
+                {
+                    if (playerConditionInfo.GetPlayerIndex() != keyValue.Key) continue;
+                    Debug.Log(playerConditionInfo.GetPlayerIndex());
+                    var skillData = _skillMasterDataRepository.GetSkillData(keyValue.Value);
+                    _activateSkillSubject.OnNext((playerConditionInfo.GetPlayerIndex(), skillData));
+                }
+            }
+        }
+
+        private void SetupPlayerInfo(DictionaryEntry prop)
+        {
+            if ((string)prop.Key != PlayerPropertiesExtensions.PlayerIndexKey)
+            {
+                return;
+            }
+
+            var players = PhotonNetwork.PlayerList;
             foreach (var player in players)
             {
                 var characterDic = player.GetCharacterId();
@@ -235,9 +272,15 @@ namespace Manager.NetworkManager
             return teamMemberCount != MinPlayerCount;
         }
 
-        private void CheckPlayerGenerateComplete(int count)
+        private void CheckPlayerGenerateComplete(DictionaryEntry prop)
         {
-            if (PhotonNetwork.CurrentRoom.PlayerCount > count)
+            if ((string)prop.Key != PlayerPropertiesExtensions.PlayerGenerateKey)
+            {
+                return;
+            }
+
+            _playerCount++;
+            if (PhotonNetwork.CurrentRoom.PlayerCount > _playerCount)
             {
                 return;
             }

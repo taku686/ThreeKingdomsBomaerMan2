@@ -7,19 +7,19 @@ using Manager.DataManager;
 using Manager.NetworkManager;
 using Photon.Pun;
 using Player.Common;
-using UniRx;
 using UnityEngine;
 using Zenject;
 
 public class BuffSkill : IDisposable
 {
     private readonly ApplyStatusSkillUseCase _applyStatusSkillUseCase;
-    private Subject<(StatusType statusType, float value)> _statusBuff;
-    private Subject<(StatusType statusType, int value, bool isBuff, bool isDebuff)> _statusBuffUi;
+
     private int _characterId;
+
     private SkillMasterData[] _statusSKillMasterDatum;
-    private TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
     private PlayerConditionInfo _playerConditionInfo;
+    private PlayerCore.PlayerStatusInfo _playerStatusInfo;
+    private bool _isBuffInAbnormalCondition;
     private const int StatusAmount = 7;
 
     [Inject]
@@ -33,30 +33,22 @@ public class BuffSkill : IDisposable
 
     public void Initialize
     (
-        Subject<(StatusType statusType, float value)> statusBuff,
-        Subject<(StatusType statusType, int value, bool isBuff, bool isDebuff)> statusBuffUi,
         int characterId,
         SkillMasterData[] statusSKillMasterDatum,
-        TranslateStatusInBattleUseCase translateStatusInBattleUseCase,
-        PlayerConditionInfo playerConditionInfo
+        PlayerConditionInfo playerConditionInfo,
+        PlayerCore.PlayerStatusInfo playerStatusInfo
     )
     {
-        _statusBuff = statusBuff;
-        _statusBuffUi = statusBuffUi;
         _characterId = characterId;
         _statusSKillMasterDatum = statusSKillMasterDatum;
-        _translateStatusInBattleUseCase = translateStatusInBattleUseCase;
         _playerConditionInfo = playerConditionInfo;
+        _playerStatusInfo = playerStatusInfo;
     }
 
     public async UniTaskVoid Buff(SkillMasterData skillMasterData, int buffCount = StatusAmount)
     {
         var skillId = skillMasterData.Id;
         var effectTime = skillMasterData.EffectTime;
-        var playerIndex = _playerConditionInfo.GetPlayerIndex();
-
-        var dic = new Dictionary<int, int> { { playerIndex, skillId } };
-        PhotonNetwork.LocalPlayer.SetSkillData(dic);
         var buffStatuses = GetBuffStatuses(skillId, _statusSKillMasterDatum, _characterId);
         var fixedBuffStatus = new Dictionary<StatusType, (int, int)>();
         foreach (var buffStatus in buffStatuses)
@@ -93,85 +85,114 @@ public class BuffSkill : IDisposable
             fixedBuffStatus.Add(buffStatus.Key, (buffStatus.Value.Item1 / 10, buffStatus.Value.Item2 / 10));
         }
 
-        foreach (var (statusType, (applyStatusSkill, applyBuffSkill)) in fixedBuffStatus)
+        foreach (var (statusType, (_, applyBuffSkill)) in fixedBuffStatus)
         {
-            var isBuff = applyBuffSkill > applyStatusSkill;
-            var translatedValue = _translateStatusInBattleUseCase.TranslateStatusValueForBattle(statusType, applyBuffSkill);
-            _statusBuff.OnNext((statusType, translatedValue));
-            _statusBuffUi.OnNext((statusType, value: applyBuffSkill, isBuff, !isBuff));
+            SetPlayerStatus(statusType, applyBuffSkill);
         }
 
         await UniTask.Delay(TimeSpan.FromSeconds(effectTime));
 
         foreach (var (statusType, (applyStatusSkill, _)) in fixedBuffStatus)
         {
-            var translatedPrefValue = _translateStatusInBattleUseCase.TranslateStatusValueForBattle(statusType, applyStatusSkill);
-            _statusBuff.OnNext((statusType, translatedPrefValue));
-            _statusBuffUi.OnNext((statusType, applyStatusSkill, isBuff: false, isDebuff: false));
+            SetPlayerStatus(statusType, applyStatusSkill);
         }
     }
 
-    public void BuffInAbnormalCondition(SkillMasterData skillMasterData, bool isActive, int buffCount = StatusAmount)
+    public async UniTask BuffInAbnormalCondition(SkillMasterData skillMasterData, int buffCount = StatusAmount)
     {
-        var skillId = skillMasterData.Id;
-        var playerIndex = _playerConditionInfo.GetPlayerIndex();
-
-        var dic = new Dictionary<int, int> { { playerIndex, skillId } };
-        PhotonNetwork.LocalPlayer.SetSkillData(dic);
-        var buffStatuses = GetBuffStatuses(skillId, _statusSKillMasterDatum, _characterId);
-        var fixedBuffStatus = new Dictionary<StatusType, (int, int)>();
-        if (isActive)
+        if (_isBuffInAbnormalCondition)
         {
-            foreach (var buffStatus in buffStatuses)
-            {
-                if (buffStatus.Key is not (StatusType.BombLimit or StatusType.FireRange))
-                {
-                    fixedBuffStatus.Add(buffStatus.Key, buffStatus.Value);
-                    continue;
-                }
-
-                fixedBuffStatus.Add(buffStatus.Key, (buffStatus.Value.Item1 * 10, buffStatus.Value.Item2 * 10));
-            }
-
-            var fixedOrderBuffStatuses = fixedBuffStatus
-                .OrderByDescending(buffStatus => buffStatus.Value.Item2)
-                .Take(buffCount)
-                .ToArray();
-
-            if (fixedOrderBuffStatuses.Length == 0)
-            {
-                return;
-            }
-
-            fixedBuffStatus.Clear();
-
-            foreach (var buffStatus in fixedOrderBuffStatuses)
-            {
-                if (buffStatus.Key is not (StatusType.BombLimit or StatusType.FireRange))
-                {
-                    fixedBuffStatus.Add(buffStatus.Key, buffStatus.Value);
-                    continue;
-                }
-
-                fixedBuffStatus.Add(buffStatus.Key, (buffStatus.Value.Item1 / 10, buffStatus.Value.Item2 / 10));
-            }
-
-            foreach (var (statusType, (applyStatusSkill, applyBuffSkill)) in fixedBuffStatus)
-            {
-                var isBuff = applyBuffSkill > applyStatusSkill;
-                var translatedValue = _translateStatusInBattleUseCase.TranslateStatusValueForBattle(statusType, applyBuffSkill);
-                _statusBuff.OnNext((statusType, translatedValue));
-                _statusBuffUi.OnNext((statusType, value: applyBuffSkill, isBuff, !isBuff));
-            }
+            return;
         }
-        else
+
+        _isBuffInAbnormalCondition = true;
+        var skillId = skillMasterData.Id;
+        var buffStatuses = GetBuffStatuses(skillId, _statusSKillMasterDatum, _characterId);
+
+        BuffStatus(buffStatuses, buffCount);
+
+        await UniTask.Delay(TimeSpan.FromSeconds(skillMasterData.EffectTime));
+
+        _isBuffInAbnormalCondition = false;
+        foreach (var (statusType, (applyStatusSkill, _)) in buffStatuses)
         {
-            foreach (var (statusType, (applyStatusSkill, _)) in buffStatuses)
+            SetPlayerStatus(statusType, applyStatusSkill);
+        }
+    }
+
+    private void BuffStatus(Dictionary<StatusType, (int, int)> buffStatuses, int buffCount)
+    {
+        var fixedBuffStatus = new Dictionary<StatusType, (int, int)>();
+        foreach (var buffStatus in buffStatuses)
+        {
+            if (buffStatus.Key is not (StatusType.BombLimit or StatusType.FireRange))
             {
-                var translatedPrefValue = _translateStatusInBattleUseCase.TranslateStatusValueForBattle(statusType, applyStatusSkill);
-                _statusBuff.OnNext((statusType, translatedPrefValue));
-                _statusBuffUi.OnNext((statusType, applyStatusSkill, isBuff: false, isDebuff: false));
+                fixedBuffStatus.Add(buffStatus.Key, buffStatus.Value);
+                continue;
             }
+
+            fixedBuffStatus.Add(buffStatus.Key, (buffStatus.Value.Item1 * 10, buffStatus.Value.Item2 * 10));
+        }
+
+        var fixedOrderBuffStatuses = fixedBuffStatus
+            .OrderByDescending(buffStatus => buffStatus.Value.Item2)
+            .Take(buffCount)
+            .ToArray();
+
+        if (fixedOrderBuffStatuses.Length == 0)
+        {
+            return;
+        }
+
+        fixedBuffStatus.Clear();
+
+        foreach (var buffStatus in fixedOrderBuffStatuses)
+        {
+            if (buffStatus.Key is not (StatusType.BombLimit or StatusType.FireRange))
+            {
+                fixedBuffStatus.Add(buffStatus.Key, buffStatus.Value);
+                continue;
+            }
+
+            fixedBuffStatus.Add(buffStatus.Key, (buffStatus.Value.Item1 / 10, buffStatus.Value.Item2 / 10));
+        }
+
+        foreach (var (statusType, (_, applyBuffSkill)) in fixedBuffStatus)
+        {
+            SetPlayerStatus(statusType, applyBuffSkill);
+        }
+    }
+
+    private void SetPlayerStatus(StatusType statusType, int value)
+    {
+        switch (statusType)
+        {
+            case StatusType.Hp:
+                var maxHp = _playerStatusInfo._Hp.Value.Item1;
+                _playerStatusInfo._Hp.Value = (maxHp, value);
+                break;
+            case StatusType.Attack:
+                _playerStatusInfo._Attack.Value = value;
+                break;
+            case StatusType.Speed:
+                _playerStatusInfo._Speed.Value = value;
+                break;
+            case StatusType.BombLimit:
+                _playerStatusInfo._BombLimit.Value = value;
+                break;
+            case StatusType.FireRange:
+                _playerStatusInfo._FireRange.Value = value;
+                break;
+            case StatusType.Defense:
+                _playerStatusInfo._Defense.Value = value;
+                break;
+            case StatusType.Resistance:
+                _playerStatusInfo._Resistance.Value = value;
+                break;
+            case StatusType.None:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(statusType), statusType, null);
         }
     }
 

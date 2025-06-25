@@ -38,7 +38,8 @@ namespace Skill.Attack.FlyingSlash
         {
         }
 
-        protected void FlyingSlash(
+        protected void FlyingSlash
+        (
             AbnormalCondition abnormalCondition,
             Animator animator,
             int skillId,
@@ -89,7 +90,7 @@ namespace Skill.Attack.FlyingSlash
                 .AddTo(effectClone);
         }
 
-        private static async UniTask HitEffectAsync
+        private async UniTask HitEffectAsync
         (
             ParticleSystem particle,
             GameObject collider,

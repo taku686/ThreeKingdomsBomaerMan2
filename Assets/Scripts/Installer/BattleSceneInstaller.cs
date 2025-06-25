@@ -65,25 +65,25 @@ namespace Common.Installer
 
         private void InstallSlashSKill()
         {
-            Container.BindFactory<int, TargetScanner, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeSlashFactory.Factory>().FromFactory<AttributeSlashFactory>();
+            Container.BindFactory<int, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeSlashFactory.Factory>().FromFactory<AttributeSlashFactory>();
             Container.BindFactory<Animator, NormalSlash, NormalSlash.Factory>().AsCached();
-            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, PoisonSlash, PoisonSlash.Factory>().AsCached();
-            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, ParalysisSlash, ParalysisSlash.Factory>().AsCached();
-            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, FrozenSlash, FrozenSlash.Factory>().AsCached();
-            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, ConfusionSlash, ConfusionSlash.Factory>().AsCached();
-            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, NockBackSlash, NockBackSlash.Factory>().AsCached();
-            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, CharmSlash, CharmSlash.Factory>().AsCached();
-            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, MiasmaSlash, MiasmaSlash.Factory>().AsCached();
-            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, DarknessSlash, DarknessSlash.Factory>().AsCached();
-            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, SealedSlash, SealedSlash.Factory>().AsCached();
-            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, LifeStealSlash, LifeStealSlash.Factory>().AsCached();
-            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, CurseSlash, CurseSlash.Factory>().AsCached();
-            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, HellFireSlash, HellFireSlash.Factory>().AsCached();
-            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, FearSlash, FearSlash.Factory>().AsCached();
-            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, TimeStopSlash, TimeStopSlash.Factory>().AsCached();
-            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, ApraxiaSlash, ApraxiaSlash.Factory>().AsCached();
-            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, SoakingWetSlash, SoakingWetSlash.Factory>().AsCached();
-            Container.BindFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, BurningSlash, BurningSlash.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, PoisonSlash, PoisonSlash.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, ParalysisSlash, ParalysisSlash.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, FrozenSlash, FrozenSlash.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, ConfusionSlash, ConfusionSlash.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, NockBackSlash, NockBackSlash.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, CharmSlash, CharmSlash.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, MiasmaSlash, MiasmaSlash.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, DarknessSlash, DarknessSlash.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, SealedSlash, SealedSlash.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, LifeStealSlash, LifeStealSlash.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, CurseSlash, CurseSlash.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, HellFireSlash, HellFireSlash.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, FearSlash, FearSlash.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, TimeStopSlash, TimeStopSlash.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, ApraxiaSlash, ApraxiaSlash.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, SoakingWetSlash, SoakingWetSlash.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, BurningSlash, BurningSlash.Factory>().AsCached();
         }
 
         private void InstallMagicShot()
@@ -142,20 +142,20 @@ namespace Common.Installer
 
         private void InstallDashAttack()
         {
-            Container.BindFactory<int, Animator, PlayerDash, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeDashAttackFactory.Factory>().FromFactory<AttributeDashAttackFactory>();
-            Container.BindFactory<Animator, PlayerDash, NormalDashAttack, NormalDashAttack.Factory>().AsCached();
-            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, PoisonDashAttack, PoisonDashAttack.Factory>().AsCached();
-            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, ParalysisDashAttack, ParalysisDashAttack.Factory>().AsCached();
-            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, FrozenDashAttack, FrozenDashAttack.Factory>().AsCached();
-            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, ConfusionDashAttack, ConfusionDashAttack.Factory>().AsCached();
-            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, CharmDashAttack, CharmDashAttack.Factory>().AsCached();
-            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, MiasmaDashAttack, MiasmaDashAttack.Factory>().AsCached();
-            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, DarknessDashAttack, DarknessDashAttack.Factory>().AsCached();
-            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, LifeStealDashAttack, LifeStealDashAttack.Factory>().AsCached();
-            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, HellFireDashAttack, HellFireDashAttack.Factory>().AsCached();
-            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, StigmataDashAttack, StigmataDashAttack.Factory>().AsCached();
-            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, SoakingWetDashAttack, SoakingWetDashAttack.Factory>().AsCached();
-            Container.BindFactory<int, Animator, Transform, IAttackBehaviour, BurningDashAttack, BurningDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeDashAttackFactory.Factory>().FromFactory<AttributeDashAttackFactory>();
+            Container.BindFactory<Animator, NormalDashAttack, NormalDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, PoisonDashAttack, PoisonDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, ParalysisDashAttack, ParalysisDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, FrozenDashAttack, FrozenDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, ConfusionDashAttack, ConfusionDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, CharmDashAttack, CharmDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, MiasmaDashAttack, MiasmaDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, DarknessDashAttack, DarknessDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, LifeStealDashAttack, LifeStealDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, HellFireDashAttack, HellFireDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, StigmataDashAttack, StigmataDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, SoakingWetDashAttack, SoakingWetDashAttack.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, BurningDashAttack, BurningDashAttack.Factory>().AsCached();
         }
 
         private void InstallCrushImpact()
@@ -183,7 +183,7 @@ namespace Common.Installer
 
         private void InstallHealSkill()
         {
-            Container.Bind<HealSkill>().AsCached();
+            Container.Bind<Heal>().AsCached();
         }
     }
 }

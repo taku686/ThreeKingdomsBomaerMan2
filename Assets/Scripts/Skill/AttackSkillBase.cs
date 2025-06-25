@@ -11,6 +11,7 @@ namespace Skill
     public class AttackSkillBase
     {
         protected CancellationTokenSource _Cts;
+        private bool _isHitAttack;
 
         protected static bool IsObstaclesTag(GameObject hitObject)
         {
@@ -20,7 +21,7 @@ namespace Skill
                    hitObject.CompareTag(GameCommonData.WallTag);
         }
 
-        protected static void HitPlayer(GameObject player, GameObject hitPlayer, int skillId)
+        protected void HitPlayer(GameObject player, GameObject hitPlayer, int skillId)
         {
             var playerPhotonView = player.GetComponent<PhotonView>();
             var hitPlayerPhotonView = hitPlayer.GetComponent<PhotonView>();
@@ -34,15 +35,16 @@ namespace Skill
                 return;
             }
 
-            var statusInfo = hitPlayer.GetComponent<PlayerConditionInfo>();
-            if (statusInfo == null)
+            if (_isHitAttack)
             {
                 return;
             }
 
+            _isHitAttack = true;
+            var statusInfo = hitPlayer.GetComponent<PlayerConditionInfo>();
             var playerIndex = statusInfo.GetPlayerIndex();
             var dic = new Dictionary<int, int> { { playerIndex, skillId } };
-            PhotonNetwork.LocalPlayer.SetSkillData(dic);
+            PhotonNetwork.LocalPlayer.SetHitAttackData(dic);
         }
 
         protected void Cancel()

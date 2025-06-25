@@ -21,9 +21,9 @@ public class InBattleView : BattleViewBase
         statusInBattleView.ApplyViewModel(viewModel);
     }
 
-    public void ApplyBuffState(StatusType statusType, int value, bool isBuff, bool isDebuff)
+    public void ApplyBuffState(StatusType statusType, int value)
     {
-        statusInBattleView.ApplyBuffState(statusType, value, isBuff, isDebuff);
+        statusInBattleView.ApplyBuffState(statusType, value);
     }
 
     public void ApplyInputViewModel(InputView.ViewModel viewModel)

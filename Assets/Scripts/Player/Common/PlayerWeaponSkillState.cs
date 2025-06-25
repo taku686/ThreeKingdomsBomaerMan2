@@ -1,3 +1,8 @@
+using System.Collections.Generic;
+using Manager.NetworkManager;
+using Photon.Pun;
+using UnityEngine;
+
 namespace Player.Common
 {
     public partial class PlayerCore
@@ -10,7 +15,11 @@ namespace Player.Common
                 var playerKey = Owner.GetPlayerKey();
                 var weaponData = _PhotonNetworkManager.GetWeaponData(playerKey);
                 _SkillMasterData = weaponData.NormalSkillMasterData;
-                _ActiveSkillManager.ActivateSkill(_SkillMasterData);
+                PlayBackAnimation(_SkillMasterData);
+                var playerIndex = _PlayerConditionInfo.GetPlayerIndex();
+                Debug.Log(playerIndex + " " + _SkillMasterData.Id);
+                var dic = new Dictionary<int, int> { { playerIndex, _SkillMasterData.Id } };
+                PhotonNetwork.LocalPlayer.SetSkillData(dic);
             }
         }
     }

@@ -1,8 +1,6 @@
-using System;
 using Common.Data;
 using Manager;
 using Photon.Pun;
-using UniRx;
 using UnityEngine;
 
 namespace Player.Common
@@ -19,12 +17,11 @@ namespace Player.Common
         private LayerMask _blockingLayer;
         private MoveDirection _currentMoveDirection;
 
-        public void Initialize(Animator animator, IObservable<(StatusType statusType, float value)> speedBuffObservable)
+        public void Initialize(Animator animator)
         {
             _blockingLayer = LayerMask.GetMask(GameCommonData.ObstacleLayer) | LayerMask.GetMask(GameCommonData.BombLayer);
             _playerTransform = transform;
             _rigidbody = GetComponent<Rigidbody>();
-            Subscribe(speedBuffObservable);
             SetAnimator(animator);
         }
 
@@ -38,14 +35,6 @@ namespace Player.Common
             _animator = animator;
             _movementAnimationManager ??= new MovementAnimationManager();
             _movementAnimationManager.SetAnimator(_animator);
-        }
-
-        private void Subscribe(IObservable<(StatusType statusType, float value)> speedBuffObservable)
-        {
-            speedBuffObservable
-                .Where(tuple => tuple.statusType == StatusType.Speed)
-                .Subscribe(tuple => { _moveSpeed = tuple.value; })
-                .AddTo(gameObject);
         }
 
         public void Run(Vector3 inputValue)

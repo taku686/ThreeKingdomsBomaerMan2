@@ -1,8 +1,10 @@
 using System;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Skill;
 using UniRx;
 using UnityEngine;
+using Zenject;
 
 public class SkillEffectActivateUseCase : MonoBehaviour
 {
@@ -51,36 +53,42 @@ public class SkillEffectActivateUseCase : MonoBehaviour
 
     #endregion
 
+    [Inject] private UnderAbnormalConditionsBySkillUseCase _underAbnormalConditionsBySkillUseCase;
+
     private const float OneSecond = 1f;
-    private const float EffectScaleAdjustedValue = 2f;
 
     public void Initialize
     (
-        IObservable<(int, SkillMasterData)> onSkillActivate,
-        int actorNumber
+        IObservable<(int, SkillMasterData)> activeSkillObservable,
+        int instantiationId
     )
     {
-        Subscribe(onSkillActivate, actorNumber);
+        Subscribe(activeSkillObservable, instantiationId);
         ForceAllEffectStop();
     }
 
     private void Subscribe
     (
-        IObservable<(int, SkillMasterData)> onSkillActivate,
-        int actorNumber
+        IObservable<(int, SkillMasterData)> activeSkillObservable,
+        int instantiationId
     )
     {
-        onSkillActivate
-            .Where(tuple => tuple.Item1 == actorNumber)
+        activeSkillObservable
+            .Where(tuple => tuple.Item1 == instantiationId)
             .Select(tuple => tuple.Item2)
-            .Subscribe(skillData =>
+            .Subscribe(ActivateBuffEffect)
+            .AddTo(gameObject.GetCancellationTokenOnDestroy());
+
+        _underAbnormalConditionsBySkillUseCase
+            .OnAbnormalConditionAsObservable()
+            .Where(tuple => tuple.Item1 == instantiationId)
+            .Subscribe(tuple =>
             {
-                ActivateBuffEffect(skillData);
+                var skillData = tuple.Item2;
                 ActivateAbnormalStateEffect(skillData);
             })
             .AddTo(gameObject.GetCancellationTokenOnDestroy());
     }
-
 
     private void ActivateBuffEffect(SkillMasterData skillMasterData)
     {
@@ -246,7 +254,6 @@ public class SkillEffectActivateUseCase : MonoBehaviour
         }
 
         effect.gameObject.SetActive(true);
-        effect.transform.localScale *= EffectScaleAdjustedValue;
         effect.Play();
         await UniTask.Delay(TimeSpan.FromSeconds(duration));
         if (effect == null)

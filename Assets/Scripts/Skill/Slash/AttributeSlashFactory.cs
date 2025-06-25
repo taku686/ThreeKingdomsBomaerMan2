@@ -2,11 +2,10 @@
 using Common.Data;
 using UnityEngine;
 using Zenject;
-using TargetScanner = DC.Scanner.TargetScanner;
 
 namespace Skill.Attack
 {
-    public class AttributeSlashFactory : IFactory<int, TargetScanner, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour>
+    public class AttributeSlashFactory : IFactory<int, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour>
     {
         private readonly NormalSlash.Factory _normalSlashBehaviourFactory;
         private readonly PoisonSlash.Factory _poisonSlashBehaviourFactory;
@@ -73,7 +72,6 @@ namespace Skill.Attack
         public IAttackBehaviour Create
         (
             int skillId,
-            TargetScanner targetScanner,
             Animator animator,
             Transform playerTransform,
             AbnormalCondition attribute,
@@ -88,29 +86,29 @@ namespace Skill.Attack
             return attribute switch
             {
                 AbnormalCondition.None => _normalSlashBehaviourFactory.Create(animator),
-                AbnormalCondition.Poison => _poisonSlashBehaviourFactory.Create(skillId, targetScanner, animator, playerTransform, attack),
-                AbnormalCondition.Paralysis => _paralysisSlashBehaviourFactory.Create(skillId, targetScanner, animator, playerTransform, attack),
-                AbnormalCondition.Frozen => _frozenSlashBehaviourFactory.Create(skillId, targetScanner, animator, playerTransform, attack),
-                AbnormalCondition.Confusion => _confusionSlashBehaviourFactory.Create(skillId, targetScanner, animator, playerTransform, attack),
-                AbnormalCondition.NockBack => _nockBackSlashBehaviourFactory.Create(skillId, targetScanner, animator, playerTransform, attack),
-                AbnormalCondition.Charm => _charmSlashBehaviourFactory.Create(skillId, targetScanner, animator, playerTransform, attack),
-                AbnormalCondition.Miasma => _miasmaSlashBehaviourFactory.Create(skillId, targetScanner, animator, playerTransform, attack),
-                AbnormalCondition.Darkness => _darknessSlashBehaviourFactory.Create(skillId, targetScanner, animator, playerTransform, attack),
-                AbnormalCondition.Sealed => _sealedSlashBehaviourFactory.Create(skillId, targetScanner, animator, playerTransform, attack),
-                AbnormalCondition.LifeSteal => _lifeStealSlashBehaviourFactory.Create(skillId, targetScanner, animator, playerTransform, attack),
-                AbnormalCondition.Curse => _curseSlashBehaviourFactory.Create(skillId, targetScanner, animator, playerTransform, attack),
-                AbnormalCondition.HellFire => _hellFireSlashBehaviourFactory.Create(skillId, targetScanner, animator, playerTransform, attack),
-                AbnormalCondition.Fear => _fearSlashBehaviourFactory.Create(skillId, targetScanner, animator, playerTransform, attack),
-                AbnormalCondition.TimeStop => _timeStopSlashBehaviourFactory.Create(skillId, targetScanner, animator, playerTransform, attack),
-                AbnormalCondition.Apraxia => _apraxiaSlashBehaviourFactory.Create(skillId, targetScanner, animator, playerTransform, attack),
-                AbnormalCondition.SoakingWet => _soakingWetSlashBehaviourFactory.Create(skillId, targetScanner, animator, playerTransform, attack),
-                AbnormalCondition.Burning => _burningSlashBehaviourFactory.Create(skillId, targetScanner, animator, playerTransform, attack),
+                AbnormalCondition.Poison => _poisonSlashBehaviourFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.Paralysis => _paralysisSlashBehaviourFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.Frozen => _frozenSlashBehaviourFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.Confusion => _confusionSlashBehaviourFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.NockBack => _nockBackSlashBehaviourFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.Charm => _charmSlashBehaviourFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.Miasma => _miasmaSlashBehaviourFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.Darkness => _darknessSlashBehaviourFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.Sealed => _sealedSlashBehaviourFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.LifeSteal => _lifeStealSlashBehaviourFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.Curse => _curseSlashBehaviourFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.HellFire => _hellFireSlashBehaviourFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.Fear => _fearSlashBehaviourFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.TimeStop => _timeStopSlashBehaviourFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.Apraxia => _apraxiaSlashBehaviourFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.SoakingWet => _soakingWetSlashBehaviourFactory.Create(skillId, playerTransform, attack),
+                AbnormalCondition.Burning => _burningSlashBehaviourFactory.Create(skillId, playerTransform, attack),
                 AbnormalCondition.ParalyzingThunder => throw new System.NotImplementedException(),
                 _ => throw new System.NotImplementedException()
             };
         }
 
-        public class Factory : PlaceholderFactory<int, TargetScanner, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour>
+        public class Factory : PlaceholderFactory<int, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour>
         {
         }
     }

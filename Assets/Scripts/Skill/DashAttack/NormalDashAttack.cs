@@ -9,31 +9,25 @@ namespace Skill.DashAttack
     public class NormalDashAttack : IAttackBehaviour
     {
         private readonly Animator _animator;
-        private readonly PlayerDash _playerDash;
-        private const float DashForce = 2.5f;
 
         [Inject]
         public NormalDashAttack
         (
-            Animator animator,
-            PlayerDash playerDash
+            Animator animator
         )
         {
             _animator = animator;
-            _playerDash = playerDash;
         }
 
         public void Attack()
         {
-            _playerDash.Dash(DashForce);
-            _animator.SetTrigger(GameCommonData.DashAttackHashKey);
         }
 
         public void Dispose()
         {
         }
 
-        public class Factory : PlaceholderFactory<Animator, PlayerDash, NormalDashAttack>
+        public class Factory : PlaceholderFactory<Animator, NormalDashAttack>
         {
         }
     }

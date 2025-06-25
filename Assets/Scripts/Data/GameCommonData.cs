@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Common.Data
@@ -116,6 +117,31 @@ namespace Common.Data
         public static int GetLayerAffectedByTheBlast()
         {
             return LayerMask.GetMask(ObstacleLayer);
+        }
+
+        public static int GetAnimatorHashKey(SkillActionType actionType)
+        {
+            return actionType switch
+            {
+                SkillActionType.AllBuff => BuffHashKey,
+                SkillActionType.HpBuff => BuffHashKey,
+                SkillActionType.AttackBuff => BuffHashKey,
+                SkillActionType.SpeedBuff => BuffHashKey,
+                SkillActionType.BombLimitBuff => BuffHashKey,
+                SkillActionType.FireRangeBuff => BuffHashKey,
+                SkillActionType.ResistanceBuff => BuffHashKey,
+                SkillActionType.DefenseBuff => BuffHashKey,
+                SkillActionType.Slash => SlashHashKey,
+                SkillActionType.Shot => MagicShotHashKey,
+                SkillActionType.Dash => DashHashKey,
+                SkillActionType.DashAttack => DashAttackHashKey,
+                SkillActionType.FlyingSlash => SlashHashKey,
+                SkillActionType.Impact => ImpactHashKey,
+                SkillActionType.SlashSpin => SlashSpinHashKey,
+                SkillActionType.Heal => BuffHashKey,
+                SkillActionType.ContinuousHeal => BuffHashKey,
+                _ => throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null)
+            };
         }
 
         public static class Terms

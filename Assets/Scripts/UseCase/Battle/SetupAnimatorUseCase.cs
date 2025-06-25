@@ -136,7 +136,6 @@ namespace UseCase.Battle
 
         public void Dispose()
         {
-            _activeSkillManager?.Dispose();
         }
     }
 }

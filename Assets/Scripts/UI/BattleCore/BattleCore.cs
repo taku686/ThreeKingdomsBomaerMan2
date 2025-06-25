@@ -43,9 +43,9 @@ namespace Manager.BattleManager
         [Inject] private AbnormalConditionEffectUseCase _abnormalConditionEffectUseCase;
 
         //Manager
+        [Inject] private ActiveSkillManager _activeSkillManager;
         [Inject] private PhotonNetworkManager _photonNetworkManager;
         [Inject] private MissionManager _missionManager;
-        [Inject] private ActiveSkillManager _activeSkillManager;
         [Inject] private PassiveSkillManager _passiveSkillManager;
         [SerializeField] private CameraManager cameraManager;
         [SerializeField] private StageManager stageManager;

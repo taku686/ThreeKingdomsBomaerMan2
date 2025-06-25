@@ -50,7 +50,7 @@ public class ApplyStatusSkillUseCase : IDisposable
             _ => throw new ArgumentOutOfRangeException(nameof(statusType), statusType, null)
         };
         addValue = addValue == GameCommonData.InvalidNumber ? 0 : addValue;
-        return appliedLevelValue + addValue;
+        return Mathf.FloorToInt(appliedLevelValue + addValue);
     }
 
     public int GetStatusSkillValue(int skillId, StatusType statusType)

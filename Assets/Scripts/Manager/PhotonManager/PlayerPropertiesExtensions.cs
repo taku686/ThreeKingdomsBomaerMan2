@@ -9,6 +9,7 @@ namespace Manager.NetworkManager
         private const string WeaponDataKey = "Wea";
         private const string CharacterLevelKey = "Lev";
         public const string SkillDataKey = "Ski";
+        public const string HitAttackDataKey = "Hit";
         public const string PlayerIndexKey = "Index";
         public const string PlayerGenerateKey = "Gen";
         private static readonly Hashtable PropsToSet = new();
@@ -27,6 +28,11 @@ namespace Manager.NetworkManager
         public static Dictionary<int, int> GetSkillId(this Photon.Realtime.Player player)
         {
             return (Dictionary<int, int>)player.CustomProperties[SkillDataKey];
+        }
+
+        public static Dictionary<int, int> GetHitAttack(this Photon.Realtime.Player player)
+        {
+            return (Dictionary<int, int>)player.CustomProperties[HitAttackDataKey];
         }
 
         public static Dictionary<int, int> GetCharacterLevel(this Photon.Realtime.Player player)
@@ -56,6 +62,13 @@ namespace Manager.NetworkManager
         public static void SetSkillData(this Photon.Realtime.Player player, Dictionary<int, int> dic)
         {
             PropsToSet[SkillDataKey] = dic;
+            player.SetCustomProperties(PropsToSet);
+            PropsToSet.Clear();
+        }
+
+        public static void SetHitAttackData(this Photon.Realtime.Player player, Dictionary<int, int> dic)
+        {
+            PropsToSet[HitAttackDataKey] = dic;
             player.SetCustomProperties(PropsToSet);
             PropsToSet.Clear();
         }

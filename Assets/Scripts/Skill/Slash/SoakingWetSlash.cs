@@ -10,8 +10,6 @@ namespace Skill.Attack
     public class SoakingWetSlash : SlashBase
     {
         private readonly int _skillId;
-        private readonly TargetScanner _targetScanner;
-        private readonly Animator _animator;
         private readonly Transform _playerTransform;
         private readonly IAttackBehaviour _attackBehaviour;
 
@@ -19,16 +17,12 @@ namespace Skill.Attack
         public SoakingWetSlash
         (
             int skillId,
-            TargetScanner targetScanner,
-            Animator animator,
             Transform playerTransform,
             IAttackBehaviour attackBehaviour,
             SkillEffectRepository skillEffectRepository
         ) : base(skillEffectRepository)
         {
             _skillId = skillId;
-            _targetScanner = targetScanner;
-            _animator = animator;
             _playerTransform = playerTransform;
             _attackBehaviour = attackBehaviour;
         }
@@ -36,14 +30,14 @@ namespace Skill.Attack
         public override void Attack()
         {
             _attackBehaviour.Attack();
-            Slash(AbnormalCondition.SoakingWet, _animator, _targetScanner, _skillId, _playerTransform);
+            Slash(AbnormalCondition.SoakingWet, _skillId, _playerTransform);
         }
 
         public override void Dispose()
         {
         }
 
-        public class Factory : PlaceholderFactory<int, TargetScanner, Animator, Transform, IAttackBehaviour, SoakingWetSlash>
+        public class Factory : PlaceholderFactory<int, Transform, IAttackBehaviour, SoakingWetSlash>
         {
         }
     }

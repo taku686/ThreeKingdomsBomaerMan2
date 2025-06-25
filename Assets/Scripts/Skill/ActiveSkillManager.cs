@@ -1,14 +1,13 @@
 ﻿using System;
 using Common.Data;
+using Photon.Pun;
 using Player.Common;
 using Skill.Attack;
 using Skill.Attack.FlyingSlash;
 using Skill.CrushImpact;
 using Skill.DashAttack;
-using Skill.Heal;
 using Skill.MagicShot;
 using Skill.SlashSpin;
-using UniRx;
 using UnityEngine;
 using Zenject;
 
@@ -23,14 +22,10 @@ namespace Skill
         private readonly AttributeSlashSpinFactory.Factory _slashSpinFactory;
         private readonly AttributeMagicShotFactory.Factory _magicShotFactory;
         private readonly BuffSkill _buffSkill;
-        private readonly HealSkill _healSkill;
+        private readonly Heal.Heal _heal;
         private Animator _animator;
-        private PlayerDash _playerDash;
-        private DC.Scanner.TargetScanner _targetScanner;
-        private Transform _playerTransform;
         private const int GodSignBuffSkillId = 160;
         private const int TopThree = 3;
-
 
         [Inject]
         public ActiveSkillManager
@@ -42,7 +37,7 @@ namespace Skill
             AttributeSlashSpinFactory.Factory slashSpinFactory,
             AttributeMagicShotFactory.Factory magicShotFactory,
             BuffSkill buffSkill,
-            HealSkill healSkill
+            Heal.Heal heal
         )
         {
             _slashFactory = slashFactory;
@@ -52,42 +47,28 @@ namespace Skill
             _slashSpinFactory = slashSpinFactory;
             _magicShotFactory = magicShotFactory;
             _buffSkill = buffSkill;
-            _healSkill = healSkill;
+            _heal = heal;
         }
 
         public void Initialize
         (
-            DC.Scanner.TargetScanner targetScanner,
             SkillMasterData[] statusSkillMasterDatum,
             Transform playerTransform,
-            Animator animator,
-            Subject<(StatusType statusType, float value)> statusBuff,
-            Subject<(StatusType statusType, int value, bool isBuff, bool isDebuff)> statusBuffUi,
             int characterId,
-            TranslateStatusInBattleUseCase translateStatusInBattleUseCase,
-            Action<int> hpCalculateFunc,
-            PlayerDash playerDash,
             PlayerCore.PlayerStatusInfo playerStatusInfo
         )
         {
-            _targetScanner = targetScanner;
-            _playerTransform = playerTransform;
-            _playerDash = playerDash;
             var playerConditionInfo = playerTransform.GetComponent<PlayerConditionInfo>();
-            SetupAnimator(animator);
             _buffSkill.Initialize
             (
-                statusBuff,
-                statusBuffUi,
                 characterId,
                 statusSkillMasterDatum,
-                translateStatusInBattleUseCase,
-                playerConditionInfo
+                playerConditionInfo,
+                playerStatusInfo
             );
 
-            _healSkill.Initialize
+            _heal.Initialize
             (
-                hpCalculateFunc,
                 playerConditionInfo,
                 playerStatusInfo
             );
@@ -95,62 +76,67 @@ namespace Skill
 
         public void SetupAnimator(Animator animator)
         {
+            if (!PhotonNetwork.LocalPlayer.IsLocal)
+            {
+                return;
+            }
+
             _animator = animator;
         }
 
-        public void ActivateSkill(SkillMasterData skillMasterData)
+        public void ActivateSkill(SkillMasterData skillMasterData, Transform playerTransform)
         {
             if (IsSlashSkillActionType(skillMasterData))
             {
-                SlashSkill(skillMasterData);
+                SlashSkill(skillMasterData, playerTransform);
             }
 
             if (IsFlyingSlashSkillActionType(skillMasterData))
             {
-                FlyingSlashSkill(skillMasterData);
+                FlyingSlashSkill(skillMasterData, playerTransform);
             }
 
             if (IsMagicShotSkillActionType(skillMasterData))
             {
-                MagicShotSkill(skillMasterData);
+                MagicShotSkill(skillMasterData, playerTransform);
             }
 
             if (IsDashAttackSkillActionType(skillMasterData))
             {
-                DashAttackSkill(skillMasterData);
+                DashAttackSkill(skillMasterData, playerTransform);
             }
 
             if (IsCrushImpactSkillActionType(skillMasterData))
             {
-                CrushImpactSkill(skillMasterData);
+                CrushImpactSkill(skillMasterData, playerTransform);
             }
 
             if (IsSlashSpinSkillActionType(skillMasterData))
             {
-                SlashSpinSkill(skillMasterData);
+                SlashSpinSkill(skillMasterData, playerTransform);
             }
+        }
 
-            if (IsBuffSkillActionType(skillMasterData))
-            {
-                BuffSkill(skillMasterData);
-            }
-
+        public void Heal(SkillMasterData skillMasterData)
+        {
             if (IsHealSkillActionType(skillMasterData))
             {
-                _animator.SetTrigger(GameCommonData.BuffHashKey);
-                _healSkill.Heal(skillMasterData);
+                _heal.HealSkill(skillMasterData);
             }
 
             if (IsContinuousHealSkillActionType(skillMasterData))
             {
-                _animator.SetTrigger(GameCommonData.BuffHashKey);
-                _healSkill.ContinuousHeal(skillMasterData);
+                _heal.ContinuousHealSkill(skillMasterData);
             }
         }
 
-        private void BuffSkill(SkillMasterData skillMasterData)
+        public void BuffSkill(SkillMasterData skillMasterData)
         {
-            _animator.SetTrigger(GameCommonData.BuffHashKey);
+            if (!IsBuffSkillActionType(skillMasterData))
+            {
+                return;
+            }
+
             if (skillMasterData.Id == GodSignBuffSkillId)
             {
                 _buffSkill.Buff(skillMasterData, TopThree).Forget();
@@ -161,85 +147,85 @@ namespace Skill
             }
         }
 
-        private void SlashSkill(SkillMasterData skillMasterData)
+        private void SlashSkill(SkillMasterData skillMasterData, Transform playerTransform)
         {
             var skillId = skillMasterData.Id;
-            var slash = _slashFactory.Create(skillId, _targetScanner, _animator, _playerTransform, AbnormalCondition.None, null);
+            var slash = _slashFactory.Create(skillId, _animator, playerTransform, AbnormalCondition.None, null);
             foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
             {
                 if (abnormalCondition == AbnormalCondition.None)
                     continue;
-                slash = _slashFactory.Create(skillId, _targetScanner, _animator, _playerTransform, abnormalCondition, slash);
+                slash = _slashFactory.Create(skillId, _animator, playerTransform, abnormalCondition, slash);
             }
 
             slash.Attack();
         }
 
-        private void FlyingSlashSkill(SkillMasterData skillMasterData)
+        private void FlyingSlashSkill(SkillMasterData skillMasterData, Transform playerTransform)
         {
             var skillId = skillMasterData.Id;
-            var flyingSlash = _flyingSlashFactory.Create(skillId, _animator, _playerTransform, AbnormalCondition.None, null);
+            var flyingSlash = _flyingSlashFactory.Create(skillId, _animator, playerTransform, AbnormalCondition.None, null);
             foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
             {
                 if (abnormalCondition == AbnormalCondition.None)
                     continue;
-                flyingSlash = _flyingSlashFactory.Create(skillId, _animator, _playerTransform, abnormalCondition, flyingSlash);
+                flyingSlash = _flyingSlashFactory.Create(skillId, _animator, playerTransform, abnormalCondition, flyingSlash);
             }
 
             flyingSlash.Attack();
         }
 
-        private void MagicShotSkill(SkillMasterData skillMasterData)
+        private void MagicShotSkill(SkillMasterData skillMasterData, Transform playerTransform)
         {
             var skillId = skillMasterData.Id;
-            var magicShot = _magicShotFactory.Create(skillId, _animator, _playerTransform, AbnormalCondition.None, null);
+            var magicShot = _magicShotFactory.Create(skillId, _animator, playerTransform, AbnormalCondition.None, null);
             foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
             {
                 if (abnormalCondition == AbnormalCondition.None)
                     continue;
-                magicShot = _magicShotFactory.Create(skillId, _animator, _playerTransform, abnormalCondition, magicShot);
+                magicShot = _magicShotFactory.Create(skillId, _animator, playerTransform, abnormalCondition, magicShot);
             }
 
             magicShot.Attack();
         }
 
-        private void DashAttackSkill(SkillMasterData skillMasterData)
+        private void DashAttackSkill(SkillMasterData skillMasterData, Transform playerTransform)
         {
             var skillId = skillMasterData.Id;
-            var dashAttack = _dashAttackFactory.Create(skillId, _animator, _playerDash, _playerTransform, AbnormalCondition.None, null);
+            var dashAttack = _dashAttackFactory.Create(skillId, _animator, playerTransform, AbnormalCondition.None, null);
             foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
             {
                 if (abnormalCondition == AbnormalCondition.None)
                     continue;
-                dashAttack = _dashAttackFactory.Create(skillId, _animator, _playerDash, _playerTransform, abnormalCondition, dashAttack);
+                dashAttack = _dashAttackFactory.Create(skillId, _animator, playerTransform, abnormalCondition, dashAttack);
             }
 
             dashAttack.Attack();
         }
 
-        private void SlashSpinSkill(SkillMasterData skillMasterData)
+        private void SlashSpinSkill(SkillMasterData skillMasterData, Transform playerTransform)
         {
             var skillId = skillMasterData.Id;
-            var slashSpin = _slashSpinFactory.Create(skillId, _animator, _playerTransform, AbnormalCondition.None, null);
+            var slashSpin = _slashSpinFactory.Create(skillId, _animator, playerTransform, AbnormalCondition.None, null);
             foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
             {
                 if (abnormalCondition == AbnormalCondition.None)
                     continue;
-                slashSpin = _slashSpinFactory.Create(skillId, _animator, _playerTransform, abnormalCondition, slashSpin);
+                slashSpin = _slashSpinFactory.Create(skillId, _animator, playerTransform, abnormalCondition, slashSpin);
             }
 
             slashSpin.Attack();
         }
 
-        private void CrushImpactSkill(SkillMasterData skillMasterData)
+        private void CrushImpactSkill(SkillMasterData skillMasterData, Transform playerTransform)
         {
             var skillId = skillMasterData.Id;
-            var crushImpact = _crushImpactFactory.Create(skillId, _animator, _playerTransform, AbnormalCondition.None, null);
+            var crushImpact = _crushImpactFactory.Create(skillId, _animator, playerTransform, AbnormalCondition.None, null);
             foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
             {
                 if (abnormalCondition == AbnormalCondition.None)
                     continue;
-                crushImpact = _crushImpactFactory.Create(skillId, _animator, _playerTransform, abnormalCondition, crushImpact);
+                crushImpact = _crushImpactFactory.Create(skillId, _animator, playerTransform, abnormalCondition, crushImpact);
             }
 
             crushImpact.Attack();
@@ -309,7 +295,8 @@ namespace Skill
 
         public void Dispose()
         {
-            // TODO マネージリソースをここで解放します
+            _buffSkill?.Dispose();
+            _heal?.Dispose();
         }
     }
 }

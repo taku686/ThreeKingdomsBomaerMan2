@@ -17,7 +17,6 @@ namespace Skill.SlashSpin
 
         public void Attack()
         {
-            _animator.SetTrigger(GameCommonData.SlashSpinHashKey);
         }
 
         public void Dispose()

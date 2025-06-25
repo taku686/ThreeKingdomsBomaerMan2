@@ -106,8 +106,34 @@ namespace Manager.BattleManager
                     })
                     .AddTo(_cts.Token);
 
-                _PlayerCore._StatusBuffUiObservable
-                    .Subscribe(tuple => { _View.ApplyBuffState(tuple.statusType, tuple.speed, tuple.isBuff, tuple.isDebuff); })
+                _PlayerCore._PlayerStatusInfo
+                    ._Attack
+                    .Subscribe(value => { _View.ApplyBuffState(StatusType.Attack, value); })
+                    .AddTo(_cts.Token);
+
+                _PlayerCore._PlayerStatusInfo
+                    ._Speed
+                    .Subscribe(value => { _View.ApplyBuffState(StatusType.Speed, value); })
+                    .AddTo(_cts.Token);
+
+                _PlayerCore._PlayerStatusInfo
+                    ._Defense
+                    .Subscribe(value => { _View.ApplyBuffState(StatusType.Defense, value); })
+                    .AddTo(_cts.Token);
+
+                _PlayerCore._PlayerStatusInfo
+                    ._Resistance
+                    .Subscribe(value => { _View.ApplyBuffState(StatusType.Resistance, value); })
+                    .AddTo(_cts.Token);
+
+                _PlayerCore._PlayerStatusInfo
+                    ._FireRange
+                    .Subscribe(value => { _View.ApplyBuffState(StatusType.FireRange, value); })
+                    .AddTo(_cts.Token);
+
+                _PlayerCore._PlayerStatusInfo
+                    ._BombLimit
+                    .Subscribe(value => { _View.ApplyBuffState(StatusType.BombLimit, value); })
                     .AddTo(_cts.Token);
             }
 

@@ -17,7 +17,7 @@ namespace Skill.MagicShot
 
         public void Attack()
         {
-            _animator.SetTrigger(GameCommonData.MagicShotHashKey);
+           
         }
 
         public void Dispose()
