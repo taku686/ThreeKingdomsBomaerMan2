@@ -1,6 +1,7 @@
 using Common.Data;
 using Manager;
 using Photon.Pun;
+using Skill;
 using UnityEngine;
 
 namespace Player.Common
@@ -12,16 +13,22 @@ namespace Player.Common
         private Transform _playerTransform;
         private Animator _animator;
         private MovementAnimationManager _movementAnimationManager;
+        private AbnormalConditionEffect _abnormalConditionEffect;
         private Rigidbody _rigidbody;
         private Vector3 _currentDestination;
         private LayerMask _blockingLayer;
         private MoveDirection _currentMoveDirection;
 
-        public void Initialize(Animator animator)
+        public void Initialize
+        (
+            Animator animator,
+            AbnormalConditionEffect abnormalConditionEffect
+        )
         {
             _blockingLayer = LayerMask.GetMask(GameCommonData.ObstacleLayer) | LayerMask.GetMask(GameCommonData.BombLayer);
             _playerTransform = transform;
             _rigidbody = GetComponent<Rigidbody>();
+            _abnormalConditionEffect = abnormalConditionEffect;
             SetAnimator(animator);
         }
 
@@ -39,13 +46,13 @@ namespace Player.Common
 
         public void Run(Vector3 inputValue)
         {
-            if (!PhotonNetwork.LocalPlayer.IsLocal)
+            _movementAnimationManager.Move(GetDirection(inputValue));
+            if (inputValue is { x: 0, z: 0 } || !_abnormalConditionEffect._canMove)
             {
+                _rigidbody.velocity = Vector3.zero;
                 return;
             }
 
-            _movementAnimationManager.Move(GetDirection(inputValue));
-            if (inputValue is { x: 0, z: 0 })
             {
                 _rigidbody.velocity = Vector3.zero;
                 return;

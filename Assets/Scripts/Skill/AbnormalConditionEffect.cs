@@ -4,13 +4,12 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using UniRx;
-using UnityEngine;
 using Zenject;
 using Random = UnityEngine.Random;
 
 namespace Skill
 {
-    public class AbnormalConditionEffectUseCase : IDisposable
+    public class AbnormalConditionEffect : IDisposable
     {
         public bool _canMove;
         private bool _canSkill;
@@ -20,7 +19,7 @@ namespace Skill
         private readonly Dictionary<AbnormalCondition, bool> _abnormalConditionInProgress = new();
 
         [Inject]
-        public AbnormalConditionEffectUseCase()
+        public AbnormalConditionEffect()
         {
             _canMove = true;
         }

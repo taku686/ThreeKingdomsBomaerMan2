@@ -43,13 +43,13 @@ namespace Enemy
 
         public void Initialize()
         {
-            /*InitializeState();
+            InitializeState();
             _seeker = GetComponent<Seeker>();
             _aiLerp = GetComponent<AILerp>();
             _photonView = GetComponent<PhotonView>();
             SetupBoxCollider();
             SetupCharacterStatusManager();
-            SetupPutBomb();*/
+            SetupPutBomb();
         }
 
         private void SetupBoxCollider()

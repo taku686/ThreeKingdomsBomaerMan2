@@ -49,8 +49,8 @@ namespace Manager.BattleManager
             private GameObject _CircleIndicatorPrefab => Owner._circleSkillIndicatorPrefab;
             private StartPointsRepository _StartPointsRepository => Owner._startPointsRepository;
 
-            private AbnormalConditionEffectUseCase _AbnormalConditionEffectUseCase =>
-                Owner._abnormalConditionEffectUseCase;
+            private AbnormalConditionEffect _AbnormalConditionEffect =>
+                Owner._abnormalConditionEffect;
 
             private PhotonView _photonView;
 
@@ -280,7 +280,7 @@ namespace Manager.BattleManager
                     _UnderAbnormalConditionsBySkillUseCase,
                     _PlayerGeneratorUseCase,
                     _CharacterCreateUseCase,
-                    _AbnormalConditionEffectUseCase,
+                    _AbnormalConditionEffect,
                     hpKey
                 );
             }

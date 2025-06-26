@@ -32,7 +32,7 @@ namespace Player.Common
         private UnderAbnormalConditionsBySkillUseCase _underAbnormalConditionsBySkillUseCase;
         private PlayerGeneratorUseCase _playerGeneratorUseCase;
         private CharacterCreateUseCase _characterCreateUseCase;
-        private AbnormalConditionEffectUseCase _abnormalConditionEffectUseCase;
+        private AbnormalConditionEffect _abnormalConditionEffect;
 
         private PlayerConditionInfo _playerConditionInfo;
         private PlayerMove _playerMove;
@@ -78,7 +78,7 @@ namespace Player.Common
             UnderAbnormalConditionsBySkillUseCase underAbnormalConditionsBySkillUseCase,
             PlayerGeneratorUseCase playerGeneratorUseCase,
             CharacterCreateUseCase characterCreateUseCase,
-            AbnormalConditionEffectUseCase abnormalConditionEffectUseCase,
+            AbnormalConditionEffect abnormalConditionEffect,
             string key
         )
         {
@@ -90,7 +90,7 @@ namespace Player.Common
             _underAbnormalConditionsBySkillUseCase = underAbnormalConditionsBySkillUseCase;
             _playerGeneratorUseCase = playerGeneratorUseCase;
             _characterCreateUseCase = characterCreateUseCase;
-            _abnormalConditionEffectUseCase = abnormalConditionEffectUseCase;
+            _abnormalConditionEffect = abnormalConditionEffect;
             InitializeComponent();
             InitializeState();
             Subscribe();
@@ -108,7 +108,7 @@ namespace Player.Common
             _TeamMemberReactiveProperty.Value = PhotonNetworkManager.GetPlayerKey(photonView.InstantiationId, 0);
             SetupTranslateStatusInBattleUseCase();
             _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
-            _playerMove.Initialize(_animator);
+            _playerMove.Initialize(_animator, _abnormalConditionEffect);
             _playerDash.Initialize();
             _cancellationToken = gameObject.GetCancellationTokenOnDestroy();
         }
@@ -226,7 +226,7 @@ namespace Player.Common
                     var abnormalConditions = skillData.InvalidAbnormalConditionEnum;
                     foreach (var abnormalCondition in abnormalConditions)
                     {
-                        _abnormalConditionEffectUseCase.InAsTask(abnormalCondition, skillData.EffectTime);
+                        _abnormalConditionEffect.InAsTask(abnormalCondition, skillData.EffectTime);
                     }
                 })
                 .AddTo(_cancellationToken);
