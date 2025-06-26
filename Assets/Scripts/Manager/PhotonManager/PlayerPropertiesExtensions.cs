@@ -9,30 +9,35 @@ namespace Manager.NetworkManager
         private const string WeaponDataKey = "Wea";
         private const string CharacterLevelKey = "Lev";
         public const string SkillDataKey = "Ski";
+        public const string HitAttackDataKey = "Hit";
         public const string PlayerIndexKey = "Index";
         public const string PlayerGenerateKey = "Gen";
-        public const string AbnormalConditionKey = "Abn";
         private static readonly Hashtable PropsToSet = new();
 
 
-        public static int GetCharacterId(this Photon.Realtime.Player player)
+        public static Dictionary<int, int> GetCharacterId(this Photon.Realtime.Player player)
         {
-            return player.CustomProperties[CharacterDataKey] is int characterId ? characterId : -1;
+            return (Dictionary<int, int>)player.CustomProperties[CharacterDataKey];
         }
 
-        public static int GetWeaponId(this Photon.Realtime.Player player)
+        public static Dictionary<int, int> GetWeaponId(this Photon.Realtime.Player player)
         {
-            return player.CustomProperties[WeaponDataKey] is int weaponId ? weaponId : -1;
+            return (Dictionary<int, int>)player.CustomProperties[WeaponDataKey];
         }
 
         public static Dictionary<int, int> GetSkillId(this Photon.Realtime.Player player)
         {
-            return player.CustomProperties[SkillDataKey] as Dictionary<int, int>;
+            return (Dictionary<int, int>)player.CustomProperties[SkillDataKey];
         }
 
-        public static int GetCharacterLevel(this Photon.Realtime.Player player)
+        public static Dictionary<int, int> GetHitAttack(this Photon.Realtime.Player player)
         {
-            return player.CustomProperties[CharacterLevelKey] is int level ? level : -1;
+            return (Dictionary<int, int>)player.CustomProperties[HitAttackDataKey];
+        }
+
+        public static Dictionary<int, int> GetCharacterLevel(this Photon.Realtime.Player player)
+        {
+            return (Dictionary<int, int>)player.CustomProperties[CharacterLevelKey];
         }
 
         public static int GetPlayerIndex(this Photon.Realtime.Player player)
@@ -40,19 +45,14 @@ namespace Manager.NetworkManager
             return player.CustomProperties[PlayerIndexKey] is int playerIndex ? playerIndex : -1;
         }
 
-        public static int GetAbnormalCondition(this Photon.Realtime.Player player)
-        {
-            return player.CustomProperties[AbnormalConditionKey] is int abnormalCondition ? abnormalCondition : -1;
-        }
-
-        public static void SetCharacterData(this Photon.Realtime.Player player, int characterId)
+        public static void SetCharacterId(this Photon.Realtime.Player player, Dictionary<int, int> characterId)
         {
             PropsToSet[CharacterDataKey] = characterId;
             player.SetCustomProperties(PropsToSet);
             PropsToSet.Clear();
         }
 
-        public static void SetWeaponData(this Photon.Realtime.Player player, int weaponId)
+        public static void SetWeaponId(this Photon.Realtime.Player player, Dictionary<int, int> weaponId)
         {
             PropsToSet[WeaponDataKey] = weaponId;
             player.SetCustomProperties(PropsToSet);
@@ -66,7 +66,14 @@ namespace Manager.NetworkManager
             PropsToSet.Clear();
         }
 
-        public static void SetCharacterLevel(this Photon.Realtime.Player player, int characterLevel)
+        public static void SetHitAttackData(this Photon.Realtime.Player player, Dictionary<int, int> dic)
+        {
+            PropsToSet[HitAttackDataKey] = dic;
+            player.SetCustomProperties(PropsToSet);
+            PropsToSet.Clear();
+        }
+
+        public static void SetCharacterLevel(this Photon.Realtime.Player player, Dictionary<int, int> characterLevel)
         {
             PropsToSet[CharacterLevelKey] = characterLevel;
             player.SetCustomProperties(PropsToSet);
@@ -87,16 +94,9 @@ namespace Manager.NetworkManager
             PropsToSet.Clear();
         }
 
-        public static void SetPlayerValue(this Photon.Realtime.Player player, string key, object value)
+        public static void SetFloatValue(this Photon.Realtime.Player player, string key, object value)
         {
             PropsToSet[key] = value;
-            player.SetCustomProperties(PropsToSet);
-            PropsToSet.Clear();
-        }
-
-        public static void SetAbnormalCondition(this Photon.Realtime.Player player, object value)
-        {
-            PropsToSet[AbnormalConditionKey] = value;
             player.SetCustomProperties(PropsToSet);
             PropsToSet.Clear();
         }

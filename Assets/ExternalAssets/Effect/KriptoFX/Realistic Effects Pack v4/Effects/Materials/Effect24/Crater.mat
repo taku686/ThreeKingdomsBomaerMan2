@@ -12,19 +12,13 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
-  - _EMISSION
   - _NORMALMAP
   - _SPECULAR_SETUP
-  m_InvalidKeywords:
-  - BlendAlpha
-  - Clip_OFF
-  - FrameBlend_OFF
-  - SoftParticles_ON
-  - VertLight_OFF
-  m_LightmapFlags: 1
+  m_InvalidKeywords: []
+  m_LightmapFlags: 6
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 2000
   stringTagMap:
     RenderType: Opaque
   disabledShaderPasses: []
@@ -42,7 +36,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
         m_Texture: {fileID: 0}
-        m_Scale: {x: 0.16666667, y: 0.25}
+        m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailMask:
         m_Texture: {fileID: 0}
@@ -57,8 +51,8 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
+        m_Texture: {fileID: 2800000, guid: c3cfe7d2684045147a1989894b810ce9, type: 3}
+        m_Scale: {x: 6, y: 4}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
@@ -134,7 +128,7 @@ Material:
     - _Tiling: {r: 800, g: 800, b: 8, a: 8}
     - _TintColor: {r: 1.5114045, g: 1.5114045, b: 1.5114045, a: 1}
   m_BuildTextureStacks: []
---- !u!114 &2172568826133098069
+--- !u!114 &7370335537492448119
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}

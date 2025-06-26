@@ -53,9 +53,12 @@ namespace PUROPORO
         private RewardDataUseCase.RewardData[] _rewardDatum;
 
         private LootBoxDemo _lootBox;
-        public IObservable<LootBoxState> _OnClickAsObservable => _button.OnClickAsObservable().Select(_ => OnClick());
 
-        public async void Initialize(RewardDataUseCase.RewardData[] rewardDatum)
+        public IObservable<LootBoxState> _OnClickAsObservable => _button
+            .OnClickAsObservable()
+            .SelectMany(_ => OnClick().ToObservable());
+
+        public void Initialize(RewardDataUseCase.RewardData[] rewardDatum)
         {
             _lootBox = Instantiate(_lootBoxPrefab, _lootBoxParent);
             _lootBox.Initialize();
@@ -66,12 +69,12 @@ namespace PUROPORO
             m_TextYouGot.SetActive(false);
             m_TextPressContinue.gameObject.SetActive(true);
             m_TextPressContinue.text = "Press to Open";
-            await UniTask.Delay(1000);
+            //await UniTask.Delay(1000);
             SpawnChest();
         }
 
         [Obsolete]
-        public LootBoxState OnClick()
+        public async UniTask<LootBoxState> OnClick()
         {
             switch (m_State)
             {
@@ -79,6 +82,7 @@ namespace PUROPORO
                     SpawnCard();
                     return m_State;
                 case LootBoxState.Resulting:
+                    await UniTask.Delay(TimeSpan.FromSeconds(1));
                     m_State = LootBoxState.Ending;
                     if (m_CardUIs.Length > 0)
                     {
@@ -133,7 +137,8 @@ namespace PUROPORO
 
             var rewardData = _rewardDatum[m_Count - 1];
             var frameSprite = _frameImages[rewardData._Rarity - 1];
-            m_CardUI.SetCard(frameSprite, rewardData._Icon, rewardData._Name);
+            var rewardType = rewardData._RewardType;
+            m_CardUI.SetCard(frameSprite, rewardData._Icon, rewardData._Name, rewardType);
             _lootBox.SetRarityColor(rewardData._Color);
 
             _lootBox.ChestQuickOpens();
@@ -172,7 +177,7 @@ namespace PUROPORO
             {
                 GameObject go = Instantiate(m_CardUiGo, m_AchievedCardsUI);
                 var frameSprite = _frameImages[rewardData._Rarity - 1];
-                go.GetComponent<CardUI>().SetCard(frameSprite, rewardData._Icon, rewardData._Name);
+                go.GetComponent<CardUI>().SetCard(frameSprite, rewardData._Icon, rewardData._Name, rewardData._RewardType);
                 m_CardUIs[index] = go.GetComponent<CardUI>();
                 index++;
             }

@@ -24,30 +24,30 @@ public class StatusInBattleView : MonoBehaviour
     }
 
     //todo 後で修正　防御と抵抗値を追加する
-    public void ApplyBuffState(StatusType statusType, int value, bool isBuff, bool isDebuff)
+    public void ApplyBuffState(StatusType statusType, int value)
     {
         switch (statusType)
         {
             case StatusType.Hp:
-                hpStatusGridView.SetBuffState(isBuff, isDebuff, value);
+                hpStatusGridView.SetBuffState(value);
                 break;
             case StatusType.Attack:
-                attackStatusGridView.SetBuffState(isBuff, isDebuff, value);
+                attackStatusGridView.SetBuffState(value);
                 break;
             case StatusType.Speed:
-                speedStatusGridView.SetBuffState(isBuff, isDebuff, value);
+                speedStatusGridView.SetBuffState(value);
                 break;
             case StatusType.BombLimit:
-                bombLimitStatusGridView.SetBuffState(isBuff, isDebuff, value);
+                bombLimitStatusGridView.SetBuffState(value);
                 break;
             case StatusType.FireRange:
-                firePowerStatusGridView.SetBuffState(isBuff, isDebuff, value);
+                firePowerStatusGridView.SetBuffState(value);
                 break;
             case StatusType.Defense:
-                _defenseStatusGridView.SetBuffState(isBuff, isDebuff, value);
+                _defenseStatusGridView.SetBuffState(value);
                 break;
             case StatusType.Resistance:
-                _resistanceStatusGridView.SetBuffState(isBuff, isDebuff, value);
+                _resistanceStatusGridView.SetBuffState(value);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(statusType), statusType, null);

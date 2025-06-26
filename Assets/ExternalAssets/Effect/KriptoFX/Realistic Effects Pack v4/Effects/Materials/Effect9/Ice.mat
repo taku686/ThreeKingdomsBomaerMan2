@@ -58,8 +58,8 @@ Material:
     - _FPOW: 1
     - _FresnelDistort: 5000
     - _FresnelInvert: 1
-    - _FresnelPow: 3
-    - _FresnelR0: 0.01
+    - _FresnelPow: 2
+    - _FresnelR0: 0.1
     - _Height: 0.47
     - _InvFade: 2
     - _LightStr: 1
@@ -67,7 +67,7 @@ Material:
     - _Opacity: 1
     - _R0: 0.8
     - _ReflectionStrength: 2.3571427
-    - _RefractiveStrength: -0.76
+    - _RefractiveStrength: 0.362
     - _Shininess: 0.145
     - _Smoothness: 1
     - _TintDistortion: 1
@@ -83,7 +83,7 @@ Material:
     m_Colors:
     - _Color: {r: 1.0582287, g: 1.1869678, b: 1.4391911, a: 1}
     - _CutoutColor: {r: 1, g: 1, b: 1, a: 1}
-    - _FresnelColor: {r: 0.7058823, g: 1.4811368, b: 3, a: 1}
+    - _FresnelColor: {r: 5.4634256, g: 14.082813, b: 28.24991, a: 1}
     - _HeightUVScrollDistort: {r: 8, g: 12, b: 0, a: 0}
     - _MainColor: {r: 0.83823526, g: 0.8929007, b: 1, a: 1}
     - _ReflectColor: {r: 0.44117644, g: 0.49695733, b: 0.58823526, a: 1}

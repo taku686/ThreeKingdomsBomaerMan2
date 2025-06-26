@@ -60,15 +60,13 @@ namespace UI.Title
                 }
 
                 View.closeButton.onClick.RemoveAllListeners();
-                View.rewardGetView.okButton.onClick.RemoveAllListeners();
                 View.closeButton.onClick.AddListener(OnClickClosePanel);
-                View.rewardGetView.okButton.onClick.AddListener(OnClickCloseRewardView);
             }
 
             private async UniTask InitializeUIContent()
             {
                 View.purchaseErrorView.gameObject.SetActive(false);
-                View.rewardGetView.gameObject.SetActive(false);
+                View._rewardPopup.gameObject.SetActive(false);
                 await Owner.SetCoinText();
                 await Owner.SetGemText();
             }
@@ -130,11 +128,16 @@ namespace UI.Title
                     {
                         var day = index + 1;
                         var errorText = View.purchaseErrorView.errorInfoText;
-                        var rewardView = View.rewardGetView;
-                        var rewardViewObj = View.rewardGetView.gameObject;
-                        var itemGetResult = await playaFabShopManager.TryPurchaseGacha(
-                            GameCommonData.LoginBonusItemKey + day, GameCommonData.CoinKey, 0,
-                            GameCommonData.GachaShopKey, rewardView, errorText);
+                        var rewardView = View._rewardPopup;
+                        var rewardViewObj = View._rewardPopup.gameObject;
+                        var itemGetResult = await playaFabShopManager.TryPurchaseGacha
+                        (
+                            GameCommonData.LoginBonusItemKey + day,
+                            GameCommonData.CoinKey,
+                            0,
+                            GameCommonData.GachaShopKey,
+                            errorText
+                        );
                         if (!itemGetResult)
                         {
                             return;
@@ -149,8 +152,8 @@ namespace UI.Title
                     {
                         var day = index + 1;
                         var errorText = View.purchaseErrorView.errorInfoText;
-                        var rewardView = View.rewardGetView;
-                        var rewardViewObj = View.rewardGetView.gameObject;
+                        var rewardView = View._rewardPopup;
+                        var rewardViewObj = View._rewardPopup.gameObject;
                         var itemGetResult =
                             await playaFabShopManager.TryPurchaseLoginBonusItem(day, GameCommonData.CoinKey, 0,
                                 rewardView, errorText);
@@ -190,18 +193,18 @@ namespace UI.Title
                 })).SetLink(button);
             }
 
-            private void OnClickCloseRewardView()
+            /*private void OnClickCloseRewardView()
             {
-                var button = View.rewardGetView.okButton.gameObject;
+                var button = View._rewardPopup.okButton.gameObject;
                 Owner._uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
                 {
-                    var panel = View.rewardGetView.transform;
+                    var panel = View._rewardPopup.transform;
                     await uiAnimation.Close(panel, GameCommonData.CloseDuration)
                         .AttachExternalCancellation(panel.GetCancellationTokenOnDestroy());
                     ;
                     panel.gameObject.SetActive(false);
                 })).SetLink(button);
-            }
+            }*/
         }
     }
 }

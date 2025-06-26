@@ -5,16 +5,31 @@ namespace Repository
 {
     public class CharacterObjectRepository : IDisposable
     {
-        private GameObject _characterObject;
+        private readonly GameObject[] _characterObjects = { null, null, null };
 
-        public GameObject GetCharacterObject()
+        public GameObject GetCharacterObject(int index = 0)
         {
-            return _characterObject;
+            if (index < 0 || index >= _characterObjects.Length)
+            {
+                return null;
+            }
+
+            return _characterObjects[index];
         }
 
-        public void SetCharacterObject(GameObject obj)
+        public GameObject[] GetCharacterObjects()
         {
-            _characterObject = obj;
+            return _characterObjects;
+        }
+
+        public void SetCharacterObject(GameObject obj, int index)
+        {
+            if (index < 0 || index >= _characterObjects.Length)
+            {
+                return;
+            }
+
+            _characterObjects[index] = obj;
         }
 
         public void Dispose()

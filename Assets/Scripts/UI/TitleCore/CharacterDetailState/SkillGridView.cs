@@ -1,4 +1,5 @@
 using System;
+using Common.Data;
 using TMPro;
 using UniRx;
 using UnityEngine;
@@ -15,17 +16,15 @@ public class SkillGridView : MonoBehaviour
 
     public void ApplyViewModel(bool isRelease, Sprite skillSprite, int releaseLv)
     {
-        if (skillSprite == null)
+        if (releaseLv != GameCommonData.InvalidNumber && _lvText != null)
         {
-            gameObject.SetActive(false);
-            return;
+            _lvText.text = "Lv" + releaseLv;
         }
 
-        gameObject.SetActive(true);
         releaseObject.SetActive(isRelease);
         lockObject.SetActive(!isRelease);
-        _lvText.text = "Lv" + releaseLv;
-        if (!isRelease)
+
+        if (!isRelease || skillSprite == null)
         {
             return;
         }

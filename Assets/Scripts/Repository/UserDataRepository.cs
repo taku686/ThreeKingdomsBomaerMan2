@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Data;
 using Manager.DataManager;
 using Manager.NetworkManager;
 using Newtonsoft.Json;
@@ -48,9 +49,13 @@ namespace Common.Data
             _userData = data;
         }
 
-        public async UniTask UpdateUserData(UserData data)
+        public async UniTask UpdateUserData(UserData data = null)
         {
-            _userData = data;
+            if (data != null)
+            {
+                _userData = data;
+            }
+
             await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
         }
 
@@ -86,16 +91,6 @@ namespace Common.Data
         {
             var status = _userData.LoginBonus[index];
             return GameCommonData.GetLoginBonusStatus(status);
-        }
-
-        public int GetEquippedCharacterId()
-        {
-            return _characterMasterDataRepository.GetCharacterData(_userData.EquippedCharacterId).Id;
-        }
-
-        public CharacterData GetEquippedCharacterData()
-        {
-            return _characterMasterDataRepository.GetCharacterData(_userData.EquippedCharacterId);
         }
 
         public LevelMasterData GetCurrentLevelData(int characterId)
@@ -159,6 +154,22 @@ namespace Common.Data
             return result;
         }
 
+        public bool HaveClearMission()
+        {
+            var missionDatum = _userData.MissionDatum;
+            foreach (var missionData in missionDatum)
+            {
+                var masterData = _missionMasterDataRepository.GetMissionData(missionData.Key);
+                var progress = GetMissionProgress(missionData.Key);
+                if (progress >= masterData.ActionCount)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public int GetMissionProgress(int missionId)
         {
             if (!_userData.MissionDatum.TryGetValue(missionId, out var value))
@@ -203,7 +214,7 @@ namespace Common.Data
                 var masterData = masterDatum[index];
                 var missionIndex = masterData.Index;
                 var actionId = masterData.Action;
-                var missionData = _userData.CreateMissionData();
+                var missionData = UserData.CreateMissionData();
 
                 if (_userData.MissionDatum.ContainsKey(missionIndex))
                 {
@@ -311,7 +322,7 @@ namespace Common.Data
             }
         }
 
-        public void SubtractWeaponData(int weaponId, int amount)
+        public void RemoveWeaponData(int weaponId, int amount)
         {
             if (!_userData.PossessedWeapons.ContainsKey(weaponId))
             {
@@ -341,6 +352,11 @@ namespace Common.Data
             return _userData.TeamMembers;
         }
 
+        public int GetTeamMember(int index)
+        {
+            return _userData.TeamMembers.GetValueOrDefault(index, GameCommonData.InvalidNumber);
+        }
+
         public void SetTeamMember(int characterId)
         {
             if (_userData.TeamMembers.ContainsValue(characterId))
@@ -354,6 +370,16 @@ namespace Common.Data
         public void SetCandidateTeamMemberIndex(int index)
         {
             _candidateTeamMemberIndex = index;
+        }
+
+        public SettingData GetSettingData()
+        {
+            return _userData._SettingData;
+        }
+
+        public void SetSettingData(SettingData settingData)
+        {
+            _userData._SettingData = settingData;
         }
 
         public void Dispose()

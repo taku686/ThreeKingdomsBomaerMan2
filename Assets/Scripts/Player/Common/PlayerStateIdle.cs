@@ -2,7 +2,6 @@
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
-using Manager;
 using Photon.Pun;
 using UniRx;
 using UnityEngine;
@@ -17,117 +16,99 @@ namespace Player.Common
             private PhotonView _PhotonView => Owner.photonView;
             private PlayerMove _PlayerMove => Owner._playerMove;
             private StateMachine<PlayerCore> _StateMachine => Owner._stateMachine;
+            private IObservable<Unit> _OnClickWeaponSkill => Owner._WeaponSkillSubject;
             private IObservable<Unit> _OnClickNormalSkill => Owner._NormalSkillSubject;
             private IObservable<Unit> _OnClickSpecialSkill => Owner._SpecialSkillSubject;
             private IObservable<Unit> _OnClickDash => Owner._DashSkillSubject;
             private IObservable<Unit> _OnClickBomb => Owner._BombSkillSubject;
+            private IObservable<int> _OnClickCharacterChange => Owner._TeamMemberReactiveProperty;
+            private PlayerStatusInfo _PlayerStatusInfo => Owner._PlayerStatusInfo;
 
 
             private Transform _playerTransform;
-            private bool _isSetup;
-            private CancellationTokenSource _cancellationTokenSource;
+            private CancellationTokenSource _cts;
 
             protected override void OnEnter(State prevState)
             {
-                base.OnEnter(prevState);
-                InitializeCancellationToken();
-                InitialiseIdleState();
-                InitializeButton();
+                _playerTransform = Owner.transform;
+                _cts = new CancellationTokenSource();
+                Subscribe();
             }
 
             protected override void OnExit(State nextState)
+
             {
-                base.OnExit(nextState);
+                _PlayerMove.Stop();
                 Cancel();
             }
 
-            protected override void OnUpdate()
+            private void Subscribe()
             {
-                if (_PlayerMove == null)
-                {
-                    return;
-                }
+                Observable
+                    .EveryFixedUpdate()
+                    .Where(_ => _PlayerMove != null)
+                    .Subscribe(_ =>
+                    {
+                        var direction = new Vector3(UltimateJoystick.GetHorizontalAxis(GameCommonData.JoystickName), 0, UltimateJoystick.GetVerticalAxis(GameCommonData.JoystickName));
+                        _PlayerMove.Run(direction);
+                    })
+                    .AddTo(_cts.Token);
 
-                var direction = new Vector3(UltimateJoystick.GetHorizontalAxis(GameCommonData.JoystickName), 0, UltimateJoystick.GetVerticalAxis(GameCommonData.JoystickName));
-                _PlayerMove.Run(direction);
-            }
+                _OnClickWeaponSkill
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.WeaponSkill); })
+                    .AddTo(_cts.Token);
 
-            private void InitialiseIdleState()
-            {
-                if (_isSetup)
-                {
-                    return;
-                }
-
-                _playerTransform = Owner.transform;
-                
                 _OnClickNormalSkill
-                    .Subscribe(_ => { OnClickNormalSkill(); })
-                    .AddTo(Owner.GetCancellationTokenOnDestroy());
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.NormalSkill); })
+                    .AddTo(_cts.Token);
 
                 _OnClickSpecialSkill
-                    .Subscribe(_ => { OnClickSpecialSkill(); })
-                    .AddTo(Owner.GetCancellationTokenOnDestroy());
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.SpecialSkill); })
+                    .AddTo(_cts.Token);
 
                 _OnClickDash
-                    .Subscribe(_ => { OnClickDash(); })
-                    .AddTo(Owner.GetCancellationTokenOnDestroy());
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.Dash); })
+                    .AddTo(_cts.Token);
 
-                _isSetup = true;
-            }
+                _OnClickCharacterChange
+                    .Throttle(TimeSpan.FromSeconds(GameCommonData.CharacterChangeInterval))
+                    .Subscribe(_ => { })
+                    .AddTo(_cts.Token);
 
-            private void InitializeCancellationToken()
-            {
-                _cancellationTokenSource ??= new CancellationTokenSource();
-            }
-
-            private void InitializeButton()
-            {
                 _OnClickBomb
                     .Where(_ => Owner._translateStatusInBattleUseCase.CanPutBomb())
                     .Throttle(TimeSpan.FromSeconds(GameCommonData.InputBombInterval))
-                    .Subscribe(
-                        _ =>
-                        {
-                            var playerId = _PhotonView.ViewID;
-                            var explosionTime = PhotonNetwork.ServerTimestamp + GameCommonData.ThreeMilliSecondsBeforeExplosion;
-                            var damageAmount = Owner._translateStatusInBattleUseCase._Attack;
-                            var fireRange = Owner._translateStatusInBattleUseCase._FireRange;
-                            var boxCollider = Owner._boxCollider;
-                            Owner._putBomb.SetBomb
-                            (
-                                boxCollider,
-                                _PhotonView,
-                                _playerTransform,
-                                (int)BombType.Normal,
-                                damageAmount,
-                                fireRange,
-                                explosionTime,
-                                playerId
-                            );
-                        }).AddTo(_cancellationTokenSource.Token);
-            }
-
-            private void OnClickNormalSkill()
-            {
-                _StateMachine.Dispatch((int)PLayerState.NormalSkill);
-            }
-
-            private void OnClickSpecialSkill()
-            {
-                _StateMachine.Dispatch((int)PLayerState.SpecialSkill);
-            }
-
-            private void OnClickDash()
-            {
-                _StateMachine.Dispatch((int)PLayerState.Dash);
+                    .Subscribe(_ =>
+                    {
+                        var playerId = _PhotonView.ViewID;
+                        var explosionTime = PhotonNetwork.ServerTimestamp + GameCommonData.ThreeMilliSecondsBeforeExplosion;
+                        var damageAmount = (int)TranslateStatusInBattleUseCase.Translate(StatusType.Attack, _PlayerStatusInfo._Attack.Value);
+                        var fireRange = (int)TranslateStatusInBattleUseCase.Translate(StatusType.FireRange, _PlayerStatusInfo._FireRange.Value);
+                        var boxCollider = Owner._boxCollider;
+                        Owner._putBomb.SetBomb
+                        (
+                            boxCollider,
+                            _PhotonView,
+                            _playerTransform,
+                            (int)BombType.Normal,
+                            damageAmount,
+                            fireRange,
+                            explosionTime,
+                            playerId
+                        );
+                    }).AddTo(_cts.Token);
             }
 
             private void Cancel()
             {
-                _cancellationTokenSource?.Cancel();
-                _cancellationTokenSource?.Dispose();
-                _cancellationTokenSource = null;
+                if (_cts == null)
+                {
+                    return;
+                }
+
+                _cts.Cancel();
+                _cts.Dispose();
+                _cts = null;
             }
         }
     }

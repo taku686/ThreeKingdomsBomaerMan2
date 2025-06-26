@@ -1,80 +1,47 @@
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
+using UnityEngine.Rendering.Universal;
+
 
 
 public class RFX4_PerPlatformSettings : MonoBehaviour
 {
-    public bool DisableOnMobiles;
+    //public bool DisableOnMobiles;
     public bool RenderMobileDistortion;
     [Range(0.1f, 1)] public float ParticleBudgetForMobiles = 0.5f;
     // Use this for initialization
-    private bool isMobile;
+    private bool startColorTex;
 
-        void Awake()
+    void Start()
     {
-        isMobile = IsMobilePlatform();
-        if (isMobile)
-        {
-            if (DisableOnMobiles) gameObject.SetActive(false);
-            else
-            {
-                if(ParticleBudgetForMobiles < 0.99f) ChangeParticlesBudget(ParticleBudgetForMobiles);
-            }
-        }
+
+
+    }
+
+    void Awake()
+    {
+        ChangeParticlesBudget(ParticleBudgetForMobiles);
     }
 
     void OnEnable()
     {
         var cam = Camera.main;
-        Legacy_Rendering_Check(cam);
-    }
-
-    //void Update()
-    //{
-    //    var cam = Camera.main;
-    //    Legacy_Rendering_Check(cam);
-    //}
-
-    void Legacy_Rendering_Check(Camera cam)
-    {
 
         if (cam == null) return;
-        if (RenderMobileDistortion && !DisableOnMobiles && isMobile)
+        var addCamData                        = cam.GetComponent<UniversalAdditionalCameraData>();
+        if (addCamData != null)
         {
-            var mobileDistortion = cam.GetComponent<RFX4_MobileDistortion>();
-            if (mobileDistortion == null) mobileDistortion = cam.gameObject.AddComponent<RFX4_MobileDistortion>();
-            mobileDistortion.IsActive = true;
-
+            startColorTex = addCamData.requiresColorTexture;
+            addCamData.requiresColorTexture = true;
         }
-
     }
 
     void OnDisable()
     {
         var cam = Camera.main;
+
         if (cam == null) return;
-        if (RenderMobileDistortion && !DisableOnMobiles && isMobile)
-        {
-
-            var mobileDistortion = cam.GetComponent<RFX4_MobileDistortion>();
-            if (mobileDistortion != null) mobileDistortion.IsActive = false;
-        }
-
-    }
-
-    bool IsMobilePlatform()
-    {
-        bool isMobile = false;
-#if UNITY_EDITOR
-        if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android
-            || EditorUserBuildSettings.activeBuildTarget == BuildTarget.iOS
-            || EditorUserBuildSettings.activeBuildTarget == BuildTarget.WSAPlayer)
-            isMobile = true;
-#endif
-        if (Application.isMobilePlatform) isMobile = true;
-        return isMobile;
+        var addCamData                                          = cam.GetComponent<UniversalAdditionalCameraData>();
+        if (addCamData != null) addCamData.requiresColorTexture = startColorTex;
     }
 
     void ChangeParticlesBudget(float particlesMul)

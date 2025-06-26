@@ -23,9 +23,15 @@ public class ApplyStatusSkillUseCase : IDisposable
         _characterMasterDataRepository = characterMasterDataRepository;
     }
 
-    public int ApplyStatusSkill(int characterId, int skillId, StatusType statusType)
+    public int ApplyStatusSkill
+    (
+        int characterId,
+        int skillId,
+        StatusType statusType,
+        LevelMasterData levelData = null
+    )
     {
-        var appliedLevelValue = ApplyLevelStatus(characterId, statusType);
+        var appliedLevelValue = ApplyLevelStatus(characterId, statusType, levelData);
         var skillData = _skillMasterDataRepository.GetSkillData(skillId);
         if (skillData.SkillType != SkillType.Status)
         {
@@ -44,7 +50,7 @@ public class ApplyStatusSkillUseCase : IDisposable
             _ => throw new ArgumentOutOfRangeException(nameof(statusType), statusType, null)
         };
         addValue = addValue == GameCommonData.InvalidNumber ? 0 : addValue;
-        return appliedLevelValue + addValue;
+        return Mathf.FloorToInt(appliedLevelValue + addValue);
     }
 
     public int GetStatusSkillValue(int skillId, StatusType statusType)
@@ -152,15 +158,15 @@ public class ApplyStatusSkillUseCase : IDisposable
         return result;
     }
 
-    public int ApplyLevelStatus(int characterId, StatusType statusType)
+    public int ApplyLevelStatus(int characterId, StatusType statusType, LevelMasterData levelData = null)
     {
-        var levelData = _userDataRepository.GetCurrentLevelData(characterId);
+        levelData ??= _userDataRepository.GetCurrentLevelData(characterId);
         var characterData = _characterMasterDataRepository.GetCharacterData(characterId);
         var statusValue = GetStatus(characterData, statusType);
         return Mathf.FloorToInt(levelData.StatusRate * statusValue);
     }
 
-    private int GetStatus(CharacterData characterData, StatusType statusType)
+    private static int GetStatus(CharacterData characterData, StatusType statusType)
     {
         return statusType switch
         {
@@ -169,6 +175,8 @@ public class ApplyStatusSkillUseCase : IDisposable
             StatusType.Speed => characterData.Speed,
             StatusType.FireRange => characterData.FireRange,
             StatusType.BombLimit => characterData.BombLimit,
+            StatusType.Defense => characterData.Defense,
+            StatusType.Resistance => characterData.Resistance,
             _ => 0
         };
     }

@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
+using Data;
 
 namespace Common.Data
 {
     public class UserData : IDisposable
     {
-        public int EquippedCharacterId;
+        //public int EquippedCharacterId;
         public string UserIconFileName;
         public int Level;
         public string Name;
@@ -20,6 +21,7 @@ namespace Common.Data
         public readonly Dictionary<int, int> EquippedWeapons = new();
         public Dictionary<int, string> MissionDatum = new();
         public readonly Dictionary<int, int> TeamMembers = new();
+        public SettingData _SettingData = new();
 
         [Serializable]
         public class MissionData
@@ -29,7 +31,7 @@ namespace Common.Data
             public int _weaponId;
         }
 
-        public MissionData CreateMissionData()
+        public static MissionData CreateMissionData()
         {
             return new MissionData
             {
@@ -42,7 +44,6 @@ namespace Common.Data
         public UserData Create()
         {
             var user = this;
-            user.EquippedCharacterId = 0;
             user.Level = 1;
             user.Name = "";
             user.EntitledId = 0;
@@ -63,6 +64,7 @@ namespace Common.Data
             }
 
             user.MissionDatum = new Dictionary<int, string>();
+            user._SettingData = new SettingData();
             return user;
         }
 

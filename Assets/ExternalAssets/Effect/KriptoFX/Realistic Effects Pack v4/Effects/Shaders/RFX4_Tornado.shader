@@ -25,6 +25,7 @@ Category {
 			#pragma fragment frag
 			#pragma multi_compile_particles
 			#pragma multi_compile_fog
+							#pragma multi_compile_instancing
 
 			#include "UnityCG.cginc"
 
@@ -40,7 +41,7 @@ Category {
 				half4 color : COLOR;
 				float2 texcoord : TEXCOORD0;
 				float4 normal : NORMAL;
-				UNITY_VERTEX_INPUT_INSTANCE_ID
+				UNITY_VERTEX_INPUT_INSTANCE_ID //Insert
 			};
 
 			struct v2f {
@@ -52,13 +53,15 @@ Category {
 				float4 projPos : TEXCOORD2;
 				#endif
 				float height : TEXCOORD3;
-				UNITY_VERTEX_OUTPUT_STEREO
+
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+				UNITY_VERTEX_OUTPUT_STEREO //Insert
 			};
 
 			float4 _MainTex_ST;
 			float4 _PerlinNoise_ST;
 
-			v2f vert (appdata_t v)
+			v2f vert(appdata_t v)
 			{
 				v2f o;
 				UNITY_SETUP_INSTANCE_ID(v); //Insert
@@ -74,36 +77,34 @@ Category {
 
 
 				float height = (wpos.y + _TwistScale.w) * _TwistScale.y;
-				v.vertex.x += sin(_Time.y*_TwistScale.z + wpos.y * _TwistScale.x) * height;
-				v.vertex.z += sin(_Time.y*_TwistScale.z + wpos.y * _TwistScale.x + 3.1415/2) * height;
-				v.vertex.xz += (v.normal.xz/_WavesScale.x + v.normal.xz * sin(-_Time.y * _WavesScale.z + wpos.y*_WavesScale.x)*_WavesScale.y)* height;
+				v.vertex.x += sin(_Time.y * _TwistScale.z + wpos.y * _TwistScale.x) * height;
+				v.vertex.z += sin(_Time.y * _TwistScale.z + wpos.y * _TwistScale.x + 3.1415 / 2) * height;
+				v.vertex.xz += (v.normal.xz / _WavesScale.x + v.normal.xz * sin(-_Time.y * _WavesScale.z + wpos.y * _WavesScale.x) * _WavesScale.y) * height;
 				///////////////////////////////////////////////////////////////////////////////////////////////////////////
 				o.height = height;
 
 				o.vertex = UnityObjectToClipPos(v.vertex);
 
-				#ifdef SOFTPARTICLES_ON
-				o.projPos = ComputeScreenPos (o.vertex);
+#ifdef SOFTPARTICLES_ON
+				o.projPos = ComputeScreenPos(o.vertex);
 				COMPUTE_EYEDEPTH(o.projPos.z);
-				#endif
+#endif
 				o.color = v.color;
-				o.texcoord = TRANSFORM_TEX(v.texcoord,_MainTex);
-				UNITY_TRANSFER_FOG(o,o.vertex);
+				o.texcoord = TRANSFORM_TEX(v.texcoord, _MainTex);
+				UNITY_TRANSFER_FOG(o, o.vertex);
 				return o;
 			}
 
 			half4 frag (v2f i) : SV_Target
 			{
 				half4 noise = tex2D(_MainTex, i.texcoord - _FireOffsetSpeed.xy * _Time.y);
-
 #ifndef UNITY_COLORSPACE_GAMMA
 				noise = pow(noise, 0.4545);
 
 #endif
-				float alphaClip = noise.r;
-				noise.rgb = noise.rgb * noise.rgb * noise.rgb;
-				half4 col = 2.0f * i.color * _TintColor * noise;
-				clip(_TintColor.a - alphaClip);
+
+				half4 col = 2.0f * i.color * _TintColor * noise * noise;
+				//clip(_TintColor.a - col.r / 3);
 				//col.rgb = lerp(col.rgb  + col.rgb *  (0.85-_TintColor.a)*5, col.rgb, _TintColor.a);
 				UNITY_APPLY_FOG(i.fogCoord, col);
 				//col.a = 1;

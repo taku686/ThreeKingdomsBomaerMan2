@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Assets.Scripts.Common.ResourceManager;
 using Common.Data;
 using Cysharp.Threading.Tasks;
@@ -14,7 +15,7 @@ using Zenject;
 
 namespace Assets.Scripts.Common.PlayFab
 {
-    public class PlayFabLoginManager : MonoBehaviour
+    public class PlayFabLoginManager : IDisposable
     {
         private const int OneDay = 1;
         private const int TimeDifference = 9;
@@ -29,12 +30,13 @@ namespace Assets.Scripts.Common.PlayFab
         [Inject] private MissionSpriteDataRepository _missionSpriteDataRepository;
         [Inject] private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
 
+        private CancellationTokenSource _cts;
         private GetPlayerCombinedInfoRequestParams _info;
-        public bool _haveLoginBonus;
-
+        private bool _haveLoginBonus;
 
         public void Initialize()
         {
+            _cts = new CancellationTokenSource();
             _playFabTitleDataManager.Initialize();
             PlayFabSettings.staticSettings.TitleId = GameCommonData.TitleID;
             _info = new GetPlayerCombinedInfoRequestParams()
@@ -62,9 +64,8 @@ namespace Assets.Scripts.Common.PlayFab
 
         public async UniTask<bool> InitializeGameData(PlayFabResult<LoginResult> response)
         {
-            await _playFabCatalogManager.Initialize();
-            await _playFabShopManager.InitializePurchasing();
             await _playFabTitleDataManager.SetTitleData(response.Result.InfoResultPayload.TitleData);
+            await _playFabCatalogManager.Initialize();
             await _userDataRepository.AddMissionData();
             if (!response.Result.InfoResultPayload.UserData.TryGetValue(GameCommonData.UserKey, value: out var value))
             {
@@ -91,7 +92,7 @@ namespace Assets.Scripts.Common.PlayFab
             _userDataRepository.Initialize(userData, userName, userIcon);
             await _playFabVirtualCurrencyManager.GetCoin();
             await _playFabVirtualCurrencyManager.GetGem();
-            await _playFabUserDataManager.TryUpdateUserDataAsync(userData).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+            await _playFabUserDataManager.TryUpdateUserDataAsync(userData).AttachExternalCancellation(_cts.Token);
             return tuple.Item1;
         }
 
@@ -128,6 +129,26 @@ namespace Assets.Scripts.Common.PlayFab
             var result = await _playFabShopManager.TryPurchaseItem(GameCommonData.LoginBonusNotificationItemKey,
                 GameCommonData.CoinKey, 0, null);
             return result;
+        }
+
+        public void Dispose()
+        {
+            _userDataRepository?.Dispose();
+            _characterMasterDataRepository?.Dispose();
+            _playFabCatalogManager?.Dispose();
+            _playFabUserDataManager?.Dispose();
+            _playFabShopManager?.Dispose();
+            _playFabTitleDataManager?.Dispose();
+            _missionManager?.Dispose();
+            _resourceManager?.Dispose();
+            _missionSpriteDataRepository?.Dispose();
+            _playFabVirtualCurrencyManager?.Dispose();
+            if (_cts != null)
+            {
+                _cts.Cancel();
+                _cts.Dispose();
+                _cts = null;
+            }
         }
     }
 }

@@ -12,7 +12,7 @@ namespace UI.Title
     public class TeamGridViewModelUseCase
     {
         private readonly UserDataRepository _userDataRepository;
-        private readonly CharacterTypeSpriteManager _characterTypeSpriteManager;
+        private readonly CharacterTypeSpriteRepository _characterTypeSpriteRepository;
         private readonly TeamStatusGridViewModelUseCase _teamStatusGridViewModelUseCase;
         private readonly CharacterMasterDataRepository _characterMasterDataRepository;
         private readonly ApplyStatusSkillUseCase _applyStatusSkillUseCase;
@@ -21,14 +21,14 @@ namespace UI.Title
         public TeamGridViewModelUseCase
         (
             UserDataRepository userDataRepository,
-            CharacterTypeSpriteManager characterTypeSpriteManager,
+            CharacterTypeSpriteRepository characterTypeSpriteRepository,
             TeamStatusGridViewModelUseCase teamStatusGridViewModelUseCase,
             CharacterMasterDataRepository characterMasterDataRepository,
             ApplyStatusSkillUseCase applyStatusSkillUseCase
         )
         {
             _userDataRepository = userDataRepository;
-            _characterTypeSpriteManager = characterTypeSpriteManager;
+            _characterTypeSpriteRepository = characterTypeSpriteRepository;
             _teamStatusGridViewModelUseCase = teamStatusGridViewModelUseCase;
             _characterMasterDataRepository = characterMasterDataRepository;
             _applyStatusSkillUseCase = applyStatusSkillUseCase;
@@ -50,7 +50,7 @@ namespace UI.Title
 
             var characterDataClone = characterData.Clone();
             characterDataClone = ApplyStatusSkill(characterDataClone);
-            var (typeSprite, typeColor) = _characterTypeSpriteManager.GetCharacterTypeData(characterDataClone.Type);
+            var (typeSprite, typeColor) = _characterTypeSpriteRepository.GetCharacterTypeData(characterDataClone.Type);
             //todo 後で修正する
             var statusGridViewModel = _teamStatusGridViewModelUseCase.InAsTask(StatusType.Hp, characterDataClone.Hp);
 

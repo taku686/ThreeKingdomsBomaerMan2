@@ -14,43 +14,60 @@ namespace UI.Title
     public class CharacterDetailView : ViewBase
     {
         [SerializeField] private Button backButton;
-        [SerializeField] private TextMeshProUGUI nameText;
-        [SerializeField] private Button selectButton;
-        [SerializeField] private RectTransform leftArrowRect;
-        [SerializeField] private RectTransform rightArrowRect;
         [SerializeField] private Button leftArrowButton;
         [SerializeField] private Button rightArrowButton;
-        [SerializeField] private StatusView statusView;
-        [SerializeField] private SkillsView skillsView;
+        [SerializeField] private Button _teamEditButton;
         [SerializeField] private Button upgradeButton;
+        [SerializeField] private Button inventoryButton;
+
+        [SerializeField] private TextMeshProUGUI nameText;
+        [SerializeField] private TextMeshProUGUI _teamEditButtonText;
         [SerializeField] private TextMeshProUGUI upgradeText;
         [SerializeField] private TextMeshProUGUI upgradeInfoText;
-        [SerializeField] private GameObject upgradeInfoGameObject;
         [SerializeField] private TextMeshProUGUI levelText;
-        [SerializeField] private PurchaseErrorView purchaseErrorView;
-        [SerializeField] private VirtualCurrencyAddPopup virtualCurrencyAddPopup;
-        [SerializeField] private Button inventoryButton;
-        [SerializeField] private GameObject[] _teamTextObjects;
-        [SerializeField] private Image _typeImage;
-        [SerializeField] private Image _typeIcon;
         [SerializeField] private TextMeshProUGUI _passiveSkillName;
         [SerializeField] private TextMeshProUGUI _passiveSkillExplanation;
+
+        [SerializeField] private Image _teamEditImage;
+        [SerializeField] private Image _typeImage;
+        [SerializeField] private Image _typeIcon;
         [SerializeField] private Image _levelIcon;
+
+        [SerializeField] private RectTransform leftArrowRect;
+        [SerializeField] private RectTransform rightArrowRect;
+
+        [SerializeField] private GameObject upgradeInfoGameObject;
+        [SerializeField] private GameObject _inventoryCautionObj;
+        [SerializeField] private GameObject[] _teamTextObjects;
+
+        [SerializeField] private StatusView statusView;
+        [SerializeField] private SkillsView skillsView;
+        [SerializeField] private PurchaseErrorView purchaseErrorView;
+        [SerializeField] private VirtualCurrencyAddPopup virtualCurrencyAddPopup;
+        [SerializeField] private LevelUpView _levelUpView;
+
         [Inject] private ApplyStatusSkillUseCase _applyStatusSkillUseCase;
         private bool _isInitialized;
         private readonly Dictionary<int, (bool, string)> _statusTextDictionary = new();
+        private readonly Color _teamEditTextColor = new(0.746f, 0f, 0f, 1);
+        private readonly Color _teamEditTextDisableColor = new(0.746f, 0f, 0f, 1);
         private const float MoveAmount = 50;
+        private const string TeamEditText = "チーム編集";
+        private const string DecideText = "決定";
+        private const float DisableAlpha = 0.5f;
         public VirtualCurrencyAddPopup _VirtualCurrencyAddPopup => virtualCurrencyAddPopup;
         public PurchaseErrorView _PurchaseErrorView => purchaseErrorView;
+        public LevelUpView _LevelUpView => _levelUpView;
         public Button _UpgradeButton => upgradeButton;
         public Button _BackButton => backButton;
-        public Button _SelectButton => selectButton;
+        public Button _TeamEditButton => _teamEditButton;
         public Button _LeftArrowButton => leftArrowButton;
         public Button _RightArrowButton => rightArrowButton;
         public Button _InventoryButton => inventoryButton;
 
         public IObservable<Button> _OnClickNormalSkillButtonAsObservable => skillsView._OnClickNormalSkillButtonAsObservable;
         public IObservable<Button> _OnClickSpecialSkillButtonAsObservable => skillsView._OnClickSpecialSkillButtonAsObservable;
+        public IObservable<Button> _OnClickWeaponSkillButtonAsObservable => skillsView._OnClickWeaponSkillButtonAsObservable;
 
         public void ApplyViewModel(ViewModel viewModel)
         {
@@ -59,15 +76,19 @@ namespace UI.Title
             var nextLevelData = viewModel._NextLevelMasterData;
             var skillsViewModel = viewModel._SkillsViewModel;
             var weaponMasterData = viewModel._WeaponMasterData;
+            var isTeamEdit = viewModel._IsTeamEdit;
+            var teamMembers = viewModel._TeamMembers;
             SetStatusView(characterData, weaponMasterData);
-            ApplySkillsViewModel(skillsViewModel);
+            skillsView.ApplyViewModel(skillsViewModel);
             SetLevelView(currentLevelData, nextLevelData);
             purchaseErrorView.gameObject.SetActive(false);
             virtualCurrencyAddPopup.gameObject.SetActive(false);
+            _teamEditButtonText.text = isTeamEdit ? DecideText : TeamEditText;
             _typeImage.color = viewModel._TypeColor;
             _typeIcon.sprite = viewModel._TypeSprite;
             _passiveSkillName.text = viewModel._PassiveSkillMasterData.Name;
             _passiveSkillExplanation.text = TranslateExplanation(viewModel._PassiveSkillMasterData);
+            _inventoryCautionObj.SetActive(viewModel._IsInventoryCaution);
             foreach (var teamText in _teamTextObjects)
             {
                 teamText.SetActive(false);
@@ -75,6 +96,27 @@ namespace UI.Title
 
             _teamTextObjects[characterData.Team].SetActive(true);
             InitializeArrowAnimation();
+            IsDecideButtonActive(isTeamEdit, characterData.Id, teamMembers);
+        }
+
+        private void IsDecideButtonActive(bool isTeamEdit, int currentCharacterId, IReadOnlyDictionary<int, int> teamMembers)
+        {
+            foreach (var teamMember in teamMembers)
+            {
+                var characterId = teamMember.Value;
+                var isContain = currentCharacterId == characterId;
+                if (isTeamEdit && isContain)
+                {
+                    _teamEditButton.interactable = false;
+                    _teamEditImage.color = new Color(1, 1, 1, DisableAlpha);
+                    _teamEditButtonText.color = _teamEditTextDisableColor;
+                    return;
+                }
+            }
+
+            _teamEditImage.color = Color.white;
+            _teamEditButtonText.color = _teamEditTextColor;
+            _teamEditButton.interactable = true;
         }
 
         private static string TranslateExplanation(SkillMasterData skillMasterData)
@@ -137,11 +179,6 @@ namespace UI.Title
             statusView._FireRangeText.text = _statusTextDictionary.First(x => x.Key == (int)StatusType.FireRange).Value.Item2;
             statusView._DefenseText.text = _statusTextDictionary.First(x => x.Key == (int)StatusType.Defense).Value.Item2;
             statusView._ResistanceText.text = _statusTextDictionary.First(x => x.Key == (int)StatusType.Resistance).Value.Item2;
-        }
-
-        private void ApplySkillsViewModel(SkillsView.ViewModel viewModel)
-        {
-            skillsView.ApplyViewModel(viewModel);
         }
 
         private void SetLevelView(LevelMasterData currentLevelMasterData, LevelMasterData nextLevelMasterData)
@@ -224,6 +261,9 @@ namespace UI.Title
             public Sprite _TypeSprite { get; }
             public Color _TypeColor { get; }
             public SkillMasterData _PassiveSkillMasterData { get; }
+            public bool _IsTeamEdit { get; }
+            public IReadOnlyDictionary<int, int> _TeamMembers { get; }
+            public bool _IsInventoryCaution { get; }
 
             public ViewModel
             (
@@ -234,7 +274,10 @@ namespace UI.Title
                 WeaponMasterData weaponMasterData,
                 Sprite typeSprite,
                 Color typeColor,
-                SkillMasterData passiveSkillMasterData
+                SkillMasterData passiveSkillMasterData,
+                bool isTeamEdit,
+                IReadOnlyDictionary<int, int> teamMembers,
+                bool isInventoryCaution
             )
             {
                 _CharacterData = characterData;
@@ -245,6 +288,9 @@ namespace UI.Title
                 _TypeSprite = typeSprite;
                 _TypeColor = typeColor;
                 _PassiveSkillMasterData = passiveSkillMasterData;
+                _IsTeamEdit = isTeamEdit;
+                _TeamMembers = teamMembers;
+                _IsInventoryCaution = isInventoryCaution;
             }
         }
     }

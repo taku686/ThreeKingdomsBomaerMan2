@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Bomb;
 using Common.Data;
 using Cysharp.Threading.Tasks;
@@ -12,9 +11,11 @@ using Player.Common;
 using Repository;
 using Skill;
 using UI.Battle;
+using UI.BattleCore.InBattle;
 using Unity.Mathematics;
 using UnityEngine;
 using UniRx;
+using UseCase.Battle;
 
 namespace Manager.BattleManager
 {
@@ -22,25 +23,41 @@ namespace Manager.BattleManager
     {
         public class PlayerCreateState : StateMachine<BattleCore>.State
         {
-            private static readonly Vector3 ColliderCenter = new(0, 0.6f, 0);
-            private static readonly Vector3 ColliderSize = new(0.4f, 0.6f, 0.4f);
-            private const float MaxRate = 1f;
             private PhotonNetworkManager _PhotonNetworkManager => Owner._photonNetworkManager;
             private PlayerGeneratorUseCase _PlayerGeneratorUseCase => Owner._playerGeneratorUseCase;
             private MapManager _MapManager => Owner.mapManager;
             private CameraManager _CameraManager => Owner.cameraManager;
             private StateMachine<BattleCore> _StateMachineClone => Owner._stateMachine;
             private BombProvider _BombProvider => Owner._bombProvider;
-            private AnimatorControllerRepository _AnimatorControllerRepository => Owner.animatorControllerRepository;
-            private EffectActivateUseCase _EffectActivateUseCase => Owner.effectActivator;
-            private ApplyStatusSkillUseCase _ApplyStatusSkillUseCase => Owner._applyStatusSkillUseCase;
+            private SkillEffectActivateUseCase _SkillEffectActivateUseCase => Owner._skillEffectActivateUseCase;
             private List<PlayerStatusUI> _PlayerStatusUiList => Owner._playerStatusUiList;
             private CharacterMasterDataRepository _CharacterMasterDataRepository => Owner._characterMasterDataRepository;
             private WeaponMasterDataRepository _WeaponMasterDataRepository => Owner._weaponMasterDataRepository;
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
             private ActiveSkillManager _ActiveSkillManager => Owner._activeSkillManager;
             private PassiveSkillManager _PassiveSkillManager => Owner._passiveSkillManager;
-            private SkillActivationConditionsUseCase _SkillActivationConditionsUseCase => Owner._skillActivationConditionsUseCase;
+
+            private UnderAbnormalConditionsBySkillUseCase _UnderAbnormalConditionsBySkillUseCase =>
+                Owner._underAbnormalConditionsBySkillUseCase;
+
+            private SetupAnimatorUseCase _SetupAnimatorUseCase => Owner._setupAnimatorUseCase;
+
+            private TranslateStatusInBattleUseCase.Factory _TranslateStatusInBattleUseCaseFactory =>
+                Owner._translateStatusInBattleUseCaseFactory;
+
+            private GameObject _ArrowIndicatorPrefab => Owner._arrowSkillIndicatorPrefab;
+            private GameObject _CircleIndicatorPrefab => Owner._circleSkillIndicatorPrefab;
+            private StartPointsRepository _StartPointsRepository => Owner._startPointsRepository;
+
+            private AbnormalConditionEffect _AbnormalConditionEffect =>
+                Owner._abnormalConditionEffect;
+
+            private PhotonView _photonView;
+
+            private static readonly Vector3 ColliderCenter = new(0, 0.6f, 0);
+            private static readonly Vector3 ColliderSize = new(0.6f, 0.6f, 0.6f);
+            private const float MaxRate = 1f;
+            private const int PlayerNotification = 1;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
             {
@@ -55,20 +72,41 @@ namespace Manager.BattleManager
             private void OnInitialize()
             {
                 _PhotonNetworkManager.CreatePlayerGenerateCompleteSubject();
-                GeneratePlayer();
                 GenerateCPU();
-                SetPlayerGenerateCompleteSubscribe();
+                GeneratePlayer();
+                PlayerGenerateCompleteSubscribe();
+                PhotonNetwork.LocalPlayer.SetPlayerGenerate(PlayerNotification);
+            }
+
+            private void PlayerGenerateCompleteSubscribe()
+            {
+                _PhotonNetworkManager._PlayerGenerateCompleteObservable.Subscribe(_ =>
+                {
+                    var players = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
+                    foreach (var player in players)
+                    {
+                        InitializePlayerComponent(player);
+                    }
+
+                    _StateMachineClone.Dispatch((int)State.BattleStart);
+                }).AddTo(Owner.GetCancellationTokenOnDestroy());
             }
 
             private void GeneratePlayer()
             {
                 var index = PhotonNetwork.LocalPlayer.ActorNumber;
-                var characterData = _PhotonNetworkManager.GetCharacterData(index);
-                var playerObj = _PlayerGeneratorUseCase.GenerateCharacter(index, characterData);
-                var weaponData = _PhotonNetworkManager.GetWeaponData(index);
+                var playerKey = PhotonNetworkManager.GetPlayerKey(index, 0);
+                var characterData = _PhotonNetworkManager.GetCharacterData(playerKey);
+                var weaponData = _PhotonNetworkManager.GetWeaponData(playerKey);
+                var spawnPoint = _StartPointsRepository.GetSpawnPoint(index);
+                var playerCore = _PlayerGeneratorUseCase.InstantiatePlayerCore(false, spawnPoint);
+                var playerObj =
+                    _PlayerGeneratorUseCase.InstantiatePlayerObj(characterData, playerCore.transform, weaponData.Id,
+                        false);
                 _CharacterCreateUseCase.CreateWeapon(playerObj, weaponData, true);
-                playerObj.tag = GameCommonData.PlayerTag;
-                playerObj.layer = LayerMask.NameToLayer(GameCommonData.PlayerLayer);
+                _photonView = playerCore.GetComponent<PhotonView>();
+                var instantiationId = _photonView.InstantiationId;
+                _PhotonNetworkManager.SetTeamMembersInfo(instantiationId);
             }
 
             private void GenerateCPU()
@@ -81,136 +119,192 @@ namespace Manager.BattleManager
                 var generateAmount = PhotonNetwork.CurrentRoom.MaxPlayers - PhotonNetwork.CurrentRoom.PlayerCount;
                 for (var i = 1; i <= generateAmount; i++)
                 {
-                    var playerIndex = PhotonNetwork.CurrentRoom.PlayerCount + i;
-                    var candidateCharacterId = _CharacterMasterDataRepository.GetRandomCharacterId();
-                    var characterData = _CharacterMasterDataRepository.GetCharacterData(candidateCharacterId);
-                    var candidateWeaponId = _WeaponMasterDataRepository.GetWeaponRandomWeaponId();
-                    var weaponData = _WeaponMasterDataRepository.GetWeaponData(candidateWeaponId);
-                    var cpuObj = _PlayerGeneratorUseCase.GenerateCPUCharacter(playerIndex, characterData);
-                    _CharacterCreateUseCase.CreateWeapon(cpuObj, weaponData, true);
-                    cpuObj.tag = GameCommonData.PlayerTag;
-                    cpuObj.layer = LayerMask.NameToLayer(GameCommonData.EnemyLayer);
-                    cpuObj.AddComponent<EnemyCore>();
-                    var userStatusInfo = cpuObj.AddComponent<PlayerStatusInfo>();
-                    userStatusInfo.SetPlayerIndex(playerIndex);
-                    AddBoxCollider(cpuObj);
-                    AddRigidbody(cpuObj);
-                    GenerateEffectActivator(cpuObj, playerIndex);
+                    //CPUのチームメンバーを3人してもいいが、現段階では1人に設定する
+                    var masterActorNr = PhotonNetwork.MasterClient.ActorNumber;
+                    var cpuActorNr = PhotonNetwork.CurrentRoom.PlayerCount + i;
+                    var characterId = _CharacterMasterDataRepository.GetRandomCharacterId();
+                    var weaponId = _WeaponMasterDataRepository.GetWeaponRandomWeaponId();
+                    var characterData = _CharacterMasterDataRepository.GetCharacterData(characterId);
+                    var weaponData = _WeaponMasterDataRepository.GetWeaponData(weaponId);
+                    var spawnPoint = _StartPointsRepository.GetSpawnPoint(cpuActorNr);
+                    var playerCore = _PlayerGeneratorUseCase.InstantiatePlayerCore(true, spawnPoint);
+                    var photonView = playerCore.GetComponent<PhotonView>();
+                    var instantiationId = photonView.InstantiationId;
+                    var playerKey = PhotonNetworkManager.GetPlayerKey(instantiationId, 0);
+                    var playerObj = _PlayerGeneratorUseCase.InstantiatePlayerObj(characterData, playerCore.transform,
+                        weaponData.Id, true);
+                    _CharacterCreateUseCase.CreateWeapon(playerObj, weaponData, true, true);
+                    var characterDic = new Dictionary<int, int> { { playerKey, characterId } };
+                    var weaponDic = new Dictionary<int, int> { { playerKey, weaponId } };
+                    var levelDic = new Dictionary<int, int> { { playerKey, GameCommonData.MaxCharacterLevel } };
+
+                    PhotonNetwork.LocalPlayer.SetCharacterId(characterDic);
+                    PhotonNetwork.LocalPlayer.SetWeaponId(weaponDic);
+                    PhotonNetwork.LocalPlayer.SetCharacterLevel(levelDic);
+                    PhotonNetwork.LocalPlayer.SetPlayerIndex(masterActorNr);
                 }
             }
 
-            private void SetPlayerGenerateCompleteSubscribe()
+            private void CommonInitializationProcess
+            (
+                GameObject playerCore,
+                out string hpKey,
+                out PlayerConditionInfo playerConditionInfo,
+                out PhotonView photonView
+            )
             {
-                _PhotonNetworkManager._PlayerGenerateCompleteSubject.Subscribe(_ =>
-                {
-                    var players = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
-                    foreach (var player in players)
-                    {
-                        var isCPU = player.TryGetComponent<EnemyCore>(out var _);
-                        if (isCPU)
-                        {
-                            continue;
-                        }
+                photonView = playerCore.GetComponent<PhotonView>();
+                var instantiationId = photonView.InstantiationId;
+                var creatorNr = photonView.CreatorActorNr;
+                var characterDatum = GetCharacterDatum(instantiationId);
+                var weaponDatum = GetWeaponDatum(instantiationId);
+                var levelDatum = GetLevelDatum(instantiationId);
+                var characterData = characterDatum[0];
+                var weaponData = weaponDatum[0];
+                var levelData = levelDatum[0];
+                var weaponType = weaponData.WeaponType;
 
-                        InitializePlayerComponent(player);
+                playerCore.tag = GameCommonData.PlayerTag;
+                playerCore.layer = LayerMask.NameToLayer(GameCommonData.EnemyLayer);
+                SetPlayerUI(playerCore, instantiationId, out hpKey);
+                playerCore.AddComponent<PlayerMove>();
+                playerCore.AddComponent<PlayerDash>();
+                _SetupAnimatorUseCase.SetAnimatorController(playerCore, weaponType);
+                GenerateEffectActivator(playerCore, instantiationId);
+                var translateStatusInBattleUseCase = _TranslateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
+                translateStatusInBattleUseCase.InitializeStatus();
+                var putBomb = playerCore.AddComponent<PutBomb>();
+                putBomb.Initialize(_BombProvider, _MapManager, translateStatusInBattleUseCase);
+                playerConditionInfo = playerCore.AddComponent<PlayerConditionInfo>();
+                playerConditionInfo.SetPlayerIndex(instantiationId);
+                AddBoxCollider(playerCore);
+                AddRigidbody(playerCore);
+                AddPlayerSkill(playerCore);
+
+                if (!PhotonNetworkManager.IsCpu(creatorNr)) return;
+                var enemyCore = playerCore.AddComponent<EnemyCore>();
+                enemyCore.enabled = PhotonNetwork.IsMasterClient;
+            }
+
+            #region GetDatum
+
+            private CharacterData[] GetCharacterDatum(int playerIndex)
+            {
+                var characterDatum = new List<CharacterData>();
+                for (var i = 0; i < GameCommonData.MaxTeamMember; i++)
+                {
+                    var playerKey = PhotonNetworkManager.GetPlayerKey(playerIndex, i);
+                    var characterData = _PhotonNetworkManager.GetCharacterData(playerKey);
+                    if (characterData == null)
+                    {
+                        continue;
                     }
 
-                    _StateMachineClone.Dispatch((int)State.BattleStart);
-                }).AddTo(Owner.GetCancellationTokenOnDestroy());
+                    characterDatum.Add(characterData);
+                }
+
+                return characterDatum.ToArray();
             }
+
+            private WeaponMasterData[] GetWeaponDatum(int playerIndex)
+            {
+                var weaponMasterDatum = new List<WeaponMasterData>();
+                for (var i = 0; i < GameCommonData.MaxTeamMember; i++)
+                {
+                    var playerKey = PhotonNetworkManager.GetPlayerKey(playerIndex, i);
+                    var weaponData = _PhotonNetworkManager.GetWeaponData(playerKey);
+                    if (weaponData == null)
+                    {
+                        continue;
+                    }
+
+                    weaponMasterDatum.Add(weaponData);
+                }
+
+                return weaponMasterDatum.ToArray();
+            }
+
+            private LevelMasterData[] GetLevelDatum(int playerIndex)
+            {
+                var levelMasterDatum = new List<LevelMasterData>();
+                for (var i = 0; i < GameCommonData.MaxTeamMember; i++)
+                {
+                    var playerKey = PhotonNetworkManager.GetPlayerKey(playerIndex, i);
+                    var levelMasterData = _PhotonNetworkManager.GetLevelMasterData(playerKey);
+                    if (levelMasterData == null)
+                    {
+                        continue;
+                    }
+
+                    levelMasterDatum.Add(levelMasterData);
+                }
+
+                return levelMasterDatum.ToArray();
+            }
+
+            #endregion
 
             private void InitializePlayerComponent(GameObject player)
             {
-                player.layer = LayerMask.NameToLayer(GameCommonData.EnemyLayer);
-                var photonView = player.GetComponent<PhotonView>();
-                var photonAnimator = player.GetComponent<PhotonAnimatorView>();
-                var playerPutBomb = player.AddComponent<PutBomb>();
-                var playerId = photonView.OwnerActorNr;
-                var characterData = _PhotonNetworkManager.GetCharacterData(playerId);
-                var weaponData = _PhotonNetworkManager.GetWeaponData(playerId);
-                var weaponType = weaponData.WeaponType;
-                var userStatusInfo = player.AddComponent<PlayerStatusInfo>();
-                userStatusInfo.SetPlayerIndex(playerId);
-                AddBoxCollider(player);
-                AddRigidbody(player);
-                SetPlayerUI(player, playerId, out var hpKey);
-                SetAnimatorController(player, weaponType, photonAnimator);
-                GenerateEffectActivator(player, playerId);
-                var playerStatusManager = InitializeStatus(characterData, weaponData, photonView.IsMine);
-                playerPutBomb.Initialize(_BombProvider, playerStatusManager, _MapManager);
-
-                if (!photonView.IsMine)
+                var playerTransformView = player.GetComponent<PhotonTransformView>();
+                if (playerTransformView == null)
                 {
                     return;
                 }
 
-                player.layer = LayerMask.NameToLayer(GameCommonData.PlayerLayer);
+                CommonInitializationProcess
+                (
+                    player,
+                    out var hpKey,
+                    out var playerStatusInfo,
+                    out var photonView
+                );
+
+                if (!IsMine(photonView))
+                {
+                    return;
+                }
+
                 _CameraManager.Initialize(player.transform);
+                player.layer = LayerMask.NameToLayer(GameCommonData.PlayerLayer);
                 var playerCore = player.AddComponent<PlayerCore>();
                 Owner.SetPlayerCore(playerCore);
+                Owner.SetPlayerStatusInfo(playerStatusInfo);
+                InstantiateSkillIndicator(playerCore.transform);
                 playerCore.Initialize
                 (
-                    playerStatusManager,
+                    _TranslateStatusInBattleUseCaseFactory,
                     _PhotonNetworkManager,
                     _ActiveSkillManager,
                     _PassiveSkillManager,
-                    _SkillActivationConditionsUseCase,
+                    _UnderAbnormalConditionsBySkillUseCase,
+                    _PlayerGeneratorUseCase,
+                    _CharacterCreateUseCase,
+                    _AbnormalConditionEffect,
                     hpKey
                 );
             }
 
-            private TranslateStatusInBattleUseCase InitializeStatus
-            (
-                CharacterData characterData,
-                WeaponMasterData weaponData,
-                bool isMine
-            )
+            private void InstantiateSkillIndicator(Transform playerTransform)
             {
-                var statusSkillDatum = weaponData.StatusSkillMasterDatum;
-                var characterId = characterData.Id;
-                var hp = 0;
-                var attack = 0;
-                var speed = 0;
-                var bombLimit = 0;
-                var fireRange = 0;
-                var defense = 0;
-                var resistance = 0;
-
-                foreach (var statusSkillData in statusSkillDatum)
-                {
-                    var skillId = statusSkillData.Id;
-                    hp = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Hp);
-                    speed = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Speed);
-                    attack = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Attack);
-                    fireRange = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.FireRange);
-                    bombLimit = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.BombLimit);
-                    defense = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Defense);
-                    resistance = _ApplyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Resistance);
-                }
-
-
-                var playerStatusForBattleUseCase = new TranslateStatusInBattleUseCase
-                (
-                    hp,
-                    speed,
-                    bombLimit,
-                    attack,
-                    fireRange,
-                    defense,
-                    resistance,
-                    isMine
-                );
-
-                return playerStatusForBattleUseCase;
+                var arrowIndicator = Instantiate(_ArrowIndicatorPrefab, playerTransform);
+                var arrowIndicatorView = arrowIndicator.GetComponent<ArrowSkillIndicatorView>();
+                arrowIndicator.SetActive(false);
+                Owner.SetArrowSkillIndicatorView(arrowIndicatorView);
+                var circleIndicator = Instantiate(_CircleIndicatorPrefab, playerTransform);
+                var circleIndicatorView = circleIndicator.GetComponent<CircleSkillIndicatorView>();
+                circleIndicator.SetActive(false);
+                Owner.SetCircleSkillIndicatorView(circleIndicatorView);
             }
 
-            private void GenerateEffectActivator(GameObject playerObj, int playerId)
+            private void GenerateEffectActivator(GameObject playerObj, int instantiationId)
             {
-                var effectActivator = Instantiate(_EffectActivateUseCase, playerObj.transform);
-                effectActivator.transform.localPosition = new Vector3(0, 0, 0);
-                effectActivator.transform.localRotation = quaternion.identity;
-                var activateSkillSubject = _PhotonNetworkManager._ActivateSkillSubject;
-                effectActivator.Initialize(activateSkillSubject, playerId);
+                var effectActivator = Instantiate(_SkillEffectActivateUseCase, playerObj.transform);
+                var effectActivatorTransform = effectActivator.transform;
+                effectActivatorTransform.localPosition = new Vector3(0, 0, 0);
+                effectActivatorTransform.localRotation = quaternion.identity;
+                var activateSkillSubject = _PhotonNetworkManager._ActivateSkillObservable;
+                effectActivator.Initialize(activateSkillSubject, instantiationId);
             }
 
             private void SetPlayerUI(GameObject player, int playerId, out string hpKey)
@@ -225,77 +319,6 @@ namespace Manager.BattleManager
                 _PlayerStatusUiList.Add(playerStatusUI);
             }
 
-            private void SetAnimatorController
-            (
-                GameObject player,
-                WeaponType weaponType,
-                PhotonAnimatorView photonAnimatorView
-            )
-            {
-                var animator = player.GetComponent<Animator>();
-                animator.runtimeAnimatorController = _AnimatorControllerRepository.GetAnimatorController(weaponType);
-                photonAnimatorView.SetParameterSynchronized
-                (
-                    GameCommonData.SpeedhParameterName,
-                    PhotonAnimatorView.ParameterType.Float,
-                    PhotonAnimatorView.SynchronizeType.Continuous
-                );
-                photonAnimatorView.SetParameterSynchronized
-                (
-                    GameCommonData.SpeedvParameterName,
-                    PhotonAnimatorView.ParameterType.Float,
-                    PhotonAnimatorView.SynchronizeType.Continuous
-                );
-                photonAnimatorView.SetParameterSynchronized
-                (
-                    GameCommonData.NormalParameterName,
-                    PhotonAnimatorView.ParameterType.Trigger,
-                    PhotonAnimatorView.SynchronizeType.Discrete
-                );
-                photonAnimatorView.SetParameterSynchronized
-                (
-                    GameCommonData.SpecialParameterName,
-                    PhotonAnimatorView.ParameterType.Trigger,
-                    PhotonAnimatorView.SynchronizeType.Discrete
-                );
-                photonAnimatorView.SetParameterSynchronized
-                (
-                    GameCommonData.KickParameterName,
-                    PhotonAnimatorView.ParameterType.Trigger,
-                    PhotonAnimatorView.SynchronizeType.Discrete
-                );
-                photonAnimatorView.SetParameterSynchronized
-                (
-                    GameCommonData.JumpParameterName,
-                    PhotonAnimatorView.ParameterType.Trigger,
-                    PhotonAnimatorView.SynchronizeType.Discrete
-                );
-                photonAnimatorView.SetParameterSynchronized
-                (
-                    GameCommonData.DashParameterName,
-                    PhotonAnimatorView.ParameterType.Trigger,
-                    PhotonAnimatorView.SynchronizeType.Discrete
-                );
-                photonAnimatorView.SetParameterSynchronized
-                (
-                    GameCommonData.BuffParameterName,
-                    PhotonAnimatorView.ParameterType.Trigger,
-                    PhotonAnimatorView.SynchronizeType.Discrete
-                );
-                photonAnimatorView.SetParameterSynchronized
-                (
-                    GameCommonData.DeadParameterName,
-                    PhotonAnimatorView.ParameterType.Trigger,
-                    PhotonAnimatorView.SynchronizeType.Discrete
-                );
-                photonAnimatorView.SetParameterSynchronized
-                (
-                    GameCommonData.SlashParameterName,
-                    PhotonAnimatorView.ParameterType.Trigger,
-                    PhotonAnimatorView.SynchronizeType.Discrete
-                );
-            }
-
             private void AddBoxCollider(GameObject player)
             {
                 var collider = player.AddComponent<BoxCollider>();
@@ -304,11 +327,23 @@ namespace Manager.BattleManager
                 collider.size = ColliderSize;
             }
 
-            private void AddRigidbody(GameObject player)
+            private static void AddRigidbody(GameObject player)
             {
                 var rigid = player.AddComponent<Rigidbody>();
-                rigid.useGravity = false;
-                rigid.constraints = RigidbodyConstraints.FreezeAll;
+                rigid.useGravity = true;
+                rigid.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
+                rigid.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+            }
+
+            private void AddPlayerSkill(GameObject playerCore)
+            {
+                var playerSkill = playerCore.AddComponent<PlayerSkill>();
+                playerSkill.Initialize(_ActiveSkillManager, _PhotonNetworkManager, playerCore);
+            }
+
+            private bool IsMine(PhotonView photonView)
+            {
+                return _photonView.InstantiationId == photonView.InstantiationId;
             }
         }
     }

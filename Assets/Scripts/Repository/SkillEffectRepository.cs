@@ -9,12 +9,83 @@ namespace Repository
 {
     public class SkillEffectRepository : SerializedMonoBehaviour
     {
-        [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Abnormal Condition", ValueLabel = "Skill Effect")]
+        [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Abnormal Condition", ValueLabel = "Slash Effect")]
         private Dictionary<AbnormalCondition, SkillEffect> _skillEffectDictionary;
 
-        public SkillEffect GetSkillEffect(AbnormalCondition abnormalCondition)
+        [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Abnormal Condition", ValueLabel = "FlyingSlash Effect")]
+        private Dictionary<AbnormalCondition, SkillEffect> _flyingSlashEffectDictionary;
+
+        [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Abnormal Condition", ValueLabel = "DashAttack Effect")]
+        private Dictionary<AbnormalCondition, SkillEffect> _dashAttackEffectDictionary;
+
+        [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Abnormal Condition", ValueLabel = "CrushImpact Effect")]
+        private Dictionary<AbnormalCondition, SkillEffect> _crushImpactEffectDictionary;
+
+        [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Abnormal Condition", ValueLabel = "SlashSpin Effect")]
+        private Dictionary<AbnormalCondition, SkillEffect> _slashSpinEffectDictionary;
+
+        [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Abnormal Condition", ValueLabel = "MagicShot Effect")]
+        private Dictionary<AbnormalCondition, SkillEffect> _magicShotEffectDictionary;
+
+
+        public SkillEffect GetSlashEffect(AbnormalCondition abnormalCondition)
         {
             if (_skillEffectDictionary.TryGetValue(abnormalCondition, out var skillEffect))
+            {
+                return skillEffect;
+            }
+
+            Debug.LogError($"Skill effect not found for {abnormalCondition}");
+            return null;
+        }
+
+        public SkillEffect GetFlyingSlashEffect(AbnormalCondition abnormalCondition)
+        {
+            if (_flyingSlashEffectDictionary.TryGetValue(abnormalCondition, out var skillEffect))
+            {
+                return skillEffect;
+            }
+
+            Debug.LogError($"Skill effect not found for {abnormalCondition}");
+            return null;
+        }
+
+        public SkillEffect GetDashAttackEffect(AbnormalCondition abnormalCondition)
+        {
+            if (_dashAttackEffectDictionary.TryGetValue(abnormalCondition, out var skillEffect))
+            {
+                return skillEffect;
+            }
+
+            Debug.LogError($"Skill effect not found for {abnormalCondition}");
+            return null;
+        }
+
+        public SkillEffect GetCrushImpactEffect(AbnormalCondition abnormalCondition)
+        {
+            if (_crushImpactEffectDictionary.TryGetValue(abnormalCondition, out var skillEffect))
+            {
+                return skillEffect;
+            }
+
+            Debug.LogError($"Skill effect not found for {abnormalCondition}");
+            return null;
+        }
+
+        public SkillEffect GetSlashSpinEffect(AbnormalCondition abnormalCondition)
+        {
+            if (_slashSpinEffectDictionary.TryGetValue(abnormalCondition, out var skillEffect))
+            {
+                return skillEffect;
+            }
+
+            Debug.LogError($"Skill effect not found for {abnormalCondition}");
+            return null;
+        }
+
+        public SkillEffect GetMagicShotEffect(AbnormalCondition abnormalCondition)
+        {
+            if (_magicShotEffectDictionary.TryGetValue(abnormalCondition, out var skillEffect))
             {
                 return skillEffect;
             }

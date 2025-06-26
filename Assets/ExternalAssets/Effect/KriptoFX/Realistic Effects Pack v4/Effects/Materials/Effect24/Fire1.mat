@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Fire1
   m_Shader: {fileID: 4800000, guid: 18cc8fe7d50c89741b56c1ae6a5baa66, type: 3}
-  m_ShaderKeywords: BlendAlpha Clip_ON FrameBlend_ON SoftParticles_ON USE_CUTOUT VertLight_OFF
+  m_ShaderKeywords: BlendAlpha Clip_ON FrameBlend_ON SoftParticles_ON VertLight_OFF
     _BLENDMODE_BLEND _FADING_ON _FLIPBOOK_BLENDING
   m_LightmapFlags: 5
   m_EnableInstancingVariants: 1
@@ -89,7 +89,7 @@ Material:
     - _SrcBlend: 1
     - _SrcMode: 5
     - _UVSec: 0
-    - _UseCutout: 1
+    - _UseCutout: 0
     - _UseCutoutTex: 0
     - _UseCutoutThreshold: 0
     - _UseFrameBlending: 1
@@ -110,4 +110,4 @@ Material:
     - _FogColorMultiplier: {r: 0, g: 0, b: 0, a: 0}
     - _FresnelColor: {r: 1, g: 1, b: 1, a: 1}
     - _Tiling: {r: 800, g: 400, b: 8, a: 4}
-    - _TintColor: {r: 1.1232523, g: 0.3678802, b: 0.06887871, a: 0.73333335}
+    - _TintColor: {r: 2.0528405, g: 0.5009196, b: 0.22540992, a: 0.30588236}

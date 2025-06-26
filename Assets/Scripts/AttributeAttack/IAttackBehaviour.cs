@@ -4,6 +4,6 @@ namespace AttributeAttack
 {
     public interface IAttackBehaviour : IDisposable
     {
-        void Attack();
+         void Attack();
     }
 }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Common.Data;
+using UnityEngine;
 using Zenject;
 
 namespace AttributeAttack.Sample
@@ -17,6 +18,11 @@ namespace AttributeAttack.Sample
         {
             _attackBehaviour.Attack();
             Debug.Log("毒状態を付与した！");
+        }
+
+        public void Attack(AbnormalCondition attribute)
+        {
+            throw new System.NotImplementedException();
         }
 
         public void Dispose()

@@ -40,7 +40,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 2a54f16904242654299a96730ded17c9, type: 3}
+        m_Texture: {fileID: 2800000, guid: ac8aea2c321c7c348bf4fbcd4fecfc2e, type: 3}
         m_Scale: {x: 2, y: 2}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -83,6 +83,7 @@ Material:
     - _FireOffsetSpeed: {r: 1, g: 1, b: 0, a: 0}
     - _NoiseScale: {r: 1, g: 0.14, b: -3, a: 0.2}
     - _Tiling: {r: 800, g: 800, b: 8, a: 8}
-    - _TintColor: {r: 16.223433, g: 2.9231257, b: 0, a: 1}
+    - _TintColor: {r: 38.937145, g: 7.7466574, b: 1.4270158, a: 1}
     - _TwistScale: {r: 2, g: 0.12, b: 2, a: 1}
     - _WavesScale: {r: 9, g: 0.07, b: 20, a: 0}
+  m_BuildTextureStacks: []

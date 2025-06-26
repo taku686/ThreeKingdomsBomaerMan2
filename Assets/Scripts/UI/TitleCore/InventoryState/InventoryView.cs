@@ -45,11 +45,6 @@ public class InventoryView : ViewBase
             .OnClickNormalSkillDetailButtonAsObservable()
             .SelectMany(_ => _uiAnimation.ClickScaleColor(weaponDetailView._NormalSkillDetailButton.gameObject).ToUniTask().ToObservable());
 
-    public IObservable<AsyncUnit> _OnClickSpecialSkillDetailButtonAsObservable
-        => weaponDetailView
-            .OnClickSpecialSkillDetailButtonAsObservable()
-            .SelectMany(_ => _uiAnimation.ClickScaleColor(weaponDetailView._SpecialSkillDetailButton.gameObject).ToUniTask().ToObservable());
-
     public void ApplyViewModel(ViewModel viewModel, UIAnimation uiAnimation, Action<bool> setActivePanelAction)
     {
         _uiAnimation = uiAnimation;
@@ -70,10 +65,21 @@ public class InventoryView : ViewBase
         foreach (var (weaponMasterData, possessedAmount) in sortedWeaponDatum)
         {
             var weaponGridView = Instantiate(weaponGridViewPrefab, weaponGridParent);
-            var weaponGridViewModel = TranslateWeaponDataToViewModel(weaponMasterData, possessedAmount, viewModel._SelectedWeaponMasterData.Id, viewModel._IsFocus);
+            var isCaution = GetCaution(viewModel._WeaponCautionDictionary, weaponMasterData.Id);
+            var weaponGridViewModel = TranslateWeaponDataToViewModel(weaponMasterData, possessedAmount, viewModel._SelectedWeaponMasterData.Id, viewModel._IsFocus, isCaution);
             weaponGridView.ApplyViewModel(weaponGridViewModel, _uiAnimation, _setActivePanelAction);
             _weaponGridViews.Add(weaponGridView);
         }
+    }
+
+    public void DestroyWeapon()
+    {
+        weaponDetailView.DestroyWeapon();
+    }
+
+    private static bool GetCaution(IReadOnlyDictionary<int, bool> cautionDictionary, int weaponId)
+    {
+        return cautionDictionary.GetValueOrDefault(weaponId, false);
     }
 
     private WeaponGridView.ViewModel TranslateWeaponDataToViewModel
@@ -81,7 +87,8 @@ public class InventoryView : ViewBase
         WeaponMasterData weaponMasterData,
         int possessedAmount,
         int selectedWeaponId,
-        bool isFocus
+        bool isFocus,
+        bool isCaution
     )
     {
         return new WeaponGridView.ViewModel
@@ -91,7 +98,8 @@ public class InventoryView : ViewBase
             weaponMasterData.Id,
             selectedWeaponId,
             weaponMasterData.Rare,
-            isFocus
+            isFocus,
+            isCaution
         );
     }
 
@@ -111,19 +119,22 @@ public class InventoryView : ViewBase
         _sortPopupView.gameObject.SetActive(false);
     }
 
-    private WeaponDetailView.ViewModel TranslateWeaponDataToViewModel(WeaponMasterData weaponMasterData)
+    private static WeaponDetailView.ViewModel TranslateWeaponDataToViewModel(WeaponMasterData weaponMasterData)
     {
         return new WeaponDetailView.ViewModel
         (
             weaponMasterData.WeaponIcon,
             weaponMasterData.Name,
             weaponMasterData.NormalSkillMasterData,
-            weaponMasterData.SpecialSkillMasterData,
             weaponMasterData.StatusSkillMasterDatum,
             weaponMasterData.WeaponObject,
             weaponMasterData.WeaponType,
             weaponMasterData.Scale,
             weaponMasterData.Rare,
+            weaponMasterData.CoinMul,
+            weaponMasterData.GemMul,
+            weaponMasterData.SkillMul,
+            weaponMasterData.RangeMul,
             weaponMasterData.Id
         );
     }
@@ -138,17 +149,20 @@ public class InventoryView : ViewBase
         public IReadOnlyDictionary<WeaponMasterData, int> _SortedWeaponDatum { get; }
         public WeaponMasterData _SelectedWeaponMasterData { get; }
         public bool _IsFocus { get; }
+        public IReadOnlyDictionary<int, bool> _WeaponCautionDictionary { get; }
 
         public ViewModel
         (
             IReadOnlyDictionary<WeaponMasterData, int> sortedWeaponDatum,
             WeaponMasterData selectedWeaponMasterData,
-            bool isFocus
+            bool isFocus,
+            IReadOnlyDictionary<int, bool> weaponCautionDictionary
         )
         {
             _SortedWeaponDatum = sortedWeaponDatum;
             _SelectedWeaponMasterData = selectedWeaponMasterData;
             _IsFocus = isFocus;
+            _WeaponCautionDictionary = weaponCautionDictionary;
         }
     }
 }

@@ -1,28 +1,28 @@
 using System;
 using System.Globalization;
 using Common.Data;
+using Manager.DataManager;
 using Repository;
 using UnityEngine;
 using Zenject;
 
 public class SkillDetailViewModelUseCase : IDisposable
 {
-    private readonly WeaponMasterDataRepository _weaponMasterDataRepository;
+    private readonly SkillMasterDataRepository _skillMasterDataRepository;
 
     [Inject]
     public SkillDetailViewModelUseCase
     (
-        WeaponMasterDataRepository weaponMasterDataRepository,
+        SkillMasterDataRepository skillMasterDataRepository,
         UserDataRepository userDataRepository
     )
     {
-        _weaponMasterDataRepository = weaponMasterDataRepository;
+        _skillMasterDataRepository = skillMasterDataRepository;
     }
 
-    public SkillDetailPopup.ViewModel InAsTask(int weaponId, int skillType)
+    public SkillDetailPopup.ViewModel InAsTask(int skillId)
     {
-        var weaponData = _weaponMasterDataRepository.GetWeaponData(weaponId);
-        var skillData = weaponData.GetSkillData(skillType);
+        var skillData = _skillMasterDataRepository.GetSkillData(skillId);
         var explanation = TranslateExplanation(skillData);
         var interval = !Mathf.Approximately(skillData.Interval, GameCommonData.InvalidNumber) ? skillData.Interval.ToString(CultureInfo.InvariantCulture) + "秒" : "-";
         var effectTime = !Mathf.Approximately(skillData.EffectTime, GameCommonData.InvalidNumber) ? skillData.EffectTime.ToString(CultureInfo.InvariantCulture) + "秒" : "-";

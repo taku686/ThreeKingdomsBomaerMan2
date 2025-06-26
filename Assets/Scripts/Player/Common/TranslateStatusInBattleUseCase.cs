@@ -1,105 +1,114 @@
 using System;
 using Common.Data;
 using UnityEngine;
+using Zenject;
 
 namespace Player.Common
 {
     public class TranslateStatusInBattleUseCase : IDisposable
     {
-        private readonly bool _isMine;
-        private const float HpRate = 1.8f;
+        private readonly CharacterData _characterData;
+        private readonly WeaponMasterData _weaponData;
+        private readonly LevelMasterData _levelData;
+        private readonly ApplyStatusSkillUseCase _applyStatusSkillUseCase;
+        private PlayerCore.PlayerStatusInfo _playerStatusInfo;
         private int _maxBombLimit;
         private int _currentBombLimit;
-        public int _CurrentHp { get; set; }
-        public int _MaxHp { get; private set; }
-        public float _Speed { get; private set; }
-        public int _Attack { get; private set; }
-        public int _Defense { get; private set; }
-        public int _Resistance { get; private set; }
-        public int _FireRange { get; private set; }
 
 
+        [Inject]
         public TranslateStatusInBattleUseCase
         (
-            int hp,
-            int speed,
-            int bombLimit,
-            int attack,
-            int fireRange,
-            int defense,
-            int resistance,
-            bool isMine
+            CharacterData characterData,
+            WeaponMasterData weaponData,
+            LevelMasterData levelData,
+            ApplyStatusSkillUseCase applyStatusSkillUseCase
         )
         {
-            _CurrentHp = (int)(hp * HpRate);
-            _MaxHp = (int)(hp * HpRate);
-            _Speed = Mathf.Sqrt(speed * 0.1f);
-            _currentBombLimit = 0;
-            _maxBombLimit = bombLimit;
-            _Attack = attack;
-            _Defense = defense / 2;
-            _Resistance = resistance;
-            _FireRange = Mathf.RoundToInt(fireRange / 2f);
-            _isMine = isMine;
+            _characterData = characterData;
+            _weaponData = weaponData;
+            _levelData = levelData;
+            _applyStatusSkillUseCase = applyStatusSkillUseCase;
         }
 
-        public float TranslateStatusValue(StatusType statusType, int value)
+        public PlayerCore.PlayerStatusInfo InitializeStatus()
+        {
+            var statusSkillDatum = _weaponData.StatusSkillMasterDatum;
+            var characterId = _characterData.Id;
+            var hp = 0;
+            var attack = 0;
+            var speed = 0;
+            var bombLimit = 0;
+            var fireRange = 0;
+            var defense = 0;
+            var resistance = 0;
+
+            foreach (var statusSkillData in statusSkillDatum)
+            {
+                var skillId = statusSkillData.Id;
+                hp = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Hp, _levelData);
+                speed = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Speed, _levelData);
+                attack = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Attack, _levelData);
+                fireRange = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.FireRange, _levelData);
+                bombLimit = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.BombLimit, _levelData);
+                defense = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Defense, _levelData);
+                resistance = _applyStatusSkillUseCase.ApplyStatusSkill(characterId, skillId, StatusType.Resistance, _levelData);
+            }
+
+            _currentBombLimit = 0;
+            _maxBombLimit = bombLimit;
+
+            return new PlayerCore.PlayerStatusInfo
+            (
+                hp,
+                speed,
+                hp,
+                attack,
+                defense,
+                resistance,
+                fireRange,
+                _maxBombLimit
+            );
+        }
+
+        public static float Translate(StatusType statusType, float value)
         {
             switch (statusType)
             {
                 case StatusType.Hp:
-                    _MaxHp = Mathf.FloorToInt(value * HpRate);
-                    return _MaxHp;
+                    return value;
                 case StatusType.Attack:
-                    _Attack = value;
-                    return _Attack;
+                    return value;
                 case StatusType.Speed:
-                    _Speed = Mathf.Sqrt(value * 0.1f);
-                    return _Speed;
+                    return Mathf.Sqrt(value * 0.1f);
                 case StatusType.BombLimit:
-                    _maxBombLimit = value;
-                    return _maxBombLimit;
+                    return value;
                 case StatusType.FireRange:
-                    _FireRange = Mathf.FloorToInt(value / 2f);
-                    return _FireRange;
+                    value = Mathf.FloorToInt(value / 2f);
+                    return value;
                 case StatusType.Defense:
-                    return _Defense;
+                    return value / 2f;
                 case StatusType.Resistance:
-                    return _Resistance;
+                    return value;
+                case StatusType.None:
                 default:
                     throw new ArgumentOutOfRangeException(nameof(statusType), statusType, null);
             }
         }
 
-        public float Heal(int value)
-        {
-            _CurrentHp += value;
-            var rate = (float)_CurrentHp / _MaxHp;
-            if (!(rate > 1)) return rate;
-            _CurrentHp = _MaxHp;
-            rate = 1;
-
-            return rate;
-        }
-
         public bool CanPutBomb()
         {
-            return _currentBombLimit <= _maxBombLimit;
+            return _currentBombLimit < _maxBombLimit;
         }
 
         public void IncrementBombCount()
         {
-            if (!_isMine)
-            {
-                return;
-            }
-
             _currentBombLimit++;
         }
 
         public void DecrementBombCount()
         {
-            if (!_isMine || _currentBombLimit <= 0)
+            if (_currentBombLimit <= 0)
             {
                 return;
             }
@@ -109,6 +118,11 @@ namespace Player.Common
 
 
         public void Dispose()
+        {
+        }
+
+        public class Factory : PlaceholderFactory<CharacterData, WeaponMasterData, LevelMasterData,
+            TranslateStatusInBattleUseCase>
         {
         }
     }

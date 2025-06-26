@@ -1,8 +1,8 @@
 using UnityEngine;
-using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 #if KRIPTO_FX_LWRP_RENDERING
-using UnityEngine.Experimental.Rendering.LightweightPipeline;
+using UnityEngine.Rendering.LWRP;
 #endif
 
 [ExecuteInEditMode]
@@ -15,6 +15,7 @@ public class RFX4_Decal : MonoBehaviour
     ParticleSystem.MainModule psMain;
     private MaterialPropertyBlock props;
     MeshRenderer rend;
+    private bool startDepthTex;
 
     private void OnEnable()
     {
@@ -24,14 +25,16 @@ public class RFX4_Decal : MonoBehaviour
         ps = GetComponent<ParticleSystem>();
         if (ps != null) psMain = ps.main;
 
-        if (Camera.main.depthTextureMode != DepthTextureMode.Depth) Camera.main.depthTextureMode = DepthTextureMode.Depth;
-
-        GetComponent<MeshRenderer>().reflectionProbeUsage = ReflectionProbeUsage.Off;
-
-#if KRIPTO_FX_LWRP_RENDERING
-        var addCamData = Camera.main.GetComponent<LWRPAdditionalCameraData>();
-        if (addCamData != null) IsScreenSpace = addCamData.requiresDepthTexture;
-#endif
+        var cam = Camera.main;
+        if (cam != null)
+        {
+            var addCamData = cam.GetComponent<UniversalAdditionalCameraData>();
+            if (addCamData != null)
+            {
+                startDepthTex = addCamData.requiresDepthTexture;
+                addCamData.requiresDepthTexture = IsScreenSpace;
+            }
+        }
 
         if (!IsScreenSpace)
         {
@@ -56,18 +59,12 @@ public class RFX4_Decal : MonoBehaviour
         }
     }
 
-    void LateUpdate()
+    void OnDisable()
     {
-        Matrix4x4 invTransformMatrix = transform.worldToLocalMatrix;
-        // mat.SetMatrix("_InverseTransformMatrix", invTransformMatrix);
-        if (props == null) props = new MaterialPropertyBlock();
-        if (rend == null) rend = GetComponent<MeshRenderer>();
-        rend.GetPropertyBlock(props);
-       
-        props.SetMatrix("_InverseTransformMatrix", invTransformMatrix);
-        rend.SetPropertyBlock(props);
-        
-        if (ps != null) psMain.scalingMode = ParticleSystemScalingMode.Hierarchy;
+        var cam = Camera.main;
+        if (cam == null) return;
+        var addCamData                                          = cam.GetComponent<UniversalAdditionalCameraData>();
+        if (addCamData != null) addCamData.requiresDepthTexture = startDepthTex;
     }
 
     void OnDrawGizmosSelected()

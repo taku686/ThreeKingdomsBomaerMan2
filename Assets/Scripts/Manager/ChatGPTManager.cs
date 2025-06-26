@@ -43,9 +43,9 @@ public class ChatGPTManager : IDisposable
         //OpenAIのAPIリクエストに必要なヘッダー情報を設定
         var headers = new Dictionary<string, string>
         {
-            { "Authorization", "Bearer " + GameCommonData.ChatGptApiKey },
+            /*{ "Authorization", "Bearer " + GameCommonData.ChatGptApiKey },
             { "Content-type", "application/json" },
-            { "X-Slack-No-Retry", "1" }
+            { "X-Slack-No-Retry", "1" }*/
         };
 
         //文章生成で利用するモデルやトークン上限、プロンプトをオプションに設定

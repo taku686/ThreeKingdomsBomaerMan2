@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
+using System.Collections.Generic;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
-using ModestTree;
+using Manager.NetworkManager;
+using Photon.Pun;
 using Player.Common;
 using Skill.Heal;
 using UniRx;
@@ -14,112 +15,90 @@ namespace Skill
 {
     public class PassiveSkillManager : IDisposable
     {
-        private SkillMasterData _normalSkillMasterData;
-        private SkillMasterData _specialSkillMasterData;
         private readonly BuffSkill _buffSkill;
-        private readonly HealSkill _healSkill;
-        private readonly SkillActivationConditionsUseCase _skillActivationConditionsUseCase;
+        private readonly Heal.Heal _heal;
+        private readonly UnderAbnormalConditionsBySkillUseCase _underAbnormalConditionsBySkillUseCase;
         private CancellationTokenSource _cancellationTokenSource;
 
         [Inject]
         public PassiveSkillManager
         (
             BuffSkill buffSkill,
-            HealSkill healSkill,
-            SkillActivationConditionsUseCase skillActivationConditionsUseCase
+            Heal.Heal heal,
+            UnderAbnormalConditionsBySkillUseCase underAbnormalConditionsBySkillUseCase
         )
         {
             _buffSkill = buffSkill;
-            _healSkill = healSkill;
-            _skillActivationConditionsUseCase = skillActivationConditionsUseCase;
+            _heal = heal;
+            _underAbnormalConditionsBySkillUseCase = underAbnormalConditionsBySkillUseCase;
         }
 
         public void Initialize
         (
-            SkillMasterData normalSkillMasterData,
-            SkillMasterData specialSkillMasterData,
             SkillMasterData[] statusSkillMasterDatum,
             Transform playerTransform,
-            Subject<(StatusType statusType, float value)> statusBuff,
-            Subject<(StatusType statusType, int value, bool isBuff, bool isDebuff)> statusBuffUi,
-            int characterId,
-            TranslateStatusInBattleUseCase translateStatusInBattleUseCase
+            PlayerCore.PlayerStatusInfo playerStatusInfo,
+            int characterId
         )
         {
-            _normalSkillMasterData = normalSkillMasterData;
-            _specialSkillMasterData = specialSkillMasterData;
-            _cancellationTokenSource = new CancellationTokenSource();
-            var playerStatusInfo = playerTransform.GetComponent<PlayerStatusInfo>();
+            Cancel();
+
+            _cancellationTokenSource ??= new CancellationTokenSource();
+            var playerConditionInfo = playerTransform.GetComponent<PlayerConditionInfo>();
             _buffSkill.Initialize
             (
-                statusBuff,
-                statusBuffUi,
                 characterId,
                 statusSkillMasterDatum,
-                translateStatusInBattleUseCase,
+                playerConditionInfo,
                 playerStatusInfo
             );
-            PassiveSkill();
+
+            PassiveSkillSubscribe(playerConditionInfo);
         }
 
-        private void PassiveSkill()
+        private void PassiveSkillSubscribe(PlayerConditionInfo playerConditionInfo)
         {
-            _skillActivationConditionsUseCase
+            _underAbnormalConditionsBySkillUseCase
                 .OnDamageAsObservable()
                 .Where(skillData => skillData.SkillType == SkillType.Passive)
                 .Where(skillData => skillData.BoolRequirementTypeEnum == BoolRequirementType.ReceiveDamage)
-                .Subscribe(skillMasterData =>
+                .Subscribe(skillData =>
                 {
-                    if (skillMasterData == null)
+                    if (skillData == null)
                     {
                         return;
                     }
 
-                    _buffSkill.Buff(skillMasterData).Forget();
+                    NotifyActivatePassiveSkill(playerConditionInfo, skillData);
+                    _buffSkill.Buff(skillData).Forget();
                 })
                 .AddTo(_cancellationTokenSource.Token);
 
-            _skillActivationConditionsUseCase
+            _underAbnormalConditionsBySkillUseCase
                 .OnAbnormalConditionAsObservable()
-                .Where(tuple => tuple.Item1 != null)
-                .Where(tuple => tuple.Item1.SkillType != SkillType.Passive)
+                .Where(tuple => tuple.Item1 == playerConditionInfo.GetPlayerIndex())
+                .Where(tuple => tuple.Item2.SkillType == SkillType.Passive)
                 .Subscribe(tuple =>
                 {
-                    if (_normalSkillMasterData != null)
+                    var skillData = tuple.Item2;
+                    if (skillData.BoolRequirementTypeEnum != BoolRequirementType.AbnormalCondition)
                     {
-                        if (_normalSkillMasterData.SkillType != SkillType.Passive)
-                        {
-                            return;
-                        }
-
-                        if (_normalSkillMasterData.BoolRequirementTypeEnum != BoolRequirementType.AbnormalCondition)
-                        {
-                            return;
-                        }
-
-                        var isActive = tuple.Item2;
-                        _buffSkill.BuffInAbnormalCondition(_normalSkillMasterData, isActive);
-                        _healSkill.ContinuousHealInAbnormalCondition(_normalSkillMasterData);
+                        return;
                     }
 
-                    if (_specialSkillMasterData != null)
-                    {
-                        if (_specialSkillMasterData.SkillType != SkillType.Passive)
-                        {
-                            return;
-                        }
-
-                        if (_specialSkillMasterData.BoolRequirementTypeEnum != BoolRequirementType.AbnormalCondition)
-                        {
-                            return;
-                        }
-
-                        var isActive = tuple.Item2;
-                        _buffSkill.BuffInAbnormalCondition(_specialSkillMasterData, isActive);
-                        _healSkill.ContinuousHealInAbnormalCondition(_specialSkillMasterData);
-                    }
+                    NotifyActivatePassiveSkill(playerConditionInfo, skillData);
+                    _buffSkill.BuffInAbnormalCondition(skillData).Forget();
+                    _heal.ContinuousHealSkillInAbnormalCondition(skillData);
                 })
                 .AddTo(_cancellationTokenSource.Token);
+        }
+
+        private static void NotifyActivatePassiveSkill(PlayerConditionInfo playerConditionInfo, SkillMasterData skillData)
+        {
+            var playerIndex = playerConditionInfo.GetPlayerIndex();
+            var skillId = skillData.Id;
+            var dic = new Dictionary<int, int> { { playerIndex, skillId } };
+            PhotonNetwork.LocalPlayer.SetSkillData(dic);
         }
 
         private void Cancel()

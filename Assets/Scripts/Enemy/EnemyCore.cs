@@ -43,13 +43,13 @@ namespace Enemy
 
         public void Initialize()
         {
-            /*InitializeState();
+            InitializeState();
             _seeker = GetComponent<Seeker>();
             _aiLerp = GetComponent<AILerp>();
             _photonView = GetComponent<PhotonView>();
             SetupBoxCollider();
             SetupCharacterStatusManager();
-            SetupPutBomb();*/
+            SetupPutBomb();
         }
 
         private void SetupBoxCollider()
@@ -69,7 +69,7 @@ namespace Enemy
         private void SetupPutBomb()
         {
             _putBomb = gameObject.AddComponent<PutBomb>();
-            _putBomb.Initialize(bombProvider, _translateStatusInBattleUseCase, mapManager);
+            //_putBomb.Initialize(bombProvider, _translateStatusInBattleUseCase, mapManager);
         }
 
         private void InitializeState()

@@ -81,7 +81,7 @@ namespace Manager.BattleManager
             }
 
             value1.Value = value;
-            PhotonNetwork.LocalPlayer.SetPlayerValue(key, value);
+            PhotonNetwork.LocalPlayer.SetFloatValue(key, value);
         }
 
         public void Create(string key, float value)
@@ -111,7 +111,7 @@ namespace Manager.BattleManager
             }
 
             value1.Value = value;
-            PhotonNetwork.LocalPlayer.SetPlayerValue(key, value);
+            PhotonNetwork.LocalPlayer.SetFloatValue(key, value);
         }
 
         private void OnDestroy()

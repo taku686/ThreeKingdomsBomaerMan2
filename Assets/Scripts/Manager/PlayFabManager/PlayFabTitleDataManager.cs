@@ -29,6 +29,8 @@ namespace Manager.PlayFabManager
         [Inject] private SkillMasterDataRepository _skillMasterDataRepository;
         [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
         [Inject] private EntitledMasterDataRepository _entitledMasterDataRepository;
+        [Inject] private AbnormalConditionMasterDataRepository _abnormalConditionMasterDataRepository;
+        [Inject] private ResourcesObjectRepository _resourcesObjectRepository;
         private CancellationTokenSource _cts;
 
         public void Initialize()
@@ -44,21 +46,27 @@ namespace Manager.PlayFabManager
             var skillDatum = JsonConvert.DeserializeObject<SkillMasterData[]>(titleDatum[SkillMasterKey]);
             var weaponDatum = JsonConvert.DeserializeObject<WeaponMasterData[]>(titleDatum[WeaponMasterKey]);
             var entitledDatum = JsonConvert.DeserializeObject<EntitledMasterData[]>(titleDatum[EntitledMasterKey]);
-            await SetCharacterData(characterDatum);
+            var abnormalConditionDatum = JsonConvert.DeserializeObject<AbnormalConditionMasterData[]>(titleDatum[AbnormalConditionMasterKey]);
+
+            SetSkillData(skillDatum).Forget();
+            SetCharacterData(characterDatum);
             SetCharacterLevelData(characterLevelDatum);
             SetMissionData(missionDatum);
-            await SetSkillData(skillDatum);
-            await SetWeaponData(weaponDatum);
+            SetWeaponData(weaponDatum);
             SetEntitledData(entitledDatum);
+            SetAbnormalConditionData(abnormalConditionDatum);
         }
 
-        private async UniTask SetCharacterData(CharacterData[] characterDatum)
+        private void SetCharacterData(CharacterData[] characterDatum)
         {
             foreach (var characterData in characterDatum)
             {
-                characterData.CharacterObject = await LoadGameObject(GameCommonData.CharacterPrefabPath, characterData.CharaObj, _cts.Token);
-                characterData.SelfPortraitSprite = await LoadCharacterSprite(characterData.Id, _cts.Token);
-                characterData.ColorSprite = await LoadCharacterColor(characterData.CharaColor, _cts.Token);
+                characterData.CharacterObject = _resourcesObjectRepository.GetCharacterPrefab(characterData.Id);
+                characterData.SelfPortraitSprite = _resourcesObjectRepository.GetCharacterIcon(characterData.Id);
+                characterData.ColorSprite = _resourcesObjectRepository.GetCharacterColor(GameCommonData.GetCharacterColor(characterData.CharaColor));
+                characterData._PassiveSkillMasterData = _skillMasterDataRepository.GetSkillData(characterData.PassiveSkillId);
+                characterData._NormalSkillMasterData = _skillMasterDataRepository.GetSkillData(characterData.NormalSkillId);
+                characterData._SpecialSkillMasterData = _skillMasterDataRepository.GetSkillData(characterData.SpecialSkillId);
                 characterData.BombLimit /= FixedValue;
                 characterData.FireRange /= FixedValue;
                 _characterMasterDataRepository.SetCharacterData(characterData);
@@ -72,7 +80,7 @@ namespace Manager.PlayFabManager
                 var id = skillData.Id;
                 var explanation = skillData.Explanation;
                 var name = skillData.Name;
-                var sprite = await LoadSkillSprite(skillData.IconID, _cts.Token);
+                var sprite = _resourcesObjectRepository.GetSkillIcon(id);
                 var skillActionType = TranslateStringToSkillActionType(skillData._SkillActionType);
                 var skillType = (SkillType)skillData.SkillTypeInt;
                 var hpPlu = skillData.HpPlu;
@@ -100,7 +108,7 @@ namespace Manager.PlayFabManager
                 var numberRequirements = TranslateStringToFloatArray(skillData.NumberRequirement);
                 var numberRequirementType = TranslateStringToNumberRequirementType(skillData.NumberRequirementType);
                 var boolRequirementType = TranslateStringToBoolRequirementType(skillData._BoolRequirementType);
-                var skillDirection = TranslateStringToSkillDirection(skillData.SkillDirection);
+                var skillDirection = TranslateStringToSkillDirection(skillData._SkillDirection);
                 var invalidAbnormalCondition = TranslateStringToAbnormalConditions(skillData.InvalidAbnormalCondition);
                 var abnormalCondition = TranslateStringToAbnormalConditions(skillData.AbnormalCondition);
                 var bombType = TranslateStringToBombType(skillData.BombType);
@@ -134,10 +142,10 @@ namespace Manager.PlayFabManager
                     resistanceMul,
                     bombMul,
                     fireMul,
+                    damageMul,
                     coinMul,
                     gemMul,
                     skillMul,
-                    damageMul,
                     numberRequirements,
                     numberRequirementType,
                     boolRequirementType,
@@ -155,7 +163,7 @@ namespace Manager.PlayFabManager
             }
         }
 
-        private async UniTask SetWeaponData(WeaponMasterData[] weaponDatum)
+        private void SetWeaponData(WeaponMasterData[] weaponDatum)
         {
             foreach (var weaponData in weaponDatum)
             {
@@ -165,26 +173,32 @@ namespace Manager.PlayFabManager
                 var statusSkillIds = TranslateStringToIntArray(weaponData.StatusSkillId);
                 var statusSkillData = _skillMasterDataRepository.GetSkillDatum(statusSkillIds);
                 var normalSkillData = _skillMasterDataRepository.GetSkillData(weaponData.NormalSkillId);
-                var specialSkillData = _skillMasterDataRepository.GetSkillData(weaponData.SpecialSkillId);
-                var weaponObject = await LoadWeaponGameObject(id, _cts.Token);
-                var weaponIcon = await LoadWeaponSprite(id, _cts.Token);
+                var weaponObject = _resourcesObjectRepository.GetWeaponPrefab(id);
+                var weaponIcon = _resourcesObjectRepository.GetWeaponIcon(id);
                 var scale = weaponData.Scale;
                 var isBothHands = weaponData.IsBothHands;
                 var rare = weaponData.Rare;
+                var coinMul = weaponData.CoinMul;
+                var gemMul = weaponData.GemMul;
+                var skillMul = weaponData.SkillMul;
+                var rangeMul = weaponData.RangeMul;
+                
                 var newWeaponData = new WeaponMasterData
                 (
                     name,
                     id,
                     weaponObject,
-                    weaponEffectObj: null,
                     weaponIcon,
                     weaponType,
                     normalSkillData,
                     statusSkillData,
-                    specialSkillData,
                     scale,
                     isBothHands,
-                    rare
+                    rare,
+                    coinMul,
+                    gemMul,
+                    skillMul,
+                    rangeMul
                 );
 
                 _weaponMasterDataRepository.AddWeaponData(newWeaponData);
@@ -322,75 +336,18 @@ namespace Manager.PlayFabManager
             }
         }
 
-        private async UniTask<GameObject> LoadGameObject(string path, string charaObj, CancellationToken token)
+        private void SetAbnormalConditionData(AbnormalConditionMasterData[] conditionMasterDatum)
         {
-            if (string.IsNullOrEmpty(charaObj))
+            foreach (var missionData in conditionMasterDatum)
             {
-                Debug.LogError("charaObj is null or empty.");
-                return null;
+                _abnormalConditionMasterDataRepository.AddAbnormalConditionMasterData(missionData);
             }
-
-            var resource = await Resources.LoadAsync<GameObject>(path + charaObj).WithCancellation(token);
-            return (GameObject)resource;
         }
 
-        private async UniTask<GameObject> LoadWeaponGameObject(int weaponId, CancellationToken token)
+        private async UniTask LoadResources(int skillId, int iconId)
         {
-            var response = await Resources
-                .LoadAsync<GameObject>(GameCommonData.WeaponPrefabPath + weaponId)
-                .WithCancellation(token);
-            return (GameObject)response;
-        }
-
-        private async UniTask<Sprite> LoadCharacterSprite(int id, CancellationToken token)
-        {
-            var response = await Resources.LoadAsync<Sprite>(GameCommonData.CharacterSpritePath + id)
-                .WithCancellation(token);
-            return (Sprite)response;
-        }
-
-        private async UniTask<Sprite> LoadSkillSprite(int characterId, int skillId, CancellationToken token)
-        {
-            var response = await Resources
-                .LoadAsync<Sprite>(GameCommonData.SkillSpritePath + characterId + "_" + skillId)
-                .WithCancellation(token);
-            return (Sprite)response;
-        }
-
-        private async UniTask<Sprite> LoadSkillSprite(int skillId, CancellationToken token)
-        {
-            if (skillId == GameCommonData.InvalidNumber)
-            {
-                return null;
-            }
-
-            var response = await Resources
-                .LoadAsync<Sprite>(GameCommonData.SkillSpritePath + skillId)
-                .WithCancellation(token);
-            return (Sprite)response;
-        }
-
-        private async UniTask<Sprite> LoadWeaponSprite(int weaponId, CancellationToken token)
-        {
-            var response = await Resources
-                .LoadAsync<Sprite>(GameCommonData.WeaponSpritePath + weaponId)
-                .WithCancellation(token);
-            return (Sprite)response;
-        }
-
-        private async UniTask<Sprite> LoadCharacterColor(string charaColor, CancellationToken token)
-        {
-            var colorIndex = (int)GameCommonData.GetCharacterColor(charaColor);
-            var resource = await Resources.LoadAsync<Sprite>(GameCommonData.CharacterColorPath + colorIndex)
-                .WithCancellation(token);
-            return (Sprite)resource;
-        }
-
-        private async UniTask<GameObject> LoadWeaponEffect(int weaponEffectId, CancellationToken token)
-        {
-            var resource = await Resources.LoadAsync<GameObject>(GameCommonData.WeaponEffectPrefabPath + weaponEffectId)
-                .WithCancellation(token);
-            return (GameObject)resource;
+            var skillIcon = await Resources.LoadAsync<Sprite>(GameCommonData.SkillIconSpritePath + iconId);
+            _resourcesObjectRepository.SetSkillSprite(skillId, skillIcon as Sprite);
         }
 
         public void Dispose()

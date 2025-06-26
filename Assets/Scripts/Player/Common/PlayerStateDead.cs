@@ -17,12 +17,7 @@ namespace Player.Common
             private void PlayBackAnimation()
             {
                 Owner._animator.SetTrigger(GameCommonData.DeadHashKey);
-                Owner._observableStateMachineTrigger.OnStateExitAsObservable()
-                    .Where(info => info.StateInfo.IsName(GameCommonData.DeadKey))
-                    .Take(1)
-                    .SelectMany(_ => Dead().ToObservable())
-                    .Subscribe()
-                    .AddTo(Owner.GetCancellationTokenOnDestroy());
+                Dead().Forget();
             }
 
             private async UniTask Dead()

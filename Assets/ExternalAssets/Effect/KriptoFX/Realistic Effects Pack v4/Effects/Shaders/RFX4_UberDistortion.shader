@@ -5,13 +5,13 @@ Shader "KriptoFX/RFX4/Distortion"
 	{
 		[Header(Main Settings)]
 	[Toggle(_EMISSION)] _UseMainTex("Use Main Texture", Int) = 0
-		[PerRendererData][HDR]_TintColor("Tint Color", Color) = (1,1,1,1)
+		[HDR]_TintColor("Tint Color", Color) = (1,1,1,1)
 		_TintDistortion("Tint Distortion", Float) = 1
 		_MainTex("Main Texture", 2D) = "black" {}
 			[Header(Main Settings)]
 		[Normal]_NormalTex("Normal(RG) Alpha(A)", 2D) = "bump" {}
-		[PerRendererData][HDR]_MainColor("Main Color", Color) = (1,1,1,1)
-			[PerRendererData]	_Distortion("Distortion", Float) = 100
+		[HDR]_MainColor("Main Color", Color) = (1,1,1,1)
+			_Distortion("Distortion", Float) = 100
 	[Toggle(USE_REFRACTIVE)] _UseRefractive("Use Refractive Distort", Int) = 0
 		_RefractiveStrength("Refractive Strength", Range(-1, 1)) = 0
 
@@ -37,7 +37,7 @@ Shader "KriptoFX/RFX4/Distortion"
 		[Header(Cutout)]
 	[Toggle(USE_CUTOUT)] _UseCutout("Use Cutout", Int) = 0
 		_CutoutTex("Cutout Tex", 2D) = "white" {}
-	[PerRendererData]	_Cutout("Cutout", Range(0, 1.2)) = 1
+	_Cutout("Cutout", Range(0, 1.2)) = 1
 		[HDR]_CutoutColor("Cutout Color", Color) = (1,1,1,1)
 		_CutoutThreshold("Cutout Threshold", Range(0, 1)) = 0.015
 
@@ -53,11 +53,9 @@ Shader "KriptoFX/RFX4/Distortion"
 	}
 		SubShader
 		{
-			GrabPass {
-			"_GrabTexture"
-			}
 
-			Tags { "Queue" = "Transparent+1" "IgnoreProjector" = "True" "RenderType" = "Transparent"}
+
+			Tags { "Queue" = "Transparent-10" "IgnoreProjector" = "True" "RenderType" = "Transparent" }
 			ZWrite[_ZWriteMode]
 			Cull[_CullMode]
 
@@ -70,7 +68,6 @@ Shader "KriptoFX/RFX4/Distortion"
 				#pragma vertex vert
 				#pragma fragment frag
 				#pragma multi_compile_fog
-				#pragma multi_compile_particles
 				#pragma multi_compile_instancing
 
 				#pragma shader_feature USE_REFRACTIVE
@@ -84,9 +81,8 @@ Shader "KriptoFX/RFX4/Distortion"
 				#pragma multi_compile _ DISTORT_OFF
 
 				#include "UnityCG.cginc"
-
-
-				UNITY_DECLARE_SCREENSPACE_TEXTURE( _GrabTexture);
+				
+				UNITY_DECLARE_SCREENSPACE_TEXTURE(_CameraOpaqueTexture);
 				sampler2D _MainTex;
 				sampler2D _NormalTex;
 				float4 _NormalTex_ST;
@@ -99,7 +95,7 @@ Shader "KriptoFX/RFX4/Distortion"
 				half4 _HeightUVScrollDistort;
 				half _Height;
 
-				float4 _GrabTexture_TexelSize;
+				float4 _CameraOpaqueTexture_TexelSize;
 				half4 _FresnelColor;
 				half _FresnelInvert;
 				half _FresnelPow;
@@ -114,7 +110,7 @@ Shader "KriptoFX/RFX4/Distortion"
 				half _AlphaClip;
 				half _TintDistortion;
 
-				UNITY_DECLARE_DEPTH_TEXTURE (_CameraDepthTexture);
+				UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
 				float4x4 _InverseTransformMatrix;
 
 				UNITY_INSTANCING_BUFFER_START(MyProperties)
@@ -171,9 +167,9 @@ Shader "KriptoFX/RFX4/Distortion"
 					float2 uvCutout : TEXCOORD4;
 	#endif
 	#ifdef _FADING_ON
-		#ifdef SOFTPARTICLES_ON
+
 					float4 projPos : TEXCOORD5;
-		#endif
+
 	#endif
 
 	#ifdef _EMISSION
@@ -247,10 +243,10 @@ Shader "KriptoFX/RFX4/Distortion"
 					o.uvgrab = ComputeGrabScreenPos(o.vertex);
 
 	#ifdef _FADING_ON
-		#ifdef SOFTPARTICLES_ON
+
 						o.projPos = ComputeScreenPos(o.vertex);
 						COMPUTE_EYEDEPTH(o.projPos.z);
-		#endif
+
 	#endif
 
 	#ifdef USE_FRESNEL
@@ -293,15 +289,15 @@ Shader "KriptoFX/RFX4/Distortion"
 	#endif
 				half fade = 1;
 #ifdef _FADING_ON
-	#ifdef SOFTPARTICLES_ON
-				float sceneZ = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture,  i.projPos.xy / i.projPos.w));
+
+				float sceneZ = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.projPos.xy/ i.projPos.w));
 				float partZ = i.projPos.z;
 				fade = saturate(_InvFade * (sceneZ - partZ));
 				i.color.a *= fade;
-	#endif
+
 #endif
 
-				half2 offset = dist.rg * UNITY_ACCESS_INSTANCED_PROP(_Distortion_arr, _Distortion) * _GrabTexture_TexelSize.xy * i.color.a * fade;
+				half2 offset = dist.rg * UNITY_ACCESS_INSTANCED_PROP(_Distortion_arr, _Distortion) * _CameraOpaqueTexture_TexelSize.xy * i.color.a * fade;
 
 				half3 fresnelCol = 0;
 	#ifdef USE_FRESNEL
@@ -315,10 +311,10 @@ Shader "KriptoFX/RFX4/Distortion"
 				half fresnel = (_FresnelInvert - dot(n, i.viewDir));
 				fresnel = pow(fresnel, _FresnelPow);
 				fresnel = saturate(_FresnelR0 + (1.0 - _FresnelR0) * fresnel);
-				offset += fresnel * _GrabTexture_TexelSize.xy * _FresnelDistort * dist.rg;
+				offset += fresnel * _CameraOpaqueTexture_TexelSize.xy * _FresnelDistort * dist.rg;
 				fresnelCol = _FresnelColor * fresnel * abs(dist.r + dist.g) * 2 * i.color.rgb * i.color.a;
 	#else
-				offset += i.fresnel * _GrabTexture_TexelSize.xy * _FresnelDistort * dist.rg;
+				offset += i.fresnel * _CameraOpaqueTexture_TexelSize.xy * _FresnelDistort * dist.rg;
 				fresnelCol = _FresnelColor * i.fresnel * abs(dist.r + dist.g) * 2 * i.color.rgb * i.color.a;
 	#endif
 
@@ -346,13 +342,11 @@ Shader "KriptoFX/RFX4/Distortion"
 	#endif
 
 				i.uvgrab.xy = offset * i.color.a + i.uvgrab.xy;
-				//half4 grabColor = tex2Dproj(_GrabTexture, UNITY_PROJ_COORD(i.uvgrab));;
-				half4 grabColor = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_GrabTexture, float4(i.uvgrab.xy / i.uvgrab.w, 0, 0));
-
+				half4 grabColor = UNITY_SAMPLE_SCREENSPACE_TEXTURE(_CameraOpaqueTexture, i.uvgrab.xy / i.uvgrab.w);
 
 				half4 result;
 				half4 mainCol = UNITY_ACCESS_INSTANCED_PROP(_MainColor_arr, _MainColor);
-				result.rgb = grabColor * lerp(float3(1, 1, 1), mainCol.rgb,  i.color.a) + fresnelCol * grabColor + cutoutCol.rgb;
+				result.rgb = grabColor * lerp(1, mainCol,  i.color.a) + fresnelCol * grabColor + cutoutCol.rgb;
 
 	#ifdef _EMISSION
 				half4 tintCol = UNITY_ACCESS_INSTANCED_PROP(_TintColor_arr, _TintColor);
@@ -361,20 +355,20 @@ Shader "KriptoFX/RFX4/Distortion"
 				UNITY_APPLY_FOG_COLOR(i.fogCoord, emissionCol, half4(0,0,0,0));
 				result.rgb += emissionCol.rgb;
 	#endif
-				result.a = lerp(saturate(dot(fresnelCol, 0.33) * 10) * _FresnelColor.a, mainCol.a , mainCol.a) * cutoutCol.a;
-				//#ifdef DISTORT_ON
-				//			result.a *= i.color.a;
-				//#endif
-				#ifdef USE_ALPHA_CLIPING
-							result.a *= alphaBump;
-				#endif
+				result.a = lerp(saturate(dot(fresnelCol, 0.33) * 10) * _FresnelColor.a, mainCol.a , mainCol.a)* cutoutCol.a;
+	//#ifdef DISTORT_ON
+	//			result.a *= i.color.a;
+	//#endif
+	#ifdef USE_ALPHA_CLIPING
+				result.a *= alphaBump;
+	#endif
 
-							result.a = saturate(result.a);
-							return result;
-							}
+				result.a = saturate(result.a);
+				return result;
+				}
 
-							ENDCG
-					}
+				ENDCG
+		}
 
 		}
 			CustomEditor "RFX4_UberDistortionGUI"

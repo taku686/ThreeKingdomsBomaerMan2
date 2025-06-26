@@ -15,7 +15,7 @@ namespace UI.Title
         [SerializeField] private Image _typeIcon;
         [SerializeField] private StatusGridView[] statusGridViews;
 
-        public void ApplyStatusGridViews(CharacterSelectRepository.OrderType orderType, CharacterData fixedCharacterData, (Sprite, Color) typeData)
+        public void ApplyStatusGridViews(TemporaryCharacterRepository.OrderType orderType, CharacterData fixedCharacterData, (Sprite, Color) typeData)
         {
             characterImage.sprite = fixedCharacterData.SelfPortraitSprite;
             backGroundImage.sprite = fixedCharacterData.ColorSprite;
@@ -35,17 +35,17 @@ namespace UI.Title
             }
         }
 
-        private string GetStatusValue(CharacterData characterData, CharacterSelectRepository.OrderType orderType)
+        private string GetStatusValue(CharacterData characterData, TemporaryCharacterRepository.OrderType orderType)
         {
             return orderType switch
             {
-                CharacterSelectRepository.OrderType.Id => characterData.Id.ToString(),
-                CharacterSelectRepository.OrderType.Level => characterData.Level.ToString(),
-                CharacterSelectRepository.OrderType.Hp => characterData.Hp.ToString(),
-                CharacterSelectRepository.OrderType.Attack => characterData.Attack.ToString(),
-                CharacterSelectRepository.OrderType.Speed => characterData.Speed.ToString(),
-                CharacterSelectRepository.OrderType.Bomb => characterData.BombLimit.ToString(),
-                CharacterSelectRepository.OrderType.Fire => characterData.FireRange.ToString(),
+                TemporaryCharacterRepository.OrderType.Id => characterData.Id.ToString(),
+                TemporaryCharacterRepository.OrderType.Level => characterData.Level.ToString(),
+                TemporaryCharacterRepository.OrderType.Hp => characterData.Hp.ToString(),
+                TemporaryCharacterRepository.OrderType.Attack => characterData.Attack.ToString(),
+                TemporaryCharacterRepository.OrderType.Speed => characterData.Speed.ToString(),
+                TemporaryCharacterRepository.OrderType.Bomb => characterData.BombLimit.ToString(),
+                TemporaryCharacterRepository.OrderType.Fire => characterData.FireRange.ToString(),
                 _ => string.Empty
             };
         }

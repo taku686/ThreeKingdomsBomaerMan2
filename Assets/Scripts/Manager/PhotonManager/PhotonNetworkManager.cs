@@ -1,15 +1,17 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Common.Data;
-using ExitGames.Client.Photon;
 using Manager.DataManager;
 using Photon.Pun;
 using Photon.Realtime;
+using Player.Common;
 using Repository;
 using Skill;
 using UniRx;
 using UnityEngine;
 using Zenject;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 namespace Manager.NetworkManager
 {
@@ -20,9 +22,8 @@ namespace Manager.NetworkManager
         [Inject] private LevelMasterDataRepository _levelMasterDataRepository;
         [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
         [Inject] private SkillMasterDataRepository _skillMasterDataRepository;
-        [Inject] private SkillActivationConditionsUseCase _skillActivationConditionsUseCase;
+        [Inject] private UnderAbnormalConditionsBySkillUseCase _underAbnormalConditionsBySkillUseCase;
         private Subject<Photon.Realtime.Player[]> _joinedRoomSubject = new();
-        private Subject<int> _leftRoomSubject = new();
         private Subject<Unit> _playerGenerateCompleteSubject = new();
         private readonly Subject<(int, SkillMasterData)> _activateSkillSubject = new();
         private readonly Dictionary<int, CharacterData> _currentRoomCharacterDatum = new();
@@ -31,10 +32,12 @@ namespace Manager.NetworkManager
         private int _playerCount;
         public bool _isTitle;
 
-        public Subject<int> _LeftRoomSubject => _leftRoomSubject;
+        private const int MinPlayerCount = 1;
+        public Subject<int> _LeftRoomSubject { get; private set; } = new();
         public IObservable<Photon.Realtime.Player[]> _JoinedRoomSubject => _joinedRoomSubject;
-        public IObservable<Unit> _PlayerGenerateCompleteSubject => _playerGenerateCompleteSubject;
-        public IObservable<(int, SkillMasterData)> _ActivateSkillSubject => _activateSkillSubject;
+        public IObservable<Unit> _PlayerGenerateCompleteObservable => _playerGenerateCompleteSubject;
+        public IObservable<(int, SkillMasterData)> _ActivateSkillObservable => _activateSkillSubject;
+
 
         private void Awake()
         {
@@ -67,20 +70,48 @@ namespace Manager.NetworkManager
                 IsOpen = true,
                 IsVisible = true,
                 EmptyRoomTtl = 0,
-                PublishUserId = true
+                PublishUserId = true,
+                CleanupCacheOnLeave = true,
             }, TypedLobby.Default);
         }
 
         public override void OnJoinedRoom()
         {
-            var index = PhotonNetwork.LocalPlayer.ActorNumber;
-            var characterId = _characterMasterDataRepository.GetUserEquippedCharacterData().Id;
-            var characterLevel = _userDataRepository.GetCurrentLevelData(characterId).Level;
-            var weaponId = _userDataRepository.GetEquippedWeaponData(characterId).Id;
-            PhotonNetwork.LocalPlayer.SetCharacterData(characterId);
-            PhotonNetwork.LocalPlayer.SetCharacterLevel(characterLevel);
-            PhotonNetwork.LocalPlayer.SetWeaponData(weaponId);
-            PhotonNetwork.LocalPlayer.SetPlayerIndex(index); //indexを参照にデータを取得するため最後に値を入れないといけない
+            var actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
+            SetTeamMembersInfo(actorNumber);
+        }
+
+        public void SetTeamMembersInfo(int playerIndex)
+        {
+            var characterIds = _userDataRepository.GetTeamMembers();
+            var characterDic = new Dictionary<int, int>();
+            var weaponDic = new Dictionary<int, int>();
+            var levelDic = new Dictionary<int, int>();
+
+            foreach (var (teamNumber, characterId) in characterIds)
+            {
+                if (characterId == GameCommonData.InvalidNumber)
+                {
+                    continue; // キャラクターが選択されていない場合はスキップ
+                }
+
+                var playerKey = GetPlayerKey(playerIndex, teamNumber);
+                var characterLevel = _userDataRepository.GetCurrentLevelData(characterId).Level;
+                var weaponId = _userDataRepository.GetEquippedWeaponData(characterId).Id;
+                characterDic[playerKey] = characterId;
+                weaponDic[playerKey] = weaponId;
+                levelDic[playerKey] = characterLevel;
+            }
+
+            PhotonNetwork.LocalPlayer.SetCharacterId(characterDic);
+            PhotonNetwork.LocalPlayer.SetCharacterLevel(levelDic);
+            PhotonNetwork.LocalPlayer.SetWeaponId(weaponDic);
+            PhotonNetwork.LocalPlayer.SetPlayerIndex(playerIndex); //indexを参照にデータを取得するため最後に値を入れないといけない
+        }
+
+        public static int GetPlayerKey(int instantiationId, int teamNumber)
+        {
+            return instantiationId * 10 + teamNumber;
         }
 
         public override void OnLeftRoom()
@@ -98,60 +129,114 @@ namespace Manager.NetworkManager
                 return;
             }
 
-            _leftRoomSubject.OnNext(otherPlayer.GetPlayerIndex());
+            _LeftRoomSubject.OnNext(otherPlayer.GetPlayerIndex());
         }
 
         public override void OnPlayerPropertiesUpdate(Photon.Realtime.Player targetPlayer, Hashtable changedProps)
         {
             foreach (var prop in changedProps)
             {
-                if ((string)prop.Key == PlayerPropertiesExtensions.PlayerIndexKey)
+                CheckPlayerGenerateComplete(prop);
+                SetupPlayerInfo(prop);
+                HitAttack(targetPlayer, prop);
+                ActivateSkill(targetPlayer, prop);
+            }
+        }
+
+
+        private void HitAttack(Photon.Realtime.Player targetPlayer, DictionaryEntry prop)
+        {
+            if ((string)prop.Key != PlayerPropertiesExtensions.HitAttackDataKey)
+            {
+                return;
+            }
+
+            var dic = targetPlayer.GetHitAttack();
+            if (dic == null)
+            {
+                return;
+            }
+
+            var players = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
+
+            foreach (var player in players)
+            {
+                var playerConditionInfo = player.GetComponent<PlayerConditionInfo>();
+                if (playerConditionInfo == null)
                 {
-                    SetupPlayerInfo(PhotonNetwork.PlayerList);
+                    continue;
                 }
 
-                if ((string)prop.Key == PlayerPropertiesExtensions.PlayerGenerateKey)
+                foreach (var keyValue in dic)
                 {
-                    _playerCount++;
-                    CheckPlayerGenerateComplete(_playerCount);
-                }
-
-                if ((string)prop.Key == PlayerPropertiesExtensions.SkillDataKey)
-                {
-                    var dic = targetPlayer.GetSkillId();
-                    if (dic == null)
-                    {
-                        return;
-                    }
-
-                    var players = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
-                    foreach (var player in players)
-                    {
-                        var playerStatusInfo = player.GetComponent<PlayerStatusInfo>();
-                        if (playerStatusInfo == null)
-                        {
-                            continue;
-                        }
-
-                        foreach (var keyValue in dic)
-                        {
-                            if (playerStatusInfo.GetPlayerIndex() != keyValue.Key) continue;
-                            var skillData = _skillMasterDataRepository.GetSkillData(keyValue.Value);
-                            _activateSkillSubject.OnNext((playerStatusInfo.GetPlayerIndex(), skillData));
-                            _skillActivationConditionsUseCase.OnNextAbnormalConditionSubject(playerStatusInfo, skillData).Forget();
-                        }
-                    }
+                    if (playerConditionInfo.GetPlayerIndex() != keyValue.Key) continue;
+                    var skillData = _skillMasterDataRepository.GetSkillData(keyValue.Value);
+                    _underAbnormalConditionsBySkillUseCase.OnNextAbnormalConditionSubject(playerConditionInfo, skillData);
                 }
             }
         }
 
-        private void SetupPlayerInfo(Photon.Realtime.Player[] players)
+        private void ActivateSkill(Photon.Realtime.Player targetPlayer, DictionaryEntry prop)
         {
+            if ((string)prop.Key != PlayerPropertiesExtensions.SkillDataKey)
+            {
+                return;
+            }
+
+            var dic = targetPlayer.GetSkillId();
+            if (dic == null)
+            {
+                return;
+            }
+
+            var players = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
+
             foreach (var player in players)
             {
-                _currentRoomCharacterDatum[player.ActorNumber] = _characterMasterDataRepository.GetCharacterData(player.GetCharacterId());
-                _currentRoomLevelDatum[player.ActorNumber] = _levelMasterDataRepository.GetLevelMasterData(player.GetCharacterLevel());
-                _currentRoomWeaponDatum[player.ActorNumber] = _weaponMasterDataRepository.GetWeaponData(player.GetWeaponId());
+                var playerConditionInfo = player.GetComponent<PlayerConditionInfo>();
+                if (playerConditionInfo == null)
+                {
+                    continue;
+                }
+
+                foreach (var keyValue in dic)
+                {
+                    if (playerConditionInfo.GetPlayerIndex() != keyValue.Key) continue;
+                    Debug.Log(playerConditionInfo.GetPlayerIndex());
+                    var skillData = _skillMasterDataRepository.GetSkillData(keyValue.Value);
+                    _activateSkillSubject.OnNext((playerConditionInfo.GetPlayerIndex(), skillData));
+                }
+            }
+        }
+
+        private void SetupPlayerInfo(DictionaryEntry prop)
+        {
+            if ((string)prop.Key != PlayerPropertiesExtensions.PlayerIndexKey)
+            {
+                return;
+            }
+
+            var players = PhotonNetwork.PlayerList;
+            foreach (var player in players)
+            {
+                var characterDic = player.GetCharacterId();
+                var weaponDic = player.GetWeaponId();
+                var levelDic = player.GetCharacterLevel();
+
+                foreach (var character in characterDic)
+                {
+                    _currentRoomCharacterDatum[character.Key] = _characterMasterDataRepository.GetCharacterData(character.Value);
+                }
+
+                foreach (var weapon in weaponDic)
+                {
+                    _currentRoomWeaponDatum[weapon.Key] = _weaponMasterDataRepository.GetWeaponData(weapon.Value);
+                }
+
+                foreach (var level in levelDic)
+                {
+                    _currentRoomLevelDatum[level.Key] = _levelMasterDataRepository.GetLevelMasterData(level.Value);
+                }
             }
 
             _joinedRoomSubject.OnNext(players);
@@ -159,40 +244,43 @@ namespace Manager.NetworkManager
 
         public CharacterData GetCharacterData(int playerId)
         {
-            if (!_currentRoomCharacterDatum.TryGetValue(playerId, out var value))
-            {
-                Debug.LogError("キャラクター情報がありません");
-                return null;
-            }
-
-            return value;
+            return _currentRoomCharacterDatum.GetValueOrDefault(playerId);
         }
 
         public WeaponMasterData GetWeaponData(int playerId)
         {
-            if (!_currentRoomWeaponDatum.TryGetValue(playerId, out var value))
-            {
-                Debug.LogError("キャラクター情報がありません");
-                return null;
-            }
-
-            return value;
+            return _currentRoomWeaponDatum.GetValueOrDefault(playerId);
         }
 
         public LevelMasterData GetLevelMasterData(int playerId)
         {
-            if (!_currentRoomLevelDatum.TryGetValue(playerId, out var data))
-            {
-                Debug.LogError("キャラクター情報がありません");
-                return null;
-            }
-
-            return data;
+            return _currentRoomLevelDatum.GetValueOrDefault(playerId);
         }
 
-        private void CheckPlayerGenerateComplete(int count)
+        public bool CanChangeCharacter()
         {
-            if (PhotonNetwork.CurrentRoom.PlayerCount > count)
+            var teamMembers = _userDataRepository.GetTeamMembers();
+            var teamMemberCount = 0;
+            foreach (var (_, characterId) in teamMembers)
+            {
+                if (characterId != GameCommonData.InvalidNumber)
+                {
+                    teamMemberCount++;
+                }
+            }
+
+            return teamMemberCount != MinPlayerCount;
+        }
+
+        private void CheckPlayerGenerateComplete(DictionaryEntry prop)
+        {
+            if ((string)prop.Key != PlayerPropertiesExtensions.PlayerGenerateKey)
+            {
+                return;
+            }
+
+            _playerCount++;
+            if (PhotonNetwork.CurrentRoom.PlayerCount > _playerCount)
             {
                 return;
             }
@@ -204,13 +292,18 @@ namespace Manager.NetworkManager
         public void DisposedRoomSubject()
         {
             _joinedRoomSubject.Dispose();
-            _leftRoomSubject.Dispose();
+            _LeftRoomSubject.Dispose();
         }
 
         public void CreateRoomSubject()
         {
             _joinedRoomSubject = new Subject<Photon.Realtime.Player[]>();
-            _leftRoomSubject = new Subject<int>();
+            _LeftRoomSubject = new Subject<int>();
+        }
+
+        public static bool IsCpu(int creatorNr)
+        {
+            return creatorNr == 0;
         }
 
         public void CreatePlayerGenerateCompleteSubject()
@@ -229,7 +322,7 @@ namespace Manager.NetworkManager
             _currentRoomCharacterDatum.Clear();
             _activateSkillSubject.Dispose();
             _joinedRoomSubject.Dispose();
-            _leftRoomSubject.Dispose();
+            _LeftRoomSubject.Dispose();
         }
     }
 }

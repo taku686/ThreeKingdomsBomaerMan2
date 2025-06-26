@@ -1,12 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using ModestTree;
 using Photon.Pun;
 using Player.Common;
 using Repository;
 using UI.Battle;
+using UI.BattleCore.InBattle;
 using UniRx;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace Manager.BattleManager
 {
@@ -20,9 +25,17 @@ namespace Manager.BattleManager
             private List<PlayerStatusUI> _PlayerStatusUiList => Owner._playerStatusUiList;
             private BattleResultDataRepository _BattleResultDataRepository => Owner._battleResultDataRepository;
             private InputViewModelUseCase _InputViewModelUseCase => Owner._inputViewModelUseCase;
+            private AbnormalConditionSpriteRepository _AbnormalConditionSpriteRepository => Owner._abnormalConditionSpriteRepository;
+            private PlayerConditionInfo _PlayerConditionInfo => Owner._playerConditionInfo;
+            private StatusInBattleViewModelUseCase _StatusInBattleViewModelUseCase => Owner._statusInBattleViewModelUseCase;
+            private ArrowSkillIndicatorView _ArrowSkillIndicatorView => Owner._arrowSkillIndicatorView;
+            private CircleSkillIndicatorView _CircleSkillIndicatorView => Owner._circleSkillIndicatorView;
+
             private CancellationTokenSource _cts;
             private int _startTime;
             private int _rank;
+            private SkillIndicatorViewBase.SkillIndicatorInfo _skillIndicatorInfo;
+            private readonly Dictionary<AbnormalCondition, Image> _abnormalConditionImages = new();
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
             {
@@ -40,49 +53,22 @@ namespace Manager.BattleManager
             {
                 _cts = new CancellationTokenSource();
                 _startTime = PhotonNetwork.ServerTimestamp;
-                InitializeView();
+                _View.UpdateTime(GameCommonData.BattleTime);
                 OnSubscribe();
                 Owner.SwitchUiObject(State.InBattle);
             }
 
-            private void InitializeView()
+            private void ApplyStatusInBattleViewModel(int playerKey)
             {
-                var viewModel = _InputViewModelUseCase.InAsTask();
-                _View.ApplyInputViewModel(viewModel);
+                var viewModel = _StatusInBattleViewModelUseCase.InAsTask(playerKey);
+                _View.ApplyStatusViewModel(viewModel);
             }
 
             private void OnSubscribe()
             {
-                _PlayerCore._DeadObservable
-                    .Subscribe(_ =>
-                    {
-                        _rank = PhotonNetwork.CurrentRoom.PlayerCount;
-                        _BattleResultDataRepository.SetRank(_rank);
-                        PhotonNetwork.LeaveRoom();
-                        _StateMachine.Dispatch((int)State.Result);
-                    })
-                    .AddTo(_cts.Token);
-
-                _PlayerCore._StatusBuffUiObservable
-                    .Subscribe(tuple => { _View.ApplyBuffState(tuple.statusType, tuple.speed, tuple.isBuff, tuple.isDebuff); })
-                    .AddTo(_cts.Token);
-
-                _View.OnClickNormalSkillButtonAsObservable()
-                    .Subscribe(_ => { _PlayerCore._NormalSkillSubject.OnNext(Unit.Default); })
-                    .AddTo(_cts.Token);
-
-                _View.OnClickSpecialSkillButtonAsObservable()
-                    .Subscribe(_ => { _PlayerCore._SpecialSkillSubject.OnNext(Unit.Default); })
-                    .AddTo(_cts.Token);
-
-                _View.OnClickDashButtonAsObservable()
-                    .Subscribe(_ => { _PlayerCore._DashSkillSubject.OnNext(Unit.Default); })
-                    .AddTo(_cts.Token);
-
-                _View.OnClickBombButtonAsObservable()
-                    .Subscribe(_ => { _PlayerCore._BombSkillSubject.OnNext(Unit.Default); })
-                    .AddTo(_cts.Token);
-
+                PlayerCoreSubscribe();
+                PlayerStatusInfoSubscribe();
+                ViewSubscribe();
 
                 Observable.EveryUpdate()
                     .Subscribe(_ =>
@@ -94,9 +80,241 @@ namespace Manager.BattleManager
                         }
 
                         _View.UpdateTime(time);
-                        _View.UpdateSkillUI();
+                        _View.UpdateInputViewTimer();
                     })
                     .AddTo(_cts.Token);
+            }
+
+            private void PlayerCoreSubscribe()
+            {
+                _PlayerCore._DeadObservable
+                    .Subscribe(_ =>
+                    {
+                        _rank = PhotonNetwork.CurrentRoom.PlayerCount;
+                        _BattleResultDataRepository.SetRank(_rank);
+                        PhotonNetwork.LeaveRoom();
+                        _StateMachine.Dispatch((int)State.Result);
+                    })
+                    .AddTo(_cts.Token);
+
+                _PlayerCore._TeamMemberReactiveProperty
+                    .Subscribe(playerKey =>
+                    {
+                        var viewModel = _InputViewModelUseCase.InAsTask(playerKey);
+                        _View.ApplyInputViewModel(viewModel);
+                        ApplyStatusInBattleViewModel(playerKey);
+                    })
+                    .AddTo(_cts.Token);
+
+                _PlayerCore._PlayerStatusInfo
+                    ._Attack
+                    .Subscribe(value => { _View.ApplyBuffState(StatusType.Attack, value); })
+                    .AddTo(_cts.Token);
+
+                _PlayerCore._PlayerStatusInfo
+                    ._Speed
+                    .Subscribe(value => { _View.ApplyBuffState(StatusType.Speed, value); })
+                    .AddTo(_cts.Token);
+
+                _PlayerCore._PlayerStatusInfo
+                    ._Defense
+                    .Subscribe(value => { _View.ApplyBuffState(StatusType.Defense, value); })
+                    .AddTo(_cts.Token);
+
+                _PlayerCore._PlayerStatusInfo
+                    ._Resistance
+                    .Subscribe(value => { _View.ApplyBuffState(StatusType.Resistance, value); })
+                    .AddTo(_cts.Token);
+
+                _PlayerCore._PlayerStatusInfo
+                    ._FireRange
+                    .Subscribe(value => { _View.ApplyBuffState(StatusType.FireRange, value); })
+                    .AddTo(_cts.Token);
+
+                _PlayerCore._PlayerStatusInfo
+                    ._BombLimit
+                    .Subscribe(value => { _View.ApplyBuffState(StatusType.BombLimit, value); })
+                    .AddTo(_cts.Token);
+            }
+
+            private void PlayerStatusInfoSubscribe()
+            {
+                _PlayerConditionInfo._AbnormalConditions
+                    .ObserveAdd()
+                    .Subscribe(value =>
+                    {
+                        var abnormalCondition = value.Value;
+                        var sprite = _AbnormalConditionSpriteRepository.GetAbnormalConditionSprite(abnormalCondition);
+                        var icon = _View.GenerateAbnormalConditionImage(sprite);
+                        _abnormalConditionImages[abnormalCondition] = icon;
+                    })
+                    .AddTo(_cts.Token);
+
+                _PlayerConditionInfo._AbnormalConditions
+                    .ObserveRemove()
+                    .Subscribe(value =>
+                    {
+                        var abnormalCondition = value.Value;
+                        if (_abnormalConditionImages.TryGetValue(abnormalCondition, out var icon))
+                        {
+                            Destroy(icon.gameObject);
+                            _abnormalConditionImages.Remove(abnormalCondition);
+                        }
+                    })
+                    .AddTo(_cts.Token);
+            }
+
+            private void ViewSubscribe()
+            {
+                _View.OnClickDashButtonAsObservable()
+                    .Subscribe(_ => { _PlayerCore._DashSkillSubject.OnNext(Unit.Default); })
+                    .AddTo(_cts.Token);
+
+                _View.OnClickBombButtonAsObservable()
+                    .Subscribe(_ => { _PlayerCore._BombSkillSubject.OnNext(Unit.Default); })
+                    .AddTo(_cts.Token);
+
+                _View.OnClickCharacterChangeButtonAsObservable()
+                    .Subscribe(_ => { _PlayerCore.ChangeTeamMember(); })
+                    .AddTo(_cts.Token);
+
+                _View.OnTouchWeaponSkillButtonAsObservable()
+                    .Subscribe(skillIndicatorInfo => { ActivateSkillIndicator(skillIndicatorInfo, _PlayerCore._WeaponSkillSubject); })
+                    .AddTo(_cts.Token);
+
+                _View.OnTouchNormalSkillButtonAsObservable()
+                    .Subscribe(skillIndicatorInfo => { ActivateSkillIndicator(skillIndicatorInfo, _PlayerCore._NormalSkillSubject); })
+                    .AddTo(_cts.Token);
+
+                _View.OnTouchSpecialSkillButtonAsObservable()
+                    .Subscribe(skillIndicatorInfo => { ActivateSkillIndicator(skillIndicatorInfo, _PlayerCore._SpecialSkillSubject); })
+                    .AddTo(_cts.Token);
+
+                Observable
+                    .EveryFixedUpdate()
+                    .Where(_ => CanUpdateSkillIndicator())
+                    .Where(_ => !IsInvalidNumber(_skillIndicatorInfo._Range))
+                    .Where(_ => _skillIndicatorInfo._IsInteractable)
+                    .Subscribe(_ => { SearchEnemy(); })
+                    .AddTo(_cts.Token);
+            }
+
+            private static bool IsInvalidSkillDirection(SkillDirection skillDirection)
+            {
+                return skillDirection is not (SkillDirection.Forward or SkillDirection.All);
+            }
+
+            private bool CanUpdateSkillIndicator()
+            {
+                return _ArrowSkillIndicatorView != null &&
+                       _CircleSkillIndicatorView != null &&
+                       _skillIndicatorInfo != null;
+            }
+
+            private static bool IsInvalidNumber(float value)
+            {
+                return Mathf.Approximately(value, GameCommonData.InvalidNumber);
+            }
+
+            private void SearchEnemy()
+            {
+                var position = _PlayerCore.transform.position;
+                var layerMask = GameCommonData.GetObstaclesLayerMask();
+                var range = _skillIndicatorInfo._Range;
+                var skillDirection = _skillIndicatorInfo._SkillDirection;
+                var direction = _PlayerCore.transform.forward;
+
+                switch (skillDirection)
+                {
+                    case SkillDirection.Forward:
+                        var origin = new Vector3(position.x, position.y + 0.5f, position.z);
+                        _ArrowSkillIndicatorView.UpdateArrowIndicator(origin, range, layerMask, direction);
+                        break;
+                    case SkillDirection.Back:
+                        break;
+                    case SkillDirection.Left:
+                        break;
+                    case SkillDirection.Right:
+                        break;
+                    case SkillDirection.ForwardBack:
+                        break;
+                    case SkillDirection.LeftRight:
+                        break;
+                    case SkillDirection.All:
+                        _CircleSkillIndicatorView.UpdateCircleIndicator(position, range, layerMask);
+                        break;
+                    case SkillDirection.Random:
+                        break;
+                    case SkillDirection.Specified:
+                        break;
+                    case SkillDirection.Everywhere:
+                        break;
+                    case SkillDirection.None:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
+            private void ActivateSkillIndicator
+            (
+                SkillIndicatorViewBase.SkillIndicatorInfo skillIndicatorInfo,
+                Subject<Unit> skillSubject
+            )
+            {
+                _skillIndicatorInfo = skillIndicatorInfo;
+                var isActive = skillIndicatorInfo._IsTouch;
+                var range = skillIndicatorInfo._Range;
+                var skillDirection = skillIndicatorInfo._SkillDirection;
+                var angle = skillIndicatorInfo._Angle;
+
+                if (!isActive)
+                {
+                    skillSubject.OnNext(Unit.Default);
+                }
+
+                if
+                (
+                    Mathf.Approximately(range, GameCommonData.InvalidNumber) ||
+                    IsInvalidSkillDirection(skillDirection)
+                )
+                {
+                    _ArrowSkillIndicatorView.gameObject.SetActive(false);
+                    _CircleSkillIndicatorView.gameObject.SetActive(false);
+                    return;
+                }
+
+                switch (skillDirection)
+                {
+                    case SkillDirection.Forward:
+                        _ArrowSkillIndicatorView.gameObject.SetActive(isActive);
+                        _ArrowSkillIndicatorView.Setup(range);
+                        break;
+                    case SkillDirection.Back:
+                        break;
+                    case SkillDirection.Left:
+                        break;
+                    case SkillDirection.Right:
+                        break;
+                    case SkillDirection.ForwardBack:
+                        break;
+                    case SkillDirection.LeftRight:
+                        break;
+                    case SkillDirection.All:
+                        _CircleSkillIndicatorView.gameObject.SetActive(isActive);
+                        _CircleSkillIndicatorView.Setup(range, angle);
+                        break;
+                    case SkillDirection.Random:
+                        break;
+                    case SkillDirection.Specified:
+                        break;
+                    case SkillDirection.Everywhere:
+                        break;
+                    case SkillDirection.None:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
 
             private void DestroyPlayerListUi()

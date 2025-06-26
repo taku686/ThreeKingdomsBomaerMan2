@@ -9,13 +9,15 @@ namespace UI.Title
     {
         [SerializeField] private Button _okButton;
         [SerializeField] private SortToggleView[] _sortToggleViews;
-        [SerializeField] private FilterToggleView[] _filterToggleViews;
+        [SerializeField] private WeaponFilterToggleView[] _filterToggleViews;
+        [SerializeField] private RareFilterToggleView[] _rareFilterToggleViews;
         [SerializeField] private SwitchView _ascendingSwitchView;
 
         public IObservable<Button> _OnClickOkButtonAsObservable => _okButton.OnClickAsObservable().Select(_ => _okButton);
         public IObservable<bool> _OnChangeAscendingToggleAsObservable => _ascendingSwitchView._OnChangeAscendingToggleAsObservable;
         public SortToggleView[] _SortToggleViews => _sortToggleViews;
-        public FilterToggleView[] _FilterToggleViews => _filterToggleViews;
+        public WeaponFilterToggleView[] _FilterToggleViews => _filterToggleViews;
+        public RareFilterToggleView[] _RareFilterToggleViews => _rareFilterToggleViews;
 
         public void ApplyAscendingSwitch(bool isOn)
         {

@@ -13,6 +13,7 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _USEALPHAOVERRIDE_ON
+  - _USESOFTALPHA_ON
   m_InvalidKeywords:
   - _DISABLE_SSR
   - _DISABLE_SSR_TRANSPARENT
@@ -119,7 +120,7 @@ Material:
     - _UsePixelation: 0
     - _UseRamp: 0
     - _UseShadowThreshold: 0
-    - _UseSoftAlpha: 0
+    - _UseSoftAlpha: 1
     - _UseUVOffset: 0
     - _ZTestDepthEqualForOpaque: 4
     - _ZTestGBuffer: 4

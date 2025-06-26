@@ -1,34 +1,35 @@
 ﻿using System;
 using Common.Data;
 using Manager.DataManager;
+using Manager.NetworkManager;
 using Zenject;
 
 namespace UI.Title
 {
     public class CharacterSelectViewModelUseCase : IDisposable
     {
-        private readonly UserDataRepository userDataRepository;
-        private readonly CharacterMasterDataRepository characterMasterDataRepository;
-        private readonly CharacterSelectRepository characterSelectRepository;
+        private readonly UserDataRepository _userDataRepository;
+        private readonly CharacterMasterDataRepository _characterMasterDataRepository;
+        private readonly TemporaryCharacterRepository _temporaryCharacterRepository;
 
         [Inject]
         public CharacterSelectViewModelUseCase
         (
             UserDataRepository userDataRepository,
             CharacterMasterDataRepository characterMasterDataRepository,
-            CharacterSelectRepository characterSelectRepository
+            TemporaryCharacterRepository temporaryCharacterRepository
         )
         {
-            this.userDataRepository = userDataRepository;
-            this.characterMasterDataRepository = characterMasterDataRepository;
-            this.characterSelectRepository = characterSelectRepository;
+            _userDataRepository = userDataRepository;
+            _characterMasterDataRepository = characterMasterDataRepository;
+            _temporaryCharacterRepository = temporaryCharacterRepository;
         }
 
         public CharacterSelectView.ViewModel InAsTask()
         {
-            var availableAmount = userDataRepository.GetAvailableCharacterAmount();
-            var totalAmount = characterMasterDataRepository.GetAllCharacterAmount();
-            var orderType = characterSelectRepository.GetOrderType();
+            var availableAmount = _userDataRepository.GetAvailableCharacterAmount();
+            var totalAmount = _characterMasterDataRepository.GetAllCharacterAmount();
+            var orderType = _temporaryCharacterRepository.GetOrderType();
             return new CharacterSelectView.ViewModel
             (
                 availableAmount,

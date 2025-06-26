@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Common.Data;
 using Cysharp.Threading.Tasks;
 
 /// <summary>
@@ -126,7 +127,7 @@ public class StateMachine<TOwner>
     /// <summary>
     /// 現在のステート
     /// </summary>
-    public State _CurrentState { get; private set; }
+    private State _CurrentState { get; set; }
 
     public int _PreviousState { get; set; }
 
@@ -147,8 +148,10 @@ public class StateMachine<TOwner>
     /// </summary>
     public T Add<T>() where T : State, new()
     {
-        var state = new T();
-        state.stateMachine = this;
+        var state = new T
+        {
+            stateMachine = this
+        };
         _states.AddLast(state);
         return state;
     }
@@ -235,7 +238,8 @@ public class StateMachine<TOwner>
     /// イベントを発行する
     /// </summary>
     /// <param name="eventId">イベントID</param>
-    public void Dispatch(int eventId, int prevEventId = -1)
+    /// <param name="prevEventId"></param>
+    public void Dispatch(int eventId, int prevEventId = GameCommonData.InvalidNumber)
     {
         State to;
         if (!_CurrentState.transitions.TryGetValue(eventId, out to))
@@ -247,10 +251,7 @@ public class StateMachine<TOwner>
             }
         }
 
-        if (prevEventId != -1)
-        {
-            _PreviousState = prevEventId;
-        }
+        _PreviousState = prevEventId;
 
         Change(to).Forget();
     }

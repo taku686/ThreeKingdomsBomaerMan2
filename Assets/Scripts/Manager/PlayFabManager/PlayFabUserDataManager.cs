@@ -73,19 +73,19 @@ namespace Manager.NetworkManager
             return user;
         }
 
-        public async UniTask DeletePlayerDataAsync()
+        public async UniTask<bool> DeletePlayerDataAsync()
         {
-            var request = new UpdateUserDataRequest()
+            var request = new UpdateUserDataRequest
             {
                 KeysToRemove = new List<string> { GameCommonData.UserKey }
             };
 
             var response = await PlayFabClientAPI.UpdateUserDataAsync(request);
 
-            if (response.Error != null)
-            {
-                Debug.Log(response.Error.GenerateErrorReport());
-            }
+            if (response.Error == null) return true;
+            Debug.LogError(response.Error.GenerateErrorReport());
+            return false;
+
         }
 
         public async UniTask<(bool, string)> UpdateUserDisplayNameAsync(string playerName)

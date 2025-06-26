@@ -3,6 +3,7 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Manager;
 using Manager.NetworkManager;
 using Repository;
 using UI.Common;
@@ -20,14 +21,15 @@ namespace UI.Title
             private CharacterSelectView _View => (CharacterSelectView)Owner.GetView(State.CharacterSelect);
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
             private CharacterSelectViewModelUseCase _CharacterSelectViewModelUseCase => Owner._characterSelectViewModelUseCase;
-            private CharacterSelectRepository _CharacterSelectRepository => Owner._characterSelectRepository;
+            private TemporaryCharacterRepository _TemporaryCharacterRepository => Owner._temporaryCharacterRepository;
             private PlayFabVirtualCurrencyManager _PlayFabVirtualCurrencyManager => Owner._playFabVirtualCurrencyManager;
             private SortCharactersUseCase _SortCharactersUseCase => Owner._sortCharactersUseCase;
             private UserDataRepository _UserDataRepository => Owner._userDataRepository;
             private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
             private StateMachine<TitleCore> _StateMachine => Owner._stateMachine;
             private RewardDataRepository _RewardDataRepository => Owner._rewardDataRepository;
-            private CharacterTypeSpriteManager _CharacterTypeSpriteManager => Owner._characterTypeSpriteManager;
+            private CharacterTypeSpriteRepository _CharacterTypeSpriteRepository => Owner._characterTypeSpriteRepository;
+            private DataAcrossStates _DataAcrossStates => Owner._dataAcrossStates;
 
             private CancellationTokenSource _cancellationTokenSource;
             private readonly Subject<Unit> _onChangeViewModel = new();
@@ -64,7 +66,7 @@ namespace UI.Title
 
             private void Subscribe()
             {
-                SubscribeToggleView();
+                SubscribeSortToggleView();
 
                 _onChangeViewModel
                     .Select(_ => _CharacterSelectViewModelUseCase.InAsTask())
@@ -82,10 +84,9 @@ namespace UI.Title
                     .Subscribe(_ =>
                     {
                         var prevState = _StateMachine._PreviousState;
-                        if (prevState >= 0)
+                        if (prevState != GameCommonData.InvalidNumber)
                         {
                             _StateMachine.Dispatch(prevState);
-                            _StateMachine._PreviousState = -1;
                         }
                         else
                         {
@@ -97,7 +98,7 @@ namespace UI.Title
                 _onChangeViewModel.OnNext(Unit.Default);
             }
 
-            private void SubscribeToggleView()
+            private void SubscribeSortToggleView()
             {
                 foreach (var element in _View._ToggleElements)
                 {
@@ -106,7 +107,7 @@ namespace UI.Title
                         {
                             Owner.SetActiveBlockPanel(true);
                             _View.ApplyToggleView(type);
-                            _CharacterSelectRepository.SetOrderType(type);
+                            _TemporaryCharacterRepository.SetOrderType(type);
                             CreateUIContents(type);
                             Owner.SetActiveBlockPanel(false);
                         })
@@ -115,7 +116,7 @@ namespace UI.Title
             }
 
 
-            private void CreateUIContents(CharacterSelectRepository.OrderType orderType)
+            private void CreateUIContents(TemporaryCharacterRepository.OrderType orderType)
             {
                 foreach (var gridGroupList in _gridGroupLists)
                 {
@@ -159,11 +160,11 @@ namespace UI.Title
                 }
             }
 
-            private void CreateActiveGrid(CharacterData fixedCharacterData, Transform parent, CharacterSelectRepository.OrderType orderType)
+            private void CreateActiveGrid(CharacterData fixedCharacterData, Transform parent, TemporaryCharacterRepository.OrderType orderType)
             {
                 var grid = Instantiate(_View._Grid, parent);
                 var characterGrid = grid.GetComponentInChildren<CharacterGridView>();
-                var (typeSprite, typeColor) = _CharacterTypeSpriteManager.GetCharacterTypeData(fixedCharacterData.Type);
+                var (typeSprite, typeColor) = _CharacterTypeSpriteRepository.GetCharacterTypeData(fixedCharacterData.Type);
                 characterGrid.ApplyStatusGridViews(orderType, fixedCharacterData, (typeSprite, typeColor));
 
                 characterGrid.gridButton
@@ -210,7 +211,7 @@ namespace UI.Title
 
                 addGem
                     .Where(isOk => isOk)
-                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.Shop); })
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)State.Shop, (int)State.CharacterSelect); })
                     .AddTo(disableGrid.GetCancellationTokenOnDestroy());
 
                 var purchaseCharacter =
@@ -285,9 +286,16 @@ namespace UI.Title
 
             private void OnClickCharacterGrid(CharacterData characterData)
             {
-                _CharacterCreateUseCase.CreateCharacter(characterData.Id);
-                _CharacterSelectRepository.SetSelectedCharacterId(characterData.Id);
-                _StateMachine.Dispatch((int)State.CharacterDetail);
+                _CharacterCreateUseCase.CreateTeamMember(characterData.Id);
+                _TemporaryCharacterRepository.SetSelectedCharacterId(characterData.Id);
+                if (_DataAcrossStates.GetCanEditTeam())
+                {
+                    _StateMachine.Dispatch((int)State.CharacterDetail, (int)State.TeamEdit);
+                }
+                else
+                {
+                    _StateMachine.Dispatch((int)State.CharacterDetail);
+                }
             }
 
 

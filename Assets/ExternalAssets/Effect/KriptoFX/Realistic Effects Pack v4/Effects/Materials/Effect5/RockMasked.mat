@@ -4,9 +4,8 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
   m_Name: RockMasked
   m_Shader: {fileID: 4800000, guid: c9b4103a57c1a374691b4a4885d157ef, type: 3}
   m_ShaderKeywords: _NORMALMAP
@@ -77,5 +76,5 @@ Material:
     m_Colors:
     - _Color: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     - _EmissionColor: {r: 0.8334853, g: 0.42039844, b: 2.4858346, a: 1}
-    - _FresnelColor: {r: 0.43698227, g: 0.22531898, b: 1.3041189, a: 1}
+    - _FresnelColor: {r: 0.33529395, g: 0.16911763, b: 1, a: 1}
     - _TintColor: {r: 0.24264705, g: 0.24264705, b: 0.24264705, a: 1}

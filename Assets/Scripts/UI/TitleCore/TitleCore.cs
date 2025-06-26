@@ -4,6 +4,7 @@ using Assets.Scripts.Common.Data;
 using Assets.Scripts.Common.PlayFab;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Data;
 using DG.Tweening;
 using Manager;
 using Manager.NetworkManager;
@@ -15,8 +16,11 @@ using Manager.DataManager;
 using Repository;
 using UI.TitleCore.UserInfoState;
 using UniRx;
-using UnityEngine.UI;
+using UnityEngine.Events;
+using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 using UseCase;
+using Button = UnityEngine.UI.Button;
 
 
 namespace UI.Title
@@ -28,13 +32,14 @@ namespace UI.Title
         [Inject] private UserDataRepository _userDataRepository;
         [Inject] private MissionMasterDataRepository _missionMasterDataRepository;
         [Inject] private CatalogDataRepository _catalogDataRepository;
-        [Inject] private CharacterSelectRepository _characterSelectRepository;
+        [Inject] private TemporaryCharacterRepository _temporaryCharacterRepository;
         [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
         [Inject] private CharacterObjectRepository _characterObjectRepository;
         [Inject] private RewardDataRepository _rewardDataRepository;
         [Inject] private WeaponSortRepository _weaponSortRepository;
         [Inject] private EntitledMasterDataRepository _entitledMasterDataRepository;
         [Inject] private MissionSpriteDataRepository _missionSpriteDataRepository;
+        [Inject] private WeaponCautionRepository _weaponCautionRepository;
 
         //UseCase
         [Inject] private CharacterSelectViewModelUseCase _characterSelectViewModelUseCase;
@@ -48,18 +53,22 @@ namespace UI.Title
         [Inject] private RewardDataUseCase _rewardDataUseCase;
         [Inject] private UserInfoViewModelUseCase _userInfoViewModelUseCase;
         [Inject] private TeamEditViewModelUseCase _teamEditViewModelUseCase;
+        [Inject] private MainViewModelUseCase _mainViewModelUseCase;
+        [Inject] private GetRewardUseCase _getRewardUseCase;
+        [Inject] private SettingViewModelUseCase _settingViewModelUseCase;
 
         //Manager
         [Inject] private PhotonNetworkManager _photonNetworkManager;
-        [Inject] private MainManager _mainManager;
-        [Inject] private PlayFabLoginManager _playFabLoginManager;
+        [Inject] private DataAcrossStates _dataAcrossStates;
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private PlayFabShopManager _playFabShopManager;
         [Inject] private PlayFabAdsManager _playFabAdsManager;
         [Inject] private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
         [Inject] private MissionManager _missionManager;
-        [Inject] private CharacterTypeSpriteManager _characterTypeSpriteManager;
+        [Inject] private CharacterTypeSpriteRepository _characterTypeSpriteRepository;
         [Inject] private SkyBoxManager _skyBoxManager;
+        [Inject] private PlayStoreShopManager _playStoreShopManager;
+        [Inject] private AdMobManager _adMobManager;
 
         //UI
         [Inject] private UIAnimation _uiAnimation;
@@ -69,6 +78,8 @@ namespace UI.Title
         [SerializeField] private CommonView _commonView;
         [SerializeField] private ViewBase[] _views;
         [SerializeField] private GameObject _blockPanel;
+        [SerializeField] private GameObject _globalVolumeObj;
+        [SerializeField] private Transform[] _characterCreateParents;
 
         private StateMachine<TitleCore> _stateMachine;
         private CancellationTokenSource _cts;
@@ -92,13 +103,9 @@ namespace UI.Title
             TeamEdit
         }
 
-        private void Awake()
-        {
-            SetActiveBlockPanel(true);
-        }
-
         private void Start()
         {
+            SetActiveBlockPanel(true);
             Application.targetFrameRate = 60;
             Initialize();
         }
@@ -117,49 +124,52 @@ namespace UI.Title
         private void Initialize()
         {
             _cts = new CancellationTokenSource();
+            _dataAcrossStates._changingScene = true;
             _fadeView.Initialize();
+            PhotonCustomTypes.Register();
             var view = (MainView)GetView(State.Main);
             view.SetBackgroundEffect(false);
-            _missionSpriteDataRepository.Initialize().Forget();
-            _commonView.Initialize();
+            InitializeOthers();
             InitializeState();
             InitializeButton();
+            InitializeSceneCallBack();
             SetActiveBlockPanel(false);
+        }
+
+        private void InitializeOthers()
+        {
+            _missionSpriteDataRepository.Initialize().Forget();
+            _commonView.Initialize();
+            _weaponSortRepository.InitializeData();
+            _weaponCautionRepository.InitializeData();
+            _playStoreShopManager.Initialize();
+            _adMobManager.Initialize();
         }
 
 
         private void InitializeState()
         {
-            _stateMachine = new StateMachine<TitleCore>(this)
-            {
-                _PreviousState = -1
-            };
-            if (_mainManager._isInitialize)
-            {
-                _stateMachine.Start<MainState>();
-            }
-            else
-            {
-                _stateMachine.Start<LoginState>();
-                _mainManager._isInitialize = true;
-            }
-
+            _stateMachine = new StateMachine<TitleCore>(this);
+            _stateMachine.Start<MainState>();
             _stateMachine.AddAnyTransition<MainState>((int)State.Main);
             _stateMachine.AddAnyTransition<ShopState>((int)State.Shop);
             _stateMachine.AddTransition<MainState, CharacterSelectState>((int)State.CharacterSelect);
-            _stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)State.CharacterDetail);
+            _stateMachine.AddTransition<RewardState, CharacterSelectState>((int)State.CharacterSelect);
             _stateMachine.AddTransition<CharacterDetailState, CharacterSelectState>((int)State.CharacterSelect);
             _stateMachine.AddTransition<TeamEditState, CharacterSelectState>((int)State.CharacterSelect);
-            _stateMachine.AddTransition<CharacterDetailState, InventoryState>((int)State.Inventory);
+            _stateMachine.AddTransition<TeamEditState, CharacterDetailState>((int)State.CharacterDetail);
+            _stateMachine.AddTransition<CharacterSelectState, CharacterDetailState>((int)State.CharacterDetail);
             _stateMachine.AddTransition<InventoryState, CharacterDetailState>((int)State.CharacterDetail);
+            _stateMachine.AddTransition<CharacterDetailState, InventoryState>((int)State.Inventory);
+            _stateMachine.AddTransition<MainState, InventoryState>((int)State.Inventory);
             _stateMachine.AddTransition<MainState, BattleReadyState>((int)State.BattleReady);
-            _stateMachine.AddTransition<LoginState, MainState>((int)State.Main);
             _stateMachine.AddTransition<MainState, SettingState>((int)State.Setting);
             _stateMachine.AddTransition<MainState, LoginBonusState>((int)State.LoginBonus);
             _stateMachine.AddTransition<MainState, MissionState>((int)State.Mission);
+            _stateMachine.AddTransition<RewardState, MissionState>((int)State.Mission);
             _stateMachine.AddTransition<CharacterSelectState, RewardState>((int)State.Reward);
             _stateMachine.AddTransition<ShopState, RewardState>((int)State.Reward);
-            _stateMachine.AddTransition<RewardState, CharacterSelectState>((int)State.CharacterSelect);
+            _stateMachine.AddTransition<MissionState, RewardState>((int)State.Reward);
             _stateMachine.AddTransition<MainState, TeamEditState>((int)State.TeamEdit);
             _stateMachine.AddTransition<CharacterDetailState, TeamEditState>((int)State.TeamEdit);
             _stateMachine.AddTransition<CharacterSelectState, TeamEditState>((int)State.TeamEdit);
@@ -170,7 +180,6 @@ namespace UI.Title
             var gemAddButton = _commonView.virtualCurrencyView.gemAddButton;
             var coinAddButton = _commonView.virtualCurrencyView.coinAddButton;
             var ticketAddButton = _commonView.virtualCurrencyView.ticketAddButton;
-            SubscribeRewardOkButton();
             OnClickTransitionState(gemAddButton, State.Shop, _cts.Token);
             OnClickTransitionState(coinAddButton, State.Shop, _cts.Token);
             OnClickTransitionState(ticketAddButton, State.Shop, _cts.Token);
@@ -207,11 +216,37 @@ namespace UI.Title
 
         private async UniTask TransitionUiAnimation(Action action)
         {
-            SetActiveBlockPanel(true);
-            await _fadeView.FadeInAsync();
+            if (!_dataAcrossStates._changingScene)
+            {
+                SetActiveBlockPanel(true);
+                await _fadeView.FadeInAsync();
+            }
+
             action.Invoke();
-            await _fadeView.FadeOutAsync();
-            SetActiveBlockPanel(false);
+
+            if (!_dataAcrossStates._changingScene)
+            {
+                await _fadeView.FadeOutAsync();
+                SetActiveBlockPanel(false);
+            }
+
+            if (_dataAcrossStates._changingScene)
+            {
+                _dataAcrossStates._changingScene = false;
+            }
+        }
+
+        private void InitializeSceneCallBack()
+        {
+            UnityAction<Scene, Scene> action = (previousScene, newScene) =>
+            {
+                if (newScene.name == GameCommonData.MainScene)
+                {
+                    _dataAcrossStates._changingScene = true;
+                }
+            };
+            SceneManager.activeSceneChanged -= action;
+            SceneManager.activeSceneChanged += action;
         }
 
         private async UniTask SetCoinText()
@@ -255,27 +290,6 @@ namespace UI.Title
                 .AddTo(cancellationToken);
         }
 
-        private void SubscribeRewardOkButton()
-        {
-            _commonView.rewardGetView.okButton
-                .OnClickAsObservable()
-                .Take(1)
-                .SelectMany(_ => OnClickScaleColorAnimation(_commonView.rewardGetView.okButton).ToObservable())
-                .SelectMany(_ => _uiAnimation.Close(_commonView.rewardGetView.transform, GameCommonData.CloseDuration).ToObservable())
-                .Subscribe(_ => { SetActiveBlockPanel(false); })
-                .AddTo(_cts.Token);
-        }
-
-        private async UniTask SetRewardUI(int value, Sprite rewardSprite)
-        {
-            var rewardView = _commonView.rewardGetView;
-            rewardView.rewardImage.sprite = rewardSprite;
-            rewardView.rewardText.text = value == 1 ? "" : value.ToString("D");
-            rewardView.transform.localScale = Vector3.zero;
-            rewardView.gameObject.SetActive(true);
-            await _uiAnimation.Open(rewardView.transform, GameCommonData.OpenDuration);
-        }
-
         private async UniTask OnClickScaleColorAnimation(Button button)
         {
             _blockPanel.SetActive(true);
@@ -291,6 +305,21 @@ namespace UI.Title
         private void SetActiveBlockPanel(bool isActive)
         {
             _blockPanel.SetActive(isActive);
+        }
+
+        private void SetActiveGlobalVolume(bool isActive)
+        {
+            _globalVolumeObj.SetActive(isActive);
+        }
+
+        private Transform GetGenerateCharacterCreateParent(int index)
+        {
+            if (index < 0 || index >= _characterCreateParents.Length)
+            {
+                return _characterCreateParents[0];
+            }
+
+            return _characterCreateParents[index];
         }
 
         private void Cancel(CancellationTokenSource cancellationTokenSource)

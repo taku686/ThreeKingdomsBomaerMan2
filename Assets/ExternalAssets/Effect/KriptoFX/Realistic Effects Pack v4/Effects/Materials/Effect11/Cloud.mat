@@ -1,5 +1,18 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-1112482390132816546
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 7
 --- !u!21 &2100000
 Material:
   serializedVersion: 8
@@ -12,25 +25,19 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
-  - _ALPHAPREMULTIPLY_ON
-  - _EMISSION
+  - _ENVIRONMENTREFLECTIONS_OFF
+  - _NORMALMAP
+  - _SPECULARHIGHLIGHTS_OFF
   - _SURFACE_TYPE_TRANSPARENT
-  m_InvalidKeywords:
-  - BlendAlpha
-  - Clip_ON
-  - FrameBlend_OFF
-  - SoftParticles_OFF
-  - VertLight4_ON
-  - _ALPHABLEND_ON
-  - _BLENDMODE_BLEND
-  - _FLIPBOOK_BLENDING
-  m_LightmapFlags: 1
+  m_InvalidKeywords: []
+  m_LightmapFlags: 6
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: 3000
   stringTagMap:
     RenderType: Transparent
   disabledShaderPasses:
+  - SHADOWCASTER
   - DepthOnly
   m_LockedProperties: 
   m_SavedProperties:
@@ -41,7 +48,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 881b0399b8c4daa49a3dea86f3567b7e, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _CutoutTex:
@@ -65,7 +72,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: ad45a48e6769c514691fe6d7b9fef330, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -108,7 +115,7 @@ Material:
     - _AlphaToMask: 0
     - _Blend: 0
     - _BlendMode: 1
-    - _BlendModePreserveSpecular: 1
+    - _BlendModePreserveSpecular: 0
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
@@ -122,7 +129,7 @@ Material:
     - _DstBlend: 10
     - _DstBlendAlpha: 10
     - _DstMode: 10
-    - _EnvironmentReflections: 1
+    - _EnvironmentReflections: 0
     - _FogColorMultiplier: 0
     - _FresnelFadeFactor: 3
     - _FresnelPow: 5
@@ -131,17 +138,17 @@ Material:
     - _Glossiness: 0.378
     - _GlossyReflections: 1
     - _InvFade: 1
-    - _Metallic: 0
+    - _Metallic: 0.25
     - _Mode: 2
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _Smoothness: 0.378
+    - _Smoothness: 0.02
     - _SmoothnessTextureChannel: 0
     - _SoftInverted: 0
-    - _SpecularHighlights: 1
-    - _SrcBlend: 1
+    - _SpecularHighlights: 0
+    - _SrcBlend: 5
     - _SrcBlendAlpha: 1
     - _SrcMode: 5
     - _Surface: 1
@@ -160,8 +167,8 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 0
     m_Colors:
-    - _BaseColor: {r: 0, g: 0, b: 0, a: 0.516}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 0.39215687}
+    - _Color: {r: 1, g: 1, b: 1, a: 0.39215687}
     - _CutoutColor: {r: 1, g: 1, b: 1, a: 1}
     - _DistortionSpeedScale: {r: 1, g: -1, b: 0.15, a: 0.15}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
@@ -170,16 +177,3 @@ Material:
     - _Tiling: {r: 800, g: 800, b: 8, a: 8}
     - _TintColor: {r: 0.051470578, g: 0.04026816, b: 0.023464529, a: 0.463}
   m_BuildTextureStacks: []
---- !u!114 &600534302219360824
-MonoBehaviour:
-  m_ObjectHideFlags: 11
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  version: 7

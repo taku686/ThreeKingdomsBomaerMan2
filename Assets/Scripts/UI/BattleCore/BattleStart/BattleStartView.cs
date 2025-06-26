@@ -1,4 +1,5 @@
 ﻿using System;
+using MoreMountains.Feedbacks;
 using UI.BattleCore;
 using UniRx;
 using UniRx.Triggers;
@@ -9,16 +10,17 @@ namespace Manager.BattleManager
     public class BattleStartView : BattleViewBase
     {
         [SerializeField] private Animator battleStartAnimator;
+        [SerializeField] private MMF_Player _battleStartFeedback;
         private ObservableStateMachineTrigger _observableStateMachineTrigger;
 
         public void Initialize()
         {
-            foreach (Transform child in transform)
-            {
-                child.gameObject.SetActive(true);
-            }
-
             _observableStateMachineTrigger = battleStartAnimator.GetBehaviour<ObservableStateMachineTrigger>();
+        }
+
+        public void PlayBattleStartFeedback()
+        {
+            _battleStartFeedback.PlayFeedbacks();
         }
 
         public IObservable<Unit> _Exit => _observableStateMachineTrigger

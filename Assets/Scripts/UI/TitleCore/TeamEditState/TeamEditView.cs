@@ -21,7 +21,7 @@ public class TeamEditView : ViewBase
         }
 
         _teamGridViews.Clear();
-        for (var i = 0; i < GameCommonData.TeamMemberCount; i++)
+        for (var i = 0; i < GameCommonData.MaxTeamMember; i++)
         {
             var teamGridView = Instantiate(_teamGridView, _teamGridParent);
             teamGridView.ApplyViewModel(viewModel._TeamGridViewModels[i]);

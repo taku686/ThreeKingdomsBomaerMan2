@@ -9,7 +9,7 @@ namespace UI.Common
 
         public ToggleElement[] _ToggleElements => toggleElements;
 
-        public void ApplyView(CharacterSelectRepository.OrderType orderType)
+        public void ApplyView(TemporaryCharacterRepository.OrderType orderType)
         {
             foreach (var element in toggleElements)
             {

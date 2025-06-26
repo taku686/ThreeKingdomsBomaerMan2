@@ -44,7 +44,7 @@ public class RFX4_TornadoParticles : MonoBehaviour
             for (int i = 0; i < numParticlesAlive; i++) {
                 var pos = particleArray[i].position;
 
-                var height = (pos.y) * _twistScale.y;
+                var height = (pos.y - transform.position.y) * _twistScale.y;
                 pos.x = Mathf.Sin(Time.time * _twistScale.z + pos.y * _twistScale.x) * height;
                 pos.z = Mathf.Sin(Time.time * _twistScale.z + pos.y * _twistScale.x + 3.1415f / 2) * height;
                 particleArray[i].position = pos;

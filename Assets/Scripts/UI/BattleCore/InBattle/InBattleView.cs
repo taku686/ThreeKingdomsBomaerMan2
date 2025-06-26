@@ -2,24 +2,28 @@ using System;
 using Common.Data;
 using TMPro;
 using UI.BattleCore;
+using UI.BattleCore.InBattle;
 using UI.Common;
 using UniRx;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class InBattleView : BattleViewBase
 {
     [SerializeField] private TextMeshProUGUI timerText;
     [SerializeField] private StatusInBattleView statusInBattleView;
     [SerializeField] private InputView _inputView;
+    [SerializeField] private Transform _abnormalConditionParent;
+    [SerializeField] private Image _abnormalConditionImage;
 
     public void ApplyStatusViewModel(StatusInBattleView.ViewModel viewModel)
     {
         statusInBattleView.ApplyViewModel(viewModel);
     }
 
-    public void ApplyBuffState(StatusType statusType, int value, bool isBuff, bool isDebuff)
+    public void ApplyBuffState(StatusType statusType, int value)
     {
-        statusInBattleView.ApplyBuffState(statusType, value, isBuff, isDebuff);
+        statusInBattleView.ApplyBuffState(statusType, value);
     }
 
     public void ApplyInputViewModel(InputView.ViewModel viewModel)
@@ -27,19 +31,22 @@ public class InBattleView : BattleViewBase
         _inputView.ApplyViewModel(viewModel);
     }
 
+    public Image GenerateAbnormalConditionImage(Sprite abnormalConditionSprite)
+    {
+        var iconObj = Instantiate(_abnormalConditionImage.gameObject, _abnormalConditionParent);
+        var image = iconObj.GetComponent<Image>();
+        image.sprite = abnormalConditionSprite;
+        return image;
+    }
+
     public void UpdateTime(int time)
     {
         timerText.text = time.ToString();
     }
 
-    public IObservable<Unit> OnClickNormalSkillButtonAsObservable()
+    public void UpdateInputViewTimer()
     {
-        return _inputView.OnClickNormalSkillButtonAsObservable();
-    }
-
-    public IObservable<Unit> OnClickSpecialSkillButtonAsObservable()
-    {
-        return _inputView.OnClickSpecialSkillButtonAsObservable();
+        _inputView.UpdateTimer();
     }
 
     public IObservable<Unit> OnClickBombButtonAsObservable()
@@ -47,13 +54,28 @@ public class InBattleView : BattleViewBase
         return _inputView.OnClickBombButtonAsObservable();
     }
 
+    public IObservable<Unit> OnClickCharacterChangeButtonAsObservable()
+    {
+        return _inputView.OnClickCharacterChangeButtonAsObservable();
+    }
+
     public IObservable<Unit> OnClickDashButtonAsObservable()
     {
         return _inputView.OnClickDashButtonAsObservable();
     }
 
-    public void UpdateSkillUI()
+    public IObservable<SkillIndicatorViewBase.SkillIndicatorInfo> OnTouchWeaponSkillButtonAsObservable()
     {
-        _inputView.UpdateSkillUI();
+        return _inputView.OnTouchWeaponSkillButtonAsObservable();
+    }
+
+    public IObservable<SkillIndicatorViewBase.SkillIndicatorInfo> OnTouchNormalSkillButtonAsObservable()
+    {
+        return _inputView.OnTouchNormalSkillButtonAsObservable();
+    }
+
+    public IObservable<SkillIndicatorViewBase.SkillIndicatorInfo> OnTouchSpecialSkillButtonAsObservable()
+    {
+        return _inputView.OnTouchSpecialSkillButtonAsObservable();
     }
 }

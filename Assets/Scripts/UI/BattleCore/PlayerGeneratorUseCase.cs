@@ -1,52 +1,84 @@
-using System.Collections.Generic;
 using Common.Data;
-using Manager.NetworkManager;
 using Photon.Pun;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace Manager.BattleManager
 {
     public class PlayerGeneratorUseCase : MonoBehaviour
     {
-        [SerializeField] private List<Transform> startPointList;
         [SerializeField] private Transform playerParent;
         private GameObject _playerObj;
-        private const int PlayerNotification = 1;
-        private const float PlayerSize = 0.8f;
 
-        public GameObject GenerateCharacter(int playerIndex, CharacterData characterData)
+        public GameObject InstantiatePlayerCore(bool isCpu,Transform spawnPoint)
         {
-            var spawnPoint = GetSpawnPoint(playerIndex);
-            _playerObj = PhotonNetwork.Instantiate
-            (
-                GameCommonData.CharacterPrefabPath + characterData.CharaObj,
-                spawnPoint.position,
-                spawnPoint.rotation
-            );
-            _playerObj.transform.localScale *= PlayerSize;
-            _playerObj.transform.SetParent(playerParent);
-            PhotonNetwork.LocalPlayer.SetPlayerGenerate(PlayerNotification);
+            GameObject playerCore;
+            if (!isCpu)
+            {
+                playerCore = PhotonNetwork.Instantiate
+                (
+                    GameCommonData.PlayerCorePath,
+                    spawnPoint.position,
+                    spawnPoint.rotation
+                );
+            }
+            else
+            {
+                playerCore = PhotonNetwork.InstantiateRoomObject
+                (
+                    GameCommonData.PlayerCorePath,
+                    spawnPoint.position,
+                    spawnPoint.rotation
+                );
+            }
+
+            return playerCore;
+        }
+
+        public GameObject InstantiatePlayerObj
+        (
+            CharacterData characterData,
+            Transform parent,
+            int weaponId,
+            bool isCpu
+        )
+        {
+            var photonView = parent.GetComponent<PhotonView>();
+            var myCustomInitData = new object[] { photonView.InstantiationId, weaponId };
+            if (!isCpu)
+            {
+                _playerObj = PhotonNetwork.Instantiate
+                (
+                    GameCommonData.CharacterPrefabPath + characterData.CharaObj,
+                    Vector3.zero,
+                    Quaternion.identity,
+                    0,
+                    myCustomInitData
+                );
+            }
+            else
+            {
+                _playerObj = PhotonNetwork.InstantiateRoomObject
+                (
+                    GameCommonData.CharacterPrefabPath + characterData.CharaObj,
+                    Vector3.zero,
+                    Quaternion.identity,
+                    0,
+                    myCustomInitData
+                );
+            }
+
             return _playerObj;
         }
 
-        public GameObject GenerateCPUCharacter(int playerIndex, CharacterData characterData)
+        public void DestroyPlayerObj()
         {
-            var spawnPoint = GetSpawnPoint(playerIndex);
-            _playerObj = PhotonNetwork.InstantiateRoomObject
-            (
-                GameCommonData.CharacterPrefabPath + characterData.CharaObj,
-                spawnPoint.position,
-                spawnPoint.rotation
-            );
-            _playerObj.transform.localScale *= PlayerSize;
-            _playerObj.transform.SetParent(playerParent);
-            return _playerObj;
-        }
+            if (_playerObj == null)
+            {
+                return;
+            }
 
-        private Transform GetSpawnPoint(int index)
-        {
-            return startPointList[index - 1];
+            PhotonNetwork.Destroy(_playerObj);
+            _playerObj = null;
         }
     }
 }

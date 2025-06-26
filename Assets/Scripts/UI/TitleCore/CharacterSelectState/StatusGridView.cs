@@ -7,9 +7,9 @@ namespace UI.Title
     {
         [SerializeField] private TextMeshProUGUI nameText;
         [SerializeField] private TextMeshProUGUI valueText;
-        [SerializeField] private CharacterSelectRepository.OrderType orderType;
+        [SerializeField] private TemporaryCharacterRepository.OrderType orderType;
 
-        public CharacterSelectRepository.OrderType OrderType => orderType;
+        public TemporaryCharacterRepository.OrderType OrderType => orderType;
 
         public void ApplyViewModel(string statusName, string value)
         {

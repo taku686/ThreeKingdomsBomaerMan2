@@ -109,6 +109,7 @@ Material:
     - _DistortionSpeedScale: {r: 3, g: -3, b: 0.15, a: 0.15}
     - _EmissionColor: {r: 3, g: 1.8416836, b: 1.2132354, a: 1}
     - _FogColorMultiplier: {r: 0, g: 0, b: 0, a: 0}
-    - _FresnelColor: {r: 2, g: 0.9572008, b: 0.57352936, a: 1}
+    - _FresnelColor: {r: 5.2164755, g: 2.2668452, b: 0.7647189, a: 1}
     - _Tiling: {r: 800, g: 800, b: 8, a: 8}
-    - _TintColor: {r: 3.4415908, g: 1.485927, b: 0.57660145, a: 1}
+    - _TintColor: {r: 5.426912, g: 1.3941207, b: 0.89595234, a: 1}
+  m_BuildTextureStacks: []

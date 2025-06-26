@@ -1,6 +1,5 @@
 ﻿using System;
 using Manager.NetworkManager;
-using Photon.Pun;
 using UI.Common;
 using Zenject;
 
@@ -19,19 +18,23 @@ namespace Manager.BattleManager
             _photonNetworkManager = photonNetworkManager;
         }
 
-        public InputView.ViewModel InAsTask()
+        public InputView.ViewModel InAsTask(int playerKey)
         {
-            var actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
-            var weaponData = _photonNetworkManager.GetWeaponData(actorNumber);
-            var normalSkill = weaponData.NormalSkillMasterData;
-            var specialSkill = weaponData.SpecialSkillMasterData;
-            var currentLevelData = _photonNetworkManager.GetLevelMasterData(actorNumber);
+            var characterData = _photonNetworkManager.GetCharacterData(playerKey);
+            var weaponData = _photonNetworkManager.GetWeaponData(playerKey);
+            var canChangeCharacter = _photonNetworkManager.CanChangeCharacter();
+            var weaponSkill = weaponData.NormalSkillMasterData;
+            var normalSkill = characterData._NormalSkillMasterData;
+            var specialSkill = characterData._SpecialSkillMasterData;
+            var currentLevelData = _photonNetworkManager.GetLevelMasterData(playerKey);
 
             return new InputView.ViewModel
             (
                 normalSkill,
                 specialSkill,
-                currentLevelData
+                weaponSkill,
+                currentLevelData,
+                canChangeCharacter
             );
         }
 

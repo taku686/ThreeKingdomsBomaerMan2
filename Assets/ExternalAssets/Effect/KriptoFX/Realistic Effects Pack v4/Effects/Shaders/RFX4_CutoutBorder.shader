@@ -6,11 +6,11 @@ Shader "KriptoFX/RFX4/CutoutBorder"{
 	[HDR]_EmissionColor("Emission Color", Color) = (1,1,1,1)
 		_EmissionTex("Emission (A)", 2D) = "black" {}
 		_Cutoff("_Cutoff", Range(0,1)) = 0
-		//_Cutout2 ("Cutout2", Range(0,1)) = 0
-		[HDR]_BorderColor("Border Color", Color) = (1,1,1,1)
-		_CutoutThickness("Cutout Thickness", Range(0,1)) = 0.03
+			//_Cutout2 ("Cutout2", Range(0,1)) = 0
+			[HDR]_BorderColor("Border Color", Color) = (1,1,1,1)
+			_CutoutThickness("Cutout Thickness", Range(0,1)) = 0.03
 	}
-	SubShader
+		SubShader
 		{
 			Tags { "RenderType" = "Opaque" "Queue" = "AlphaTest-1"}
 			LOD 100
@@ -24,6 +24,7 @@ Shader "KriptoFX/RFX4/CutoutBorder"{
 				#pragma vertex vert
 				#pragma fragment frag
 				#pragma multi_compile_fog
+								#pragma multi_compile_instancing
 
 				#include "UnityCG.cginc"
 
@@ -53,7 +54,7 @@ Shader "KriptoFX/RFX4/CutoutBorder"{
 					float2 uv : TEXCOORD0;
 					half4 color : COLOR;
 					half3 normal : NORMAL;
-					UNITY_VERTEX_INPUT_INSTANCE_ID
+					UNITY_VERTEX_INPUT_INSTANCE_ID //Insert
 				};
 
 				struct v2f
@@ -63,7 +64,10 @@ Shader "KriptoFX/RFX4/CutoutBorder"{
 					UNITY_FOG_COORDS(2)
 					float4 vertex : SV_POSITION;
 					half4 color : COLOR;
-					UNITY_VERTEX_OUTPUT_STEREO
+
+
+					UNITY_VERTEX_INPUT_INSTANCE_ID
+					UNITY_VERTEX_OUTPUT_STEREO //Insert
 
 				};
 
@@ -87,6 +91,7 @@ Shader "KriptoFX/RFX4/CutoutBorder"{
 				v2f vert(appdata v)
 				{
 					v2f o;
+
 					UNITY_SETUP_INSTANCE_ID(v); //Insert
 					UNITY_INITIALIZE_OUTPUT(v2f, o); //Insert
 					UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o); //Insert
@@ -109,7 +114,7 @@ Shader "KriptoFX/RFX4/CutoutBorder"{
 					//return i.color;
 
 					half4 c = tex2D(_MainTex, i.uv) * _Color;
-					c.rgb = c.rgb * i.color.rgb + i.color.rgb * 0.01;
+					c.rgb = c.rgb * i.color.rgb + i.color.rgb * 0.00;
 					half cutoff = _Cutoff + (1 - i.color.a);
 					clip(c.a - cutoff);
 					if (c.a < cutoff + _CutoutThickness) c.rgb += _BorderColor;
@@ -129,7 +134,7 @@ Shader "KriptoFX/RFX4/CutoutBorder"{
 				#pragma vertex vert
 				#pragma fragment frag
 				#pragma multi_compile_shadowcaster
-
+				#pragma fragmentoption ARB_precision_hint_fastest
 
 				#include "UnityCG.cginc"
 
@@ -144,7 +149,6 @@ Shader "KriptoFX/RFX4/CutoutBorder"{
 					float2 uv : TEXCOORD0;
 					float4 color : COLOR0;
 					half3 normal : NORMAL;
-					UNITY_VERTEX_INPUT_INSTANCE_ID
 				};
 
 
@@ -153,15 +157,11 @@ Shader "KriptoFX/RFX4/CutoutBorder"{
 					float2 uv : TEXCOORD1;
 					float4 color : COLOR0;
 					V2F_SHADOW_CASTER;
-					UNITY_VERTEX_OUTPUT_STEREO
 				};
 
 				v2f vert(appdata v)
 				{
 					v2f o;
-					UNITY_SETUP_INSTANCE_ID(v); //Insert
-					UNITY_INITIALIZE_OUTPUT(v2f, o); //Insert
-					UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o); //Insert
 					o.uv = TRANSFORM_TEX(v.uv, _MainTex);
 					o.color.a = v.color.a;
 					TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
@@ -178,5 +178,5 @@ Shader "KriptoFX/RFX4/CutoutBorder"{
 				ENDCG
 			}
 		}
-	//Fallback "Transparent/Cutout/Diffuse"
+			//Fallback "Transparent/Cutout/Diffuse"
 }

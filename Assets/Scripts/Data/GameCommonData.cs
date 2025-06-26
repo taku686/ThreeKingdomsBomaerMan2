@@ -7,22 +7,23 @@ namespace Common.Data
     {
         public const int CharacterPrice = 200;
         public const int WeaponBuyPrice = 100;
-        public const float TurnDuration = 0.3f;
         public const float InputBombInterval = 0.05f;
+        public const float CharacterChangeInterval = 5f;
         public const float DashInterval = 0.5f;
         public const string TitleID = "92AF5";
-        public const string ChatGptApiKey = "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";
         public const string JoystickName = "JoyStickMove";
         public const string PlayerTag = "Player";
         public const string BombTag = "Bomb";
         public const string BombEffectTag = "BombEffect";
         public const string BreakingWallTag = "BreakingWall";
+        public const string BushTag = "Bush";
         public const string WeaponTag = "Weapon";
+        public const string WallTag = "Wall";
         public const string ObstacleLayer = "Obstacles";
         public const string ExplosionLayer = "Explosion";
         public const string BombLayer = "Bomb";
         public const string PlayerLayer = "Player";
-        public const string EnemyLayer = "Enemies";
+        public const string EnemyLayer = "Enemy";
         public const string UserKey = "User";
         public const string GemKey = "MS";
         public const string CoinKey = "CO";
@@ -31,12 +32,6 @@ namespace Common.Data
         public const string ConsumableClassKey = "Consumable";
         public const string CharacterClassKey = "Character";
         public const string LoginBonusClassKey = "Consumable";
-        public const string CharacterGachaItemKey = "bundle01";
-        public const string FiveThousandCoinItemKey = "coin5000";
-        public const string TwelveThousandCoinItemKey = "coin12000";
-        public const string TwentyGemItemKey = "gem20";
-        public const string HundredGemItemKey = "gem100";
-        public const string TwoHundredGemItemKey = "gem200";
         public const string LoginBonusNotificationItemKey = "LoginBonusNotification";
         public const string LevelItemKey = "level";
         public const string LoginBonusItemKey = "day";
@@ -48,15 +43,23 @@ namespace Common.Data
         public static readonly int BuffHashKey = Animator.StringToHash("Buff");
         public static readonly int DeadHashKey = Animator.StringToHash("Dead");
         public static readonly int SlashHashKey = Animator.StringToHash("Slash");
+        public static readonly int MagicShotHashKey = Animator.StringToHash("MagicShot");
+        public static readonly int SlashSpinHashKey = Animator.StringToHash("SlashSpin");
+        public static readonly int DashAttackHashKey = Animator.StringToHash("DashAttack");
+        public static readonly int ImpactHashKey = Animator.StringToHash("Impact");
         public static readonly int PerformanceHashKey = Animator.StringToHash("Performance");
         public const string NormalKey = "Base Layer.Normal";
         public const string SpecialKey = "Base Layer.Special";
         public const string KickKey = "Base Layer.Kick";
         public const string JumpKey = "Base Layer.Jump";
         public const string DashKey = "Base Layer.Dash";
+        public const string DashAttackKey = "Base Layer.DashAttack";
+        public const string MagicShotKey = "Base Layer.MagicShot";
         public const string BuffKey = "Base Layer.Buff";
         public const string DeadKey = "Base Layer.Dead";
         public const string SlashKey = "Base Layer.Slash";
+        public const string SlashSpinKey = "Base Layer.SlashSpin";
+        public const string ImpactKey = "Base Layer.Impact";
         public const string SpeedhParameterName = "speedh";
         public const string SpeedvParameterName = "speedv";
         public const string NormalParameterName = "Normal";
@@ -67,24 +70,26 @@ namespace Common.Data
         public const string BuffParameterName = "Buff";
         public const string DeadParameterName = "Dead";
         public const string SlashParameterName = "Slash";
-        public const string GameID = "5089859";
-        public const string RewardAdsKey = "ca-app-pub-3759795642939239/2878540700";
-        public const string PlacementName = "testReward";
+        public const string ImpactParameterName = "Impact";
+        public const string DashAttackParameterName = "DashAttack";
+        public const string SlashSpinParameterName = "SlashSpin";
+        public const string MagicShotParameterName = "MagicShot";
         public const string CharacterSpritePath = "Sprites/Character/";
         public const string UserIconSpritePath = "Sprites/UserIcon/";
+        public const string SkillIconSpritePath = "Sprites/Skill/";
         public const string CharacterColorPath = "Sprites/CharacterColor/";
         public const string CharacterPrefabPath = "Prefabs/Character/";
-        public const string WeaponEffectPrefabPath = "Prefabs/WeaponEffect/Effect";
+        public const string PlayerCorePath = "Prefabs/Character/PlayerCore";
         public const string StagePrefabPath = "Prefabs/Stage/";
-        public const string SkillSpritePath = "Sprites/Skill/";
-        public const string WeaponSpritePath = "Sprites/Weapon/";
         public const string WeaponPrefabPath = "Prefabs/Weapon/";
-        public const string VirtualCurrencySpritePath = "Sprites/VirtualCurrency/";
         public const string RewardSpritePath = "Sprites/Reward/";
         public const string MissionActionPath = "Sprites/MissionAction/";
+        public static readonly string _SortWeaponDataPath = Application.persistentDataPath + "/weaponSortData.json";
+        public static readonly string _WeaponCautionDataPath = Application.persistentDataPath + "/weaponCautionData.json";
         public const string LevelText = "Lv.";
-        public const string TitleScene = "Title";
+        public const string MainScene = "Main";
         public const string BattleScene = "Battle";
+        public const string LoginScene = "Login";
         public const float CloseDuration = 0.5f;
         public const float OpenDuration = 1.0f;
         public const int ThreeMilliSecondsBeforeExplosion = 3000;
@@ -92,12 +97,53 @@ namespace Common.Data
         public const int MinCharacterLevel = 1;
         public const int MaxMissionCount = 20;
         public const int NetworkErrorCode = int.MaxValue;
-        public const int BattleTime = 180;
-        public const int DefaultWeaponId = 71;
+        public const int BattleTime = 300;
+        public const int DefaultWeaponId = 0;
         public const int NormalSkillReleaseLevel = 3;
         public const int SpecialSkillReleaseLevel = 5;
         public const int InvalidNumber = -9999;
-        public const int TeamMemberCount = 3;
+        public const int MaxTeamMember = 3;
+        public const string Item1000CoinKey = "1000_coin";
+        public const string Item5000CoinKey = "5000_coin";
+        public const string Item12000CoinKey = "12000_coin";
+        public const string Item20GemKey = "20_gem";
+        public const string Item100GemKey = "100_gem";
+        public const string Item200GemKey = "200_gem";
+
+        public static int GetObstaclesLayerMask()
+        {
+            return LayerMask.GetMask(EnemyLayer) | LayerMask.GetMask(ObstacleLayer) | LayerMask.GetMask(BombLayer);
+        }
+
+        public static int GetLayerAffectedByTheBlast()
+        {
+            return LayerMask.GetMask(ObstacleLayer);
+        }
+
+        public static int GetAnimatorHashKey(SkillActionType actionType)
+        {
+            return actionType switch
+            {
+                SkillActionType.AllBuff => BuffHashKey,
+                SkillActionType.HpBuff => BuffHashKey,
+                SkillActionType.AttackBuff => BuffHashKey,
+                SkillActionType.SpeedBuff => BuffHashKey,
+                SkillActionType.BombLimitBuff => BuffHashKey,
+                SkillActionType.FireRangeBuff => BuffHashKey,
+                SkillActionType.ResistanceBuff => BuffHashKey,
+                SkillActionType.DefenseBuff => BuffHashKey,
+                SkillActionType.Slash => SlashHashKey,
+                SkillActionType.Shot => MagicShotHashKey,
+                SkillActionType.Dash => DashHashKey,
+                SkillActionType.DashAttack => DashAttackHashKey,
+                SkillActionType.FlyingSlash => SlashHashKey,
+                SkillActionType.Impact => ImpactHashKey,
+                SkillActionType.SlashSpin => SlashSpinHashKey,
+                SkillActionType.Heal => BuffHashKey,
+                SkillActionType.ContinuousHeal => BuffHashKey,
+                _ => throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null)
+            };
+        }
 
         public static class Terms
         {
@@ -113,6 +159,11 @@ namespace Common.Data
             public const string PurchaseCharacterPopupExplanation = "200ジェムを消費して \nキャラクターを購入しますか？";
             public const string PurchaseCharacterPopupOk = "購入";
             public const string PurchaseCharacterPopupCancel = "キャンセル";
+            public const string AccountDeleteConfirmTitle = "アカウント削除の確認";
+            public const string AccountDeleteConfirmExplanation = "アカウントを削除しますか？\n\n削除後は復元できません。";
+            public const string AccountDeleteTitle = "アカウント削除";
+            public const string AccountDeleteExplanation = "アカウントを削除しました。\n\nタイトルへ戻ります。";
+            public const string ToTitle = "タイトルに戻る";
         }
 
         public static int GetWeaponSellPrice(int rare)
@@ -395,10 +446,20 @@ namespace Common.Data
         Frozen = 5,
         Confusion = 6,
         Sealed = 7,
-        DeadlyPoison = 8,
         GreatFire = 9,
         LifeSteal = 10,
         Holy = 11,
+        Apraxia = 12,
+        Burning = 13,
+        Charm = 14,
+        Curse = 15,
+        Darkness = 16,
+        Fear = 17,
+        HellFire = 18,
+        Miasma = 19,
+        ParalyzingThunder = 20,
+        SoakingWet = 21,
+        TimeStop = 22,
         None = 999
     }
 
@@ -421,6 +482,7 @@ namespace Common.Data
         Apraxia = 14,
         SoakingWet = 15,
         Burning = 16,
+        ParalyzingThunder = 17,
         All = 99,
         None = 999
     }
@@ -581,6 +643,15 @@ namespace Common.Data
         DefenseBuff = 79,
         Slash = 80,
         Shot = 83,
+        Resistance = 84,
+        Bomb = 85,
+        Dash = 86,
+        DashAttack = 87,
+        FlyingSlash = 88,
+        Impact = 89,
+        JumpSmash = 90,
+        SlashSpin = 91,
+        ThrowEdge = 92,
         None = 999
     }
 }

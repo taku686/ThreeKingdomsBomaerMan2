@@ -20,41 +20,6 @@ namespace Manager.NetworkManager
         private RewardedAd _rewardAd;
         private bool _isProcessing;
 
-        public async UniTask<bool> GetAdPlacementAsync(CancellationToken token)
-        {
-            if (_isProcessing)
-            {
-                _isProcessing = false;
-                return false;
-            }
-
-            _isProcessing = true;
-            _rewardAd = new RewardedAd(GameCommonData.RewardAdsKey);
-            AdRequest adRequest = new AdRequest.Builder().Build();
-            _rewardAd.LoadAd(adRequest);
-            await UniTask.WaitUntil(() => _rewardAd.IsLoaded(), PlayerLoopTiming.Update, token);
-            _rewardAd.Show();
-            _rewardAd.OnUserEarnedReward += HandleUserEarnedReward;
-            var request = new GetAdPlacementsRequest { AppId = GameCommonData.GameID };
-            var result = await PlayFabClientAPI.GetAdPlacementsAsync(request);
-
-            if (result.Error != null)
-            {
-                _isProcessing = false;
-                Debug.Log(result.Error.GenerateErrorReport());
-                return false;
-            }
-
-            var placement = result.Result.AdPlacements.Find(x => x.PlacementName == GameCommonData.PlacementName);
-            _placementId = placement.PlacementId;
-            _rewardId = placement.RewardId;
-            _placementViewsRemaining = placement.PlacementViewsRemaining;
-            _placementViewsRestMinutes = placement.PlacementViewsResetMinutes;
-
-            await UniTask.WaitUntil(() => _isProcessing == false, PlayerLoopTiming.Update, token);
-            return true;
-        }
-
         private async UniTask ReportAdActivityAsync(AdActivity activity)
         {
             var request = new ReportAdActivityRequest

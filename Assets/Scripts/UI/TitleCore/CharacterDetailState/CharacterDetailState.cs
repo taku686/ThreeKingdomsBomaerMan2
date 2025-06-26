@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Manager;
 using Manager.NetworkManager;
 using Repository;
 using UI.Common;
@@ -27,19 +28,19 @@ namespace UI.Title
             private PopupGenerateUseCase _PopupGenerateUseCase => Owner._popupGenerateUseCase;
             private SkillDetailViewModelUseCase _SkillDetailViewModelUseCase => Owner._skillDetailViewModelUseCase;
             private MissionManager _MissionManager => Owner._missionManager;
+            private DataAcrossStates _DataAcrossStates => Owner._dataAcrossStates;
             private StateMachine<TitleCore> _StateMachine => Owner._stateMachine;
-            private PlayFabUserDataManager _playFabUserDataManager;
-            private PlayFabShopManager _playFabShopManager;
-            private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
-            private CharacterSelectRepository _characterSelectRepository;
-            private UIAnimation _uiAnimation;
+            private PlayFabUserDataManager _PlayFabUserDataManager => Owner._playFabUserDataManager;
+            private PlayFabShopManager _PlayFabShopManager => Owner._playFabShopManager;
+            private PlayFabVirtualCurrencyManager _PlayFabVirtualCurrencyManager　=> Owner._playFabVirtualCurrencyManager;
+            private TemporaryCharacterRepository _TemporaryCharacterRepository　=> Owner._temporaryCharacterRepository;
+            private UIAnimation _UIAnimation　=> Owner._uiAnimation;
 
+            private bool _isTeamEdit;
             private CancellationTokenSource _cts;
             private int _candidateIndex;
             private CharacterData[] _sortedCharacters;
             private readonly Subject<int> _onChangeViewModel = new();
-            private const int SkillOne = 1;
-            private const int SkillTwo = 2;
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
@@ -53,14 +54,10 @@ namespace UI.Title
 
             private async UniTask Initialize()
             {
-                SetupCancellationToken();
-                _playFabUserDataManager = Owner._playFabUserDataManager;
-                _playFabShopManager = Owner._playFabShopManager;
-                _playFabVirtualCurrencyManager = Owner._playFabVirtualCurrencyManager;
-                _uiAnimation = Owner._uiAnimation;
-                _characterSelectRepository = Owner._characterSelectRepository;
                 await Owner.SwitchUiObject(State.CharacterDetail, true, () =>
                 {
+                    SetupCancellationToken();
+                    _isTeamEdit = _DataAcrossStates.GetCanEditTeam();
                     var userData = _UserDataRepository.GetUserData();
                     if (userData.Characters.Count <= 1)
                     {
@@ -82,7 +79,7 @@ namespace UI.Title
             private void Subscribe()
             {
                 _onChangeViewModel
-                    .Select(characterId => _CharacterDetailViewModelUseCase.InAsTask(characterId))
+                    .Select(characterId => _CharacterDetailViewModelUseCase.InAsTask(characterId, _isTeamEdit))
                     .Subscribe(viewModel => _View.ApplyViewModel(viewModel))
                     .AddTo(_cts.Token);
 
@@ -95,17 +92,19 @@ namespace UI.Title
 
                 _View._BackButton
                     .OnClickAsObservable()
-                    .Take(1)
                     .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._BackButton).ToObservable())
                     .Subscribe(_ => OnClickBackButton())
                     .AddTo(_cts.Token);
 
-                _View._SelectButton
+                _View._TeamEditButton
                     .OnClickAsObservable()
-                    .Take(1)
-                    .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._SelectButton).ToObservable())
-                    .SelectMany(_ => OnClickDecideButton().ToObservable())
-                    .Subscribe()
+                    .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._TeamEditButton).ToObservable())
+                    .SelectMany(_ => OnClickTeamEditButton().ToObservable())
+                    .Subscribe(_ =>
+                    {
+                        Owner.SetActiveBlockPanel(false);
+                        ChangeState();
+                    })
                     .AddTo(_cts.Token);
 
                 _View._LeftArrowButton.OnClickAsObservable()
@@ -146,7 +145,7 @@ namespace UI.Title
                     .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._InventoryButton).ToObservable())
                     .Subscribe(_ =>
                     {
-                        stateMachine.Dispatch((int)State.Inventory);
+                        stateMachine.Dispatch((int)State.Inventory, (int)State.CharacterDetail);
                         Owner.SetActiveBlockPanel(false);
                     })
                     .AddTo(_cts.Token);
@@ -160,8 +159,8 @@ namespace UI.Title
                 _View._OnClickNormalSkillButtonAsObservable
                     .SelectMany(button => Owner.OnClickScaleColorAnimation(button).ToObservable())
                     .WithLatestFrom(_onChangeViewModel, (_, onChange) => onChange)
-                    .Select(characterId => _CharacterDetailViewModelUseCase.InAsTask(characterId))
-                    .Select(viewModel => _SkillDetailViewModelUseCase.InAsTask(viewModel._WeaponMasterData.Id, SkillOne))
+                    .Select(characterId => _CharacterDetailViewModelUseCase.InAsTask(characterId, _isTeamEdit))
+                    .Select(viewModel => _SkillDetailViewModelUseCase.InAsTask(viewModel._CharacterData.NormalSkillId))
                     .SelectMany(viewModel => _PopupGenerateUseCase.GenerateSkillDetailPopup(viewModel))
                     .Subscribe(_ => { Owner.SetActiveBlockPanel(false); })
                     .AddTo(_cts.Token);
@@ -169,8 +168,18 @@ namespace UI.Title
                 _View._OnClickSpecialSkillButtonAsObservable
                     .SelectMany(button => Owner.OnClickScaleColorAnimation(button).ToObservable())
                     .WithLatestFrom(_onChangeViewModel, (_, onChange) => onChange)
-                    .Select(characterId => _CharacterDetailViewModelUseCase.InAsTask(characterId))
-                    .Select(viewModel => _SkillDetailViewModelUseCase.InAsTask(viewModel._WeaponMasterData.Id, SkillTwo))
+                    .Select(characterId => _CharacterDetailViewModelUseCase.InAsTask(characterId, _isTeamEdit))
+                    .Select(viewModel => _SkillDetailViewModelUseCase.InAsTask(viewModel._CharacterData.SpecialSkillId))
+                    .SelectMany(viewModel => _PopupGenerateUseCase.GenerateSkillDetailPopup(viewModel))
+                    .Subscribe(_ => { Owner.SetActiveBlockPanel(false); })
+                    .AddTo(_cts.Token);
+
+                _View._OnClickWeaponSkillButtonAsObservable
+                    .SelectMany(button => Owner.OnClickScaleColorAnimation(button).ToObservable())
+                    .WithLatestFrom(_onChangeViewModel, (_, onChange) => onChange)
+                    .Select(characterId => _CharacterDetailViewModelUseCase.InAsTask(characterId, _isTeamEdit))
+                    .Where(viewModel => viewModel._WeaponMasterData.NormalSkillMasterData != null)
+                    .Select(viewModel => _SkillDetailViewModelUseCase.InAsTask(viewModel._WeaponMasterData.NormalSkillMasterData.Id))
                     .SelectMany(viewModel => _PopupGenerateUseCase.GenerateSkillDetailPopup(viewModel))
                     .Subscribe(_ => { Owner.SetActiveBlockPanel(false); })
                     .AddTo(_cts.Token);
@@ -181,8 +190,8 @@ namespace UI.Title
 
             private void GenerateCharacter()
             {
-                var selectedCharacterId = _characterSelectRepository.GetSelectedCharacterId();
-                var orderType = _characterSelectRepository.GetOrderType();
+                var selectedCharacterId = _TemporaryCharacterRepository.GetSelectedCharacterId();
+                var orderType = _TemporaryCharacterRepository.GetOrderType();
                 _sortedCharacters = _SortCharactersUseCase.InAsTask(orderType).ToArray();
                 _candidateIndex = Array.FindIndex(_sortedCharacters, x => x.Id == selectedCharacterId);
                 var selectedCharacter = _sortedCharacters[_candidateIndex];
@@ -211,7 +220,7 @@ namespace UI.Title
                 }
 
                 var candidateCharacter = _sortedCharacters[_candidateIndex];
-                _characterSelectRepository.SetSelectedCharacterId(candidateCharacter.Id);
+                _TemporaryCharacterRepository.SetSelectedCharacterId(candidateCharacter.Id);
                 CreateCharacter(candidateCharacter);
                 _onChangeViewModel.OnNext(candidateCharacter.Id);
                 PlayBackAnimation();
@@ -234,39 +243,40 @@ namespace UI.Title
                 }
 
                 var candidateCharacter = _sortedCharacters[_candidateIndex];
-                _characterSelectRepository.SetSelectedCharacterId(candidateCharacter.Id);
+                _TemporaryCharacterRepository.SetSelectedCharacterId(candidateCharacter.Id);
                 CreateCharacter(candidateCharacter);
                 _onChangeViewModel.OnNext(candidateCharacter.Id);
                 PlayBackAnimation();
                 Owner.SetActiveBlockPanel(false);
             }
 
-            private async UniTask OnClickDecideButton()
+            private async UniTask OnClickTeamEditButton()
             {
+                if (!_isTeamEdit) return;
+
                 var userData = _UserDataRepository.GetUserData();
                 var characterId = _sortedCharacters[_candidateIndex].Id;
-                userData.EquippedCharacterId = characterId;
                 _UserDataRepository.SetTeamMember(characterId);
-                var result = await _playFabUserDataManager.TryUpdateUserDataAsync(userData);
-                if (result)
+                await _PlayFabUserDataManager.TryUpdateUserDataAsync(userData);
+            }
+
+            private void ChangeState()
+            {
+                var prevState = _StateMachine._PreviousState;
+                if (prevState != GameCommonData.InvalidNumber)
                 {
-                    var prevState = _StateMachine._PreviousState;
-                    if (prevState >= 0)
-                    {
-                        _StateMachine.Dispatch(prevState);
-                        _StateMachine._PreviousState = -1;
-                    }
-                    else
-                    {
-                        _StateMachine.Dispatch((int)State.Main);
-                    }
+                    _StateMachine.Dispatch(prevState);
+                }
+                else
+                {
+                    _StateMachine.Dispatch((int)State.TeamEdit, (int)State.CharacterDetail);
                 }
             }
 
             private async UniTask OnClickUpgrade()
             {
                 var selectedCharacterData = _sortedCharacters[_candidateIndex];
-                var coin = await _playFabVirtualCurrencyManager.GetCoin();
+                var coin = await _PlayFabVirtualCurrencyManager.GetCoin();
                 if (coin == GameCommonData.NetworkErrorCode)
                 {
                     Owner.SetActiveBlockPanel(false);
@@ -279,15 +289,14 @@ namespace UI.Title
                 var purchaseErrorView = _View._PurchaseErrorView;
                 if (coin < nextLevelData.NeedCoin)
                 {
-                    Debug.LogError("コイン足りない");
                     virtualCurrencyAddView.transform.localScale = Vector3.zero;
                     virtualCurrencyAddView.gameObject.SetActive(true);
-                    await _uiAnimation.Open(virtualCurrencyAddView.transform, GameCommonData.OpenDuration);
+                    await _UIAnimation.Open(virtualCurrencyAddView.transform, GameCommonData.OpenDuration);
                     Owner.SetActiveBlockPanel(false);
                     return;
                 }
 
-                var result = await _playFabShopManager.TryPurchaseLevelUpItem(nextLevelData.Level,
+                var result = await _PlayFabShopManager.TryPurchaseLevelUpItem(nextLevelData.Level,
                     GameCommonData.CoinKey, nextLevelData.NeedCoin, selectedCharacterData.Id, purchaseErrorView);
 
                 if (!result)
@@ -295,7 +304,7 @@ namespace UI.Title
                     Debug.LogError("購入処理エラー");
                     purchaseErrorView.transform.localScale = Vector3.zero;
                     purchaseErrorView.gameObject.SetActive(true);
-                    await _uiAnimation.Open(purchaseErrorView.transform, GameCommonData.OpenDuration);
+                    await _UIAnimation.Open(purchaseErrorView.transform, GameCommonData.OpenDuration);
                     Owner.SetActiveBlockPanel(false);
                     return;
                 }
@@ -311,13 +320,14 @@ namespace UI.Title
                     CreateCharacter(selectedCharacterData);
                 }
 
+                _View._LevelUpView.ShowLevelUpEffect().Forget();
                 Owner.SetActiveBlockPanel(false);
             }
 
             private async UniTask OnClickCloseVirtualCurrencyAddView()
             {
                 var virtualCurrencyAddView = _View._VirtualCurrencyAddPopup;
-                await _uiAnimation.Close(virtualCurrencyAddView.transform, GameCommonData.CloseDuration);
+                await _UIAnimation.Close(virtualCurrencyAddView.transform, GameCommonData.CloseDuration);
                 virtualCurrencyAddView.gameObject.SetActive(false);
                 Owner.SetActiveBlockPanel(false);
             }
@@ -331,7 +341,7 @@ namespace UI.Title
             private async UniTask OnClickClosePurchaseErrorView()
             {
                 var purchaseErrorView = _View._PurchaseErrorView;
-                await _uiAnimation.Close(purchaseErrorView.transform, GameCommonData.CloseDuration);
+                await _UIAnimation.Close(purchaseErrorView.transform, GameCommonData.CloseDuration);
                 purchaseErrorView.gameObject.SetActive(false);
             }
 
@@ -339,7 +349,7 @@ namespace UI.Title
             private async UniTask OnClickCloseErrorView()
             {
                 var errorView = _CommonView.errorView.transform;
-                await _uiAnimation.Close(errorView, GameCommonData.CloseDuration);
+                await _UIAnimation.Close(errorView, GameCommonData.CloseDuration);
                 errorView.gameObject.SetActive(false);
                 Owner.SetActiveBlockPanel(false);
             }
@@ -347,7 +357,7 @@ namespace UI.Title
 
             private void CreateCharacter(CharacterData characterData)
             {
-                _CharacterCreateUseCase.CreateCharacter(characterData.Id);
+                _CharacterCreateUseCase.CreateTeamMember(characterData.Id);
             }
 
             private void PlayBackAnimation()
@@ -380,67 +390,6 @@ namespace UI.Title
                 _cts.Dispose();
                 _cts = null;
             }
-
-            #region chatGpt
-
-/*private async UniTask OnClickSendQuestion()
-            {
-                View.QuestionView.sendButton.interactable = false;
-                CommonView.waitPopup.SetActive(true);
-                var question = View.QuestionView.questionField.text;
-                var commentTransform = View.QuestionView.commentObj.transform;
-                var commentText = View.QuestionView.commentText;
-                var errorText = CommonView.errorView.errorInfoText;
-                if (question.Length > GameCommonData.CharacterLimit)
-                {
-                    CommonView.waitPopup.SetActive(false);
-                    View.QuestionView.sendButton.interactable = true;
-                    await OpenErrorView();
-                    return;
-                }
-
-                var result = await playFabShopManager.TryPurchaseItem(GameCommonData.QuestionItemKey,
-                    GameCommonData.TicketKey, 1, errorText);
-                if (!result)
-                {
-                    CommonView.waitPopup.SetActive(false);
-                    View.QuestionView.sendButton.interactable = true;
-                    await OpenErrorView();
-                    return;
-                }
-
-                await chatGptManager.Request(question, commentText);
-                CommonView.waitPopup.SetActive(false);
-                await Owner.SetTicketText();
-                commentText.pageToDisplay = DefaultPage;
-                commentTransform.localScale = Vector3.zero;
-                commentTransform.gameObject.SetActive(true);
-                await uiAnimation.Open(commentTransform, GameCommonData.OpenDuration);
-                View.QuestionView.sendButton.interactable = true;
-            }*/
-
-            /*private void OnClickCloseComment()
-            {
-                var button = View.QuestionView.closeButton.gameObject;
-                Owner.uiAnimation.ClickScaleColor(button).OnComplete(() => UniTask.Void(async () =>
-                    {
-                        var comment = View.QuestionView.commentObj.transform;
-                        await uiAnimation.Close(comment, GameCommonData.CloseDuration);
-                        comment.gameObject.SetActive(false);
-                    }
-                )).SetLink(button);
-
-                 private async UniTask OpenErrorView()
-            {
-                var errorView = CommonView.errorView;
-                var errorViewObj = CommonView.errorView.gameObject;
-                errorView.transform.localScale = Vector3.zero;
-                errorViewObj.SetActive(true);
-                await uiAnimation.Open(errorView.transform, GameCommonData.OpenDuration);
-            }
-            }*/
-
-            #endregion
         }
     }
 }

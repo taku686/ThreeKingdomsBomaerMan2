@@ -27,11 +27,6 @@ namespace Manager.DataManager
             return id == GameCommonData.InvalidNumber ? null : value;
         }
 
-        public int GeCharacterCount()
-        {
-            return CharacterDatum.Count;
-        }
-
         public IReadOnlyCollection<CharacterData> GetAllCharacterData()
         {
             return CharacterDatum.Values;
@@ -40,11 +35,6 @@ namespace Manager.DataManager
         public int GetAllCharacterAmount()
         {
             return CharacterDatum.Count;
-        }
-
-        public CharacterData GetUserEquippedCharacterData()
-        {
-            return GetCharacterData(_userDataRepository.GetUserData().EquippedCharacterId);
         }
 
         public int GetRandomCharacterId()

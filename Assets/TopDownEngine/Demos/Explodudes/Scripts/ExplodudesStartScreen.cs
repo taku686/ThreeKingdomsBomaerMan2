@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace MoreMountains.TopDownEngine
+﻿namespace MoreMountains.TopDownEngine
 {
 	/// <summary>
 	/// This class handles the startscreen of the Explodudes demo scene

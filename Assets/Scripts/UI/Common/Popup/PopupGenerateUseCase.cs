@@ -1,5 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
+using UI.Common.Popup;
+using UI.Title;
 using UI.TitleCore.UserInfoState;
 using UniRx;
 using Zenject;
@@ -11,6 +13,10 @@ public class PopupGenerateUseCase : IDisposable
     [Inject] private ErrorPopup.Factory _errorPopupFactory;
     [Inject] private UserInfoPopup.Factory _userInfoPopupFactory;
     [Inject] private SkillDetailPopup.Factory _skillDetailPopupFactory;
+    [Inject] private AbnormalConditionPopup.Factory _abnormalConditionPopupFactory;
+    [Inject] private RewardPopup.Factory _rewardPopupFactory;
+    [Inject] private SettingPopup.Factory _settingPopupFactory;
+    [Inject] private CheckingPopup.Factory _checkingPopupFactory;
 
     public IObservable<bool> GenerateConfirmPopup
     (
@@ -52,6 +58,19 @@ public class PopupGenerateUseCase : IDisposable
         return errorPopup._OnClickButton;
     }
 
+    public IObservable<Unit> GenerateCheckingPopup
+    (
+        string explanation,
+        string title,
+        string buttonText
+    )
+    {
+        var viewModel = new SingleButtonPopup.ViewModel(title, explanation, buttonText);
+        var checkingPopup = _checkingPopupFactory.Create();
+        checkingPopup.Open(viewModel).Forget();
+        return checkingPopup._OnClickButton;
+    }
+
     public IObservable<Unit> GenerateUserInfoPopup(UserInfoPopup.ViewModel viewModel)
     {
         var userInfoPopup = _userInfoPopupFactory.Create();
@@ -64,6 +83,27 @@ public class PopupGenerateUseCase : IDisposable
         var skillDetailPopup = _skillDetailPopupFactory.Create();
         skillDetailPopup.Open(viewModel).Forget();
         return skillDetailPopup._OnClickButton;
+    }
+
+    public IObservable<Unit> GenerateAbnormalConditionPopup(AbnormalConditionPopup.ViewModel viewModel)
+    {
+        var abnormalConditionPopup = _abnormalConditionPopupFactory.Create();
+        abnormalConditionPopup.Open(viewModel).Forget();
+        return abnormalConditionPopup._OnClickButton;
+    }
+
+    public IObservable<Unit> GenerateRewardPopup(RewardPopup.ViewModel viewModel)
+    {
+        var rewardPopup = _rewardPopupFactory.Create();
+        rewardPopup.Open(viewModel).Forget();
+        return rewardPopup._OnClickButton;
+    }
+
+    public IObservable<Unit> GenerateSettingPopup(SettingPopup.ViewModel viewModel)
+    {
+        var settingPopup = _settingPopupFactory.Create();
+        settingPopup.Open(viewModel).Forget();
+        return settingPopup._OnClickButton;
     }
 
     public void Dispose()
