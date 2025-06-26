@@ -7,6 +7,7 @@ namespace Manager
         public bool _changingScene;
         private bool _canEditTeam;
         
+        
         public bool GetCanEditTeam()
         {
             return _canEditTeam;

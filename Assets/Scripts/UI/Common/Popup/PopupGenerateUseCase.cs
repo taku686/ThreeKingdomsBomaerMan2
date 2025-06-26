@@ -1,5 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
+using UI.Common.Popup;
 using UI.Title;
 using UI.TitleCore.UserInfoState;
 using UniRx;
@@ -15,6 +16,7 @@ public class PopupGenerateUseCase : IDisposable
     [Inject] private AbnormalConditionPopup.Factory _abnormalConditionPopupFactory;
     [Inject] private RewardPopup.Factory _rewardPopupFactory;
     [Inject] private SettingPopup.Factory _settingPopupFactory;
+    [Inject] private CheckingPopup.Factory _checkingPopupFactory;
 
     public IObservable<bool> GenerateConfirmPopup
     (
@@ -54,6 +56,19 @@ public class PopupGenerateUseCase : IDisposable
         var errorPopup = _errorPopupFactory.Create();
         errorPopup.Open(viewModel).Forget();
         return errorPopup._OnClickButton;
+    }
+
+    public IObservable<Unit> GenerateCheckingPopup
+    (
+        string explanation,
+        string title,
+        string buttonText
+    )
+    {
+        var viewModel = new SingleButtonPopup.ViewModel(title, explanation, buttonText);
+        var checkingPopup = _checkingPopupFactory.Create();
+        checkingPopup.Open(viewModel).Forget();
+        return checkingPopup._OnClickButton;
     }
 
     public IObservable<Unit> GenerateUserInfoPopup(UserInfoPopup.ViewModel viewModel)

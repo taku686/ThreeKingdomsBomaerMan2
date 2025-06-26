@@ -48,7 +48,7 @@ namespace UI.LoginCore
                 .AddTo(_cancellationTokenSource.Token);
         }
 
-        private async UniTask OnClickScaleColorAnimation(Button button)
+        private async UniTask OnClickScaleColorAnimation(Component button)
         {
             _blockPanel.SetActive(true);
             await _uiAnimation.ClickScaleColor(button.gameObject).ToUniTask();

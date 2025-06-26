@@ -89,6 +89,7 @@ namespace Common.Data
         public const string LevelText = "Lv.";
         public const string MainScene = "Main";
         public const string BattleScene = "Battle";
+        public const string LoginScene = "Login";
         public const float CloseDuration = 0.5f;
         public const float OpenDuration = 1.0f;
         public const int ThreeMilliSecondsBeforeExplosion = 3000;
@@ -158,6 +159,11 @@ namespace Common.Data
             public const string PurchaseCharacterPopupExplanation = "200ジェムを消費して \nキャラクターを購入しますか？";
             public const string PurchaseCharacterPopupOk = "購入";
             public const string PurchaseCharacterPopupCancel = "キャンセル";
+            public const string AccountDeleteConfirmTitle = "アカウント削除の確認";
+            public const string AccountDeleteConfirmExplanation = "アカウントを削除しますか？\n\n削除後は復元できません。";
+            public const string AccountDeleteTitle = "アカウント削除";
+            public const string AccountDeleteExplanation = "アカウントを削除しました。\n\nタイトルへ戻ります。";
+            public const string ToTitle = "タイトルに戻る";
         }
 
         public static int GetWeaponSellPrice(int rare)

@@ -1,10 +1,14 @@
 ﻿using System;
+using Common.Data;
 using Cysharp.Threading.Tasks;
 using Data;
+using Manager.NetworkManager;
+using MoreMountains.Tools;
 using UI.Common;
 using UI.Common.Popup;
 using UniRx;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Zenject;
 
@@ -20,6 +24,7 @@ namespace UI.Title
         [Inject] private UIAnimation _uiAnimation;
         [Inject] private PopupGenerateUseCase _popupGenerateUseCase;
         [Inject] private AbnormalConditionViewModelUseCase _abnormalConditionViewModelUseCase;
+        [Inject] private PlayFabUserDataManager _playFabUserDataManager;
 
         private Action<bool> _setActivePanelAction;
         public IObservable<Unit> _OnClickButton { get; private set; }
@@ -27,6 +32,7 @@ namespace UI.Title
         public async UniTask Open(ViewModel viewModel)
         {
             ApplyViewModel(viewModel);
+            Subscribe();
             _OnClickButton = _closeButton
                 .OnClickAsObservable()
                 .Take(1)
@@ -45,7 +51,42 @@ namespace UI.Title
         private void ApplyViewModel(ViewModel viewModel)
         {
             _bgmSlider.value = viewModel._SettingData._BgmVolume;
-            //_pushNotificationToggle.isOn = viewModel._SettingData._IsActivePushNotification;
+        }
+
+        private void Subscribe()
+        {
+            var confirmToDelete =
+                _deleteAccountButton
+                    .OnClickAsObservable()
+                    .SelectMany(_ => _popupGenerateUseCase.GenerateConfirmPopup
+                    (
+                        GameCommonData.Terms.AccountDeleteConfirmExplanation,
+                        GameCommonData.Terms.AccountDeleteConfirmTitle
+                    ))
+                    .Publish();
+
+            confirmToDelete
+                .Where(result => result)
+                .SelectMany(_ => DeleteAccountAsync().ToObservable())
+                .SelectMany(_ => _popupGenerateUseCase.GenerateCheckingPopup
+                (
+                    GameCommonData.Terms.AccountDeleteExplanation,
+                    GameCommonData.Terms.AccountDeleteTitle,
+                    GameCommonData.Terms.ToTitle
+                )).Subscribe(_ => { MMSceneLoadingManager.LoadScene(GameCommonData.LoginScene); })
+                .AddTo(gameObject);
+
+            confirmToDelete
+                .Where(result => !result)
+                .Subscribe()
+                .AddTo(gameObject);
+            
+            confirmToDelete.Connect();
+        }
+
+        private async UniTask<bool> DeleteAccountAsync()
+        {
+            return await _playFabUserDataManager.DeletePlayerDataAsync();
         }
 
 

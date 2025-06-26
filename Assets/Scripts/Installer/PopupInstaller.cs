@@ -1,4 +1,5 @@
 using Common.Data;
+using UI.Common.Popup;
 using UI.Title;
 using UI.TitleCore.UserInfoState;
 using UnityEngine;
@@ -17,6 +18,7 @@ public class PopupInstaller : MonoInstaller<PopupInstaller>
     [SerializeField] private GameObject _abnormalConditionPopupPrefab;
     [SerializeField] private GameObject _rewardPopupPrefab;
     [SerializeField] private GameObject _settingsPopupPrefab;
+    [SerializeField] private GameObject _checkingPopupPrefab;
 
     public override void InstallBindings()
     {
@@ -62,6 +64,11 @@ public class PopupInstaller : MonoInstaller<PopupInstaller>
 
         Container.BindFactory<SettingPopup, SettingPopup.Factory>()
             .FromComponentInNewPrefab(_settingsPopupPrefab)
+            .UnderTransform(_popupParent)
+            .AsTransient();
+        
+        Container.BindFactory<CheckingPopup, CheckingPopup.Factory>()
+            .FromComponentInNewPrefab(_checkingPopupPrefab)
             .UnderTransform(_popupParent)
             .AsTransient();
     }
