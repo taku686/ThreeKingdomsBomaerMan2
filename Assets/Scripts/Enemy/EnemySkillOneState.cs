@@ -4,7 +4,7 @@ namespace Enemy
 {
     public partial class EnemyCore
     {
-        public class EnemySkillOneState : State
+        public class EnemyNormalSkillState : State
         {
         }
     }

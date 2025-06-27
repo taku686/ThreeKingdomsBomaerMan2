@@ -1,6 +1,7 @@
 using AttributeAttack;
 using Bomb;
 using Common.Data;
+using Enemy;
 using Manager.BattleManager;
 using Manager.DataManager;
 using Player.Common;
@@ -46,6 +47,7 @@ namespace Common.Installer
             Container.Bind<AnimatorControllerRepository>().FromComponentInNewPrefab(_animatorControllerRepositoryGameObject).AsSingle();
             Container.Bind<SkillEffectActivateUseCase>().FromComponentOn(_skillEffectActivateGameObject).AsCached();
 
+            InstallEnemyCore();
             InstallSkill();
             InstallSlashSKill();
             InstallFlyingSlashSkill();
@@ -55,6 +57,12 @@ namespace Common.Installer
             InstallCrushImpact();
             InstallSlashSpin();
             InstallMagicShot();
+        }
+
+        private void InstallEnemyCore()
+        {
+            Container.BindFactory<GameObject, EnemySearchPlayer, EnemySearchPlayer.Factory>().AsCached();
+            Container.Bind<EnemySkillTimer>().AsCached();
         }
 
         private void InstallSkill()

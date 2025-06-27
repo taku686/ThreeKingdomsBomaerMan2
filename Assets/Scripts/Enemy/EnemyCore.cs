@@ -1,16 +1,26 @@
+using System.Threading;
 using Bomb;
+using Common.Data;
+using Cysharp.Threading.Tasks;
 using Manager.DataManager;
+using Manager.NetworkManager;
+using MoreMountains.Tools;
 using Pathfinding;
 using Photon.Pun;
 using Player.Common;
+using Repository;
+using UniRx;
+using UniRx.Triggers;
 using UnityEngine;
-using Zenject;
 
 namespace Enemy
 {
     public partial class EnemyCore : MonoBehaviourPunCallbacks
     {
-        [Inject] private CharacterMasterDataRepository characterMasterDataRepository;
+        private EnemySearchPlayer.Factory _searchPlayerFactory;
+        private EnemySkillTimer _enemySkillTimer;
+        private PhotonNetworkManager _photonNetworkManager;
+        private SkillMasterDataRepository _skillMasterDataRepository;
         [SerializeField] private BombProvider bombProvider;
         [SerializeField] private MapManager mapManager;
 
@@ -19,19 +29,22 @@ namespace Enemy
         private PutBomb _putBomb;
         private Seeker _seeker;
         private AILerp _aiLerp;
-        private SearchPlayer _searchPlayer;
+        private EnemySearchPlayer _enemySearchPlayer;
 
         private Transform _target;
         private BoxCollider _boxCollider;
         private StateMachine<EnemyCore> _stateMachine;
+        private CancellationTokenSource _cts;
+        private int _playerKey;
 
         private enum EnemyState
         {
             Idle,
             Move,
             Escape,
-            Skill1,
-            Skill2,
+            NormalSkill,
+            SpecialSkill,
+            WeaponSkill,
             PutBomb,
             Dead
         }
@@ -41,18 +54,32 @@ namespace Enemy
             _stateMachine?.Update();
         }
 
-        public void Initialize()
+        public void Initialize
+        (
+            EnemySearchPlayer.Factory searchPlayerFactory,
+            EnemySkillTimer enemySkillTimer,
+            PhotonNetworkManager photonNetworkManager,
+            SkillMasterDataRepository skillMasterDataRepository
+        )
         {
+            _cts = new CancellationTokenSource();
+            _searchPlayerFactory = searchPlayerFactory;
+            _enemySkillTimer = enemySkillTimer;
+            _photonNetworkManager = photonNetworkManager;
+            _skillMasterDataRepository = skillMasterDataRepository;
+
             InitializeState();
             InitializeComponent();
+            Subscribe();
         }
 
         private void InitializeComponent()
         {
             _seeker = GetComponent<Seeker>();
             _aiLerp = GetComponent<AILerp>();
-            _searchPlayer = gameObject.AddComponent<SearchPlayer>();
             _photonView = GetComponent<PhotonView>();
+            _enemySearchPlayer = _searchPlayerFactory.Create(gameObject);
+            _playerKey = PhotonNetworkManager.GetPlayerKey(photonView.InstantiationId, 0);
         }
 
         private void InitializeState()
@@ -65,11 +92,80 @@ namespace Enemy
             _stateMachine.AddTransition<EnemyMoveState, EnemyPutBombState>((int)EnemyState.PutBomb);
             _stateMachine.AddTransition<EnemyPutBombState, EnemyEscapeState>((int)EnemyState.Escape);
             _stateMachine.AddTransition<EnemyEscapeState, EnemyEscapeState>((int)EnemyState.Escape);
+            _stateMachine.AddTransition<EnemyMoveState, EnemyNormalSkillState>((int)EnemyState.NormalSkill);
+            _stateMachine.AddTransition<EnemyMoveState, EnemySpecialSkillState>((int)EnemyState.SpecialSkill);
+            _stateMachine.AddTransition<EnemyMoveState, EnemyWeaponSkillState>((int)EnemyState.WeaponSkill);
+        }
+
+        private void Subscribe()
+        {
+            SkillSubscribe();
+            EventSubscribe();
+        }
+
+        private void SkillSubscribe()
+        {
+            var weaponData = _photonNetworkManager.GetWeaponData(_playerKey);
+            var skillId = weaponData.NormalSkillId;
+            var skillData = _skillMasterDataRepository.GetSkillData(skillId);
+            if (skillData == null)
+            {
+                return;
+            }
+
+            if (Mathf.Approximately(skillData.Interval, GameCommonData.InvalidNumber))
+            {
+                return;
+            }
+
+            if (Mathf.Approximately(skillData.Range, GameCommonData.InvalidNumber))
+            {
+                _enemySkillTimer
+                    .TimerSubscribe(skillData)
+                    .Where(activate => activate)
+                    .Where(_ => IsStateEnableToSkill(_stateMachine._CurrentState))
+                    .Subscribe(_ => { _stateMachine.Dispatch((int)EnemyState.WeaponSkill); })
+                    .AddTo(_cts.Token);
+            }
+            else
+            {
+                _enemySkillTimer
+                    .TimerSubscribe(skillData)
+                    .Where(activate => activate)
+                    .SelectMany(_ => _enemySearchPlayer.ColliderObservable(skillData.Range, _cts.Token))
+                    .Where(_ => IsStateEnableToSkill(_stateMachine._CurrentState))
+                    .Subscribe(target =>
+                    {
+                        transform.LookAt(target.transform);
+                        _stateMachine.Dispatch((int)EnemyState.WeaponSkill);
+                    })
+                    .AddTo(_cts.Token);
+            }
+        }
+
+        private bool IsStateEnableToSkill(StateMachine<EnemyCore>.State currentState)
+        {
+            return currentState is EnemyIdleState or EnemyMoveState;
+        }
+
+        private void EventSubscribe()
+        {
+            gameObject
+                .UpdateAsObservable()
+                .Subscribe(_ => _stateMachine.Update())
+                .AddTo(_cts.Token);
         }
 
         private bool IsMine(int instantiatedId)
         {
             return _photonView != null && _photonView.InstantiationId == instantiatedId;
+        }
+
+        private void OnDestroy()
+        {
+            _cts?.Cancel();
+            _cts?.Dispose();
+            _cts = null;
         }
     }
 }

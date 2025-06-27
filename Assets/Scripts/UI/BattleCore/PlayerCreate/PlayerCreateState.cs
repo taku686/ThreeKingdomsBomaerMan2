@@ -23,37 +23,44 @@ namespace Manager.BattleManager
     {
         public class PlayerCreateState : StateMachine<BattleCore>.State
         {
+            //Manager
             private PhotonNetworkManager _PhotonNetworkManager => Owner._photonNetworkManager;
-            private PlayerGeneratorUseCase _PlayerGeneratorUseCase => Owner._playerGeneratorUseCase;
             private MapManager _MapManager => Owner.mapManager;
             private CameraManager _CameraManager => Owner.cameraManager;
-            private StateMachine<BattleCore> _StateMachineClone => Owner._stateMachine;
-            private BombProvider _BombProvider => Owner._bombProvider;
-            private SkillEffectActivateUseCase _SkillEffectActivateUseCase => Owner._skillEffectActivateUseCase;
-            private List<PlayerStatusUI> _PlayerStatusUiList => Owner._playerStatusUiList;
-            private CharacterMasterDataRepository _CharacterMasterDataRepository => Owner._characterMasterDataRepository;
-            private WeaponMasterDataRepository _WeaponMasterDataRepository => Owner._weaponMasterDataRepository;
-            private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
             private ActiveSkillManager _ActiveSkillManager => Owner._activeSkillManager;
+
             private PassiveSkillManager _PassiveSkillManager => Owner._passiveSkillManager;
 
-            private UnderAbnormalConditionsBySkillUseCase _UnderAbnormalConditionsBySkillUseCase =>
-                Owner._underAbnormalConditionsBySkillUseCase;
+            //UseCase
+            private PlayerGeneratorUseCase _PlayerGeneratorUseCase => Owner._playerGeneratorUseCase;
+            private SkillEffectActivateUseCase _SkillEffectActivateUseCase => Owner._skillEffectActivateUseCase;
+            private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
+            private UnderAbnormalConditionsBySkillUseCase _UnderAbnormalConditionsBySkillUseCase => Owner._underAbnormalConditionsBySkillUseCase;
 
             private SetupAnimatorUseCase _SetupAnimatorUseCase => Owner._setupAnimatorUseCase;
 
-            private TranslateStatusInBattleUseCase.Factory _TranslateStatusInBattleUseCaseFactory =>
-                Owner._translateStatusInBattleUseCaseFactory;
-
-            private GameObject _ArrowIndicatorPrefab => Owner._arrowSkillIndicatorPrefab;
-            private GameObject _CircleIndicatorPrefab => Owner._circleSkillIndicatorPrefab;
+            //Repository
+            private CharacterMasterDataRepository _CharacterMasterDataRepository => Owner._characterMasterDataRepository;
+            private WeaponMasterDataRepository _WeaponMasterDataRepository => Owner._weaponMasterDataRepository;
             private StartPointsRepository _StartPointsRepository => Owner._startPointsRepository;
 
-            private AbnormalConditionEffect _AbnormalConditionEffect =>
-                Owner._abnormalConditionEffect;
+            private SkillMasterDataRepository _SkillMasterDataRepository => Owner._skillMasterDataRepository;
+
+            //Factory
+            private EnemySearchPlayer.Factory _EnemySearchPlayerFactory => Owner._enemySearchPlayerFactory;
+
+            private TranslateStatusInBattleUseCase.Factory _TranslateStatusInBattleUseCaseFactory => Owner._translateStatusInBattleUseCaseFactory;
+
+            //Others
+            private List<PlayerStatusUI> _PlayerStatusUiList => Owner._playerStatusUiList;
+            private GameObject _ArrowIndicatorPrefab => Owner._arrowSkillIndicatorPrefab;
+            private GameObject _CircleIndicatorPrefab => Owner._circleSkillIndicatorPrefab;
+            private AbnormalConditionEffect _AbnormalConditionEffect => Owner._abnormalConditionEffect;
+            private EnemySkillTimer _EnemySkillTimer => Owner._enemySkillTimer;
+            private BombProvider _BombProvider => Owner._bombProvider;
+            private StateMachine<BattleCore> _StateMachineClone => Owner._stateMachine;
 
             private PhotonView _photonView;
-
             private static readonly Vector3 ColliderCenter = new(0, 0.6f, 0);
             private static readonly Vector3 ColliderSize = new(0.6f, 0.6f, 0.6f);
             private const float MaxRate = 1f;
@@ -131,8 +138,7 @@ namespace Manager.BattleManager
                     var photonView = playerCore.GetComponent<PhotonView>();
                     var instantiationId = photonView.InstantiationId;
                     var playerKey = PhotonNetworkManager.GetPlayerKey(instantiationId, 0);
-                    var playerObj = _PlayerGeneratorUseCase.InstantiatePlayerObj(characterData, playerCore.transform,
-                        weaponData.Id, true);
+                    var playerObj = _PlayerGeneratorUseCase.InstantiatePlayerObj(characterData, playerCore.transform, weaponData.Id, true);
                     _CharacterCreateUseCase.CreateWeapon(playerObj, weaponData, true, true);
                     var characterDic = new Dictionary<int, int> { { playerKey, characterId } };
                     var weaponDic = new Dictionary<int, int> { { playerKey, weaponId } };
@@ -262,7 +268,7 @@ namespace Manager.BattleManager
                 {
                     return;
                 }
-                
+
                 _CameraManager.Initialize(player.transform);
                 player.layer = LayerMask.NameToLayer(GameCommonData.PlayerLayer);
                 var playerCore = player.AddComponent<PlayerCore>();
@@ -283,11 +289,17 @@ namespace Manager.BattleManager
                 );
             }
 
-            private static void InitializeCpu(GameObject playerCore, int creatorActorNr)
+            private void InitializeCpu(GameObject playerCore, int creatorActorNr)
             {
                 if (!PhotonNetworkManager.IsCpu(creatorActorNr)) return;
                 var enemyCore = playerCore.AddComponent<EnemyCore>();
-                enemyCore.Initialize();
+                enemyCore.Initialize
+                (
+                    _EnemySearchPlayerFactory,
+                    _EnemySkillTimer,
+                    _PhotonNetworkManager,
+                    _SkillMasterDataRepository
+                );
                 enemyCore.enabled = PhotonNetwork.IsMasterClient;
             }
 

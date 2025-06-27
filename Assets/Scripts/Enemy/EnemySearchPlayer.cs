@@ -10,25 +10,31 @@ using Zenject;
 
 namespace Enemy
 {
-    public class SearchPlayer : IDisposable
+    public class EnemySearchPlayer : IDisposable
     {
         private readonly SphereCollider _searchCollider;
         private readonly ReactiveCollection<GameObject> _playerList = new();
 
         [Inject]
-        public SearchPlayer(GameObject transform)
+        public EnemySearchPlayer(GameObject transform)
         {
             _searchCollider = transform.AddComponent<SphereCollider>();
             _searchCollider.isTrigger = true;
             _searchCollider.enabled = false;
         }
 
-        public IObservable<GameObject> SearchObservable(float radius, CancellationToken token)
+        public IObservable<GameObject> ColliderObservable(float radius, CancellationToken token)
         {
-            SetupCollider(radius);
+            SetupCollider(radius, true);
 
             _searchCollider
                 .OnCollisionEnterAsObservable()
+                .Where(other => other.gameObject.CompareTag(GameCommonData.PlayerTag))
+                .Subscribe(other => { _playerList.Add(other.gameObject); })
+                .AddTo(token);
+
+            _searchCollider
+                .OnCollisionStayAsObservable()
                 .Where(other => other.gameObject.CompareTag(GameCommonData.PlayerTag))
                 .Subscribe(other => { _playerList.Add(other.gameObject); })
                 .AddTo(token);
@@ -42,12 +48,13 @@ namespace Enemy
             return _playerList
                 .ObserveAdd()
                 .Do(player => Debug.Log($"Player found: {player.Value.name}"))
+                .Do(_ => SetupCollider(0, false))
                 .Select(player => player.Value);
         }
 
-        private void SetupCollider(float radius)
+        private void SetupCollider(float radius, bool enable)
         {
-            _searchCollider.enabled = true;
+            _searchCollider.enabled = enable;
             _searchCollider.radius = radius;
         }
 
@@ -56,7 +63,7 @@ namespace Enemy
             _playerList?.Dispose();
         }
 
-        public class Factory : PlaceholderFactory<GameObject, SearchPlayer>
+        public class Factory : PlaceholderFactory<GameObject, EnemySearchPlayer>
         {
         }
     }

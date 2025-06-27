@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Bomb;
 using Common.Data;
+using Enemy;
 using Manager.BattleManager.Camera;
 using Manager.BattleManager.Environment;
 using Manager.DataManager;
@@ -50,12 +51,16 @@ namespace Manager.BattleManager
         [SerializeField] private CameraManager cameraManager;
         [SerializeField] private StageManager stageManager;
         [SerializeField] private MapManager mapManager;
+        
+        //Factory
+        [Inject] private EnemySearchPlayer.Factory _enemySearchPlayerFactory;
 
         //UI
         [SerializeField] private BattleViewBase[] _views;
 
         //Other
         [Inject] private BombProvider _bombProvider;
+        [Inject] private EnemySkillTimer _enemySkillTimer;
         [SerializeField] private Transform playerUIParent;
         [SerializeField] private GameObject playerUI;
         [SerializeField] private GameObject _arrowSkillIndicatorPrefab;

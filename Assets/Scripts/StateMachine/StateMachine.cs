@@ -127,7 +127,7 @@ public class StateMachine<TOwner>
     /// <summary>
     /// 現在のステート
     /// </summary>
-    private State _CurrentState { get; set; }
+    public State _CurrentState { get; set; }
 
     public int _PreviousState { get; set; }
 
