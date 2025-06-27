@@ -8,10 +8,10 @@ namespace Enemy
     {
         public class EnemyMoveState : State
         {
-            private Seeker _seeker;
-            private AILerp _aiLerp;
-            private Transform _target;
-            private StateMachine<EnemyCore> _stateMachine;
+            private Seeker _Seeker => Owner._seeker;
+            private AILerp _AILerp => Owner._aiLerp;
+            private Transform _Target => Owner._target;
+            private StateMachine<EnemyCore> _StateMachine => Owner._stateMachine;
 
             protected override void OnEnter(State prevState)
             {
@@ -19,44 +19,41 @@ namespace Enemy
                 Initialize();
             }
 
+            private void Initialize()
+            {
+                Move();
+            }
+
             protected override void OnUpdate()
             {
-                if (_aiLerp == null)
+                if (_AILerp == null)
                 {
                     return;
                 }
 
-                if (_aiLerp.reachedEndOfPath)
+                if (_AILerp.reachedEndOfPath)
                 {
                     Debug.Log("行き止まり");
-                    _stateMachine.Dispatch((int)EnemyState.PutBomb);
+                    _StateMachine.Dispatch((int)EnemyState.PutBomb);
                 }
 
-                if (_aiLerp.reachedDestination)
+                if (_AILerp.reachedDestination)
                 {
                     Debug.Log("目的地に到達");
-                    _stateMachine.Dispatch((int)EnemyState.PutBomb);
+                    _StateMachine.Dispatch((int)EnemyState.PutBomb);
                 }
             }
 
-            private void Initialize()
-            {
-                _seeker = Owner._seeker;
-                _aiLerp = Owner._aiLerp;
-                _target = Owner._target;
-                _stateMachine = Owner._stateMachine;
-                Move();
-            }
 
             private void Move()
             {
-                if (_seeker == null || _target == null)
+                if (_Seeker == null || _Target == null)
                 {
                     return;
                 }
 
                 Debug.Log("パスセット");
-                _seeker.StartPath(Owner.transform.position, _target.position, OnPathComplete);
+                _Seeker.StartPath(Owner.transform.position, _Target.position, OnPathComplete);
             }
 
             private void OnPathComplete(Path path)

@@ -68,6 +68,7 @@ namespace Player.Common
             WeaponSkill
         }
 
+        #region Initialize
 
         public void Initialize
         (
@@ -150,11 +151,33 @@ namespace Player.Common
             _stateMachine.AddTransition<PlayerIdleState, PlayerStateDash>((int)PLayerState.Dash);
         }
 
+        #endregion
+
+        #region Subscribe
+
         private void Subscribe()
         {
+            EventSubscribe();
             ChangeMemberSubscribe();
             PlayerStatusSubscribe();
             PhotonNetWorkManagerSubscribe();
+        }
+
+        private void EventSubscribe()
+        {
+            gameObject
+                .UpdateAsObservable()
+                .Subscribe(_ =>
+                {
+                    _stateMachine.Update();
+                    OnInvincible();
+                })
+                .AddTo(_cancellationToken);
+
+            gameObject
+                .OnTriggerEnterAsObservable()
+                .Subscribe(other => { OnDamage(other.gameObject).Forget(); })
+                .AddTo(_cancellationToken);
         }
 
         private void ChangeMemberSubscribe()
@@ -232,6 +255,8 @@ namespace Player.Common
                 .AddTo(_cancellationToken);
         }
 
+        #endregion
+
         private void SetupTranslateStatusInBattleUseCase(int playerKey = GameCommonData.InvalidNumber)
         {
             if (playerKey == GameCommonData.InvalidNumber)
@@ -271,23 +296,6 @@ namespace Player.Common
                 PhotonNetwork.Destroy(weapon.gameObject);
             }
         }
-
-        private void Update()
-        {
-            if (!photonView.IsMine)
-            {
-                return;
-            }
-
-            _stateMachine.Update();
-            OnInvincible();
-        }
-
-        private void OnTriggerEnter(Collider other)
-        {
-            OnDamage(other.gameObject).Forget();
-        }
-
 
         private async void OnInvincible()
         {

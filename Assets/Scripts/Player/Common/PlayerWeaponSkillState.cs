@@ -17,7 +17,6 @@ namespace Player.Common
                 _SkillMasterData = weaponData.NormalSkillMasterData;
                 PlayBackAnimation(_SkillMasterData);
                 var playerIndex = _PlayerConditionInfo.GetPlayerIndex();
-                Debug.Log(playerIndex + " " + _SkillMasterData.Id);
                 var dic = new Dictionary<int, int> { { playerIndex, _SkillMasterData.Id } };
                 PhotonNetwork.LocalPlayer.SetSkillData(dic);
             }

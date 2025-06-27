@@ -202,7 +202,6 @@ namespace Manager.NetworkManager
                 foreach (var keyValue in dic)
                 {
                     if (playerConditionInfo.GetPlayerIndex() != keyValue.Key) continue;
-                    Debug.Log(playerConditionInfo.GetPlayerIndex());
                     var skillData = _skillMasterDataRepository.GetSkillData(keyValue.Value);
                     _activateSkillSubject.OnNext((playerConditionInfo.GetPlayerIndex(), skillData));
                 }

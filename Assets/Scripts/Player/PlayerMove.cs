@@ -52,13 +52,7 @@ namespace Player.Common
                 _rigidbody.velocity = Vector3.zero;
                 return;
             }
-
-            {
-                _rigidbody.velocity = Vector3.zero;
-                return;
-            }
-
-
+            
             if (IsObstacleOnLine(_playerTransform.position, inputValue))
             {
                 transform.localRotation = Quaternion.LookRotation(inputValue);

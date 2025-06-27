@@ -1,5 +1,6 @@
 ﻿using Common.Data;
 using Pathfinding;
+using Photon.Pun;
 using UnityEngine;
 using UnityEngine.TextCore.Text;
 using State = StateMachine<Enemy.EnemyCore>.State;
@@ -10,48 +11,55 @@ namespace Enemy
     {
         public class EnemyIdleState : State
         {
-            private StateMachine<EnemyCore> _stateMachine;
+            private StateMachine<EnemyCore> _StateMachine => Owner._stateMachine;
             private bool _isDecideTarget;
 
             protected override void OnEnter(State prevState)
             {
-                Initialize();
+                _isDecideTarget = false;
             }
 
             protected override void OnUpdate()
             {
-                DecideTarget();
-                if (_isDecideTarget)
+                if (DecideTarget())
                 {
-                    _isDecideTarget = false;
-                    _stateMachine.Dispatch((int)EnemyState.Move);
+                    _StateMachine.Dispatch((int)EnemyState.Move);
                 }
             }
 
-            private void Initialize()
-            {
-                _stateMachine = Owner._stateMachine;
-            }
 
-
-            private void DecideTarget()
+            private bool DecideTarget()
             {
                 if (_isDecideTarget)
                 {
-                    return;
+                    return true;
                 }
 
                 var targets = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
                 if (targets == null)
                 {
-                    return;
+                    return false;
                 }
 
                 Debug.Log("ターゲット発見");
-                var targetIndex = Random.Range(0, targets.Length);
-                var target = targets[targetIndex];
-                Owner._target = target.transform;
-                _isDecideTarget = true;
+
+                for (var index = 0; index < targets.Length; index++)
+                {
+                    var t = targets[index];
+                    var targetIndex = Random.Range(0, targets.Length);
+                    var target = targets[targetIndex];
+                    var photonView = target.GetComponent<PhotonView>();
+                    var photonTransformView = target.GetComponent<PhotonTransformView>();
+                    if (photonTransformView == null || Owner.IsMine(photonView.InstantiationId))
+                    {
+                        continue;
+                    }
+
+                    Owner._target = target.transform;
+                    return true;
+                }
+
+                return false;
             }
         }
     }

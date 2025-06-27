@@ -180,10 +180,6 @@ namespace Manager.BattleManager
                 AddBoxCollider(playerCore);
                 AddRigidbody(playerCore);
                 AddPlayerSkill(playerCore);
-
-                if (!PhotonNetworkManager.IsCpu(creatorNr)) return;
-                var enemyCore = playerCore.AddComponent<EnemyCore>();
-                enemyCore.enabled = PhotonNetwork.IsMasterClient;
             }
 
             #region GetDatum
@@ -260,11 +256,13 @@ namespace Manager.BattleManager
                     out var photonView
                 );
 
+                InitializeCpu(player, photonView.CreatorActorNr);
+
                 if (!IsMine(photonView))
                 {
                     return;
                 }
-
+                
                 _CameraManager.Initialize(player.transform);
                 player.layer = LayerMask.NameToLayer(GameCommonData.PlayerLayer);
                 var playerCore = player.AddComponent<PlayerCore>();
@@ -283,6 +281,14 @@ namespace Manager.BattleManager
                     _AbnormalConditionEffect,
                     hpKey
                 );
+            }
+
+            private static void InitializeCpu(GameObject playerCore, int creatorActorNr)
+            {
+                if (!PhotonNetworkManager.IsCpu(creatorActorNr)) return;
+                var enemyCore = playerCore.AddComponent<EnemyCore>();
+                enemyCore.Initialize();
+                enemyCore.enabled = PhotonNetwork.IsMasterClient;
             }
 
             private void InstantiateSkillIndicator(Transform playerTransform)
@@ -319,7 +325,7 @@ namespace Manager.BattleManager
                 _PlayerStatusUiList.Add(playerStatusUI);
             }
 
-            private void AddBoxCollider(GameObject player)
+            private static void AddBoxCollider(GameObject player)
             {
                 var collider = player.AddComponent<BoxCollider>();
                 collider.isTrigger = false;
