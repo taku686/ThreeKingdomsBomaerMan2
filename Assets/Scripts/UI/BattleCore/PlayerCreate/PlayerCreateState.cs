@@ -44,8 +44,6 @@ namespace Manager.BattleManager
             private WeaponMasterDataRepository _WeaponMasterDataRepository => Owner._weaponMasterDataRepository;
             private StartPointsRepository _StartPointsRepository => Owner._startPointsRepository;
 
-            private SkillMasterDataRepository _SkillMasterDataRepository => Owner._skillMasterDataRepository;
-
             //Factory
             private EnemySearchPlayer.Factory _EnemySearchPlayerFactory => Owner._enemySearchPlayerFactory;
 
@@ -130,9 +128,10 @@ namespace Manager.BattleManager
                     var masterActorNr = PhotonNetwork.MasterClient.ActorNumber;
                     var cpuActorNr = PhotonNetwork.CurrentRoom.PlayerCount + i;
                     var characterId = _CharacterMasterDataRepository.GetRandomCharacterId();
-                    var weaponId = _WeaponMasterDataRepository.GetWeaponRandomWeaponId();
+                    //todo review later
+                    //var weaponId = _WeaponMasterDataRepository.GetWeaponRandomWeaponId();
                     var characterData = _CharacterMasterDataRepository.GetCharacterData(characterId);
-                    var weaponData = _WeaponMasterDataRepository.GetWeaponData(weaponId);
+                    var weaponData = _WeaponMasterDataRepository.GetWeaponData(148);
                     var spawnPoint = _StartPointsRepository.GetSpawnPoint(cpuActorNr);
                     var playerCore = _PlayerGeneratorUseCase.InstantiatePlayerCore(true, spawnPoint);
                     var photonView = playerCore.GetComponent<PhotonView>();
@@ -141,7 +140,7 @@ namespace Manager.BattleManager
                     var playerObj = _PlayerGeneratorUseCase.InstantiatePlayerObj(characterData, playerCore.transform, weaponData.Id, true);
                     _CharacterCreateUseCase.CreateWeapon(playerObj, weaponData, true, true);
                     var characterDic = new Dictionary<int, int> { { playerKey, characterId } };
-                    var weaponDic = new Dictionary<int, int> { { playerKey, weaponId } };
+                    var weaponDic = new Dictionary<int, int> { { playerKey, 148 } };
                     var levelDic = new Dictionary<int, int> { { playerKey, GameCommonData.MaxCharacterLevel } };
 
                     PhotonNetwork.LocalPlayer.SetCharacterId(characterDic);
@@ -161,7 +160,6 @@ namespace Manager.BattleManager
             {
                 photonView = playerCore.GetComponent<PhotonView>();
                 var instantiationId = photonView.InstantiationId;
-                var creatorNr = photonView.CreatorActorNr;
                 var characterDatum = GetCharacterDatum(instantiationId);
                 var weaponDatum = GetWeaponDatum(instantiationId);
                 var levelDatum = GetLevelDatum(instantiationId);
@@ -297,8 +295,7 @@ namespace Manager.BattleManager
                 (
                     _EnemySearchPlayerFactory,
                     _EnemySkillTimer,
-                    _PhotonNetworkManager,
-                    _SkillMasterDataRepository
+                    _PhotonNetworkManager
                 );
                 enemyCore.enabled = PhotonNetwork.IsMasterClient;
             }

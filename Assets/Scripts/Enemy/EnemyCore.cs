@@ -4,11 +4,9 @@ using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.DataManager;
 using Manager.NetworkManager;
-using MoreMountains.Tools;
 using Pathfinding;
 using Photon.Pun;
 using Player.Common;
-using Repository;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
@@ -20,7 +18,6 @@ namespace Enemy
         private EnemySearchPlayer.Factory _searchPlayerFactory;
         private EnemySkillTimer _enemySkillTimer;
         private PhotonNetworkManager _photonNetworkManager;
-        private SkillMasterDataRepository _skillMasterDataRepository;
         [SerializeField] private BombProvider bombProvider;
         [SerializeField] private MapManager mapManager;
 
@@ -58,15 +55,13 @@ namespace Enemy
         (
             EnemySearchPlayer.Factory searchPlayerFactory,
             EnemySkillTimer enemySkillTimer,
-            PhotonNetworkManager photonNetworkManager,
-            SkillMasterDataRepository skillMasterDataRepository
+            PhotonNetworkManager photonNetworkManager
         )
         {
             _cts = new CancellationTokenSource();
             _searchPlayerFactory = searchPlayerFactory;
             _enemySkillTimer = enemySkillTimer;
             _photonNetworkManager = photonNetworkManager;
-            _skillMasterDataRepository = skillMasterDataRepository;
 
             InitializeState();
             InitializeComponent();
@@ -106,15 +101,13 @@ namespace Enemy
         private void SkillSubscribe()
         {
             var weaponData = _photonNetworkManager.GetWeaponData(_playerKey);
-            var skillId = weaponData.NormalSkillId;
-            var skillData = _skillMasterDataRepository.GetSkillData(skillId);
-            if (skillData == null)
-            {
-                return;
-            }
+            var skillData = weaponData.NormalSkillMasterData;
 
+            Debug.Log(skillData.Name);
+            Debug.Log("Interval: " + skillData.Interval);
             if (Mathf.Approximately(skillData.Interval, GameCommonData.InvalidNumber))
             {
+                Debug.LogWarning("Skill interval is invalid, skipping skill subscription.");
                 return;
             }
 
@@ -132,10 +125,11 @@ namespace Enemy
                 _enemySkillTimer
                     .TimerSubscribe(skillData)
                     .Where(activate => activate)
-                    .SelectMany(_ => _enemySearchPlayer.ColliderObservable(skillData.Range, _cts.Token))
+                    .SelectMany(_ => _enemySearchPlayer.SearchObservable(skillData.Range))
                     .Where(_ => IsStateEnableToSkill(_stateMachine._CurrentState))
                     .Subscribe(target =>
                     {
+                        _enemySkillTimer.ResetTimer();
                         transform.LookAt(target.transform);
                         _stateMachine.Dispatch((int)EnemyState.WeaponSkill);
                     })
@@ -143,8 +137,9 @@ namespace Enemy
             }
         }
 
-        private bool IsStateEnableToSkill(StateMachine<EnemyCore>.State currentState)
+        private static bool IsStateEnableToSkill(StateMachine<EnemyCore>.State currentState)
         {
+            Debug.Log("Current State: " + currentState.GetType().Name);
             return currentState is EnemyIdleState or EnemyMoveState;
         }
 

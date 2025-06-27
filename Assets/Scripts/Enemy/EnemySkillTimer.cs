@@ -7,23 +7,29 @@ namespace Enemy
 {
     public class EnemySkillTimer : IDisposable
     {
+        private float _timer;
+
         public IObservable<bool> TimerSubscribe(SkillMasterData skillMasterData)
         {
-            var timer = 0f;
-
             return Observable
                 .EveryUpdate()
-                .Do(_ => timer += Time.deltaTime)
+                .Where(_ => _timer < skillMasterData.Interval)
+                .Do(_ => _timer += Time.deltaTime)
                 .Select(_ =>
                 {
-                    if (timer >= skillMasterData.Interval)
+                    if (_timer >= skillMasterData.Interval)
                     {
-                        timer = 0f;
+                        Debug.Log("Skill can be used now");
                         return true;
                     }
 
                     return false;
                 });
+        }
+        
+        public void ResetTimer()
+        {
+            _timer = 0f;
         }
 
         public void Dispose()

@@ -3,6 +3,7 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Photon.Pun;
+using Player.Common;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
@@ -12,38 +13,47 @@ namespace Enemy
 {
     public class EnemySearchPlayer : IDisposable
     {
+        private readonly PhotonView _photonView;
         private readonly SphereCollider _searchCollider;
-        private readonly ReactiveCollection<GameObject> _playerList = new();
+        private ReactiveCollection<GameObject> _playerList;
+        private CancellationTokenSource _cts;
 
         [Inject]
-        public EnemySearchPlayer(GameObject transform)
+        public EnemySearchPlayer(GameObject playerCore)
         {
-            _searchCollider = transform.AddComponent<SphereCollider>();
+            _cts = new CancellationTokenSource();
+            _photonView = playerCore.GetComponent<PhotonView>();
+            var skillCollider = new GameObject("SkillCollider");
+            skillCollider.transform.SetParent(playerCore.transform);
+            skillCollider.transform.localPosition = Vector3.zero;
+            skillCollider.transform.localRotation = Quaternion.identity;
+            skillCollider.layer = LayerMask.NameToLayer(GameCommonData.DefaultLayer);
+            _searchCollider = skillCollider.AddComponent<SphereCollider>();
+            _searchCollider.radius = 0;
             _searchCollider.isTrigger = true;
             _searchCollider.enabled = false;
+            ColliderObservable(_searchCollider);
         }
 
-        public IObservable<GameObject> ColliderObservable(float radius, CancellationToken token)
+        private void ColliderObservable(SphereCollider searchCollider)
         {
+            searchCollider
+                .OnTriggerEnterAsObservable()
+                .Where(other => other.gameObject.CompareTag(GameCommonData.PlayerTag))
+                .Subscribe(other => { AddPlayer(other.gameObject); })
+                .AddTo(_cts.Token);
+
+            searchCollider
+                .OnTriggerStayAsObservable()
+                .Where(other => other.gameObject.CompareTag(GameCommonData.PlayerTag))
+                .Subscribe(other => { AddPlayer(other.gameObject); })
+                .AddTo(_cts.Token);
+        }
+
+        public IObservable<GameObject> SearchObservable(float radius)
+        {
+            SetupPlayerList();
             SetupCollider(radius, true);
-
-            _searchCollider
-                .OnCollisionEnterAsObservable()
-                .Where(other => other.gameObject.CompareTag(GameCommonData.PlayerTag))
-                .Subscribe(other => { _playerList.Add(other.gameObject); })
-                .AddTo(token);
-
-            _searchCollider
-                .OnCollisionStayAsObservable()
-                .Where(other => other.gameObject.CompareTag(GameCommonData.PlayerTag))
-                .Subscribe(other => { _playerList.Add(other.gameObject); })
-                .AddTo(token);
-
-            _searchCollider
-                .OnCollisionExitAsObservable()
-                .Where(other => other.gameObject.CompareTag(GameCommonData.PlayerTag))
-                .Subscribe(other => { _playerList.Remove(other.gameObject); })
-                .AddTo(token);
 
             return _playerList
                 .ObserveAdd()
@@ -52,8 +62,40 @@ namespace Enemy
                 .Select(player => player.Value);
         }
 
+        private void Cancel()
+        {
+            if (_cts == null) return;
+            _cts.Cancel();
+            _cts.Dispose();
+            _cts = null;
+        }
+
+        private void SetupPlayerList()
+        {
+            _playerList?.Clear();
+            _playerList?.Dispose();
+            _playerList = null;
+            _playerList = new ReactiveCollection<GameObject>();
+        }
+
+        private void AddPlayer(GameObject player)
+        {
+            var playerConditionInfo = player.GetComponent<PlayerConditionInfo>();
+            if (playerConditionInfo == null || playerConditionInfo.GetPlayerIndex() == _photonView.InstantiationId)
+            {
+                return;
+            }
+
+            if (!_playerList.Contains(player))
+            {
+                _playerList.Add(player);
+                Debug.Log($"Player added: {player.name}");
+            }
+        }
+
         private void SetupCollider(float radius, bool enable)
         {
+            Debug.Log("Setting up search collider: " + radius);
             _searchCollider.enabled = enable;
             _searchCollider.radius = radius;
         }
@@ -61,6 +103,7 @@ namespace Enemy
         public void Dispose()
         {
             _playerList?.Dispose();
+            Cancel();
         }
 
         public class Factory : PlaceholderFactory<GameObject, EnemySearchPlayer>
