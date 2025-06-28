@@ -57,7 +57,6 @@ namespace Enemy
 
             return _playerList
                 .ObserveAdd()
-                .Do(player => Debug.Log($"Player found: {player.Value.name}"))
                 .Do(_ => SetupCollider(0, false))
                 .Select(player => player.Value);
         }
@@ -89,13 +88,11 @@ namespace Enemy
             if (!_playerList.Contains(player))
             {
                 _playerList.Add(player);
-                Debug.Log($"Player added: {player.name}");
             }
         }
 
         private void SetupCollider(float radius, bool enable)
         {
-            Debug.Log("Setting up search collider: " + radius);
             _searchCollider.enabled = enable;
             _searchCollider.radius = radius;
         }

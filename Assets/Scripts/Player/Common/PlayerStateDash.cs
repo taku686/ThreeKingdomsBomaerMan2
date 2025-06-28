@@ -40,7 +40,7 @@ namespace Player.Common
                     .OnStateExitAsObservable()
                     .Where(info => info.StateInfo.IsName(key))
                     .Take(1)
-                    .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.Idle); })
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)PlayerState.Idle); })
                     .AddTo(_cts.Token);
             }
 

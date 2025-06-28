@@ -2,7 +2,6 @@ using System.Threading;
 using Bomb;
 using Common.Data;
 using Cysharp.Threading.Tasks;
-using Manager.DataManager;
 using Manager.NetworkManager;
 using Pathfinding;
 using Photon.Pun;
@@ -54,13 +53,13 @@ namespace Enemy
         public void Initialize
         (
             EnemySearchPlayer.Factory searchPlayerFactory,
-            EnemySkillTimer enemySkillTimer,
+            EnemySkillTimer.Factory enemySkillTimerFactory,
             PhotonNetworkManager photonNetworkManager
         )
         {
             _cts = new CancellationTokenSource();
             _searchPlayerFactory = searchPlayerFactory;
-            _enemySkillTimer = enemySkillTimer;
+            _enemySkillTimer = enemySkillTimerFactory.Create();
             _photonNetworkManager = photonNetworkManager;
 
             InitializeState();
@@ -102,12 +101,9 @@ namespace Enemy
         {
             var weaponData = _photonNetworkManager.GetWeaponData(_playerKey);
             var skillData = weaponData.NormalSkillMasterData;
-
-            Debug.Log(skillData.Name);
-            Debug.Log("Interval: " + skillData.Interval);
+            
             if (Mathf.Approximately(skillData.Interval, GameCommonData.InvalidNumber))
             {
-                Debug.LogWarning("Skill interval is invalid, skipping skill subscription.");
                 return;
             }
 
@@ -139,7 +135,6 @@ namespace Enemy
 
         private static bool IsStateEnableToSkill(StateMachine<EnemyCore>.State currentState)
         {
-            Debug.Log("Current State: " + currentState.GetType().Name);
             return currentState is EnemyIdleState or EnemyMoveState;
         }
 

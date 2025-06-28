@@ -2,6 +2,7 @@
 using Common.Data;
 using UniRx;
 using UnityEngine;
+using Zenject;
 
 namespace Enemy
 {
@@ -15,24 +16,19 @@ namespace Enemy
                 .EveryUpdate()
                 .Where(_ => _timer < skillMasterData.Interval)
                 .Do(_ => _timer += Time.deltaTime)
-                .Select(_ =>
-                {
-                    if (_timer >= skillMasterData.Interval)
-                    {
-                        Debug.Log("Skill can be used now");
-                        return true;
-                    }
-
-                    return false;
-                });
+                .Select(_ => _timer >= skillMasterData.Interval);
         }
-        
+
         public void ResetTimer()
         {
             _timer = 0f;
         }
 
         public void Dispose()
+        {
+        }
+
+        public class Factory : PlaceholderFactory<EnemySkillTimer>
         {
         }
     }

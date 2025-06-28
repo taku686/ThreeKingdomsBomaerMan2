@@ -1,4 +1,9 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Threading;
+using Common.Data;
+using Manager.NetworkManager;
+using Photon.Pun;
+using UnityEngine;
 using State = StateMachine<Enemy.EnemyCore>.State;
 
 namespace Enemy
@@ -9,8 +14,9 @@ namespace Enemy
         {
             protected override void OnEnter(State prevState)
             {
-                Debug.Log("Weapon Skill State Entered");
+             
             }
+            
             /*private void ActiveSkill
             (
                 SkillMasterData skillMasterData,
@@ -32,13 +38,13 @@ namespace Enemy
                 }
 
                 _animator.SetTrigger(GameCommonData.GetAnimatorHashKey(skillMasterData._SkillActionTypeEnum));
-            }
+            }*/
 
             private static void Cancel(CancellationTokenSource cancellationTokenSource)
             {
                 cancellationTokenSource?.Cancel();
                 cancellationTokenSource?.Dispose();
-            }*/
+            }
         }
     }
 }

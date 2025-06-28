@@ -55,19 +55,19 @@ namespace Player.Common
                     .AddTo(_cts.Token);
 
                 _OnClickWeaponSkill
-                    .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.WeaponSkill); })
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)PlayerState.WeaponSkill); })
                     .AddTo(_cts.Token);
 
                 _OnClickNormalSkill
-                    .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.NormalSkill); })
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)PlayerState.NormalSkill); })
                     .AddTo(_cts.Token);
 
                 _OnClickSpecialSkill
-                    .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.SpecialSkill); })
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)PlayerState.SpecialSkill); })
                     .AddTo(_cts.Token);
 
                 _OnClickDash
-                    .Subscribe(_ => { _StateMachine.Dispatch((int)PLayerState.Dash); })
+                    .Subscribe(_ => { _StateMachine.Dispatch((int)PlayerState.Dash); })
                     .AddTo(_cts.Token);
 
                 _OnClickCharacterChange

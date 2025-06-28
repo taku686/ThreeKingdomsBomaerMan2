@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Common.Data;
-using Zenject;
 using Random = UnityEngine.Random;
 
 namespace Manager.DataManager

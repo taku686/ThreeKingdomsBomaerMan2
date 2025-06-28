@@ -1,7 +1,9 @@
+using System.ComponentModel;
 using AttributeAttack;
 using Bomb;
 using Common.Data;
 using Enemy;
+using Facade.Skill;
 using Manager.BattleManager;
 using Manager.DataManager;
 using Player.Common;
@@ -62,13 +64,14 @@ namespace Common.Installer
         private void InstallEnemyCore()
         {
             Container.BindFactory<GameObject, EnemySearchPlayer, EnemySearchPlayer.Factory>().AsCached();
-            Container.Bind<EnemySkillTimer>().AsCached();
+            Container.BindFactory<EnemySkillTimer, EnemySkillTimer.Factory>().AsCached();
         }
 
         private void InstallSkill()
         {
             Container.Bind<ActiveSkillManager>().AsCached();
             Container.Bind<PassiveSkillManager>().AsCached();
+            Container.Bind<SkillAnimationFacade>().AsCached();
         }
 
         private void InstallSlashSKill()

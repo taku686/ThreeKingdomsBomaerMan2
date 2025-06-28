@@ -3,6 +3,7 @@ using System.Threading;
 using Bomb;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Facade.Skill;
 using Manager.BattleManager;
 using Manager.NetworkManager;
 using Photon.Pun;
@@ -34,6 +35,7 @@ namespace Player.Common
         private CharacterCreateUseCase _characterCreateUseCase;
         private AbnormalConditionEffect _abnormalConditionEffect;
 
+        private SkillAnimationFacade _skillAnimationFacade;
         private PlayerConditionInfo _playerConditionInfo;
         private PlayerMove _playerMove;
         private PlayerDash _playerDash;
@@ -58,7 +60,7 @@ namespace Player.Common
         public ReactiveProperty<int> _TeamMemberReactiveProperty { get; } = new();
         public PlayerStatusInfo _PlayerStatusInfo { get; private set; }
 
-        private enum PLayerState
+        private enum PlayerState
         {
             Idle,
             Dead,
@@ -80,6 +82,7 @@ namespace Player.Common
             PlayerGeneratorUseCase playerGeneratorUseCase,
             CharacterCreateUseCase characterCreateUseCase,
             AbnormalConditionEffect abnormalConditionEffect,
+            SkillAnimationFacade skillAnimationFacade,
             string key
         )
         {
@@ -92,6 +95,7 @@ namespace Player.Common
             _playerGeneratorUseCase = playerGeneratorUseCase;
             _characterCreateUseCase = characterCreateUseCase;
             _abnormalConditionEffect = abnormalConditionEffect;
+            _skillAnimationFacade = skillAnimationFacade;
             InitializeComponent();
             InitializeState();
             Subscribe();
@@ -143,12 +147,12 @@ namespace Player.Common
         {
             _stateMachine = new StateMachine<PlayerCore>(this);
             _stateMachine.Start<PlayerIdleState>();
-            _stateMachine.AddAnyTransition<PlayerDeadState>((int)PLayerState.Dead);
-            _stateMachine.AddAnyTransition<PlayerIdleState>((int)PLayerState.Idle);
-            _stateMachine.AddTransition<PlayerIdleState, PlayerWeaponSkillState>((int)PLayerState.WeaponSkill);
-            _stateMachine.AddTransition<PlayerIdleState, PlayerNormalSkillState>((int)PLayerState.NormalSkill);
-            _stateMachine.AddTransition<PlayerIdleState, PlayerSpecialSkillState>((int)PLayerState.SpecialSkill);
-            _stateMachine.AddTransition<PlayerIdleState, PlayerStateDash>((int)PLayerState.Dash);
+            _stateMachine.AddAnyTransition<PlayerDeadState>((int)PlayerState.Dead);
+            _stateMachine.AddAnyTransition<PlayerIdleState>((int)PlayerState.Idle);
+            _stateMachine.AddTransition<PlayerIdleState, PlayerWeaponSkillState>((int)PlayerState.WeaponSkill);
+            _stateMachine.AddTransition<PlayerIdleState, PlayerNormalSkillState>((int)PlayerState.NormalSkill);
+            _stateMachine.AddTransition<PlayerIdleState, PlayerSpecialSkillState>((int)PlayerState.SpecialSkill);
+            _stateMachine.AddTransition<PlayerIdleState, PlayerStateDash>((int)PlayerState.Dash);
         }
 
         #endregion
@@ -372,7 +376,7 @@ namespace Player.Common
         {
             _isDead = true;
             await UniTask.Delay(500, cancellationToken: _cancellationToken);
-            _stateMachine.Dispatch((int)PLayerState.Dead);
+            _stateMachine.Dispatch((int)PlayerState.Dead);
         }
 
         public void ChangeTeamMember()

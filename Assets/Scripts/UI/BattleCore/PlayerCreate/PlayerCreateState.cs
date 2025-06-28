@@ -3,6 +3,7 @@ using Bomb;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Enemy;
+using Facade.Skill;
 using Manager.BattleManager.Camera;
 using Manager.DataManager;
 using Manager.NetworkManager;
@@ -28,7 +29,6 @@ namespace Manager.BattleManager
             private MapManager _MapManager => Owner.mapManager;
             private CameraManager _CameraManager => Owner.cameraManager;
             private ActiveSkillManager _ActiveSkillManager => Owner._activeSkillManager;
-
             private PassiveSkillManager _PassiveSkillManager => Owner._passiveSkillManager;
 
             //UseCase
@@ -36,7 +36,6 @@ namespace Manager.BattleManager
             private SkillEffectActivateUseCase _SkillEffectActivateUseCase => Owner._skillEffectActivateUseCase;
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
             private UnderAbnormalConditionsBySkillUseCase _UnderAbnormalConditionsBySkillUseCase => Owner._underAbnormalConditionsBySkillUseCase;
-
             private SetupAnimatorUseCase _SetupAnimatorUseCase => Owner._setupAnimatorUseCase;
 
             //Repository
@@ -46,15 +45,17 @@ namespace Manager.BattleManager
 
             //Factory
             private EnemySearchPlayer.Factory _EnemySearchPlayerFactory => Owner._enemySearchPlayerFactory;
-
             private TranslateStatusInBattleUseCase.Factory _TranslateStatusInBattleUseCaseFactory => Owner._translateStatusInBattleUseCaseFactory;
+            private EnemySkillTimer.Factory _EnemySkillTimerFactory => Owner._enemySkillTimerFactory;
+
+            //Facade
+            private SkillAnimationFacade _SkillAnimationFacade => Owner._skillAnimationFacade;
 
             //Others
             private List<PlayerStatusUI> _PlayerStatusUiList => Owner._playerStatusUiList;
             private GameObject _ArrowIndicatorPrefab => Owner._arrowSkillIndicatorPrefab;
             private GameObject _CircleIndicatorPrefab => Owner._circleSkillIndicatorPrefab;
             private AbnormalConditionEffect _AbnormalConditionEffect => Owner._abnormalConditionEffect;
-            private EnemySkillTimer _EnemySkillTimer => Owner._enemySkillTimer;
             private BombProvider _BombProvider => Owner._bombProvider;
             private StateMachine<BattleCore> _StateMachineClone => Owner._stateMachine;
 
@@ -283,6 +284,7 @@ namespace Manager.BattleManager
                     _PlayerGeneratorUseCase,
                     _CharacterCreateUseCase,
                     _AbnormalConditionEffect,
+                    _SkillAnimationFacade,
                     hpKey
                 );
             }
@@ -294,7 +296,7 @@ namespace Manager.BattleManager
                 enemyCore.Initialize
                 (
                     _EnemySearchPlayerFactory,
-                    _EnemySkillTimer,
+                    _EnemySkillTimerFactory,
                     _PhotonNetworkManager
                 );
                 enemyCore.enabled = PhotonNetwork.IsMasterClient;

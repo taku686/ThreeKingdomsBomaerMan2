@@ -15,7 +15,6 @@ namespace Enemy
 
             protected override void OnEnter(State prevState)
             {
-                Debug.Log("移動開始");
                 Initialize();
             }
 

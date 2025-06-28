@@ -3,6 +3,7 @@ using System.Linq;
 using Bomb;
 using Common.Data;
 using Enemy;
+using Facade.Skill;
 using Manager.BattleManager.Camera;
 using Manager.BattleManager.Environment;
 using Manager.DataManager;
@@ -24,17 +25,14 @@ namespace Manager.BattleManager
     {
         //Repository
         [Inject] private UserDataRepository _userDataRepository;
-        [Inject] private SkillMasterDataRepository _skillMasterDataRepository;
         [Inject] private BattleResultDataRepository _battleResultDataRepository;
         [Inject] private CharacterMasterDataRepository _characterMasterDataRepository;
         [Inject] private WeaponMasterDataRepository _weaponMasterDataRepository;
         [Inject] private AbnormalConditionSpriteRepository _abnormalConditionSpriteRepository;
-        [Inject] private AnimatorControllerRepository _animatorControllerRepository;
 
         //UseCase
         [Inject] private PlayerGeneratorUseCase _playerGeneratorUseCase;
         [Inject] private StatusInBattleViewModelUseCase _statusInBattleViewModelUseCase;
-        [Inject] private ApplyStatusSkillUseCase _applyStatusSkillUseCase;
         [Inject] private CharacterCreateUseCase _characterCreateUseCase;
         [Inject] private InputViewModelUseCase _inputViewModelUseCase;
         [Inject] private UnderAbnormalConditionsBySkillUseCase _underAbnormalConditionsBySkillUseCase;
@@ -49,24 +47,26 @@ namespace Manager.BattleManager
         [Inject] private MissionManager _missionManager;
         [Inject] private PassiveSkillManager _passiveSkillManager;
         [SerializeField] private CameraManager cameraManager;
-        [SerializeField] private StageManager stageManager;
         [SerializeField] private MapManager mapManager;
         
         //Factory
         [Inject] private EnemySearchPlayer.Factory _enemySearchPlayerFactory;
+        [Inject] private EnemySkillTimer.Factory _enemySkillTimerFactory;
 
         //UI
         [SerializeField] private BattleViewBase[] _views;
+        
+        //Facade
+        [Inject] private SkillAnimationFacade _skillAnimationFacade;
 
         //Other
         [Inject] private BombProvider _bombProvider;
-        [Inject] private EnemySkillTimer _enemySkillTimer;
+        
         [SerializeField] private Transform playerUIParent;
         [SerializeField] private GameObject playerUI;
         [SerializeField] private GameObject _arrowSkillIndicatorPrefab;
         [SerializeField] private GameObject _circleSkillIndicatorPrefab;
         [SerializeField] private StageCreate _stageCreate;
-        [SerializeField] private PhysicMaterial _characterPhysicMaterial;
         private StateMachine<BattleCore> _stateMachine;
         private PlayerCore _playerCore;
         private readonly List<PlayerStatusUI> _playerStatusUiList = new();
