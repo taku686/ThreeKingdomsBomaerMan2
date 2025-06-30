@@ -9,14 +9,14 @@ using Zenject;
 
 namespace Skill
 {
-    public class UnderAbnormalConditionsBySkillUseCase : IDisposable
+    public class OnDamageFacade : IDisposable
     {
         private readonly Subject<SkillMasterData> _onDamageSubject = new();
         private readonly Subject<(int, SkillMasterData)> _onAbnormalConditionSubject = new();
         private CancellationTokenSource _cts;
 
         [Inject]
-        public UnderAbnormalConditionsBySkillUseCase()
+        public OnDamageFacade()
         {
             _cts = new CancellationTokenSource();
         }

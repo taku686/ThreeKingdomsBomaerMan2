@@ -17,7 +17,7 @@ namespace Skill
     {
         private readonly BuffSkill _buffSkill;
         private readonly Heal.Heal _heal;
-        private readonly UnderAbnormalConditionsBySkillUseCase _underAbnormalConditionsBySkillUseCase;
+        private readonly OnDamageFacade _onDamageFacade;
         private CancellationTokenSource _cancellationTokenSource;
 
         [Inject]
@@ -25,12 +25,12 @@ namespace Skill
         (
             BuffSkill buffSkill,
             Heal.Heal heal,
-            UnderAbnormalConditionsBySkillUseCase underAbnormalConditionsBySkillUseCase
+            OnDamageFacade onDamageFacade
         )
         {
             _buffSkill = buffSkill;
             _heal = heal;
-            _underAbnormalConditionsBySkillUseCase = underAbnormalConditionsBySkillUseCase;
+            _onDamageFacade = onDamageFacade;
         }
 
         public void Initialize
@@ -58,7 +58,7 @@ namespace Skill
 
         private void PassiveSkillSubscribe(PlayerConditionInfo playerConditionInfo)
         {
-            _underAbnormalConditionsBySkillUseCase
+            _onDamageFacade
                 .OnDamageAsObservable()
                 .Where(skillData => skillData.SkillType == SkillType.Passive)
                 .Where(skillData => skillData.BoolRequirementTypeEnum == BoolRequirementType.ReceiveDamage)
@@ -74,7 +74,7 @@ namespace Skill
                 })
                 .AddTo(_cancellationTokenSource.Token);
 
-            _underAbnormalConditionsBySkillUseCase
+            _onDamageFacade
                 .OnAbnormalConditionAsObservable()
                 .Where(tuple => tuple.Item1 == playerConditionInfo.GetPlayerIndex())
                 .Where(tuple => tuple.Item2.SkillType == SkillType.Passive)

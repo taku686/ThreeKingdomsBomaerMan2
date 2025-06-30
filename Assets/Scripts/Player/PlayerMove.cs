@@ -13,7 +13,7 @@ namespace Player.Common
         private Transform _playerTransform;
         private Animator _animator;
         private MovementAnimationManager _movementAnimationManager;
-        private AbnormalConditionEffect _abnormalConditionEffect;
+        private AbnormalConditionEffectFacade _abnormalConditionEffectFacade;
         private Rigidbody _rigidbody;
         private Vector3 _currentDestination;
         private LayerMask _blockingLayer;
@@ -22,13 +22,13 @@ namespace Player.Common
         public void Initialize
         (
             Animator animator,
-            AbnormalConditionEffect abnormalConditionEffect
+            AbnormalConditionEffectFacade abnormalConditionEffectFacade
         )
         {
             _blockingLayer = LayerMask.GetMask(GameCommonData.ObstacleLayer) | LayerMask.GetMask(GameCommonData.BombLayer);
             _playerTransform = transform;
             _rigidbody = GetComponent<Rigidbody>();
-            _abnormalConditionEffect = abnormalConditionEffect;
+            _abnormalConditionEffectFacade = abnormalConditionEffectFacade;
             SetAnimator(animator);
         }
 
@@ -47,7 +47,7 @@ namespace Player.Common
         public void Run(Vector3 inputValue)
         {
             _movementAnimationManager.Move(GetDirection(inputValue));
-            if (inputValue is { x: 0, z: 0 } || !_abnormalConditionEffect._CanMove)
+            if (inputValue is { x: 0, z: 0 } || !_abnormalConditionEffectFacade._CanMove)
             {
                 _rigidbody.velocity = Vector3.zero;
                 return;

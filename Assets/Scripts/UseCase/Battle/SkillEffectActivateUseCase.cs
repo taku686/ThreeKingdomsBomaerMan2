@@ -53,7 +53,7 @@ public class SkillEffectActivateUseCase : MonoBehaviour
 
     #endregion
 
-    [Inject] private UnderAbnormalConditionsBySkillUseCase _underAbnormalConditionsBySkillUseCase;
+    [Inject] private OnDamageFacade _onDamageFacade;
 
     private const float OneSecond = 1f;
 
@@ -79,7 +79,7 @@ public class SkillEffectActivateUseCase : MonoBehaviour
             .Subscribe(ActivateBuffEffect)
             .AddTo(gameObject.GetCancellationTokenOnDestroy());
 
-        _underAbnormalConditionsBySkillUseCase
+        _onDamageFacade
             .OnAbnormalConditionAsObservable()
             .Where(tuple => tuple.Item1 == instantiationId)
             .Subscribe(tuple =>

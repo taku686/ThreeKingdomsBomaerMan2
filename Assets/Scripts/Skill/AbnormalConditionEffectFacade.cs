@@ -3,24 +3,30 @@ using System.Collections.Generic;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Player.Common;
 using UniRx;
 using UnityEngine;
+using UseCase;
 using Zenject;
 using Random = UnityEngine.Random;
 
 namespace Skill
 {
-    public class AbnormalConditionEffect : IDisposable
+    public class AbnormalConditionEffectFacade : IDisposable
     {
         public bool _CanMove;
         private bool _canSkill;
         private bool _canChangeCharacter;
         private bool _randomMove;
+
+        private const float PoisonDamageInterval = 1f;
+        private const float PoisonDamageRate = 0.02f; // 最大HPの2%
+
         private readonly List<int> _charmedCharacterIds = new();
         private readonly Dictionary<AbnormalCondition, bool> _abnormalConditionInProgress = new();
 
         [Inject]
-        public AbnormalConditionEffect()
+        public AbnormalConditionEffectFacade()
         {
             _CanMove = true;
         }
@@ -29,11 +35,11 @@ namespace Skill
 
         public void InAsTask
         (
-            Animator animator,
             AbnormalCondition abnormalCondition,
+            Animator animator,
+            PlayerCore.PlayerStatusInfo playerStatusInfo,
             float effectTime
         )
-
         {
             switch (abnormalCondition)
             {
@@ -41,6 +47,7 @@ namespace Skill
                     Paralysis(animator, effectTime);
                     break;
                 case AbnormalCondition.Poison:
+                    Poison(playerStatusInfo, effectTime);
                     break;
                 case AbnormalCondition.Frozen:
                     break;
@@ -107,6 +114,41 @@ namespace Skill
                     cts.Cancel();
                     cts.Dispose();
                     cts = null;
+                })
+                .AddTo(cts.Token);
+        }
+
+        /// <summary>
+        /// 最大HPの２％のダメージを毎秒受け続ける
+        /// </summary>
+        private void Poison(PlayerCore.PlayerStatusInfo playerStatusInfo, float effectTime)
+        {
+            var cts = new CancellationTokenSource();
+            var maxHp = playerStatusInfo._Hp.Value.Item1;
+            var damageAmount = Mathf.CeilToInt(maxHp * PoisonDamageRate);
+
+            Observable
+                .Interval(TimeSpan.FromSeconds(PoisonDamageInterval))
+                .Subscribe(_ =>
+                {
+                    HpCalculateUseCase.InAsTask
+                    (
+                        playerStatusInfo,
+                        damageAmount,
+                        () =>
+                        {
+                            cts.Cancel();
+                            cts.Dispose();
+                        });
+                })
+                .AddTo(cts.Token);
+
+            Observable
+                .Timer(TimeSpan.FromSeconds(effectTime))
+                .Subscribe(_ =>
+                {
+                    cts.Cancel();
+                    cts.Dispose();
                 })
                 .AddTo(cts.Token);
         }

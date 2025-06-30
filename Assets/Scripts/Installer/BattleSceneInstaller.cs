@@ -1,11 +1,9 @@
-using System.ComponentModel;
 using AttributeAttack;
 using Bomb;
 using Common.Data;
 using Enemy;
 using Facade.Skill;
 using Manager.BattleManager;
-using Manager.DataManager;
 using Player.Common;
 using Repository;
 using Skill;
@@ -18,9 +16,9 @@ using Skill.MagicShot;
 using Skill.SlashSpin;
 using UI.Common;
 using UnityEngine;
+using UseCase;
 using UseCase.Battle;
 using Zenject;
-using TargetScanner = DC.Scanner.TargetScanner;
 
 namespace Common.Installer
 {
@@ -44,7 +42,7 @@ namespace Common.Installer
             Container.Bind<BattleResultDataRepository>().AsCached();
             Container.Bind<CharacterObjectRepository>().AsCached();
             Container.Bind<SetupAnimatorUseCase>().AsCached();
-            Container.Bind<AbnormalConditionEffect>().AsCached();
+            Container.Bind<AbnormalConditionEffectFacade>().AsCached();
             Container.BindFactory<CharacterData, WeaponMasterData, LevelMasterData, TranslateStatusInBattleUseCase, TranslateStatusInBattleUseCase.Factory>().AsCached();
             Container.Bind<AnimatorControllerRepository>().FromComponentInNewPrefab(_animatorControllerRepositoryGameObject).AsSingle();
             Container.Bind<SkillEffectActivateUseCase>().FromComponentOn(_skillEffectActivateGameObject).AsCached();
@@ -65,6 +63,7 @@ namespace Common.Installer
         {
             Container.BindFactory<GameObject, EnemySearchPlayer, EnemySearchPlayer.Factory>().AsCached();
             Container.BindFactory<EnemySkillTimer, EnemySkillTimer.Factory>().AsCached();
+            Container.Bind<HpCalculateUseCase>().AsCached();
         }
 
         private void InstallSkill()

@@ -40,7 +40,6 @@ namespace Skill
                 return;
             }
 
-            Debug.Log("HitPlayer: " + hitPlayer.name + " with skillId: " + skillId);
             _isHitAttack = true;
             var statusInfo = hitPlayer.GetComponent<PlayerConditionInfo>();
             var playerIndex = statusInfo.GetPlayerIndex();

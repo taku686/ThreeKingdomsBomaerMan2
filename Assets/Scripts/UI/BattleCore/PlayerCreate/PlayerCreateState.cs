@@ -35,7 +35,7 @@ namespace Manager.BattleManager
             private PlayerGeneratorUseCase _PlayerGeneratorUseCase => Owner._playerGeneratorUseCase;
             private SkillEffectActivateUseCase _SkillEffectActivateUseCase => Owner._skillEffectActivateUseCase;
             private CharacterCreateUseCase _CharacterCreateUseCase => Owner._characterCreateUseCase;
-            private UnderAbnormalConditionsBySkillUseCase _UnderAbnormalConditionsBySkillUseCase => Owner._underAbnormalConditionsBySkillUseCase;
+            private OnDamageFacade _OnDamageFacade => Owner._onDamageFacade;
             private SetupAnimatorUseCase _SetupAnimatorUseCase => Owner._setupAnimatorUseCase;
 
             //Repository
@@ -55,7 +55,7 @@ namespace Manager.BattleManager
             private List<PlayerStatusUI> _PlayerStatusUiList => Owner._playerStatusUiList;
             private GameObject _ArrowIndicatorPrefab => Owner._arrowSkillIndicatorPrefab;
             private GameObject _CircleIndicatorPrefab => Owner._circleSkillIndicatorPrefab;
-            private AbnormalConditionEffect _AbnormalConditionEffect => Owner._abnormalConditionEffect;
+            private AbnormalConditionEffectFacade _AbnormalConditionEffectFacade => Owner._abnormalConditionEffectFacade;
             private BombProvider _BombProvider => Owner._bombProvider;
             private StateMachine<BattleCore> _StateMachineClone => Owner._stateMachine;
 
@@ -64,6 +64,7 @@ namespace Manager.BattleManager
             private static readonly Vector3 ColliderSize = new(0.6f, 0.6f, 0.6f);
             private const float MaxRate = 1f;
             private const int PlayerNotification = 1;
+            private const int DefaultTeamMember = 0;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
             {
@@ -101,14 +102,12 @@ namespace Manager.BattleManager
             private void GeneratePlayer()
             {
                 var index = PhotonNetwork.LocalPlayer.ActorNumber;
-                var playerKey = PhotonNetworkManager.GetPlayerKey(index, 0);
+                var playerKey = PhotonNetworkManager.GetPlayerKey(index, DefaultTeamMember);
                 var characterData = _PhotonNetworkManager.GetCharacterData(playerKey);
                 var weaponData = _PhotonNetworkManager.GetWeaponData(playerKey);
                 var spawnPoint = _StartPointsRepository.GetSpawnPoint(index);
                 var playerCore = _PlayerGeneratorUseCase.InstantiatePlayerCore(false, spawnPoint);
-                var playerObj =
-                    _PlayerGeneratorUseCase.InstantiatePlayerObj(characterData, playerCore.transform, weaponData.Id,
-                        false);
+                var playerObj = _PlayerGeneratorUseCase.InstantiatePlayerObj(characterData, playerCore.transform, weaponData.Id, false);
                 _CharacterCreateUseCase.CreateWeapon(playerObj, weaponData, true);
                 _photonView = playerCore.GetComponent<PhotonView>();
                 var instantiationId = _photonView.InstantiationId;
@@ -132,16 +131,16 @@ namespace Manager.BattleManager
                     //todo review later
                     //var weaponId = _WeaponMasterDataRepository.GetWeaponRandomWeaponId();
                     var characterData = _CharacterMasterDataRepository.GetCharacterData(characterId);
-                    var weaponData = _WeaponMasterDataRepository.GetWeaponData(148);
+                    var weaponData = _WeaponMasterDataRepository.GetWeaponData(30);
                     var spawnPoint = _StartPointsRepository.GetSpawnPoint(cpuActorNr);
                     var playerCore = _PlayerGeneratorUseCase.InstantiatePlayerCore(true, spawnPoint);
                     var photonView = playerCore.GetComponent<PhotonView>();
                     var instantiationId = photonView.InstantiationId;
-                    var playerKey = PhotonNetworkManager.GetPlayerKey(instantiationId, 0);
+                    var playerKey = PhotonNetworkManager.GetPlayerKey(instantiationId, DefaultTeamMember);
                     var playerObj = _PlayerGeneratorUseCase.InstantiatePlayerObj(characterData, playerCore.transform, weaponData.Id, true);
                     _CharacterCreateUseCase.CreateWeapon(playerObj, weaponData, true, true);
                     var characterDic = new Dictionary<int, int> { { playerKey, characterId } };
-                    var weaponDic = new Dictionary<int, int> { { playerKey, 148 } };
+                    var weaponDic = new Dictionary<int, int> { { playerKey, weaponData.Id } };
                     var levelDic = new Dictionary<int, int> { { playerKey, GameCommonData.MaxCharacterLevel } };
 
                     PhotonNetwork.LocalPlayer.SetCharacterId(characterDic);
@@ -280,10 +279,10 @@ namespace Manager.BattleManager
                     _PhotonNetworkManager,
                     _ActiveSkillManager,
                     _PassiveSkillManager,
-                    _UnderAbnormalConditionsBySkillUseCase,
+                    _OnDamageFacade,
                     _PlayerGeneratorUseCase,
                     _CharacterCreateUseCase,
-                    _AbnormalConditionEffect,
+                    _AbnormalConditionEffectFacade,
                     _SkillAnimationFacade,
                     hpKey
                 );

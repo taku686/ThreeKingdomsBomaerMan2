@@ -132,6 +132,13 @@ namespace UseCase.Battle
                 PhotonAnimatorView.ParameterType.Trigger,
                 PhotonAnimatorView.SynchronizeType.Discrete
             );
+
+            photonAnimatorView.SetParameterSynchronized
+            (
+                GameCommonData.HitParameterName,
+                PhotonAnimatorView.ParameterType.Trigger,
+                PhotonAnimatorView.SynchronizeType.Discrete
+            );
         }
 
         public void Dispose()

@@ -12,6 +12,7 @@ using Skill;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
+using UseCase;
 
 namespace Player.Common
 {
@@ -24,17 +25,20 @@ namespace Player.Common
         private bool _isInvincible;
         private string _hpKey;
 
+        //Manager
         private PhotonNetworkManager _photonNetworkManager;
         private PassiveSkillManager _passiveSkillManager;
         private ActiveSkillManager _activeSkillManager;
 
+        //UseCase
         private TranslateStatusInBattleUseCase.Factory _translateStatusInBattleUseCaseFactory;
         private TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
-        private UnderAbnormalConditionsBySkillUseCase _underAbnormalConditionsBySkillUseCase;
+        private OnDamageFacade _onDamageFacade;
         private PlayerGeneratorUseCase _playerGeneratorUseCase;
         private CharacterCreateUseCase _characterCreateUseCase;
-        private AbnormalConditionEffect _abnormalConditionEffect;
 
+        //Others
+        private AbnormalConditionEffectFacade _abnormalConditionEffectFacade;
         private SkillAnimationFacade _skillAnimationFacade;
         private PlayerConditionInfo _playerConditionInfo;
         private PlayerMove _playerMove;
@@ -78,10 +82,10 @@ namespace Player.Common
             PhotonNetworkManager networkManager,
             ActiveSkillManager activeSkillManager,
             PassiveSkillManager passiveSkillManager,
-            UnderAbnormalConditionsBySkillUseCase underAbnormalConditionsBySkillUseCase,
+            OnDamageFacade onDamageFacade,
             PlayerGeneratorUseCase playerGeneratorUseCase,
             CharacterCreateUseCase characterCreateUseCase,
-            AbnormalConditionEffect abnormalConditionEffect,
+            AbnormalConditionEffectFacade abnormalConditionEffectFacade,
             SkillAnimationFacade skillAnimationFacade,
             string key
         )
@@ -91,10 +95,10 @@ namespace Player.Common
             _photonNetworkManager = networkManager;
             _activeSkillManager = activeSkillManager;
             _passiveSkillManager = passiveSkillManager;
-            _underAbnormalConditionsBySkillUseCase = underAbnormalConditionsBySkillUseCase;
+            _onDamageFacade = onDamageFacade;
             _playerGeneratorUseCase = playerGeneratorUseCase;
             _characterCreateUseCase = characterCreateUseCase;
-            _abnormalConditionEffect = abnormalConditionEffect;
+            _abnormalConditionEffectFacade = abnormalConditionEffectFacade;
             _skillAnimationFacade = skillAnimationFacade;
             InitializeComponent();
             InitializeState();
@@ -113,7 +117,7 @@ namespace Player.Common
             _TeamMemberReactiveProperty.Value = PhotonNetworkManager.GetPlayerKey(photonView.InstantiationId, 0);
             SetupTranslateStatusInBattleUseCase();
             _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
-            _playerMove.Initialize(_animator, _abnormalConditionEffect);
+            _playerMove.Initialize(_animator, _abnormalConditionEffectFacade);
             _playerDash.Initialize();
             _cancellationToken = gameObject.GetCancellationTokenOnDestroy();
         }
@@ -244,7 +248,7 @@ namespace Player.Common
         {
             var instantiationId = photonView.InstantiationId;
 
-            _underAbnormalConditionsBySkillUseCase
+            _onDamageFacade
                 .OnAbnormalConditionAsObservable()
                 .Where(tuple => tuple.Item1 == instantiationId)
                 .Select(tuple => tuple.Item2)
@@ -253,7 +257,13 @@ namespace Player.Common
                     var abnormalConditions = skillData.AbnormalConditionEnum;
                     foreach (var abnormalCondition in abnormalConditions)
                     {
-                        _abnormalConditionEffect.InAsTask(_animator, abnormalCondition, skillData.EffectTime);
+                        _abnormalConditionEffectFacade.InAsTask
+                        (
+                            abnormalCondition,
+                            _animator,
+                            _PlayerStatusInfo,
+                            skillData.EffectTime
+                        );
                     }
                 })
                 .AddTo(_cancellationToken);
@@ -339,7 +349,7 @@ namespace Player.Common
 
             ActivatePassiveSkillOnDamage();
             var explosion = other.GetComponentInParent<Explosion>();
-            CalculateHp(explosion.damageAmount);
+            HpCalculateUseCase.InAsTask(_PlayerStatusInfo, explosion.damageAmount);
 
             _isDamage = true;
             await UniTask.Delay(TimeSpan.FromSeconds(InvincibleDuration), cancellationToken: _cancellationToken);
@@ -353,23 +363,13 @@ namespace Player.Common
             _playerRenderer.enabled = true;
         }
 
-        private void CalculateHp(int damage)
-        {
-            var tuple = _PlayerStatusInfo._Hp.Value;
-            var maxHp = Mathf.FloorToInt(TranslateStatusInBattleUseCase.Translate(StatusType.Hp, tuple.Item1));
-            var hp = Mathf.FloorToInt(TranslateStatusInBattleUseCase.Translate(StatusType.Hp, tuple.Item2));
-            hp -= damage;
-            hp = Mathf.Clamp(hp, DeadHp, maxHp);
-            _PlayerStatusInfo._Hp.Value = (maxHp, hp);
-        }
-
         private void ActivatePassiveSkillOnDamage()
         {
             var playerKey = _TeamMemberReactiveProperty.Value;
             var weaponData = _photonNetworkManager.GetWeaponData(playerKey);
             var normalSkillData = weaponData.NormalSkillMasterData;
-            _underAbnormalConditionsBySkillUseCase.OnNextDamageSubject(normalSkillData);
-            _underAbnormalConditionsBySkillUseCase.OnNextDamageSubject(null);
+            _onDamageFacade.OnNextDamageSubject(normalSkillData);
+            _onDamageFacade.OnNextDamageSubject(null);
         }
 
         private async UniTask Dead()

@@ -1,11 +1,7 @@
-﻿using Assets.Scripts.Common.PlayFab;
-using AttributeAttack;
+﻿using AttributeAttack;
 using Common.Data;
 using Manager;
 using Manager.NetworkManager;
-using Manager.PlayFabManager;
-using Manager.ResourceManager;
-using Player.Common;
 using Repository;
 using Skill;
 using Skill.Attack;
@@ -22,7 +18,6 @@ using UnityEngine;
 using UseCase;
 using UseCase.Battle;
 using Zenject;
-using TargetScanner = DC.Scanner.TargetScanner;
 
 namespace Common.Installer
 {

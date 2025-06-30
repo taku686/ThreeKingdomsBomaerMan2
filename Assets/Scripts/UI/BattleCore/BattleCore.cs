@@ -35,11 +35,11 @@ namespace Manager.BattleManager
         [Inject] private StatusInBattleViewModelUseCase _statusInBattleViewModelUseCase;
         [Inject] private CharacterCreateUseCase _characterCreateUseCase;
         [Inject] private InputViewModelUseCase _inputViewModelUseCase;
-        [Inject] private UnderAbnormalConditionsBySkillUseCase _underAbnormalConditionsBySkillUseCase;
+        [Inject] private OnDamageFacade _onDamageFacade;
         [Inject] private SetupAnimatorUseCase _setupAnimatorUseCase;
         [Inject] private SkillEffectActivateUseCase _skillEffectActivateUseCase;
         [Inject] private TranslateStatusInBattleUseCase.Factory _translateStatusInBattleUseCaseFactory;
-        [Inject] private AbnormalConditionEffect _abnormalConditionEffect;
+        [Inject] private AbnormalConditionEffectFacade _abnormalConditionEffectFacade;
 
         //Manager
         [Inject] private ActiveSkillManager _activeSkillManager;

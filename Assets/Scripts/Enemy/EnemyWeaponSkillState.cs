@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Threading;
-using Common.Data;
 using Manager.NetworkManager;
 using Photon.Pun;
-using UnityEngine;
 using State = StateMachine<Enemy.EnemyCore>.State;
 
 namespace Enemy
