@@ -48,6 +48,7 @@ namespace Common.Data
         public static readonly int SlashSpinHashKey = Animator.StringToHash("SlashSpin");
         public static readonly int DashAttackHashKey = Animator.StringToHash("DashAttack");
         public static readonly int ImpactHashKey = Animator.StringToHash("Impact");
+        public static readonly int HitHashKey = Animator.StringToHash("Hit");
         public static readonly int PerformanceHashKey = Animator.StringToHash("Performance");
         public const string NormalKey = "Base Layer.Normal";
         public const string SpecialKey = "Base Layer.Special";
@@ -61,6 +62,7 @@ namespace Common.Data
         public const string SlashKey = "Base Layer.Slash";
         public const string SlashSpinKey = "Base Layer.SlashSpin";
         public const string ImpactKey = "Base Layer.Impact";
+        public const string HitKey = "Base Layer.Hit";
         public const string SpeedhParameterName = "speedh";
         public const string SpeedvParameterName = "speedv";
         public const string NormalParameterName = "Normal";
@@ -75,6 +77,7 @@ namespace Common.Data
         public const string DashAttackParameterName = "DashAttack";
         public const string SlashSpinParameterName = "SlashSpin";
         public const string MagicShotParameterName = "MagicShot";
+        public const string HitParameterName = "Hit";
         public const string CharacterSpritePath = "Sprites/Character/";
         public const string UserIconSpritePath = "Sprites/UserIcon/";
         public const string SkillIconSpritePath = "Sprites/Skill/";

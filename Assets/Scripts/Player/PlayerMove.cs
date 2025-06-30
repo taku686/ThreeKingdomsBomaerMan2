@@ -47,7 +47,7 @@ namespace Player.Common
         public void Run(Vector3 inputValue)
         {
             _movementAnimationManager.Move(GetDirection(inputValue));
-            if (inputValue is { x: 0, z: 0 } || !_abnormalConditionEffect._canMove)
+            if (inputValue is { x: 0, z: 0 } || !_abnormalConditionEffect._CanMove)
             {
                 _rigidbody.velocity = Vector3.zero;
                 return;

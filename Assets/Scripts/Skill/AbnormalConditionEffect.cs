@@ -12,7 +12,7 @@ namespace Skill
 {
     public class AbnormalConditionEffect : IDisposable
     {
-        public bool _canMove;
+        public bool _CanMove;
         private bool _canSkill;
         private bool _canChangeCharacter;
         private bool _randomMove;
@@ -22,17 +22,23 @@ namespace Skill
         [Inject]
         public AbnormalConditionEffect()
         {
-            _canMove = true;
+            _CanMove = true;
         }
 
         private const float CantMoveTime = 0.5f;
 
-        public void InAsTask(AbnormalCondition abnormalCondition, float effectTime)
+        public void InAsTask
+        (
+            Animator animator,
+            AbnormalCondition abnormalCondition,
+            float effectTime
+        )
+
         {
             switch (abnormalCondition)
             {
                 case AbnormalCondition.Paralysis:
-                    Paralysis(effectTime);
+                    Paralysis(animator, effectTime);
                     break;
                 case AbnormalCondition.Poison:
                     break;
@@ -80,23 +86,24 @@ namespace Skill
         /// <summary>
         /// 一時的に行動不能になる（2～4秒に1回発生する）
         /// </summary>
+        /// <param name="animator"></param>
         /// <param name="duration"></param>
-        private void Paralysis(float duration)
+        private void Paralysis(Animator animator, float duration)
         {
-            Debug.Log("Paralysis effect started for " + duration + " seconds.");
             var cts = new CancellationTokenSource();
-            var updateObservable = Observable.EveryUpdate();
             _abnormalConditionInProgress[AbnormalCondition.Paralysis] = false;
 
-            updateObservable
+            Observable
+                .EveryUpdate()
                 .Where(_ => !_abnormalConditionInProgress[AbnormalCondition.Paralysis])
-                .SelectMany(_ => RandomMoveStop().ToObservable())
+                .SelectMany(_ => RandomMoveStop(animator, cts.Token).ToObservable())
                 .Subscribe()
                 .AddTo(cts.Token);
 
             Observable.Timer(TimeSpan.FromSeconds(duration))
                 .Subscribe(_ =>
                 {
+                    _CanMove = true;
                     cts.Cancel();
                     cts.Dispose();
                     cts = null;
@@ -104,14 +111,15 @@ namespace Skill
                 .AddTo(cts.Token);
         }
 
-        private async UniTask RandomMoveStop()
+        private async UniTask RandomMoveStop(Animator animator, CancellationToken cts)
         {
             _abnormalConditionInProgress[AbnormalCondition.Paralysis] = true;
             var randomTime = Random.Range(2f, 4f);
-            await UniTask.Delay((int)(randomTime * 1000));
-            _canMove = false;
-            await UniTask.Delay((int)(CantMoveTime * 1000));
-            _canMove = true;
+            await UniTask.Delay((int)(randomTime * 1000), cancellationToken: cts);
+            _CanMove = false;
+            animator.SetTrigger(GameCommonData.HitParameterName);
+            await UniTask.Delay((int)(CantMoveTime * 1000), cancellationToken: cts);
+            _CanMove = true;
             _abnormalConditionInProgress[AbnormalCondition.Paralysis] = false;
         }
 

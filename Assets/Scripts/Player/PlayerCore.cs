@@ -253,7 +253,7 @@ namespace Player.Common
                     var abnormalConditions = skillData.AbnormalConditionEnum;
                     foreach (var abnormalCondition in abnormalConditions)
                     {
-                        _abnormalConditionEffect.InAsTask(abnormalCondition, skillData.EffectTime);
+                        _abnormalConditionEffect.InAsTask(_animator, abnormalCondition, skillData.EffectTime);
                     }
                 })
                 .AddTo(_cancellationToken);
