@@ -2,6 +2,7 @@ using System.Threading;
 using Bomb;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Facade.Skill;
 using Manager.NetworkManager;
 using Pathfinding;
 using Photon.Pun;
@@ -26,6 +27,10 @@ namespace Enemy
         private Seeker _seeker;
         private AILerp _aiLerp;
         private EnemySearchPlayer _enemySearchPlayer;
+        private Animator _animator;
+        private PlayerConditionInfo _playerConditionInfo;
+        private SkillAnimationFacade _skillAnimationFacade;
+        private ObservableStateMachineTrigger _observableStateMachineTrigger;
 
         private Transform _target;
         private BoxCollider _boxCollider;
@@ -54,13 +59,15 @@ namespace Enemy
         (
             EnemySearchPlayer.Factory searchPlayerFactory,
             EnemySkillTimer.Factory enemySkillTimerFactory,
-            PhotonNetworkManager photonNetworkManager
+            PhotonNetworkManager photonNetworkManager,
+            SkillAnimationFacade skillAnimationFacade
         )
         {
             _cts = new CancellationTokenSource();
             _searchPlayerFactory = searchPlayerFactory;
             _enemySkillTimer = enemySkillTimerFactory.Create();
             _photonNetworkManager = photonNetworkManager;
+            _skillAnimationFacade = skillAnimationFacade;
 
             InitializeState();
             InitializeComponent();
@@ -69,6 +76,9 @@ namespace Enemy
 
         private void InitializeComponent()
         {
+            _animator = GetComponentInChildren<Animator>();
+            _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
+            _playerConditionInfo = GetComponent<PlayerConditionInfo>();
             _seeker = GetComponent<Seeker>();
             _aiLerp = GetComponent<AILerp>();
             _photonView = GetComponent<PhotonView>();
@@ -101,7 +111,7 @@ namespace Enemy
         {
             var weaponData = _photonNetworkManager.GetWeaponData(_playerKey);
             var skillData = weaponData.NormalSkillMasterData;
-            
+
             if (Mathf.Approximately(skillData.Interval, GameCommonData.InvalidNumber))
             {
                 return;
@@ -149,6 +159,11 @@ namespace Enemy
         private bool IsMine(int instantiatedId)
         {
             return _photonView != null && _photonView.InstantiationId == instantiatedId;
+        }
+
+        private int GetPlayerKey()
+        {
+            return _playerKey;
         }
 
         private void OnDestroy()

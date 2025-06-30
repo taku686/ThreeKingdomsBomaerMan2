@@ -2,21 +2,23 @@
 using Common.Data;
 using Facade.Skill;
 using Manager.NetworkManager;
+using Player.Common;
 using UniRx.Triggers;
 using UnityEngine;
-using State = StateMachine<Player.Common.PlayerCore>.State;
+using State = StateMachine<Enemy.EnemyCore>.State;
 
-namespace Player.Common
+namespace Enemy
 {
-    public partial class PlayerCore
+    public partial class EnemyCore
     {
-        public class PlayerSkillStateBase : State
+        public class EnemySkillStateBase : State
         {
-            private ObservableStateMachineTrigger _ObservableStateMachineTrigger => Owner._observableStateMachineTrigger;
+            
             protected PhotonNetworkManager _PhotonNetworkManager => Owner._photonNetworkManager;
             protected PlayerConditionInfo _PlayerConditionInfo => Owner._playerConditionInfo;
-            private StateMachine<PlayerCore> _StateMachine => Owner._stateMachine;
+            private StateMachine<EnemyCore> _StateMachine => Owner._stateMachine;
             private Animator _Animator => Owner._animator;
+            private ObservableStateMachineTrigger _ObservableStateMachineTrigger => Owner._observableStateMachineTrigger;
             private SkillAnimationFacade _SkillAnimationFacade => Owner._skillAnimationFacade;
             private CancellationTokenSource _cts;
             protected SkillMasterData _SkillMasterData;
@@ -35,7 +37,7 @@ namespace Player.Common
             {
                 if (_SkillMasterData._SkillActionTypeEnum == SkillActionType.None)
                 {
-                    _StateMachine.Dispatch((int)PlayerState.Idle);
+                    _StateMachine.Dispatch((int)EnemyState.Idle);
                 }
             }
 
@@ -53,7 +55,7 @@ namespace Player.Common
                 (
                     skillMasterData,
                     _cts,
-                    () => { _StateMachine.Dispatch((int)PlayerState.Idle); }
+                    () => { _StateMachine.Dispatch((int)EnemyState.Idle); }
                 );
             }
 

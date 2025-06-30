@@ -297,7 +297,8 @@ namespace Manager.BattleManager
                 (
                     _EnemySearchPlayerFactory,
                     _EnemySkillTimerFactory,
-                    _PhotonNetworkManager
+                    _PhotonNetworkManager,
+                    _SkillAnimationFacade
                 );
                 enemyCore.enabled = PhotonNetwork.IsMasterClient;
             }

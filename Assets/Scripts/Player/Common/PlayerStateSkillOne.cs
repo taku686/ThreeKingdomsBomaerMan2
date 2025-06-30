@@ -13,10 +13,10 @@ namespace Player.Common
                 base.Initialize();
                 var playerKey = Owner.GetPlayerKey();
                 var characterData = _PhotonNetworkManager.GetCharacterData(playerKey);
-                _skillMasterData = characterData._NormalSkillMasterData;
-                SetupAnimation(_skillMasterData);
+                _SkillMasterData = characterData._NormalSkillMasterData;
+                SetupAnimation(_SkillMasterData);
                 var playerIndex = _PlayerConditionInfo.GetPlayerIndex();
-                var dic = new Dictionary<int, int> { { playerIndex, _skillMasterData.Id } };
+                var dic = new Dictionary<int, int> { { playerIndex, _SkillMasterData.Id } };
                 PhotonNetwork.LocalPlayer.SetSkillData(dic);
             }
         }

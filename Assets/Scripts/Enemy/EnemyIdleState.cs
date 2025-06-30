@@ -43,7 +43,6 @@ namespace Enemy
 
                 for (var index = 0; index < targets.Length; index++)
                 {
-                    var t = targets[index];
                     var targetIndex = Random.Range(0, targets.Length);
                     var target = targets[targetIndex];
                     var photonView = target.GetComponent<PhotonView>();

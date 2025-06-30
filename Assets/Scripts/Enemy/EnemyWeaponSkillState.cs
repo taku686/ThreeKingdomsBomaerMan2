@@ -10,40 +10,18 @@ namespace Enemy
 {
     public partial class EnemyCore
     {
-        public class EnemyWeaponSkillState : State
+        public class EnemyWeaponSkillState : EnemySkillStateBase
         {
             protected override void OnEnter(State prevState)
             {
-             
-            }
-            
-            /*private void ActiveSkill
-            (
-                SkillMasterData skillMasterData,
-                CancellationTokenSource cancellationTokenSource
-            )
-            {
-                PlayBackAnimation(skillMasterData);
-                var playerIndex = _playerConditionInfo.GetPlayerIndex();
-                var dic = new Dictionary<int, int> { { playerIndex, skillMasterData.Id } };
+                base.Initialize();
+                var playerKey = Owner.GetPlayerKey();
+                var weaponData = _PhotonNetworkManager.GetWeaponData(playerKey);
+                _SkillMasterData = weaponData.NormalSkillMasterData;
+                SetupAnimation(_SkillMasterData);
+                var playerIndex = _PlayerConditionInfo.GetPlayerIndex();
+                var dic = new Dictionary<int, int> { { playerIndex, _SkillMasterData.Id } };
                 PhotonNetwork.LocalPlayer.SetSkillData(dic);
-                Cancel(cancellationTokenSource);
-            }
-
-            private void PlayBackAnimation(SkillMasterData skillMasterData)
-            {
-                if (skillMasterData._SkillActionTypeEnum == SkillActionType.None)
-                {
-                    return;
-                }
-
-                _animator.SetTrigger(GameCommonData.GetAnimatorHashKey(skillMasterData._SkillActionTypeEnum));
-            }*/
-
-            private static void Cancel(CancellationTokenSource cancellationTokenSource)
-            {
-                cancellationTokenSource?.Cancel();
-                cancellationTokenSource?.Dispose();
             }
         }
     }
