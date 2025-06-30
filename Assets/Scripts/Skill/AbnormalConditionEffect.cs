@@ -4,6 +4,7 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using UniRx;
+using UnityEngine;
 using Zenject;
 using Random = UnityEngine.Random;
 
@@ -82,6 +83,7 @@ namespace Skill
         /// <param name="duration"></param>
         private void Paralysis(float duration)
         {
+            Debug.Log("Paralysis effect started for " + duration + " seconds.");
             var cts = new CancellationTokenSource();
             var updateObservable = Observable.EveryUpdate();
             _abnormalConditionInProgress[AbnormalCondition.Paralysis] = false;

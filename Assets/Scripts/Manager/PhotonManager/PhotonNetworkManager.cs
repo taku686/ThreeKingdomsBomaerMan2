@@ -241,6 +241,8 @@ namespace Manager.NetworkManager
             _joinedRoomSubject.OnNext(players);
         }
 
+        #region GetData
+
         public CharacterData GetCharacterData(int playerId)
         {
             return _currentRoomCharacterDatum.GetValueOrDefault(playerId);
@@ -255,6 +257,8 @@ namespace Manager.NetworkManager
         {
             return _currentRoomLevelDatum.GetValueOrDefault(playerId);
         }
+
+        #endregion
 
         public bool CanChangeCharacter()
         {

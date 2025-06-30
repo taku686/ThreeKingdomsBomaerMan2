@@ -59,11 +59,13 @@ namespace Skill.DashAttack
                 })
                 .AddTo(_Cts.Token);
 
-            Observable.Timer(TimeSpan.FromSeconds(WaitDurationForStart))
+            Observable
+                .Timer(TimeSpan.FromSeconds(WaitDurationForStart))
                 .Subscribe(_ => { ActivateEffect(playerTransform, abnormalCondition, skillId); })
                 .AddTo(_Cts.Token);
 
-            Observable.Timer(TimeSpan.FromSeconds(WaitDurationForEnd))
+            Observable
+                .Timer(TimeSpan.FromSeconds(WaitDurationForEnd))
                 .Subscribe(_ =>
                 {
                     rigid.velocity = Vector3.zero;
@@ -97,7 +99,8 @@ namespace Skill.DashAttack
             boxCollider.isTrigger = true;
             var player = playerTransform.gameObject;
 
-            boxCollider.OnTriggerEnterAsObservable()
+            boxCollider
+                .OnTriggerEnterAsObservable()
                 .Where(collider => IsObstaclesTag(collider.gameObject))
                 .Subscribe(collider => HitPlayer(player, collider.gameObject, skillId))
                 .AddTo(_effectClone);

@@ -242,15 +242,15 @@ namespace Player.Common
 
         private void PhotonNetWorkManagerSubscribe()
         {
-            var actorNumber = photonView.InstantiationId;
+            var instantiationId = photonView.InstantiationId;
 
-            _photonNetworkManager
-                ._ActivateSkillObservable
-                .Where(tuple => tuple.Item1 == actorNumber)
+            _underAbnormalConditionsBySkillUseCase
+                .OnAbnormalConditionAsObservable()
+                .Where(tuple => tuple.Item1 == instantiationId)
                 .Select(tuple => tuple.Item2)
                 .Subscribe(skillData =>
                 {
-                    var abnormalConditions = skillData.InvalidAbnormalConditionEnum;
+                    var abnormalConditions = skillData.AbnormalConditionEnum;
                     foreach (var abnormalCondition in abnormalConditions)
                     {
                         _abnormalConditionEffect.InAsTask(abnormalCondition, skillData.EffectTime);
