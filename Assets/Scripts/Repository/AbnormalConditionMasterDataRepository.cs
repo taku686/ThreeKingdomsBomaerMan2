@@ -11,9 +11,10 @@ namespace Repository
 
         public void AddAbnormalConditionMasterData(AbnormalConditionMasterData abnormalConditionMasterData)
         {
-            if (_abnormalConditionMasterDatum.Contains(abnormalConditionMasterData))
+            var ids = _abnormalConditionMasterDatum.Select(data => data.Id).ToArray();
+            if (ids.Contains(abnormalConditionMasterData.Id))
             {
-                return;
+                return; // Abnormal condition data already exists
             }
 
             _abnormalConditionMasterDatum.Add(abnormalConditionMasterData);

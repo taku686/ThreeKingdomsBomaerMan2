@@ -163,7 +163,7 @@ namespace Manager.PlayFabManager
             }
         }
 
-        private void SetWeaponData(WeaponMasterData[] weaponDatum)
+        private void SetWeaponData(IEnumerable<WeaponMasterData> weaponDatum)
         {
             foreach (var weaponData in weaponDatum)
             {
@@ -312,7 +312,7 @@ namespace Manager.PlayFabManager
             return result;
         }
 
-        private void SetCharacterLevelData(LevelMasterData[] characterLevelMasterDatum)
+        private void SetCharacterLevelData(IEnumerable<LevelMasterData> characterLevelMasterDatum)
         {
             foreach (var characterLevelMasterData in characterLevelMasterDatum)
             {
@@ -320,7 +320,7 @@ namespace Manager.PlayFabManager
             }
         }
 
-        private void SetEntitledData(EntitledMasterData[] entitledMasterDatum)
+        private void SetEntitledData(IEnumerable<EntitledMasterData> entitledMasterDatum)
         {
             foreach (var entitledMasterData in entitledMasterDatum)
             {
@@ -328,7 +328,7 @@ namespace Manager.PlayFabManager
             }
         }
 
-        private void SetMissionData(MissionMasterData[] missionDatum)
+        private void SetMissionData(IEnumerable<MissionMasterData> missionDatum)
         {
             foreach (var missionData in missionDatum)
             {
@@ -336,7 +336,7 @@ namespace Manager.PlayFabManager
             }
         }
 
-        private void SetAbnormalConditionData(AbnormalConditionMasterData[] conditionMasterDatum)
+        private void SetAbnormalConditionData(IEnumerable<AbnormalConditionMasterData> conditionMasterDatum)
         {
             foreach (var missionData in conditionMasterDatum)
             {

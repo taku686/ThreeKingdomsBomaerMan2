@@ -11,6 +11,12 @@ namespace Manager.DataManager
 
         public void AddMissionData(MissionMasterData masterData)
         {
+            var ids = _MissionDatum.Select(data => data.Index).ToArray();
+            if (ids.Contains(masterData.Index))
+            {
+                return; // Mission data already exists
+            }
+
             _MissionDatum.Add(masterData);
         }
 

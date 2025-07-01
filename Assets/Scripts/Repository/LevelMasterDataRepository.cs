@@ -21,7 +21,8 @@ namespace Manager.DataManager
 
         public void SetCharacterLevelData(LevelMasterData levelMasterData)
         {
-            if (_levelMasterDatum.Contains(levelMasterData))
+            var ids = _levelMasterDatum.Select(data => data.Level).ToArray();
+            if (ids.Contains(levelMasterData.Level))
             {
                 return;
             }

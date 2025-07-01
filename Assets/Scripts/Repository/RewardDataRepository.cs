@@ -70,7 +70,7 @@ namespace Repository
             return _rewards.ToArray();
         }
 
-        private IReadOnlyCollection<(int, GameCommonData.RewardType)> GetTreasureBox(int rewardAmount)
+        private IEnumerable<(int, GameCommonData.RewardType)> GetTreasureBox(int rewardAmount)
         {
             var result = new List<(int, GameCommonData.RewardType)>();
             const int characterRate = 5;
@@ -107,6 +107,7 @@ namespace Repository
 
         public IReadOnlyCollection<(int, GameCommonData.RewardType)> GetRandomWeaponReward(int rewardAmount)
         {
+            _rewards.Clear();
             var result = new List<(int, GameCommonData.RewardType)>();
             var weaponMasterDatum = _weaponMasterDataRepository.GetAllWeaponData().ToArray();
 # if UNITY_EDITOR

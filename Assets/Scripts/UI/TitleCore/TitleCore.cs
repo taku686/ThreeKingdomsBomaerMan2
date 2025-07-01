@@ -27,6 +27,8 @@ namespace UI.Title
 {
     public partial class TitleCore : MonoBehaviourPunCallbacks
     {
+        #region Variables
+
         //Repository
         [Inject] private CharacterMasterDataRepository _characterMasterDataRepository;
         [Inject] private UserDataRepository _userDataRepository;
@@ -84,6 +86,7 @@ namespace UI.Title
         private StateMachine<TitleCore> _stateMachine;
         private CancellationTokenSource _cts;
 
+        #endregion
 
         public enum State
         {
@@ -120,6 +123,7 @@ namespace UI.Title
             _stateMachine?.Update();
         }
 
+        #region Initialization Methods
 
         private void Initialize()
         {
@@ -184,6 +188,9 @@ namespace UI.Title
             OnClickTransitionState(coinAddButton, State.Shop, _cts.Token);
             OnClickTransitionState(ticketAddButton, State.Shop, _cts.Token);
         }
+
+        #endregion
+
 
         private ViewBase GetView(State state)
         {

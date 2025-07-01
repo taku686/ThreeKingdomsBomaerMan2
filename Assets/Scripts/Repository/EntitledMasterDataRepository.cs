@@ -15,6 +15,12 @@ namespace Repository
 
         public void AddEntitledMasterData(EntitledMasterData data)
         {
+            var ids = _entitledMasterDataList.ConvertAll(d => d.Id);
+            if (ids.Contains(data.Id))
+            {
+                return; // Entitled data already exists
+            }
+
             _entitledMasterDataList.Add(data);
         }
 

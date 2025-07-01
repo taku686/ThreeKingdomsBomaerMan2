@@ -12,7 +12,8 @@ namespace Manager.DataManager
 
         public void AddSkillData(SkillMasterData masterData)
         {
-            if (_skillDatum.Contains(masterData))
+            var ids = _skillDatum.Select(data => data.Id).ToArray();
+            if (ids.Contains(masterData.Id))
             {
                 return;
             }

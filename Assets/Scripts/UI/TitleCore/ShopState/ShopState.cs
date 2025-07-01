@@ -75,6 +75,8 @@ namespace UI.Title
                 AdMobSubscribe();
             }
 
+            #region Subscribe Methods
+
             private void AdMobSubscribe()
             {
                 _View._AdsButton
@@ -139,34 +141,6 @@ namespace UI.Title
                     .AddTo(_cts.Token);
             }
 
-            private string GetRewardKey(GameCommonData.RewardType rewardType)
-            {
-                return rewardType switch
-                {
-                    GameCommonData.RewardType.Gem => GameCommonData.GemKey,
-                    GameCommonData.RewardType.Coin => GameCommonData.CoinKey,
-                    _ => throw new ArgumentOutOfRangeException(nameof(rewardType), rewardType, null)
-                };
-            }
-
-            private RewardPopup.ViewModel GetRewardPopupViewModel
-            (
-                int amount,
-                GameCommonData.RewardType rewardType
-            )
-            {
-                var rewardSprite = _MissionSpriteDataRepository.GetRewardSprite(rewardType);
-                var popupViewModel = new RewardPopup.ViewModel
-                (
-                    "購入完了",
-                    $"{amount}コインを獲得しました。",
-                    rewardSprite,
-                    amount
-                );
-
-                return popupViewModel;
-            }
-
             private void CharacterSubscribe()
             {
                 var addCharacter =
@@ -220,6 +194,37 @@ namespace UI.Title
                 addWeapon.Connect().AddTo(_cts.Token);
             }
 
+            #endregion
+
+
+            private string GetRewardKey(GameCommonData.RewardType rewardType)
+            {
+                return rewardType switch
+                {
+                    GameCommonData.RewardType.Gem => GameCommonData.GemKey,
+                    GameCommonData.RewardType.Coin => GameCommonData.CoinKey,
+                    _ => throw new ArgumentOutOfRangeException(nameof(rewardType), rewardType, null)
+                };
+            }
+
+            private RewardPopup.ViewModel GetRewardPopupViewModel
+            (
+                int amount,
+                GameCommonData.RewardType rewardType
+            )
+            {
+                var rewardSprite = _MissionSpriteDataRepository.GetRewardSprite(rewardType);
+                var popupViewModel = new RewardPopup.ViewModel
+                (
+                    "購入完了",
+                    $"{amount}コインを獲得しました。",
+                    rewardSprite,
+                    amount
+                );
+
+                return popupViewModel;
+            }
+            
             private async UniTask GetRewardAsync
             (
                 int rewardAmount,

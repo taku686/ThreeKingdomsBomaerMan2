@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Common.Data;
+using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace Repository
@@ -12,7 +13,8 @@ namespace Repository
 
         public void AddWeaponData(WeaponMasterData weaponMasterData)
         {
-            if (_weaponDataList.Contains(weaponMasterData))
+            var ids = _weaponDataList.Select(data => data.Id).ToArray();
+            if (ids.Contains(weaponMasterData.Id))
             {
                 return;
             }
@@ -28,7 +30,7 @@ namespace Repository
                 .ToArray();
             return result;
         }
-        
+
         public int GetWeaponRandomWeaponId()
         {
             var keys = _weaponDataList.Select(data => data.Id).ToArray();
