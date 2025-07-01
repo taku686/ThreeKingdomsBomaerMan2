@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
-using ModestTree;
 using Photon.Pun;
 using Player.Common;
 using Repository;
+using Skill;
 using UI.Battle;
 using UI.BattleCore.InBattle;
 using UniRx;
@@ -30,6 +30,7 @@ namespace Manager.BattleManager
             private StatusInBattleViewModelUseCase _StatusInBattleViewModelUseCase => Owner._statusInBattleViewModelUseCase;
             private ArrowSkillIndicatorView _ArrowSkillIndicatorView => Owner._arrowSkillIndicatorView;
             private CircleSkillIndicatorView _CircleSkillIndicatorView => Owner._circleSkillIndicatorView;
+            private AbnormalConditionEffectUseCase _AbnormalConditionEffectUseCase => Owner._abnormalConditionEffectUseCase;
 
             private CancellationTokenSource _cts;
             private int _startTime;
@@ -64,12 +65,18 @@ namespace Manager.BattleManager
                 _View.ApplyStatusViewModel(viewModel);
             }
 
+            #region Subscribe Methods
+
             private void OnSubscribe()
             {
                 PlayerCoreSubscribe();
                 PlayerStatusInfoSubscribe();
                 ViewSubscribe();
+                EventSubscribe();
+            }
 
+            private void EventSubscribe()
+            {
                 Observable.EveryUpdate()
                     .Subscribe(_ =>
                     {
@@ -190,6 +197,11 @@ namespace Manager.BattleManager
                     .Subscribe(skillIndicatorInfo => { ActivateSkillIndicator(skillIndicatorInfo, _PlayerCore._SpecialSkillSubject); })
                     .AddTo(_cts.Token);
 
+                _AbnormalConditionEffectUseCase
+                    ._CanPutBombReactiveProperty
+                    .Subscribe(canPutBomb => { _View.ActivateBombButton(canPutBomb); })
+                    .AddTo(_cts.Token);
+
                 Observable
                     .EveryFixedUpdate()
                     .Where(_ => CanUpdateSkillIndicator())
@@ -198,6 +210,8 @@ namespace Manager.BattleManager
                     .Subscribe(_ => { SearchEnemy(); })
                     .AddTo(_cts.Token);
             }
+
+            #endregion
 
             private static bool IsInvalidSkillDirection(SkillDirection skillDirection)
             {

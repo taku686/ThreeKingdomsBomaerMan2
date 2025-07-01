@@ -48,6 +48,11 @@ public class InBattleView : BattleViewBase
     {
         _inputView.UpdateTimer();
     }
+    
+    public void ActivateBombButton(bool isActive)
+    {
+        _inputView.ActivateBombButton(isActive);
+    }
 
     public IObservable<Unit> OnClickBombButtonAsObservable()
     {

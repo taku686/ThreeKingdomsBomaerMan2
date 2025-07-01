@@ -43,7 +43,7 @@ namespace UI.Common
             _changeCharacterButtonView.ActivateButton(viewModel._CanChangeCharacter);
         }
 
-        private void ActivateBombButton(bool isActive)
+        public void ActivateBombButton(bool isActive)
         {
             bombButton.interactable = isActive;
             _bombDisableImage.gameObject.SetActive(!isActive);

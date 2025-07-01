@@ -131,7 +131,7 @@ namespace Manager.BattleManager
                     //todo review later
                     //var weaponId = _WeaponMasterDataRepository.GetWeaponRandomWeaponId();
                     var characterData = _CharacterMasterDataRepository.GetCharacterData(characterId);
-                    var weaponData = _WeaponMasterDataRepository.GetWeaponData(74);
+                    var weaponData = _WeaponMasterDataRepository.GetWeaponData(246);
                     var spawnPoint = _StartPointsRepository.GetSpawnPoint(cpuActorNr);
                     var playerCore = _PlayerGeneratorUseCase.InstantiatePlayerCore(true, spawnPoint);
                     var photonView = playerCore.GetComponent<PhotonView>();

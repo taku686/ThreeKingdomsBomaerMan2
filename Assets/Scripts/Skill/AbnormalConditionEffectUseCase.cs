@@ -18,7 +18,7 @@ namespace Skill
         public bool _CanMove { get; private set; }
         private bool _canSkill;
         private bool _canChangeCharacter;
-        public bool _CanPutBomb { get; private set; }
+        public ReactiveProperty<bool> _CanPutBombReactiveProperty { get; } = new(true);
         public bool _RandomMove { get; private set; }
 
         private const float PoisonDamageInterval = 1f;
@@ -203,11 +203,11 @@ namespace Skill
         /// </summary>
         private void SoakingWet(float effectTime)
         {
-            _CanPutBomb = false;
+            _CanPutBombReactiveProperty.Value = false;
 
             Observable
                 .Timer(TimeSpan.FromSeconds(effectTime))
-                .Subscribe(_ => { _CanPutBomb = true; });
+                .Subscribe(_ => { _CanPutBombReactiveProperty.Value = true; });
         }
 
         /// <summary>

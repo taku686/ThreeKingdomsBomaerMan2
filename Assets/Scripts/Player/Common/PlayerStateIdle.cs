@@ -80,7 +80,7 @@ namespace Player.Common
 
                 _OnClickBomb
                     .Where(_ => Owner._translateStatusInBattleUseCase.CanPutBomb())
-                    .Where(_ => _AbnormalConditionEffectUseCase._CanPutBomb)
+                    .Where(_ => _AbnormalConditionEffectUseCase._CanPutBombReactiveProperty.Value)
                     .Throttle(TimeSpan.FromSeconds(GameCommonData.InputBombInterval))
                     .Subscribe(_ =>
                     {
