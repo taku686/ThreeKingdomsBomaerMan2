@@ -36,10 +36,12 @@ namespace Player.Common
         private OnDamageFacade _onDamageFacade;
         private PlayerGeneratorUseCase _playerGeneratorUseCase;
         private CharacterCreateUseCase _characterCreateUseCase;
+        private AbnormalConditionEffectUseCase _abnormalConditionEffectUseCase;
+
+        //Facade
+        private SkillAnimationFacade _skillAnimationFacade;
 
         //Others
-        private AbnormalConditionEffectFacade _abnormalConditionEffectFacade;
-        private SkillAnimationFacade _skillAnimationFacade;
         private PlayerConditionInfo _playerConditionInfo;
         private PlayerMove _playerMove;
         private PlayerDash _playerDash;
@@ -85,7 +87,7 @@ namespace Player.Common
             OnDamageFacade onDamageFacade,
             PlayerGeneratorUseCase playerGeneratorUseCase,
             CharacterCreateUseCase characterCreateUseCase,
-            AbnormalConditionEffectFacade abnormalConditionEffectFacade,
+            AbnormalConditionEffectUseCase abnormalConditionEffectUseCase,
             SkillAnimationFacade skillAnimationFacade,
             string key
         )
@@ -98,7 +100,7 @@ namespace Player.Common
             _onDamageFacade = onDamageFacade;
             _playerGeneratorUseCase = playerGeneratorUseCase;
             _characterCreateUseCase = characterCreateUseCase;
-            _abnormalConditionEffectFacade = abnormalConditionEffectFacade;
+            _abnormalConditionEffectUseCase = abnormalConditionEffectUseCase;
             _skillAnimationFacade = skillAnimationFacade;
             InitializeComponent();
             InitializeState();
@@ -117,7 +119,7 @@ namespace Player.Common
             _TeamMemberReactiveProperty.Value = PhotonNetworkManager.GetPlayerKey(photonView.InstantiationId, 0);
             SetupTranslateStatusInBattleUseCase();
             _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
-            _playerMove.Initialize(_animator, _abnormalConditionEffectFacade);
+            _playerMove.Initialize(_animator, _abnormalConditionEffectUseCase);
             _playerDash.Initialize();
             _cancellationToken = gameObject.GetCancellationTokenOnDestroy();
         }
@@ -257,7 +259,7 @@ namespace Player.Common
                     var abnormalConditions = skillData.AbnormalConditionEnum;
                     foreach (var abnormalCondition in abnormalConditions)
                     {
-                        _abnormalConditionEffectFacade.InAsTask
+                        _abnormalConditionEffectUseCase.InAsTask
                         (
                             abnormalCondition,
                             _animator,
@@ -438,6 +440,54 @@ namespace Player.Common
                 _Defense = new ReactiveProperty<int>(defense);
                 _Resistance = new ReactiveProperty<int>(resistance);
                 _FireRange = new ReactiveProperty<int>(fireRange);
+            }
+
+            public int GetStatusValue(StatusType statusType)
+            {
+                return statusType switch
+                {
+                    StatusType.Hp => _Hp.Value.Item2,
+                    StatusType.Attack => _Attack.Value,
+                    StatusType.Speed => _Speed.Value,
+                    StatusType.BombLimit => _BombLimit.Value,
+                    StatusType.FireRange => _FireRange.Value,
+                    StatusType.Defense => _Defense.Value,
+                    StatusType.Resistance => _Resistance.Value,
+                    StatusType.None => 0,
+                    _ => throw new ArgumentOutOfRangeException(nameof(statusType), statusType, null)
+                };
+            }
+
+            public void SetStatusValue(StatusType statusType, int value)
+            {
+                switch (statusType)
+                {
+                    case StatusType.Hp:
+                        _Hp.Value = (_Hp.Value.Item1, value);
+                        break;
+                    case StatusType.Attack:
+                        _Attack.Value = value;
+                        break;
+                    case StatusType.Speed:
+                        _Speed.Value = value;
+                        break;
+                    case StatusType.BombLimit:
+                        _BombLimit.Value = value;
+                        break;
+                    case StatusType.FireRange:
+                        _FireRange.Value = value;
+                        break;
+                    case StatusType.Defense:
+                        _Defense.Value = value;
+                        break;
+                    case StatusType.Resistance:
+                        _Resistance.Value = value;
+                        break;
+                    case StatusType.None:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(statusType), statusType, null);
+                }
             }
         }
     }

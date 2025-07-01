@@ -3,6 +3,7 @@ using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Photon.Pun;
+using Skill;
 using UniRx;
 using UnityEngine;
 using State = StateMachine<Player.Common.PlayerCore>.State;
@@ -16,13 +17,15 @@ namespace Player.Common
             private PhotonView _PhotonView => Owner.photonView;
             private PlayerMove _PlayerMove => Owner._playerMove;
             private StateMachine<PlayerCore> _StateMachine => Owner._stateMachine;
+            private PlayerStatusInfo _PlayerStatusInfo => Owner._PlayerStatusInfo;
+            private AbnormalConditionEffectUseCase _AbnormalConditionEffectUseCase => Owner._abnormalConditionEffectUseCase;
+
             private IObservable<Unit> _OnClickWeaponSkill => Owner._WeaponSkillSubject;
             private IObservable<Unit> _OnClickNormalSkill => Owner._NormalSkillSubject;
             private IObservable<Unit> _OnClickSpecialSkill => Owner._SpecialSkillSubject;
             private IObservable<Unit> _OnClickDash => Owner._DashSkillSubject;
             private IObservable<Unit> _OnClickBomb => Owner._BombSkillSubject;
             private IObservable<int> _OnClickCharacterChange => Owner._TeamMemberReactiveProperty;
-            private PlayerStatusInfo _PlayerStatusInfo => Owner._PlayerStatusInfo;
 
 
             private Transform _playerTransform;
@@ -77,6 +80,7 @@ namespace Player.Common
 
                 _OnClickBomb
                     .Where(_ => Owner._translateStatusInBattleUseCase.CanPutBomb())
+                    .Where(_ => _AbnormalConditionEffectUseCase._CanPutBomb)
                     .Throttle(TimeSpan.FromSeconds(GameCommonData.InputBombInterval))
                     .Subscribe(_ =>
                     {

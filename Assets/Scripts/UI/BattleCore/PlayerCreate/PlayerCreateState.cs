@@ -55,7 +55,7 @@ namespace Manager.BattleManager
             private List<PlayerStatusUI> _PlayerStatusUiList => Owner._playerStatusUiList;
             private GameObject _ArrowIndicatorPrefab => Owner._arrowSkillIndicatorPrefab;
             private GameObject _CircleIndicatorPrefab => Owner._circleSkillIndicatorPrefab;
-            private AbnormalConditionEffectFacade _AbnormalConditionEffectFacade => Owner._abnormalConditionEffectFacade;
+            private AbnormalConditionEffectUseCase _AbnormalConditionEffectUseCase => Owner._abnormalConditionEffectUseCase;
             private BombProvider _BombProvider => Owner._bombProvider;
             private StateMachine<BattleCore> _StateMachineClone => Owner._stateMachine;
 
@@ -131,7 +131,7 @@ namespace Manager.BattleManager
                     //todo review later
                     //var weaponId = _WeaponMasterDataRepository.GetWeaponRandomWeaponId();
                     var characterData = _CharacterMasterDataRepository.GetCharacterData(characterId);
-                    var weaponData = _WeaponMasterDataRepository.GetWeaponData(30);
+                    var weaponData = _WeaponMasterDataRepository.GetWeaponData(74);
                     var spawnPoint = _StartPointsRepository.GetSpawnPoint(cpuActorNr);
                     var playerCore = _PlayerGeneratorUseCase.InstantiatePlayerCore(true, spawnPoint);
                     var photonView = playerCore.GetComponent<PhotonView>();
@@ -282,7 +282,7 @@ namespace Manager.BattleManager
                     _OnDamageFacade,
                     _PlayerGeneratorUseCase,
                     _CharacterCreateUseCase,
-                    _AbnormalConditionEffectFacade,
+                    _AbnormalConditionEffectUseCase,
                     _SkillAnimationFacade,
                     hpKey
                 );

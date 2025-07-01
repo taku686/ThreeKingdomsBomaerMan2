@@ -13,7 +13,7 @@ namespace Player.Common
         private Transform _playerTransform;
         private Animator _animator;
         private MovementAnimationManager _movementAnimationManager;
-        private AbnormalConditionEffectFacade _abnormalConditionEffectFacade;
+        private AbnormalConditionEffectUseCase _abnormalConditionEffectUseCase;
         private Rigidbody _rigidbody;
         private Vector3 _currentDestination;
         private LayerMask _blockingLayer;
@@ -22,13 +22,13 @@ namespace Player.Common
         public void Initialize
         (
             Animator animator,
-            AbnormalConditionEffectFacade abnormalConditionEffectFacade
+            AbnormalConditionEffectUseCase abnormalConditionEffectUseCase
         )
         {
             _blockingLayer = LayerMask.GetMask(GameCommonData.ObstacleLayer) | LayerMask.GetMask(GameCommonData.BombLayer);
             _playerTransform = transform;
             _rigidbody = GetComponent<Rigidbody>();
-            _abnormalConditionEffectFacade = abnormalConditionEffectFacade;
+            _abnormalConditionEffectUseCase = abnormalConditionEffectUseCase;
             SetAnimator(animator);
         }
 
@@ -46,13 +46,18 @@ namespace Player.Common
 
         public void Run(Vector3 inputValue)
         {
+            if (_abnormalConditionEffectUseCase._RandomMove)
+            {
+                inputValue = new Vector3(inputValue.z, 0, -inputValue.x); // 90度回転
+            }
+
             _movementAnimationManager.Move(GetDirection(inputValue));
-            if (inputValue is { x: 0, z: 0 } || !_abnormalConditionEffectFacade._CanMove)
+            if (inputValue is { x: 0, z: 0 } || !_abnormalConditionEffectUseCase._CanMove)
             {
                 _rigidbody.velocity = Vector3.zero;
                 return;
             }
-            
+
             if (IsObstacleOnLine(_playerTransform.position, inputValue))
             {
                 transform.localRotation = Quaternion.LookRotation(inputValue);

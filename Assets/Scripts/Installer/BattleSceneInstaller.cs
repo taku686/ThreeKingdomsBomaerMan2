@@ -42,7 +42,7 @@ namespace Common.Installer
             Container.Bind<BattleResultDataRepository>().AsCached();
             Container.Bind<CharacterObjectRepository>().AsCached();
             Container.Bind<SetupAnimatorUseCase>().AsCached();
-            Container.Bind<AbnormalConditionEffectFacade>().AsCached();
+            Container.Bind<AbnormalConditionEffectUseCase>().AsCached();
             Container.BindFactory<CharacterData, WeaponMasterData, LevelMasterData, TranslateStatusInBattleUseCase, TranslateStatusInBattleUseCase.Factory>().AsCached();
             Container.Bind<AnimatorControllerRepository>().FromComponentInNewPrefab(_animatorControllerRepositoryGameObject).AsSingle();
             Container.Bind<SkillEffectActivateUseCase>().FromComponentOn(_skillEffectActivateGameObject).AsCached();
