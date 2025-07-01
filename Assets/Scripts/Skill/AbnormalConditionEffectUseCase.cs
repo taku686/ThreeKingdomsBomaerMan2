@@ -19,10 +19,12 @@ namespace Skill
         private bool _canSkill;
         private bool _canChangeCharacter;
         public ReactiveProperty<bool> _CanPutBombReactiveProperty { get; } = new(true);
+        public bool _isBurning { get; private set; }
         public bool _RandomMove { get; private set; }
 
-        private const float PoisonDamageInterval = 1f;
+        private const float OneSecond = 1f;
         private const float PoisonDamageRate = 0.02f; // 最大HPの2%
+        private const int BurningDamage = 3; // 毎秒3ダメージ
 
         private readonly List<int> _charmedCharacterIds = new();
         private readonly Dictionary<AbnormalCondition, bool> _abnormalConditionInProgress = new();
@@ -74,11 +76,14 @@ namespace Skill
                     SoakingWet(effectTime);
                     break;
                 case AbnormalCondition.Burning:
+                    Burning(playerStatusInfo, effectTime);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(abnormalCondition), abnormalCondition, null);
             }
         }
+
+        #region AbnormalCondition Methods
 
         /// <summary>
         /// 一時的に行動不能になる（2～4秒に1回発生する）
@@ -111,38 +116,12 @@ namespace Skill
         /// <summary>
         /// 最大HPの２％のダメージを毎秒受け続ける
         /// </summary>
-        private static void Poison(PlayerCore.PlayerStatusInfo playerStatusInfo, float effectTime)
+        private void Poison(PlayerCore.PlayerStatusInfo playerStatusInfo, float effectTime)
         {
-            var cts = new CancellationTokenSource();
             var maxHp = playerStatusInfo._Hp.Value.Item1;
             var damageAmount = Mathf.CeilToInt(maxHp * PoisonDamageRate);
-
-            Observable
-                .Interval(TimeSpan.FromSeconds(PoisonDamageInterval))
-                .Subscribe(_ =>
-                {
-                    HpCalculateUseCase.InAsTask
-                    (
-                        playerStatusInfo,
-                        damageAmount,
-                        () =>
-                        {
-                            cts.Cancel();
-                            cts.Dispose();
-                        });
-                })
-                .AddTo(cts.Token);
-
-            Observable
-                .Timer(TimeSpan.FromSeconds(effectTime))
-                .Subscribe(_ =>
-                {
-                    cts.Cancel();
-                    cts.Dispose();
-                })
-                .AddTo(cts.Token);
+            ContinuousDamage(playerStatusInfo, effectTime, damageAmount);
         }
-
 
         /// <summary>
         /// 防御と耐性、移動速度が半分になる
@@ -214,8 +193,20 @@ namespace Skill
         /// 毎秒10ダメージ貰い続ける
         /// ボムの爆破時間が短くなる
         /// </summary>
-        private void Burning()
+        private void Burning(PlayerCore.PlayerStatusInfo playerStatusInfo, float effectTime)
         {
+            ContinuousDamage
+            (
+                playerStatusInfo,
+                effectTime,
+                BurningDamage
+            );
+
+            _isBurning = true;
+
+            Observable
+                .Timer(TimeSpan.FromSeconds(effectTime))
+                .Subscribe(_ => { _isBurning = false; });
         }
 
         /// <summary>
@@ -235,6 +226,8 @@ namespace Skill
         private void Stigmata()
         {
         }
+
+        #endregion
 
         private async UniTask RandomMoveStop(Animator animator, CancellationToken cts)
         {
@@ -261,6 +254,41 @@ namespace Skill
             Observable
                 .Timer(TimeSpan.FromSeconds(effectTime))
                 .Subscribe(_ => { playerStatusInfo.SetStatusValue(statusType, originValue); });
+        }
+
+        private void ContinuousDamage
+        (
+            PlayerCore.PlayerStatusInfo playerStatusInfo,
+            float effectTime,
+            int damageAmount
+        )
+        {
+            var cts = new CancellationTokenSource();
+
+            Observable
+                .Interval(TimeSpan.FromSeconds(OneSecond))
+                .Subscribe(_ =>
+                {
+                    HpCalculateUseCase.InAsTask
+                    (
+                        playerStatusInfo,
+                        damageAmount,
+                        () =>
+                        {
+                            cts.Cancel();
+                            cts.Dispose();
+                        });
+                })
+                .AddTo(cts.Token);
+
+            Observable
+                .Timer(TimeSpan.FromSeconds(effectTime))
+                .Subscribe(_ =>
+                {
+                    cts.Cancel();
+                    cts.Dispose();
+                })
+                .AddTo(cts.Token);
         }
 
         public void Dispose()

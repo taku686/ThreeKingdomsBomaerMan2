@@ -96,7 +96,6 @@ namespace Common.Data
         public const string LoginScene = "Login";
         public const float CloseDuration = 0.5f;
         public const float OpenDuration = 1.0f;
-        public const int ThreeMilliSecondsBeforeExplosion = 3000;
         public const int MaxCharacterLevel = 10;
         public const int MinCharacterLevel = 1;
         public const int MaxMissionCount = 20;

@@ -12,11 +12,12 @@ namespace Enemy
         {
             private StateMachine<EnemyCore> _stateMachine;
             private PhotonView _photonView;
-            private TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
             private MapManager _mapManager;
             private BoxCollider _boxCollider;
             private PutBomb _putBomb;
             private bool _isPutBomb;
+
+            private const int WaitDurationBeforeExplosion = 3000; // 3 seconds
 
             protected override void OnEnter(State prevState)
             {
@@ -36,7 +37,6 @@ namespace Enemy
                 _isPutBomb = false;
                 _stateMachine = Owner._stateMachine;
                 _photonView = Owner._photonView;
-                _translateStatusInBattleUseCase = Owner._translateStatusInBattleUseCase;
                 _boxCollider = Owner._boxCollider;
                 _putBomb = Owner._putBomb;
                 PutBomb();
@@ -44,9 +44,8 @@ namespace Enemy
 
             private void PutBomb()
             {
-                Debug.Log("ボム設置");
                 var playerId = _photonView.ViewID;
-                var explosionTime = PhotonNetwork.ServerTimestamp + GameCommonData.ThreeMilliSecondsBeforeExplosion;
+                var explosionTime = PhotonNetwork.ServerTimestamp + WaitDurationBeforeExplosion;
                 var photonView = _photonView;
                 //todo 後で修正
                 //var damageAmount = _translateStatusInBattleUseCase._Attack;

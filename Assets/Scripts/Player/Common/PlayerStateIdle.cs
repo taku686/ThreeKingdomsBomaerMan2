@@ -19,7 +19,6 @@ namespace Player.Common
             private StateMachine<PlayerCore> _StateMachine => Owner._stateMachine;
             private PlayerStatusInfo _PlayerStatusInfo => Owner._PlayerStatusInfo;
             private AbnormalConditionEffectUseCase _AbnormalConditionEffectUseCase => Owner._abnormalConditionEffectUseCase;
-
             private IObservable<Unit> _OnClickWeaponSkill => Owner._WeaponSkillSubject;
             private IObservable<Unit> _OnClickNormalSkill => Owner._NormalSkillSubject;
             private IObservable<Unit> _OnClickSpecialSkill => Owner._SpecialSkillSubject;
@@ -30,6 +29,8 @@ namespace Player.Common
 
             private Transform _playerTransform;
             private CancellationTokenSource _cts;
+            private const int WaitDurationBeforeExplosion = 3000;
+            private const int WaitDurationBeforeExplosionInBurning = 1000;
 
             protected override void OnEnter(State prevState)
             {
@@ -39,7 +40,6 @@ namespace Player.Common
             }
 
             protected override void OnExit(State nextState)
-
             {
                 _PlayerMove.Stop();
                 Cancel();
@@ -85,7 +85,8 @@ namespace Player.Common
                     .Subscribe(_ =>
                     {
                         var playerId = _PhotonView.ViewID;
-                        var explosionTime = PhotonNetwork.ServerTimestamp + GameCommonData.ThreeMilliSecondsBeforeExplosion;
+                        var waitDuration = _AbnormalConditionEffectUseCase._isBurning ? WaitDurationBeforeExplosionInBurning : WaitDurationBeforeExplosion;
+                        var explosionTime = PhotonNetwork.ServerTimestamp + waitDuration;
                         var damageAmount = (int)TranslateStatusInBattleUseCase.Translate(StatusType.Attack, _PlayerStatusInfo._Attack.Value);
                         var fireRange = (int)TranslateStatusInBattleUseCase.Translate(StatusType.FireRange, _PlayerStatusInfo._FireRange.Value);
                         var boxCollider = Owner._boxCollider;
