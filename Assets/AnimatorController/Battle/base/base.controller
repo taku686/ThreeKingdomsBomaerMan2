@@ -1061,7 +1061,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Impact
-  m_Speed: 1.5
+  m_Speed: 2
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 6873460886087105156}
@@ -1076,7 +1076,7 @@ AnimatorState:
   m_TimeParameterActive: 0
   m_Motion: {fileID: 7400000, guid: c69441891be7fe64c880356c200d340d, type: 2}
   m_Tag: 
-  m_SpeedParameter: 
+  m_SpeedParameter: speedh
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 

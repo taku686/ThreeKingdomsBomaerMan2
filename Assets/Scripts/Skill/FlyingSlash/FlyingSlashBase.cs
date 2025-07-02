@@ -75,9 +75,9 @@ namespace Skill.Attack.FlyingSlash
             var endPos = spawnPosition + playerTransform.forward * range;
 
             var particle = effectClone.GetComponent<ParticleSystem>();
+            SetupParticleSystem(effectClone.gameObject);
             effectClone.transform.DOMove(endPos, EffectDuration)
                 .SetEase(Ease.Linear)
-                .OnComplete(() => particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear))
                 .SetLink(effectClone.gameObject);
 
             var boxCollider = effectClone.GetComponent<BoxCollider>();

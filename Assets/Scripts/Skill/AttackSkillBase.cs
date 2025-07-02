@@ -47,6 +47,16 @@ namespace Skill
             PhotonNetwork.LocalPlayer.SetHitAttackData(dic);
         }
 
+        protected void SetupParticleSystem(GameObject effect)
+        {
+            var particleSystems = effect.GetComponentsInChildren<ParticleSystem>();
+            foreach (var particleSystem in particleSystems)
+            {
+                var main = particleSystem.main;
+                main.stopAction = ParticleSystemStopAction.Destroy;
+            }
+        }
+
         protected void Cancel()
         {
             if (_Cts == null)

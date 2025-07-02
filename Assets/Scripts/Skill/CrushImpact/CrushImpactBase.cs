@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using AttributeAttack;
 using Common.Data;
 using Cysharp.Threading.Tasks;
@@ -13,9 +14,11 @@ namespace Skill.CrushImpact
 {
     public class CrushImpactBase : AttackSkillBase, IAttackBehaviour
     {
+        private GameObject _effectClone;
+        private Collider _effectCollider;
         private readonly SkillEffectRepository _skillEffectRepository;
-        private const float DelayTime = 0.8f;
-        private const float ColliderEnableDuration = 0.9f;
+        private const float WaitDurationForStart = 0.85f;
+        private const float WaitDurationForEnd = 1.75f;
 
         [Inject]
         public CrushImpactBase
@@ -33,22 +36,32 @@ namespace Skill.CrushImpact
         protected void CrushImpact
         (
             AbnormalCondition abnormalCondition,
-            Animator animator,
             int skillId,
             Transform playerTransform
         )
         {
-            var observableStateMachineTrigger = animator.GetBehaviour<ObservableStateMachineTrigger>();
-            observableStateMachineTrigger
-                .OnStateEnterAsObservable()
-                .Where(info => info.StateInfo.IsName(GameCommonData.ImpactKey))
-                .Take(1)
-                .Delay(TimeSpan.FromSeconds(DelayTime))
-                .Subscribe(_ => { ActivateEffect(playerTransform, abnormalCondition, skillId); })
-                .AddTo(playerTransform);
+            _Cts = new CancellationTokenSource();
+
+            Observable
+                .Timer(TimeSpan.FromSeconds(WaitDurationForStart))
+                .Subscribe(_ =>
+                {
+                    ActivateEffect(playerTransform, abnormalCondition, skillId);
+                    SetupCollider(_effectClone, playerTransform, skillId);
+                })
+                .AddTo(_Cts.Token);
+
+            Observable
+                .Timer(TimeSpan.FromSeconds(WaitDurationForEnd))
+                .Subscribe(_ =>
+                {
+                    _effectCollider.enabled = false;
+                    Cancel();
+                })
+                .AddTo(_Cts.Token);
         }
 
-        protected virtual void ActivateEffect
+        protected void ActivateEffect
         (
             Transform playerTransform,
             AbnormalCondition abnormalCondition,
@@ -59,9 +72,9 @@ namespace Skill.CrushImpact
             var spawnPosition = playerTransform.position;
             var effectClone = Object.Instantiate(effect, spawnPosition, Quaternion.identity);
             var effectTransform = effectClone.transform;
-            var effectObj = effectClone.gameObject;
+            _effectClone = effectClone.gameObject;
             FixTransform(effectTransform, playerTransform);
-            SetupCollider(effectObj, playerTransform, skillId);
+            SetupParticleSystem(_effectClone);
         }
 
         private static void FixTransform(Transform effectTransform, Transform playerTransform)
@@ -73,22 +86,14 @@ namespace Skill.CrushImpact
 
         private void SetupCollider(GameObject effectClone, Transform playerTransform, int skillId)
         {
-            var effectCollider = effectClone.GetComponent<Collider>();
-            effectCollider.isTrigger = true;
+            _effectCollider = effectClone.GetComponent<Collider>();
+            _effectCollider.isTrigger = true;
             var player = playerTransform.gameObject;
 
-            effectCollider.OnTriggerEnterAsObservable()
+            _effectCollider.OnTriggerEnterAsObservable()
                 .Where(collider => IsObstaclesTag(collider.gameObject))
                 .Subscribe(collider => HitPlayer(player, collider.gameObject, skillId))
                 .AddTo(effectClone);
-
-            DisableCollider(effectCollider).Forget();
-        }
-
-        private static async UniTask DisableCollider(Collider collider)
-        {
-            await UniTask.Delay(TimeSpan.FromSeconds(ColliderEnableDuration));
-            collider.enabled = false;
         }
 
         public void Dispose()

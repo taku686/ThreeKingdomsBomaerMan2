@@ -8,26 +8,34 @@ namespace Skill.CrushImpact
 {
     public class NormalCrushImpact : IAttackBehaviour
     {
-        private readonly Animator _animator;
         private readonly Transform _playerTransform;
-        private const float AnimationTime = 0.983f;
+
+        //private const float AnimationTime = 0.983f;
+        private const float AnimationTime = 0.5f;
 
         [Inject]
         public NormalCrushImpact
         (
-            Animator animator,
             Transform playerTransform
         )
         {
-            _animator = animator;
             _playerTransform = playerTransform;
         }
 
         public void Attack()
         {
             _playerTransform.GetComponentInChildren<WeaponObject>();
-            _playerTransform.DOJump(_playerTransform.position, 3f, 1, AnimationTime)
-                .SetEase(Ease.InOutQuad)
+            var startValue = _playerTransform.position;
+            var endValue = _playerTransform.position + new Vector3(0, 3f, 0);
+            var sequence = DOTween.Sequence();
+
+            sequence
+                .Append(_playerTransform
+                    .DOMove(endValue, AnimationTime / 2)
+                    .SetEase(Ease.OutCubic))
+                .Append(_playerTransform
+                    .DOMove(startValue, AnimationTime / 2)
+                    .SetEase(Ease.InCubic))
                 .SetLink(_playerTransform.gameObject);
         }
 
@@ -35,7 +43,7 @@ namespace Skill.CrushImpact
         {
         }
 
-        public class Factory : PlaceholderFactory<Animator, Transform, NormalCrushImpact>
+        public class Factory : PlaceholderFactory<Transform, NormalCrushImpact>
         {
         }
     }

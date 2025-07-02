@@ -66,7 +66,7 @@ namespace Skill.CrushImpact
         {
             if (attack == null && attribute == AbnormalCondition.None)
             {
-                return _normalCrushImpactFactory.Create(animator, playerTransform);
+                return _normalCrushImpactFactory.Create(playerTransform);
             }
 
             return attribute switch

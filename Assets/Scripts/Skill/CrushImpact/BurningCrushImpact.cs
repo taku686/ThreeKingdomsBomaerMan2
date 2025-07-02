@@ -31,7 +31,7 @@ namespace Skill.CrushImpact
         public override void Attack()
         {
             _attackBehaviour.Attack();
-            CrushImpact(AbnormalCondition.Burning, _animator, _skillId, _playerTransform);
+            CrushImpact(AbnormalCondition.Burning, _skillId, _playerTransform);
         }
 
         public class Factory : PlaceholderFactory

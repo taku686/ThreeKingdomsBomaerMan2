@@ -31,7 +31,7 @@ namespace Skill.CrushImpact
         public override void Attack()
         {
             _attackBehaviour.Attack();
-            CrushImpact(AbnormalCondition.Confusion, _animator, _skillId, _playerTransform);
+            CrushImpact(AbnormalCondition.Confusion, _skillId, _playerTransform);
         }
 
         public class Factory : PlaceholderFactory

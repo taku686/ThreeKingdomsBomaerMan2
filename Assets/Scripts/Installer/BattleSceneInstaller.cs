@@ -171,7 +171,7 @@ namespace Common.Installer
         private void InstallCrushImpact()
         {
             Container.BindFactory<int, Animator, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeCrushImpactFactory.Factory>().FromFactory<AttributeCrushImpactFactory>();
-            Container.BindFactory<Animator, Transform, NormalCrushImpact, NormalCrushImpact.Factory>().AsCached();
+            Container.BindFactory<Transform, NormalCrushImpact, NormalCrushImpact.Factory>().AsCached();
             Container.BindFactory<int, Animator, Transform, IAttackBehaviour, PoisonCrushImpact, PoisonCrushImpact.Factory>().AsCached();
             Container.BindFactory<int, Animator, Transform, IAttackBehaviour, ParalysisCrushImpact, ParalysisCrushImpact.Factory>().AsCached();
             Container.BindFactory<int, Animator, Transform, IAttackBehaviour, FrozenCrushImpact, FrozenCrushImpact.Factory>().AsCached();
