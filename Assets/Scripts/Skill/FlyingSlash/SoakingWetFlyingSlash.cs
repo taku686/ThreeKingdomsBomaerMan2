@@ -33,7 +33,7 @@ namespace Skill.Attack.FlyingSlash
         public override void Attack()
         {
             _attackBehaviour.Attack();
-            FlyingSlash(AbnormalCondition.SoakingWet, _animator, _skillId, _playerTransform);
+            FlyingSlash(AbnormalCondition.SoakingWet, _skillId, _playerTransform);
         }
 
         public class Factory : PlaceholderFactory

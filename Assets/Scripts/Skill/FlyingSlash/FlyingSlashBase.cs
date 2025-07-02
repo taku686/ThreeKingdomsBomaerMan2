@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using AttributeAttack;
 using Common.Data;
 using Cysharp.Threading.Tasks;
@@ -15,9 +16,10 @@ namespace Skill.Attack.FlyingSlash
 {
     public class FlyingSlashBase : AttackSkillBase, IAttackBehaviour
     {
+        private GameObject _effectClone;
         private readonly SkillEffectRepository _skillEffectRepository;
         private readonly SkillMasterDataRepository _skillMasterDataRepository;
-        private const float DelayTime = 0.1f;
+        private const float DelayTime = 0.26f;
         private const float EffectHeight = 0.5f;
         private const float EffectScale = 0.3f;
         private const float EffectDuration = 0.5f;
@@ -41,19 +43,16 @@ namespace Skill.Attack.FlyingSlash
         protected void FlyingSlash
         (
             AbnormalCondition abnormalCondition,
-            Animator animator,
             int skillId,
             Transform playerTransform
         )
         {
-            var observableStateMachineTrigger = animator.GetBehaviour<ObservableStateMachineTrigger>();
-            observableStateMachineTrigger
-                .OnStateEnterAsObservable()
-                .Where(info => info.StateInfo.IsName(GameCommonData.SlashKey))
-                .Take(1)
-                .Delay(TimeSpan.FromSeconds(DelayTime))
+            _Cts = new CancellationTokenSource();
+
+            Observable
+                .Timer(TimeSpan.FromSeconds(DelayTime))
                 .Subscribe(_ => { ActivateEffect(playerTransform, abnormalCondition, skillId); })
-                .AddTo(playerTransform);
+                .AddTo(_Cts.Token);
         }
 
         protected virtual void ActivateEffect
@@ -70,15 +69,18 @@ namespace Skill.Attack.FlyingSlash
             var spawnPosition = new Vector3(playerPosition.x, playerPosition.y + EffectHeight, playerPosition.z);
             var spawnRotation = new Vector3(0, playerTransform.eulerAngles.y + 180, 0);
             var effectClone = Object.Instantiate(effect, spawnPosition, Quaternion.Euler(spawnRotation));
-            effectClone.transform.position -= effectClone.transform.forward * 2;
-            effectClone.transform.localScale *= EffectScale;
+            var effectTransform = effectClone.transform;
+            _effectClone = effectClone.gameObject;
+            effectTransform.position -= effectTransform.forward * 2;
+            effectTransform.localScale *= EffectScale;
             var endPos = spawnPosition + playerTransform.forward * range;
 
-            var particle = effectClone.GetComponent<ParticleSystem>();
-            SetupParticleSystem(effectClone.gameObject);
-            effectClone.transform.DOMove(endPos, EffectDuration)
+            var particle = _effectClone.GetComponent<ParticleSystem>();
+            SetupParticleSystem(_effectClone);
+            effectTransform.DOMove(endPos, EffectDuration)
                 .SetEase(Ease.Linear)
-                .SetLink(effectClone.gameObject);
+                .OnComplete(() => { particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear); })
+                .SetLink(_effectClone);
 
             var boxCollider = effectClone.GetComponent<BoxCollider>();
             boxCollider.isTrigger = true;
@@ -87,7 +89,7 @@ namespace Skill.Attack.FlyingSlash
                 .Where(collider => IsObstaclesTag(collider.gameObject))
                 .SelectMany(collider => HitEffectAsync(particle, collider.gameObject, playerTransform.gameObject, skillId).ToObservable())
                 .Subscribe()
-                .AddTo(effectClone);
+                .AddTo(_effectClone);
         }
 
         private async UniTask HitEffectAsync

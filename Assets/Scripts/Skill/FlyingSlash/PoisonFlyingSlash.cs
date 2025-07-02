@@ -32,7 +32,7 @@ public class PoisonFlyingSlash : FlyingSlashBase
     public override void Attack()
     {
         _attackBehaviour.Attack();
-        FlyingSlash(AbnormalCondition.Poison, _animator, _skillId, _playerTransform);
+        FlyingSlash(AbnormalCondition.Poison, _skillId, _playerTransform);
     }
 
     public class Factory : PlaceholderFactory
