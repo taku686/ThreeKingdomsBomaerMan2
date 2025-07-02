@@ -199,7 +199,17 @@ namespace Manager.BattleManager
 
                 _AbnormalConditionEffectUseCase
                     ._CanPutBombReactiveProperty
-                    .Subscribe(canPutBomb => { _View.ActivateBombButton(canPutBomb); })
+                    .Subscribe(isActive => { _View.ActivateBombButton(isActive); })
+                    .AddTo(_cts.Token);
+
+                _AbnormalConditionEffectUseCase
+                    ._CanSkillReactiveProperty
+                    .Subscribe(isActive => { _View.ActiveSkillButton(isActive); })
+                    .AddTo(_cts.Token);
+
+                _AbnormalConditionEffectUseCase
+                    ._CanCharacterChangeReactiveProperty
+                    .Subscribe(isActive => { _View.ActiveCharacterChangeButton(isActive); })
                     .AddTo(_cts.Token);
 
                 Observable

@@ -2,7 +2,6 @@ using System;
 using Common.Data;
 using UI.BattleCore.InBattle;
 using UniRx;
-using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,13 +19,14 @@ namespace UI.Common
 
         public void ApplyViewModel(ViewModel viewModel)
         {
+            //todo : review later
             var normalSkill = viewModel._NormalSkillMasterData;
             var specialSkill = viewModel._SpecialSkillMasterData;
             var weaponSkill = viewModel._WeaponSkillMasterData;
             var levelMasterData = viewModel._LevelMasterData;
 
-            _normalSkillButtonView.InitializeSkillButton(normalSkill, levelMasterData);
-            _specialSkillButtonView.InitializeSkillButton(specialSkill, levelMasterData);
+            _normalSkillButtonView.InitializeSkillButton(weaponSkill, levelMasterData);
+            _specialSkillButtonView.InitializeSkillButton(weaponSkill, levelMasterData);
             _jumpSkillButtonView.InitializeSkillButton(null, null);
             _changeCharacterButtonView.InitializeSkillButton(null, null);
 
@@ -47,6 +47,31 @@ namespace UI.Common
         {
             bombButton.interactable = isActive;
             _bombDisableImage.gameObject.SetActive(!isActive);
+        }
+
+        public void ActivateWeaponSkillButton(bool isActive)
+        {
+            _weaponSkillButtonView.ActivateButton(isActive);
+        }
+
+        public void ActivateNormalSkillButton(bool isActive)
+        {
+            _normalSkillButtonView.ActivateButton(isActive);
+        }
+
+        public void ActivateSpecialSkillButton(bool isActive)
+        {
+            _specialSkillButtonView.ActivateButton(isActive);
+        }
+
+        public void ActivateJumpSkillButton(bool isActive)
+        {
+            _jumpSkillButtonView.ActivateButton(isActive);
+        }
+
+        public void ActivateChangeCharacterButton(bool isActive)
+        {
+            _changeCharacterButtonView.ActivateButton(isActive);
         }
 
         public void UpdateTimer()

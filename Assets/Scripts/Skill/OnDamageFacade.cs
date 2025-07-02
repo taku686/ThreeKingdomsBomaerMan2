@@ -12,7 +12,7 @@ namespace Skill
     public class OnDamageFacade : IDisposable
     {
         private readonly Subject<SkillMasterData> _onDamageSubject = new();
-        private readonly Subject<(int, SkillMasterData)> _onAbnormalConditionSubject = new();
+        private readonly Subject<(PlayerConditionInfo, SkillMasterData)> _onAbnormalConditionSubject = new();
         private CancellationTokenSource _cts;
 
         [Inject]
@@ -28,7 +28,7 @@ namespace Skill
                 .AsObservable();
         }
 
-        public IObservable<(int, SkillMasterData)> OnAbnormalConditionAsObservable()
+        public IObservable<(PlayerConditionInfo, SkillMasterData)> OnAbnormalConditionAsObservable()
         {
             return _onAbnormalConditionSubject
                 .Where(tuple => tuple.Item2 != null)
@@ -47,7 +47,7 @@ namespace Skill
                 return;
             }
 
-            _onAbnormalConditionSubject.OnNext((playerConditionInfo.GetPlayerIndex(), skillMasterData));
+            _onAbnormalConditionSubject.OnNext((playerConditionInfo, skillMasterData));
 
             foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
             {

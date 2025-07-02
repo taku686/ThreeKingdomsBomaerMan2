@@ -76,7 +76,7 @@ namespace Skill
 
             _onDamageFacade
                 .OnAbnormalConditionAsObservable()
-                .Where(tuple => tuple.Item1 == playerConditionInfo.GetPlayerIndex())
+                .Where(tuple => tuple.Item1.GetPlayerIndex() == playerConditionInfo.GetPlayerIndex())
                 .Where(tuple => tuple.Item2.SkillType == SkillType.Passive)
                 .Subscribe(tuple =>
                 {

@@ -26,6 +26,7 @@ public class SkillButtonView : MonoBehaviour
     private bool _isInteractive;
     private SkillActionType _skillActionType;
     private SkillDirection _skillDirection;
+    private SkillMasterData _skillMasterData;
     private const float MaxFillAmount = 1;
     private const float MinFillAmount = 0;
 
@@ -52,6 +53,7 @@ public class SkillButtonView : MonoBehaviour
 
     public void InitializeSkillButton(SkillMasterData skillMasterData, LevelMasterData levelMasterData)
     {
+        _skillMasterData = skillMasterData;
         _timerSkill = 0;
         _skillIntervalImage.fillAmount = MinFillAmount;
         _isInteractive = false;
@@ -84,6 +86,11 @@ public class SkillButtonView : MonoBehaviour
 
     public void ActivateButton(bool isActivate)
     {
+        if (_skillMasterData == null && isActivate && !IsRequiredType())
+        {
+            return;
+        }
+
         _isInteractive = isActivate;
         _skillButton.interactable = isActivate;
         _disableImage.gameObject.SetActive(!isActivate);
@@ -171,9 +178,7 @@ public class SkillButtonView : MonoBehaviour
             return false;
         }
 
-        if
-        (
-            skillActionType
+        return skillActionType
             is SkillActionType.Heal
             or SkillActionType.ContinuousHeal
             or SkillActionType.AllBuff
@@ -182,13 +187,7 @@ public class SkillButtonView : MonoBehaviour
             or SkillActionType.SpeedBuff
             or SkillActionType.FireRangeBuff
             or SkillActionType.BombLimitBuff
-            or SkillActionType.ResistanceBuff
-        )
-        {
-            return true;
-        }
-
-        return false;
+            or SkillActionType.ResistanceBuff;
     }
 
     private void ResetSkillIntervalImage()
@@ -216,7 +215,9 @@ public class SkillButtonView : MonoBehaviour
 
     private bool IsRequiredType()
     {
-        return _skillButtonType is not (SkillButtonType.NormalSkillButton or SkillButtonType.SpecialSkillButton or SkillButtonType.WeaponSkillButton);
+        return _skillButtonType is
+            SkillButtonType.JumpSkillButton or
+            SkillButtonType.CharacterChangeSkillButton;
     }
 
     public IObservable<Unit> OnClickSkillButtonAsObservable()

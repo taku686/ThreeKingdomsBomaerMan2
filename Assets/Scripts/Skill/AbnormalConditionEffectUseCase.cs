@@ -6,7 +6,6 @@ using Cysharp.Threading.Tasks;
 using Player.Common;
 using UniRx;
 using UnityEngine;
-using UnityEngine.Assertions.Must;
 using UseCase;
 using Zenject;
 using Random = UnityEngine.Random;
@@ -16,11 +15,11 @@ namespace Skill
     public class AbnormalConditionEffectUseCase : IDisposable
     {
         public bool _CanMove { get; private set; }
-        private bool _canSkill;
-        private bool _canChangeCharacter;
-        public ReactiveProperty<bool> _CanPutBombReactiveProperty { get; } = new(true);
-        public bool _isBurning { get; private set; }
+        public bool _IsBurning { get; private set; }
         public bool _RandomMove { get; private set; }
+        public readonly ReactiveProperty<bool> _CanPutBombReactiveProperty = new(true);
+        public readonly ReactiveProperty<bool> _CanSkillReactiveProperty = new(true);
+        public readonly ReactiveProperty<bool> _CanCharacterChangeReactiveProperty = new(true);
 
         private const float OneSecond = 1f;
         private const float PoisonDamageRate = 0.02f; // 最大HPの2%
@@ -32,7 +31,7 @@ namespace Skill
         [Inject]
         public AbnormalConditionEffectUseCase()
         {
-            _CanMove = true;
+            Initialize();
         }
 
         private const float CantMoveTime = 0.5f;
@@ -41,7 +40,8 @@ namespace Skill
         (
             AbnormalCondition abnormalCondition,
             Animator animator,
-            PlayerCore.PlayerStatusInfo playerStatusInfo,
+            PlayerCore.PlayerStatusInfo myStatusInfo,
+            PlayerConditionInfo hitPlayerConditionInfo,
             float effectTime
         )
         {
@@ -51,32 +51,37 @@ namespace Skill
                     Paralysis(animator, effectTime);
                     break;
                 case AbnormalCondition.Poison:
-                    Poison(playerStatusInfo, effectTime);
+                    Poison(myStatusInfo, effectTime);
                     break;
                 case AbnormalCondition.Frozen:
-                    Frozen(playerStatusInfo, effectTime);
+                    Frozen(myStatusInfo, effectTime);
                     break;
                 case AbnormalCondition.Confusion:
                     Confusion(effectTime);
                     break;
                 case AbnormalCondition.Charm:
+                    Charm();
                     break;
                 case AbnormalCondition.Miasma:
-                    Miasma(playerStatusInfo, effectTime);
+                    Miasma(myStatusInfo, effectTime);
                     break;
                 case AbnormalCondition.Darkness:
+                    Darkness();
                     break;
                 case AbnormalCondition.LifeSteal:
+                    LifeSteal();
                     break;
                 case AbnormalCondition.HellFire:
+                    HellFire(myStatusInfo, animator, effectTime);
                     break;
                 case AbnormalCondition.TimeStop:
+                    Stigmata(effectTime);
                     break;
                 case AbnormalCondition.SoakingWet:
                     SoakingWet(effectTime);
                     break;
                 case AbnormalCondition.Burning:
-                    Burning(playerStatusInfo, effectTime);
+                    Burning(myStatusInfo, effectTime);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(abnormalCondition), abnormalCondition, null);
@@ -93,12 +98,11 @@ namespace Skill
         private void Paralysis(Animator animator, float duration)
         {
             var cts = new CancellationTokenSource();
-            _abnormalConditionInProgress[AbnormalCondition.Paralysis] = false;
 
             Observable
                 .EveryUpdate()
                 .Where(_ => !_abnormalConditionInProgress[AbnormalCondition.Paralysis])
-                .SelectMany(_ => RandomMoveStop(animator, cts.Token).ToObservable())
+                .SelectMany(_ => RandomMoveStop(AbnormalCondition.Paralysis, animator, cts.Token).ToObservable())
                 .Subscribe()
                 .AddTo(cts.Token);
 
@@ -202,11 +206,11 @@ namespace Skill
                 BurningDamage
             );
 
-            _isBurning = true;
+            _IsBurning = true;
 
             Observable
                 .Timer(TimeSpan.FromSeconds(effectTime))
-                .Subscribe(_ => { _isBurning = false; });
+                .Subscribe(_ => { _IsBurning = false; });
         }
 
         /// <summary>
@@ -214,8 +218,44 @@ namespace Skill
         ///・一時的に行動不能になる
         ///・全ステータスが半減される
         /// </summary>
-        private void HellFire()
+        private void HellFire
+        (
+            PlayerCore.PlayerStatusInfo playerStatusInfo,
+            Animator animator,
+            float effectTime
+        )
         {
+            var cts = new CancellationTokenSource();
+
+            // スキルが使えなくなる
+            _CanSkillReactiveProperty.Value = false;
+
+            // 一時的に行動不能になる
+            Observable
+                .EveryUpdate()
+                .Where(_ => !_abnormalConditionInProgress[AbnormalCondition.HellFire])
+                .SelectMany(_ => RandomMoveStop(AbnormalCondition.HellFire, animator, cts.Token).ToObservable())
+                .Subscribe()
+                .AddTo(cts.Token);
+
+            // 全ステータスが半減される
+            HalvedStatus(StatusType.Attack, playerStatusInfo, effectTime);
+            HalvedStatus(StatusType.Speed, playerStatusInfo, effectTime);
+            HalvedStatus(StatusType.BombLimit, playerStatusInfo, effectTime);
+            HalvedStatus(StatusType.FireRange, playerStatusInfo, effectTime);
+            HalvedStatus(StatusType.Defense, playerStatusInfo, effectTime);
+            HalvedStatus(StatusType.Resistance, playerStatusInfo, effectTime);
+
+            // スキルが使えるようになるまでの時間を設定
+            Observable
+                .Timer(TimeSpan.FromSeconds(effectTime))
+                .Subscribe(_ =>
+                {
+                    _CanSkillReactiveProperty.Value = true;
+                    _CanMove = true;
+                    cts.Cancel();
+                    cts.Dispose();
+                });
         }
 
         /// <summary>
@@ -223,22 +263,57 @@ namespace Skill
         ///・ボム設置ができなくなる
         ///・キャラクターの変更ができなくなる
         /// </summary>
-        private void Stigmata()
+        private void Stigmata(float effectTime)
         {
+            _CanSkillReactiveProperty.Value = false;
+            _CanPutBombReactiveProperty.Value = false;
+            _CanCharacterChangeReactiveProperty.Value = false;
+
+            Observable
+                .Timer(TimeSpan.FromSeconds(effectTime))
+                .Subscribe(_ =>
+                {
+                    _CanSkillReactiveProperty.Value = true;
+                    _CanPutBombReactiveProperty.Value = true;
+                    _CanCharacterChangeReactiveProperty.Value = true;
+                });
         }
 
         #endregion
 
-        private async UniTask RandomMoveStop(Animator animator, CancellationToken cts)
+        private void Initialize()
         {
-            _abnormalConditionInProgress[AbnormalCondition.Paralysis] = true;
+            _abnormalConditionInProgress[AbnormalCondition.Paralysis] = false;
+            _abnormalConditionInProgress[AbnormalCondition.Poison] = false;
+            _abnormalConditionInProgress[AbnormalCondition.Frozen] = false;
+            _abnormalConditionInProgress[AbnormalCondition.Confusion] = false;
+            _abnormalConditionInProgress[AbnormalCondition.Charm] = false;
+            _abnormalConditionInProgress[AbnormalCondition.Miasma] = false;
+            _abnormalConditionInProgress[AbnormalCondition.Darkness] = false;
+            _abnormalConditionInProgress[AbnormalCondition.LifeSteal] = false;
+            _abnormalConditionInProgress[AbnormalCondition.HellFire] = false;
+            _abnormalConditionInProgress[AbnormalCondition.TimeStop] = false;
+            _abnormalConditionInProgress[AbnormalCondition.SoakingWet] = false;
+            _abnormalConditionInProgress[AbnormalCondition.Burning] = false;
+
+            _CanMove = true;
+        }
+
+        private async UniTask RandomMoveStop
+        (
+            AbnormalCondition abnormalCondition,
+            Animator animator,
+            CancellationToken cts
+        )
+        {
+            _abnormalConditionInProgress[abnormalCondition] = true;
             var randomTime = Random.Range(2f, 4f);
             await UniTask.Delay((int)(randomTime * 1000), cancellationToken: cts);
             _CanMove = false;
             animator.SetTrigger(GameCommonData.HitParameterName);
             await UniTask.Delay((int)(CantMoveTime * 1000), cancellationToken: cts);
             _CanMove = true;
-            _abnormalConditionInProgress[AbnormalCondition.Paralysis] = false;
+            _abnormalConditionInProgress[abnormalCondition] = false;
         }
 
         private static void HalvedStatus

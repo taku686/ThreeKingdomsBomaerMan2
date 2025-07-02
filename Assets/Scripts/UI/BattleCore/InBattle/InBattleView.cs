@@ -54,6 +54,19 @@ public class InBattleView : BattleViewBase
         _inputView.ActivateBombButton(isActive);
     }
 
+    public void ActiveSkillButton(bool isActive)
+    {
+        _inputView.ActivateWeaponSkillButton(isActive);
+        _inputView.ActivateNormalSkillButton(isActive);
+        _inputView.ActivateSpecialSkillButton(isActive);
+        _inputView.ActivateJumpSkillButton(isActive);
+    }
+    
+    public void ActiveCharacterChangeButton(bool isActive)
+    {
+        _inputView.ActivateChangeCharacterButton(isActive);
+    }
+
     public IObservable<Unit> OnClickBombButtonAsObservable()
     {
         return _inputView.OnClickBombButtonAsObservable();

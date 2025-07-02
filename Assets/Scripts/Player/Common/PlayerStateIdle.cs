@@ -85,7 +85,7 @@ namespace Player.Common
                     .Subscribe(_ =>
                     {
                         var playerId = _PhotonView.ViewID;
-                        var waitDuration = _AbnormalConditionEffectUseCase._isBurning ? WaitDurationBeforeExplosionInBurning : WaitDurationBeforeExplosion;
+                        var waitDuration = _AbnormalConditionEffectUseCase._IsBurning ? WaitDurationBeforeExplosionInBurning : WaitDurationBeforeExplosion;
                         var explosionTime = PhotonNetwork.ServerTimestamp + waitDuration;
                         var damageAmount = (int)TranslateStatusInBattleUseCase.Translate(StatusType.Attack, _PlayerStatusInfo._Attack.Value);
                         var fireRange = (int)TranslateStatusInBattleUseCase.Translate(StatusType.FireRange, _PlayerStatusInfo._FireRange.Value);

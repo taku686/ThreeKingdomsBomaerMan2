@@ -252,10 +252,11 @@ namespace Player.Common
 
             _onDamageFacade
                 .OnAbnormalConditionAsObservable()
-                .Where(tuple => tuple.Item1 == instantiationId)
-                .Select(tuple => tuple.Item2)
-                .Subscribe(skillData =>
+                .Where(tuple => tuple.Item1.GetPlayerIndex() == instantiationId)
+                .Subscribe(tuple =>
                 {
+                    var hitPlayerInfo = tuple.Item1;
+                    var skillData = tuple.Item2;
                     var abnormalConditions = skillData.AbnormalConditionEnum;
                     foreach (var abnormalCondition in abnormalConditions)
                     {
@@ -264,6 +265,7 @@ namespace Player.Common
                             abnormalCondition,
                             _animator,
                             _PlayerStatusInfo,
+                            hitPlayerInfo,
                             skillData.EffectTime
                         );
                     }

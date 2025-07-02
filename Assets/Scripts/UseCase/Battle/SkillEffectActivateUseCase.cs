@@ -81,7 +81,7 @@ public class SkillEffectActivateUseCase : MonoBehaviour
 
         _onDamageFacade
             .OnAbnormalConditionAsObservable()
-            .Where(tuple => tuple.Item1 == instantiationId)
+            .Where(tuple => tuple.Item1.GetPlayerIndex() == instantiationId)
             .Subscribe(tuple =>
             {
                 var skillData = tuple.Item2;
