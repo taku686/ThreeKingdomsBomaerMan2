@@ -8,6 +8,7 @@ namespace Pathfinding.Examples.RTS {
 	using Pathfinding;
 	using Pathfinding.RVO;
 	using Pathfinding.Util;
+	using Pathfinding.Pooling;
 
 	[HelpURL("https://arongranberg.com/astar/documentation/stable/rtsunit.html")]
 	public class RTSUnit : VersionedMonoBehaviour {

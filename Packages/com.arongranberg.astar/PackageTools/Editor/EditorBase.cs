@@ -38,6 +38,12 @@ namespace Pathfinding {
 
 
 		static string LookupPath (System.Type type, string path, Dictionary<string, string> lookupData) {
+			// Common case for backing fields of properties
+			if (path.EndsWith("Backing")) {
+				var basePath = LookupPath(type, path.Substring(0, path.Length - "Backing".Length), lookupData);
+				if (basePath != null) return basePath;
+			}
+
 			// Find the correct type if the path was not an immediate member of #type
 			while (true) {
 				var index = path.IndexOf('.');

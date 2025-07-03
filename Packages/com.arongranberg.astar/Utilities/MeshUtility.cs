@@ -2,7 +2,7 @@ using UnityEngine;
 using Unity.Collections;
 using Unity.Burst;
 using Unity.Jobs;
-using Unity.Collections.LowLevel.Unsafe;
+using Pathfinding.Collections;
 using Unity.Mathematics;
 
 namespace Pathfinding.Util {
@@ -52,66 +52,118 @@ namespace Pathfinding.Util {
 			}
 		}
 
-		/// <summary>Removes duplicate vertices from the array and updates the triangle array.</summary>
+		/// <summary>
+		/// Removes duplicate vertices from the array and updates the triangle array.
+		///
+		/// Uses a sweep line algorithm. For mergeRadiusSq=0, this is slower than a hash map based approach (by a factor of 3-4 even, primarily due to the sort),
+		/// but this code doesn't tend to be a bottleneck so it's not a big deal.
+		/// A hash based approach cannot easily support a mergeRadiusSq > 0.
+		///
+		/// A hash based approach was removed in the commit after cc57efb0c.
+		/// </summary>
 		[BurstCompile]
-		public struct JobRemoveDuplicateVertices : IJob {
-			[ReadOnly]
-			public NativeArray<Int3> vertices;
-			[ReadOnly]
-			public NativeArray<int> triangles;
-			[ReadOnly]
-			public NativeArray<int> tags;
+		public struct JobMergeNearbyVertices : IJob {
+			public NativeList<Int3> vertices;
+			public NativeList<int> triangles;
+			public int mergeRadiusSq;
 
-			public unsafe UnsafeAppendBuffer* outputVertices; // Element Type Int3
-			public unsafe UnsafeAppendBuffer* outputTriangles; // Element Type int
-			public unsafe UnsafeAppendBuffer* outputTags; // Element Type uint
+			struct CoordinateSorter : System.Collections.Generic.IComparer<int> {
+				public UnsafeSpan<int3> vertices;
 
-			public static int3 cross(int3 x, int3 y) => (x * y.yzx - x.yzx * y).yzx;
+				public int Compare (int a, int b) {
+					Unity.Burst.CompilerServices.Hint.Assume((uint)a < vertices.length);
+					Unity.Burst.CompilerServices.Hint.Assume((uint)b < vertices.length);
+					return vertices[a].x.CompareTo(vertices[b].x);
+				}
+			}
+
+			public void Execute () {
+				var indicesArr = new NativeArray<int>(vertices.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+				for (int i = 0; i < indicesArr.Length; i++) indicesArr[i] = i;
+				indicesArr.Sort(new CoordinateSorter {
+					vertices = vertices.AsUnsafeSpan().Reinterpret<int3>()
+				});
+				var indices = indicesArr.AsUnsafeSpan();
+
+				var compressedPointers = new NativeArray<int>(vertices.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+				var verticesSpan = vertices.AsUnsafeSpan().Reinterpret<int3>();
+				var trianglesSpan = triangles.AsUnsafeSpan();
+				var compressedVerticesArr = new NativeArray<int3>(vertices.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+				var compressedVertices = compressedVerticesArr.AsUnsafeSpan();
+
+				int vertexCount = 0;
+				var mergeRadiusCeil = (int)math.ceil(math.sqrt(mergeRadiusSq));
+				uint rangeEndIndex = 1;
+
+				// Use a sweep line algorithm to merge nearby vertices
+				for (uint i = 0; i < indices.length; i++) {
+					if (indices[i] == -1) continue;
+					var v = verticesSpan[indices[i]];
+					compressedPointers[indices[i]] = vertexCount;
+
+					while (rangeEndIndex < indices.length && verticesSpan[indices[rangeEndIndex]].x <= v.x + mergeRadiusCeil) rangeEndIndex++;
+
+					var mean = v;
+					int count = 1;
+					for (uint j = i + 1; j < rangeEndIndex; j++) {
+						if (indices[j] == -1) continue;
+
+						var v2 = verticesSpan[indices[j]];
+						if (math.lengthsq(v2 - v) <= mergeRadiusSq) {
+							mean += v2;
+							count++;
+							compressedPointers[indices[j]] = vertexCount;
+							indices[j] = -1;
+						}
+					}
+					compressedVertices[vertexCount] = mean / count;
+					vertexCount++;
+				}
+
+				vertices.Length = vertexCount;
+				compressedVertices.Slice(0, vertexCount).CopyTo(vertices.AsUnsafeSpan().Reinterpret<int3>());
+				for (uint i = 0; i < trianglesSpan.length; i++) {
+					trianglesSpan[i] = compressedPointers[trianglesSpan[i]];
+				}
+			}
+		}
+
+		[BurstCompile]
+		public struct JobRemoveDegenerateTriangles : IJob {
+			public NativeList<Int3> vertices;
+			public NativeList<int> triangles;
+			public NativeList<int> tags;
+			public bool verbose;
+
+			public static int3 cross(int3 lhs, int3 rhs) => (lhs * rhs.yzx - lhs.yzx * rhs).yzx;
 
 			public void Execute () {
 				int numDegenerate = 0;
-				unsafe {
-					outputVertices->Reset();
-					outputTriangles->Reset();
-					outputTags->Reset();
+				var verticesSpan = vertices.AsUnsafeSpan().Reinterpret<int3>();
+				var trianglesSpan = triangles.AsUnsafeSpan().Reinterpret<int3>(4);
+				var tagsSpan = tags.AsUnsafeSpan();
 
-					var firstVerts = new NativeHashMapInt3Int(vertices.Length, Allocator.Temp);
+				uint triCount = 0;
+				for (uint ti = 0; ti < trianglesSpan.length; ti++) {
+					var tri = trianglesSpan[ti];
 
-					// Remove duplicate vertices
-					var compressedPointers = new NativeArray<int>(vertices.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-
-					int count = 0;
-
-					for (int i = 0; i < vertices.Length; i++) {
-						if (firstVerts.TryAdd(vertices[i], count)) {
-							compressedPointers[i] = count;
-							outputVertices->Add(vertices[i]);
-							count++;
-						} else {
-							// There are some cases, rare but still there, that vertices are identical
-							compressedPointers[i] = firstVerts[vertices[i]];
-						}
+					// In some cases, users feed a navmesh graph a mesh with degenerate triangles.
+					// These are triangles with a zero area.
+					// We must remove these as they can otherwise cause issues for the JobCalculateTriangleConnections job, and they are generally just bad to include a navmesh.
+					// Note: This cross product calculation can result in overflows if the triangle is large, but since we check for equality with zero it should not be a problem in practice.
+					if (math.all(cross(verticesSpan[tri.y] - verticesSpan[tri.x], verticesSpan[tri.z] - verticesSpan[tri.x]) == 0)) {
+						// Degenerate triangle
+						numDegenerate++;
+						continue;
 					}
-
-					for (int i = 0, j = 0; i < triangles.Length; i += 3, j++) {
-						var a = triangles[i+0];
-						var b = triangles[i+1];
-						var c = triangles[i+2];
-
-						// In some cases, users feed a navmesh graph a mesh with degenerate triangles.
-						// These are triangles with a zero area.
-						// We must remove these as they can otherwise cause issues for the JobCalculateTriangleConnections job, and they are generally just bad to include a navmesh.
-						// Note: This cross product calculation can result in overflows if the triangle is large, but since we check for equality with zero it should not be a problem in practice.
-						if (math.all(cross(vertices.ReinterpretLoad<int3>(b) - vertices.ReinterpretLoad<int3>(a), vertices.ReinterpretLoad<int3>(c) - vertices.ReinterpretLoad<int3>(a)) == 0)) {
-							// Degenerate triangle
-							numDegenerate++;
-							continue;
-						}
-						outputTriangles->Add(new int3(compressedPointers[a], compressedPointers[b], compressedPointers[c]));
-						outputTags->Add(tags[j]);
-					}
+					trianglesSpan[triCount] = tri;
+					tagsSpan[triCount] = tagsSpan[ti];
+					triCount++;
 				}
-				if (numDegenerate > 0) {
+
+				triangles.Length = (int)triCount * 3;
+				tags.Length = (int)triCount;
+				if (verbose && numDegenerate > 0) {
 					Debug.LogWarning($"Input mesh contained {numDegenerate} degenerate triangles. These have been removed.\nA degenerate triangle is a triangle with zero area. It resembles a line or a point.");
 				}
 			}

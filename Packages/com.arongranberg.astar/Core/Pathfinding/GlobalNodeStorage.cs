@@ -3,6 +3,7 @@ using UnityEngine;
 using Unity.Mathematics;
 using Unity.Jobs;
 using UnityEngine.Profiling;
+using Pathfinding.Collections;
 
 namespace Pathfinding {
 	using Pathfinding.Util;

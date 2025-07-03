@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using Pathfinding.Sync;
 using Unity.Collections;
 using Unity.Burst;
 using Unity.Jobs;
@@ -13,23 +13,28 @@ namespace Pathfinding {
 	using Pathfinding.RVO;
 	using Pathfinding.Jobs;
 	using Pathfinding.Drawing;
+	using Pathfinding.Collections;
 
 	[BurstCompile]
 	public class NavmeshEdges {
 		public RVO.SimulatorBurst.ObstacleData obstacleData;
-		SpinLock allocationLock = new SpinLock();
+		NativeReference<SpinLock> allocationLock;
 		const int JobRecalculateObstaclesBatchCount = 32;
 		RWLock rwLock = new RWLock();
 		public HierarchicalGraph hierarchicalGraph;
 		int gizmoVersion = 0;
 
 		public void Dispose () {
+			// Waits for any jobs to finish
 			rwLock.WriteSync().Unlock();
 			obstacleData.Dispose();
+			// Note: The IsCreated check is necessary to not throw an exception in old versions of the collections package.
+			if (allocationLock.IsCreated) allocationLock.Dispose();
 		}
 
 		void Init () {
 			obstacleData.Init(Allocator.Persistent);
+			if (!allocationLock.IsCreated) allocationLock = new NativeReference<SpinLock>(Allocator.Persistent);
 		}
 
 		public JobHandle RecalculateObstacles (NativeList<int> dirtyHierarchicalNodes, NativeReference<int> numHierarchicalNodes, JobHandle dependency) {
@@ -50,8 +55,7 @@ namespace Pathfinding {
 					obstacles = obstacleData.obstacles.AsDeferredJobArray(),
 					bounds = hierarchicalGraph.bounds.AsDeferredJobArray(),
 					dirtyHierarchicalNodes = dirtyHierarchicalNodes,
-					// SAFETY: This is safe because the class will wait for the job to complete before it is disposed
-					allocationLock = (SpinLock*)UnsafeUtility.AddressOf(ref this.allocationLock),
+					allocationLock = allocationLock,
 				}.ScheduleBatch(JobRecalculateObstaclesBatchCount, 1, lastJob);
 				writeLock.UnlockAfter(lastJob);
 				gizmoVersion++;
@@ -137,8 +141,8 @@ namespace Pathfinding {
 			public NativeArray<Bounds> bounds;
 			[ReadOnly]
 			public NativeList<int> dirtyHierarchicalNodes;
-			[NativeDisableUnsafePtrRestriction]
-			public unsafe SpinLock* allocationLock;
+			[NativeDisableParallelForRestriction]
+			public NativeReference<SpinLock> allocationLock;
 
 			public void Execute (int startIndex, int count) {
 				var hGraph = hGraphGC.Target as HierarchicalGraph;
@@ -214,49 +218,52 @@ namespace Pathfinding {
 				RVO.RVOObstacleCache.CollectContours(hGraph.children[hierarchicalNode], edgesScratch);
 				MarkerCollect.End();
 				var prev = obstacles[hierarchicalNode];
-				if (prev.groupsAllocation != SlabAllocator<ObstacleVertexGroup>.ZeroLengthArray) {
-					unsafe {
-						allocationLock->Lock();
-						obstacleVertices.Free(prev.verticesAllocation);
-						obstacleVertexGroups.Free(prev.groupsAllocation);
-						allocationLock->Unlock();
-					}
-				}
 				unsafe {
-					// Find the graph's natural movement plane.
-					// This is used to simplify almost colinear segments into a single segment.
-					var children = hGraph.children[hierarchicalNode];
-					NativeMovementPlane movementPlane;
-					bool simplifyObstacles = true;
-					if (children.Count > 0) {
-						if (children[0] is GridNodeBase) {
-							movementPlane = new NativeMovementPlane((children[0].Graph as GridGraph).transform.rotation);
-						} else if (children[0] is TriangleMeshNode) {
-							var graph = children[0].Graph as NavmeshBase;
-							movementPlane = new NativeMovementPlane(graph.transform.rotation);
-							// If normal recalculation is disabled, the graph may have very a strange shape, like a spherical world.
-							// In that case we should not simplify the obstacles, as there is no well defined movement plane.
-							simplifyObstacles = graph.RecalculateNormals;
-						} else {
-							movementPlane = new NativeMovementPlane(quaternion.identity);
-							simplifyObstacles = false;
+					ref var allocationLockRef = ref UnsafeUtility.AsRef<SpinLock>(allocationLock.GetUnsafePtr());
+					if (prev.groupsAllocation != SlabAllocator<ObstacleVertexGroup>.ZeroLengthArray) {
+						unsafe {
+							allocationLockRef.Lock();
+							obstacleVertices.Free(prev.verticesAllocation);
+							obstacleVertexGroups.Free(prev.groupsAllocation);
+							allocationLockRef.Unlock();
 						}
-					} else {
-						movementPlane = default;
 					}
-					MarkerTrace.Begin();
-					var edgesSpan = edgesScratch.AsUnsafeSpan();
-					RVO.RVOObstacleCache.TraceContours(
-						ref edgesSpan,
-						ref movementPlane,
-						hierarchicalNode,
-						(UnmanagedObstacle*)obstacles.GetUnsafePtr(),
-						ref obstacleVertices,
-						ref obstacleVertexGroups,
-						ref UnsafeUtility.AsRef<SpinLock>(allocationLock),
-						simplifyObstacles
-						);
-					MarkerTrace.End();
+					unsafe {
+						// Find the graph's natural movement plane.
+						// This is used to simplify almost colinear segments into a single segment.
+						var children = hGraph.children[hierarchicalNode];
+						NativeMovementPlane movementPlane;
+						bool simplifyObstacles = true;
+						if (children.Count > 0) {
+							if (children[0] is GridNodeBase) {
+								movementPlane = new NativeMovementPlane((children[0].Graph as GridGraph).transform.rotation);
+							} else if (children[0] is TriangleMeshNode) {
+								var graph = children[0].Graph as NavmeshBase;
+								movementPlane = new NativeMovementPlane(graph.transform.rotation);
+								// If normal recalculation is disabled, the graph may have very a strange shape, like a spherical world.
+								// In that case we should not simplify the obstacles, as there is no well defined movement plane.
+								simplifyObstacles = graph.RecalculateNormals;
+							} else {
+								movementPlane = new NativeMovementPlane(quaternion.identity);
+								simplifyObstacles = false;
+							}
+						} else {
+							movementPlane = default;
+						}
+						MarkerTrace.Begin();
+						var edgesSpan = edgesScratch.AsUnsafeSpan();
+						RVO.RVOObstacleCache.TraceContours(
+							ref edgesSpan,
+							ref movementPlane,
+							hierarchicalNode,
+							(UnmanagedObstacle*)obstacles.GetUnsafePtr(),
+							ref obstacleVertices,
+							ref obstacleVertexGroups,
+							ref allocationLockRef,
+							simplifyObstacles
+							);
+						MarkerTrace.End();
+					}
 				}
 				MarkerObstacles.End();
 			}
@@ -337,9 +344,10 @@ namespace Pathfinding {
 								continue;
 							}
 
-							for (int j = 0; j < group.vertexCount - 1; j++) {
-								var p1 = vertices[offset + j];
-								var p2 = vertices[offset + j + 1];
+							var loop = group.type == RVO.ObstacleType.Loop;
+							for (int a = offset + (loop ? group.vertexCount - 1 : 0), b = offset + (loop ? 0 : 1); b < offset + group.vertexCount; a = b, b++) {
+								var p1 = vertices[a];
+								var p2 = vertices[b];
 								var mn = math.min(p1, p2);
 								var mx = math.max(p1, p2);
 								// Check for intersection with the global bounds (coarse check)
@@ -349,22 +357,6 @@ namespace Pathfinding {
 									mn = math.min(p1local, p2local);
 									mx = math.max(p1local, p2local);
 									// Check for intersection with the local bounds (more accurate)
-									if (math.all((mx >= localMn) & (mn <= localMx))) {
-										edgeBuffer[edgeVertexOffset++] = p1local.xz;
-										edgeBuffer[edgeVertexOffset++] = p2local.xz;
-									}
-								}
-							}
-							if (group.type == RVO.ObstacleType.Loop) {
-								var p1 = vertices[offset + group.vertexCount - 1];
-								var p2 = vertices[offset];
-								var mn = math.min(p1, p2);
-								var mx = math.max(p1, p2);
-								if (math.all((mx >= globalMn) & (mn <= globalMx))) {
-									var p1local = worldToMovementPlane.ToXZPlane(p1);
-									var p2local = worldToMovementPlane.ToXZPlane(p2);
-									mn = math.min(p1local, p2local);
-									mx = math.max(p1local, p2local);
 									if (math.all((mx >= localMn) & (mn <= localMx))) {
 										edgeBuffer[edgeVertexOffset++] = p1local.xz;
 										edgeBuffer[edgeVertexOffset++] = p2local.xz;
@@ -384,12 +376,11 @@ namespace Pathfinding {
 				GetHierarchicalNodesInRangeRec(hierarchicalNode, bounds, hierarhicalNodeData.connectionAllocator, hierarhicalNodeData.connectionAllocations, hierarhicalNodeData.bounds, obstacleIndexBuffer);
 			}
 
-			public void GetEdgesInRange (int hierarchicalNode, Bounds localBounds, NativeList<float2> edgeBuffer, NativeMovementPlane movementPlane) {
+			public void GetEdgesInRange (int hierarchicalNode, Bounds localBounds, NativeList<float2> edgeBuffer, NativeList<int> scratchBuffer, NativeMovementPlane movementPlane) {
 				if (!obstacleData.obstacleVertices.IsCreated) return;
 
-				var indices = new NativeList<int>(8, Allocator.Temp);
-				GetObstaclesInRange(hierarchicalNode, movementPlane.ToWorld(localBounds), indices);
-				ConvertObstaclesToEdges(ref obstacleData, indices, localBounds, edgeBuffer, movementPlane);
+				GetObstaclesInRange(hierarchicalNode, movementPlane.ToWorld(localBounds), scratchBuffer);
+				ConvertObstaclesToEdges(ref obstacleData, scratchBuffer, localBounds, edgeBuffer, movementPlane);
 			}
 		}
 	}

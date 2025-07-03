@@ -3,7 +3,8 @@ using Unity.Collections;
 using UnityEngine;
 
 namespace Pathfinding {
-	using Pathfinding.Util;
+	using Pathfinding.Collections;
+	using Unity.Profiling;
 
 	/// <summary>
 	/// NNConstraint which also takes an <see cref="ITraversalProvider"/> into account.
@@ -162,14 +163,14 @@ namespace Pathfinding {
 		public readonly int totalThreadCount;
 		public readonly NNConstraintWithTraversalProvider constraintWrapper = new NNConstraintWithTraversalProvider();
 		internal readonly GlobalNodeStorage nodeStorage;
-		public int numTemporaryNodes { get; private set; }
+		public int numTemporaryNodes { [IgnoredByDeepProfiler] get; private set; }
 
 		/// <summary>
 		/// All path nodes with an index greater or equal to this are temporary nodes that only exist for the duration of a single path.
 		///
 		/// This is a copy of NodeStorage.nextNodeIndex. This is used to avoid having to access the NodeStorage while pathfinding as it's an extra indirection.
 		/// </summary>
-		public uint temporaryNodeStartIndex { get; private set; }
+		public uint temporaryNodeStartIndex { [IgnoredByDeepProfiler] get; private set; }
 		UnsafeSpan<TemporaryNode> temporaryNodes;
 
 		/// <summary>

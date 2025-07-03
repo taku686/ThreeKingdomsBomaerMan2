@@ -1,10 +1,12 @@
-//#define ASTAR_POOL_DEBUG //@SHOWINEDITOR Enables debugging of path pooling. Will log warnings and info messages about paths not beeing pooled correctly.
+//#define ASTAR_POOL_DEBUG // Enables debugging of path pooling. Will log warnings and info messages about paths not beeing pooled correctly.
 
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using System.Runtime.CompilerServices;
+using Pathfinding.Collections;
+using Pathfinding.Pooling;
 
 namespace Pathfinding {
 	/// <summary>Base class for all path types</summary>
@@ -420,7 +422,7 @@ namespace Pathfinding {
 		/// Using a struct instead of passing the parameters as separate arguments is significantly faster.
 		/// </summary>
 		public struct OpenCandidateParams {
-			public Util.UnsafeSpan<PathNode> pathNodes;
+			public UnsafeSpan<PathNode> pathNodes;
 			public uint parentPathNode;
 			public uint targetPathNode;
 			public uint targetNodeIndex;
@@ -451,19 +453,16 @@ namespace Pathfinding {
 				target.pathID = pathID;
 				target.parentIndex = parentPathNode;
 				var candidateH = (uint)heuristicObjective.Calculate(targetNodePosition, pars.targetNodeIndex);
-				var candidateF = candidateG + candidateH;
-				heap.Add(pathNodes, targetPathNode, candidateG, candidateF);
+				heap.Add(pathNodes, targetPathNode, candidateG, candidateH);
 			} else {
 				// Note: Before this method is called, a check is done for the case target.pathID==pathID && heapIndex == NotInHeap,
 				// so we know target.heapIndex != NotInHeap here.
 
 				// We have seen this node before and it is in the heap.
 				// Now we check if this path to the target node is better than the previous one.
-
-				var targetG = heap.GetG(target.heapIndex);
 				// The previous F score of the node
 				var targetF = heap.GetF(target.heapIndex);
-				var targetH = targetF - targetG;
+				var targetH = heap.GetH(target.heapIndex);
 				uint candidateH;
 
 				if (target.fractionAlongEdge != fractionAlongEdge) {
@@ -481,7 +480,7 @@ namespace Pathfinding {
 					// This connection is better than the previous one.
 					target.fractionAlongEdge = fractionAlongEdge;
 					target.parentIndex = parentPathNode;
-					heap.Add(pathNodes, targetPathNode, candidateG, candidateF);
+					heap.Add(pathNodes, targetPathNode, candidateG, candidateH);
 				} else {
 					// This connection is not better than the previous one.
 					// We can safely discard this connection.
@@ -601,8 +600,8 @@ namespace Pathfinding {
 		/// Warning: Do not call this function manually.
 		/// </summary>
 		protected virtual void OnEnterPool () {
-			if (vectorPath != null) Pathfinding.Util.ListPool<Vector3>.Release(ref vectorPath);
-			if (path != null) Pathfinding.Util.ListPool<GraphNode>.Release(ref path);
+			if (vectorPath != null) Pathfinding.Pooling.ListPool<Vector3>.Release(ref vectorPath);
+			if (path != null) Pathfinding.Pooling.ListPool<GraphNode>.Release(ref path);
 			// Clear the callback to remove a potential memory leak
 			// while the path is in the pool (which it could be for a long time).
 			callback = null;
@@ -640,8 +639,8 @@ namespace Pathfinding {
 			errorLog = "";
 			completeState = PathCompleteState.NotCalculated;
 
-			path = Pathfinding.Util.ListPool<GraphNode>.Claim();
-			vectorPath = Pathfinding.Util.ListPool<Vector3>.Claim();
+			path = Pathfinding.Pooling.ListPool<GraphNode>.Claim();
+			vectorPath = Pathfinding.Pooling.ListPool<Vector3>.Claim();
 
 			duration = 0;
 			searchedNodes = 0;
@@ -757,6 +756,10 @@ namespace Pathfinding {
 		/// Assumes the <see cref="vectorPath"/> and <see cref="path"/> are empty and not null (which will be the case for a correctly initialized path).
 		/// </summary>
 		protected virtual void Trace (uint fromPathNodeIndex) {
+			Trace(fromPathNodeIndex, true);
+		}
+
+		protected void Trace (uint fromPathNodeIndex, bool reverse) {
 			MarkerTrace.Begin();
 			// Current node we are processing
 			var c = fromPathNodeIndex;
@@ -796,15 +799,12 @@ namespace Pathfinding {
 				c = pathNodes[c].parentIndex;
 			}
 
-			// Reverse
-			count = path.Count;
-			int half = count/2;
-			for (int i = 0; i < half; i++) {
-				var tmp = path[i];
-				path[i] = path[count-i-1];
-				path[count - i - 1] = tmp;
-			}
+			// Reverse to make the path go from the start to the end.
+			// Note: List<T>.Reverse is way faster than a for loop, even for very small lists.
+			// It seems to call out to a native function.
+			if (reverse) path.Reverse();
 
+			count = path.Count;
 			if (vectorPath.Capacity < count) vectorPath.Capacity = count;
 			for (int i = 0; i < count; i++) {
 				vectorPath.Add((Vector3)path[i].position);
@@ -1066,8 +1066,7 @@ namespace Pathfinding {
 				}
 
 				// Select the node with the lowest F score and remove it from the open list
-				var currentPathNodeIndex = pathHandler.heap.Remove(pathHandler.pathNodes, out uint currentNodeG, out uint currentNodeF);
-				var currentNodeH = currentNodeF - currentNodeG;
+				var currentPathNodeIndex = pathHandler.heap.Remove(pathHandler.pathNodes, out uint currentNodeG, out uint currentNodeH);
 
 				if (currentPathNodeIndex >= temporaryNodeStartIndex) {
 					// This is a special node

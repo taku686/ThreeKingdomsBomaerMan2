@@ -2,9 +2,34 @@
 /// \page changelog Changelog
 /// \order{-10}
 ///
+/// - 1.7.9
+///     - Got rid of some small GC allocations.
+///
+/// - 1.7.8 (2025-05-06)
+///     - Fixed a minor GC allocation happening every frame when using URP.
+///     - Improved performance in standalone builds when nothing is being rendered.
+///     - Fixed a significant memory leak when starting unity in batch mode.
+///
+/// - 1.7.7 (2025-03-20)
+///     - Added a new tutorial on using caching to improve performance: caching (view in online documentation for working links).
+///
+///     - Fixed <see cref="Draw.xz.SolidRectangle"/> would render the rectangle in the XY plane, instead of the XZ plane.
+///     - Fixed an exception could be thrown when cameras were rendered without a color target.
+///     - Added <see cref="PolylineWithSymbol.up"/>, to allow you to configure the orientation of the symbols. Previously it was hardcoded to Vector3.up.
+///     - Added an offset parameter to <see cref="PolylineWithSymbol"/>, to allow shifting all symbols along the polyline. This is useful for animations.
+///     - Fixed various minor glitches that could happen when using <see cref="PolylineWithSymbol"/>.
+///
+/// - 1.7.6 (2024-10-14)
+///     - Fixed a compatibility issue with the high definition render pipeline, accidentally introduced in 1.7.5.
+///     - Fixed gizmos were not rendered when opening prefab assets in isolation mode and the high definition render pipeline was used.
+///
 /// - 1.7.5 (2024-08-06)
 ///     - Fixed a memory leak causing references to destroyed cameras to be kept around.
 ///     - Fixed <see cref="Draw.xy.SolidCircle(float3,float,float,float)"/> and <see cref="Draw.xz.SolidCircle(float3,float,float,float)"/> would render the circles in the wrong location.
+///     - Reduced overhead when rendering gizmos.
+///     - Each component type now shows up as a scope in the Unity Profiler when rendering their gizmos.
+///     - Worked around a limitation in Unity's HDRP renderer caused errors to be logged constantly when forward rendering MSAA was enabled. Depth testing will now be disabled in this case, and a single warning will be logged.
+///         Unfortunately there's nothing I can do to fix the underlying issue, since it's a limitation in Unity's HDRP renderer.
 ///
 /// - 1.7.4 (2024-02-13)
 ///     - Fixed compatibility with HDRP render pipeline.

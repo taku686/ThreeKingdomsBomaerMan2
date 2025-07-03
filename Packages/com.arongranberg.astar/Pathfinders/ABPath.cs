@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using Pathfinding.Pooling;
 
 namespace Pathfinding {
 	/// <summary>

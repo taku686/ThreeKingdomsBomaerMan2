@@ -13,6 +13,9 @@ namespace Pathfinding {
 	/// That's where this graph type comes in. It supports basically the same stuff as the grid graph, but also multiple layers.
 	/// It uses a bit more memory than a regular grid graph, but is otherwise equivalent.
 	///
+	/// See: get-started-grid (view in online documentation for working links)
+	/// See: graphTypes (view in online documentation for working links)
+	///
 	/// \section layergridgraph-inspector Inspector
 	/// [Open online documentation to see images]
 	///

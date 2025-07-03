@@ -248,7 +248,7 @@ namespace Pathfinding.Examples {
 			var existingEntities = entityManager.CreateEntityQuery(typeof(LightweightAgentData));
 
 #if MODULE_ENTITIES_1_0_8_OR_NEWER
-			buffer.DestroyEntity(existingEntities, EntityQueryCaptureMode.AtRecord);
+			buffer.DestroyEntity(existingEntities, EntityQueryCaptureMode.AtPlayback);
 #else
 			buffer.DestroyEntity(existingEntities);
 #endif

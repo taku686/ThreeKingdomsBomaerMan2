@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using Pathfinding.Util;
 using Pathfinding.Drawing;
+using Pathfinding.Pooling;
+
 namespace Pathfinding.Examples {
 	/// <summary>
 	/// Demos different path types.

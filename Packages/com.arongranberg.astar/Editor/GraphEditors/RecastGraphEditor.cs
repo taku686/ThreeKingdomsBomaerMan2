@@ -73,7 +73,7 @@ namespace Pathfinding {
 			}
 
 			if (settings.rasterizeMeshes && settings.rasterizeColliders && dimensionMode == RecastGraph.DimensionMode.Dimension3D) {
-				EditorGUILayout.HelpBox("You are rasterizing both meshes and colliders. This is likely just duplicate work if the colliders and meshes are similar in shape. You can use the RecastMeshObj component" +
+				EditorGUILayout.HelpBox("You are rasterizing both meshes and colliders. This is likely just duplicate work if the colliders and meshes are similar in shape. You can use the RecastNavmeshModifier component" +
 					" to always include some specific objects regardless of what the above settings are set to.", MessageType.Info);
 			}
 		}
@@ -101,18 +101,18 @@ namespace Pathfinding {
 					var spacing = EditorGUIUtility.standardVerticalSpacing;
 					element.layer = EditorGUI.LayerField(SliceColumn(ref rect, w * 0.3f, spacing), element.layer);
 
-					if (element.mode == RecastMeshObj.Mode.WalkableSurfaceWithTag) {
-						element.mode = (RecastMeshObj.Mode)EditorGUI.EnumPopup(SliceColumn(ref rect, w * 0.4f, spacing), element.mode);
+					if (element.mode == RecastNavmeshModifier.Mode.WalkableSurfaceWithTag) {
+						element.mode = (RecastNavmeshModifier.Mode)EditorGUI.EnumPopup(SliceColumn(ref rect, w * 0.4f, spacing), element.mode);
 						element.surfaceID = Util.EditorGUILayoutHelper.TagField(rect, GUIContent.none, element.surfaceID, AstarPathEditor.EditTags);
 						element.surfaceID = Mathf.Clamp(element.surfaceID, 0, GraphNode.MaxTagIndex);
-					} else if (element.mode == RecastMeshObj.Mode.WalkableSurfaceWithSeam) {
-						element.mode = (RecastMeshObj.Mode)EditorGUI.EnumPopup(SliceColumn(ref rect, w * 0.4f, spacing), element.mode);
+					} else if (element.mode == RecastNavmeshModifier.Mode.WalkableSurfaceWithSeam) {
+						element.mode = (RecastNavmeshModifier.Mode)EditorGUI.EnumPopup(SliceColumn(ref rect, w * 0.4f, spacing), element.mode);
 						string helpTooltip = "All surfaces on this mesh will be walkable and a " +
 											 "seam will be created between the surfaces on this mesh and the surfaces on other meshes (with a different surface id)";
 						GUI.Label(SliceColumn(ref rect, 70, spacing), new GUIContent("Surface ID", helpTooltip));
 						element.surfaceID = Mathf.Max(0, EditorGUI.IntField(rect, new GUIContent("", helpTooltip), element.surfaceID));
 					} else {
-						element.mode = (RecastMeshObj.Mode)EditorGUI.EnumPopup(rect, element.mode);
+						element.mode = (RecastNavmeshModifier.Mode)EditorGUI.EnumPopup(rect, element.mode);
 					}
 
 					graph.perLayerModifications[index] = element;
@@ -187,9 +187,9 @@ namespace Pathfinding {
 			EditorGUI.BeginDisabledGroup(true);
 			var estTilesX = (estWidth + graph.editorTileSize - 1) / graph.editorTileSize;
 			var estTilesZ = (estDepth + graph.editorTileSize - 1) / graph.editorTileSize;
-			var label = estWidth.ToString() + " x " + estDepth.ToString();
+			var label = estWidth.ToString() + " x " + estDepth.ToString() + " voxels";
 			if (graph.useTiles) {
-				label += " voxels, divided into " + (estTilesX*estTilesZ) + " tiles";
+				label += ", divided into " + (estTilesX*estTilesZ) + " tiles";
 			}
 			EditorGUILayout.LabelField(new GUIContent("Size", "Based on the voxel size and the bounding box"), new GUIContent(label));
 			EditorGUI.EndDisabledGroup();
@@ -255,6 +255,15 @@ namespace Pathfinding {
 
 			DrawIndentedList(perLayerModificationsList);
 
+			int seenLayers = 0;
+			for (int i = 0; i < graph.perLayerModifications.Count; i++) {
+				if ((seenLayers & 1 << graph.perLayerModifications[i].layer) != 0) {
+					EditorGUILayout.HelpBox("Duplicate layers. Each layer can only be modified by a single rule.", MessageType.Error);
+					break;
+				}
+				seenLayers |= 1 << graph.perLayerModifications[i].layer;
+			}
+
 			Separator();
 			Header("Rasterization");
 
@@ -288,15 +297,6 @@ namespace Pathfinding {
 			var effectivelyRasterizingColliders = graph.collectionSettings.rasterizeColliders || (graph.dimensionMode == RecastGraph.DimensionMode.Dimension3D && graph.collectionSettings.rasterizeTerrain && graph.collectionSettings.rasterizeTrees) || graph.dimensionMode == RecastGraph.DimensionMode.Dimension2D;
 			if (effectivelyRasterizingColliders) {
 				DrawColliderDetail(graph.collectionSettings);
-			}
-
-			int seenLayers = 0;
-			for (int i = 0; i < graph.perLayerModifications.Count; i++) {
-				if ((seenLayers & 1 << graph.perLayerModifications[i].layer) != 0) {
-					EditorGUILayout.HelpBox("Duplicate layers. Each layer can only be modified by a single rule.", MessageType.Error);
-					break;
-				}
-				seenLayers |= 1 << graph.perLayerModifications[i].layer;
 			}
 
 			var countStillUnreadable = 0;

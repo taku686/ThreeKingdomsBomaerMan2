@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-using Pathfinding.Util;
+using Pathfinding.Pooling;
 
 namespace Pathfinding {
 	[AddComponentMenu("Pathfinding/Modifiers/Funnel Modifier")]
@@ -94,7 +94,10 @@ namespace Pathfinding {
 				return;
 			}
 
-			if (quality == FunnelQuality.High) Funnel.Simplify(parts, ref p.path);
+			if (quality == FunnelQuality.High) {
+				System.Func<GraphNode, bool>  filter = p.CanTraverse;
+				Funnel.Simplify(parts, ref p.path, filter);
+			}
 
 			for (int i = 0; i < parts.Count; i++) {
 				var part = parts[i];

@@ -1,10 +1,12 @@
 #pragma warning disable 0162
 using UnityEngine;
 using Pathfinding.Serialization;
+using Pathfinding.Collections;
 using UnityEngine.Assertions;
 using Unity.Mathematics;
 using Pathfinding.Util;
 using Unity.Burst;
+using Unity.Profiling;
 
 namespace Pathfinding {
 	/// <summary>Interface for something that holds a triangle based navmesh</summary>
@@ -111,6 +113,7 @@ namespace Pathfinding {
 		/// not have the same vertex numbers.
 		/// </summary>
 		[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		[IgnoredByDeepProfiler]
 		public int GetVertexIndex (int i) {
 			return i == 0 ? v0 : (i == 1 ? v1 : v2);
 		}
@@ -147,6 +150,7 @@ namespace Pathfinding {
 		}
 
 		[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		[IgnoredByDeepProfiler]
 		public override Int3 GetVertex (int i) {
 			return GetNavmeshHolder(GraphIndex).GetVertex(GetVertexIndex(i));
 		}
@@ -443,6 +447,26 @@ namespace Pathfinding {
 							}
 						}
 					}
+				}
+			}
+
+			if (edge == -1) {
+				// If we have entered this node via an off-mesh link, or if this was the first node in the path,
+				// then we must consider moving directly from #pos to the end point of the path.
+				// Otherwise we would just consider paths that first to the side of the triangle and then back to the end point of the path.
+				// Note: flag1 checks if this node is connected to the end node of the path.
+				if (pathHandler.pathNodes[NodeIndex].flag1) {
+					// Note: If we entered this node via an off-mesh link, then #pathNodeIndex may not belong to this node,
+					// but instead to the off-mesh link. This is fine. The path can still be reconstructed correctly later.
+					path.OpenCandidateConnectionsToEndNode(pos, pathNodeIndex, NodeIndex, gScore);
+				}
+
+				// Sometimes we may enter a node via e.g. an off-mesh link that doesn't have any other adjacent triangles.
+				// In this case we still want to visit at least one side of the triangle, to ensure that paths like the
+				// ConstantPath notice that the node has been visited.
+				// The code above would otherwise skip this node completely.
+				if (visitedEdges == 0) {
+					OpenSingleEdge(path, pathNodeIndex, this, 0, pos, gScore);
 				}
 			}
 		}

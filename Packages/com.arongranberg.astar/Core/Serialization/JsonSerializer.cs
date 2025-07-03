@@ -3,7 +3,10 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using Pathfinding.Util;
-
+using Pathfinding.Collections;
+using Pathfinding.Pooling;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Collections;
 
 #if ASTAR_NO_ZIP
 using Pathfinding.Serialization.Zip;
@@ -156,20 +159,12 @@ namespace Pathfinding.Serialization {
 			return new Int3(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32());
 		}
 
-		public int DeserializeInt (int defaultValue) {
-			if (reader.BaseStream.Position <= reader.BaseStream.Length-4) {
-				return reader.ReadInt32();
-			} else {
-				return defaultValue;
-			}
-		}
-
-		public float DeserializeFloat (float defaultValue) {
-			if (reader.BaseStream.Position <= reader.BaseStream.Length-4) {
-				return reader.ReadSingle();
-			} else {
-				return defaultValue;
-			}
+		public UnsafeSpan<T> ReadSpan<T>(Allocator allocator) where T : unmanaged {
+			var res = new UnsafeSpan<T>(allocator, reader.ReadInt32());
+			if (UnsafeUtility.SizeOf<T>() % sizeof(int) != 0) throw new Exception("Cannot read data of type "+typeof(T)+" because it has a size which is not a multiple of 4 bytes");
+			var s = res.Reinterpret<int>(UnsafeUtility.SizeOf<T>());
+			for (int i = 0; i < s.Length; i++) s[i] = reader.ReadInt32();
+			return res;
 		}
 	}
 
@@ -212,8 +207,6 @@ namespace Pathfinding.Serialization {
 		/// Used for deserialization.
 		/// </summary>
 		private Dictionary<NavGraph, int> graphIndexInZip;
-
-		private int graphIndexOffset;
 
 		/// <summary>Extension to use for binary files</summary>
 		const string binaryExt = ".binary";
@@ -281,6 +274,9 @@ namespace Pathfinding.Serialization {
 		/// <summary>Cached version object for 5.1.0</summary>
 		public static readonly System.Version V5_1_0 = new System.Version(5, 1, 0);
 
+		/// <summary>Cached version object for 5.2.0</summary>
+		public static readonly System.Version V5_2_0 = new System.Version(5, 2, 0);
+
 		public AstarSerializer (AstarData data, GameObject contextRoot) : this(data, SerializeSettings.Settings, contextRoot) {
 		}
 
@@ -288,10 +284,6 @@ namespace Pathfinding.Serialization {
 			this.data = data;
 			this.contextRoot = contextRoot;
 			this.settings = settings;
-		}
-
-		public void SetGraphIndexOffset (int offset) {
-			graphIndexOffset = offset;
 		}
 
 		void AddChecksum (byte[] bytes) {
@@ -615,15 +607,14 @@ namespace Pathfinding.Serialization {
 		/// Deserializes graph settings.
 		/// Note: Stored in files named "graph<see cref=".json"/>" where # is the graph number.
 		/// </summary>
-		public NavGraph[] DeserializeGraphs (System.Type[] availableGraphTypes) {
+		public NavGraph[] DeserializeGraphs (System.Type[] availableGraphTypes, bool allowLoadingNodes, System.Func<int> nextGraphIndex) {
 			// Allocate a list of graphs to be deserialized
 			var graphList = new List<NavGraph>();
 
 			graphIndexInZip = new Dictionary<NavGraph, int>();
 
 			for (int i = 0; i < meta.graphs; i++) {
-				var newIndex = graphList.Count + graphIndexOffset;
-				var graph = DeserializeGraph(i, newIndex, availableGraphTypes);
+				var graph = DeserializeGraph(i, nextGraphIndex(), availableGraphTypes);
 				if (graph != null) {
 					graphList.Add(graph);
 					graphIndexInZip[graph] = i;
@@ -633,7 +624,7 @@ namespace Pathfinding.Serialization {
 			graphs = graphList.ToArray();
 
 			DeserializeEditorSettingsCompatibility();
-			DeserializeExtraInfo();
+			if (allowLoadingNodes) DeserializeExtraInfo();
 
 			return graphs;
 		}
@@ -971,19 +962,12 @@ namespace Pathfinding.Serialization {
 		/// </summary>
 		public bool nodes = true;
 
-		/// <summary>
-		/// Save editor settings.
-		/// Warning: Only applicable when saving from the editor using the AstarPathEditor methods
-		/// </summary>
-		public bool editorSettings;
-
 		/// <summary>Serialization settings for only saving graph settings</summary>
-		public static SerializeSettings Settings {
-			get {
-				return new SerializeSettings {
-						   nodes = false
-				};
-			}
-		}
+		public static SerializeSettings Settings => new SerializeSettings {
+			nodes = false
+		};
+
+		/// <summary>Serialization settings for serializing nodes and settings</summary>
+		public static SerializeSettings NodesAndSettings => new SerializeSettings();
 	}
 }

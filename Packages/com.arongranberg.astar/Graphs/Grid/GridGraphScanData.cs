@@ -7,6 +7,7 @@ using UnityEngine.Profiling;
 using System.Collections.Generic;
 using Pathfinding.Jobs;
 using Pathfinding.Graphs.Grid.Jobs;
+using Pathfinding.Collections;
 using Unity.Jobs.LowLevel.Unsafe;
 
 namespace Pathfinding.Graphs.Grid {
@@ -494,11 +495,10 @@ namespace Pathfinding.Graphs.Grid {
 			}.Schedule(dependencyTracker);
 		}
 
-		public JobHandle HeightCheck (GraphCollision collision, int maxHits, IntBounds recalculationBounds, NativeArray<int> outLayerCount, float characterHeight, Allocator allocator) {
+		public JobHandle HeightCheck (GraphCollision collision, float nodeWidth, int maxHits, IntBounds recalculationBounds, NativeArray<int> outLayerCount, float characterHeight, Allocator allocator) {
 			// For some reason the physics code crashes when allocating raycastCommands with UninitializedMemory, even though I have verified that every
 			// element in the array is set to a well defined value before the physics code gets to it... Mysterious.
 			var cellCount = recalculationBounds.size.x * recalculationBounds.size.z;
-			var raycastCommands = dependencyTracker.NewNativeArray<RaycastCommand>(cellCount, allocator, NativeArrayOptions.ClearMemory);
 
 			heightHits = dependencyTracker.NewNativeArray<RaycastHit>(cellCount * maxHits, allocator, NativeArrayOptions.ClearMemory);
 			heightHitsBounds = recalculationBounds;
@@ -507,36 +507,71 @@ namespace Pathfinding.Graphs.Grid {
 			// The rays may or may not hit colliders with the exact same y coordinate.
 			// We extend the rays a bit to ensure they always hit
 			const float RayLengthMargin = 0.01f;
-			var prepareJob = new JobPrepareGridRaycast {
-				graphToWorld = transform.matrix,
-				bounds = recalculationBounds,
-				physicsScene = Physics.defaultPhysicsScene,
-				raycastOffset = up * collision.fromHeight,
-				raycastDirection = -up * (collision.fromHeight + RayLengthMargin),
-				raycastMask = collision.heightMask,
-				raycastCommands = raycastCommands,
-			}.Schedule(dependencyTracker);
+			var raycastOffset = up * collision.fromHeight;
+			var raycastDirection = -up * (collision.fromHeight + RayLengthMargin);
 
-			if (maxHits > 1) {
-				// Skip this distance between each hit.
-				// It is pretty arbitrarily chosen, but it must be lower than characterHeight.
-				// If it would be set too low then many thin colliders stacked on top of each other could lead to a very large number of hits
-				// that will not lead to any walkable nodes anyway.
-				float minStep = characterHeight * 0.5f;
-				var dependency = new JobRaycastAll(raycastCommands, heightHits, Physics.defaultPhysicsScene, maxHits, allocator, dependencyTracker, minStep).Schedule(prepareJob);
+			if (collision.thickRaycast) {
+				if (maxHits > 1) {
+					throw new System.NotImplementedException("Thick raycasts are not supported for layered grid graphs");
+				}
 
-				dependency = new JobMaxHitCount {
-					hits = heightHits,
-					maxHits = maxHits,
-					layerStride = cellCount,
-					maxHitCount = outLayerCount,
-				}.Schedule(dependency);
+				var raycastCommands = dependencyTracker.NewNativeArray<SpherecastCommand>(cellCount, allocator, NativeArrayOptions.ClearMemory);
 
-				return dependency;
-			} else {
+				new JobPrepareGridRaycastThick {
+					graphToWorld = transform.matrix,
+					bounds = recalculationBounds,
+					physicsScene = Physics.defaultPhysicsScene,
+					raycastOffset = raycastOffset,
+					raycastDirection = raycastDirection,
+					raycastMask = collision.heightMask,
+					raycastCommands = raycastCommands,
+					radius = collision.thickRaycastDiameter * nodeWidth * 0.5f,
+				}.Schedule(dependencyTracker);
+
 				dependencyTracker.ScheduleBatch(raycastCommands, heightHits, 2048);
+
+				new JobClampHitToRay {
+					hits = heightHits,
+					commands = raycastCommands,
+				}.Schedule(dependencyTracker);
+
 				outLayerCount[0] = 1;
 				return default;
+			} else {
+				// Common case
+				var raycastCommands = dependencyTracker.NewNativeArray<RaycastCommand>(cellCount, allocator, NativeArrayOptions.ClearMemory);
+
+				var prepareJob = new JobPrepareGridRaycast {
+					graphToWorld = transform.matrix,
+					bounds = recalculationBounds,
+					physicsScene = Physics.defaultPhysicsScene,
+					raycastOffset = raycastOffset,
+					raycastDirection = raycastDirection,
+					raycastMask = collision.heightMask,
+					raycastCommands = raycastCommands,
+				}.Schedule(dependencyTracker);
+
+				if (maxHits > 1) {
+					// Skip this distance between each hit.
+					// It is pretty arbitrarily chosen, but it must be lower than characterHeight.
+					// If it would be set too low then many thin colliders stacked on top of each other could lead to a very large number of hits
+					// that will not lead to any walkable nodes anyway.
+					float minStep = characterHeight * 0.5f;
+					var dependency = new JobRaycastAll(raycastCommands, heightHits, Physics.defaultPhysicsScene, maxHits, allocator, dependencyTracker, minStep).Schedule(prepareJob);
+
+					dependency = new JobMaxHitCount {
+						hits = heightHits,
+						maxHits = maxHits,
+						layerStride = cellCount,
+						maxHitCount = outLayerCount,
+					}.Schedule(dependency);
+
+					return dependency;
+				} else {
+					dependencyTracker.ScheduleBatch(raycastCommands, heightHits, 2048);
+					outLayerCount[0] = 1;
+					return default;
+				}
 			}
 		}
 
@@ -573,8 +608,8 @@ namespace Pathfinding.Graphs.Grid {
 				nodes.walkable.BitwiseAndWith(collisionCheckResult).WithLength(nodes.numNodes).Schedule(dependencyTracker);
 				return null;
 
-// Before Unity 2023.3, these features compile, but they will cause memory corruption in some cases, due to a bug in Unity
-#if UNITY_2022_2_OR_NEWER && UNITY_2023_3_OR_NEWER && UNITY_HAS_FIXED_MEMORY_CORRUPTION_ISSUE
+// Before Unity 6000.1, these features compile, but they will cause memory corruption in some cases, due to a bug in Unity
+#if UNITY_2022_2_OR_NEWER && UNITY_6000_1_OR_NEWER
 			} else if (collision.type == ColliderType.Capsule && !collision.use2D) {
 				var collisionCheckResult = dependencyTracker.NewNativeArray<bool>(nodes.numNodes, nodes.allocationMethod, NativeArrayOptions.UninitializedMemory);
 				collision.JobCollisionCapsule(nodes.positions, collisionCheckResult, up, nodes.allocationMethod, dependencyTracker);
@@ -600,7 +635,7 @@ namespace Pathfinding.Graphs.Grid {
 			var job = new JobCalculateGridConnections {
 				maxStepHeight = maxStepHeight,
 				maxStepUsesSlope = maxStepUsesSlope,
-				up = up,
+				graphToWorld = transform.matrix,
 				bounds = calculationBounds.Offset(-nodes.bounds.min),
 				arrayBounds = nodes.bounds.size,
 				neighbours = neighbours,

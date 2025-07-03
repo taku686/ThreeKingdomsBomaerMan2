@@ -2,6 +2,8 @@ using UnityEngine;
 
 namespace Pathfinding.Util {
 	using Pathfinding.Drawing;
+	using Pathfinding.Collections;
+	using Pathfinding.Pooling;
 
 	/// <summary>Combines hashes into a single hash value</summary>
 	public struct NodeHasher {

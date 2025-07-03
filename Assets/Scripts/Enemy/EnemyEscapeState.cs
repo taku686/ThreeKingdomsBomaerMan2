@@ -9,7 +9,7 @@ namespace Enemy
         public class EnemyEscapeState : State
         {
             private Seeker _seeker;
-            private AILerp _aiLerp;
+            private AIPath _aiPath;
             private Transform _target;
             private MapManager _mapManager;
             private StateMachine<EnemyCore> _stateMachine;
@@ -25,18 +25,18 @@ namespace Enemy
 
             protected override void OnUpdate()
             {
-                if (_aiLerp == null)
+                if (_aiPath == null)
                 {
                     return;
                 }
 
-                if (_aiLerp.reachedEndOfPath)
+                if (_aiPath.reachedEndOfPath)
                 {
                     Debug.Log("行き止まり");
                     _stateMachine.Dispatch((int)EnemyState.Move);
                 }
 
-                if (_aiLerp.reachedDestination)
+                if (_aiPath.reachedDestination)
                 {
                     Debug.Log("目的地に到達");
                     _stateMachine.Dispatch((int)EnemyState.Move);
@@ -46,7 +46,7 @@ namespace Enemy
             private void Initialize()
             {
                 _seeker = Owner._seeker;
-                _aiLerp = Owner._aiLerp;
+                _aiPath = Owner._aiPath;
                 _target = Owner._target;
                 _stateMachine = Owner._stateMachine;
                 _mapManager = Owner.mapManager;

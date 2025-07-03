@@ -63,7 +63,7 @@ namespace Pathfinding {
 			Separator();
 			DrawMiddleSection(graph);
 			Separator();
-			DrawCollisionEditor(graph.collision);
+			DrawCollisionEditor(graph, graph.collision);
 			DrawRules(graph);
 
 			Separator();
@@ -436,7 +436,7 @@ namespace Pathfinding {
 		}
 
 		/// <summary>Draws the inspector for a <see cref="GraphCollision"/> class</summary>
-		protected virtual void DrawCollisionEditor (GraphCollision collision) {
+		protected virtual void DrawCollisionEditor (GridGraph graph, GraphCollision collision) {
 			collision = collision ?? new GraphCollision();
 
 			DrawUse2DPhysics(collision);
@@ -489,12 +489,17 @@ namespace Pathfinding {
 
 					collision.heightMask = EditorGUILayoutx.LayerMaskField("Mask", collision.heightMask);
 
-					collision.thickRaycast = EditorGUILayout.Toggle(new GUIContent("Thick Raycast", "Use a thick line instead of a thin line"), collision.thickRaycast);
+					// Layered grid graphs don't support thick raycasts
+					if (graph.MaxLayers == 1) {
+						collision.thickRaycast = EditorGUILayout.Toggle(new GUIContent("Thick Raycast", "Use a thick line instead of a thin line"), collision.thickRaycast);
 
-					if (collision.thickRaycast) {
-						EditorGUI.indentLevel++;
-						collision.thickRaycastDiameter = EditorGUILayout.FloatField(new GUIContent("Diameter", "Diameter of the thick raycast"), collision.thickRaycastDiameter);
-						EditorGUI.indentLevel--;
+						if (collision.thickRaycast) {
+							EditorGUI.indentLevel++;
+							collision.thickRaycastDiameter = EditorGUILayout.FloatField(new GUIContent("Diameter", "Diameter of the thick raycast"), collision.thickRaycastDiameter);
+							EditorGUI.indentLevel--;
+						}
+					} else {
+						collision.thickRaycast = false;
 					}
 
 					collision.unwalkableWhenNoGround = EditorGUILayout.Toggle(new GUIContent("Unwalkable when no ground", "Make nodes unwalkable when no ground was found with the height raycast. If height raycast is turned off, this doesn't affect anything"), collision.unwalkableWhenNoGround);

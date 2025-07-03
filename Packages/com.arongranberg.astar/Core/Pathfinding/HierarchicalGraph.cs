@@ -10,9 +10,11 @@ namespace Pathfinding {
 	using System.Runtime.InteropServices;
 	using Pathfinding.Drawing;
 	using Pathfinding.Jobs;
+	using Pathfinding.Collections;
+	using Pathfinding.Sync;
+	using Pathfinding.Pooling;
 	using Unity.Collections;
 	using Unity.Collections.LowLevel.Unsafe;
-	using Unity.Mathematics;
 
 	/// <summary>
 	/// Holds a hierarchical graph to speed up certain pathfinding queries.
@@ -544,7 +546,8 @@ namespace Pathfinding {
 		/// Note: Assumes the graph is unchanged until the returned dependency is completed.
 		/// </summary>
 		public JobHandle JobRecalculateIfNecessary (JobHandle dependsOn = default) {
-			OnEnable();
+			if (!connectionAllocator.IsCreated) throw new System.InvalidOperationException("The hierarchical graph has not been initialized. Please call OnEnable before using it.");
+
 			if (!dirtyNodes.IsEmpty) {
 				var writeLock = rwLock.Write();
 				var lastJob = new JobRecalculateComponents {

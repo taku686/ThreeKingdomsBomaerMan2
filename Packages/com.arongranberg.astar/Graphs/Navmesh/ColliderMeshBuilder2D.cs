@@ -7,12 +7,13 @@ using Unity.Burst;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using Pathfinding.Util;
+using Pathfinding.Collections;
 using UnityEngine.Tilemaps;
 
 
 namespace Pathfinding.Graphs.Navmesh {
 	[BurstCompile]
-	public struct CircleGeometryUtilities {
+	struct CircleGeometryUtilities {
 		/// <summary>
 		/// Cached values for CircleRadiusAdjustmentFactor.
 		///
@@ -69,7 +70,7 @@ namespace Pathfinding.Graphs.Navmesh {
 	}
 
 	[BurstCompile]
-	public static class ColliderMeshBuilder2D {
+	internal static class ColliderMeshBuilder2D {
 		static int GetShapes (Collider2D coll, PhysicsShapeGroup2D group, HashSet<Rigidbody2D> handledRigidbodies) {
 #if !UNITY_6000_0_OR_NEWER
 			var rigid = coll.attachedRigidbody;

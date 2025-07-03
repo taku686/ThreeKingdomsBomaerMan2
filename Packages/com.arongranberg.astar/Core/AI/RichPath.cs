@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Pathfinding.Util;
+using Pathfinding.Pooling;
 using UnityEngine.Assertions;
 
 namespace Pathfinding {
@@ -177,7 +178,7 @@ namespace Pathfinding {
 		}
 	}
 
-	public abstract class RichPathPart : Pathfinding.Util.IAstarPooledObject {
+	public abstract class RichPathPart : IAstarPooledObject {
 		public abstract void OnEnterPool();
 	}
 
@@ -198,8 +199,8 @@ namespace Pathfinding {
 		public bool funnelSimplification = true;
 
 		public RichFunnel () {
-			left = Pathfinding.Util.ListPool<Vector3>.Claim();
-			right = Pathfinding.Util.ListPool<Vector3>.Claim();
+			left = Pathfinding.Pooling.ListPool<Vector3>.Claim();
+			right = Pathfinding.Pooling.ListPool<Vector3>.Claim();
 			nodes = new List<TriangleMeshNode>();
 			this.graph = null;
 		}

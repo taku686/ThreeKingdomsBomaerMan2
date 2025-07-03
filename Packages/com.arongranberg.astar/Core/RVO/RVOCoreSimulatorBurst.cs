@@ -1,7 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-
-using Unity.Burst;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Collections;
@@ -12,7 +10,9 @@ namespace Pathfinding.RVO {
 	using Pathfinding.Jobs;
 	using Pathfinding.Drawing;
 	using Pathfinding.Util;
+	using Pathfinding.Sync;
 	using Pathfinding.ECS.RVO;
+	using Pathfinding.Collections;
 
 	public interface IMovementPlaneWrapper {
 		float2 ToPlane(float3 p);
@@ -77,23 +77,6 @@ namespace Pathfinding.RVO {
 					new float4(0, 0, 0, 1)
 					));
 			}
-		}
-	}
-
-	public struct IReadOnlySlice<T> : System.Collections.Generic.IReadOnlyList<T> {
-		public T[] data;
-		public int length;
-
-		public T this[int index] => data[index];
-
-		public int Count => length;
-
-		public IEnumerator<T> GetEnumerator () {
-			throw new System.NotImplementedException();
-		}
-
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator () {
-			throw new System.NotImplementedException();
 		}
 	}
 
@@ -368,6 +351,17 @@ namespace Pathfinding.RVO {
 	}
 
 	// TODO: Change to byte?
+
+	/// <summary>
+	/// Indicates if the agent has reached the end of its path, or been blocked by other agents.
+	///
+	/// In the video below, the agents will get a red ring around them for the Reached state,
+	/// and a brown ring for the ReachedSoon state.
+	///
+	/// [Open online documentation to see videos]
+	///
+	/// See: <see cref="IAgent.SetTarget"/>
+	/// </summary>
 	public enum ReachedEndOfPath {
 		/// <summary>The agent has no reached the end of its path yet</summary>
 		NotReached,
@@ -467,6 +461,8 @@ namespace Pathfinding.RVO {
 		/// Used internally by the simulation to perform fast neighbour lookups for each agent.
 		/// Please only read from this tree, do not rebuild it since that can interfere with the simulation.
 		/// It is rebuilt when necessary.
+		///
+		/// Warning: Before accessing this, you should call <see cref="LockSimulationDataReadOnly"/> or <see cref="LockSimulationDataReadWrite"/>.
 		/// </summary>
 		public RVOQuadtreeBurst quadtree;
 
@@ -480,15 +476,11 @@ namespace Pathfinding.RVO {
 		HorizonAgentData horizonAgentData;
 
 		/// <summary>
-		/// Internal obstacle data.
-		/// Normally you will never need to access this directly
-		/// </summary>
-		public ObstacleData obstacleData;
-
-		/// <summary>
 		/// Internal simulation data.
 		/// Can be used if you need very high performance access to the agent data.
 		/// Normally you would use the SimulatorBurst.Agent class instead (implements the IAgent interface).
+		///
+		/// Warning: Before accessing this, you should call <see cref="LockSimulationDataReadOnly"/> or <see cref="LockSimulationDataReadWrite"/>.
 		/// </summary>
 		public AgentData simulationData;
 
@@ -496,6 +488,8 @@ namespace Pathfinding.RVO {
 		/// Internal simulation data.
 		/// Can be used if you need very high performance access to the agent data.
 		/// Normally you would use the SimulatorBurst.Agent class instead (implements the IAgent interface).
+		///
+		/// Warning: Before accessing this, you should call <see cref="LockSimulationDataReadOnly"/> or <see cref="LockSimulationDataReadWrite"/>.
 		/// </summary>
 		public AgentOutputData outputData;
 
@@ -503,6 +497,33 @@ namespace Pathfinding.RVO {
 		public const int MaxBlockingAgentCount = 7;
 
 		public const int MaxObstacleVertices = 256;
+
+		public struct AgentNeighbourLookup {
+			[ReadOnly]
+			[NativeDisableParallelForRestriction]
+			NativeArray<int> neighbours;
+
+			public AgentNeighbourLookup(NativeArray<int> neighbours) {
+				this.neighbours = neighbours;
+			}
+
+			/// <summary>Read-only span with all agent indices that a given agent took into account during its last simulation step</summary>
+			public UnsafeSpan<int> GetNeighbours (int agentIndex) {
+				var startIndex = agentIndex * MaxNeighbourCount;
+				var endIndex = startIndex;
+				while (neighbours[endIndex] != -1) endIndex++;
+				return neighbours.AsUnsafeReadOnlySpan().Slice(startIndex, endIndex - startIndex);
+			}
+		}
+
+		/// <summary>
+		/// Lookup to find neighbours of a agents.
+		///
+		/// Warning: Before accessing this, you should call <see cref="LockSimulationDataReadOnly"/> or <see cref="LockSimulationDataReadWrite"/>.
+		/// </summary>
+		public AgentNeighbourLookup GetAgentNeighbourLookup () {
+			return new AgentNeighbourLookup(temporaryAgentData.neighbours);
+		}
 
 		struct Agent : IAgent {
 			public SimulatorBurst simulator;
@@ -821,7 +842,7 @@ namespace Pathfinding.RVO {
 
 		public Rect AgentBounds {
 			get {
-				lastJob.Complete();
+				rwLock.ReadSync().Unlock();
 				return quadtree.bounds;
 			}
 		}
@@ -834,11 +855,11 @@ namespace Pathfinding.RVO {
 		/// <summary>Determines if the XY (2D) or XZ (3D) plane is used for movement</summary>
 		public readonly MovementPlane movementPlane = MovementPlane.XZ;
 
-		/// <summary>Job handle for the last update</summary>
-		public JobHandle lastJob { get; private set; }
+		/// <summary>Used to synchronize access to the simulation data</summary>
+		RWLock rwLock = new RWLock();
 
 		public void BlockUntilSimulationStepDone () {
-			lastJob.Complete();
+			rwLock.WriteSync().Unlock();
 		}
 
 		/// <summary>Create a new simulator.</summary>
@@ -847,7 +868,6 @@ namespace Pathfinding.RVO {
 			this.DesiredDeltaTime = 1;
 			this.movementPlane = movementPlane;
 
-			obstacleData.Init(Allocator.Persistent);
 			AllocateAgentSpace();
 
 			// Just to make sure the quadtree is in a valid state
@@ -869,7 +889,6 @@ namespace Pathfinding.RVO {
 			debugDrawingScope.Dispose();
 			BlockUntilSimulationStepDone();
 			ClearAgents();
-			obstacleData.Dispose();
 			simulationData.Dispose();
 			temporaryAgentData.Dispose();
 			outputData.Dispose();
@@ -891,20 +910,7 @@ namespace Pathfinding.RVO {
 			}
 		}
 
-		/// <summary>
-		/// Add an agent at the specified position.
-		/// You can use the returned interface to read and write parameters
-		/// and set for example radius and desired point to move to.
-		///
-		/// See: <see cref="RemoveAgent"/>
-		///
-		/// Deprecated: Use AddAgent(Vector3) instead
-		/// </summary>
-		[System.Obsolete("Use AddAgent(Vector3) instead")]
-		public IAgent AddAgent (Vector2 position, float elevationCoordinate) {
-			if (movementPlane == MovementPlane.XY) return AddAgent(new Vector3(position.x, position.y, elevationCoordinate));
-			else return AddAgent(new Vector3(position.x, elevationCoordinate, position.y));
-		}
+		public bool anyAgentsInSimulation => numAgents > freeAgentIndices.Count;
 
 		/// <summary>
 		/// Add an agent at the specified position.
@@ -961,7 +967,7 @@ namespace Pathfinding.RVO {
 			// Set the default movement plane. Default to the XZ plane even if movement plane is arbitrary (the user will have to set a custom one later)
 			simulationData.movementPlane[agentIndex] = new NativeMovementPlane((movementPlane == MovementPlane.XY ? SimpleMovementPlane.XYPlane : SimpleMovementPlane.XZPlane).rotation);
 			simulationData.allowedVelocityDeviationAngles[agentIndex] = float2.zero;
-			simulationData.endOfPath[agentIndex] = float3.zero;
+			simulationData.endOfPath[agentIndex] = new float3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
 			simulationData.agentObstacleMapping[agentIndex] = -1;
 			simulationData.hierarchicalNodeIndex[agentIndex] = -1;
 
@@ -971,6 +977,8 @@ namespace Pathfinding.RVO {
 			outputData.blockedByAgents[agentIndex * MaxBlockingAgentCount] = -1;
 			outputData.effectivelyReachedDestination[agentIndex] = ReachedEndOfPath.NotReached;
 
+			temporaryAgentData.neighbours[agentIndex * MaxNeighbourCount] = -1;
+
 			horizonAgentData.horizonSide[agentIndex] = 0;
 			agentPreCalculationCallbacks[agentIndex] = null;
 			agentDestroyCallbacks[agentIndex] = null;
@@ -979,10 +987,8 @@ namespace Pathfinding.RVO {
 		}
 
 		/// <summary>Deprecated: Use AddAgent(Vector3) instead</summary>
-		[System.Obsolete("Use AddAgent(Vector3) instead")]
-		public IAgent AddAgent (IAgent agent) {
-			throw new System.NotImplementedException("Use AddAgent(position) instead. Agents are not persistent after being removed.");
-		}
+		[System.Obsolete("Use AddAgent(Vector3) instead", true)]
+		public IAgent AddAgent (IAgent agent) { return null; }
 
 		/// <summary>
 		/// Removes a specified agent from this simulation.
@@ -997,20 +1003,11 @@ namespace Pathfinding.RVO {
 			RemoveAgent(realAgent.agentIndex);
 		}
 
-		public bool AgentExists (AgentIndex agent) {
-			BlockUntilSimulationStepDone();
-			if (!simulationData.version.IsCreated) return false;
-			var index = agent.Index;
-			if (index >= simulationData.version.Length) return false;
-			if (agent.Version != simulationData.version[index].Version) return false;
-			return true;
-		}
-
 		public void RemoveAgent (AgentIndex agent) {
 			BlockUntilSimulationStepDone();
-			if (!AgentExists(agent)) throw new System.InvalidOperationException("Trying to remove agent which does not exist");
 
-			var index = agent.Index;
+			if (!agent.TryGetIndex(ref simulationData, out var index)) throw new System.InvalidOperationException("Trying to remove agent which does not exist");
+
 			// Increment version and set deleted bit
 			simulationData.version[index] = simulationData.version[index].WithIncrementedVersion().WithDeleted();
 			// Avoid memory leaks
@@ -1031,6 +1028,8 @@ namespace Pathfinding.RVO {
 				if (callback != null) {
 					if (!blocked) {
 						dependency.Complete();
+						// The pre-calculation callback may want to read the simulation data
+						rwLock.ReadSync().Unlock();
 						blocked = true;
 					}
 					callback.Invoke();
@@ -1053,6 +1052,18 @@ namespace Pathfinding.RVO {
 				new JobRVO<XZMovementPlane>().ScheduleBatch(0, 0);
 				new JobRVO<ArbitraryMovementPlane>().ScheduleBatch(0, 0);
 
+				new JobRVOPreprocess<XYMovementPlane>().Schedule();
+				new JobRVOPreprocess<XZMovementPlane>().Schedule();
+				new JobRVOPreprocess<ArbitraryMovementPlane>().Schedule();
+
+				new JobHorizonAvoidancePhase1<XYMovementPlane>().ScheduleBatch(0, 0);
+				new JobHorizonAvoidancePhase1<XZMovementPlane>().ScheduleBatch(0, 0);
+				new JobHorizonAvoidancePhase1<ArbitraryMovementPlane>().ScheduleBatch(0, 0);
+
+				new JobHorizonAvoidancePhase2<XYMovementPlane>().ScheduleBatch(0, 0);
+				new JobHorizonAvoidancePhase2<XZMovementPlane>().ScheduleBatch(0, 0);
+				new JobHorizonAvoidancePhase2<ArbitraryMovementPlane>().ScheduleBatch(0, 0);
+
 				new JobRVOCalculateNeighbours<XYMovementPlane>().ScheduleBatch(0, 0);
 				new JobRVOCalculateNeighbours<XZMovementPlane>().ScheduleBatch(0, 0);
 				new JobRVOCalculateNeighbours<ArbitraryMovementPlane>().ScheduleBatch(0, 0);
@@ -1066,21 +1077,49 @@ namespace Pathfinding.RVO {
 				new JobDestinationReached<ArbitraryMovementPlane>().Schedule();
 			}
 
-			// The burst jobs are specialized for the type of movement plane used. This improves performance for the XY and XZ movement planes quite a lot
+			// The burst jobs are specialized for the type of movement plane used. This improves performance for the XY and XZ movement planes quite a lot.
+			// Note: The agents' own movement planes could be colinear with e.g. the XY plane, but may add an additional rotation,
+			// so we must ensure that we always use the movement plane wrappers for all conversions.
+			// Otherwise some conversions may add a rotation, and some may not.
+			// All external communication with the rest of the world happens in world space, so we just need to be consistent internally.
 			if (movementPlane == MovementPlane.XY) return UpdateInternal<XYMovementPlane>(dependency, dt, drawGizmos, allocator);
 			else if (movementPlane == MovementPlane.XZ) return UpdateInternal<XZMovementPlane>(dependency, dt, drawGizmos, allocator);
 			else return UpdateInternal<ArbitraryMovementPlane>(dependency, dt, drawGizmos, allocator);
 		}
 
-		public void LockSimulationDataReadOnly (JobHandle dependencies) {
-			this.lastJob = JobHandle.CombineDependencies(this.lastJob, dependencies);
+		/// <summary>
+		/// Takes an async read-only lock on the simulation data.
+		///
+		/// This can be used to access <see cref="simulationData"/>, <see cref="outputData"/>, <see cref="quadtree"/>, and <see cref="GetAgentNeighbourLookup"/> in a job.
+		///
+		/// Use the <see cref="ReadLockAsync.dependency"/> field when you schedule the job using the simulation data,
+		/// and then call <see cref="ReadLockAsync.UnlockAfter"/> with the job handle of that job.
+		/// </summary>
+		public RWLock.ReadLockAsync LockSimulationDataReadOnly () {
+			return this.rwLock.Read();
+		}
+
+		/// <summary>
+		/// Takes an async read/write lock on the simulation data.
+		///
+		/// This can be used to access <see cref="simulationData"/>, <see cref="outputData"/>, <see cref="quadtree"/>, and <see cref="GetAgentNeighbourLookup"/> in a job.
+		///
+		/// Use the <see cref="WriteLockAsync.dependency"/> field when you schedule the job using the simulation data,
+		/// and then call <see cref="WriteLockAsync.UnlockAfter"/> with the job handle of that job.
+		/// </summary>
+		public RWLock.WriteLockAsync LockSimulationDataReadWrite () {
+			return this.rwLock.Write();
 		}
 
 		JobHandle UpdateInternal<T>(JobHandle dependency, float deltaTime, bool drawGizmos, Allocator allocator) where T : struct, IMovementPlaneWrapper {
+			if (!anyAgentsInSimulation) {
+				// No agents, nothing to do
+				// This saves some performance, since scheduling jobs has some overhead
+				return dependency;
+			}
+
 			// Prevent a zero delta time
 			deltaTime = math.max(deltaTime, 1.0f/2000f);
-
-			BlockUntilSimulationStepDone();
 
 			UnityEngine.Profiling.Profiler.BeginSample("Read agent data");
 
@@ -1091,9 +1130,12 @@ namespace Pathfinding.RVO {
 
 			UnityEngine.Profiling.Profiler.EndSample();
 
+			var writeLock = rwLock.Write();
+			dependency = JobHandle.CombineDependencies(dependency, writeLock.dependency);
+
 			var quadtreeJob = quadtree.BuildJob(simulationData.position, simulationData.version, outputData.speed, simulationData.radius, numAgents, movementPlane).Schedule(dependency);
 
-			var preprocessJob = new JobRVOPreprocess {
+			var preprocessJob = new JobRVOPreprocess<T> {
 				agentData = simulationData,
 				previousOutput = outputData,
 				temporaryAgentData = temporaryAgentData,
@@ -1117,7 +1159,7 @@ namespace Pathfinding.RVO {
 			debugDrawingScope.Rewind();
 			var draw = DrawingManager.GetBuilder(debugDrawingScope);
 
-			var horizonJob1 = new JobHorizonAvoidancePhase1 {
+			var horizonJob1 = new JobHorizonAvoidancePhase1<T> {
 				agentData = simulationData,
 				neighbours = temporaryAgentData.neighbours,
 				desiredTargetPointInVelocitySpace = temporaryAgentData.desiredTargetPointInVelocitySpace,
@@ -1125,7 +1167,7 @@ namespace Pathfinding.RVO {
 				draw = draw,
 			}.ScheduleBatch(numAgents, batchSize, combinedJob);
 
-			var horizonJob2 = new JobHorizonAvoidancePhase2 {
+			var horizonJob2 = new JobHorizonAvoidancePhase2<T> {
 				neighbours = temporaryAgentData.neighbours,
 				versions = simulationData.version,
 				desiredVelocity = temporaryAgentData.desiredVelocity,
@@ -1195,7 +1237,6 @@ namespace Pathfinding.RVO {
 
 			var reachedJob = new JobDestinationReached<T> {
 				agentData = simulationData,
-				obstacleData = obstacleData,
 				temporaryAgentData = temporaryAgentData,
 				output = outputData,
 				draw = draw,
@@ -1219,7 +1260,7 @@ namespace Pathfinding.RVO {
 
 			draw.DisposeAfter(dependency);
 
-			lastJob = dependency;
+			writeLock.UnlockAfter(dependency);
 			return dependency;
 		}
 	}

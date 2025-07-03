@@ -6,7 +6,8 @@ namespace Pathfinding {
 	using Pathfinding.Graphs.Navmesh;
 	using Pathfinding.Jobs;
 	using Pathfinding.Serialization;
-	using Pathfinding.Util;
+	using Pathfinding.Sync;
+	using Pathfinding.Pooling;
 	using Unity.Jobs;
 
 	/// <summary>
@@ -54,6 +55,9 @@ namespace Pathfinding {
 	/// So if your world is made up entirely of NavmeshPrefabs, you can skip scanning for performance by setting A* Inspector -> Settings -> Scan On Awake to false.
 	///
 	/// You can also apply a NavmeshPrefab to a graph manually by calling the <see cref="Apply(RecastGraph)"/> method.
+	///
+	/// Note: A navmesh prefab will fully replace the tiles within its bounding box. You cannot stack multiple navmesh prefabs on top of each other
+	/// to make e.g. a building with multiple floors.
 	///
 	/// See: <see cref="RecastGraph"/>
 	/// See: <see cref="TileMeshes"/>
@@ -134,9 +138,9 @@ namespace Pathfinding {
 						trisCount += tileMeshes.tileMeshes[i].triangles.Length;
 					}
 
-					var colors = Util.ArrayPool<Color>.Claim(vertexCount);
-					var vertices = Util.ArrayPool<Vector3>.Claim(vertexCount);
-					var triangles = Util.ArrayPool<int>.Claim(trisCount);
+					var colors = ArrayPool<Color>.Claim(vertexCount);
+					var vertices = ArrayPool<Vector3>.Claim(vertexCount);
+					var triangles = ArrayPool<int>.Claim(trisCount);
 					vertexCount = 0;
 					trisCount = 0;
 
@@ -165,9 +169,9 @@ namespace Pathfinding {
 					}
 
 					builder.SolidMesh(vertices, triangles, colors, vertexCount, trisCount);
-					Util.ArrayPool<Color>.Release(ref colors);
-					Util.ArrayPool<Vector3>.Release(ref vertices);
-					Util.ArrayPool<int>.Release(ref triangles);
+					ArrayPool<Color>.Release(ref colors);
+					ArrayPool<Vector3>.Release(ref vertices);
+					ArrayPool<int>.Release(ref triangles);
 
 					builder.Dispose();
 				}
@@ -259,7 +263,7 @@ namespace Pathfinding {
 		public static Bounds SnapSizeToClosestTileMultiple (RecastGraph graph, Bounds bounds) {
 			var tileSize = Mathf.Max(graph.editorTileSize * graph.cellSize, 0.001f);
 			var tiles = new Vector2(bounds.size.x / tileSize, bounds.size.z / tileSize);
-			var roundedTiles = new Int2(Mathf.Max(1, Mathf.RoundToInt(tiles.x)), Mathf.Max(1, Mathf.RoundToInt(tiles.y)));
+			var roundedTiles = new Vector2Int(Mathf.Max(1, Mathf.RoundToInt(tiles.x)), Mathf.Max(1, Mathf.RoundToInt(tiles.y)));
 			return new Bounds(
 				bounds.center,
 				new Vector3(
@@ -280,7 +284,7 @@ namespace Pathfinding {
 			var cornerInGraphSpace2 = localToGraph.MultiplyPoint3x4(bounds.extents);
 			var minInGraphSpace = Vector3.Min(cornerInGraphSpace1, cornerInGraphSpace2);
 			var tileCoordinatesF = Vector3.Scale(minInGraphSpace, new Vector3(1.0f/tileLayout.TileWorldSizeX, 1, 1.0f/tileLayout.TileWorldSizeZ));
-			var tileCoordinates = new Int2(Mathf.RoundToInt(tileCoordinatesF.x), Mathf.RoundToInt(tileCoordinatesF.z));
+			var tileCoordinates = new Vector2Int(Mathf.RoundToInt(tileCoordinatesF.x), Mathf.RoundToInt(tileCoordinatesF.z));
 			var boundsSizeInGraphSpace = new Vector2(bounds.size.x, bounds.size.z);
 			if (((snappedRotation % 2) + 2) % 2 == 1) Util.Memory.Swap(ref boundsSizeInGraphSpace.x, ref boundsSizeInGraphSpace.y);
 			var w = Mathf.Max(1, Mathf.RoundToInt(boundsSizeInGraphSpace.x / tileLayout.TileWorldSizeX));
@@ -365,7 +369,9 @@ namespace Pathfinding {
 			tileLayout.graphSpaceSize.x = float.PositiveInfinity;
 			tileLayout.graphSpaceSize.z = float.PositiveInfinity;
 			var buildSettings = RecastBuilder.BuildTileMeshes(graph, tileLayout, new IntRect(0, 0, tileLayout.tileCount.x - 1, tileLayout.tileCount.y - 1));
-			buildSettings.scene = this.gameObject.scene;
+			var scene = this.gameObject.scene;
+			buildSettings.collectionSettings.physicsScene = scene.GetPhysicsScene();
+			buildSettings.collectionSettings.physicsScene2D = scene.GetPhysicsScene2D();
 
 			// Schedule the jobs asynchronously
 			var tileMeshesPromise = buildSettings.Schedule(arena);
@@ -435,16 +441,31 @@ namespace Pathfinding {
 				if (prefabPath != null && prefabPath != "") {
 					name = System.IO.Path.GetFileNameWithoutExtension(prefabPath);
 				}
-				name = name.Replace("/", "_").Replace(".", "_").Replace("__", "_");
+				name = name.Replace("/", "_").Replace("\\", "_").Replace(".", "_").Replace("__", "_");
 				path = UnityEditor.AssetDatabase.GenerateUniqueAssetPath("Assets/Tiles/" + name + ".bytes");
 			}
 			var fullPath = Application.dataPath + "/../" + path;
-			System.IO.File.WriteAllBytes(fullPath, data);
+			WriteFileSomewhatAtomic(fullPath, data);
 
 			UnityEditor.AssetDatabase.Refresh();
 			serializedNavmesh = UnityEditor.AssetDatabase.LoadAssetAtPath(path, typeof(TextAsset)) as TextAsset;
 			// Required if we do this in edit mode
 			UnityEditor.EditorUtility.SetDirty(this);
+		}
+
+		static void WriteFileSomewhatAtomic (string path, byte[] data) {
+			// Ensure the temp path is likely on the same disk as the final path.
+			// This is not necessarily true for the system wide "get temp path" function.
+			var tempPath = Application.dataPath + "/../Temp/tmp_" + System.Guid.NewGuid().ToString() + ".bytes";
+			System.IO.File.WriteAllBytes(tempPath, data);
+			try {
+				// Unfortunately the Move + overwrite operation doesn't exist until .net core 3.0.
+				// So we have to delete the target file before moving to it.
+				if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+				System.IO.File.Move(tempPath, path);
+			} catch {
+				if (System.IO.File.Exists(tempPath)) System.IO.File.Delete(tempPath);
+			}
 		}
 
 		/// <summary>

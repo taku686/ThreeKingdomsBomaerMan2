@@ -108,7 +108,7 @@ namespace Pathfinding.Drawing {
 		///
 		/// You must do this when you are done with the scope, even if it was never used to actually render anything.
 		/// The items will stop rendering immediately: the next camera to render will not render the items unless kept alive in some other way.
-		/// For example items are always rendered at least once.
+		/// However, items are always rendered at least once.
 		/// </summary>
 		public void Dispose () {
 			if (gizmos.IsAllocated) {
@@ -119,41 +119,7 @@ namespace Pathfinding.Drawing {
 		}
 	};
 
-	/// <summary>
-	/// Helper for drawing Gizmos in a performant way.
-	/// This is a replacement for the Unity Gizmos class as that is not very performant
-	/// when drawing very large amounts of geometry (for example a large grid graph).
-	/// These gizmos can be persistent, so if the data does not change, the gizmos
-	/// do not need to be updated.
-	///
-	/// How to use
-	/// - Create a Hasher object and hash whatever data you will be using to draw the gizmos
-	///      Could be for example the positions of the vertices or something. Just as long as
-	///      if the gizmos should change, then the hash changes as well.
-	/// - Check if a cached mesh exists for that hash
-	/// - If not, then create a Builder object and call the drawing methods until you are done
-	///      and then call Finalize with a reference to a gizmos class and the hash you calculated before.
-	/// - Call gizmos.Draw with the hash.
-	/// - When you are done with drawing gizmos for this frame, call gizmos.FinalizeDraw
-	///
-	/// <code>
-	/// var a = Vector3.zero;
-	/// var b = Vector3.one;
-	/// var color = Color.red;
-	/// var hasher = DrawingData.Hasher.Create(this);
-	///
-	/// hasher.Add(a);
-	/// hasher.Add(b);
-	/// hasher.Add(color);
-	/// var gizmos = DrawingManager.instance.gizmos;
-	/// if (!gizmos.Draw(hasher)) {
-	///     using (var builder = gizmos.GetBuilder(hasher)) {
-	///         // Ideally something very complex, not just a single line
-	///         builder.Line(a, b, color);
-	///     }
-	/// }
-	/// </code>
-	/// </summary>
+	/// <summary>Helper for drawing Gizmos in a performant way</summary>
 	public class DrawingData {
 		/// <summary>Combines hashes into a single hash value</summary>
 		public struct Hasher : IEquatable<Hasher> {
@@ -161,6 +127,7 @@ namespace Pathfinding.Drawing {
 
 			public static Hasher NotSupplied => new Hasher { hash = ulong.MaxValue };
 
+			[System.Obsolete("Use the constructor instead")]
 			public static Hasher Create<T>(T init) {
 				var h = new Hasher();
 
@@ -168,17 +135,17 @@ namespace Pathfinding.Drawing {
 				return h;
 			}
 
+			/// <summary>
+			/// Includes the given data in the final hash.
+			/// You can call this as many times as you want.
+			/// </summary>
 			public void Add<T>(T hash) {
 				// Just a regular hash function. The + 12289 is to make sure that hashing zeros doesn't just produce a zero (and generally that hashing one X doesn't produce a hash of X)
 				// (with a struct we can't provide default initialization)
 				this.hash = (1572869UL * this.hash) ^ (ulong)hash.GetHashCode() + 12289;
 			}
 
-			public ulong Hash {
-				get {
-					return hash;
-				}
-			}
+			public readonly ulong Hash => hash;
 
 			public override int GetHashCode () {
 				return (int)hash;
@@ -208,7 +175,11 @@ namespace Pathfinding.Drawing {
 			JobHandle buildJob, splitterJob;
 			public List<MeshWithType> meshes;
 
-			public bool isValid => type != Type.Invalid;
+			public bool isValid {
+				get {
+					return type != Type.Invalid;
+				}
+			}
 
 			public struct CapturedState {
 				public Matrix4x4 matrix;
@@ -615,6 +586,18 @@ namespace Pathfinding.Drawing {
 			public void Submit (DrawingData gizmos) {
 				if (state != State.Initialized) throw new System.InvalidOperationException();
 
+#if !UNITY_EDITOR
+				if (meta.isGizmos) {
+					// Gizmos are never drawn in standalone builds.
+					// Draw.Line, and similar draw commands, will already have been removed in standalone builds,
+					// but if users use e.g. Draw.editor directly, then the commands will be added to the command buffer.
+					// For performance we can just discard the whole buffer here.
+					Release();
+					return;
+				}
+#endif
+
+
 				unsafe {
 					// There are about 128 buffers we need to check and it's faster to do that using Burst
 					if (meshes.Count == 0 && !AnyBuffersWrittenToInvoke((UnsafeAppendBuffer*)commandBuffers.GetUnsafeReadOnlyPtr(), commandBuffers.Length)) {
@@ -824,6 +807,8 @@ namespace Pathfinding.Drawing {
 			Dictionary<ulong, List<int> > hash2index;
 			Stack<int> freeSlots;
 			Stack<List<int> > freeLists;
+
+			public bool isEmpty => data == null || freeSlots.Count == data.Length;
 
 			public int memoryUsage {
 				get {
@@ -1344,7 +1329,7 @@ namespace Pathfinding.Drawing {
 		/// </summary>
 		public bool Draw (Hasher hasher, RedrawScope scope) {
 			if (hasher.Equals(Hasher.NotSupplied)) throw new System.ArgumentException("Invalid hash value");
-			processedData.SetCustomScope(hasher, scope);
+			if (scope.isValid) processedData.SetCustomScope(hasher, scope);
 			return processedData.SetVersion(hasher, version);
 		}
 
@@ -1460,16 +1445,15 @@ namespace Pathfinding.Drawing {
 			version++;
 		}
 
-		class MeshCompareByDrawingOrder : IComparer<RenderedMeshWithType> {
-			public int Compare (RenderedMeshWithType a, RenderedMeshWithType b) {
-				// Extract if the meshes are Solid/Lines/Text
-				var ta = (int)a.type & 0x7;
-				var tb = (int)b.type & 0x7;
-				return ta != tb ? ta - tb : a.drawingOrderIndex - b.drawingOrderIndex;
-			}
+		static int MeshCompareByDrawingOrder (RenderedMeshWithType a, RenderedMeshWithType b) {
+			// Extract if the meshes are Solid/Lines/Text
+			var ta = (int)a.type & 0x7;
+			var tb = (int)b.type & 0x7;
+			return ta != tb ? ta - tb : a.drawingOrderIndex - b.drawingOrderIndex;
 		}
 
-		static readonly MeshCompareByDrawingOrder meshSorter = new MeshCompareByDrawingOrder();
+		static readonly System.Comparison<RenderedMeshWithType> meshSorter = MeshCompareByDrawingOrder;
+
 		// Temporary array, cached to avoid allocations
 		Plane[] frustrumPlanes = new Plane[6];
 		// Temporary block, cached to avoid allocations
@@ -1547,6 +1531,9 @@ namespace Pathfinding.Drawing {
 		/// <summary>Call after all <see cref="Draw"/> commands for the frame have been done to draw everything.</summary>
 		/// <param name="allowCameraDefault">Indicates if built-in command builders and custom ones without a custom CommandBuilder.cameraTargets should render to this camera.</param>
 		public void Render (Camera cam, bool allowGizmos, CommandBufferWrapper commandBuffer, bool allowCameraDefault) {
+			// Early out when there's nothing to render
+			if (processedData.isEmpty) return;
+
 			LoadMaterials();
 
 			// Warn if the materials could not be found
@@ -1556,9 +1543,6 @@ namespace Pathfinding.Drawing {
 				// UnityEngine.Debug.LogWarning("Looks like you just installed ALINE. The ALINE package will start working after the next script recompilation.");
 				return;
 			}
-
-			var planes = frustrumPlanes;
-			GeometryUtility.CalculateFrustumPlanes(cam, planes);
 
 			if (!cameraVersions.TryGetValue(cam, out Range cameraRenderingRange)) {
 				cameraRenderingRange = new Range { start = int.MinValue, end = int.MinValue };
@@ -1614,71 +1598,78 @@ namespace Pathfinding.Drawing {
 				processedData.CollectMeshes(cameraRenderingRange.start, meshes, cam, allowGizmos, allowCameraDefault);
 				processedData.PoolDynamicMeshes(this);
 				MarkerCollectMeshes.End();
-				MarkerSortMeshes.Begin();
-				// Note that a stable sort is required as some meshes may have the same sorting index
-				// but those meshes will have a consistent ordering between them in the list
-				meshes.Sort(meshSorter);
-				MarkerSortMeshes.End();
 
-				int colorID = Shader.PropertyToID("_Color");
-				int colorFadeID = Shader.PropertyToID("_FadeColor");
-				var solidBaseColor = new Color(1, 1, 1, settings.solidOpacity);
-				var solidFadeColor = new Color(1, 1, 1, settings.solidOpacityBehindObjects);
-				var lineBaseColor = new Color(1, 1, 1, settings.lineOpacity);
-				var lineFadeColor = new Color(1, 1, 1, settings.lineOpacityBehindObjects);
-				var textBaseColor = new Color(1, 1, 1, settings.textOpacity);
-				var textFadeColor = new Color(1, 1, 1, settings.textOpacityBehindObjects);
+				// Early out if nothing is being rendered
+				if (meshes.Count > 0) {
+					MarkerSortMeshes.Begin();
+					// Note that a stable sort is required as some meshes may have the same sorting index
+					// but those meshes will have a consistent ordering between them in the list
+					meshes.Sort(meshSorter);
+					MarkerSortMeshes.End();
 
-				// The meshes list is already sorted as first surfaces, then lines, then text
-				for (int i = 0; i < meshes.Count;) {
-					int meshEndIndex = i+1;
-					var tp = meshes[i].type & MeshType.BaseType;
-					while (meshEndIndex < meshes.Count && (meshes[meshEndIndex].type & MeshType.BaseType) == tp) meshEndIndex++;
+					var planes = frustrumPlanes;
+					GeometryUtility.CalculateFrustumPlanes(cam, planes);
 
-					Material mat;
-					customMaterialProperties.Clear();
-					switch (tp) {
-					case MeshType.Solid:
-						mat = surfaceMaterial;
-						customMaterialProperties.SetColor(colorID, solidBaseColor);
-						customMaterialProperties.SetColor(colorFadeID, solidFadeColor);
-						break;
-					case MeshType.Lines:
-						mat = lineMaterial;
-						customMaterialProperties.SetColor(colorID, lineBaseColor);
-						customMaterialProperties.SetColor(colorFadeID, lineFadeColor);
-						break;
-					case MeshType.Text:
-						mat = fontData.material;
-						customMaterialProperties.SetColor(colorID, textBaseColor);
-						customMaterialProperties.SetColor(colorFadeID, textFadeColor);
-						break;
-					default:
-						throw new System.InvalidOperationException("Invalid mesh type");
-					}
+					int colorID = Shader.PropertyToID("_Color");
+					int colorFadeID = Shader.PropertyToID("_FadeColor");
+					var solidBaseColor = new Color(1, 1, 1, settings.solidOpacity);
+					var solidFadeColor = new Color(1, 1, 1, settings.solidOpacityBehindObjects);
+					var lineBaseColor = new Color(1, 1, 1, settings.lineOpacity);
+					var lineFadeColor = new Color(1, 1, 1, settings.lineOpacityBehindObjects);
+					var textBaseColor = new Color(1, 1, 1, settings.textOpacity);
+					var textFadeColor = new Color(1, 1, 1, settings.textOpacityBehindObjects);
 
-					for (int pass = 0; pass < mat.passCount; pass++) {
-						for (int j = i; j < meshEndIndex; j++) {
-							var mesh = meshes[j];
-							if ((mesh.type & MeshType.Custom) != 0) {
-								// This mesh type may have a matrix set. So we need to handle that
-								if (GeometryUtility.TestPlanesAABB(planes, TransformBoundingBox(mesh.matrix, mesh.mesh.bounds))) {
-									// Custom meshes may have different colors
-									customMaterialProperties.SetColor(colorID, solidBaseColor * mesh.color);
-									commandBuffer.DrawMesh(mesh.mesh, mesh.matrix, mat, 0, pass, customMaterialProperties);
-									customMaterialProperties.SetColor(colorID, solidBaseColor);
+					// The meshes list is already sorted as first surfaces, then lines, then text
+					for (int i = 0; i < meshes.Count;) {
+						int meshEndIndex = i+1;
+						var tp = meshes[i].type & MeshType.BaseType;
+						while (meshEndIndex < meshes.Count && (meshes[meshEndIndex].type & MeshType.BaseType) == tp) meshEndIndex++;
+
+						Material mat;
+						customMaterialProperties.Clear();
+						switch (tp) {
+						case MeshType.Solid:
+							mat = surfaceMaterial;
+							customMaterialProperties.SetColor(colorID, solidBaseColor);
+							customMaterialProperties.SetColor(colorFadeID, solidFadeColor);
+							break;
+						case MeshType.Lines:
+							mat = lineMaterial;
+							customMaterialProperties.SetColor(colorID, lineBaseColor);
+							customMaterialProperties.SetColor(colorFadeID, lineFadeColor);
+							break;
+						case MeshType.Text:
+							mat = fontData.material;
+							customMaterialProperties.SetColor(colorID, textBaseColor);
+							customMaterialProperties.SetColor(colorFadeID, textFadeColor);
+							break;
+						default:
+							throw new System.InvalidOperationException("Invalid mesh type");
+						}
+
+						for (int pass = 0; pass < mat.passCount; pass++) {
+							for (int j = i; j < meshEndIndex; j++) {
+								var mesh = meshes[j];
+								if ((mesh.type & MeshType.Custom) != 0) {
+									// This mesh type may have a matrix set. So we need to handle that
+									if (GeometryUtility.TestPlanesAABB(planes, TransformBoundingBox(mesh.matrix, mesh.mesh.bounds))) {
+										// Custom meshes may have different colors
+										customMaterialProperties.SetColor(colorID, solidBaseColor * mesh.color);
+										commandBuffer.DrawMesh(mesh.mesh, mesh.matrix, mat, 0, pass, customMaterialProperties);
+										customMaterialProperties.SetColor(colorID, solidBaseColor);
+									}
+								} else if (GeometryUtility.TestPlanesAABB(planes, mesh.mesh.bounds)) {
+									// This mesh is drawn with an identity matrix
+									commandBuffer.DrawMesh(mesh.mesh, Matrix4x4.identity, mat, 0, pass, customMaterialProperties);
 								}
-							} else if (GeometryUtility.TestPlanesAABB(planes, mesh.mesh.bounds)) {
-								// This mesh is drawn with an identity matrix
-								commandBuffer.DrawMesh(mesh.mesh, Matrix4x4.identity, mat, 0, pass, customMaterialProperties);
 							}
 						}
+
+						i = meshEndIndex;
 					}
 
-					i = meshEndIndex;
+					meshes.Clear();
 				}
-
-				meshes.Clear();
 			}
 
 			cameraVersions[cam] = cameraRenderingRange;

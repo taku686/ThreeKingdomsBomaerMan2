@@ -25,7 +25,7 @@ namespace Enemy
         private PhotonView _photonView;
         private PutBomb _putBomb;
         private Seeker _seeker;
-        private AILerp _aiLerp;
+        private AIPath _aiPath;
         private EnemySearchPlayer _enemySearchPlayer;
         private Animator _animator;
         private PlayerConditionInfo _playerConditionInfo;
@@ -79,8 +79,8 @@ namespace Enemy
             _animator = GetComponentInChildren<Animator>();
             _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
             _playerConditionInfo = GetComponent<PlayerConditionInfo>();
-            _seeker = GetComponent<Seeker>();
-            _aiLerp = GetComponent<AILerp>();
+            _seeker = gameObject.AddComponent<Seeker>();
+            _aiPath = gameObject.AddComponent<AIPath>();
             _photonView = GetComponent<PhotonView>();
             _enemySearchPlayer = _searchPlayerFactory.Create(gameObject);
             _playerKey = PhotonNetworkManager.GetPlayerKey(photonView.InstantiationId, 0);

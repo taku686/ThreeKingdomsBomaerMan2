@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine.Profiling;
 using UnityEngine.Assertions;
+using Pathfinding.Sync;
 
 namespace Pathfinding {
 #if NETFX_CORE
@@ -317,6 +318,11 @@ namespace Pathfinding {
 
 					// Prepare the path
 					ipath.Prepare();
+
+					// When using a heuristic, break ties using the H score.
+					// When not using a heuristic, break ties by the insertion order of the nodes.
+					// This will make paths a lot prettier, especially on grid graphs.
+					pathHandler.heap.tieBreaking = path.heuristicObjectiveInternal.hasHeuristic ? BinaryHeap.TieBreaking.HScore : BinaryHeap.TieBreaking.InsertionOrder;
 					MarkerPreparePath.End();
 
 
@@ -445,6 +451,11 @@ namespace Pathfinding {
 				long totalTicks = 0;
 
 				ip.Prepare();
+
+				// When using a heuristic, break ties using the H score.
+				// When not using a heuristic, break ties by the insertion order of the nodes.
+				// This will make paths a lot prettier, especially on grid graphs.
+				pathHandler.heap.tieBreaking = p.heuristicObjectiveInternal.hasHeuristic ? BinaryHeap.TieBreaking.HScore : BinaryHeap.TieBreaking.InsertionOrder;
 
 				// Check if the Prepare call caused the path to complete
 				// If this happens the path usually failed

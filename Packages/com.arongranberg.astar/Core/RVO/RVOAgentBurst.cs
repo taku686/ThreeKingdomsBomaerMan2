@@ -8,7 +8,7 @@ namespace Pathfinding.RVO {
 	using Unity.Jobs;
 	using Unity.Mathematics;
 	using Unity.Collections;
-	using Unity.IL2CPP.CompilerServices;
+	using Pathfinding.Collections;
 	using Pathfinding.Drawing;
 	using Pathfinding.ECS.RVO;
 	using static Unity.Burst.CompilerServices.Aliasing;
@@ -16,7 +16,7 @@ namespace Pathfinding.RVO {
 	using System.Diagnostics;
 
 	[BurstCompile(CompileSynchronously = false, FloatMode = FloatMode.Fast)]
-	public struct JobRVOPreprocess : IJob {
+	public struct JobRVOPreprocess<MovementPlaneWrapper> : IJob where MovementPlaneWrapper : struct, IMovementPlaneWrapper {
 		[ReadOnly]
 		public SimulatorBurst.AgentData agentData;
 
@@ -42,7 +42,10 @@ namespace Pathfinding.RVO {
 					temporaryAgentData.desiredVelocity[i] = float3.zero;
 					temporaryAgentData.currentVelocity[i] = float3.zero;
 				} else {
-					var desiredTargetPointInVelocitySpace = agentData.movementPlane[i].ToPlane(agentData.targetPoint[i] - agentData.position[i]);
+					MovementPlaneWrapper movementPlane = default;
+					movementPlane.Set(agentData.movementPlane[i]);
+
+					var desiredTargetPointInVelocitySpace = movementPlane.ToPlane(agentData.targetPoint[i] - agentData.position[i]);
 					temporaryAgentData.desiredTargetPointInVelocitySpace[i] = desiredTargetPointInVelocitySpace;
 
 					// Estimate our current velocity
@@ -51,7 +54,7 @@ namespace Pathfinding.RVO {
 					var currentVelocity = math.normalizesafe(previousOutput.targetPoint[i] - agentData.position[i]) * previousOutput.speed[i];
 
 					// Calculate the desired velocity from the point we want to reach
-					temporaryAgentData.desiredVelocity[i] = agentData.movementPlane[i].ToWorld(math.normalizesafe(desiredTargetPointInVelocitySpace) * agentData.desiredSpeed[i], 0);
+					temporaryAgentData.desiredVelocity[i] = movementPlane.ToWorld(math.normalizesafe(desiredTargetPointInVelocitySpace) * agentData.desiredSpeed[i], 0);
 
 					var collisionNormal = math.normalizesafe(agentData.collisionNormal[i]);
 					// Check if the velocity is going into the wall
@@ -70,7 +73,7 @@ namespace Pathfinding.RVO {
 	/// See: http://www.gdcvault.com/play/1014514/AI-Navigation-It-s-Not
 	/// </summary>
 	[BurstCompile(FloatMode = FloatMode.Fast)]
-	public struct JobHorizonAvoidancePhase1 : Pathfinding.Jobs.IJobParallelForBatched {
+	public struct JobHorizonAvoidancePhase1<MovementPlaneWrapper> : Pathfinding.Jobs.IJobParallelForBatched where MovementPlaneWrapper : struct, IMovementPlaneWrapper {
 		[ReadOnly]
 		public SimulatorBurst.AgentData agentData;
 
@@ -134,9 +137,6 @@ namespace Pathfinding.RVO {
 					continue;
 				}
 
-				float minAngle = 0;
-				float maxAngle = 0;
-
 				float desiredAngle = math.atan2(desiredTargetPointInVelocitySpace[i].y, desiredTargetPointInVelocitySpace[i].x);
 
 				int eventCount = 0;
@@ -146,7 +146,10 @@ namespace Pathfinding.RVO {
 				float radius = agentData.radius[i];
 
 				var position = agentData.position[i];
-				var movementPlane = agentData.movementPlane[i];
+				MovementPlaneWrapper movementPlane = default;
+				movementPlane.Set(agentData.movementPlane[i]);
+
+				var distSqToEndOfPath = math.all(math.isfinite(agentData.endOfPath[i])) ? math.lengthsq(agentData.endOfPath[i] - position) : float.PositiveInfinity;
 
 				var agentNeighbours = neighbours.Slice(i*SimulatorBurst.MaxNeighbourCount, SimulatorBurst.MaxNeighbourCount);
 				for (int j = 0; j < agentNeighbours.Length && agentNeighbours[j] != -1; j++) {
@@ -155,12 +158,15 @@ namespace Pathfinding.RVO {
 
 					var relativePosition = movementPlane.ToPlane(agentData.position[other] - position);
 					float dist = math.length(relativePosition);
+					var otherRadius = agentData.radius[other];
+
+					var distanceUntilCollision = dist - (radius + otherRadius);
+					if (distanceUntilCollision*distanceUntilCollision > distSqToEndOfPath) continue;
 
 					float angle = math.atan2(relativePosition.y, relativePosition.x) - desiredAngle;
 					float deltaAngle;
 
-					var otherRadius = agentData.radius[other];
-					if (dist < radius + otherRadius) {
+					if (distanceUntilCollision <= 0) {
 						// Collision
 						deltaAngle = math.PI * 0.49f;
 					} else {
@@ -204,7 +210,7 @@ namespace Pathfinding.RVO {
 					tmpInside += deltas[tmpIndex];
 					if (tmpInside == 0) break;
 				}
-				maxAngle = tmpIndex == eventCount ? math.PI : angles[tmpIndex];
+				var maxAngle = tmpIndex == eventCount ? math.PI : angles[tmpIndex];
 
 				// Walk in the negative direction from angle 0 until the end of the group of angle ranges that include angle 0
 				tmpInside = inside;
@@ -213,7 +219,7 @@ namespace Pathfinding.RVO {
 					tmpInside -= deltas[tmpIndex];
 					if (tmpInside == 0) break;
 				}
-				minAngle = tmpIndex == -1 ? -math.PI : angles[tmpIndex];
+				var minAngle = tmpIndex == -1 ? -math.PI : angles[tmpIndex];
 
 				//horizonBias = -(minAngle + maxAngle);
 
@@ -232,7 +238,7 @@ namespace Pathfinding.RVO {
 	/// See: http://www.gdcvault.com/play/1014514/AI-Navigation-It-s-Not
 	/// </summary>
 	[BurstCompile(FloatMode = FloatMode.Fast)]
-	public struct JobHorizonAvoidancePhase2 : Pathfinding.Jobs.IJobParallelForBatched {
+	public struct JobHorizonAvoidancePhase2<MovementPlaneWrapper> : Pathfinding.Jobs.IJobParallelForBatched where MovementPlaneWrapper : struct, IMovementPlaneWrapper {
 		[ReadOnly]
 		public NativeArray<int> neighbours;
 		[ReadOnly]
@@ -275,7 +281,11 @@ namespace Pathfinding.RVO {
 				float bestAngle = horizonAgentData.horizonSide[i] < 0 ? horizonAgentData.horizonMinAngle[i] : horizonAgentData.horizonMaxAngle[i];
 				float2 desiredDirection;
 				math.sincos(bestAngle, out desiredDirection.y, out desiredDirection.x);
-				desiredVelocity[i] = movementPlane[i].ToWorld(math.length(desiredVelocity[i]) * desiredDirection, 0);
+
+				MovementPlaneWrapper movementPlane = default;
+				movementPlane.Set(this.movementPlane[i]);
+
+				desiredVelocity[i] = movementPlane.ToWorld(math.length(desiredVelocity[i]) * desiredDirection, 0);
 				desiredTargetPointInVelocitySpace[i] = math.length(desiredTargetPointInVelocitySpace[i]) * desiredDirection;
 			}
 		}
@@ -385,7 +395,7 @@ namespace Pathfinding.RVO {
 			// Write the output starting at this index in the neighbours array
 			var outputIndex = agentIndex * SimulatorBurst.MaxNeighbourCount;
 
-			quadtree.QueryKNearest(new RVOQuadtreeBurst.QuadtreeQuery {
+			int numNeighbours = quadtree.QueryKNearest(new RVOQuadtreeBurst.QuadtreeQuery {
 				position = agentData.position[agentIndex],
 				speed = agentData.maxSpeed[agentIndex],
 				agentRadius = agentData.radius[agentIndex],
@@ -393,20 +403,22 @@ namespace Pathfinding.RVO {
 				outputStartIndex = outputIndex,
 				maxCount = maxNeighbourCount,
 				result = neighbours,
+				layerMask = agentData.collidesWith[agentIndex],
+				layers = agentData.layer,
 				resultDistances = neighbourDistances,
 			});
 
-			int numNeighbours = 0;
-			while (numNeighbours < maxNeighbourCount && math.isfinite(neighbourDistances[numNeighbours])) numNeighbours++;
 			output.numNeighbours[agentIndex] = numNeighbours;
 
 			MovementPlaneWrapper movementPlane = default;
 			movementPlane.Set(agentData.movementPlane[agentIndex]);
+
 			movementPlane.ToPlane(agentData.position[agentIndex], out float localElevation);
 
 			// Filter out invalid neighbours
 			for (int i = 0; i < numNeighbours; i++) {
 				int otherIndex = neighbours[outputIndex + i];
+				if (otherIndex == -1) throw new System.Exception("Invalid neighbour index");
 				// Interval along the y axis in which the agents overlap
 				movementPlane.ToPlane(agentData.position[otherIndex], out float otherElevation);
 				float maxY = math.min(localElevation + agentData.height[agentIndex], otherElevation + agentData.height[otherIndex]);
@@ -414,9 +426,8 @@ namespace Pathfinding.RVO {
 
 				// The agents cannot collide if they are on different y-levels.
 				// Also do not avoid the agent itself.
-				// Apply the layer masks for agents.
 				// Use binary OR to reduce branching.
-				if ((maxY < minY) | (otherIndex == agentIndex) | (((int)agentData.collidesWith[agentIndex] & (int)agentData.layer[otherIndex]) == 0)) {
+				if ((maxY < minY) | (otherIndex == agentIndex)) {
 					numNeighbours--;
 					neighbours[outputIndex + i] = neighbours[outputIndex + numNeighbours];
 					i--;
@@ -468,9 +479,6 @@ namespace Pathfinding.RVO {
 		[ReadOnly]
 		public SimulatorBurst.TemporaryAgentData temporaryAgentData;
 
-		[ReadOnly]
-		public SimulatorBurst.ObstacleData obstacleData;
-
 		public SimulatorBurst.AgentOutputData output;
 		public int numAgents;
 		public CommandBuilder draw;
@@ -519,7 +527,9 @@ namespace Pathfinding.RVO {
 				if (!agentData.version[agentIndex].Valid) continue;
 
 				var position = agentData.position[agentIndex];
-				var movementPlane = agentData.movementPlane[agentIndex];
+				MovementPlaneWrapper movementPlane = default;
+				movementPlane.Set(agentData.movementPlane[agentIndex]);
+
 				var ourSpeed = output.speed[agentIndex];
 				var ourEndOfPath = agentData.endOfPath[agentIndex];
 
@@ -609,6 +619,8 @@ namespace Pathfinding.RVO {
 				var ourSpeed = output.speed[agentIndex];
 				var ourEndOfPath = agentData.endOfPath[agentIndex];
 				// Ignore if destination is not set
+				// TODO: Will this never trigger due to FloatMode.Fast?
+				// Should be ok anyway, since the distance calculations below will filter it out anyway.
 				if (!math.isfinite(ourEndOfPath.x)) continue;
 
 				var ourPosition = agentData.position[agentIndex];
@@ -1200,6 +1212,7 @@ namespace Pathfinding.RVO {
 
 				var localPosition = movementPlane.ToPlane(position);
 				var agentRadius = agentData.radius[agentIndex];
+				var distSqToEndOfPath = math.all(math.isfinite(agentData.endOfPath[agentIndex])) ? math.lengthsq(agentData.endOfPath[agentIndex] - position) : float.PositiveInfinity;
 
 				for (int neighbourIndex = 0; neighbourIndex < neighbours.Length; neighbourIndex++) {
 					int otherIndex = neighbours[neighbourIndex];
@@ -1240,9 +1253,19 @@ namespace Pathfinding.RVO {
 					}
 
 					var dist = math.length(relativePosition);
+
 					// Figure out an approximate time to collision. We avoid using the current velocities of the agents because that leads to oscillations,
 					// as the agents change their velocities, which results in a change to the time to collision, which makes them change their velocities again.
-					var minimumTimeToCollision = math.max(0, dist - combinedRadius) / math.max(combinedRadius, agentData.desiredSpeed[agentIndex] + agentData.desiredSpeed[otherIndex]);
+					var minimumDistanceToCollision = math.max(0, dist - combinedRadius);
+					if (agentData.locked[otherIndex] && minimumDistanceToCollision*minimumDistanceToCollision > distSqToEndOfPath) {
+						// The other agent is locked and we cannot collide with it until we have reached the end of our path.
+						// That means it can be safely ignored.
+						// This will reduce "shyness" around locked agents.
+						// TODO: This should ideally be done for non-locked agents too, but with a better heuristic.
+						continue;
+					}
+
+					var minimumTimeToCollision = minimumDistanceToCollision / math.max(combinedRadius, agentData.desiredSpeed[agentIndex] + agentData.desiredSpeed[otherIndex]);
 
 					// Adjust the radius to make the avoidance smoother.
 					// The agent will slowly start to take another agent into account instead of making a sharp turn.

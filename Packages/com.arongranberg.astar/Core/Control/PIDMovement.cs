@@ -414,7 +414,7 @@ namespace Pathfinding.PID {
 			buffer.AddNoResize(e2);
 		}
 
-		struct EdgeBuffers {
+		private struct EdgeBuffers {
 			public FixedList512Bytes<float2> triangleRegionEdgesL;
 			public FixedList512Bytes<float2> triangleRegionEdgesR;
 			public FixedList512Bytes<float2> straightRegionEdgesL;

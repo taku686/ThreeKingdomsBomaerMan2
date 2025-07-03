@@ -9,12 +9,12 @@ namespace Pathfinding.ECS {
 	using System.Collections.Generic;
 	using System.Runtime.InteropServices;
 	using Pathfinding;
-	using Pathfinding.Drawing;
 	using Pathfinding.Util;
+	using Pathfinding.Collections;
 	using Unity.Transforms;
 	using UnityEngine.Profiling;
 
-	[UpdateBefore(typeof(FollowerControlSystem))]
+	[UpdateBefore(typeof(RepairPathSystem))]
 	[UpdateInGroup(typeof(AIMovementSystemGroup))]
 	[RequireMatchingQueriesForUpdate]
 	[BurstCompile]
@@ -131,6 +131,7 @@ namespace Pathfinding.ECS {
 
 			while (queStart < que.Count) {
 				var current = que[queStart++] as TriangleMeshNode;
+				if (current == null) continue;
 				var anyVertex = current.v0 == i0 | current.v1 == i0 | current.v2 == i0 | current.v0 == i1 | current.v1 == i1 | current.v2 == i1 | current.v0 == i2 | current.v1 == i2 | current.v2 == i2;
 				if (anyVertex) {
 					current.GetVertices(out var v0, out var v1, out var v2);
@@ -238,7 +239,7 @@ namespace Pathfinding.ECS {
 				var targetNormal = math.normalizesafe(normals[0] * barycentric.x + normals[1] * barycentric.y + normals[2] * barycentric.z);
 
 				var nextNormal = math.lerp(currentNormal, targetNormal, math.clamp(alpha, 0, 1));
-				JobApplyGravity.UpdateMovementPlaneFromNormal(nextNormal, ref agentMovementPlane);
+				agentMovementPlane.value = agentMovementPlane.value.MatchUpDirection(nextNormal);
 			}
 		}
 	}

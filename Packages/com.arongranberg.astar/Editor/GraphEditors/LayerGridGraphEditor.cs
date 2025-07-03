@@ -28,14 +28,6 @@ namespace Pathfinding {
 			}
 		}
 
-		protected override void DrawCollisionEditor (GraphCollision collision) {
-			base.DrawCollisionEditor(collision);
-
-			if (collision.thickRaycast) {
-				EditorGUILayout.HelpBox("Note: Thick raycast cannot be used with this graph type", MessageType.Error);
-			}
-		}
-
 		protected override void DrawUse2DPhysics (GraphCollision collision) {
 			// 2D physics does not make sense for a layered grid graph
 			collision.use2D = false;

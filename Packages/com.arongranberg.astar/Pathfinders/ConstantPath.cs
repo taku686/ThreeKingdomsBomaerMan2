@@ -2,6 +2,7 @@
 using UnityEngine;
 using Unity.Mathematics;
 using System.Collections.Generic;
+using Pathfinding.Pooling;
 
 namespace Pathfinding {
 	/// <summary>
@@ -75,7 +76,7 @@ namespace Pathfinding {
 
 		protected override void OnEnterPool () {
 			base.OnEnterPool();
-			if (allNodes != null) Util.ListPool<GraphNode>.Release(ref allNodes);
+			if (allNodes != null) Pooling.ListPool<GraphNode>.Release(ref allNodes);
 		}
 
 		/// <summary>
@@ -87,7 +88,7 @@ namespace Pathfinding {
 		/// </summary>
 		protected override void Reset () {
 			base.Reset();
-			allNodes = Util.ListPool<GraphNode>.Claim();
+			allNodes = Pooling.ListPool<GraphNode>.Claim();
 			endingCondition = null;
 			originalStartPoint = Vector3.zero;
 			startPoint = Vector3.zero;

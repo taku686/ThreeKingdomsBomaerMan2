@@ -5,11 +5,10 @@ using System.Linq;
 using UnityEngine.Assertions;
 
 namespace Pathfinding {
-	using Pathfinding.Util;
+	using Pathfinding.Pooling;
+	using Pathfinding.Collections;
 	using Unity.Burst;
 	using Unity.Collections;
-	using Unity.Collections.LowLevel.Unsafe;
-	using Unity.Jobs;
 	using Unity.Mathematics;
 	using UnityEngine.Profiling;
 
@@ -199,7 +198,7 @@ namespace Pathfinding {
 		}
 
 
-		public static void Simplify (List<PathPart> parts, ref List<GraphNode> nodes) {
+		public static void Simplify (List<PathPart> parts, ref List<GraphNode> nodes, System.Func<GraphNode, bool> filter = null) {
 			List<GraphNode> resultNodes = ListPool<GraphNode>.Claim();
 
 			for (int i = 0; i < parts.Count; i++) {
@@ -211,7 +210,7 @@ namespace Pathfinding {
 
 				if (part.type == PartType.NodeSequence) {
 					if (nodes[part.startIndex].Graph is IRaycastableGraph graph) {
-						Simplify(part, graph, nodes, resultNodes, Path.ZeroTagPenalties, -1);
+						Simplify(part, graph, nodes, resultNodes, Path.ZeroTagPenalties, -1, filter);
 						newPart.endIndex = resultNodes.Count - 1;
 						parts[i] = newPart;
 						continue;
@@ -237,7 +236,7 @@ namespace Pathfinding {
 		///
 		/// Requires graph to implement IRaycastableGraph
 		/// </summary>
-		public static void Simplify (PathPart part, IRaycastableGraph graph, List<GraphNode> nodes, List<GraphNode> result, int[] tagPenalties, int traversableTags) {
+		public static void Simplify (PathPart part, IRaycastableGraph graph, List<GraphNode> nodes, List<GraphNode> result, int[] tagPenalties, int traversableTags, System.Func<GraphNode, bool> filter = null) {
 			var start = part.startIndex;
 			var end = part.endIndex;
 			var startPoint = part.startPoint;
@@ -264,6 +263,7 @@ namespace Pathfinding {
 					for (int i = 0; i < result.Count; i++) {
 						penaltySum2 += result[i].Penalty + tagPenalties[result[i].Tag];
 						walkable &= ((traversableTags >> (int)result[i].Tag) & 1) == 1;
+						walkable &= filter == null || filter(result[i]);
 					}
 
 					// Allow 40% more penalty on average per node
@@ -290,6 +290,7 @@ namespace Pathfinding {
 
 				if (start == end) {
 					result.Add(nodes[end]);
+					RemoveBacktracking(result, ostart, result.Count-2);
 					return;
 				}
 
@@ -317,6 +318,7 @@ namespace Pathfinding {
 
 				if (!anySucceded) {
 					result.Add(nodes[start]);
+					RemoveBacktracking(result, ostart, result.Count-2);
 
 					// It is guaranteed that mn = start+1
 					start = mn;
@@ -347,11 +349,28 @@ namespace Pathfinding {
 						result.Add(nodes[start]);
 						start++;
 					} else {
-						//Remove nodes[end]
+						// In some rare cases, doing the raycast simplification may cause it to backtrack so that the path goes:
+						// A -> B -> C -> B -> D
+						// While this is technically allowed, it will cause a weird and suboptimal path. So we should try to avoid it.
+						RemoveBacktracking(result, ostart, resCount);
+
+						// Remove nodes[end], otherwise we will get a duplicate node when the next raycast happens
 						result.RemoveAt(result.Count-1);
 						start = mn;
 					}
 				}
+			}
+		}
+
+		/// <summary>
+		/// Removes backtracking in the path.
+		/// This can happen when the path goes A -> B -> C -> B -> D.
+		/// This method will replace B -> C -> B with just B, when passed aroundIndex=C.
+		/// </summary>
+		static void RemoveBacktracking (List<GraphNode> nodes, int listStartIndex, int aroundIndex) {
+			while (aroundIndex - 1 > listStartIndex && aroundIndex + 1 < nodes.Count && nodes[aroundIndex-1] == nodes[aroundIndex+1]) {
+				nodes.RemoveRange(aroundIndex, 2);
+				aroundIndex--;
 			}
 		}
 

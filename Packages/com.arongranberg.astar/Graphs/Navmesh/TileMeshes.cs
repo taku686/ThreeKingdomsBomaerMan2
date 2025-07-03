@@ -21,7 +21,7 @@ namespace Pathfinding.Graphs.Navmesh {
 	///     TileMeshes tiles = result.tileMeshes.ToManaged();
 	///     // Take the scanned tiles and place them in the graph,
 	///     // but not at their original location, but 2 tiles away, rotated 90 degrees.
-	///     tiles.tileRect = tiles.tileRect.Offset(new Int2(2, 0));
+	///     tiles.tileRect = tiles.tileRect.Offset(new Vector2Int(2, 0));
 	///     tiles.Rotate(1);
 	///     graph.ReplaceTiles(tiles);
 	///
@@ -105,7 +105,10 @@ namespace Pathfinding.Graphs.Navmesh {
 						writer.Write(v.y);
 						writer.Write(v.z);
 					}
-					for (int i = 0; i < tile.triangles.Length; i++) writer.Write(tile.triangles[i]);
+					for (int i = 0; i < tile.triangles.Length; i++) {
+						UnityEngine.Assertions.Assert.IsTrue(tile.triangles[i] >= 0 && tile.triangles[i] < tile.verticesInTileSpace.Length, "Triangle index is out of bounds");
+						writer.Write(tile.triangles[i]);
+					}
 					for (int i = 0; i < tile.tags.Length; i++) writer.Write(tile.tags[i]);
 				}
 			}
@@ -138,7 +141,7 @@ namespace Pathfinding.Graphs.Navmesh {
 					for (int i = 0; i < vertsInTileSpace.Length; i++) vertsInTileSpace[i] = new Int3(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32());
 					for (int i = 0; i < tris.Length; i++) {
 						tris[i] = reader.ReadInt32();
-						UnityEngine.Assertions.Assert.IsTrue(tris[i] >= 0 && tris[i] < vertsInTileSpace.Length);
+						UnityEngine.Assertions.Assert.IsTrue(tris[i] >= 0 && tris[i] < vertsInTileSpace.Length, "Triangle index is out of bounds");
 					}
 					for (int i = 0; i < tags.Length; i++) tags[i] = reader.ReadUInt32();
 
@@ -182,11 +185,11 @@ namespace Pathfinding.Graphs.Navmesh {
 			};
 		}
 
-		public void Dispose () {
+		public void Dispose (Allocator allocator) {
 			// Allows calling Dispose on zero-initialized instances
 			if (!tileMeshes.IsCreated) return;
 
-			for (int i = 0; i < tileMeshes.Length; i++) tileMeshes[i].Dispose();
+			for (int i = 0; i < tileMeshes.Length; i++) tileMeshes[i].Dispose(allocator);
 			tileMeshes.Dispose();
 		}
 	}

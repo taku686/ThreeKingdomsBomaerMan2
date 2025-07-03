@@ -18,8 +18,9 @@ namespace Pathfinding {
 	/// See: RecastTileUpdateHandler
 	///
 	/// Deprecated: Since version 5.0, this component is not necessary, since normal graph updates on recast graphs are now batched together if they update the same tiles.
-	/// Use e.g. the <see cref="DynamicGridObstacle"/> component instead.
+	/// Use e.g. the <see cref="DynamicObstacle"/> component instead.
 	/// </summary>
+	[System.Obsolete("This component is no longer necessary. Normal graph updates on recast graphs are now batched together if they update the same tiles. Use the DynamicObstacle component instead")]
 	[HelpURL("https://arongranberg.com/astar/documentation/stable/recasttileupdate.html")]
 	public class RecastTileUpdate : MonoBehaviour {
 		public static event System.Action<Bounds> OnNeedUpdates;

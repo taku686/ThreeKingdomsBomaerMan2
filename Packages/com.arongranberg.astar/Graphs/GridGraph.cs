@@ -13,10 +13,11 @@ namespace Pathfinding {
 	using Unity.Mathematics;
 	using Pathfinding.Jobs;
 	using Pathfinding.Graphs.Grid.Jobs;
-	using Unity.Burst;
+	using Pathfinding.Collections;
 	using Pathfinding.Drawing;
 	using Pathfinding.Graphs.Grid;
 	using Pathfinding.Graphs.Grid.Rules;
+	using Pathfinding.Pooling;
 	using UnityEngine.Assertions;
 
 	/// <summary>
@@ -25,6 +26,9 @@ namespace Pathfinding {
 	/// The GridGraph does exactly what the name implies, generates nodes in a grid pattern.
 	///
 	/// Grid graphs are excellent for when you already have a grid-based world. But they also work well for free-form worlds.
+	///
+	/// See: get-started-grid (view in online documentation for working links)
+	/// See: graphTypes (view in online documentation for working links)
 	///
 	/// \section gridgraph-features Features
 	/// - Throw any scene at it, and with minimal configurations you can get a good graph from it.
@@ -309,6 +313,8 @@ namespace Pathfinding {
 		/// If false, diagonals will cost more.
 		/// This is useful for a hexagon graph where the diagonals are actually the same length as the
 		/// normal edges (since the graph has been skewed)
+		///
+		/// If the graph is set to hexagonal in the inspector, this will be automatically set to true.
 		/// </summary>
 		[JsonMember]
 		public bool uniformEdgeCosts;
@@ -349,6 +355,7 @@ namespace Pathfinding {
 		/// Instead you can convert it to a dimension on a hexagon using <see cref="ConvertNodeSizeToHexagonSize"/>.
 		///
 		/// See: <see cref="SetDimensions"/>
+		/// See: <see cref="SetGridShape"/>
 		/// </summary>
 		[JsonMember]
 		public float nodeSize = 1;
@@ -847,6 +854,7 @@ namespace Pathfinding {
 		/// </code>
 		/// </summary>
 		public void RelocateNodes (Vector3 center, Quaternion rotation, float nodeSize, float aspectRatio = 1, float isometricAngle = 0) {
+			AssertSafeToUpdateGraph();
 			var previousTransform = transform;
 
 			this.center = center;
@@ -875,6 +883,8 @@ namespace Pathfinding {
 		/// <summary>
 		/// True if the point is inside the bounding box of this graph.
 		///
+		/// This method may be able to use a tighter (non-axis aligned) bounding box than using the one returned by <see cref="bounds"/>.
+		///
 		/// For a graph that uses 2D physics, or if height testing is disabled, then the graph is treated as infinitely tall.
 		/// Otherwise, the height of the graph is determined by <see cref="GraphCollision.fromHeight"/>.
 		///
@@ -888,7 +898,8 @@ namespace Pathfinding {
 
 			if (collision.use2D || !collision.heightCheck) return true;
 
-			return local.y >= 0 && local.y <= collision.fromHeight;
+			const float Margin = 0.001f;
+			return local.y >= -Margin && local.y <= collision.fromHeight + Margin;
 		}
 
 		/// <summary>
@@ -1024,6 +1035,21 @@ namespace Pathfinding {
 		///
 		/// [Open online documentation to see images]
 		///
+		/// Note: This will not change the width/height of the graph. It only aligns the graph to the closest orientation so that the grid nodes will be aligned to the cells in the tilemap.
+		/// You can adjust the width/height of the graph separately using e.g. <see cref="SetDimensions"/>.
+		///
+		/// The following parameters will be updated:
+		///
+		/// - <see cref="center"/>
+		/// - <see cref="nodeSize"/>
+		/// - <see cref="isometricAngle"/>
+		/// - <see cref="aspectRatio"/>
+		/// - <see cref="rotation"/>
+		/// - <see cref="uniformEdgeCosts"/>
+		/// - <see cref="neighbours"/>
+		/// - <see cref="inspectorGridMode"/>
+		/// - <see cref="transform"/>
+		///
 		/// See: tilemaps (view in online documentation for working links)
 		/// </summary>
 		public void AlignToTilemap (UnityEngine.GridLayout grid) {
@@ -1125,6 +1151,10 @@ namespace Pathfinding {
 		/// </code>
 		/// </summary>
 		public void SetDimensions (int width, int depth, float nodeSize) {
+			if (width < 1) throw new System.ArgumentOutOfRangeException("width", "width must be at least 1");
+			if (depth < 1) throw new System.ArgumentOutOfRangeException("depth", "depth must be at least 1");
+			if (nodeSize <= 0) throw new System.ArgumentOutOfRangeException("nodeSize", "nodeSize must be greater than 0");
+
 			unclampedSize = new Vector2(width, depth)*nodeSize;
 			this.nodeSize = nodeSize;
 			UpdateTransform();
@@ -1445,6 +1475,22 @@ namespace Pathfinding {
 			}
 		}
 
+		public override NNInfo RandomPointOnSurface (NNConstraint nnConstraint = null, bool highQuality = true) {
+			if (!isScanned || nodes.Length == 0) return NNInfo.Empty;
+
+			// All nodes have the same surface area, so just pick a random node
+			for (int i = 0; i < 10; i++) {
+				var node = this.nodes[UnityEngine.Random.Range(0, this.nodes.Length)];
+				if (node != null && (nnConstraint == null || nnConstraint.Suitable(node))) {
+					return new NNInfo(node, node.RandomPointOnSurface(), 0);
+				}
+			}
+
+			// If a valid node was not found after a few tries, the graph likely contains a lot of unwalkable/unsuitable nodes.
+			// Fall back to the base method which will try to find a valid node by checking all nodes.
+			return base.RandomPointOnSurface(nnConstraint, highQuality);
+		}
+
 		/// <summary>
 		/// Sets up <see cref="neighbourOffsets"/> with the current settings. <see cref="neighbourOffsets"/>, <see cref="neighbourCosts"/>, <see cref="neighbourXOffsets"/> and <see cref="neighbourZOffsets"/> are set up.
 		/// The cost for a non-diagonal movement between two adjacent nodes is RoundToInt (<see cref="nodeSize"/> * Int3.Precision)
@@ -1462,7 +1508,7 @@ namespace Pathfinding {
 			neighbourOffsets[7] = -width-1;
 
 			// The width of a single node, and thus also the distance between two adjacent nodes (axis aligned).
-			// For hexagonal graphs the node size is different from the width of a hexaon.
+			// For hexagonal graphs the node size is different from the width of a hexagon.
 			float nodeWidth = neighbours == NumNeighbours.Six ? ConvertNodeSizeToHexagonSize(InspectorGridHexagonNodeSize.Width, nodeSize) : nodeSize;
 
 			uint straightCost = (uint)Mathf.RoundToInt(nodeWidth*Int3.Precision);
@@ -1797,7 +1843,8 @@ namespace Pathfinding {
 					var heightCheck = collision.heightCheck && !collision.use2D;
 					if (heightCheck) {
 						var layerCount = dependencyTracker.NewNativeArray<int>(1, allocationMethod, NativeArrayOptions.UninitializedMemory);
-						yield return context.data.HeightCheck(collision, graph.MaxLayers, fullRecalculationBounds, layerCount, characterHeight, allocationMethod);
+						float nodeWidth = graph.neighbours == NumNeighbours.Six ? ConvertNodeSizeToHexagonSize(InspectorGridHexagonNodeSize.Width, graph.nodeSize) : graph.nodeSize;
+						yield return context.data.HeightCheck(collision, nodeWidth, graph.MaxLayers, fullRecalculationBounds, layerCount, characterHeight, allocationMethod);
 						// The size of the buffers depend on the height check for layered grid graphs since the number of layers might change.
 						// Never reduce the layer count of the graph.
 						// Unless we are recalculating the whole graph: in that case we don't care about the existing layers.
@@ -1928,6 +1975,7 @@ namespace Pathfinding {
 							nodePositions = context.data.nodes.positions,
 							nodePenalties = context.data.nodes.penalties,
 							nodeWalkable = context.data.nodes.walkable,
+							nodeNormals = context.data.nodes.normals,
 							nodeTags = context.data.nodes.tags,
 							nodeIndices = nodeIndices,
 						}, dependencyTracker);
@@ -2102,6 +2150,7 @@ namespace Pathfinding {
 		/// Note: Any other graph updates may overwrite this data.
 		///
 		/// <code>
+		/// // Perform the update when it is safe to do so
 		/// AstarPath.active.AddWorkItem(() => {
 		///     var grid = AstarPath.active.data.gridGraph;
 		///     // Mark all nodes in a 10x10 square, in the top-left corner of the graph, as unwalkable.
@@ -2513,7 +2562,7 @@ namespace Pathfinding {
 		/// <summary>
 		/// All nodes inside the bounding box.
 		/// Note: Be nice to the garbage collector and pool the list when you are done with it (optional)
-		/// See: Pathfinding.Util.ListPool
+		/// See: Pathfinding.Pooling.ListPool
 		///
 		/// See: GetNodesInRegion(GraphUpdateShape)
 		/// </summary>
@@ -2524,7 +2573,7 @@ namespace Pathfinding {
 		/// <summary>
 		/// All nodes inside the shape.
 		/// Note: Be nice to the garbage collector and pool the list when you are done with it (optional)
-		/// See: Pathfinding.Util.ListPool
+		/// See: Pathfinding.Pooling.ListPool
 		///
 		/// See: GetNodesInRegion(Bounds)
 		/// </summary>

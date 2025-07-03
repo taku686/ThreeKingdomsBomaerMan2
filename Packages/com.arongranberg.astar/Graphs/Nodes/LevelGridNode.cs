@@ -187,16 +187,6 @@ namespace Pathfinding {
 #endif
 		}
 
-		/// <summary>
-		/// Is there a grid connection in that direction.
-		///
-		/// Deprecated: Use <see cref="HasConnectionInDirection"/> instead
-		/// </summary>
-		[System.Obsolete("Use HasConnectionInDirection instead")]
-		public bool GetConnection (int i) {
-			return ((gridConnections >> i*ConnectionStride) & ConnectionMask) != NoConnection;
-		}
-
 		public override bool HasConnectionInDirection (int direction) {
 			return ((gridConnections >> direction*ConnectionStride) & ConnectionMask) != NoConnection;
 		}
@@ -272,29 +262,43 @@ namespace Pathfinding {
 		}
 
 		public override bool GetPortal (GraphNode other, out Vector3 left, out Vector3 right) {
-			LayerGridGraph graph = GetGridGraph(GraphIndex);
-			int[] neighbourOffsets = graph.neighbourOffsets;
-			var nodes = graph.nodes;
-			int index = NodeInGridIndex;
-
-			for (int i = 0; i < MaxNeighbours; i++) {
-				int conn = GetConnectionValue(i);
-				if (conn != LevelGridNode.NoConnection) {
-					if (other == nodes[index+neighbourOffsets[i] + graph.lastScannedWidth*graph.lastScannedDepth*conn]) {
-						Vector3 middle = ((Vector3)(position + other.position))*0.5f;
-						Vector3 cross = Vector3.Cross(graph.collision.up, (Vector3)(other.position-position));
-						cross.Normalize();
-						cross *= graph.nodeSize*0.5f;
-						left = middle - cross;
-						right = middle + cross;
-						return true;
-					}
-				}
+			if (other.GraphIndex != GraphIndex) {
+				left = right = Vector3.zero;
+				return false;
 			}
 
-			left = Vector3.zero;
-			right = Vector3.zero;
-			return false;
+			LayerGridGraph gg = GetGridGraph(GraphIndex);
+			var cellOffset = (other as GridNodeBase).CoordinatesInGrid - CoordinatesInGrid;
+			var dir = OffsetToConnectionDirection(cellOffset.x, cellOffset.y);
+			if (dir == -1 || GetNeighbourAlongDirection(dir) != other) {
+				left = right = Vector3.zero;
+				return false;
+			}
+
+			if (dir < 4) {
+				Vector3 middle = ((Vector3)(position + other.position))*0.5f;
+				var cross = gg.transform.TransformVector(new Vector3(cellOffset.y, 0, -cellOffset.x)*0.5f);
+				left = middle - cross;
+				right = middle + cross;
+			} else {
+				bool rClear = false;
+				bool lClear = false;
+				var n2 = GetNeighbourAlongDirection(dir-4);
+				if (n2 != null && n2.Walkable && n2.GetNeighbourAlongDirection((dir-4+1)%4) == other) {
+					rClear = true;
+				}
+
+				n2 = GetNeighbourAlongDirection((dir-4+1)%4);
+				if (n2 != null && n2.Walkable && n2.GetNeighbourAlongDirection(dir-4) == other) {
+					lClear = true;
+				}
+
+				Vector3 middle = ((Vector3)(position + other.position))*0.5f;
+				var cross = gg.transform.TransformVector(new Vector3(cellOffset.y, 0, -cellOffset.x));
+				left = middle - (lClear ? cross : Vector3.zero);
+				right = middle + (rClear ? cross : Vector3.zero);
+			}
+			return true;
 		}
 
 		public override void Open (Path path, uint pathNodeIndex, uint gScore) {

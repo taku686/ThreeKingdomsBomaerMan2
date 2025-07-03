@@ -144,7 +144,7 @@ namespace Pathfinding.Drawing {
 		///
 		/// [Open online documentation to see images]
 		///
-		/// See: <see cref="Circle(float3,float3,float)"/>
+		/// See: <see cref="Circle(float3,float,float,float)"/>
 		/// See: <see cref="Arc(float3,float3,float3)"/>
 		/// </summary>
 		/// <param name="center">Center of the circle or arc.</param>
@@ -162,7 +162,7 @@ namespace Pathfinding.Drawing {
 		///
 		/// [Open online documentation to see images]
 		///
-		/// See: <see cref="Circle(float3,float3,float)"/>
+		/// See: <see cref="CommandBuilder.Circle(float3,float3,float)"/>
 		/// See: <see cref="Arc(float3,float3,float3)"/>
 		/// </summary>
 		/// <param name="center">Center of the circle or arc.</param>
@@ -380,7 +380,7 @@ namespace Pathfinding.Drawing {
 		/// See: <see cref="Draw.SolidBox"/>
 		/// </summary>
 		public void SolidRectangle (Rect rect) {
-			draw.SolidPlane(new float3(rect.center.x, rect.center.y, 0.0f), xy ? XY_TO_XZ_ROTATION : XZ_TO_XZ_ROTATION, new float2(rect.width, rect.height));
+			draw.SolidPlane(xy ? new float3(rect.center.x, rect.center.y, 0.0f) : new float3(rect.center.x, 0, rect.center.y), xy ? XY_TO_XZ_ROTATION : XZ_TO_XZ_ROTATION, new float2(rect.width, rect.height));
 		}
 
 		/// <summary>

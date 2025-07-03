@@ -1,5 +1,5 @@
 // #define DEBUG_ALLOCATOR
-namespace Pathfinding.Util {
+namespace Pathfinding.Collections {
 	using Unity.Mathematics;
 	using Unity.Collections;
 	using Unity.Collections.LowLevel.Unsafe;

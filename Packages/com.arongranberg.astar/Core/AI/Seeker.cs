@@ -16,6 +16,7 @@ namespace Pathfinding {
 	/// See: modifiers (view in online documentation for working links)
 	/// </summary>
 	[AddComponentMenu("Pathfinding/Seeker")]
+	[DisallowMultipleComponent]
 	[HelpURL("https://arongranberg.com/astar/documentation/stable/seeker.html")]
 	public class Seeker : VersionedMonoBehaviour {
 		/// <summary>
@@ -260,10 +261,13 @@ namespace Pathfinding {
 
 		/// <summary>Called by modifiers to register themselves</summary>
 		public void RegisterModifier (IPathModifier modifier) {
-			modifiers.Add(modifier);
+			// Modifier might already be registered if pathfinding is used outside of play mode
+			if (!modifiers.Contains(modifier)) {
+				modifiers.Add(modifier);
 
-			// Sort the modifiers based on their specified order
-			modifiers.Sort((a, b) => a.Order.CompareTo(b.Order));
+				// Sort the modifiers based on their specified order
+				modifiers.Sort((a, b) => a.Order.CompareTo(b.Order));
+			}
 		}
 
 		/// <summary>Called by modifiers when they are disabled or destroyed</summary>
@@ -271,8 +275,13 @@ namespace Pathfinding {
 			modifiers.Remove(modifier);
 		}
 
+		void ForceRegisterModifiers () {
+			GetComponents<IPathModifier>(modifiers);
+			modifiers.Sort((a, b) => a.Order.CompareTo(b.Order));
+		}
+
 		/// <summary>
-		/// Post Processes the path.
+		/// Post-processes a path.
 		/// This will run any modifiers attached to this GameObject on the path.
 		/// This is identical to calling RunModifiers(ModifierPass.PostProcess, path)
 		/// See: <see cref="RunModifiers"/>
@@ -283,6 +292,8 @@ namespace Pathfinding {
 
 		/// <summary>Runs modifiers on a path</summary>
 		public void RunModifiers (ModifierPass pass, Path path) {
+			if (!Application.isPlaying) ForceRegisterModifiers();
+
 			if (pass == ModifierPass.PreProcess) {
 				if (preProcessPath != null) preProcessPath(path);
 
@@ -538,7 +549,7 @@ namespace Pathfinding {
 		}
 
 		/// <summary>
-		/// Call this function to start calculating a path.
+		/// Queue a path to be calculated.
 		///
 		/// The callback will be called when the path has been calculated (which may be several frames into the future).
 		/// The callback will not be called if a new path request is started before this path request has been calculated.
