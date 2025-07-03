@@ -46,12 +46,6 @@ namespace Skill.Attack
                     SetupCollider(playerTransform, skillId);
                 })
                 .AddTo(playerTransform);
-
-            /*Observable
-                .Timer(TimeSpan.FromSeconds(WaitDurationForEnd))
-                .Subscribe(_ => { Object.Destroy(_effectClone); })
-                .AddTo(playerTransform);*/
-            
         }
 
         protected virtual void ActivateEffect

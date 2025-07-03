@@ -45,8 +45,6 @@ namespace Enemy
 
             private void Initialize()
             {
-                _seeker = Owner._seeker;
-                _aiPath = Owner._aiPath;
                 _target = Owner._target;
                 _stateMachine = Owner._stateMachine;
                 _mapManager = Owner.mapManager;

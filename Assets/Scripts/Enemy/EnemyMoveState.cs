@@ -1,6 +1,11 @@
-﻿using Common.Data;
+﻿using System.Collections.Generic;
+using System.Threading;
+using Common.Data;
+using Cysharp.Threading.Tasks;
 using Pathfinding;
 using Photon.Pun;
+using UniRx;
+using UniRx.Triggers;
 using UnityEngine;
 using State = StateMachine<Enemy.EnemyCore>.State;
 
@@ -10,138 +15,105 @@ namespace Enemy
     {
         public class EnemyMoveState : State
         {
-            private Seeker _Seeker => Owner._seeker;
-            private AIPath _AIPath => Owner._aiPath;
+            private AIDestinationSetter _AIDestinationSetter => Owner._aiDestinationSetter;
+            private FollowerEntity _FollowerEntity => Owner._followerEntity;
             private StateMachine<EnemyCore> _StateMachine => Owner._stateMachine;
 
             private Transform _PlayerTransform => Owner.transform;
-            private const float WanderingRadius = 5f;
-            private const float WanderInterval = 3f; // How often to choose a new wander point
-            private const float StoppingDistance = 1f; // How close to get to the wander point before choosing a new one
-
-            private float _nextWanderTime;
-            private Vector3 _currentWanderTarget;
+            private const float MinDistance = 5f;
+            private const float StoppingDistance = 3f; // How close to get to the wander point before choosing a new one
+            private const int TryCount = 5;
+            private Vector3 _currentTarget;
+            private CancellationTokenSource _cts;
 
             protected override void OnEnter(State prevState)
             {
                 Initialize();
             }
 
+            protected override void OnExit(State nextState)
+            {
+                Cancel(_cts);
+            }
+
             private void Initialize()
             {
-                if (_AIPath != null)
+                Subscribe();
+                if (_FollowerEntity != null)
                 {
-                    _AIPath.maxSpeed = 3f; // 適宜調整
-                    _AIPath.endReachedDistance = StoppingDistance;
+                    _FollowerEntity.maxSpeed = 3f; // 適宜調整
+                    _FollowerEntity.stopDistance = StoppingDistance;
+                    _FollowerEntity.enableGravity = false;
                 }
 
-                _nextWanderTime = Time.time + Random.Range(0f, WanderInterval);
                 ChooseNewWanderPoint();
+            }
+
+            private void Subscribe()
+            {
+                _cts = new CancellationTokenSource();
+
+                _PlayerTransform
+                    .OnCollisionEnterAsObservable()
+                    .Where(collision => collision.gameObject.CompareTag(GameCommonData.WallTag))
+                    .Subscribe(_ => ChooseNewWanderPoint())
+                    .AddTo(_cts.Token);
             }
 
             protected override void OnUpdate()
             {
-                /*if (_AIPath == null)
+                if (_FollowerEntity.reachedDestination)
                 {
-                    return;
-                }
-
-                if (_AIPath.reachedEndOfPath)
-                {
-                    Debug.Log("行き止まり");
-                    _StateMachine.Dispatch((int)EnemyState.PutBomb);
-                }
-
-                if (_AIPath.reachedDestination)
-                {
-                    Debug.Log("目的地に到達");
-                    _StateMachine.Dispatch((int)EnemyState.PutBomb);
-                }*/
-                if (Time.time >= _nextWanderTime)
-                {
-                    if (_AIPath.reachedEndOfPath)
-                    {
-                        ChooseNewWanderPoint();
-                    }
-                    else if (Vector3.Distance(_PlayerTransform.position, _currentWanderTarget) < StoppingDistance)
-                    {
-                        ChooseNewWanderPoint();
-                    }
-                }
-
-                // AIPath を使用していない場合の簡易的な移動処理
-                if (_AIPath == null && _Seeker.IsDone() && Vector3.Distance(_PlayerTransform.position, _currentWanderTarget) > StoppingDistance)
-                {
-                    var moveDirection = (_currentWanderTarget - _PlayerTransform.position).normalized;
-                    _PlayerTransform.position += moveDirection * 3f * Time.deltaTime; // 適宜速度調整
+                    ChooseNewWanderPoint();
                 }
             }
-
-
-            /*private void Move()
-            {
-                if (_Seeker == null || _Target == null)
-                {
-                    return;
-                }
-
-                Debug.Log("パスセット");
-                _Seeker.StartPath(Owner.transform.position, _Target.position, OnPathComplete);
-            }*/
 
             private void ChooseNewWanderPoint()
             {
                 var target = FindTarget();
-                var randomCircle = Random.insideUnitCircle * WanderingRadius;
-                var wanderPoint = target + new Vector3(randomCircle.x, 0f, randomCircle.y);
-
-                // 地形や障害物を考慮して到達可能なポイントを探す (A* Pathfinding Projectの機能を利用)
-                if (_Seeker != null)
-                {
-                    _Seeker.StartPath(_PlayerTransform.position, wanderPoint, OnPathComplete);
-                }
-                else
-                {
-                    _currentWanderTarget = wanderPoint;
-                    _nextWanderTime = Time.time + WanderInterval;
-                }
+                _AIDestinationSetter.target = target; // Clear the current target
             }
 
-            private Vector3 FindTarget()
+            private Transform FindTarget()
             {
-                //todo review later
-                var candidateTargets = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
-                var targetCount = candidateTargets.Length;
-                if (targetCount == 0)
-                {
-                    return _PlayerTransform.position; // No targets found
-                }
+                var findCount = 0;
+                var candidateTargets = new List<GameObject>();
+                var players = GameObject.FindGameObjectsWithTag(GameCommonData.PlayerTag);
+                var props = GameObject.FindGameObjectsWithTag(GameCommonData.PropsTag);
+                candidateTargets.AddRange(players);
+                candidateTargets.AddRange(props);
 
-                var targetIndex = Random.Range(0, targetCount);
-                var target = candidateTargets[targetIndex];
-                var photonView = target.GetComponent<PhotonView>();
-                var photonTransformView = target.GetComponent<PhotonTransformView>();
-                if (photonTransformView == null || Owner.IsMine(photonView.InstantiationId))
+                while (true)
                 {
-                    return _PlayerTransform.position; // Skip if the target is not valid
-                }
+                    var targetCount = candidateTargets.Count;
+                    if (targetCount == 0)
+                    {
+                        return _PlayerTransform; // No targets found
+                    }
 
-                return target.transform.position; // Return the position of the chosen target
-            }
+                    var targetIndex = Random.Range(0, targetCount);
+                    var target = candidateTargets[targetIndex];
+                    var photonView = target.GetComponent<PhotonView>();
 
-            private void OnPathComplete(Path p)
-            {
-                switch (p.error)
-                {
-                    case false when _AIPath != null:
-                        _AIPath.SetPath(p);
-                        _AIPath.canMove = true;
-                        _nextWanderTime = Time.time + WanderInterval;
-                        break;
-                    case false when _AIPath == null:
-                        _currentWanderTarget = p.vectorPath[^1]; // パスの最後の点を目指す
-                        _nextWanderTime = Time.time + WanderInterval;
-                        break;
+                    if (photonView != null)
+                    {
+                        if (Owner.IsMine(photonView.InstantiationId))
+                        {
+                            continue;
+                        }
+                    }
+
+                    if
+                    (
+                        Vector3.Distance(_PlayerTransform.position, target.transform.position) <= MinDistance
+                        && findCount < TryCount
+                    )
+                    {
+                        findCount++;
+                        continue; // Ensure the target is within the wandering radius
+                    }
+
+                    return target.transform; // Return the position of the chosen target
                 }
             }
         }

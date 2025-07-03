@@ -23,9 +23,11 @@ namespace Enemy
 
         private TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
         private PhotonView _photonView;
+
         private PutBomb _putBomb;
-        private Seeker _seeker;
-        private AIPath _aiPath;
+
+        private AIDestinationSetter _aiDestinationSetter;
+        private FollowerEntity _followerEntity;
         private EnemySearchPlayer _enemySearchPlayer;
         private Animator _animator;
         private PlayerConditionInfo _playerConditionInfo;
@@ -76,11 +78,13 @@ namespace Enemy
 
         private void InitializeComponent()
         {
+            var rigid = GetComponent<Rigidbody>();
+            rigid.isKinematic = true;
             _animator = GetComponentInChildren<Animator>();
             _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
             _playerConditionInfo = GetComponent<PlayerConditionInfo>();
-            _seeker = gameObject.AddComponent<Seeker>();
-            _aiPath = gameObject.AddComponent<AIPath>();
+            _aiDestinationSetter = gameObject.AddComponent<AIDestinationSetter>();
+            _followerEntity = gameObject.AddComponent<FollowerEntity>();
             _photonView = GetComponent<PhotonView>();
             _enemySearchPlayer = _searchPlayerFactory.Create(gameObject);
             _playerKey = PhotonNetworkManager.GetPlayerKey(photonView.InstantiationId, 0);
@@ -117,7 +121,7 @@ namespace Enemy
                 return;
             }
 
-            if (Mathf.Approximately(skillData.Range, GameCommonData.InvalidNumber))
+            /*if (Mathf.Approximately(skillData.Range, GameCommonData.InvalidNumber))
             {
                 _enemySkillTimer
                     .TimerSubscribe(skillData)
@@ -140,7 +144,7 @@ namespace Enemy
                         _stateMachine.Dispatch((int)EnemyState.WeaponSkill);
                     })
                     .AddTo(_cts.Token);
-            }
+            }*/
         }
 
         private static bool IsStateEnableToSkill(StateMachine<EnemyCore>.State currentState)
@@ -164,6 +168,17 @@ namespace Enemy
         private int GetPlayerKey()
         {
             return _playerKey;
+        }
+
+        private static void Cancel(CancellationTokenSource cts)
+        {
+            if (cts == null)
+            {
+                return;
+            }
+
+            cts.Cancel();
+            cts.Dispose();
         }
 
         private void OnDestroy()

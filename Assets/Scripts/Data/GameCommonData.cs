@@ -19,6 +19,7 @@ namespace Common.Data
         public const string BushTag = "Bush";
         public const string WeaponTag = "Weapon";
         public const string WallTag = "Wall";
+        public const string PropsTag = "Props";
         public const string DefaultLayer = "Default";
         public const string ObstacleLayer = "Obstacles";
         public const string ExplosionLayer = "Explosion";
