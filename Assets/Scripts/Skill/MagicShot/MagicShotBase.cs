@@ -76,8 +76,10 @@ namespace Skill.MagicShot
             var effect = _skillEffectRepository.GetMagicShotEffect(abnormalCondition);
             var spawnPosition = GetSpawnPosition(playerTransform);
             var effectClone = Object.Instantiate(effect, spawnPosition, quaternion.identity);
-            effectClone.transform.position += playerTransform.forward;
-            effectClone.transform.localScale *= EffectScale;
+            var transform = effectClone.transform;
+            transform.position += playerTransform.forward;
+            transform.localScale *= EffectScale;
+            SetupParticleSystem(effectClone.gameObject);
 
             return effectClone.gameObject;
         }
@@ -92,10 +94,16 @@ namespace Skill.MagicShot
             effectClone.transform.DOMove(endPos, EffectLifeTime)
                 .SetEase(Ease.Linear)
                 .OnComplete(() => { DestroyEffect(particle.gameObject); })
-                .SetLink(effectClone.gameObject);
+                .SetLink(effectClone);
         }
 
-        private void SetUpCollider(GameObject effectClone, ParticleSystem particle, Transform playerTransform, int skillId)
+        private void SetUpCollider
+        (
+            GameObject effectClone,
+            Component particle,
+            Component playerTransform,
+            int skillId
+        )
         {
             var effectCollider = effectClone.GetComponent<Collider>();
             effectCollider.isTrigger = true;
@@ -108,32 +116,26 @@ namespace Skill.MagicShot
 
         private void HitEffect
         (
-            ParticleSystem particle,
+            Component particle,
             GameObject hitObject,
             GameObject player,
             int skillId
         )
         {
+            DestroyEffect(particle.gameObject);
+
             if (!hitObject.CompareTag(GameCommonData.PlayerTag))
             {
-                DestroyEffect(particle.gameObject);
                 return;
             }
 
-            DestroyEffect(particle.gameObject);
             HitPlayer(player, hitObject, skillId);
         }
 
         private void DestroyEffect(GameObject effectClone)
         {
-            if (effectClone == null)
-            {
-                return;
-            }
-
             var particle = effectClone.GetComponent<ParticleSystem>();
             particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            Object.Destroy(effectClone);
             Cancel();
         }
 

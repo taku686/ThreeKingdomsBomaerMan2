@@ -40,13 +40,18 @@ namespace Skill.Attack
         {
             Observable
                 .Timer(TimeSpan.FromSeconds(DelayTime))
-                .Subscribe(_ => { ActivateEffect(playerTransform, abnormalCondition, skillId); })
+                .Subscribe(_ =>
+                {
+                    ActivateEffect(playerTransform, abnormalCondition, skillId);
+                    SetupCollider(playerTransform, skillId);
+                })
                 .AddTo(playerTransform);
 
-            Observable
+            /*Observable
                 .Timer(TimeSpan.FromSeconds(WaitDurationForEnd))
                 .Subscribe(_ => { Object.Destroy(_effectClone); })
-                .AddTo(playerTransform);
+                .AddTo(playerTransform);*/
+            
         }
 
         protected virtual void ActivateEffect
@@ -58,10 +63,20 @@ namespace Skill.Attack
         {
             var effect = _skillEffectRepository.GetSlashEffect(abnormalCondition);
             _effectClone = Object.Instantiate(effect, playerTransform).gameObject;
+            SetupParticleSystem(_effectClone);
             var spawnPosition = new Vector3(0, EffectHeight, 0);
             var spawnRotation = new Vector3(180, 34.3f, 0);
-            _effectClone.transform.localPosition = spawnPosition;
-            _effectClone.transform.localEulerAngles = spawnRotation;
+            var effectTransform = _effectClone.transform;
+            effectTransform.localPosition = spawnPosition;
+            effectTransform.localEulerAngles = spawnRotation;
+        }
+
+        private void SetupCollider
+        (
+            Component playerTransform,
+            int skillId
+        )
+        {
             var colliders = _effectClone.GetComponents<SphereCollider>();
             var player = playerTransform.gameObject;
 

@@ -53,21 +53,29 @@ namespace Skill.SlashSpin
 
             Observable
                 .EveryFixedUpdate()
-                .Where(_ => _Cts is { IsCancellationRequested: false })
                 .SelectMany(_ => UniTask.Delay(TimeSpan.FromSeconds(WaitDurationForStart), DelayType.DeltaTime, PlayerLoopTiming.FixedUpdate).ToObservable())
                 .Subscribe(_ =>
                 {
                     const float moveDuration = WaitDurationForEnd - WaitDurationForStart;
                     rigid.velocity = playerTransform.forward * (range / moveDuration);
-                    ActivateEffect(playerTransform, abnormalCondition, skillId);
                 })
                 .AddTo(_Cts.Token);
 
-            Observable.Timer(TimeSpan.FromSeconds(WaitDurationForEnd))
+            Observable
+                .Timer(TimeSpan.FromSeconds(WaitDurationForStart))
+                .Subscribe(_ =>
+                {
+                    ActivateEffect(playerTransform, abnormalCondition, skillId);
+                    SetupCollider(playerTransform, skillId);
+                })
+                .AddTo(_Cts.Token);
+
+            Observable
+                .Timer(TimeSpan.FromSeconds(WaitDurationForEnd))
                 .Subscribe(_ =>
                 {
                     rigid.velocity = Vector3.zero;
-                    var particleSystems = _effectClone?.GetComponentsInChildren<ParticleSystem>();
+                    var particleSystems = _effectClone.GetComponentsInChildren<ParticleSystem>();
                     if (particleSystems != null)
                     {
                         foreach (var particleSystem in particleSystems)
@@ -89,16 +97,18 @@ namespace Skill.SlashSpin
             int skillId
         )
         {
-            if (_isSpawnEffect)
-            {
-                return;
-            }
-
-            _isSpawnEffect = true;
             var effect = _skillEffectRepository.GetSlashSpinEffect(abnormalCondition);
             _effectClone = Object.Instantiate(effect, playerTransform).gameObject;
             _effectClone.transform.localPosition = new Vector3(0, EffectHeight, 0);
             _effectClone.transform.localEulerAngles = new Vector3(0, 90, 0);
+        }
+
+        private void SetupCollider
+        (
+            Component playerTransform,
+            int skillId
+        )
+        {
             var effectCollider = _effectClone.GetComponent<Collider>();
             effectCollider.isTrigger = true;
             var player = playerTransform.gameObject;

@@ -61,7 +61,11 @@ namespace Skill.DashAttack
 
             Observable
                 .Timer(TimeSpan.FromSeconds(WaitDurationForStart))
-                .Subscribe(_ => { ActivateEffect(playerTransform, abnormalCondition, skillId); })
+                .Subscribe(_ =>
+                {
+                    ActivateEffect(playerTransform, abnormalCondition, skillId);
+                    SetupCollider(playerTransform, skillId);
+                })
                 .AddTo(_Cts.Token);
 
             Observable
@@ -69,16 +73,6 @@ namespace Skill.DashAttack
                 .Subscribe(_ =>
                 {
                     rigid.velocity = Vector3.zero;
-                    var particleSystems = _effectClone?.GetComponentsInChildren<ParticleSystem>();
-                    if (particleSystems != null)
-                    {
-                        foreach (var particleSystem in particleSystems)
-                        {
-                            particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-                        }
-                    }
-
-                    Object.Destroy(_effectClone);
                     Cancel();
                 })
                 .AddTo(_Cts.Token);
@@ -93,8 +87,18 @@ namespace Skill.DashAttack
         {
             var effect = _skillEffectRepository.GetDashAttackEffect(abnormalCondition);
             _effectClone = Object.Instantiate(effect, playerTransform).gameObject;
-            _effectClone.transform.localPosition = new Vector3(0.3f, 0.5f, 3f);
-            _effectClone.transform.localEulerAngles = new Vector3(0, 90, 0);
+            SetupParticleSystem(_effectClone);
+            var effectTransform = _effectClone.transform;
+            effectTransform.localPosition = new Vector3(0.3f, 0.5f, 3f);
+            effectTransform.localEulerAngles = new Vector3(0, 90, 0);
+        }
+
+        private void SetupCollider
+        (
+            Component playerTransform,
+            int skillId
+        )
+        {
             var boxCollider = _effectClone.GetComponent<BoxCollider>();
             boxCollider.isTrigger = true;
             var player = playerTransform.gameObject;
