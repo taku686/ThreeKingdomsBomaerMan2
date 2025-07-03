@@ -17,14 +17,12 @@ namespace Player.Common
             private PlayerDash _PlayerDash => Owner._playerDash;
             private ObservableStateMachineTrigger _ObservableStateMachineTrigger => Owner._observableStateMachineTrigger;
             private StateMachine<PlayerCore> _StateMachine => Owner._stateMachine;
-
             private CancellationTokenSource _cts;
-            private const float DashForce = 5f;
 
             protected override void OnEnter(State prevState)
             {
                 _cts = new CancellationTokenSource();
-                _PlayerDash.Dash(DashForce);
+                _PlayerDash.Dash();
                 PlayBackAnimation(GameCommonData.DashHashKey, GameCommonData.DashKey);
             }
 
