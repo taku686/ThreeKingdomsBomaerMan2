@@ -34,6 +34,8 @@ namespace Enemy
         private SkillAnimationFacade _skillAnimationFacade;
         private ObservableStateMachineTrigger _observableStateMachineTrigger;
 
+        private Rigidbody _rigidbody;
+        private Transform _skillTarget;
         private Transform _target;
         private BoxCollider _boxCollider;
         private StateMachine<EnemyCore> _stateMachine;
@@ -78,13 +80,13 @@ namespace Enemy
 
         private void InitializeComponent()
         {
-            var rigid = GetComponent<Rigidbody>();
-            rigid.isKinematic = true;
+            _rigidbody = GetComponent<Rigidbody>();
             _animator = GetComponentInChildren<Animator>();
             _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
             _playerConditionInfo = GetComponent<PlayerConditionInfo>();
             _aiDestinationSetter = gameObject.AddComponent<AIDestinationSetter>();
             _followerEntity = gameObject.AddComponent<FollowerEntity>();
+            _followerEntity.enableGravity = false;
             _photonView = GetComponent<PhotonView>();
             _enemySearchPlayer = _searchPlayerFactory.Create(gameObject);
             _playerKey = PhotonNetworkManager.GetPlayerKey(photonView.InstantiationId, 0);
@@ -103,15 +105,16 @@ namespace Enemy
             _stateMachine.AddTransition<EnemyMoveState, EnemyNormalSkillState>((int)EnemyState.NormalSkill);
             _stateMachine.AddTransition<EnemyMoveState, EnemySpecialSkillState>((int)EnemyState.SpecialSkill);
             _stateMachine.AddTransition<EnemyMoveState, EnemyWeaponSkillState>((int)EnemyState.WeaponSkill);
+            _stateMachine.AddTransition<EnemyIdleState, EnemyWeaponSkillState>((int)EnemyState.WeaponSkill);
         }
 
         private void Subscribe()
         {
-            SkillSubscribe();
             EventSubscribe();
+            SkillSubscribe(_cts);
         }
 
-        private void SkillSubscribe()
+        private void SkillSubscribe(CancellationTokenSource cts)
         {
             var weaponData = _photonNetworkManager.GetWeaponData(_playerKey);
             var skillData = weaponData.NormalSkillMasterData;
@@ -121,14 +124,14 @@ namespace Enemy
                 return;
             }
 
-            /*if (Mathf.Approximately(skillData.Range, GameCommonData.InvalidNumber))
+            if (Mathf.Approximately(skillData.Range, GameCommonData.InvalidNumber))
             {
                 _enemySkillTimer
                     .TimerSubscribe(skillData)
                     .Where(activate => activate)
                     .Where(_ => IsStateEnableToSkill(_stateMachine._CurrentState))
                     .Subscribe(_ => { _stateMachine.Dispatch((int)EnemyState.WeaponSkill); })
-                    .AddTo(_cts.Token);
+                    .AddTo(cts.Token);
             }
             else
             {
@@ -139,12 +142,19 @@ namespace Enemy
                     .Where(_ => IsStateEnableToSkill(_stateMachine._CurrentState))
                     .Subscribe(target =>
                     {
+                        _skillTarget = target.transform;
                         _enemySkillTimer.ResetTimer();
-                        transform.LookAt(target.transform);
                         _stateMachine.Dispatch((int)EnemyState.WeaponSkill);
                     })
-                    .AddTo(_cts.Token);
-            }*/
+                    .AddTo(cts.Token);
+            }
+        }
+
+        private void Stop()
+        {
+            _followerEntity.isStopped = true; // Stop the follower entity
+            _rigidbody.velocity = Vector3.zero; // Stop the Rigidbody's movement
+            _rigidbody.isKinematic = false; // Re-enable physics interactions
         }
 
         private static bool IsStateEnableToSkill(StateMachine<EnemyCore>.State currentState)

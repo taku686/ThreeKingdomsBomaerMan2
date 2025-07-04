@@ -13,13 +13,14 @@ namespace Enemy
     {
         public class EnemySkillStateBase : State
         {
-            
             protected PhotonNetworkManager _PhotonNetworkManager => Owner._photonNetworkManager;
             protected PlayerConditionInfo _PlayerConditionInfo => Owner._playerConditionInfo;
             private StateMachine<EnemyCore> _StateMachine => Owner._stateMachine;
             private Animator _Animator => Owner._animator;
             private ObservableStateMachineTrigger _ObservableStateMachineTrigger => Owner._observableStateMachineTrigger;
             private SkillAnimationFacade _SkillAnimationFacade => Owner._skillAnimationFacade;
+            private Transform _SkillTarget => Owner._skillTarget;
+            private Transform _PlayerTransform => Owner.transform;
             private CancellationTokenSource _cts;
             protected SkillMasterData _SkillMasterData;
 
@@ -44,11 +45,13 @@ namespace Enemy
             protected virtual void Initialize()
             {
                 _cts = new CancellationTokenSource();
+                Owner.Stop();
                 _SkillAnimationFacade.Initialize(_Animator, _ObservableStateMachineTrigger);
             }
 
             protected void SetupAnimation(SkillMasterData skillMasterData)
             {
+                _PlayerTransform.LookAt(_SkillTarget.position);
                 _SkillAnimationFacade.PlayBack(skillMasterData);
 
                 _SkillAnimationFacade.AnimationSubscribe

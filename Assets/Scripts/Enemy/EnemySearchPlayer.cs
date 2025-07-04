@@ -93,6 +93,11 @@ namespace Enemy
 
         private void SetupCollider(float radius, bool enable)
         {
+            if (_searchCollider == null)
+            {
+                return;
+            }
+
             _searchCollider.enabled = enable;
             _searchCollider.radius = radius;
         }

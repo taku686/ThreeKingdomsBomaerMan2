@@ -18,7 +18,7 @@ namespace Enemy
             private AIDestinationSetter _AIDestinationSetter => Owner._aiDestinationSetter;
             private FollowerEntity _FollowerEntity => Owner._followerEntity;
             private StateMachine<EnemyCore> _StateMachine => Owner._stateMachine;
-
+            private Rigidbody _Rigidbody => Owner._rigidbody;
             private Transform _PlayerTransform => Owner.transform;
             private const float MinDistance = 5f;
             private const float StoppingDistance = 3f; // How close to get to the wander point before choosing a new one
@@ -39,11 +39,12 @@ namespace Enemy
             private void Initialize()
             {
                 Subscribe();
+                _FollowerEntity.isStopped = false;
+                _Rigidbody.isKinematic = true; // Disable physics interactions
                 if (_FollowerEntity != null)
                 {
                     _FollowerEntity.maxSpeed = 3f; // 適宜調整
                     _FollowerEntity.stopDistance = StoppingDistance;
-                    _FollowerEntity.enableGravity = false;
                 }
 
                 ChooseNewWanderPoint();

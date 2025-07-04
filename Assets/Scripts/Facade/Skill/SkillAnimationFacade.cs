@@ -40,10 +40,8 @@ namespace Facade.Skill
             Action action
         )
         {
-            var onStateEnter = _observableStateMachineTrigger
-                .OnStateEnterAsObservable();
-
-            onStateEnter
+            _observableStateMachineTrigger
+                .OnStateExitAsObservable()
                 .Where(stateInfo => IsAnimationState(skillMasterData, stateInfo))
                 .Take(1)
                 .Subscribe(_ => action?.Invoke())
