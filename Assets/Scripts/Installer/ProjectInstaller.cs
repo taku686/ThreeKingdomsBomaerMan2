@@ -11,6 +11,7 @@ using Repository;
 using Skill;
 using UI.Common;
 using UI.Title;
+using UI.TitleCore.LoginBonusState;
 using UnityEngine;
 using Zenject;
 
@@ -24,6 +25,7 @@ namespace Common.Installer
         [SerializeField] private GameObject _skillEffectRepositoryGameObject;
         [SerializeField] private GameObject _abnormalConditionSpriteRepositoryGameObject;
         [SerializeField] private GameObject _resourcesObjectRepositoryGameObject;
+        [SerializeField] private ScriptableObject _loginBonusConfig;
 
         public override void InstallBindings()
         {
@@ -54,6 +56,13 @@ namespace Common.Installer
             Container.Bind<AbnormalConditionSpriteRepository>().FromComponentInNewPrefab(_abnormalConditionSpriteRepositoryGameObject).AsSingle();
             Container.Bind<SkillEffectRepository>().FromComponentInNewPrefab(_skillEffectRepositoryGameObject).AsSingle();
             Container.Bind<ResourcesObjectRepository>().FromComponentInNewPrefab(_resourcesObjectRepositoryGameObject).AsSingle();
+            InstallLoginBonus();
+        }
+
+        private void InstallLoginBonus()
+        {
+            Container.Bind<LoginBonusConfig>().FromScriptableObject(_loginBonusConfig).AsSingle();
+            Container.Bind<LoginBonusFacade>().AsCached();
         }
     }
 }

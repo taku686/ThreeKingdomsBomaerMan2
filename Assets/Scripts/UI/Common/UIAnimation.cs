@@ -13,8 +13,8 @@ namespace UI.Common
 
         public Sequence ClickScaleColor(GameObject target)
         {
-            Sequence preSequence = DOTween.Sequence();
-            Sequence postSequence = DOTween.Sequence();
+            var preSequence = DOTween.Sequence();
+            var postSequence = DOTween.Sequence();
             var rect = target.GetComponent<RectTransform>();
             var images = target.GetComponentsInChildren<Image>();
             var texts = target.GetComponentsInChildren<TextMeshProUGUI>();

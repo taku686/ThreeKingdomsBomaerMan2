@@ -11,14 +11,14 @@ using PlayFab.ClientModels;
 using UnityEngine;
 using Newtonsoft.Json;
 using Repository;
+using TitleCore.LoginBonusState;
+using UI.TitleCore.LoginBonusState;
 using Zenject;
 
 namespace Assets.Scripts.Common.PlayFab
 {
     public class PlayFabLoginManager : IDisposable
     {
-        private const int OneDay = 1;
-        private const int TimeDifference = 9;
         [Inject] private UserDataRepository _userDataRepository;
         [Inject] private CharacterMasterDataRepository _characterMasterDataRepository;
         [Inject] private PlayFabCatalogManager _playFabCatalogManager;
@@ -29,6 +29,7 @@ namespace Assets.Scripts.Common.PlayFab
         [Inject] private Manager.ResourceManager.ResourceManager _resourceManager;
         [Inject] private MissionSpriteDataRepository _missionSpriteDataRepository;
         [Inject] private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
+        [Inject] private LoginBonusFacade _loginBonusFacade;
 
         private CancellationTokenSource _cts;
         private GetPlayerCombinedInfoRequestParams _info;
@@ -79,6 +80,7 @@ namespace Assets.Scripts.Common.PlayFab
             var userIcon = await _resourceManager.LoadUserIconSprite(user.UserIconFileName);
             await _playFabUserDataManager.TryUpdateUserDataAsync(user);
             _userDataRepository.Initialize(user, userName, userIcon);
+            _loginBonusFacade.LoadState();
             _missionManager.Initialize();
             await _userDataRepository.AddMissionData();
             return true;
@@ -90,45 +92,11 @@ namespace Assets.Scripts.Common.PlayFab
             var userName = tuple.Item2;
             var userIcon = await _resourceManager.LoadUserIconSprite(userData.UserIconFileName);
             _userDataRepository.Initialize(userData, userName, userIcon);
+            _loginBonusFacade.LoadState();
             await _playFabVirtualCurrencyManager.GetCoin();
             await _playFabVirtualCurrencyManager.GetGem();
             await _playFabUserDataManager.TryUpdateUserDataAsync(userData).AttachExternalCancellation(_cts.Token);
             return tuple.Item1;
-        }
-
-        private async UniTask SetLoginBonus(DateTime lastLoginDate)
-        {
-            var daySubtraction = DateTime.Today - lastLoginDate.Date;
-            var dayOfWeek = DateTime.Today.DayOfWeek;
-            _haveLoginBonus = daySubtraction.Days >= OneDay;
-            if (dayOfWeek == DayOfWeek.Sunday)
-            {
-                await _userDataRepository.ResetLoginBonus();
-            }
-
-            if (!_haveLoginBonus)
-            {
-                return;
-            }
-
-            await _userDataRepository.SetLoginBonus((int)dayOfWeek, LoginBonusStatus.CanReceive);
-        }
-
-        private async UniTask<bool> HaveLoginBonus(LoginResult loginResult)
-        {
-            var loginDateTime = loginResult.InfoResultPayload.AccountInfo.TitleInfo.LastLogin;
-            var lastLoginDateTime = loginResult.LastLoginTime;
-            if (loginDateTime == null || lastLoginDateTime == null)
-            {
-                return false;
-            }
-
-            var loginDate = (loginDateTime + TimeSpan.FromHours(TimeDifference))?.Date;
-            var lastLoginDate = (lastLoginDateTime + TimeSpan.FromHours(TimeDifference))?.Date;
-            if (loginDate == lastLoginDate) return true;
-            var result = await _playFabShopManager.TryPurchaseItem(GameCommonData.LoginBonusNotificationItemKey,
-                GameCommonData.CoinKey, 0, null);
-            return result;
         }
 
         public void Dispose()

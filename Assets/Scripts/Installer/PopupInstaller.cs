@@ -1,9 +1,8 @@
-using Common.Data;
+using TitleCore.LoginBonusState;
 using UI.Common.Popup;
 using UI.Title;
 using UI.TitleCore.UserInfoState;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using Zenject;
 
 public class PopupInstaller : MonoInstaller<PopupInstaller>
@@ -19,6 +18,7 @@ public class PopupInstaller : MonoInstaller<PopupInstaller>
     [SerializeField] private GameObject _rewardPopupPrefab;
     [SerializeField] private GameObject _settingsPopupPrefab;
     [SerializeField] private GameObject _checkingPopupPrefab;
+    [SerializeField] private GameObject _loginBonusPopupPrefab;
 
     public override void InstallBindings()
     {
@@ -66,9 +66,14 @@ public class PopupInstaller : MonoInstaller<PopupInstaller>
             .FromComponentInNewPrefab(_settingsPopupPrefab)
             .UnderTransform(_popupParent)
             .AsTransient();
-        
+
         Container.BindFactory<CheckingPopup, CheckingPopup.Factory>()
             .FromComponentInNewPrefab(_checkingPopupPrefab)
+            .UnderTransform(_popupParent)
+            .AsTransient();
+
+        Container.BindFactory<LoginBonusPopup, LoginBonusPopup.Factory>()
+            .FromComponentInNewPrefab(_loginBonusPopupPrefab)
             .UnderTransform(_popupParent)
             .AsTransient();
     }

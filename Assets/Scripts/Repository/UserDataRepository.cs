@@ -8,6 +8,7 @@ using Manager.DataManager;
 using Manager.NetworkManager;
 using Newtonsoft.Json;
 using Repository;
+using UI.TitleCore.LoginBonusState;
 using UnityEngine;
 using Zenject;
 using Random = UnityEngine.Random;
@@ -57,40 +58,6 @@ namespace Common.Data
             }
 
             await _playFabUserDataManager.TryUpdateUserDataAsync(_userData);
-        }
-
-        public async UniTask<bool> SetLoginBonus(int index, LoginBonusStatus status)
-        {
-            if (!_userData.LoginBonus.ContainsKey(index))
-            {
-                return false;
-            }
-
-            var data = GetUserData();
-            data.LoginBonus[index] = (int)status;
-            SetUserData(data);
-            var result = await _playFabUserDataManager.TryUpdateUserDataAsync(data).AttachExternalCancellation(_cancellationTokenSource.Token);
-            return result;
-        }
-
-        public async UniTask<bool> ResetLoginBonus()
-        {
-            var data = GetUserData();
-            for (var i = 0; i < _userData.LoginBonus.Count; i++)
-            {
-                _userData.LoginBonus[i] = (int)LoginBonusStatus.Disable;
-            }
-
-            SetUserData(data);
-            var result = await _playFabUserDataManager.TryUpdateUserDataAsync(data)
-                .AttachExternalCancellation(_cancellationTokenSource.Token);
-            return result;
-        }
-
-        public LoginBonusStatus GetLoginBonusStatus(int index)
-        {
-            var status = _userData.LoginBonus[index];
-            return GameCommonData.GetLoginBonusStatus(status);
         }
 
         public LevelMasterData GetCurrentLevelData(int characterId)
@@ -380,6 +347,16 @@ namespace Common.Data
         public void SetSettingData(SettingData settingData)
         {
             _userData._SettingData = settingData;
+        }
+        
+        public void SetLoginBonusData(LoginBonusData loginBonus)
+        {
+            _userData._LoginBonusData = loginBonus;
+        }
+        
+        public LoginBonusData GetLoginBonusData()
+        {
+            return _userData._LoginBonusData;
         }
 
         public void Dispose()

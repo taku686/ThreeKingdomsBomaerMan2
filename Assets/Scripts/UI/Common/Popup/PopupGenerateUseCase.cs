@@ -1,5 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
+using TitleCore.LoginBonusState;
 using UI.Common.Popup;
 using UI.Title;
 using UI.TitleCore.UserInfoState;
@@ -17,6 +18,7 @@ public class PopupGenerateUseCase : IDisposable
     [Inject] private RewardPopup.Factory _rewardPopupFactory;
     [Inject] private SettingPopup.Factory _settingPopupFactory;
     [Inject] private CheckingPopup.Factory _checkingPopupFactory;
+    [Inject] private LoginBonusPopup.Factory _loginBonusPopupFactory;
 
     public IObservable<bool> GenerateConfirmPopup
     (
@@ -104,6 +106,12 @@ public class PopupGenerateUseCase : IDisposable
         var settingPopup = _settingPopupFactory.Create();
         settingPopup.Open(viewModel).Forget();
         return settingPopup._OnClickButton;
+    }
+
+    public async UniTask<LoginBonusPopup> GenerateLoginBonusPopup()
+    {
+        var loginBonusPopup = _loginBonusPopupFactory.Create();
+        return await loginBonusPopup.Open();
     }
 
     public void Dispose()

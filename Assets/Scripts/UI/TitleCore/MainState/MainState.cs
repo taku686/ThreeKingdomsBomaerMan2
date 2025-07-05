@@ -5,6 +5,7 @@ using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager;
 using Repository;
+using UI.TitleCore.LoginBonusState;
 using UI.TitleCore.UserInfoState;
 using UniRx;
 
@@ -25,6 +26,7 @@ namespace UI.Title
             private MainViewModelUseCase _MainViewModelUseCase => Owner._mainViewModelUseCase;
             private TemporaryCharacterRepository _TemporaryCharacterRepository => Owner._temporaryCharacterRepository;
             private SettingViewModelUseCase _SettingViewModelUseCase => Owner._settingViewModelUseCase;
+            private LoginBonusFacade _LoginBonusFacade => Owner._loginBonusFacade;
 
             private CancellationTokenSource _cts;
 
@@ -137,6 +139,12 @@ namespace UI.Title
                     .Subscribe(_ => Owner.SetActiveBlockPanel(false))
                     .AddTo(_cts.Token);
 
+                _View._LoginBonusButton
+                    .OnClickAsObservable()
+                    .SelectMany(_ => Owner.OnClickScaleColorAnimation(_View._LoginBonusButton).ToObservable())
+                    .Subscribe(_ => _StateMachine.Dispatch((int)State.LoginBonus))
+                    .AddTo(_cts.Token);
+
                 _View._TeamEditButton
                     .OnClickAsObservable()
                     .Take(1)
@@ -153,6 +161,19 @@ namespace UI.Title
                         var characterId = _UserDataRepository.GetTeamMember(0);
                         _TemporaryCharacterRepository.SetSelectedCharacterId(characterId);
                         _StateMachine.Dispatch((int)State.Inventory, (int)State.Main);
+                    })
+                    .AddTo(_cts.Token);
+
+                Observable
+                    .EveryUpdate()
+                    .Subscribe(_ =>
+                    {
+                        if (_LoginBonusFacade._Data._todayReceived)
+                        {
+                            return;
+                        }
+
+                        _StateMachine.Dispatch((int)State.LoginBonus);
                     })
                     .AddTo(_cts.Token);
             }

@@ -1,7 +1,6 @@
 using System;
 using System.Threading;
 using Assets.Scripts.Common.Data;
-using Assets.Scripts.Common.PlayFab;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Data;
@@ -14,11 +13,11 @@ using UnityEngine;
 using Zenject;
 using Manager.DataManager;
 using Repository;
+using UI.TitleCore.LoginBonusState;
 using UI.TitleCore.UserInfoState;
 using UniRx;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
-using UnityEngine.UIElements;
 using UseCase;
 using Button = UnityEngine.UI.Button;
 
@@ -42,6 +41,7 @@ namespace UI.Title
         [Inject] private EntitledMasterDataRepository _entitledMasterDataRepository;
         [Inject] private MissionSpriteDataRepository _missionSpriteDataRepository;
         [Inject] private WeaponCautionRepository _weaponCautionRepository;
+        [Inject] private CharacterTypeSpriteRepository _characterTypeSpriteRepository;
 
         //UseCase
         [Inject] private CharacterSelectViewModelUseCase _characterSelectViewModelUseCase;
@@ -61,16 +61,20 @@ namespace UI.Title
 
         //Manager
         [Inject] private PhotonNetworkManager _photonNetworkManager;
-        [Inject] private DataAcrossStates _dataAcrossStates;
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
         [Inject] private PlayFabShopManager _playFabShopManager;
         [Inject] private PlayFabAdsManager _playFabAdsManager;
         [Inject] private PlayFabVirtualCurrencyManager _playFabVirtualCurrencyManager;
         [Inject] private MissionManager _missionManager;
-        [Inject] private CharacterTypeSpriteRepository _characterTypeSpriteRepository;
         [Inject] private SkyBoxManager _skyBoxManager;
         [Inject] private PlayStoreShopManager _playStoreShopManager;
         [Inject] private AdMobManager _adMobManager;
+
+        //Data
+        [Inject] private DataAcrossStates _dataAcrossStates;
+
+        //Facade
+        [Inject] private LoginBonusFacade _loginBonusFacade;
 
         //UI
         [Inject] private UIAnimation _uiAnimation;
@@ -223,6 +227,13 @@ namespace UI.Title
 
         private async UniTask TransitionUiAnimation(Action action)
         {
+            if (DisableFadeView(_stateMachine._PreviousState))
+            {
+                SetActiveBlockPanel(false);
+                action.Invoke();
+                return;
+            }
+
             if (!_dataAcrossStates._changingScene)
             {
                 SetActiveBlockPanel(true);
@@ -241,6 +252,11 @@ namespace UI.Title
             {
                 _dataAcrossStates._changingScene = false;
             }
+        }
+
+        private bool DisableFadeView(int prevState)
+        {
+            return prevState is (int)State.LoginBonus;
         }
 
         private void InitializeSceneCallBack()

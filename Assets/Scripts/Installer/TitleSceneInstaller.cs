@@ -13,6 +13,7 @@ using Skill.MagicShot;
 using Skill.SlashSpin;
 using UI.Common;
 using UI.Title;
+using UI.TitleCore.LoginBonusState;
 using UI.TitleCore.UserInfoState;
 using UnityEngine;
 using UseCase;
@@ -37,6 +38,7 @@ namespace Common.Installer
             InstallInventory();
             InstallCharacterDetail();
             InstallTeamEdit();
+
             InstallSlashSKill();
             InstallSlashSpin();
             InstallFlyingSlashSkill();

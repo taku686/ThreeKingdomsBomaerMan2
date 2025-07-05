@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using Data;
+using UI.TitleCore.LoginBonusState;
 
 namespace Common.Data
 {
     public class UserData : IDisposable
     {
-        //public int EquippedCharacterId;
         public string UserIconFileName;
         public int Level;
         public string Name;
@@ -22,6 +22,8 @@ namespace Common.Data
         public Dictionary<int, string> MissionDatum = new();
         public readonly Dictionary<int, int> TeamMembers = new();
         public SettingData _SettingData = new();
+        public LoginBonusData _LoginBonusData = new();
+
 
         [Serializable]
         public class MissionData
@@ -65,6 +67,7 @@ namespace Common.Data
 
             user.MissionDatum = new Dictionary<int, string>();
             user._SettingData = new SettingData();
+            user._LoginBonusData = new LoginBonusData();
             return user;
         }
 

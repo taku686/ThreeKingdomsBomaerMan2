@@ -6,6 +6,7 @@ using Manager.NetworkManager;
 using MoreMountains.Tools;
 using UI.Common;
 using UI.Title;
+using UI.TitleCore.LoginBonusState;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,6 +20,7 @@ namespace UI.LoginCore
         [Inject] private PlayFabLoginManager _playFabLoginManager;
         [Inject] private PopupGenerateUseCase _popupGenerateUseCase;
         [Inject] private PlayFabUserDataManager _playFabUserDataManager;
+        [Inject] private LoginBonusFacade _loginBonusFacade;
         [SerializeField] private GameObject _blockPanel;
         [SerializeField] private LoginView _loginView;
         [SerializeField] private CommonView _commonView;
@@ -90,6 +92,7 @@ namespace UI.LoginCore
                     .SelectMany(tuple => _playFabLoginManager.Login(tuple.Item2).ToObservable())
                     .SelectMany(tuple => _playFabLoginManager.CreateUserData(tuple).ToObservable())
                     .SelectMany(response => _playFabLoginManager.InitializeGameData(response).ToObservable())
+                    .SelectMany(_ => _loginBonusFacade.CheckLogin().ToObservable())
                     .Subscribe(_ =>
                     {
                         MMSceneLoadingManager.LoadScene(GameCommonData.MainScene);

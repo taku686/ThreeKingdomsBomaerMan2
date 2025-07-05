@@ -12,6 +12,7 @@ namespace Installer
             Container.Bind<PlayFabLoginManager>().AsCached();
             Container.Bind<UIAnimation>().AsCached();
             Container.Bind<PlayFabShopManager>().AsCached();
+            Container.Bind<PhotonNetworkManager>().AsCached();
         }
     }
 }
