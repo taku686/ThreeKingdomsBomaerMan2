@@ -1,26 +1,35 @@
 using System;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Repository;
 using UnityEngine;
+using UseCase;
 using Zenject;
 
 namespace UI.TitleCore.LoginBonusState
 {
     public class LoginBonusFacade : IDisposable
     {
-        private readonly LoginBonusConfig _config;
         private readonly UserDataRepository _userDataRepository;
+        private readonly RewardDataRepository _rewardDataRepository;
+        private readonly GetRewardUseCase _getRewardUseCase;
         public LoginBonusData _Data { get; private set; }
+        public LoginBonusConfig _LoginBonusConfig { get; }
+        private const int MaxConsecutiveDays = 7; // 最大連続ログイン日数
 
         [Inject]
         public LoginBonusFacade
         (
             LoginBonusConfig config,
-            UserDataRepository userDataRepository
+            UserDataRepository userDataRepository,
+            RewardDataRepository rewardDataRepository,
+            GetRewardUseCase getRewardUseCase
         )
         {
-            _config = config;
+            _LoginBonusConfig = config;
             _userDataRepository = userDataRepository;
+            _rewardDataRepository = rewardDataRepository;
+            _getRewardUseCase = getRewardUseCase;
         }
 
         public void LoadState()
@@ -70,6 +79,10 @@ namespace UI.TitleCore.LoginBonusState
                 if (diff == 1)
                 {
                     _Data._consecutiveDays++;
+                    if (_Data._consecutiveDays > MaxConsecutiveDays)
+                    {
+                        _Data._consecutiveDays = 1; // 最大連続ログイン日数を超えないようにする
+                    }
                 }
                 else
                 {
@@ -95,7 +108,7 @@ namespace UI.TitleCore.LoginBonusState
                 return;
             }
 
-            var reward = _config._rewards.Find(r => r._day == _Data._consecutiveDays);
+            var reward = _LoginBonusConfig._rewards.Find(r => r._day == _Data._consecutiveDays);
             if (reward == null)
             {
                 Debug.Log("ボーナス設定がありません。");
@@ -103,8 +116,10 @@ namespace UI.TitleCore.LoginBonusState
             }
 
             // ここで報酬を付与（例：コイン加算など）
-            Debug.Log($"{reward._rewardType} x{reward._amount} を付与しました！");
-
+            var rewardType = reward._rewardType;
+            var amount = reward._amount;
+            var results = _rewardDataRepository.SetReward(rewardType, amount);
+            await _getRewardUseCase.InAsTask(results);
             _Data._todayReceived = true;
             await SaveState();
         }

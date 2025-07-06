@@ -40,7 +40,7 @@ namespace Repository
             return _rewards;
         }
 
-        public (int, GameCommonData.RewardType)[] SetMissionReward(MissionMasterData missionMasterData)
+        public (int, GameCommonData.RewardType)[] SetReward(MissionMasterData missionMasterData)
         {
             _rewards.Clear();
             var reward = new List<(int, GameCommonData.RewardType)>();
@@ -63,6 +63,36 @@ namespace Repository
                     break;
                 case GameCommonData.RewardType.TreasureBox:
                     reward.AddRange(GetTreasureBox(missionMasterData.RewardAmount));
+                    break;
+            }
+
+            _rewards = reward;
+            return _rewards.ToArray();
+        }
+
+        public (int, GameCommonData.RewardType)[] SetReward(GameCommonData.RewardType rewardType, int rewardAmount)
+        {
+            _rewards.Clear();
+            var reward = new List<(int, GameCommonData.RewardType)>();
+            switch (rewardType)
+            {
+                case GameCommonData.RewardType.Coin:
+                    reward.Add((rewardAmount, GameCommonData.RewardType.Coin));
+                    break;
+                case GameCommonData.RewardType.Gem:
+                    reward.Add((rewardAmount, GameCommonData.RewardType.Gem));
+                    break;
+                case GameCommonData.RewardType.Weapon:
+                    reward.AddRange(GetRandomWeaponReward(rewardAmount));
+                    break;
+                case GameCommonData.RewardType.Character:
+                    reward.AddRange(GetRandomCharacterReward(rewardAmount));
+                    break;
+                case GameCommonData.RewardType.Consumable:
+                    reward.Add((rewardAmount, GameCommonData.RewardType.Consumable));
+                    break;
+                case GameCommonData.RewardType.TreasureBox:
+                    reward.AddRange(GetTreasureBox(rewardAmount));
                     break;
             }
 

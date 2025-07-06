@@ -38,6 +38,7 @@ namespace Common.Installer
             InstallInventory();
             InstallCharacterDetail();
             InstallTeamEdit();
+            InstallLoginBonus();
 
             InstallSlashSKill();
             InstallSlashSpin();
@@ -68,7 +69,6 @@ namespace Common.Installer
             Container.Bind<ActiveSkillManager>().AsCached();
             Container.Bind<PassiveSkillManager>().AsCached();
             Container.Bind<SaveLocalDataUseCase>().AsCached();
-            Container.Bind<GetRewardUseCase>().AsCached();
         }
 
         private void InstallCharacterSelect()
@@ -82,6 +82,11 @@ namespace Common.Installer
         {
             Container.Bind<CharacterDetailViewModelUseCase>().AsCached();
             Container.Bind<AnimationPlayBackUseCase>().AsCached();
+        }
+
+        private void InstallLoginBonus()
+        {
+            Container.Bind<LoginBonusViewModelUseCase>().AsCached();
         }
 
         private void InstallInventory()

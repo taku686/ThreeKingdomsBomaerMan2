@@ -108,10 +108,10 @@ public class PopupGenerateUseCase : IDisposable
         return settingPopup._OnClickButton;
     }
 
-    public async UniTask<LoginBonusPopup> GenerateLoginBonusPopup()
+    public async UniTask<LoginBonusPopup> GenerateLoginBonusPopup(LoginBonusPopup.ViewModel viewModel)
     {
         var loginBonusPopup = _loginBonusPopupFactory.Create();
-        return await loginBonusPopup.Open();
+        return await loginBonusPopup.Open(viewModel);
     }
 
     public void Dispose()

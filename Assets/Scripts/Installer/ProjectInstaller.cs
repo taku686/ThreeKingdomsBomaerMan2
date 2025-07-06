@@ -13,6 +13,7 @@ using UI.Common;
 using UI.Title;
 using UI.TitleCore.LoginBonusState;
 using UnityEngine;
+using UseCase;
 using Zenject;
 
 namespace Common.Installer
@@ -63,6 +64,7 @@ namespace Common.Installer
         {
             Container.Bind<LoginBonusConfig>().FromScriptableObject(_loginBonusConfig).AsSingle();
             Container.Bind<LoginBonusFacade>().AsCached();
+            Container.Bind<GetRewardUseCase>().AsCached();
         }
     }
 }

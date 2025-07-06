@@ -58,6 +58,7 @@ namespace UI.Title
         [Inject] private MainViewModelUseCase _mainViewModelUseCase;
         [Inject] private GetRewardUseCase _getRewardUseCase;
         [Inject] private SettingViewModelUseCase _settingViewModelUseCase;
+        [Inject] private LoginBonusViewModelUseCase _loginBonusViewModelUseCase;
 
         //Manager
         [Inject] private PhotonNetworkManager _photonNetworkManager;

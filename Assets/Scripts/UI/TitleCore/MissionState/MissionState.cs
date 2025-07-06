@@ -75,6 +75,7 @@ namespace UI.Title
             private void GenerateMissionGrid()
             {
                 DestroyMissionGrids();
+
                 var missionDatum = _UserDataRepository.GetMissionDatum()
                     .OrderBy(x => x.Key)
                     .ToDictionary(x => x.Key, x => x.Value);
@@ -105,15 +106,21 @@ namespace UI.Title
                     .SelectMany(_ => GetRewardAsync(missionMasterData).ToObservable())
                     .Subscribe(_ =>
                     {
-                        stateMachine.Dispatch((int)State.Reward, (int)State.Mission);
                         Owner.SetActiveBlockPanel(false);
+
+                        if (missionMasterData.RewardId is (int)GameCommonData.RewardType.Coin or (int)GameCommonData.RewardType.Gem)
+                        {
+                            return;
+                        }
+
+                        stateMachine.Dispatch((int)State.Reward, (int)State.Mission);
                     })
                     .AddTo(button.gameObject);
             }
 
             private async UniTask GetRewardAsync(MissionMasterData missionMasterData)
             {
-                var rewardResults = _RewardDataRepository.SetMissionReward(missionMasterData);
+                var rewardResults = _RewardDataRepository.SetReward(missionMasterData);
                 await _GetRewardUseCase.InAsTask(rewardResults);
                 await _UserDataRepository.RemoveMissionData(missionMasterData.Index);
                 await _UserDataRepository.AddMissionData();
