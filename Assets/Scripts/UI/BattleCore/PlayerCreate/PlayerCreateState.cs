@@ -131,7 +131,7 @@ namespace Manager.BattleManager
                     //todo review later
                     //var weaponId = _WeaponMasterDataRepository.GetWeaponRandomWeaponId();
                     var characterData = _CharacterMasterDataRepository.GetCharacterData(characterId);
-                    var weaponData = _WeaponMasterDataRepository.GetWeaponData(343);
+                    var weaponData = _WeaponMasterDataRepository.GetWeaponData(300);
                     var spawnPoint = _StartPointsRepository.GetSpawnPoint(cpuActorNr);
                     var playerCore = _PlayerGeneratorUseCase.InstantiatePlayerCore(true, spawnPoint);
                     var photonView = playerCore.GetComponent<PhotonView>();
@@ -174,7 +174,7 @@ namespace Manager.BattleManager
                 playerCore.AddComponent<PlayerMove>();
                 playerCore.AddComponent<PlayerDash>();
                 _SetupAnimatorUseCase.SetAnimatorController(playerCore, weaponType);
-                GenerateEffectActivator(playerCore, instantiationId);
+                GenerateEffectActivator(playerCore, photonView);
                 var translateStatusInBattleUseCase = _TranslateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
                 translateStatusInBattleUseCase.InitializeStatus();
                 var putBomb = playerCore.AddComponent<PutBomb>();
@@ -314,14 +314,14 @@ namespace Manager.BattleManager
                 Owner.SetCircleSkillIndicatorView(circleIndicatorView);
             }
 
-            private void GenerateEffectActivator(GameObject playerObj, int instantiationId)
+            private void GenerateEffectActivator(GameObject playerCore, PhotonView photonView)
             {
-                var effectActivator = Instantiate(_SkillEffectActivateUseCase, playerObj.transform);
+                var effectActivator = Instantiate(_SkillEffectActivateUseCase, playerCore.transform);
                 var effectActivatorTransform = effectActivator.transform;
                 effectActivatorTransform.localPosition = new Vector3(0, 0, 0);
                 effectActivatorTransform.localRotation = quaternion.identity;
                 var activateSkillSubject = _PhotonNetworkManager._ActivateSkillObservable;
-                effectActivator.Initialize(activateSkillSubject, instantiationId);
+                effectActivator.Initialize(activateSkillSubject, photonView);
             }
 
             private void SetPlayerUI(GameObject player, int playerId, out string hpKey)

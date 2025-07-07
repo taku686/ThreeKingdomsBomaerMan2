@@ -1,6 +1,8 @@
 using System;
 using Common.Data;
 using Cysharp.Threading.Tasks;
+using Manager.NetworkManager;
+using Photon.Pun;
 using Skill;
 using UniRx;
 using UnityEngine;
@@ -41,6 +43,7 @@ public class SkillEffectActivateUseCase : MonoBehaviour
     [SerializeField] private ParticleSystem _charmEffect;
     [SerializeField] private ParticleSystem _miasmaEffect;
     [SerializeField] private ParticleSystem _darknessEffect;
+    [SerializeField] private ParticleSystem _darknessPpEffect;
     [SerializeField] private ParticleSystem _sealedEffect;
     [SerializeField] private ParticleSystem _lifeStealEffect;
     [SerializeField] private ParticleSystem _curseEffect;
@@ -55,16 +58,29 @@ public class SkillEffectActivateUseCase : MonoBehaviour
 
     [Inject] private OnDamageFacade _onDamageFacade;
 
+    private Transform _ppEffectParent;
+    private bool _isMine;
     private const float OneSecond = 1f;
 
     public void Initialize
     (
         IObservable<(int, SkillMasterData)> activeSkillObservable,
-        int instantiationId
+        PhotonView photonView
     )
     {
+        var instantiationId = photonView.InstantiationId;
+        _ppEffectParent = FindObjectOfType<PPEffect>().transform;
+        SetupIsMine(photonView);
         Subscribe(activeSkillObservable, instantiationId);
         ForceAllEffectStop();
+    }
+
+    private void SetupIsMine(PhotonView photonView)
+    {
+        var creatorId = photonView.CreatorActorNr;
+        var isCpu = PhotonNetworkManager.IsCpu(creatorId);
+        var isMine = photonView.IsMine;
+        _isMine = isMine && !isCpu;
     }
 
     private void Subscribe
@@ -211,6 +227,7 @@ public class SkillEffectActivateUseCase : MonoBehaviour
                     break;
                 case AbnormalCondition.Darkness:
                     PlayEffect(_darknessEffect, skillMasterData.EffectTime).Forget();
+                    PlayPpEffect(_darknessPpEffect, skillMasterData.EffectTime).Forget();
                     break;
                 case AbnormalCondition.Sealed:
                     PlayEffect(_sealedEffect, skillMasterData.EffectTime).Forget();
@@ -263,6 +280,33 @@ public class SkillEffectActivateUseCase : MonoBehaviour
 
         effect.Stop();
         effect.gameObject.SetActive(false);
+    }
+
+    private async UniTask PlayPpEffect(ParticleSystem effect, float duration)
+    {
+        if (!_isMine)
+        {
+            return;
+        }
+
+        if (Mathf.Approximately(duration, GameCommonData.InvalidNumber))
+        {
+            return;
+        }
+
+        var ppEffect = Instantiate(effect, _ppEffectParent);
+        ppEffect.transform.localPosition = Vector3.zero;
+        ppEffect.transform.localEulerAngles = Vector3.zero;
+        ppEffect.gameObject.SetActive(true);
+        ppEffect.Play();
+        await UniTask.Delay(TimeSpan.FromSeconds(duration));
+        if (effect == null)
+        {
+            return;
+        }
+
+        ppEffect.Stop();
+        Destroy(ppEffect.gameObject);
     }
 
     private void PlayEffectInActive(ParticleSystem effect, bool isActive)

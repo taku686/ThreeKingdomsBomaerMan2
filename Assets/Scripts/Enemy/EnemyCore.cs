@@ -124,6 +124,7 @@ namespace Enemy
                 return;
             }
 
+            Debug.Log(skillData.Range + " : " + skillData.Interval);
             if (Mathf.Approximately(skillData.Range, GameCommonData.InvalidNumber))
             {
                 _enemySkillTimer
