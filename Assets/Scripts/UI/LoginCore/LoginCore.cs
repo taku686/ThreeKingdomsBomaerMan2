@@ -105,6 +105,7 @@ namespace UI.LoginCore
             else
             {
                 await _playFabLoginManager.InitializeGameData(loginResult);
+                await _loginBonusFacade.CheckLogin();
                 MMSceneLoadingManager.LoadScene(GameCommonData.MainScene);
                 _commonView.waitPopup.SetActive(false);
             }

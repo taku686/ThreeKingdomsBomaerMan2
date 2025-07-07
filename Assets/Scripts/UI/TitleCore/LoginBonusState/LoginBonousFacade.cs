@@ -66,6 +66,7 @@ namespace UI.TitleCore.LoginBonusState
         // ログイン判定
         public async UniTask CheckLogin()
         {
+            Debug.Log("Last Login Date: " + _Data._lastLoginDate);
             var today = DateTime.UtcNow.ToString("yyyy-MM-dd");
             if (_Data._lastLoginDate == today)
             {

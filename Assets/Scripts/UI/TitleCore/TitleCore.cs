@@ -111,11 +111,11 @@ namespace UI.Title
             TeamEdit
         }
 
-        private void Start()
+        private async void Start()
         {
             SetActiveBlockPanel(true);
             Application.targetFrameRate = 60;
-            Initialize();
+            await Initialize();
         }
 
         private void OnDestroy()
@@ -130,7 +130,7 @@ namespace UI.Title
 
         #region Initialization Methods
 
-        private void Initialize()
+        private async UniTask Initialize()
         {
             _cts = new CancellationTokenSource();
             _dataAcrossStates._changingScene = true;
@@ -138,16 +138,16 @@ namespace UI.Title
             PhotonCustomTypes.Register();
             var view = (MainView)GetView(State.Main);
             view.SetBackgroundEffect(false);
-            InitializeOthers();
+            await InitializeOthers();
             InitializeState();
             InitializeButton();
             InitializeSceneCallBack();
             SetActiveBlockPanel(false);
         }
 
-        private void InitializeOthers()
+        private async UniTask InitializeOthers()
         {
-            _missionSpriteDataRepository.Initialize().Forget();
+            await _missionSpriteDataRepository.Initialize();
             _commonView.Initialize();
             _weaponSortRepository.InitializeData();
             _weaponCautionRepository.InitializeData();

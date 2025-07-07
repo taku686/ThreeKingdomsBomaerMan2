@@ -52,7 +52,6 @@ namespace TitleCore.LoginBonusState
                 {
                     var stampAnimation = _buttons[i].GetComponentInChildren<StampUiAnimation>();
                     stampAnimation.ImageActivate(isActive);
-                    stampAnimation.ImageActivate(false);
                 }
             }
 
