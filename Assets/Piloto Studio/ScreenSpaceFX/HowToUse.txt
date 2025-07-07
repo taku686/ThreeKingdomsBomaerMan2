@@ -1,0 +1,18 @@
+How to use:
+
+1.Drag the prefab into the object camera
+2.Make sure the camera is Tagged as "MainCamera"
+3.Adjust the Z axis of the scaler component until it match your size requirements
+4.Feel free to adjust the script as you please
+
+Enable Opaque Texture in URP Settings:
+
+1.Go to your URP Asset (Edit > Project Settings > Graphics > Scriptable Render Pipeline Settings).
+
+2.Select your URP asset and find the Opaque Texture checkbo and enable it.
+
+Enable Opaque Texture on the Camera:
+
+Select your Main Camera in the scene.
+
+In the Rendering section, make sure Opaque Texture is also enabled.
