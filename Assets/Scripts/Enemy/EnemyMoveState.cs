@@ -17,11 +17,11 @@ namespace Enemy
         {
             private AIDestinationSetter _AIDestinationSetter => Owner._aiDestinationSetter;
             private FollowerEntity _FollowerEntity => Owner._followerEntity;
-            private StateMachine<EnemyCore> _StateMachine => Owner._stateMachine;
             private Rigidbody _Rigidbody => Owner._rigidbody;
             private Transform _PlayerTransform => Owner.transform;
+            private Animator _Animator => Owner._animator;
             private const float MinDistance = 5f;
-            private const float StoppingDistance = 3f; // How close to get to the wander point before choosing a new one
+            private const float StoppingDistance = 1f; // How close to get to the wander point before choosing a new one
             private const int TryCount = 5;
             private Vector3 _currentTarget;
             private CancellationTokenSource _cts;
@@ -38,6 +38,7 @@ namespace Enemy
 
             private void Initialize()
             {
+                _cts = new CancellationTokenSource();
                 Subscribe();
                 _FollowerEntity.isStopped = false;
                 _Rigidbody.isKinematic = true; // Disable physics interactions
@@ -52,8 +53,6 @@ namespace Enemy
 
             private void Subscribe()
             {
-                _cts = new CancellationTokenSource();
-
                 _PlayerTransform
                     .OnCollisionEnterAsObservable()
                     .Where(collision => collision.gameObject.CompareTag(GameCommonData.WallTag))
@@ -63,6 +62,8 @@ namespace Enemy
 
             protected override void OnUpdate()
             {
+                _Animator.SetFloat(GameCommonData.MoveKey, _FollowerEntity.velocity.magnitude);
+
                 if (_FollowerEntity.reachedDestination)
                 {
                     ChooseNewWanderPoint();

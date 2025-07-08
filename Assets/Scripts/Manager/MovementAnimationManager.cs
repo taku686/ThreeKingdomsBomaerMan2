@@ -7,7 +7,6 @@ namespace Manager
     public class MovementAnimationManager : IDisposable
     {
         private Animator _animator;
-        private const string MoveKey = "speedv";
 
         public void SetAnimator(Animator animator)
         {
@@ -23,7 +22,7 @@ namespace Manager
                 return;
             }
 
-            _animator.SetFloat(MoveKey, speed);
+            _animator.SetFloat(GameCommonData.MoveKey, speed);
         }
 
         private static Vector3 DirectionToVector3(MoveDirection moveDirection)

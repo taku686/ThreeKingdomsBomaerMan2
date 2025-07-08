@@ -41,6 +41,7 @@ namespace Common.Data
         public static readonly int SpecialHashKey = Animator.StringToHash("Special");
         public static readonly int KickHashKey = Animator.StringToHash("Kick");
         public static readonly int JumpHashKey = Animator.StringToHash("Jump");
+        public static readonly int MoveKey = Animator.StringToHash("speedv");
         public static readonly int DashHashKey = Animator.StringToHash("Dash");
         public static readonly int BuffHashKey = Animator.StringToHash("Buff");
         public static readonly int DeadHashKey = Animator.StringToHash("Dead");
