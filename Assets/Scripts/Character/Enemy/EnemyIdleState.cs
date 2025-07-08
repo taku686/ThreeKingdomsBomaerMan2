@@ -41,18 +41,18 @@ namespace Enemy
                     return false;
                 }
 
-                for (var index = 0; index < targets.Length; index++)
+                foreach (var unused in targets)
                 {
                     var targetIndex = Random.Range(0, targets.Length);
-                    var target = targets[targetIndex];
-                    var photonView = target.GetComponent<PhotonView>();
-                    var photonTransformView = target.GetComponent<PhotonTransformView>();
+                    var targetCandidate = targets[targetIndex];
+                    var photonView = targetCandidate.GetComponent<PhotonView>();
+                    var photonTransformView = targetCandidate.GetComponent<PhotonTransformView>();
                     if (photonTransformView == null || Owner.IsMine(photonView.InstantiationId))
                     {
                         continue;
                     }
 
-                    Owner._target = target.transform;
+                    Owner.SetTarget(targetCandidate.transform);
                     return true;
                 }
 

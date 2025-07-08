@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using Character;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.NetworkManager;
@@ -37,7 +38,7 @@ namespace Skill
         (
             SkillMasterData[] statusSkillMasterDatum,
             Transform playerTransform,
-            PlayerCore.PlayerStatusInfo playerStatusInfo,
+            PlayerStatusInfo playerStatusInfo,
             int characterId
         )
         {

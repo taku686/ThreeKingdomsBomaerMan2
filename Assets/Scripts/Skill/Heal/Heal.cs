@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using Character;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.NetworkManager;
@@ -14,7 +15,7 @@ namespace Skill.Heal
     public class Heal : IDisposable
     {
         private PlayerConditionInfo _playerConditionInfo;
-        private PlayerCore.PlayerStatusInfo _playerStatusInfo;
+        private PlayerStatusInfo _playerStatusInfo;
         private float _timer;
         private float _oneSecondTimer;
         private const int DeadHp = 0;
@@ -22,7 +23,7 @@ namespace Skill.Heal
         public void Initialize
         (
             PlayerConditionInfo playerConditionInfo,
-            PlayerCore.PlayerStatusInfo playerStatusInfo
+            PlayerStatusInfo playerStatusInfo
         )
         {
             _playerConditionInfo = playerConditionInfo;

@@ -155,7 +155,8 @@ namespace Manager.BattleManager
                 GameObject playerCore,
                 out string hpKey,
                 out PlayerConditionInfo playerConditionInfo,
-                out PhotonView photonView
+                out PhotonView photonView,
+                out TranslateStatusInBattleUseCase translateStatusInBattleUseCase
             )
             {
                 photonView = playerCore.GetComponent<PhotonView>();
@@ -175,7 +176,7 @@ namespace Manager.BattleManager
                 playerCore.AddComponent<PlayerDash>();
                 _SetupAnimatorUseCase.SetAnimatorController(playerCore, weaponType);
                 GenerateEffectActivator(playerCore, photonView);
-                var translateStatusInBattleUseCase = _TranslateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
+                translateStatusInBattleUseCase = _TranslateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
                 translateStatusInBattleUseCase.InitializeStatus();
                 var putBomb = playerCore.AddComponent<PutBomb>();
                 putBomb.Initialize(_BombProvider, _MapManager, translateStatusInBattleUseCase);
@@ -257,10 +258,15 @@ namespace Manager.BattleManager
                     player,
                     out var hpKey,
                     out var playerStatusInfo,
-                    out var photonView
+                    out var photonView,
+                    out var translateStatusInBattleUseCase
                 );
 
-                InitializeCpu(player, photonView.CreatorActorNr);
+                if (PhotonNetworkManager.IsCpu(photonView.CreatorActorNr))
+                {
+                    InitializeCpu(player, translateStatusInBattleUseCase);
+                }
+
 
                 if (!IsMine(photonView))
                 {
@@ -288,16 +294,20 @@ namespace Manager.BattleManager
                 );
             }
 
-            private void InitializeCpu(GameObject playerCore, int creatorActorNr)
+            private void InitializeCpu
+            (
+                GameObject playerCore,
+                TranslateStatusInBattleUseCase translateStatusInBattleUseCase
+            )
             {
-                if (!PhotonNetworkManager.IsCpu(creatorActorNr)) return;
                 var enemyCore = playerCore.AddComponent<EnemyCore>();
                 enemyCore.Initialize
                 (
                     _EnemySearchPlayerFactory,
                     _EnemySkillTimerFactory,
                     _PhotonNetworkManager,
-                    _SkillAnimationFacade
+                    _SkillAnimationFacade,
+                    translateStatusInBattleUseCase
                 );
                 enemyCore.enabled = PhotonNetwork.IsMasterClient;
             }

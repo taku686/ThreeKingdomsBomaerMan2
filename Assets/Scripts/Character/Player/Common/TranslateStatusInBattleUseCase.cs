@@ -1,4 +1,5 @@
 using System;
+using Character;
 using Common.Data;
 using UnityEngine;
 using Zenject;
@@ -11,7 +12,7 @@ namespace Player.Common
         private readonly WeaponMasterData _weaponData;
         private readonly LevelMasterData _levelData;
         private readonly ApplyStatusSkillUseCase _applyStatusSkillUseCase;
-        private PlayerCore.PlayerStatusInfo _playerStatusInfo;
+        private PlayerStatusInfo _playerStatusInfo;
         private int _maxBombLimit;
         private int _currentBombLimit;
 
@@ -31,7 +32,7 @@ namespace Player.Common
             _applyStatusSkillUseCase = applyStatusSkillUseCase;
         }
 
-        public PlayerCore.PlayerStatusInfo InitializeStatus()
+        public PlayerStatusInfo InitializeStatus()
         {
             var statusSkillDatum = _weaponData.StatusSkillMasterDatum;
             var characterId = _characterData.Id;
@@ -58,7 +59,7 @@ namespace Player.Common
             _currentBombLimit = 0;
             _maxBombLimit = bombLimit;
 
-            return new PlayerCore.PlayerStatusInfo
+            return new PlayerStatusInfo
             (
                 hp,
                 speed,
@@ -121,8 +122,7 @@ namespace Player.Common
         {
         }
 
-        public class Factory : PlaceholderFactory<CharacterData, WeaponMasterData, LevelMasterData,
-            TranslateStatusInBattleUseCase>
+        public class Factory : PlaceholderFactory<CharacterData, WeaponMasterData, LevelMasterData, TranslateStatusInBattleUseCase>
         {
         }
     }

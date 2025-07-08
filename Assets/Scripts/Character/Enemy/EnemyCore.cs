@@ -1,5 +1,5 @@
 using System.Threading;
-using Bomb;
+using Character;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Facade.Skill;
@@ -18,22 +18,20 @@ namespace Enemy
         private EnemySearchPlayer.Factory _searchPlayerFactory;
         private EnemySkillTimer _enemySkillTimer;
         private PhotonNetworkManager _photonNetworkManager;
-        [SerializeField] private BombProvider bombProvider;
-        [SerializeField] private MapManager mapManager;
 
+        private TranslateStatusInBattleUseCase.Factory _translateStatusInBattleUseCaseFactory;
         private TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
         private PhotonView _photonView;
-
         private PutBomb _putBomb;
-
         private AIDestinationSetter _aiDestinationSetter;
         private FollowerEntity _followerEntity;
         private EnemySearchPlayer _enemySearchPlayer;
-        private Animator _animator;
         private PlayerConditionInfo _playerConditionInfo;
+        private PlayerStatusInfo _playerStatusInfo;
         private SkillAnimationFacade _skillAnimationFacade;
         private ObservableStateMachineTrigger _observableStateMachineTrigger;
 
+        private Animator _animator;
         private Rigidbody _rigidbody;
         private Transform _skillTarget;
         private Transform _target;
@@ -64,7 +62,8 @@ namespace Enemy
             EnemySearchPlayer.Factory searchPlayerFactory,
             EnemySkillTimer.Factory enemySkillTimerFactory,
             PhotonNetworkManager photonNetworkManager,
-            SkillAnimationFacade skillAnimationFacade
+            SkillAnimationFacade skillAnimationFacade,
+            TranslateStatusInBattleUseCase translateStatusInBattleUseCase
         )
         {
             _cts = new CancellationTokenSource();
@@ -72,6 +71,7 @@ namespace Enemy
             _enemySkillTimer = enemySkillTimerFactory.Create();
             _photonNetworkManager = photonNetworkManager;
             _skillAnimationFacade = skillAnimationFacade;
+            _translateStatusInBattleUseCase = translateStatusInBattleUseCase;
 
             InitializeState();
             InitializeComponent();
@@ -80,6 +80,8 @@ namespace Enemy
 
         private void InitializeComponent()
         {
+            _boxCollider = GetComponent<BoxCollider>();
+            _putBomb = GetComponent<PutBomb>();
             _rigidbody = GetComponent<Rigidbody>();
             _animator = GetComponentInChildren<Animator>();
             _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
@@ -89,6 +91,7 @@ namespace Enemy
             _followerEntity.enableGravity = false;
             _photonView = GetComponent<PhotonView>();
             _enemySearchPlayer = _searchPlayerFactory.Create(gameObject);
+            _playerStatusInfo = _translateStatusInBattleUseCase.InitializeStatus();
             _playerKey = PhotonNetworkManager.GetPlayerKey(photonView.InstantiationId, 0);
         }
 
@@ -100,8 +103,6 @@ namespace Enemy
             _stateMachine.AddAnyTransition<EnemyDeadState>((int)EnemyState.Dead);
             _stateMachine.AddAnyTransition<EnemyMoveState>((int)EnemyState.Move);
             _stateMachine.AddTransition<EnemyMoveState, EnemyPutBombState>((int)EnemyState.PutBomb);
-            _stateMachine.AddTransition<EnemyPutBombState, EnemyEscapeState>((int)EnemyState.Escape);
-            _stateMachine.AddTransition<EnemyEscapeState, EnemyEscapeState>((int)EnemyState.Escape);
             _stateMachine.AddTransition<EnemyMoveState, EnemyNormalSkillState>((int)EnemyState.NormalSkill);
             _stateMachine.AddTransition<EnemyMoveState, EnemySpecialSkillState>((int)EnemyState.SpecialSkill);
             _stateMachine.AddTransition<EnemyMoveState, EnemyWeaponSkillState>((int)EnemyState.WeaponSkill);
@@ -178,6 +179,11 @@ namespace Enemy
         private int GetPlayerKey()
         {
             return _playerKey;
+        }
+
+        private void SetTarget(Transform target)
+        {
+            _target = target;
         }
 
         private static void Cancel(CancellationTokenSource cts)

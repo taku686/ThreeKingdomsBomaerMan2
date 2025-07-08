@@ -1,4 +1,5 @@
 ﻿using System;
+using Character;
 using Common.Data;
 using Photon.Pun;
 using Player.Common;
@@ -55,7 +56,7 @@ namespace Skill
             SkillMasterData[] statusSkillMasterDatum,
             Transform playerTransform,
             int characterId,
-            PlayerCore.PlayerStatusInfo playerStatusInfo
+            PlayerStatusInfo playerStatusInfo
         )
         {
             var playerConditionInfo = playerTransform.GetComponent<PlayerConditionInfo>();

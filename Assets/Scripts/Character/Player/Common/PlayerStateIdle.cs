@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using Character;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Photon.Pun;

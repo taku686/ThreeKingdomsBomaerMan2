@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Character;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.DataManager;
@@ -18,7 +19,7 @@ public class BuffSkill : IDisposable
 
     private SkillMasterData[] _statusSKillMasterDatum;
     private PlayerConditionInfo _playerConditionInfo;
-    private PlayerCore.PlayerStatusInfo _playerStatusInfo;
+    private PlayerStatusInfo _playerStatusInfo;
     private bool _isBuffInAbnormalCondition;
     private const int StatusAmount = 7;
 
@@ -36,7 +37,7 @@ public class BuffSkill : IDisposable
         int characterId,
         SkillMasterData[] statusSKillMasterDatum,
         PlayerConditionInfo playerConditionInfo,
-        PlayerCore.PlayerStatusInfo playerStatusInfo
+        PlayerStatusInfo playerStatusInfo
     )
     {
         _characterId = characterId;

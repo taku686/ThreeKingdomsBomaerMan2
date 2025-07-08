@@ -15,6 +15,7 @@ namespace Enemy
     {
         public class EnemyMoveState : State
         {
+            private StateMachine<EnemyCore> _StateMachine => Owner._stateMachine;
             private AIDestinationSetter _AIDestinationSetter => Owner._aiDestinationSetter;
             private FollowerEntity _FollowerEntity => Owner._followerEntity;
             private Rigidbody _Rigidbody => Owner._rigidbody;
@@ -66,7 +67,8 @@ namespace Enemy
 
                 if (_FollowerEntity.reachedDestination)
                 {
-                    ChooseNewWanderPoint();
+                    _StateMachine.Dispatch((int)EnemyState.PutBomb);
+                    //ChooseNewWanderPoint();
                 }
             }
 

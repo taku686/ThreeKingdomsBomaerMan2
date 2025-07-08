@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using Character;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Player.Common;
@@ -40,7 +41,7 @@ namespace Skill
         (
             AbnormalCondition abnormalCondition,
             Animator animator,
-            PlayerCore.PlayerStatusInfo myStatusInfo,
+            PlayerStatusInfo myStatusInfo,
             PlayerConditionInfo hitPlayerConditionInfo,
             float effectTime
         )
@@ -120,7 +121,7 @@ namespace Skill
         /// <summary>
         /// 最大HPの２％のダメージを毎秒受け続ける
         /// </summary>
-        private void Poison(PlayerCore.PlayerStatusInfo playerStatusInfo, float effectTime)
+        private void Poison(PlayerStatusInfo playerStatusInfo, float effectTime)
         {
             var maxHp = playerStatusInfo._Hp.Value.Item1;
             var damageAmount = Mathf.CeilToInt(maxHp * PoisonDamageRate);
@@ -130,7 +131,7 @@ namespace Skill
         /// <summary>
         /// 防御と耐性、移動速度が半分になる
         /// </summary>
-        private static void Frozen(PlayerCore.PlayerStatusInfo playerStatusInfo, float effectTime)
+        private static void Frozen(PlayerStatusInfo playerStatusInfo, float effectTime)
         {
             HalvedStatus(StatusType.Defense, playerStatusInfo, effectTime);
             HalvedStatus(StatusType.Resistance, playerStatusInfo, effectTime);
@@ -159,7 +160,7 @@ namespace Skill
         /// <summary>
         /// 攻撃、ボム数、火力を半減にする
         /// </summary>
-        private static void Miasma(PlayerCore.PlayerStatusInfo playerStatusInfo, float effectTime)
+        private static void Miasma(PlayerStatusInfo playerStatusInfo, float effectTime)
         {
             HalvedStatus(StatusType.Attack, playerStatusInfo, effectTime);
             HalvedStatus(StatusType.BombLimit, playerStatusInfo, effectTime);
@@ -197,7 +198,7 @@ namespace Skill
         /// 毎秒10ダメージ貰い続ける
         /// ボムの爆破時間が短くなる
         /// </summary>
-        private void Burning(PlayerCore.PlayerStatusInfo playerStatusInfo, float effectTime)
+        private void Burning(PlayerStatusInfo playerStatusInfo, float effectTime)
         {
             ContinuousDamage
             (
@@ -220,7 +221,7 @@ namespace Skill
         /// </summary>
         private void HellFire
         (
-            PlayerCore.PlayerStatusInfo playerStatusInfo,
+            PlayerStatusInfo playerStatusInfo,
             Animator animator,
             float effectTime
         )
@@ -319,7 +320,7 @@ namespace Skill
         private static void HalvedStatus
         (
             StatusType statusType,
-            PlayerCore.PlayerStatusInfo playerStatusInfo,
+            PlayerStatusInfo playerStatusInfo,
             float effectTime
         )
         {
@@ -333,7 +334,7 @@ namespace Skill
 
         private void ContinuousDamage
         (
-            PlayerCore.PlayerStatusInfo playerStatusInfo,
+            PlayerStatusInfo playerStatusInfo,
             float effectTime,
             int damageAmount
         )

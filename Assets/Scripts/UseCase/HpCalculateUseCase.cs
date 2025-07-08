@@ -1,4 +1,5 @@
 ﻿using System;
+using Character;
 using Common.Data;
 using Player.Common;
 using UnityEngine;
@@ -11,7 +12,7 @@ namespace UseCase
 
         public static void InAsTask
         (
-            PlayerCore.PlayerStatusInfo playerStatusInfo,
+            PlayerStatusInfo playerStatusInfo,
             int damage,
             Action deadAction = null
         )
