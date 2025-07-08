@@ -10,11 +10,12 @@ namespace Enemy
     {
         public class EnemyPutBombState : State
         {
-            private StateMachine<EnemyCore> _stateMachine;
-            private PhotonView _photonView;
-            private MapManager _mapManager;
-            private BoxCollider _boxCollider;
-            private PutBomb _putBomb;
+            private TranslateStatusInBattleUseCase _TranslateStatusInBattleUseCase => Owner._translateStatusInBattleUseCase;
+            private StateMachine<EnemyCore> _stateMachine => Owner._stateMachine;
+            private PhotonView _photonView => Owner._photonView;
+            private MapManager _mapManager => Owner.mapManager;
+            private BoxCollider _boxCollider => Owner._boxCollider;
+            private PutBomb _putBomb => Owner._putBomb;
             private bool _isPutBomb;
 
             private const int WaitDurationBeforeExplosion = 3000; // 3 seconds
@@ -48,8 +49,8 @@ namespace Enemy
                 var explosionTime = PhotonNetwork.ServerTimestamp + WaitDurationBeforeExplosion;
                 var photonView = _photonView;
                 //todo 後で修正
-                //var damageAmount = _translateStatusInBattleUseCase._Attack;
-                //var fireRange = _translateStatusInBattleUseCase._FireRange;
+                var damageAmount = _TranslateStatusInBattleUseCase._Attack;
+                var fireRange = _TranslateStatusInBattleUseCase._FireRange;
                 var boxCollider = _boxCollider;
                 _putBomb.SetBomb
                 (
