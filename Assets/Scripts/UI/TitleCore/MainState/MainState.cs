@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading;
-using Assets.Scripts.Common.PlayFab;
+﻿using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager;
@@ -32,7 +30,7 @@ namespace UI.Title
 
             protected override void OnEnter(StateMachine<TitleCore>.State prevState)
             {
-                Initialize().Forget();
+                Initialize();
             }
 
             protected override void OnExit(StateMachine<TitleCore>.State nextState)
@@ -41,19 +39,19 @@ namespace UI.Title
                 _View.SetBackgroundEffect(false);
             }
 
-            private async UniTaskVoid Initialize()
+            private void Initialize()
             {
                 _cts = new CancellationTokenSource();
                 Owner.SwitchUiObject(State.Main, true, () =>
                 {
                     Subscribe();
-                    _SkyBoxManager.ChangeSkyBox();
+                    InitializeText().Forget();
                     ApplySimpleUserInfoView();
                     ApplyMainViewModel();
-                    _View.SetBackgroundEffect(true);
                     GenerateTeamMembers();
+                    _SkyBoxManager.ChangeSkyBox();
+                    _View.SetBackgroundEffect(true);
                 }).Forget();
-                await InitializeText();
             }
 
             private void ApplyMainViewModel()
