@@ -1,6 +1,4 @@
 ﻿using AttributeAttack;
-using Common.Data;
-using Player.Common;
 using UnityEngine;
 using Zenject;
 

@@ -13,6 +13,7 @@ using Skill.CrushImpact;
 using Skill.DashAttack;
 using Skill.Heal;
 using Skill.MagicShot;
+using Skill.RainArrow;
 using Skill.SlashSpin;
 using UI.Common;
 using UnityEngine;
@@ -57,6 +58,7 @@ namespace Common.Installer
             InstallCrushImpact();
             InstallSlashSpin();
             InstallMagicShot();
+            InstallRainArrowSKill();
         }
 
         private void InstallEnemyCore()
@@ -112,6 +114,24 @@ namespace Common.Installer
             Container.BindFactory<int, Animator, Transform, IAttackBehaviour, StigmataMagicShot, StigmataMagicShot.Factory>().AsCached();
             Container.BindFactory<int, Animator, Transform, IAttackBehaviour, SoakingWetMagicShot, SoakingWetMagicShot.Factory>().AsCached();
             Container.BindFactory<int, Animator, Transform, IAttackBehaviour, BurningMagicShot, BurningMagicShot.Factory>().AsCached();
+        }
+
+        private void InstallRainArrowSKill()
+        {
+            Container.BindFactory<int, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeRainArrowFactory.Factory>().FromFactory<AttributeRainArrowFactory>();
+            Container.BindFactory<NormalRainArrow, NormalRainArrow.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, PoisonRainArrow, PoisonRainArrow.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, FrozenRainArrow, FrozenRainArrow.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, ConfusionRainArrow, ConfusionRainArrow.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, CharmRainArrow, CharmRainArrow.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, MiasmaRainArrow, MiasmaRainArrow.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, DarknessRainArrow, DarknessRainArrow.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, LifeStealRainArrow, LifeStealRainArrow.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, HellFireRainArrow, HellFireRainArrow.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, StigmataRainArrow, StigmataRainArrow.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, SoakingWetRainArrow, SoakingWetRainArrow.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, BurningRainArrow, BurningRainArrow.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, ParalysisRainArrow, ParalysisRainArrow.Factory>().AsCached();
         }
 
         private void InstallSlashSpin()

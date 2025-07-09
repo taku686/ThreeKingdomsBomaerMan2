@@ -657,6 +657,7 @@ namespace Common.Data
         JumpSmash = 90,
         SlashSpin = 91,
         ThrowEdge = 92,
+        RainArrow = 93,
         None = 999
     }
 }

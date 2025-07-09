@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Threading;
 using AttributeAttack;
 using Common.Data;
+using Cysharp.Threading.Tasks;
+using Manager.DataManager;
 using Repository;
 using UniRx;
 using UniRx.Triggers;
@@ -8,60 +11,67 @@ using UnityEngine;
 using Zenject;
 using Object = UnityEngine.Object;
 
-namespace Skill.Attack
+namespace Skill.RainArrow
 {
-    public class SlashBase : AttackSkillBase, IAttackBehaviour
+    public class RainArrowBase : AttackSkillBase, IAttackBehaviour
     {
         private GameObject _effectClone;
         private readonly SkillEffectRepository _skillEffectRepository;
-        private const float DelayTime = 0.1f;
-        private const float EffectHeight = 0.5f;
+        private readonly SkillMasterDataRepository _skillMasterDataRepository;
+        private const float WaitDurationForStart = 0.1f;
+        private const float WaitDurationForEnd = 0.1f;
 
         [Inject]
-        public SlashBase
+        public RainArrowBase
         (
-            SkillEffectRepository skillEffectRepository
+            SkillEffectRepository skillEffectRepository,
+            SkillMasterDataRepository skillMasterDataRepository
         )
         {
             _skillEffectRepository = skillEffectRepository;
+            _skillMasterDataRepository = skillMasterDataRepository;
         }
+
 
         public virtual void Attack()
         {
         }
 
-        protected void Slash
+        protected void RainArrow
         (
             AbnormalCondition abnormalCondition,
             int skillId,
             Transform playerTransform
         )
         {
+            var skillData = _skillMasterDataRepository.GetSkillData(skillId);
+            var range = skillData.Range;
+
             Observable
-                .Timer(TimeSpan.FromSeconds(DelayTime))
+                .Timer(TimeSpan.FromSeconds(WaitDurationForStart))
                 .Subscribe(_ =>
                 {
-                    ActivateEffect(playerTransform, abnormalCondition, skillId);
+                    ActivateEffect(playerTransform, abnormalCondition, skillId, range);
                     SetupCollider(playerTransform, skillId);
-                })
-                .AddTo(playerTransform);
+                });
         }
 
         protected virtual void ActivateEffect
         (
             Transform playerTransform,
             AbnormalCondition abnormalCondition,
-            int skillId
+            int skillId,
+            float range
         )
         {
-            var effect = _skillEffectRepository.GetSlashEffect(abnormalCondition);
-            _effectClone = Object.Instantiate(effect, playerTransform).gameObject;
+            var effect = _skillEffectRepository.GetRainArrowEffect(abnormalCondition);
+            _effectClone = Object.Instantiate(effect).gameObject;
             SetupParticleSystem(_effectClone);
-            var spawnPosition = new Vector3(0, EffectHeight, 0);
-            var spawnRotation = new Vector3(180, 34.3f, 0);
+            var playerPosition = playerTransform.position;
+            var spawnPosition = new Vector3(playerPosition.x, playerPosition.y, playerPosition.z);
+            spawnPosition += playerTransform.forward * 8;
             var effectTransform = _effectClone.transform;
-            effectTransform.localPosition = spawnPosition;
-            effectTransform.localEulerAngles = spawnRotation;
+            effectTransform.position = spawnPosition;
         }
 
         private void SetupCollider
@@ -82,8 +92,9 @@ namespace Skill.Attack
             }
         }
 
-        public virtual void Dispose()
+        public void Dispose()
         {
+            // TODO release managed resources here
         }
     }
 }

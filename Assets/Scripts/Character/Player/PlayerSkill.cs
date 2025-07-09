@@ -1,4 +1,5 @@
-﻿using Manager.NetworkManager;
+﻿using Common.Data;
+using Manager.NetworkManager;
 using Photon.Pun;
 using Skill;
 using UniRx;

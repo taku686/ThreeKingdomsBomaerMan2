@@ -8,6 +8,7 @@ using Skill.Attack.FlyingSlash;
 using Skill.CrushImpact;
 using Skill.DashAttack;
 using Skill.MagicShot;
+using Skill.RainArrow;
 using Skill.SlashSpin;
 using UnityEngine;
 using Zenject;
@@ -22,6 +23,7 @@ namespace Skill
         private readonly AttributeCrushImpactFactory.Factory _crushImpactFactory;
         private readonly AttributeSlashSpinFactory.Factory _slashSpinFactory;
         private readonly AttributeMagicShotFactory.Factory _magicShotFactory;
+        private readonly AttributeRainArrowFactory.Factory _rainArrowFactory;
         private readonly BuffSkill _buffSkill;
         private readonly Heal.Heal _heal;
         private Animator _animator;
@@ -37,6 +39,7 @@ namespace Skill
             AttributeCrushImpactFactory.Factory crushImpactFactory,
             AttributeSlashSpinFactory.Factory slashSpinFactory,
             AttributeMagicShotFactory.Factory magicShotFactory,
+            AttributeRainArrowFactory.Factory rainArrowFactory,
             BuffSkill buffSkill,
             Heal.Heal heal
         )
@@ -47,6 +50,7 @@ namespace Skill
             _crushImpactFactory = crushImpactFactory;
             _slashSpinFactory = slashSpinFactory;
             _magicShotFactory = magicShotFactory;
+            _rainArrowFactory = rainArrowFactory;
             _buffSkill = buffSkill;
             _heal = heal;
         }
@@ -87,45 +91,50 @@ namespace Skill
 
         public void ActivateSkill(SkillMasterData skillMasterData, Transform playerTransform)
         {
-            if (IsSlashSkillActionType(skillMasterData))
+            if (IsActionType(skillMasterData, SkillActionType.Slash))
             {
                 SlashSkill(skillMasterData, playerTransform);
             }
 
-            if (IsFlyingSlashSkillActionType(skillMasterData))
+            if (IsActionType(skillMasterData, SkillActionType.FlyingSlash))
             {
                 FlyingSlashSkill(skillMasterData, playerTransform);
             }
 
-            if (IsMagicShotSkillActionType(skillMasterData))
+            if (IsActionType(skillMasterData, SkillActionType.Shot))
             {
                 MagicShotSkill(skillMasterData, playerTransform);
             }
 
-            if (IsDashAttackSkillActionType(skillMasterData))
+            if (IsActionType(skillMasterData, SkillActionType.DashAttack))
             {
                 DashAttackSkill(skillMasterData, playerTransform);
             }
 
-            if (IsCrushImpactSkillActionType(skillMasterData))
+            if (IsActionType(skillMasterData, SkillActionType.Impact))
             {
                 CrushImpactSkill(skillMasterData, playerTransform);
             }
 
-            if (IsSlashSpinSkillActionType(skillMasterData))
+            if (IsActionType(skillMasterData, SkillActionType.SlashSpin))
             {
                 SlashSpinSkill(skillMasterData, playerTransform);
+            }
+
+            if (IsActionType(skillMasterData, SkillActionType.RainArrow))
+            {
+                RainArrowSkill(skillMasterData, playerTransform);
             }
         }
 
         public void Heal(SkillMasterData skillMasterData)
         {
-            if (IsHealSkillActionType(skillMasterData))
+            if (IsActionType(skillMasterData, SkillActionType.Heal))
             {
                 _heal.HealSkill(skillMasterData);
             }
 
-            if (IsContinuousHealSkillActionType(skillMasterData))
+            if (IsActionType(skillMasterData, SkillActionType.ContinuousHeal))
             {
                 _heal.ContinuousHealSkill(skillMasterData);
             }
@@ -174,6 +183,20 @@ namespace Skill
             }
 
             flyingSlash.Attack();
+        }
+
+        private void RainArrowSkill(SkillMasterData skillMasterData, Transform playerTransform)
+        {
+            var skillId = skillMasterData.Id;
+            var rainArrow = _rainArrowFactory.Create(skillId, playerTransform, AbnormalCondition.None, null);
+            foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
+            {
+                if (abnormalCondition == AbnormalCondition.None)
+                    continue;
+                rainArrow = _rainArrowFactory.Create(skillId, playerTransform, abnormalCondition, rainArrow);
+            }
+
+            rainArrow.Attack();
         }
 
         private void MagicShotSkill(SkillMasterData skillMasterData, Transform playerTransform)
@@ -246,52 +269,9 @@ namespace Skill
                 SkillActionType.AllBuff;
         }
 
-        private static bool IsSlashSkillActionType(SkillMasterData skillMasterData)
+        private static bool IsActionType(SkillMasterData skillMasterData, SkillActionType skillActionType)
         {
-            var skillActionType = skillMasterData._SkillActionTypeEnum;
-            return skillActionType is SkillActionType.Slash;
-        }
-
-        private static bool IsMagicShotSkillActionType(SkillMasterData skillMasterData)
-        {
-            var skillActionType = skillMasterData._SkillActionTypeEnum;
-            return skillActionType is SkillActionType.Shot;
-        }
-
-        private static bool IsFlyingSlashSkillActionType(SkillMasterData skillMasterData)
-        {
-            var skillActionType = skillMasterData._SkillActionTypeEnum;
-            return skillActionType is SkillActionType.FlyingSlash;
-        }
-
-        private static bool IsSlashSpinSkillActionType(SkillMasterData skillMasterData)
-        {
-            var skillActionType = skillMasterData._SkillActionTypeEnum;
-            return skillActionType is SkillActionType.SlashSpin;
-        }
-
-        private static bool IsDashAttackSkillActionType(SkillMasterData skillMasterData)
-        {
-            var skillActionType = skillMasterData._SkillActionTypeEnum;
-            return skillActionType is SkillActionType.DashAttack;
-        }
-
-        private static bool IsCrushImpactSkillActionType(SkillMasterData skillMasterData)
-        {
-            var skillActionType = skillMasterData._SkillActionTypeEnum;
-            return skillActionType is SkillActionType.Impact;
-        }
-
-        private static bool IsHealSkillActionType(SkillMasterData skillMasterData)
-        {
-            var skillActionType = skillMasterData._SkillActionTypeEnum;
-            return skillActionType is SkillActionType.Heal;
-        }
-
-        private static bool IsContinuousHealSkillActionType(SkillMasterData skillMasterData)
-        {
-            var skillActionType = skillMasterData._SkillActionTypeEnum;
-            return skillActionType is SkillActionType.ContinuousHeal;
+            return skillMasterData._SkillActionTypeEnum == skillActionType;
         }
 
         public void Dispose()
