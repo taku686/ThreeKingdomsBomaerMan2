@@ -219,6 +219,9 @@ namespace Facade.Skill
                     break;
                 case SkillActionType.ThrowEdge:
                     break;
+                case SkillActionType.RainArrow:
+                    stateName = GameCommonData.RainArrowKey;
+                    break;
                 case SkillActionType.None:
                     break;
                 default:

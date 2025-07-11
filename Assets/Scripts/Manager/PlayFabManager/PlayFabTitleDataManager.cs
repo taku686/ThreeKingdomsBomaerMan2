@@ -48,11 +48,11 @@ namespace Manager.PlayFabManager
             var entitledDatum = JsonConvert.DeserializeObject<EntitledMasterData[]>(titleDatum[EntitledMasterKey]);
             var abnormalConditionDatum = JsonConvert.DeserializeObject<AbnormalConditionMasterData[]>(titleDatum[AbnormalConditionMasterKey]);
 
-            SetSkillData(skillDatum).Forget();
+            await SetSkillData(skillDatum);
             SetCharacterData(characterDatum);
             SetCharacterLevelData(characterLevelDatum);
             SetMissionData(missionDatum);
-            SetWeaponData(weaponDatum);
+            await SetWeaponData(weaponDatum);
             SetEntitledData(entitledDatum);
             SetAbnormalConditionData(abnormalConditionDatum);
         }
@@ -73,13 +73,14 @@ namespace Manager.PlayFabManager
             }
         }
 
-        private async UniTask SetSkillData(SkillMasterData[] skillDatum)
+        private async UniTask SetSkillData(IEnumerable<SkillMasterData> skillDatum)
         {
             foreach (var skillData in skillDatum)
             {
                 var id = skillData.Id;
                 var explanation = skillData.Explanation;
                 var name = skillData.Name;
+                await LoadSkillIconResources(id, skillData.IconID);
                 var sprite = _resourcesObjectRepository.GetSkillIcon(id);
                 var skillActionType = TranslateStringToSkillActionType(skillData._SkillActionType);
                 var skillType = (SkillType)skillData.SkillTypeInt;
@@ -163,12 +164,13 @@ namespace Manager.PlayFabManager
             }
         }
 
-        private void SetWeaponData(IEnumerable<WeaponMasterData> weaponDatum)
+        private async UniTask SetWeaponData(IEnumerable<WeaponMasterData> weaponDatum)
         {
             foreach (var weaponData in weaponDatum)
             {
                 var name = weaponData.Name;
                 var id = weaponData.Id;
+                await _resourcesObjectRepository.SetWeaponData(id);
                 var weaponType = (WeaponType)weaponData.WeaponTypeInt;
                 var statusSkillIds = TranslateStringToIntArray(weaponData.StatusSkillId);
                 var statusSkillData = _skillMasterDataRepository.GetSkillDatum(statusSkillIds);
@@ -182,7 +184,7 @@ namespace Manager.PlayFabManager
                 var gemMul = weaponData.GemMul;
                 var skillMul = weaponData.SkillMul;
                 var rangeMul = weaponData.RangeMul;
-                
+
                 var newWeaponData = new WeaponMasterData
                 (
                     name,
@@ -344,7 +346,7 @@ namespace Manager.PlayFabManager
             }
         }
 
-        private async UniTask LoadResources(int skillId, int iconId)
+        private async UniTask LoadSkillIconResources(int skillId, int iconId)
         {
             var skillIcon = await Resources.LoadAsync<Sprite>(GameCommonData.SkillIconSpritePath + iconId);
             _resourcesObjectRepository.SetSkillSprite(skillId, skillIcon as Sprite);

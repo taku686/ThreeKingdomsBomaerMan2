@@ -30,30 +30,23 @@ namespace Common.Data
         public const string GemKey = "MS";
         public const string CoinKey = "CO";
         public const string TicketKey = "TK";
-        public const string GachaShopKey = "GachaStore";
         public const string ConsumableClassKey = "Consumable";
         public const string CharacterClassKey = "Character";
         public const string LoginBonusClassKey = "Consumable";
-        public const string LoginBonusNotificationItemKey = "LoginBonusNotification";
         public const string LevelItemKey = "level";
         public const string LoginBonusItemKey = "day";
-        public static readonly int NormalHashKey = Animator.StringToHash("Normal");
-        public static readonly int SpecialHashKey = Animator.StringToHash("Special");
         public static readonly int KickHashKey = Animator.StringToHash("Kick");
         public static readonly int JumpHashKey = Animator.StringToHash("Jump");
         public static readonly int MoveKey = Animator.StringToHash("speedv");
         public static readonly int DashHashKey = Animator.StringToHash("Dash");
-        public static readonly int BuffHashKey = Animator.StringToHash("Buff");
+        private static readonly int BuffHashKey = Animator.StringToHash("Buff");
         public static readonly int DeadHashKey = Animator.StringToHash("Dead");
-        public static readonly int SlashHashKey = Animator.StringToHash("Slash");
-        public static readonly int MagicShotHashKey = Animator.StringToHash("MagicShot");
-        public static readonly int SlashSpinHashKey = Animator.StringToHash("SlashSpin");
-        public static readonly int DashAttackHashKey = Animator.StringToHash("DashAttack");
-        public static readonly int ImpactHashKey = Animator.StringToHash("Impact");
-        public static readonly int HitHashKey = Animator.StringToHash("Hit");
-        public static readonly int PerformanceHashKey = Animator.StringToHash("Performance");
-        public const string NormalKey = "Base Layer.Normal";
-        public const string SpecialKey = "Base Layer.Special";
+        private static readonly int SlashHashKey = Animator.StringToHash("Slash");
+        private static readonly int MagicShotHashKey = Animator.StringToHash("MagicShot");
+        private static readonly int SlashSpinHashKey = Animator.StringToHash("SlashSpin");
+        private static readonly int DashAttackHashKey = Animator.StringToHash("DashAttack");
+        private static readonly int ImpactHashKey = Animator.StringToHash("Impact");
+        private static readonly int RainArrowHashKey = Animator.StringToHash("RainArrow");
         public const string KickKey = "Base Layer.Kick";
         public const string JumpKey = "Base Layer.Jump";
         public const string DashKey = "Base Layer.Dash";
@@ -65,6 +58,7 @@ namespace Common.Data
         public const string SlashSpinKey = "Base Layer.SlashSpin";
         public const string ImpactKey = "Base Layer.Impact";
         public const string HitKey = "Base Layer.Hit";
+        public const string RainArrowKey = "Base Layer.RainArrow";
         public const string SpeedhParameterName = "speedh";
         public const string SpeedvParameterName = "speedv";
         public const string NormalParameterName = "Normal";
@@ -80,6 +74,7 @@ namespace Common.Data
         public const string SlashSpinParameterName = "SlashSpin";
         public const string MagicShotParameterName = "MagicShot";
         public const string HitParameterName = "Hit";
+        public const string RainArrowParameterName = "RainArrow";
         public const string CharacterSpritePath = "Sprites/Character/";
         public const string UserIconSpritePath = "Sprites/UserIcon/";
         public const string SkillIconSpritePath = "Sprites/Skill/";
@@ -146,6 +141,7 @@ namespace Common.Data
                 SkillActionType.SlashSpin => SlashSpinHashKey,
                 SkillActionType.Heal => BuffHashKey,
                 SkillActionType.ContinuousHeal => BuffHashKey,
+                SkillActionType.RainArrow => RainArrowHashKey,
                 _ => throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null)
             };
         }

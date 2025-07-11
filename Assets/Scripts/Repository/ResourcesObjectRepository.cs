@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Common.Data;
+using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 using UnityEngine;
@@ -32,11 +33,13 @@ namespace Repository
         [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Id", ValueLabel = "Prefab")]
         private Dictionary<string, Sprite> _weaponSpriteByName;
 
-        /*public void SetWeaponData(int weaponId)
+        public async UniTask SetWeaponData(int weaponId)
         {
+            var weaponObj = await Resources.LoadAsync<GameObject>(GameCommonData.WeaponPrefabPath + weaponId);
+            _weaponPrefab[weaponId] = (GameObject)weaponObj;
             _weaponPrefab[weaponId].name = $"Weapon_{weaponId}";
             _weaponIcon[weaponId].name = $"WeaponIcon_{weaponId}";
-        }*/
+        }
 
         public void SetSkillSprite(int skillId, Sprite sprite)
         {
