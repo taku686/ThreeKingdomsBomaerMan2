@@ -1,6 +1,7 @@
 ﻿using System;
 using AttributeAttack;
 using Common.Data;
+using MoreMountains.Tools;
 using Repository;
 using UniRx;
 using UniRx.Triggers;
@@ -8,17 +9,16 @@ using UnityEngine;
 using Zenject;
 using Object = UnityEngine.Object;
 
-namespace Skill.Attack
+namespace Skill.ImpactRock
 {
-    public class SlashBase : AttackSkillBase, IAttackBehaviour
+    public class ImpactRockBase : AttackSkillBase, IAttackBehaviour
     {
         private GameObject _effectClone;
         private readonly SkillEffectRepository _skillEffectRepository;
-        private const float DelayTime = 0.1f;
-        private const float EffectHeight = 0.5f;
+        private const float DelayTime = 0.47f;
 
         [Inject]
-        public SlashBase
+        public ImpactRockBase
         (
             SkillEffectRepository skillEffectRepository
         )
@@ -30,7 +30,7 @@ namespace Skill.Attack
         {
         }
 
-        protected void Slash
+        protected void ImpactRock
         (
             AbnormalCondition abnormalCondition,
             int skillId,
@@ -54,14 +54,12 @@ namespace Skill.Attack
             int skillId
         )
         {
-            var effect = _skillEffectRepository.GetSlashEffect(abnormalCondition);
-            _effectClone = Object.Instantiate(effect, playerTransform).gameObject;
+            var effect = _skillEffectRepository.GetImpactRockEffect(abnormalCondition);
+            var playerPosition = playerTransform.position;
+            var spawnPosition = new Vector3(playerPosition.x, playerPosition.y, playerPosition.z);
+            var spawnRotation = new Vector3(0, playerTransform.eulerAngles.y, 0);
+            _effectClone = Object.Instantiate(effect, spawnPosition, Quaternion.Euler(spawnRotation)).gameObject;
             SetupParticleSystem(_effectClone);
-            var spawnPosition = new Vector3(0, EffectHeight, 0);
-            var spawnRotation = new Vector3(180, 34.3f, 0);
-            var effectTransform = _effectClone.transform;
-            effectTransform.localPosition = spawnPosition;
-            effectTransform.localEulerAngles = spawnRotation;
         }
 
         private void SetupCollider
@@ -70,12 +68,12 @@ namespace Skill.Attack
             int skillId
         )
         {
-            var colliders = _effectClone.GetComponentsInChildren<SphereCollider>();
+            var colliders = _effectClone.GetComponentsInChildren<Collider>();
             var player = playerTransform.gameObject;
 
-            foreach (var sphereCollider in colliders)
+            foreach (var effectCollider in colliders)
             {
-                sphereCollider.OnTriggerEnterAsObservable()
+                effectCollider.OnTriggerEnterAsObservable()
                     .Where(collider => IsObstaclesTag(collider.gameObject))
                     .Subscribe(collider => HitPlayer(player, collider.gameObject, skillId))
                     .AddTo(_effectClone);

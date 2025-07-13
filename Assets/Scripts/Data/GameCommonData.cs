@@ -47,6 +47,7 @@ namespace Common.Data
         private static readonly int DashAttackHashKey = Animator.StringToHash("DashAttack");
         private static readonly int ImpactHashKey = Animator.StringToHash("Impact");
         private static readonly int RainArrowHashKey = Animator.StringToHash("RainArrow");
+        private static readonly int ImpactRockHashKey = Animator.StringToHash("ImpactRock");
         public const string KickKey = "Base Layer.Kick";
         public const string JumpKey = "Base Layer.Jump";
         public const string DashKey = "Base Layer.Dash";
@@ -59,6 +60,7 @@ namespace Common.Data
         public const string ImpactKey = "Base Layer.Impact";
         public const string HitKey = "Base Layer.Hit";
         public const string RainArrowKey = "Base Layer.RainArrow";
+        public const string ImpactRockKey = "Base Layer.ImpactRock";
         public const string SpeedhParameterName = "speedh";
         public const string SpeedvParameterName = "speedv";
         public const string NormalParameterName = "Normal";
@@ -75,6 +77,7 @@ namespace Common.Data
         public const string MagicShotParameterName = "MagicShot";
         public const string HitParameterName = "Hit";
         public const string RainArrowParameterName = "RainArrow";
+        public const string ImpactRockParameterName = "ImpactRock";
         public const string CharacterSpritePath = "Sprites/Character/";
         public const string UserIconSpritePath = "Sprites/UserIcon/";
         public const string SkillIconSpritePath = "Sprites/Skill/";
@@ -142,6 +145,7 @@ namespace Common.Data
                 SkillActionType.Heal => BuffHashKey,
                 SkillActionType.ContinuousHeal => BuffHashKey,
                 SkillActionType.RainArrow => RainArrowHashKey,
+                SkillActionType.ImpactRock => ImpactRockHashKey,
                 _ => throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null)
             };
         }
@@ -654,6 +658,7 @@ namespace Common.Data
         SlashSpin = 91,
         ThrowEdge = 92,
         RainArrow = 93,
+        ImpactRock = 94,
         None = 999
     }
 }

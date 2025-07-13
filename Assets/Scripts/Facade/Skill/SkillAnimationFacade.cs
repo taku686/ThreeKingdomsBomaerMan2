@@ -222,6 +222,9 @@ namespace Facade.Skill
                 case SkillActionType.RainArrow:
                     stateName = GameCommonData.RainArrowKey;
                     break;
+                case SkillActionType.ImpactRock:
+                    stateName = GameCommonData.ImpactRockKey;
+                    break;
                 case SkillActionType.None:
                     break;
                 default:

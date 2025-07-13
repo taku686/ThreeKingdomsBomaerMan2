@@ -30,6 +30,9 @@ namespace Repository
         [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Abnormal Condition", ValueLabel = "RainArrow Effect")]
         private Dictionary<AbnormalCondition, SkillEffect> _rainArrowEffectDictionary;
 
+        [OdinSerialize, DictionaryDrawerSettings(KeyLabel = "Abnormal Condition", ValueLabel = "ImpactRock Effect")]
+        private Dictionary<AbnormalCondition, SkillEffect> _impactRockEffectDictionary;
+
 
         public SkillEffect GetSlashEffect(AbnormalCondition abnormalCondition)
         {
@@ -100,6 +103,17 @@ namespace Repository
         public SkillEffect GetMagicShotEffect(AbnormalCondition abnormalCondition)
         {
             if (_magicShotEffectDictionary.TryGetValue(abnormalCondition, out var skillEffect))
+            {
+                return skillEffect;
+            }
+
+            Debug.LogError($"Skill effect not found for {abnormalCondition}");
+            return null;
+        }
+
+        public SkillEffect GetImpactRockEffect(AbnormalCondition abnormalCondition)
+        {
+            if (_impactRockEffectDictionary.TryGetValue(abnormalCondition, out var skillEffect))
             {
                 return skillEffect;
             }

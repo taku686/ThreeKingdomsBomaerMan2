@@ -7,6 +7,7 @@ using Skill.Attack;
 using Skill.Attack.FlyingSlash;
 using Skill.CrushImpact;
 using Skill.DashAttack;
+using Skill.ImpactRock;
 using Skill.MagicShot;
 using Skill.RainArrow;
 using Skill.SlashSpin;
@@ -24,6 +25,7 @@ namespace Skill
         private readonly AttributeSlashSpinFactory.Factory _slashSpinFactory;
         private readonly AttributeMagicShotFactory.Factory _magicShotFactory;
         private readonly AttributeRainArrowFactory.Factory _rainArrowFactory;
+        private readonly AttributeImpactRockFactory.Factory _impactRockFactory;
         private readonly BuffSkill _buffSkill;
         private readonly Heal.Heal _heal;
         private Animator _animator;
@@ -40,6 +42,7 @@ namespace Skill
             AttributeSlashSpinFactory.Factory slashSpinFactory,
             AttributeMagicShotFactory.Factory magicShotFactory,
             AttributeRainArrowFactory.Factory rainArrowFactory,
+            AttributeImpactRockFactory.Factory impactRockFactory,
             BuffSkill buffSkill,
             Heal.Heal heal
         )
@@ -51,6 +54,7 @@ namespace Skill
             _slashSpinFactory = slashSpinFactory;
             _magicShotFactory = magicShotFactory;
             _rainArrowFactory = rainArrowFactory;
+            _impactRockFactory = impactRockFactory;
             _buffSkill = buffSkill;
             _heal = heal;
         }
@@ -124,6 +128,11 @@ namespace Skill
             if (IsActionType(skillMasterData, SkillActionType.RainArrow))
             {
                 RainArrowSkill(skillMasterData, playerTransform);
+            }
+
+            if (IsActionType(skillMasterData, SkillActionType.ImpactRock))
+            {
+                ImpactRockSkill(skillMasterData, playerTransform);
             }
         }
 
@@ -253,6 +262,20 @@ namespace Skill
             }
 
             crushImpact.Attack();
+        }
+
+        private void ImpactRockSkill(SkillMasterData skillMasterData, Transform playerTransform)
+        {
+            var skillId = skillMasterData.Id;
+            var impactRock = _impactRockFactory.Create(skillId, playerTransform, AbnormalCondition.None, null);
+            foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
+            {
+                if (abnormalCondition == AbnormalCondition.None)
+                    continue;
+                impactRock = _impactRockFactory.Create(skillId, playerTransform, abnormalCondition, impactRock);
+            }
+
+            impactRock.Attack();
         }
 
         private static bool IsBuffSkillActionType(SkillMasterData skillMasterData)

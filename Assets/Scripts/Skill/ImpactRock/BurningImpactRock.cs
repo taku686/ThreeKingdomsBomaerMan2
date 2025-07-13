@@ -4,16 +4,16 @@ using Repository;
 using UnityEngine;
 using Zenject;
 
-namespace Skill.Attack
+namespace Skill.ImpactRock
 {
-    public class ParalysisSlash : SlashBase
+    public class BurningImpactRock : ImpactRockBase
     {
         private readonly int _skillId;
         private readonly Transform _playerTransform;
         private readonly IAttackBehaviour _attackBehaviour;
 
         [Inject]
-        public ParalysisSlash
+        public BurningImpactRock
         (
             int skillId,
             Transform playerTransform,
@@ -29,14 +29,14 @@ namespace Skill.Attack
         public override void Attack()
         {
             _attackBehaviour.Attack();
-            Slash(AbnormalCondition.Paralysis, _skillId, _playerTransform);
+            ImpactRock(AbnormalCondition.Burning, _skillId, _playerTransform);
         }
 
         public override void Dispose()
         {
         }
 
-        public class Factory : PlaceholderFactory<int, Transform, IAttackBehaviour, ParalysisSlash>
+        public class Factory : PlaceholderFactory<int, Transform, IAttackBehaviour, BurningImpactRock>
         {
         }
     }

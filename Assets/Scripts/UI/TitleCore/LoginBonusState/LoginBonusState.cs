@@ -58,8 +58,6 @@ namespace UI.Title
                 var rewardData = _LoginBonusFacade._LoginBonusConfig._rewards[day];
                 var button = buttons[data._consecutiveDays];
                 var stampAnimation = button.GetComponentInChildren<StampUiAnimation>();
-                Debug.Log("Day: " + day + ", Reward Type: " + rewardData._rewardType);
-                Debug.Log("Today Received: " + data._todayReceived);
                 button
                     .OnClickAsObservable()
                     .Where(_ => !data._todayReceived)

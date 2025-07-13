@@ -12,6 +12,7 @@ using Skill.Attack.FlyingSlash;
 using Skill.CrushImpact;
 using Skill.DashAttack;
 using Skill.Heal;
+using Skill.ImpactRock;
 using Skill.MagicShot;
 using Skill.RainArrow;
 using Skill.SlashSpin;
@@ -59,6 +60,7 @@ namespace Common.Installer
             InstallSlashSpin();
             InstallMagicShot();
             InstallRainArrowSKill();
+            InstallImpactRock();
         }
 
         private void InstallEnemyCore()
@@ -204,6 +206,23 @@ namespace Common.Installer
             Container.BindFactory<int, Animator, Transform, IAttackBehaviour, StigmataCrushImpact, StigmataCrushImpact.Factory>().AsCached();
             Container.BindFactory<int, Animator, Transform, IAttackBehaviour, SoakingWetCrushImpact, SoakingWetCrushImpact.Factory>().AsCached();
             Container.BindFactory<int, Animator, Transform, IAttackBehaviour, BurningCrushImpact, BurningCrushImpact.Factory>().AsCached();
+        }
+
+        private void InstallImpactRock()
+        {
+            Container.BindFactory<int, Transform, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeImpactRockFactory.Factory>().FromFactory<AttributeImpactRockFactory>();
+            Container.BindFactory<NormalImpactRock, NormalImpactRock.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, PoisonImpactRock, PoisonImpactRock.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, ParalysisImpactRock, ParalysisImpactRock.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, FrozenImpactRock, FrozenImpactRock.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, ConfusionImpactRock, ConfusionImpactRock.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, CharmImpactRock, CharmImpactRock.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, MiasmaImpactRock, MiasmaImpactRock.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, DarknessImpactRock, DarknessImpactRock.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, HellFireImpactRock, HellFireImpactRock.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, StigmataImpactRock, StigmataImpactRock.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, SoakingWetImpactRock, SoakingWetImpactRock.Factory>().AsCached();
+            Container.BindFactory<int, Transform, IAttackBehaviour, BurningImpactRock, BurningImpactRock.Factory>().AsCached();
         }
 
         private void InstallBuffSkill()
