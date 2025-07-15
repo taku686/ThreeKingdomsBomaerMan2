@@ -9,7 +9,6 @@ namespace Bomb
     {
         private readonly BombBase _bombBase;
         private readonly TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
-        private readonly MapManager _mapManager;
         private readonly Transform _bombParent;
         private static readonly Vector3 ColliderCenter = new(0, 0.5f, 0);
         private static readonly Vector3 ColliderScale = new(1f, 1, 1f);
@@ -18,14 +17,12 @@ namespace Bomb
         (
             BombBase bombBase,
             Transform parent,
-            TranslateStatusInBattleUseCase translateStatusInBattleUseCase,
-            MapManager mapManager
+            TranslateStatusInBattleUseCase translateStatusInBattleUseCase
         )
         {
             _bombBase = bombBase;
             _bombParent = parent;
             _translateStatusInBattleUseCase = translateStatusInBattleUseCase;
-            _mapManager = mapManager;
         }
 
         protected override BombBase CreateInstance()
@@ -51,18 +48,7 @@ namespace Bomb
 
         protected override void OnBeforeReturn(BombBase instance)
         {
-            var position = instance.transform.position;
-            _mapManager.RemoveMap(position.x, position.z);
-            for (var i = 1; i <= instance._fireRange; i++)
-            {
-                _mapManager.RemoveMap(position.x + i, position.z);
-                _mapManager.RemoveMap(position.x - i, position.z);
-                _mapManager.RemoveMap(position.x, position.z + i);
-                _mapManager.RemoveMap(position.x, position.z - i);
-            }
-
             base.OnBeforeReturn(instance);
-
 
             if (!PhotonNetwork.LocalPlayer.IsLocal)
             {

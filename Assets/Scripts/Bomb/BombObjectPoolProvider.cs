@@ -11,7 +11,6 @@ namespace Bomb
         [SerializeField] private BombBase normalBomb;
         [SerializeField] private BombBase penetrationBomb;
         [SerializeField] private BombBase dangerBomb;
-        [SerializeField] private MapManager mapManager;
 
         private BombObjectPoolBase _normalBombPool;
         private BombObjectPoolBase _penetrationBombPool;
@@ -38,7 +37,7 @@ namespace Bomb
 
         private void Initialize(TranslateStatusInBattleUseCase translateStatusInBattleUseCase)
         {
-            _normalBombPool = new NormalObjectPoolBase(normalBomb, _normalBombPoolParent.transform, translateStatusInBattleUseCase, mapManager);
+            _normalBombPool = new NormalObjectPoolBase(normalBomb, _normalBombPoolParent.transform, translateStatusInBattleUseCase);
             _normalBombPool.PreloadAsync(PreloadCount, Threshold).Subscribe().AddTo(_token);
         }
 

@@ -1,4 +1,3 @@
-using System;
 using Bomb;
 using Common.Data;
 using Photon.Pun;
@@ -8,13 +7,11 @@ namespace Player.Common
 {
     public class PutBomb : MonoBehaviour
     {
-        private MapManager _mapManager;
         private BombProvider _bombProvider;
 
-        public void Initialize(BombProvider bombProvider, MapManager mapManager, TranslateStatusInBattleUseCase translateStatusInBattleUseCase)
+        public void Initialize(BombProvider bombProvider, TranslateStatusInBattleUseCase translateStatusInBattleUseCase)
         {
             _bombProvider = bombProvider;
-            _mapManager = mapManager;
             SetupBombProvider(translateStatusInBattleUseCase);
         }
 
@@ -26,7 +23,7 @@ namespace Player.Common
         {
             _bombProvider.Initialize(translateStatusInBattleUseCase, BombType.Normal);
         }
-        
+
         public void SetBomb
         (
             BoxCollider boxCollider,
@@ -59,15 +56,6 @@ namespace Player.Common
             int playerId
         )
         {
-            _mapManager.AddMap(MapManager.Area.Bomb, playerPos.x, playerPos.z);
-            for (var i = 0; i <= fireRange; i++)
-            {
-                _mapManager.AddMap(MapManager.Area.Explosion, playerPos.x + i, playerPos.z);
-                _mapManager.AddMap(MapManager.Area.Explosion, playerPos.x - i, playerPos.z);
-                _mapManager.AddMap(MapManager.Area.Explosion, playerPos.x, playerPos.z + i);
-                _mapManager.AddMap(MapManager.Area.Explosion, playerPos.x, playerPos.z - i);
-            }
-
             var bomb = _bombProvider.GetBomb(bombType, damageAmount, fireRange, explosionTime, playerId);
             bomb.transform.position = new Vector3(playerPos.x, playerPos.y, playerPos.z);
         }

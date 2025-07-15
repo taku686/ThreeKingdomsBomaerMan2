@@ -47,21 +47,20 @@ namespace Manager.BattleManager
         [Inject] private MissionManager _missionManager;
         [Inject] private PassiveSkillManager _passiveSkillManager;
         [SerializeField] private CameraManager cameraManager;
-        [SerializeField] private MapManager mapManager;
-        
+
         //Factory
         [Inject] private EnemySearchPlayer.Factory _enemySearchPlayerFactory;
         [Inject] private EnemySkillTimer.Factory _enemySkillTimerFactory;
 
         //UI
         [SerializeField] private BattleViewBase[] _views;
-        
+
         //Facade
         [Inject] private SkillAnimationFacade _skillAnimationFacade;
 
         //Other
         [Inject] private BombProvider _bombProvider;
-        
+
         [SerializeField] private Transform playerUIParent;
         [SerializeField] private GameObject playerUI;
         [SerializeField] private GameObject _arrowSkillIndicatorPrefab;
@@ -83,7 +82,7 @@ namespace Manager.BattleManager
             InBattle,
             Result,
         }
-        
+
         private void Start()
         {
             _photonNetworkManager._isTitle = false;

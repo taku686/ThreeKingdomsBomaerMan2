@@ -26,7 +26,6 @@ namespace Manager.BattleManager
         {
             //Manager
             private PhotonNetworkManager _PhotonNetworkManager => Owner._photonNetworkManager;
-            private MapManager _MapManager => Owner.mapManager;
             private CameraManager _CameraManager => Owner.cameraManager;
             private ActiveSkillManager _ActiveSkillManager => Owner._activeSkillManager;
             private PassiveSkillManager _PassiveSkillManager => Owner._passiveSkillManager;
@@ -179,7 +178,7 @@ namespace Manager.BattleManager
                 translateStatusInBattleUseCase = _TranslateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
                 translateStatusInBattleUseCase.InitializeStatus();
                 var putBomb = playerCore.AddComponent<PutBomb>();
-                putBomb.Initialize(_BombProvider, _MapManager, translateStatusInBattleUseCase);
+                putBomb.Initialize(_BombProvider, translateStatusInBattleUseCase);
                 playerConditionInfo = playerCore.AddComponent<PlayerConditionInfo>();
                 playerConditionInfo.SetPlayerIndex(instantiationId);
                 AddBoxCollider(playerCore);

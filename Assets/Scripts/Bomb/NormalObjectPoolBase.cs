@@ -9,9 +9,8 @@ namespace Bomb
         (
             BombBase bombBase,
             Transform parent,
-            TranslateStatusInBattleUseCase translateStatusInBattleUseCase,
-            MapManager mapManager
-        ) : base(bombBase, parent, translateStatusInBattleUseCase, mapManager)
+            TranslateStatusInBattleUseCase translateStatusInBattleUseCase
+        ) : base(bombBase, parent, translateStatusInBattleUseCase)
         {
         }
     }
