@@ -9,6 +9,7 @@ namespace Bomb
     public class NormalBomb : BombBase
     {
         [SerializeField] private GameObject _bombCollider;
+        [SerializeField] private BombExplosionRepository _bombExplosionRepository;
         private static readonly Vector3 EffectOriginPosition = new(0, 0.5f, 0);
         private const float ExplosionMoveDuration = 0.5f;
         private const float BombInterval = 0.3f;
@@ -21,19 +22,25 @@ namespace Bomb
             }
 
             _IsExplosion = true;
-            _BlockShakeAction.Invoke();
             var position = transform.position;
-            var startPos = new Vector3(position.x, transform.position.y + 0.5f, position.z);
-            await UniTask.WhenAll(
+            var startPos = new Vector3(position.x, position.y + 0.5f, position.z);
+            await UniTask.WhenAll
+            (
                 Explosion(startPos, MoveDirection.Forward, damageAmount),
                 Explosion(startPos, MoveDirection.Back, damageAmount),
                 Explosion(startPos, MoveDirection.Left, damageAmount),
-                Explosion(startPos, MoveDirection.Right, damageAmount));
+                Explosion(startPos, MoveDirection.Right, damageAmount)
+            );
 
-            base.Explosion(damageAmount);
+            base.Explosion(damageAmount).Forget();
         }
 
-        private async UniTask Explosion(Vector3 startPos, MoveDirection moveDirection, int damageAmount)
+        private async UniTask Explosion
+        (
+            Vector3 startPos,
+            MoveDirection moveDirection,
+            int damageAmount
+        )
         {
             var dir = GameCommonData.DirectionToVector3(moveDirection);
             var index = (int)moveDirection;
@@ -43,14 +50,15 @@ namespace Bomb
             var fireRange = isHit ? CalculateFireRange(hit, startPos) : _fireRange;
             var endPos = CalculateEndPos(isHit, hit, startPos, fireRange, dir);
             var distance = (endPos - startPos).magnitude;
-            var isExplosion = distance >= MinDistance;
-            if (!isExplosion)
+            var canExplosion = distance >= MinDistance;
+            if (!canExplosion)
             {
                 return;
             }
 
             GenerateCollider(startPos, moveDirection, fireRange, damageAmount);
-            await UniTask.WhenAll(SetupExplosionEffect(ExplosionMoveDuration, endPos, explosionList[index].transform));
+            var explosionTransform = explosionList[index].transform;
+            await UniTask.WhenAll(SetupExplosionEffect(ExplosionMoveDuration, endPos, explosionTransform));
         }
 
         private static bool TryGetObstacles
@@ -130,13 +138,39 @@ namespace Bomb
             return endPos;
         }
 
-        private async UniTask SetupExplosionEffect(float moveDuration, Vector3 endPos, Transform explosionEffect)
+        private async UniTask SetupExplosionEffect
+        (
+            float moveDuration,
+            Vector3 endPos,
+            Transform explosionEffectTransform,
+            AbnormalCondition abnormalCondition = AbnormalCondition.None
+        )
         {
-            explosionEffect.localPosition = EffectOriginPosition;
-            explosionEffect.gameObject.SetActive(true);
-            explosionEffect.DOMove(endPos, moveDuration).SetLink(gameObject);
+            InitializeEffect(explosionEffectTransform, abnormalCondition);
+            explosionEffectTransform.localPosition = EffectOriginPosition;
+            explosionEffectTransform.gameObject.SetActive(true);
+            explosionEffectTransform.DOMove(endPos, moveDuration).SetLink(gameObject);
             await UniTask.Delay(TimeSpan.FromSeconds(ExplosionDisplayDuration), cancellationToken: _Cts.Token);
-            explosionEffect.gameObject.SetActive(false);
+            explosionEffectTransform.gameObject.SetActive(false);
+        }
+
+        private void InitializeEffect
+        (
+            Transform parent,
+            AbnormalCondition abnormalCondition
+        )
+        {
+            var explosionEffect = _bombExplosionRepository.Get(abnormalCondition);
+            if (explosionEffect == null)
+            {
+                Debug.LogError("Explosion effect is null.");
+                return;
+            }
+
+            var explosionEffectClone = Instantiate(explosionEffect, parent).gameObject;
+            explosionEffectClone.transform.localScale = Vector3.one;
+            explosionEffectClone.transform.localEulerAngles = Vector3.zero;
+            explosionEffectClone.transform.localPosition = Vector3.zero;
         }
     }
 }

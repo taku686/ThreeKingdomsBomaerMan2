@@ -20,7 +20,6 @@ namespace Bomb
         public int _fireRange;
         protected bool _IsExplosion;
         protected LayerMask _ObstaclesLayerMask;
-        protected Action _BlockShakeAction;
         protected Renderer _BombRenderer;
         protected BoxCollider _BoxCollider;
         protected CancellationTokenSource _Cts;
@@ -44,8 +43,7 @@ namespace Bomb
             int damageAmount,
             int fireRange,
             int playerId,
-            int explosionTime,
-            StageOrnamentsBlock stageOrnamentsBlock
+            int explosionTime
         )
         {
             _Cts ??= new CancellationTokenSource();
@@ -57,7 +55,6 @@ namespace Bomb
             _playerId = playerId;
             _explosionTime = explosionTime;
             _fireRange = fireRange;
-            _BlockShakeAction = stageOrnamentsBlock.Shake;
             _IsExplosion = false;
             foreach (var bombEffect in explosionList)
             {

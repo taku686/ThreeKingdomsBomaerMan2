@@ -11,7 +11,6 @@ using PlayFab.ClientModels;
 using UnityEngine;
 using Newtonsoft.Json;
 using Repository;
-using TitleCore.LoginBonusState;
 using UI.TitleCore.LoginBonusState;
 using Zenject;
 
@@ -61,8 +60,7 @@ namespace Assets.Scripts.Common.PlayFab
             };
             return (await PlayFabClientAPI.LoginWithAndroidDeviceIDAsync(request), userName);
         }
-
-
+        
         public async UniTask<bool> InitializeGameData(PlayFabResult<LoginResult> response)
         {
             await _playFabTitleDataManager.SetTitleData(response.Result.InfoResultPayload.TitleData);
@@ -72,7 +70,6 @@ namespace Assets.Scripts.Common.PlayFab
             {
                 return false;
             }
-
 
             var user = JsonConvert.DeserializeObject<UserData>(value.Value);
             if (user == null) return false;

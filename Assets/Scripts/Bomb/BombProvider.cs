@@ -75,7 +75,14 @@ namespace Bomb
             }
         }
 
-        public BombBase GetBomb(int bombType, int damageAmount, int fireRange, int explosionTime, int playerId)
+        public BombBase GetBomb
+        (
+            int bombType,
+            int damageAmount,
+            int fireRange,
+            int explosionTime,
+            int playerId
+        )
         {
             var bombPool = GetBombObjectPoolBase(bombType);
             var bomb = bombPool.Rent();
@@ -84,7 +91,7 @@ namespace Bomb
                 return null;
             }
 
-            bomb.Setup(damageAmount, fireRange, playerId, explosionTime, stageOrnamentsBlock);
+            bomb.Setup(damageAmount, fireRange, playerId, explosionTime);
             bomb._OnFinishIObservable.Take(1).Subscribe(_ => { bombPool.Return(bomb); });
             return bomb;
         }
