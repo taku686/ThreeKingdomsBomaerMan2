@@ -4,7 +4,7 @@ using UniRx;
 
 namespace Character
 {
-    public class PlayerStatusInfo
+    public class PlayerStatusInfo : IDisposable
     {
         public readonly ReactiveProperty<(int, int)> _Hp;
         public readonly ReactiveProperty<int> _Speed;
@@ -81,6 +81,17 @@ namespace Character
                 default:
                     throw new ArgumentOutOfRangeException(nameof(statusType), statusType, null);
             }
+        }
+
+        public void Dispose()
+        {
+            _Hp?.Dispose();
+            _Speed?.Dispose();
+            _Attack?.Dispose();
+            _Defense?.Dispose();
+            _Resistance?.Dispose();
+            _FireRange?.Dispose();
+            _BombLimit?.Dispose();
         }
     }
 }

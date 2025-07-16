@@ -7,6 +7,8 @@ namespace Common.Data
     {
         public const int CharacterPrice = 200;
         public const int WeaponBuyPrice = 100;
+        public const int WaitDurationBeforeExplosion = 3000;
+        public const int WaitDurationBeforeExplosionInBurning = 1000;
         public const float InputBombInterval = 0.05f;
         public const float CharacterChangeInterval = 5f;
         public const float DashInterval = 0.5f;

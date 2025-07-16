@@ -1,6 +1,5 @@
 ﻿using System;
 using Common.Data;
-using Manager.BattleManager.Environment;
 using Player.Common;
 using UniRx;
 using UnityEngine;

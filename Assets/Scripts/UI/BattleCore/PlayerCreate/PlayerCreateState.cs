@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Bomb;
+using Character;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Enemy;
@@ -176,14 +177,23 @@ namespace Manager.BattleManager
                 _SetupAnimatorUseCase.SetAnimatorController(playerCore, weaponType);
                 GenerateEffectActivator(playerCore, photonView);
                 translateStatusInBattleUseCase = _TranslateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
-                translateStatusInBattleUseCase.InitializeStatus();
-                var putBomb = playerCore.AddComponent<PutBomb>();
-                putBomb.Initialize(_BombProvider, translateStatusInBattleUseCase);
+                var playerStatusInfo = translateStatusInBattleUseCase.InitializeStatus();
                 playerConditionInfo = playerCore.AddComponent<PlayerConditionInfo>();
                 playerConditionInfo.SetPlayerIndex(instantiationId);
-                AddBoxCollider(playerCore);
+                var boxCollider = AddBoxCollider(playerCore);
                 AddRigidbody(playerCore);
-                AddPlayerSkill(playerCore);
+
+                var putBomb = playerCore.AddComponent<PutBomb>();
+                putBomb.Initialize
+                (
+                    playerCore.transform,
+                    photonView,
+                    boxCollider,
+                    _BombProvider,
+                    translateStatusInBattleUseCase
+                );
+
+                AddPlayerSkill(playerCore, putBomb);
             }
 
             #region GetDatum
@@ -345,12 +355,13 @@ namespace Manager.BattleManager
                 _PlayerStatusUiList.Add(playerStatusUI);
             }
 
-            private static void AddBoxCollider(GameObject player)
+            private static BoxCollider AddBoxCollider(GameObject player)
             {
                 var collider = player.AddComponent<BoxCollider>();
                 collider.isTrigger = false;
                 collider.center = ColliderCenter;
                 collider.size = ColliderSize;
+                return collider;
             }
 
             private static void AddRigidbody(GameObject player)
@@ -361,10 +372,16 @@ namespace Manager.BattleManager
                 rigid.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
             }
 
-            private void AddPlayerSkill(GameObject playerCore)
+            private void AddPlayerSkill(GameObject playerCore, PutBomb putBomb)
             {
                 var playerSkill = playerCore.AddComponent<PlayerSkill>();
-                playerSkill.Initialize(_ActiveSkillManager, _PhotonNetworkManager, playerCore);
+                playerSkill.Initialize
+                (
+                    _ActiveSkillManager,
+                    _PhotonNetworkManager,
+                    playerCore,
+                    putBomb
+                );
             }
 
             private bool IsMine(PhotonView photonView)

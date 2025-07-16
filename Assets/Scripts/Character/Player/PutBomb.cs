@@ -7,11 +7,26 @@ namespace Player.Common
 {
     public class PutBomb : MonoBehaviour
     {
+        private Transform _playerTransform;
         private BombProvider _bombProvider;
+        private BoxCollider _boxCollider;
+        private PhotonView _photonView;
+        private int _instantiationId;
 
-        public void Initialize(BombProvider bombProvider, TranslateStatusInBattleUseCase translateStatusInBattleUseCase)
+        public void Initialize
+        (
+            Transform playerTransform,
+            PhotonView photonView,
+            BoxCollider boxCollider,
+            BombProvider bombProvider,
+            TranslateStatusInBattleUseCase translateStatusInBattleUseCase
+        )
         {
+            _playerTransform = playerTransform;
+            _photonView = photonView;
+            _boxCollider = boxCollider;
             _bombProvider = bombProvider;
+            _instantiationId = photonView.InstantiationId;
             SetupBombProvider(translateStatusInBattleUseCase);
         }
 
@@ -27,25 +42,21 @@ namespace Player.Common
 
         public void SetBomb
         (
-            BoxCollider boxCollider,
-            PhotonView photonView,
-            Transform playerTransform,
             int bombType,
             int damageAmount,
             int fireRange,
             int explosionTime,
-            int instantiationId,
             int skillId,
             AbnormalCondition abnormalCondition = AbnormalCondition.None
         )
         {
-            var playerPos = playerTransform.position;
-            if (CanPutBomb(playerPos, boxCollider))
+            var playerPos = _playerTransform.position;
+            if (CanPutBomb(playerPos, _boxCollider))
             {
                 return;
             }
 
-            photonView.RPC
+            _photonView.RPC
             (
                 nameof(RpcPutBomb),
                 RpcTarget.All,
@@ -54,7 +65,7 @@ namespace Player.Common
                 damageAmount,
                 fireRange,
                 explosionTime,
-                instantiationId,
+                _instantiationId,
                 skillId,
                 abnormalCondition
             );

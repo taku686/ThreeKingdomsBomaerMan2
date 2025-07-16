@@ -39,23 +39,16 @@ namespace Enemy
 
             private void PutBomb()
             {
-                var playerTransform = Owner.transform;
-                var playerId = _PhotonView.InstantiationId;
                 var explosionTime = PhotonNetwork.ServerTimestamp + WaitDurationBeforeExplosion;
-                var photonView = _PhotonView;
                 var damageAmount = _PlayerStatusInfo._Attack.Value;
                 var fireRange = _PlayerStatusInfo._FireRange.Value;
-                var boxCollider = _BoxCollider;
+
                 _PutBomb.SetBomb
                 (
-                    boxCollider,
-                    photonView,
-                    playerTransform,
                     (int)BombType.Normal,
                     damageAmount,
                     fireRange,
                     explosionTime,
-                    playerId,
                     GameCommonData.InvalidNumber
                 );
                 _isPutBomb = true;

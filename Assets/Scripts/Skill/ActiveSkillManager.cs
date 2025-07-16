@@ -5,6 +5,7 @@ using Photon.Pun;
 using Player.Common;
 using Skill.Attack;
 using Skill.Attack.FlyingSlash;
+using Skill.ChangeBomb;
 using Skill.CrushImpact;
 using Skill.DashAttack;
 using Skill.ImpactRock;
@@ -26,9 +27,11 @@ namespace Skill
         private readonly AttributeMagicShotFactory.Factory _magicShotFactory;
         private readonly AttributeRainArrowFactory.Factory _rainArrowFactory;
         private readonly AttributeImpactRockFactory.Factory _impactRockFactory;
+        private readonly AttributeChangeBombFactory.Factory _changeBombFactory;
         private readonly BuffSkill _buffSkill;
         private readonly Heal.Heal _heal;
         private Animator _animator;
+        private PlayerStatusInfo _playerStatusInfo;
         private const int GodSignBuffSkillId = 160;
         private const int TopThree = 3;
 
@@ -43,6 +46,7 @@ namespace Skill
             AttributeMagicShotFactory.Factory magicShotFactory,
             AttributeRainArrowFactory.Factory rainArrowFactory,
             AttributeImpactRockFactory.Factory impactRockFactory,
+            AttributeChangeBombFactory.Factory changeBombFactory,
             BuffSkill buffSkill,
             Heal.Heal heal
         )
@@ -55,6 +59,7 @@ namespace Skill
             _magicShotFactory = magicShotFactory;
             _rainArrowFactory = rainArrowFactory;
             _impactRockFactory = impactRockFactory;
+            _changeBombFactory = changeBombFactory;
             _buffSkill = buffSkill;
             _heal = heal;
         }
@@ -67,6 +72,7 @@ namespace Skill
             PlayerStatusInfo playerStatusInfo
         )
         {
+            _playerStatusInfo = playerStatusInfo;
             var playerConditionInfo = playerTransform.GetComponent<PlayerConditionInfo>();
             _buffSkill.Initialize
             (
@@ -93,7 +99,12 @@ namespace Skill
             _animator = animator;
         }
 
-        public void ActivateSkill(SkillMasterData skillMasterData, Transform playerTransform)
+        public void ActivateSkill
+        (
+            SkillMasterData skillMasterData,
+            Transform playerTransform,
+            PutBomb putBomb
+        )
         {
             if (IsActionType(skillMasterData, SkillActionType.Slash))
             {
@@ -133,6 +144,11 @@ namespace Skill
             if (IsActionType(skillMasterData, SkillActionType.ImpactRock))
             {
                 ImpactRockSkill(skillMasterData, playerTransform);
+            }
+
+            if (IsActionType(skillMasterData, SkillActionType.Bomb))
+            {
+                ChangeBomb(putBomb, _playerStatusInfo, skillMasterData);
             }
         }
 
@@ -206,6 +222,25 @@ namespace Skill
             }
 
             rainArrow.Attack();
+        }
+
+        private void ChangeBomb
+        (
+            PutBomb putBomb,
+            PlayerStatusInfo playerStatusInfo,
+            SkillMasterData skillMasterData
+        )
+        {
+            var skillId = skillMasterData.Id;
+            var changeBomb = _changeBombFactory.Create(skillId, putBomb, playerStatusInfo, AbnormalCondition.None, null);
+            foreach (var abnormalCondition in skillMasterData.AbnormalConditionEnum)
+            {
+                if (abnormalCondition == AbnormalCondition.None)
+                    continue;
+                changeBomb = _changeBombFactory.Create(skillId, putBomb, playerStatusInfo, abnormalCondition, changeBomb);
+            }
+
+            changeBomb.Attack();
         }
 
         private void MagicShotSkill(SkillMasterData skillMasterData, Transform playerTransform)

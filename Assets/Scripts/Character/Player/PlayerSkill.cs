@@ -1,4 +1,4 @@
-﻿using Common.Data;
+﻿using Character;
 using Manager.NetworkManager;
 using Photon.Pun;
 using Skill;
@@ -13,14 +13,17 @@ namespace Player.Common
         private ActiveSkillManager _activeSkillManager;
         private PhotonNetworkManager _photonNetworkManager;
         private Transform _playerTransform;
+        private PutBomb _putBomb;
 
         public void Initialize
         (
             ActiveSkillManager activeSkillManager,
             PhotonNetworkManager photonNetworkManager,
-            GameObject playerCore
+            GameObject playerCore,
+            PutBomb putBomb
         )
         {
+            _putBomb = putBomb;
             _activeSkillManager = activeSkillManager;
             _photonNetworkManager = photonNetworkManager;
             _playerTransform = playerCore.transform;
@@ -36,7 +39,7 @@ namespace Player.Common
                 .Subscribe(tuple =>
                 {
                     var skillMasterData = tuple.Item2;
-                    _activeSkillManager.ActivateSkill(skillMasterData, _playerTransform);
+                    _activeSkillManager.ActivateSkill(skillMasterData, _playerTransform, _putBomb);
                     _activeSkillManager.Heal(skillMasterData);
                     _activeSkillManager.BuffSkill(skillMasterData);
                 })

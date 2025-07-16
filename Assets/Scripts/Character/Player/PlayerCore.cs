@@ -276,7 +276,11 @@ namespace Player.Common
 
         #endregion
 
-        private void SetupTranslateStatusInBattleUseCase(int playerKey = GameCommonData.InvalidNumber)
+        private void SetupTranslateStatusInBattleUseCase
+        (
+            int playerKey = GameCommonData.InvalidNumber,
+            PlayerStatusInfo playerStatusInfo = null
+        )
         {
             if (playerKey == GameCommonData.InvalidNumber)
             {
@@ -287,15 +291,22 @@ namespace Player.Common
             var characterData = _photonNetworkManager.GetCharacterData(playerKey);
             var levelData = _photonNetworkManager.GetLevelMasterData(playerKey);
             _translateStatusInBattleUseCase = _translateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
-            var newPlayerStatusInfo = _translateStatusInBattleUseCase.InitializeStatus();
-            SetupPlayerStatusInfo(newPlayerStatusInfo);
+            if (playerStatusInfo != null)
+            {
+                _PlayerStatusInfo = playerStatusInfo;
+            }
+            else
+            {
+                _PlayerStatusInfo = _translateStatusInBattleUseCase.InitializeStatus();
+            }
+
+            SetupPlayerStatusInfo(_PlayerStatusInfo);
             _putBomb.SetupBombProvider(_translateStatusInBattleUseCase);
             InitializeSkillManager(weaponData, characterData.Id);
         }
 
         private void SetupPlayerStatusInfo(PlayerStatusInfo newPlayerStatusInfo)
         {
-            _PlayerStatusInfo ??= newPlayerStatusInfo;
             var currentHp = _PlayerStatusInfo._Hp.Value.Item2;
             var maxHp = newPlayerStatusInfo._Hp.Value.Item1;
             _PlayerStatusInfo._Hp.Value = (maxHp, currentHp);

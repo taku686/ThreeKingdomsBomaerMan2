@@ -15,7 +15,6 @@ namespace Player.Common
     {
         public class PlayerIdleState : State
         {
-            private PhotonView _PhotonView => Owner.photonView;
             private PlayerMove _PlayerMove => Owner._playerMove;
             private StateMachine<PlayerCore> _StateMachine => Owner._stateMachine;
             private PlayerStatusInfo _PlayerStatusInfo => Owner._PlayerStatusInfo;
@@ -30,8 +29,6 @@ namespace Player.Common
 
             private Transform _playerTransform;
             private CancellationTokenSource _cts;
-            private const int WaitDurationBeforeExplosion = 3000;
-            private const int WaitDurationBeforeExplosionInBurning = 1000;
 
             protected override void OnEnter(State prevState)
             {
@@ -85,24 +82,17 @@ namespace Player.Common
                     .Throttle(TimeSpan.FromSeconds(GameCommonData.InputBombInterval))
                     .Subscribe(_ =>
                     {
-                        var instantiationId = _PhotonView.InstantiationId;
-                        var waitDuration = _AbnormalConditionEffectUseCase._IsBurning ? WaitDurationBeforeExplosionInBurning : WaitDurationBeforeExplosion;
+                        var waitDuration = _AbnormalConditionEffectUseCase._IsBurning ? GameCommonData.WaitDurationBeforeExplosionInBurning : GameCommonData.WaitDurationBeforeExplosion;
                         var explosionTime = PhotonNetwork.ServerTimestamp + waitDuration;
                         var damageAmount = (int)TranslateStatusInBattleUseCase.Translate(StatusType.Attack, _PlayerStatusInfo._Attack.Value);
                         var fireRange = (int)TranslateStatusInBattleUseCase.Translate(StatusType.FireRange, _PlayerStatusInfo._FireRange.Value);
-                        var boxCollider = Owner._boxCollider;
                         Owner._putBomb.SetBomb
                         (
-                            boxCollider,
-                            _PhotonView,
-                            _playerTransform,
-                            (int)BombType.Attribute,
+                            (int)BombType.Normal,
                             damageAmount,
                             fireRange,
                             explosionTime,
-                            instantiationId,
-                            393,
-                            AbnormalCondition.Paralysis
+                            GameCommonData.InvalidNumber
                         );
                     }).AddTo(_cts.Token);
             }
