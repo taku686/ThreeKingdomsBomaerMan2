@@ -81,7 +81,8 @@ namespace Bomb
             int damageAmount,
             int fireRange,
             int explosionTime,
-            int playerId
+            int playerId,
+            AbnormalCondition abnormalCondition
         )
         {
             var bombPool = GetBombObjectPoolBase(bombType);

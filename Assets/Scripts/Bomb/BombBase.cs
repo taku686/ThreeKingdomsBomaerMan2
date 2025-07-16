@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
-using Manager.BattleManager.Environment;
 using Photon.Pun;
 using UniRx;
 using UniRx.Triggers;

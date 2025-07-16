@@ -33,7 +33,8 @@ namespace Player.Common
             int damageAmount,
             int fireRange,
             int explosionTime,
-            int playerId
+            int playerId,
+            AbnormalCondition abnormalCondition = AbnormalCondition.None
         )
         {
             var playerPos = playerTransform.position;
@@ -42,7 +43,18 @@ namespace Player.Common
                 return;
             }
 
-            photonView.RPC(nameof(RpcPutBomb), RpcTarget.All, playerPos, bombType, damageAmount, fireRange, explosionTime, playerId);
+            photonView.RPC
+            (
+                nameof(RpcPutBomb),
+                RpcTarget.All,
+                playerPos,
+                bombType,
+                damageAmount,
+                fireRange,
+                explosionTime,
+                playerId,
+                abnormalCondition
+            );
         }
 
         [PunRPC]
@@ -53,10 +65,19 @@ namespace Player.Common
             int damageAmount,
             int fireRange,
             int explosionTime,
-            int playerId
+            int playerId,
+            AbnormalCondition abnormalCondition
         )
         {
-            var bomb = _bombProvider.GetBomb(bombType, damageAmount, fireRange, explosionTime, playerId);
+            var bomb = _bombProvider.GetBomb
+            (
+                bombType,
+                damageAmount,
+                fireRange,
+                explosionTime,
+                playerId,
+                abnormalCondition
+            );
             bomb.transform.position = new Vector3(playerPos.x, playerPos.y, playerPos.z);
         }
 

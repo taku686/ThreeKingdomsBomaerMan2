@@ -12,7 +12,7 @@ namespace Bomb
         [SerializeField] private BombExplosionRepository _bombExplosionRepository;
         private static readonly Vector3 EffectOriginPosition = new(0, 0.5f, 0);
         private const float ExplosionMoveDuration = 0.5f;
-        private const float BombInterval = 0.3f;
+        private const float ColliderIntervalDistance = 0.3f;
 
         protected override async UniTask Explosion(int damageAmount)
         {
@@ -90,11 +90,11 @@ namespace Bomb
 
         private async void GenerateCollider(Vector3 startPos, MoveDirection moveDirection, float fireRange, int damageAmount)
         {
-            var generateAmount = fireRange / BombInterval;
+            var generateAmount = fireRange / ColliderIntervalDistance;
             var dir = GameCommonData.DirectionToVector3(moveDirection);
             for (var i = 0; i <= generateAmount; i++)
             {
-                var adjustmentValue = i * BombInterval;
+                var adjustmentValue = i * ColliderIntervalDistance;
                 var colliderObj = Instantiate(_bombCollider, gameObject.transform);
                 FixTransform(colliderObj.transform, dir, startPos, adjustmentValue);
                 var explosion = colliderObj.GetComponent<Explosion>();
@@ -110,7 +110,7 @@ namespace Bomb
             var isX = dir.x != 0;
             colliderTransform.position = CalculateGeneratePos(startPos, dir, adjustmentValue);
             colliderTransform.localEulerAngles = Vector3.zero;
-            colliderTransform.localScale = new Vector3(isX ? 1 * BombInterval : 1, 1, isX ? 1 : 1 * BombInterval);
+            colliderTransform.localScale = new Vector3(isX ? 1 * ColliderIntervalDistance : 1, 1, isX ? 1 : 1 * ColliderIntervalDistance);
         }
 
         private static Vector3 CalculateGeneratePos(Vector3 startPos, Vector3 direction, float adjustmentValue)
