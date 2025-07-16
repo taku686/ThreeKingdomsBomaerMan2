@@ -16,12 +16,12 @@ namespace Bomb
 
         protected override async UniTask Explosion(int damageAmount)
         {
-            if (_IsExplosion)
+            if (_isExplosion)
             {
                 return;
             }
 
-            _IsExplosion = true;
+            _isExplosion = true;
             var position = transform.position;
             var startPos = new Vector3(position.x, position.y + 0.5f, position.z);
             await UniTask.WhenAll
@@ -44,9 +44,9 @@ namespace Bomb
         {
             var dir = GameCommonData.DirectionToVector3(moveDirection);
             var index = (int)moveDirection;
-            _BombRenderer.enabled = false;
-            _BoxCollider.enabled = false;
-            var isHit = TryGetObstacles(_fireRange, dir, startPos, _ObstaclesLayerMask, out var hit);
+            _bombRenderer.enabled = false;
+            _boxCollider.enabled = false;
+            var isHit = TryGetObstacles(_fireRange, dir, startPos, _obstaclesLayerMask, out var hit);
             var fireRange = isHit ? CalculateFireRange(hit, startPos) : _fireRange;
             var endPos = CalculateEndPos(isHit, hit, startPos, fireRange, dir);
             var distance = (endPos - startPos).magnitude;
@@ -88,7 +88,13 @@ namespace Bomb
             return Mathf.Abs((endPosition - startPosition).magnitude);
         }
 
-        private async void GenerateCollider(Vector3 startPos, MoveDirection moveDirection, float fireRange, int damageAmount)
+        private async void GenerateCollider
+        (
+            Vector3 startPos,
+            MoveDirection moveDirection,
+            float fireRange,
+            int damageAmount
+        )
         {
             var generateAmount = fireRange / ColliderIntervalDistance;
             var dir = GameCommonData.DirectionToVector3(moveDirection);
@@ -99,8 +105,7 @@ namespace Bomb
                 FixTransform(colliderObj.transform, dir, startPos, adjustmentValue);
                 var explosion = colliderObj.GetComponent<Explosion>();
                 colliderObj.layer = LayerMask.NameToLayer(GameCommonData.ExplosionLayer);
-                explosion._explosionMoveDirection = moveDirection;
-                explosion.damageAmount = damageAmount;
+                explosion._damageAmount = damageAmount;
                 await UniTask.Delay(TimeSpan.FromSeconds(ExplosionMoveDuration / generateAmount));
             }
         }
@@ -150,7 +155,7 @@ namespace Bomb
             explosionEffectTransform.localPosition = EffectOriginPosition;
             explosionEffectTransform.gameObject.SetActive(true);
             explosionEffectTransform.DOMove(endPos, moveDuration).SetLink(gameObject);
-            await UniTask.Delay(TimeSpan.FromSeconds(ExplosionDisplayDuration), cancellationToken: _Cts.Token);
+            await UniTask.Delay(TimeSpan.FromSeconds(ExplosionDisplayDuration), cancellationToken: _cts.Token);
             explosionEffectTransform.gameObject.SetActive(false);
         }
 

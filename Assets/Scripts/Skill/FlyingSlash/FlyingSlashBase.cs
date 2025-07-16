@@ -47,12 +47,12 @@ namespace Skill.Attack.FlyingSlash
             Transform playerTransform
         )
         {
-            _Cts = new CancellationTokenSource();
+            _cts = new CancellationTokenSource();
 
             Observable
                 .Timer(TimeSpan.FromSeconds(DelayTime))
                 .Subscribe(_ => { ActivateEffect(playerTransform, abnormalCondition, skillId); })
-                .AddTo(_Cts.Token);
+                .AddTo(_cts.Token);
         }
 
         protected virtual void ActivateEffect

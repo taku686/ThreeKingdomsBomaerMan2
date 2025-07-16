@@ -40,7 +40,7 @@ namespace Enemy
             private void PutBomb()
             {
                 var playerTransform = Owner.transform;
-                var playerId = _PhotonView.ViewID;
+                var playerId = _PhotonView.InstantiationId;
                 var explosionTime = PhotonNetwork.ServerTimestamp + WaitDurationBeforeExplosion;
                 var photonView = _PhotonView;
                 var damageAmount = _PlayerStatusInfo._Attack.Value;
@@ -55,7 +55,8 @@ namespace Enemy
                     damageAmount,
                     fireRange,
                     explosionTime,
-                    playerId
+                    playerId,
+                    GameCommonData.InvalidNumber
                 );
                 _isPutBomb = true;
             }

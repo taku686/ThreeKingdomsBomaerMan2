@@ -10,10 +10,10 @@ namespace Skill
 {
     public class AttackSkillBase
     {
-        protected CancellationTokenSource _Cts;
+        protected CancellationTokenSource _cts;
         private bool _isHitAttack;
 
-        protected static bool IsObstaclesTag(GameObject hitObject)
+        public static bool IsObstaclesTag(GameObject hitObject)
         {
             return hitObject.CompareTag(GameCommonData.BushTag) ||
                    hitObject.CompareTag(GameCommonData.BreakingWallTag) ||
@@ -59,14 +59,14 @@ namespace Skill
 
         protected void Cancel()
         {
-            if (_Cts == null)
+            if (_cts == null)
             {
                 return;
             }
 
-            _Cts.Cancel();
-            _Cts.Dispose();
-            _Cts = null;
+            _cts.Cancel();
+            _cts.Dispose();
+            _cts = null;
         }
     }
 }

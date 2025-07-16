@@ -49,10 +49,10 @@ namespace Skill.MagicShot
             Transform playerTransform
         )
         {
-            _Cts = new CancellationTokenSource();
+            _cts = new CancellationTokenSource();
             Observable.Timer(TimeSpan.FromSeconds(EffectInstantiateDelayTime))
                 .Subscribe(_ => { ActivateEffect(playerTransform, abnormalCondition, skillId); })
-                .AddTo(_Cts.Token);
+                .AddTo(_cts.Token);
         }
 
         protected void ActivateEffect

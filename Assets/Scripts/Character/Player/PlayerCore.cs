@@ -354,7 +354,7 @@ namespace Player.Common
 
             ActivatePassiveSkillOnDamage();
             var explosion = other.GetComponentInParent<Explosion>();
-            HpCalculateUseCase.InAsTask(_PlayerStatusInfo, explosion.damageAmount);
+            HpCalculateUseCase.InAsTask(_PlayerStatusInfo, explosion._damageAmount);
 
             _isDamage = true;
             await UniTask.Delay(TimeSpan.FromSeconds(InvincibleDuration), cancellationToken: _cancellationToken);

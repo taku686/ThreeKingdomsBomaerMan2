@@ -43,21 +43,21 @@ namespace Skill.DashAttack
             Transform playerTransform
         )
         {
-            _Cts = new CancellationTokenSource();
+            _cts = new CancellationTokenSource();
             var rigid = playerTransform.GetComponent<Rigidbody>();
             var skillData = _skillMasterDataRepository.GetSkillData(skillId);
             var range = skillData.Range;
 
             Observable
                 .EveryFixedUpdate()
-                .Where(_ => _Cts is { IsCancellationRequested: false })
+                .Where(_ => _cts is { IsCancellationRequested: false })
                 .SelectMany(_ => UniTask.Delay(TimeSpan.FromSeconds(WaitDurationForStart), DelayType.DeltaTime, PlayerLoopTiming.FixedUpdate).ToObservable())
                 .Subscribe(_ =>
                 {
                     const float moveDuration = WaitDurationForEnd - WaitDurationForStart;
                     rigid.velocity = playerTransform.forward * (range / moveDuration);
                 })
-                .AddTo(_Cts.Token);
+                .AddTo(_cts.Token);
 
             Observable
                 .Timer(TimeSpan.FromSeconds(WaitDurationForStart))
@@ -66,7 +66,7 @@ namespace Skill.DashAttack
                     ActivateEffect(playerTransform, abnormalCondition, skillId);
                     SetupCollider(playerTransform, skillId);
                 })
-                .AddTo(_Cts.Token);
+                .AddTo(_cts.Token);
 
             Observable
                 .Timer(TimeSpan.FromSeconds(WaitDurationForEnd))
@@ -75,7 +75,7 @@ namespace Skill.DashAttack
                     rigid.velocity = Vector3.zero;
                     Cancel();
                 })
-                .AddTo(_Cts.Token);
+                .AddTo(_cts.Token);
         }
 
         protected virtual void ActivateEffect

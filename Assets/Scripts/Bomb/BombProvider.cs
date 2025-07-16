@@ -10,10 +10,10 @@ namespace Bomb
     public class BombProvider : MonoBehaviour
     {
         [SerializeField] private BombObjectPoolProvider bombObjectPoolProvider;
-        [SerializeField] private StageOrnamentsBlock stageOrnamentsBlock;
         private BombObjectPoolBase _normalBombProvider;
         private BombObjectPoolBase _penetrationBombProvider;
         private BombObjectPoolBase _dangerBombProvider;
+        private BombObjectPoolBase _attributeBombProvider;
 
         public void Initialize
         (
@@ -30,45 +30,8 @@ namespace Bomb
                     break;
                 case BombType.Diffusion:
                     break;
-                case BombType.Paralysis:
-                    break;
-                case BombType.Poison:
-                    break;
-                case BombType.Frozen:
-                    break;
-                case BombType.Confusion:
-                    break;
-                case BombType.Sealed:
-                    break;
-                case BombType.GreatFire:
-                    break;
-                case BombType.LifeSteal:
-                    break;
-                case BombType.Holy:
-                    break;
-                case BombType.Apraxia:
-                    break;
-                case BombType.Burning:
-                    break;
-                case BombType.Charm:
-                    break;
-                case BombType.Curse:
-                    break;
-                case BombType.Darkness:
-                    break;
-                case BombType.Fear:
-                    break;
-                case BombType.HellFire:
-                    break;
-                case BombType.Miasma:
-                    break;
-                case BombType.ParalyzingThunder:
-                    break;
-                case BombType.SoakingWet:
-                    break;
-                case BombType.TimeStop:
-                    break;
-                case BombType.None:
+                case BombType.Attribute:
+                    _attributeBombProvider = bombObjectPoolProvider.GetAttributeBombPool(translateStatusInBattleUseCase);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(bombType), bombType, null);
@@ -81,7 +44,8 @@ namespace Bomb
             int damageAmount,
             int fireRange,
             int explosionTime,
-            int playerId,
+            int instantiationId,
+            int skillId,
             AbnormalCondition abnormalCondition
         )
         {
@@ -92,7 +56,15 @@ namespace Bomb
                 return null;
             }
 
-            bomb.Setup(damageAmount, fireRange, playerId, explosionTime);
+            bomb.Setup
+            (
+                damageAmount,
+                fireRange,
+                instantiationId,
+                explosionTime,
+                skillId,
+                abnormalCondition
+            );
             bomb._OnFinishIObservable.Take(1).Subscribe(_ => { bombPool.Return(bomb); });
             return bomb;
         }
@@ -104,6 +76,7 @@ namespace Bomb
                 (int)BombType.Normal => _normalBombProvider,
                 (int)BombType.Penetration => _penetrationBombProvider,
                 (int)BombType.Diffusion => _dangerBombProvider,
+                (int)BombType.Attribute => _attributeBombProvider,
                 _ => null
             };
         }

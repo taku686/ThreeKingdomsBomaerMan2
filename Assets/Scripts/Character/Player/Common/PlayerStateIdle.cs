@@ -85,7 +85,7 @@ namespace Player.Common
                     .Throttle(TimeSpan.FromSeconds(GameCommonData.InputBombInterval))
                     .Subscribe(_ =>
                     {
-                        var playerId = _PhotonView.ViewID;
+                        var instantiationId = _PhotonView.InstantiationId;
                         var waitDuration = _AbnormalConditionEffectUseCase._IsBurning ? WaitDurationBeforeExplosionInBurning : WaitDurationBeforeExplosion;
                         var explosionTime = PhotonNetwork.ServerTimestamp + waitDuration;
                         var damageAmount = (int)TranslateStatusInBattleUseCase.Translate(StatusType.Attack, _PlayerStatusInfo._Attack.Value);
@@ -96,11 +96,13 @@ namespace Player.Common
                             boxCollider,
                             _PhotonView,
                             _playerTransform,
-                            (int)BombType.Normal,
+                            (int)BombType.Attribute,
                             damageAmount,
                             fireRange,
                             explosionTime,
-                            playerId
+                            instantiationId,
+                            393,
+                            AbnormalCondition.Paralysis
                         );
                     }).AddTo(_cts.Token);
             }

@@ -40,7 +40,7 @@ namespace Skill.CrushImpact
             Transform playerTransform
         )
         {
-            _Cts = new CancellationTokenSource();
+            _cts = new CancellationTokenSource();
 
             Observable
                 .Timer(TimeSpan.FromSeconds(WaitDurationForStart))
@@ -49,7 +49,7 @@ namespace Skill.CrushImpact
                     ActivateEffect(playerTransform, abnormalCondition, skillId);
                     SetupCollider(_effectClone, playerTransform, skillId);
                 })
-                .AddTo(_Cts.Token);
+                .AddTo(_cts.Token);
 
             Observable
                 .Timer(TimeSpan.FromSeconds(WaitDurationForEnd))
@@ -58,7 +58,7 @@ namespace Skill.CrushImpact
                     _effectCollider.enabled = false;
                     Cancel();
                 })
-                .AddTo(_Cts.Token);
+                .AddTo(_cts.Token);
         }
 
         protected void ActivateEffect

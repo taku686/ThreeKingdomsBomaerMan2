@@ -1,17 +1,11 @@
 ﻿using Common.Data;
 using UnityEngine;
 
-namespace Bomb
+namespace Effect
 {
-    public class BombExplosionEffect : MonoBehaviour
+    public class AttributeBombEffect : MonoBehaviour
     {
         [SerializeField] private AbnormalCondition _abnormalCondition;
-
         public AbnormalCondition _AbnormalCondition => _abnormalCondition;
-
-        private void OnDisable()
-        {
-            Destroy(gameObject);
-        }
     }
 }

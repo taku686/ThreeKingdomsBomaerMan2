@@ -7,9 +7,9 @@ namespace Bomb
 {
     public abstract class BombObjectPoolBase : ObjectPool<BombBase>
     {
-        private readonly BombBase _bombBase;
+        protected readonly Transform _bombParent;
+        protected readonly BombBase _bombBase;
         private readonly TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
-        private readonly Transform _bombParent;
         private static readonly Vector3 ColliderCenter = new(0, 0.5f, 0);
         private static readonly Vector3 ColliderScale = new(1f, 1, 1f);
 
@@ -58,7 +58,7 @@ namespace Bomb
             _translateStatusInBattleUseCase.DecrementBombCount();
         }
 
-        private static void AddCollider(GameObject bomb)
+        protected static void AddCollider(GameObject bomb)
         {
             var collider = bomb.AddComponent<BoxCollider>();
             collider.center = ColliderCenter;
@@ -67,7 +67,7 @@ namespace Bomb
             collider.isTrigger = true;
         }
 
-        private static void AddRigidbody(GameObject bomb)
+        protected static void AddRigidbody(GameObject bomb)
         {
             var rigid = bomb.AddComponent<Rigidbody>();
             rigid.useGravity = false;

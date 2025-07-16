@@ -465,7 +465,8 @@ namespace Common.Data
         ParalyzingThunder = 20,
         SoakingWet = 21,
         TimeStop = 22,
-        None = 999
+        Attribute = 23,
+        None = GameCommonData.InvalidNumber
     }
 
     public enum AbnormalCondition

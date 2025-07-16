@@ -46,7 +46,7 @@ namespace Skill.SlashSpin
             Transform playerTransform
         )
         {
-            _Cts = new CancellationTokenSource();
+            _cts = new CancellationTokenSource();
             var rigid = playerTransform.GetComponent<Rigidbody>();
             var skillData = _skillMasterDataRepository.GetSkillData(skillId);
             var range = skillData.Range;
@@ -59,7 +59,7 @@ namespace Skill.SlashSpin
                     const float moveDuration = WaitDurationForEnd - WaitDurationForStart;
                     rigid.velocity = playerTransform.forward * (range / moveDuration);
                 })
-                .AddTo(_Cts.Token);
+                .AddTo(_cts.Token);
 
             Observable
                 .Timer(TimeSpan.FromSeconds(WaitDurationForStart))
@@ -68,7 +68,7 @@ namespace Skill.SlashSpin
                     ActivateEffect(playerTransform, abnormalCondition, skillId);
                     SetupCollider(playerTransform, skillId);
                 })
-                .AddTo(_Cts.Token);
+                .AddTo(_cts.Token);
 
             Observable
                 .Timer(TimeSpan.FromSeconds(WaitDurationForEnd))
@@ -87,7 +87,7 @@ namespace Skill.SlashSpin
                     Object.Destroy(_effectClone);
                     Cancel();
                 })
-                .AddTo(_Cts.Token);
+                .AddTo(_cts.Token);
         }
 
         protected virtual void ActivateEffect

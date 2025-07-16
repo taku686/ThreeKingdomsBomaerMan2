@@ -22,6 +22,7 @@ namespace Player.Common
         )
         {
             _bombProvider.Initialize(translateStatusInBattleUseCase, BombType.Normal);
+            _bombProvider.Initialize(translateStatusInBattleUseCase, BombType.Attribute);
         }
 
         public void SetBomb
@@ -33,7 +34,8 @@ namespace Player.Common
             int damageAmount,
             int fireRange,
             int explosionTime,
-            int playerId,
+            int instantiationId,
+            int skillId,
             AbnormalCondition abnormalCondition = AbnormalCondition.None
         )
         {
@@ -52,7 +54,8 @@ namespace Player.Common
                 damageAmount,
                 fireRange,
                 explosionTime,
-                playerId,
+                instantiationId,
+                skillId,
                 abnormalCondition
             );
         }
@@ -65,7 +68,8 @@ namespace Player.Common
             int damageAmount,
             int fireRange,
             int explosionTime,
-            int playerId,
+            int instantiationId,
+            int skillId,
             AbnormalCondition abnormalCondition
         )
         {
@@ -75,7 +79,8 @@ namespace Player.Common
                 damageAmount,
                 fireRange,
                 explosionTime,
-                playerId,
+                instantiationId,
+                skillId,
                 abnormalCondition
             );
             bomb.transform.position = new Vector3(playerPos.x, playerPos.y, playerPos.z);
