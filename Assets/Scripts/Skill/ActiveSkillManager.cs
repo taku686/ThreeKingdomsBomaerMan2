@@ -74,13 +74,6 @@ namespace Skill
         {
             _playerStatusInfo = playerStatusInfo;
             var playerConditionInfo = playerTransform.GetComponent<PlayerConditionInfo>();
-            _buffSkill.Initialize
-            (
-                characterId,
-                statusSkillMasterDatum,
-                playerConditionInfo,
-                playerStatusInfo
-            );
 
             _heal.Initialize
             (
@@ -165,7 +158,13 @@ namespace Skill
             }
         }
 
-        public void BuffSkill(SkillMasterData skillMasterData)
+        public void BuffSkill
+        (
+            SkillMasterData skillMasterData,
+            SkillMasterData[] statusSkillMasterDatum,
+            int characterId,
+            PlayerStatusInfo playerStatusInfo
+        )
         {
             if (!IsBuffSkillActionType(skillMasterData))
             {
@@ -174,11 +173,24 @@ namespace Skill
 
             if (skillMasterData.Id == GodSignBuffSkillId)
             {
-                _buffSkill.Buff(skillMasterData, TopThree).Forget();
+                _buffSkill.Buff
+                (
+                    skillMasterData,
+                    statusSkillMasterDatum,
+                    characterId,
+                    playerStatusInfo,
+                    TopThree
+                ).Forget();
             }
             else
             {
-                _buffSkill.Buff(skillMasterData).Forget();
+                _buffSkill.Buff
+                (
+                    skillMasterData,
+                    statusSkillMasterDatum,
+                    characterId,
+                    playerStatusInfo
+                ).Forget();
             }
         }
 

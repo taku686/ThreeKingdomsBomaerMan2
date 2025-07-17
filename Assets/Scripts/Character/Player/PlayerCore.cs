@@ -50,7 +50,6 @@ namespace Player.Common
         private Animator _animator;
         private ObservableStateMachineTrigger _observableStateMachineTrigger;
         private Renderer _playerRenderer;
-        private BoxCollider _boxCollider;
         private CancellationToken _cancellationToken;
 
         private readonly Subject<Unit> _deadSubject = new();
@@ -82,6 +81,7 @@ namespace Player.Common
         public void Initialize
         (
             TranslateStatusInBattleUseCase.Factory translateStatusInBattleUseCaseFactory,
+            TranslateStatusInBattleUseCase translateStatusInBattleUseCase,
             PhotonNetworkManager networkManager,
             ActiveSkillManager activeSkillManager,
             PassiveSkillManager passiveSkillManager,
@@ -90,11 +90,13 @@ namespace Player.Common
             CharacterCreateUseCase characterCreateUseCase,
             AbnormalConditionEffectUseCase abnormalConditionEffectUseCase,
             SkillAnimationFacade skillAnimationFacade,
+            PlayerStatusInfo playerStatusInfo,
             string key
         )
         {
             _hpKey = key;
             _translateStatusInBattleUseCaseFactory = translateStatusInBattleUseCaseFactory;
+            _translateStatusInBattleUseCase = translateStatusInBattleUseCase;
             _photonNetworkManager = networkManager;
             _activeSkillManager = activeSkillManager;
             _passiveSkillManager = passiveSkillManager;
@@ -105,6 +107,7 @@ namespace Player.Common
             _skillAnimationFacade = skillAnimationFacade;
             InitializeComponent();
             InitializeState();
+            SetupPlayerStatusInfo(playerStatusInfo);
             Subscribe();
         }
 
@@ -116,19 +119,18 @@ namespace Player.Common
             _putBomb = GetComponent<PutBomb>();
             _animator = GetComponentInChildren<Animator>();
             _playerRenderer = GetComponentInChildren<Renderer>();
-            _boxCollider = GetComponent<BoxCollider>();
             _TeamMemberReactiveProperty.Value = PhotonNetworkManager.GetPlayerKey(photonView.InstantiationId, 0);
-            SetupTranslateStatusInBattleUseCase();
             _observableStateMachineTrigger = _animator.GetBehaviour<ObservableStateMachineTrigger>();
             _playerMove.Initialize(_animator, _abnormalConditionEffectUseCase);
             _playerDash.Initialize();
             _cancellationToken = gameObject.GetCancellationTokenOnDestroy();
         }
 
-        private void InitializeSkillManager
+        private void SetupSkillManager
         (
             WeaponMasterData weaponMasterData,
-            int characterId
+            int characterId,
+            PlayerStatusInfo playerStatusInfo
         )
         {
             var statusSkillDatum = weaponMasterData.StatusSkillMasterDatum;
@@ -138,14 +140,14 @@ namespace Player.Common
                 statusSkillDatum,
                 transform,
                 characterId,
-                _PlayerStatusInfo
+                playerStatusInfo
             );
 
             _passiveSkillManager.Initialize
             (
                 statusSkillDatum,
                 transform,
-                _PlayerStatusInfo,
+                playerStatusInfo,
                 characterId
             );
         }
@@ -216,7 +218,7 @@ namespace Player.Common
 
         private void PlayerStatusSubscribe()
         {
-            _PlayerStatusInfo._Hp
+            _PlayerStatusInfo._hp
                 .Subscribe(tuple =>
                 {
                     if (_isDead)
@@ -238,7 +240,7 @@ namespace Player.Common
                     Dead().Forget();
                 }).AddTo(_cancellationToken);
 
-            _PlayerStatusInfo._Speed
+            _PlayerStatusInfo._speed
                 .Subscribe(speed =>
                 {
                     var translatedValue = TranslateStatusInBattleUseCase.Translate(StatusType.Speed, speed);
@@ -278,8 +280,7 @@ namespace Player.Common
 
         private void SetupTranslateStatusInBattleUseCase
         (
-            int playerKey = GameCommonData.InvalidNumber,
-            PlayerStatusInfo playerStatusInfo = null
+            int playerKey = GameCommonData.InvalidNumber
         )
         {
             if (playerKey == GameCommonData.InvalidNumber)
@@ -291,31 +292,24 @@ namespace Player.Common
             var characterData = _photonNetworkManager.GetCharacterData(playerKey);
             var levelData = _photonNetworkManager.GetLevelMasterData(playerKey);
             _translateStatusInBattleUseCase = _translateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
-            if (playerStatusInfo != null)
-            {
-                _PlayerStatusInfo = playerStatusInfo;
-            }
-            else
-            {
-                _PlayerStatusInfo = _translateStatusInBattleUseCase.InitializeStatus();
-            }
-
-            SetupPlayerStatusInfo(_PlayerStatusInfo);
+            var newPlayerStatusInfo = _translateStatusInBattleUseCase.InitializeStatus();
+            SetupPlayerStatusInfo(newPlayerStatusInfo);
             _putBomb.SetupBombProvider(_translateStatusInBattleUseCase);
-            InitializeSkillManager(weaponData, characterData.Id);
+            SetupSkillManager(weaponData, characterData.Id, newPlayerStatusInfo);
         }
 
         private void SetupPlayerStatusInfo(PlayerStatusInfo newPlayerStatusInfo)
         {
-            var currentHp = _PlayerStatusInfo._Hp.Value.Item2;
-            var maxHp = newPlayerStatusInfo._Hp.Value.Item1;
-            _PlayerStatusInfo._Hp.Value = (maxHp, currentHp);
-            _PlayerStatusInfo._Speed.Value = newPlayerStatusInfo._Speed.Value;
-            _PlayerStatusInfo._Attack.Value = newPlayerStatusInfo._Attack.Value;
-            _PlayerStatusInfo._Defense.Value = newPlayerStatusInfo._Defense.Value;
-            _PlayerStatusInfo._Resistance.Value = newPlayerStatusInfo._Resistance.Value;
-            _PlayerStatusInfo._FireRange.Value = newPlayerStatusInfo._FireRange.Value;
-            _PlayerStatusInfo._BombLimit.Value = newPlayerStatusInfo._BombLimit.Value;
+            _PlayerStatusInfo ??= newPlayerStatusInfo;
+            var currentHp = newPlayerStatusInfo._hp.Value.Item2;
+            var maxHp = newPlayerStatusInfo._hp.Value.Item1;
+            _PlayerStatusInfo._hp.Value = (maxHp, currentHp);
+            _PlayerStatusInfo._speed.Value = newPlayerStatusInfo._speed.Value;
+            _PlayerStatusInfo._attack.Value = newPlayerStatusInfo._attack.Value;
+            _PlayerStatusInfo._defense.Value = newPlayerStatusInfo._defense.Value;
+            _PlayerStatusInfo._resistance.Value = newPlayerStatusInfo._resistance.Value;
+            _PlayerStatusInfo._fireRange.Value = newPlayerStatusInfo._fireRange.Value;
+            _PlayerStatusInfo._bombLimit.Value = newPlayerStatusInfo._bombLimit.Value;
         }
 
         private static void DestroyWeaponObj(GameObject playerObj)

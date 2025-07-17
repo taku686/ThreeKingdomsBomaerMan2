@@ -1,11 +1,14 @@
 ﻿using AttributeAttack;
+using Character;
 using Common.Data;
 using Manager;
 using Manager.NetworkManager;
+using Player.Common;
 using Repository;
 using Skill;
 using Skill.Attack;
 using Skill.Attack.FlyingSlash;
+using Skill.ChangeBomb;
 using Skill.CrushImpact;
 using Skill.DashAttack;
 using Skill.Heal;
@@ -53,6 +56,7 @@ namespace Common.Installer
             InstallMagicShot();
             InstallRainArrowSKill();
             InstallImpactRock();
+            InstallChangeBomb();
         }
 
         private void InstallCommon()
@@ -260,6 +264,13 @@ namespace Common.Installer
             Container.BindFactory<int, Transform, IAttackBehaviour, StigmataImpactRock, StigmataImpactRock.Factory>().AsCached();
             Container.BindFactory<int, Transform, IAttackBehaviour, SoakingWetImpactRock, SoakingWetImpactRock.Factory>().AsCached();
             Container.BindFactory<int, Transform, IAttackBehaviour, BurningImpactRock, BurningImpactRock.Factory>().AsCached();
+        }
+
+        private void InstallChangeBomb()
+        {
+            Container.BindFactory<int, PutBomb, PlayerStatusInfo, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeChangeBombFactory.Factory>().FromFactory<AttributeChangeBombFactory>();
+            Container.BindFactory<NormalChangeBomb, NormalChangeBomb.Factory>().AsCached();
+            Container.BindFactory<int, PutBomb, PlayerStatusInfo, IAttackBehaviour, ParalysisChangeBomb, ParalysisChangeBomb.Factory>().AsCached();
         }
 
 

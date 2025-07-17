@@ -243,19 +243,19 @@ namespace Manager.NetworkManager
 
         #region GetData
 
-        public CharacterData GetCharacterData(int playerId)
+        public CharacterData GetCharacterData(int playerKey)
         {
-            return _currentRoomCharacterDatum.GetValueOrDefault(playerId);
+            return _currentRoomCharacterDatum.GetValueOrDefault(playerKey);
         }
 
-        public WeaponMasterData GetWeaponData(int playerId)
+        public WeaponMasterData GetWeaponData(int playerKey)
         {
-            return _currentRoomWeaponDatum.GetValueOrDefault(playerId);
+            return _currentRoomWeaponDatum.GetValueOrDefault(playerKey);
         }
 
-        public LevelMasterData GetLevelMasterData(int playerId)
+        public LevelMasterData GetLevelMasterData(int playerKey)
         {
-            return _currentRoomLevelDatum.GetValueOrDefault(playerId);
+            return _currentRoomLevelDatum.GetValueOrDefault(playerKey);
         }
 
         #endregion

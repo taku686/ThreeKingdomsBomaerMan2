@@ -51,6 +51,11 @@ namespace Enemy
 
             protected void SetupAnimation(SkillMasterData skillMasterData)
             {
+                if (_SkillTarget == null)
+                {
+                    return;
+                }
+
                 _PlayerTransform.LookAt(_SkillTarget.position);
                 _SkillAnimationFacade.PlayBack(skillMasterData);
 

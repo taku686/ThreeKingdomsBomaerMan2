@@ -18,15 +18,15 @@ namespace Skill
         public bool _CanMove { get; private set; }
         public bool _IsBurning { get; private set; }
         public bool _RandomMove { get; private set; }
-        public readonly ReactiveProperty<bool> _CanPutBombReactiveProperty = new(true);
-        public readonly ReactiveProperty<bool> _CanSkillReactiveProperty = new(true);
-        public readonly ReactiveProperty<bool> _CanCharacterChangeReactiveProperty = new(true);
+        public readonly ReactiveProperty<bool> _canPutBombReactiveProperty = new(true);
+        public readonly ReactiveProperty<bool> _canSkillReactiveProperty = new(true);
+        public readonly ReactiveProperty<bool> _canCharacterChangeReactiveProperty = new(true);
 
         private const float OneSecond = 1f;
         private const float PoisonDamageRate = 0.02f; // 最大HPの2%
         private const int BurningDamage = 3; // 毎秒3ダメージ
 
-        private readonly List<int> _charmedCharacterIds = new();
+        public readonly List<int> _charmedCharacterIds = new();
         private readonly Dictionary<AbnormalCondition, bool> _abnormalConditionInProgress = new();
 
         [Inject]
@@ -123,7 +123,7 @@ namespace Skill
         /// </summary>
         private void Poison(PlayerStatusInfo playerStatusInfo, float effectTime)
         {
-            var maxHp = playerStatusInfo._Hp.Value.Item1;
+            var maxHp = playerStatusInfo._hp.Value.Item1;
             var damageAmount = Mathf.CeilToInt(maxHp * PoisonDamageRate);
             ContinuousDamage(playerStatusInfo, effectTime, damageAmount);
         }
@@ -187,11 +187,11 @@ namespace Skill
         /// </summary>
         private void SoakingWet(float effectTime)
         {
-            _CanPutBombReactiveProperty.Value = false;
+            _canPutBombReactiveProperty.Value = false;
 
             Observable
                 .Timer(TimeSpan.FromSeconds(effectTime))
-                .Subscribe(_ => { _CanPutBombReactiveProperty.Value = true; });
+                .Subscribe(_ => { _canPutBombReactiveProperty.Value = true; });
         }
 
         /// <summary>
@@ -229,7 +229,7 @@ namespace Skill
             var cts = new CancellationTokenSource();
 
             // スキルが使えなくなる
-            _CanSkillReactiveProperty.Value = false;
+            _canSkillReactiveProperty.Value = false;
 
             // 一時的に行動不能になる
             Observable
@@ -252,7 +252,7 @@ namespace Skill
                 .Timer(TimeSpan.FromSeconds(effectTime))
                 .Subscribe(_ =>
                 {
-                    _CanSkillReactiveProperty.Value = true;
+                    _canSkillReactiveProperty.Value = true;
                     _CanMove = true;
                     cts.Cancel();
                     cts.Dispose();
@@ -266,17 +266,17 @@ namespace Skill
         /// </summary>
         private void Stigmata(float effectTime)
         {
-            _CanSkillReactiveProperty.Value = false;
-            _CanPutBombReactiveProperty.Value = false;
-            _CanCharacterChangeReactiveProperty.Value = false;
+            _canSkillReactiveProperty.Value = false;
+            _canPutBombReactiveProperty.Value = false;
+            _canCharacterChangeReactiveProperty.Value = false;
 
             Observable
                 .Timer(TimeSpan.FromSeconds(effectTime))
                 .Subscribe(_ =>
                 {
-                    _CanSkillReactiveProperty.Value = true;
-                    _CanPutBombReactiveProperty.Value = true;
-                    _CanCharacterChangeReactiveProperty.Value = true;
+                    _canSkillReactiveProperty.Value = true;
+                    _canPutBombReactiveProperty.Value = true;
+                    _canCharacterChangeReactiveProperty.Value = true;
                 });
         }
 

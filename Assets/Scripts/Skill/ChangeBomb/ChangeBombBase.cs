@@ -35,8 +35,8 @@ namespace Skill.ChangeBomb
         )
         {
             var explosionTime = PhotonNetwork.ServerTimestamp + GameCommonData.WaitDurationBeforeExplosion;
-            var damageAmount = (int)TranslateStatusInBattleUseCase.Translate(StatusType.Attack, _playerStatusInfo._Attack.Value);
-            var fireRange = (int)TranslateStatusInBattleUseCase.Translate(StatusType.FireRange, _playerStatusInfo._FireRange.Value);
+            var damageAmount = (int)TranslateStatusInBattleUseCase.Translate(StatusType.Attack, _playerStatusInfo._attack.Value);
+            var fireRange = (int)TranslateStatusInBattleUseCase.Translate(StatusType.FireRange, _playerStatusInfo._fireRange.Value);
             _putBomb.SetBomb
             (
                 (int)BombType.Attribute,

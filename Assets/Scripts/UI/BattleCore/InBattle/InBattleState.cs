@@ -114,32 +114,32 @@ namespace Manager.BattleManager
                     .AddTo(_cts.Token);
 
                 _PlayerCore._PlayerStatusInfo
-                    ._Attack
+                    ._attack
                     .Subscribe(value => { _View.ApplyBuffState(StatusType.Attack, value); })
                     .AddTo(_cts.Token);
 
                 _PlayerCore._PlayerStatusInfo
-                    ._Speed
+                    ._speed
                     .Subscribe(value => { _View.ApplyBuffState(StatusType.Speed, value); })
                     .AddTo(_cts.Token);
 
                 _PlayerCore._PlayerStatusInfo
-                    ._Defense
+                    ._defense
                     .Subscribe(value => { _View.ApplyBuffState(StatusType.Defense, value); })
                     .AddTo(_cts.Token);
 
                 _PlayerCore._PlayerStatusInfo
-                    ._Resistance
+                    ._resistance
                     .Subscribe(value => { _View.ApplyBuffState(StatusType.Resistance, value); })
                     .AddTo(_cts.Token);
 
                 _PlayerCore._PlayerStatusInfo
-                    ._FireRange
+                    ._fireRange
                     .Subscribe(value => { _View.ApplyBuffState(StatusType.FireRange, value); })
                     .AddTo(_cts.Token);
 
                 _PlayerCore._PlayerStatusInfo
-                    ._BombLimit
+                    ._bombLimit
                     .Subscribe(value => { _View.ApplyBuffState(StatusType.BombLimit, value); })
                     .AddTo(_cts.Token);
             }
@@ -198,17 +198,17 @@ namespace Manager.BattleManager
                     .AddTo(_cts.Token);
 
                 _AbnormalConditionEffectUseCase
-                    ._CanPutBombReactiveProperty
+                    ._canPutBombReactiveProperty
                     .Subscribe(isActive => { _View.ActivateBombButton(isActive); })
                     .AddTo(_cts.Token);
 
                 _AbnormalConditionEffectUseCase
-                    ._CanSkillReactiveProperty
+                    ._canSkillReactiveProperty
                     .Subscribe(isActive => { _View.ActiveSkillButton(isActive); })
                     .AddTo(_cts.Token);
 
                 _AbnormalConditionEffectUseCase
-                    ._CanCharacterChangeReactiveProperty
+                    ._canCharacterChangeReactiveProperty
                     .Subscribe(isActive => { _View.ActiveCharacterChangeButton(isActive); })
                     .AddTo(_cts.Token);
 

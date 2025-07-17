@@ -20,7 +20,9 @@ namespace Player.Common
             ActiveSkillManager activeSkillManager,
             PhotonNetworkManager photonNetworkManager,
             GameObject playerCore,
-            PutBomb putBomb
+            PutBomb putBomb,
+            int playerKey,
+            PlayerStatusInfo playerStatusInfo
         )
         {
             _putBomb = putBomb;
@@ -28,10 +30,16 @@ namespace Player.Common
             _photonNetworkManager = photonNetworkManager;
             _playerTransform = playerCore.transform;
             _photonView = playerCore.GetComponent<PhotonView>();
-            Subscribe(_photonView.InstantiationId);
+            var instantiationId = _photonView.InstantiationId;
+            Subscribe(instantiationId, playerKey, playerStatusInfo);
         }
 
-        private void Subscribe(int instantiationId)
+        private void Subscribe
+        (
+            int instantiationId,
+            int playerKey,
+            PlayerStatusInfo playerStatusInfo
+        )
         {
             _photonNetworkManager
                 ._ActivateSkillObservable
@@ -39,9 +47,13 @@ namespace Player.Common
                 .Subscribe(tuple =>
                 {
                     var skillMasterData = tuple.Item2;
+                    var weaponData = _photonNetworkManager.GetWeaponData(playerKey);
+                    var characterData = _photonNetworkManager.GetCharacterData(playerKey);
+                    var characterId = characterData.Id;
+                    var statusSkillMasterData = weaponData.StatusSkillMasterDatum;
                     _activeSkillManager.ActivateSkill(skillMasterData, _playerTransform, _putBomb);
                     _activeSkillManager.Heal(skillMasterData);
-                    _activeSkillManager.BuffSkill(skillMasterData);
+                    _activeSkillManager.BuffSkill(skillMasterData, statusSkillMasterData, characterId, playerStatusInfo);
                 })
                 .AddTo(gameObject);
         }

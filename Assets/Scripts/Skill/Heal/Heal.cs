@@ -84,12 +84,12 @@ namespace Skill.Heal
 
         private void CalculateHp(int healAmount)
         {
-            var tuple = _playerStatusInfo._Hp.Value;
+            var tuple = _playerStatusInfo._hp.Value;
             var maxHp = Mathf.FloorToInt(TranslateStatusInBattleUseCase.Translate(StatusType.Hp, tuple.Item1));
             var hp = Mathf.FloorToInt(TranslateStatusInBattleUseCase.Translate(StatusType.Hp, tuple.Item2));
             hp += healAmount;
             hp = Mathf.Clamp(hp, DeadHp, maxHp);
-            _playerStatusInfo._Hp.Value = (maxHp, hp);
+            _playerStatusInfo._hp.Value = (maxHp, hp);
         }
 
         private int GetHealAmount(SkillMasterData skillMasterData)
@@ -103,7 +103,7 @@ namespace Skill.Heal
 
             if (!Mathf.Approximately(skillMasterData.HpMul, GameCommonData.InvalidNumber))
             {
-                var maxHp = _playerStatusInfo._Hp.Value.Item1;
+                var maxHp = _playerStatusInfo._hp.Value.Item1;
                 healAmount = Mathf.FloorToInt(maxHp * skillMasterData.HpMul);
             }
 

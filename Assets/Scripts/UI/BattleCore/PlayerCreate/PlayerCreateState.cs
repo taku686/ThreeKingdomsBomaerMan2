@@ -64,7 +64,6 @@ namespace Manager.BattleManager
             private static readonly Vector3 ColliderSize = new(0.6f, 0.6f, 0.6f);
             private const float MaxRate = 1f;
             private const int PlayerNotification = 1;
-            private const int DefaultTeamMember = 0;
 
             protected override void OnEnter(StateMachine<BattleCore>.State prevState)
             {
@@ -102,7 +101,7 @@ namespace Manager.BattleManager
             private void GeneratePlayer()
             {
                 var index = PhotonNetwork.LocalPlayer.ActorNumber;
-                var playerKey = PhotonNetworkManager.GetPlayerKey(index, DefaultTeamMember);
+                var playerKey = PhotonNetworkManager.GetPlayerKey(index, GameCommonData.DefaultTeamMember);
                 var characterData = _PhotonNetworkManager.GetCharacterData(playerKey);
                 var weaponData = _PhotonNetworkManager.GetWeaponData(playerKey);
                 var spawnPoint = _StartPointsRepository.GetSpawnPoint(index);
@@ -128,15 +127,14 @@ namespace Manager.BattleManager
                     var masterActorNr = PhotonNetwork.MasterClient.ActorNumber;
                     var cpuActorNr = PhotonNetwork.CurrentRoom.PlayerCount + i;
                     var characterId = _CharacterMasterDataRepository.GetRandomCharacterId();
-                    //todo review later
-                    //var weaponId = _WeaponMasterDataRepository.GetWeaponRandomWeaponId();
+                    var weaponId = _WeaponMasterDataRepository.GetWeaponRandomWeaponId();
                     var characterData = _CharacterMasterDataRepository.GetCharacterData(characterId);
-                    var weaponData = _WeaponMasterDataRepository.GetWeaponData(300);
+                    var weaponData = _WeaponMasterDataRepository.GetWeaponData(weaponId);
                     var spawnPoint = _StartPointsRepository.GetSpawnPoint(cpuActorNr);
                     var playerCore = _PlayerGeneratorUseCase.InstantiatePlayerCore(true, spawnPoint);
                     var photonView = playerCore.GetComponent<PhotonView>();
                     var instantiationId = photonView.InstantiationId;
-                    var playerKey = PhotonNetworkManager.GetPlayerKey(instantiationId, DefaultTeamMember);
+                    var playerKey = PhotonNetworkManager.GetPlayerKey(instantiationId, GameCommonData.DefaultTeamMember);
                     var playerObj = _PlayerGeneratorUseCase.InstantiatePlayerObj(characterData, playerCore.transform, weaponData.Id, true);
                     _CharacterCreateUseCase.CreateWeapon(playerObj, weaponData, true, true);
                     var characterDic = new Dictionary<int, int> { { playerKey, characterId } };
@@ -156,7 +154,8 @@ namespace Manager.BattleManager
                 out string hpKey,
                 out PlayerConditionInfo playerConditionInfo,
                 out PhotonView photonView,
-                out TranslateStatusInBattleUseCase translateStatusInBattleUseCase
+                out TranslateStatusInBattleUseCase translateStatusInBattleUseCase,
+                out PlayerStatusInfo playerStatusInfo
             )
             {
                 photonView = playerCore.GetComponent<PhotonView>();
@@ -177,7 +176,8 @@ namespace Manager.BattleManager
                 _SetupAnimatorUseCase.SetAnimatorController(playerCore, weaponType);
                 GenerateEffectActivator(playerCore, photonView);
                 translateStatusInBattleUseCase = _TranslateStatusInBattleUseCaseFactory.Create(characterData, weaponData, levelData);
-                var playerStatusInfo = translateStatusInBattleUseCase.InitializeStatus();
+                playerStatusInfo = translateStatusInBattleUseCase.InitializeStatus();
+                InitializeSkillManager(playerCore, weaponData, characterData.Id, playerStatusInfo);
                 playerConditionInfo = playerCore.AddComponent<PlayerConditionInfo>();
                 playerConditionInfo.SetPlayerIndex(instantiationId);
                 var boxCollider = AddBoxCollider(playerCore);
@@ -193,7 +193,7 @@ namespace Manager.BattleManager
                     translateStatusInBattleUseCase
                 );
 
-                AddPlayerSkill(playerCore, putBomb);
+                AddPlayerSkill(playerCore, putBomb, instantiationId, playerStatusInfo);
             }
 
             #region GetDatum
@@ -254,6 +254,33 @@ namespace Manager.BattleManager
 
             #endregion
 
+            private void InitializeSkillManager
+            (
+                GameObject playerCore,
+                WeaponMasterData weaponMasterData,
+                int characterId,
+                PlayerStatusInfo playerStatusInfo
+            )
+            {
+                var statusSkillDatum = weaponMasterData.StatusSkillMasterDatum;
+
+                _ActiveSkillManager.Initialize
+                (
+                    statusSkillDatum,
+                    playerCore.transform,
+                    characterId,
+                    playerStatusInfo
+                );
+
+                _PassiveSkillManager.Initialize
+                (
+                    statusSkillDatum,
+                    playerCore.transform,
+                    playerStatusInfo,
+                    characterId
+                );
+            }
+
             private void InitializePlayerComponent(GameObject player)
             {
                 var playerTransformView = player.GetComponent<PhotonTransformView>();
@@ -266,14 +293,15 @@ namespace Manager.BattleManager
                 (
                     player,
                     out var hpKey,
-                    out var playerStatusInfo,
+                    out var playerConditionInfo,
                     out var photonView,
-                    out var translateStatusInBattleUseCase
+                    out var translateStatusInBattleUseCase,
+                    out var playerStatusInfo
                 );
 
                 if (PhotonNetworkManager.IsCpu(photonView.CreatorActorNr))
                 {
-                    InitializeCpu(player, translateStatusInBattleUseCase);
+                    InitializeCpu(player, playerStatusInfo);
                 }
 
 
@@ -286,11 +314,12 @@ namespace Manager.BattleManager
                 player.layer = LayerMask.NameToLayer(GameCommonData.PlayerLayer);
                 var playerCore = player.AddComponent<PlayerCore>();
                 Owner.SetPlayerCore(playerCore);
-                Owner.SetPlayerStatusInfo(playerStatusInfo);
+                Owner.SetPlayerStatusInfo(playerConditionInfo);
                 InstantiateSkillIndicator(playerCore.transform);
                 playerCore.Initialize
                 (
                     _TranslateStatusInBattleUseCaseFactory,
+                    translateStatusInBattleUseCase,
                     _PhotonNetworkManager,
                     _ActiveSkillManager,
                     _PassiveSkillManager,
@@ -299,6 +328,7 @@ namespace Manager.BattleManager
                     _CharacterCreateUseCase,
                     _AbnormalConditionEffectUseCase,
                     _SkillAnimationFacade,
+                    playerStatusInfo,
                     hpKey
                 );
             }
@@ -306,7 +336,7 @@ namespace Manager.BattleManager
             private void InitializeCpu
             (
                 GameObject playerCore,
-                TranslateStatusInBattleUseCase translateStatusInBattleUseCase
+                PlayerStatusInfo playerStatusInfo
             )
             {
                 var enemyCore = playerCore.AddComponent<EnemyCore>();
@@ -316,7 +346,7 @@ namespace Manager.BattleManager
                     _EnemySkillTimerFactory,
                     _PhotonNetworkManager,
                     _SkillAnimationFacade,
-                    translateStatusInBattleUseCase
+                    playerStatusInfo
                 );
                 enemyCore.enabled = PhotonNetwork.IsMasterClient;
             }
@@ -372,15 +402,24 @@ namespace Manager.BattleManager
                 rigid.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
             }
 
-            private void AddPlayerSkill(GameObject playerCore, PutBomb putBomb)
+            private void AddPlayerSkill
+            (
+                GameObject playerCore,
+                PutBomb putBomb,
+                int instantiationId,
+                PlayerStatusInfo playerStatusInfo
+            )
             {
+                var playerKey = PhotonNetworkManager.GetPlayerKey(instantiationId, GameCommonData.DefaultTeamMember);
                 var playerSkill = playerCore.AddComponent<PlayerSkill>();
                 playerSkill.Initialize
                 (
                     _ActiveSkillManager,
                     _PhotonNetworkManager,
                     playerCore,
-                    putBomb
+                    putBomb,
+                    playerKey,
+                    playerStatusInfo
                 );
             }
 

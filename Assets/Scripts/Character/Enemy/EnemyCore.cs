@@ -19,8 +19,6 @@ namespace Enemy
         private EnemySkillTimer _enemySkillTimer;
         private PhotonNetworkManager _photonNetworkManager;
 
-        private TranslateStatusInBattleUseCase.Factory _translateStatusInBattleUseCaseFactory;
-        private TranslateStatusInBattleUseCase _translateStatusInBattleUseCase;
         private PhotonView _photonView;
         private PutBomb _putBomb;
         private AIDestinationSetter _aiDestinationSetter;
@@ -33,7 +31,9 @@ namespace Enemy
 
         private Animator _animator;
         private Rigidbody _rigidbody;
+
         private Transform _skillTarget;
+
         private Transform _target;
         private BoxCollider _boxCollider;
         private StateMachine<EnemyCore> _stateMachine;
@@ -63,7 +63,7 @@ namespace Enemy
             EnemySkillTimer.Factory enemySkillTimerFactory,
             PhotonNetworkManager photonNetworkManager,
             SkillAnimationFacade skillAnimationFacade,
-            TranslateStatusInBattleUseCase translateStatusInBattleUseCase
+            PlayerStatusInfo playerStatusInfo
         )
         {
             _cts = new CancellationTokenSource();
@@ -71,7 +71,7 @@ namespace Enemy
             _enemySkillTimer = enemySkillTimerFactory.Create();
             _photonNetworkManager = photonNetworkManager;
             _skillAnimationFacade = skillAnimationFacade;
-            _translateStatusInBattleUseCase = translateStatusInBattleUseCase;
+            _playerStatusInfo = playerStatusInfo;
 
             InitializeState();
             InitializeComponent();
@@ -91,8 +91,7 @@ namespace Enemy
             _followerEntity.enableGravity = false;
             _photonView = GetComponent<PhotonView>();
             _enemySearchPlayer = _searchPlayerFactory.Create(gameObject);
-            _playerStatusInfo = _translateStatusInBattleUseCase.InitializeStatus();
-            _playerKey = PhotonNetworkManager.GetPlayerKey(photonView.InstantiationId, 0);
+            _playerKey = PhotonNetworkManager.GetPlayerKey(_photonView.InstantiationId, 0);
         }
 
         private void InitializeState()
@@ -118,7 +117,17 @@ namespace Enemy
         private void SkillSubscribe(CancellationTokenSource cts)
         {
             var weaponData = _photonNetworkManager.GetWeaponData(_playerKey);
+            if (weaponData == null)
+            {
+                return;
+            }
+
             var skillData = weaponData.NormalSkillMasterData;
+
+            if (skillData == null)
+            {
+                return;
+            }
 
             if (Mathf.Approximately(skillData.Interval, GameCommonData.InvalidNumber))
             {

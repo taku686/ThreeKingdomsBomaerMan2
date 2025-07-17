@@ -6,13 +6,13 @@ namespace Character
 {
     public class PlayerStatusInfo : IDisposable
     {
-        public readonly ReactiveProperty<(int, int)> _Hp;
-        public readonly ReactiveProperty<int> _Speed;
-        public readonly ReactiveProperty<int> _Attack;
-        public readonly ReactiveProperty<int> _Defense;
-        public readonly ReactiveProperty<int> _Resistance;
-        public readonly ReactiveProperty<int> _FireRange;
-        public readonly ReactiveProperty<int> _BombLimit;
+        public readonly ReactiveProperty<(int, int)> _hp;
+        public readonly ReactiveProperty<int> _speed;
+        public readonly ReactiveProperty<int> _attack;
+        public readonly ReactiveProperty<int> _defense;
+        public readonly ReactiveProperty<int> _resistance;
+        public readonly ReactiveProperty<int> _fireRange;
+        public readonly ReactiveProperty<int> _bombLimit;
 
         public PlayerStatusInfo
         (
@@ -26,26 +26,26 @@ namespace Character
             int bombLimit
         )
         {
-            _BombLimit = new ReactiveProperty<int>(bombLimit);
-            _Hp = new ReactiveProperty<(int, int)>((maxHp, currentHp));
-            _Speed = new ReactiveProperty<int>(speed);
-            _Attack = new ReactiveProperty<int>(attack);
-            _Defense = new ReactiveProperty<int>(defense);
-            _Resistance = new ReactiveProperty<int>(resistance);
-            _FireRange = new ReactiveProperty<int>(fireRange);
+            _bombLimit = new ReactiveProperty<int>(bombLimit);
+            _hp = new ReactiveProperty<(int, int)>((maxHp, currentHp));
+            _speed = new ReactiveProperty<int>(speed);
+            _attack = new ReactiveProperty<int>(attack);
+            _defense = new ReactiveProperty<int>(defense);
+            _resistance = new ReactiveProperty<int>(resistance);
+            _fireRange = new ReactiveProperty<int>(fireRange);
         }
 
         public int GetStatusValue(StatusType statusType)
         {
             return statusType switch
             {
-                StatusType.Hp => _Hp.Value.Item2,
-                StatusType.Attack => _Attack.Value,
-                StatusType.Speed => _Speed.Value,
-                StatusType.BombLimit => _BombLimit.Value,
-                StatusType.FireRange => _FireRange.Value,
-                StatusType.Defense => _Defense.Value,
-                StatusType.Resistance => _Resistance.Value,
+                StatusType.Hp => _hp.Value.Item2,
+                StatusType.Attack => _attack.Value,
+                StatusType.Speed => _speed.Value,
+                StatusType.BombLimit => _bombLimit.Value,
+                StatusType.FireRange => _fireRange.Value,
+                StatusType.Defense => _defense.Value,
+                StatusType.Resistance => _resistance.Value,
                 StatusType.None => 0,
                 _ => throw new ArgumentOutOfRangeException(nameof(statusType), statusType, null)
             };
@@ -56,25 +56,25 @@ namespace Character
             switch (statusType)
             {
                 case StatusType.Hp:
-                    _Hp.Value = (_Hp.Value.Item1, value);
+                    _hp.Value = (_hp.Value.Item1, value);
                     break;
                 case StatusType.Attack:
-                    _Attack.Value = value;
+                    _attack.Value = value;
                     break;
                 case StatusType.Speed:
-                    _Speed.Value = value;
+                    _speed.Value = value;
                     break;
                 case StatusType.BombLimit:
-                    _BombLimit.Value = value;
+                    _bombLimit.Value = value;
                     break;
                 case StatusType.FireRange:
-                    _FireRange.Value = value;
+                    _fireRange.Value = value;
                     break;
                 case StatusType.Defense:
-                    _Defense.Value = value;
+                    _defense.Value = value;
                     break;
                 case StatusType.Resistance:
-                    _Resistance.Value = value;
+                    _resistance.Value = value;
                     break;
                 case StatusType.None:
                     break;
@@ -85,13 +85,13 @@ namespace Character
 
         public void Dispose()
         {
-            _Hp?.Dispose();
-            _Speed?.Dispose();
-            _Attack?.Dispose();
-            _Defense?.Dispose();
-            _Resistance?.Dispose();
-            _FireRange?.Dispose();
-            _BombLimit?.Dispose();
+            _hp?.Dispose();
+            _speed?.Dispose();
+            _attack?.Dispose();
+            _defense?.Dispose();
+            _resistance?.Dispose();
+            _fireRange?.Dispose();
+            _bombLimit?.Dispose();
         }
     }
 }

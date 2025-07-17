@@ -14,12 +14,6 @@ using Zenject;
 public class BuffSkill : IDisposable
 {
     private readonly ApplyStatusSkillUseCase _applyStatusSkillUseCase;
-
-    private int _characterId;
-
-    private SkillMasterData[] _statusSKillMasterDatum;
-    private PlayerConditionInfo _playerConditionInfo;
-    private PlayerStatusInfo _playerStatusInfo;
     private bool _isBuffInAbnormalCondition;
     private const int StatusAmount = 7;
 
@@ -32,25 +26,18 @@ public class BuffSkill : IDisposable
         _applyStatusSkillUseCase = applyStatusSkillUseCase;
     }
 
-    public void Initialize
+    public async UniTaskVoid Buff
     (
-        int characterId,
+        SkillMasterData skillMasterData,
         SkillMasterData[] statusSKillMasterDatum,
-        PlayerConditionInfo playerConditionInfo,
-        PlayerStatusInfo playerStatusInfo
+        int characterId,
+        PlayerStatusInfo playerStatusInfo,
+        int buffCount = StatusAmount
     )
-    {
-        _characterId = characterId;
-        _statusSKillMasterDatum = statusSKillMasterDatum;
-        _playerConditionInfo = playerConditionInfo;
-        _playerStatusInfo = playerStatusInfo;
-    }
-
-    public async UniTaskVoid Buff(SkillMasterData skillMasterData, int buffCount = StatusAmount)
     {
         var skillId = skillMasterData.Id;
         var effectTime = skillMasterData.EffectTime;
-        var buffStatuses = GetBuffStatuses(skillId, _statusSKillMasterDatum, _characterId);
+        var buffStatuses = GetBuffStatuses(skillId, statusSKillMasterDatum, characterId);
         var fixedBuffStatus = new Dictionary<StatusType, (int, int)>();
         foreach (var buffStatus in buffStatuses)
         {
@@ -88,18 +75,25 @@ public class BuffSkill : IDisposable
 
         foreach (var (statusType, (_, applyBuffSkill)) in fixedBuffStatus)
         {
-            SetPlayerStatus(statusType, applyBuffSkill);
+            SetPlayerStatus(statusType, playerStatusInfo, applyBuffSkill);
         }
 
         await UniTask.Delay(TimeSpan.FromSeconds(effectTime));
 
         foreach (var (statusType, (applyStatusSkill, _)) in fixedBuffStatus)
         {
-            SetPlayerStatus(statusType, applyStatusSkill);
+            SetPlayerStatus(statusType, playerStatusInfo, applyStatusSkill);
         }
     }
 
-    public async UniTask BuffInAbnormalCondition(SkillMasterData skillMasterData, int buffCount = StatusAmount)
+    public async UniTask BuffInAbnormalCondition
+    (
+        SkillMasterData skillMasterData,
+        SkillMasterData[] statusSKillMasterDatum,
+        int characterId,
+        PlayerStatusInfo playerStatusInfo,
+        int buffCount = StatusAmount
+    )
     {
         if (_isBuffInAbnormalCondition)
         {
@@ -108,20 +102,25 @@ public class BuffSkill : IDisposable
 
         _isBuffInAbnormalCondition = true;
         var skillId = skillMasterData.Id;
-        var buffStatuses = GetBuffStatuses(skillId, _statusSKillMasterDatum, _characterId);
+        var buffStatuses = GetBuffStatuses(skillId, statusSKillMasterDatum, characterId);
 
-        BuffStatus(buffStatuses, buffCount);
+        BuffStatus(buffStatuses, buffCount, playerStatusInfo);
 
         await UniTask.Delay(TimeSpan.FromSeconds(skillMasterData.EffectTime));
 
         _isBuffInAbnormalCondition = false;
         foreach (var (statusType, (applyStatusSkill, _)) in buffStatuses)
         {
-            SetPlayerStatus(statusType, applyStatusSkill);
+            SetPlayerStatus(statusType, playerStatusInfo, applyStatusSkill);
         }
     }
 
-    private void BuffStatus(Dictionary<StatusType, (int, int)> buffStatuses, int buffCount)
+    private void BuffStatus
+    (
+        Dictionary<StatusType, (int, int)> buffStatuses,
+        int buffCount,
+        PlayerStatusInfo playerStatusInfo
+    )
     {
         var fixedBuffStatus = new Dictionary<StatusType, (int, int)>();
         foreach (var buffStatus in buffStatuses)
@@ -160,35 +159,40 @@ public class BuffSkill : IDisposable
 
         foreach (var (statusType, (_, applyBuffSkill)) in fixedBuffStatus)
         {
-            SetPlayerStatus(statusType, applyBuffSkill);
+            SetPlayerStatus(statusType, playerStatusInfo, applyBuffSkill);
         }
     }
 
-    private void SetPlayerStatus(StatusType statusType, int value)
+    private void SetPlayerStatus
+    (
+        StatusType statusType,
+        PlayerStatusInfo playerStatusInfo,
+        int value
+    )
     {
         switch (statusType)
         {
             case StatusType.Hp:
-                var maxHp = _playerStatusInfo._Hp.Value.Item1;
-                _playerStatusInfo._Hp.Value = (maxHp, value);
+                var maxHp = playerStatusInfo._hp.Value.Item1;
+                playerStatusInfo._hp.Value = (maxHp, value);
                 break;
             case StatusType.Attack:
-                _playerStatusInfo._Attack.Value = value;
+                playerStatusInfo._attack.Value = value;
                 break;
             case StatusType.Speed:
-                _playerStatusInfo._Speed.Value = value;
+                playerStatusInfo._speed.Value = value;
                 break;
             case StatusType.BombLimit:
-                _playerStatusInfo._BombLimit.Value = value;
+                playerStatusInfo._bombLimit.Value = value;
                 break;
             case StatusType.FireRange:
-                _playerStatusInfo._FireRange.Value = value;
+                playerStatusInfo._fireRange.Value = value;
                 break;
             case StatusType.Defense:
-                _playerStatusInfo._Defense.Value = value;
+                playerStatusInfo._defense.Value = value;
                 break;
             case StatusType.Resistance:
-                _playerStatusInfo._Resistance.Value = value;
+                playerStatusInfo._resistance.Value = value;
                 break;
             case StatusType.None:
                 break;

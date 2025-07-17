@@ -46,18 +46,22 @@ namespace Skill
 
             _cancellationTokenSource ??= new CancellationTokenSource();
             var playerConditionInfo = playerTransform.GetComponent<PlayerConditionInfo>();
-            _buffSkill.Initialize
+            PassiveSkillSubscribe
             (
-                characterId,
-                statusSkillMasterDatum,
                 playerConditionInfo,
+                statusSkillMasterDatum,
+                characterId,
                 playerStatusInfo
             );
-
-            PassiveSkillSubscribe(playerConditionInfo);
         }
 
-        private void PassiveSkillSubscribe(PlayerConditionInfo playerConditionInfo)
+        private void PassiveSkillSubscribe
+        (
+            PlayerConditionInfo playerConditionInfo,
+            SkillMasterData[] statusSkillMasterDatum,
+            int characterId,
+            PlayerStatusInfo playerStatusInfo
+        )
         {
             _onDamageFacade
                 .OnDamageAsObservable()
@@ -71,7 +75,13 @@ namespace Skill
                     }
 
                     NotifyActivatePassiveSkill(playerConditionInfo, skillData);
-                    _buffSkill.Buff(skillData).Forget();
+                    _buffSkill.Buff
+                    (
+                        skillData,
+                        statusSkillMasterDatum,
+                        characterId,
+                        playerStatusInfo
+                    ).Forget();
                 })
                 .AddTo(_cancellationTokenSource.Token);
 
@@ -88,8 +98,14 @@ namespace Skill
                     }
 
                     NotifyActivatePassiveSkill(playerConditionInfo, skillData);
-                    _buffSkill.BuffInAbnormalCondition(skillData).Forget();
                     _heal.ContinuousHealSkillInAbnormalCondition(skillData);
+                    _buffSkill.BuffInAbnormalCondition
+                    (
+                        skillData,
+                        statusSkillMasterDatum,
+                        characterId,
+                        playerStatusInfo
+                    ).Forget();
                 })
                 .AddTo(_cancellationTokenSource.Token);
         }

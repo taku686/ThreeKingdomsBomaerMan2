@@ -40,8 +40,8 @@ namespace Enemy
             private void PutBomb()
             {
                 var explosionTime = PhotonNetwork.ServerTimestamp + WaitDurationBeforeExplosion;
-                var damageAmount = _PlayerStatusInfo._Attack.Value;
-                var fireRange = _PlayerStatusInfo._FireRange.Value;
+                var damageAmount = _PlayerStatusInfo._attack.Value;
+                var fireRange = _PlayerStatusInfo._fireRange.Value;
 
                 _PutBomb.SetBomb
                 (

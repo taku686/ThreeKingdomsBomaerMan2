@@ -78,14 +78,14 @@ namespace Player.Common
 
                 _OnClickBomb
                     .Where(_ => Owner._translateStatusInBattleUseCase.CanPutBomb())
-                    .Where(_ => _AbnormalConditionEffectUseCase._CanPutBombReactiveProperty.Value)
+                    .Where(_ => _AbnormalConditionEffectUseCase._canPutBombReactiveProperty.Value)
                     .Throttle(TimeSpan.FromSeconds(GameCommonData.InputBombInterval))
                     .Subscribe(_ =>
                     {
                         var waitDuration = _AbnormalConditionEffectUseCase._IsBurning ? GameCommonData.WaitDurationBeforeExplosionInBurning : GameCommonData.WaitDurationBeforeExplosion;
                         var explosionTime = PhotonNetwork.ServerTimestamp + waitDuration;
-                        var damageAmount = (int)TranslateStatusInBattleUseCase.Translate(StatusType.Attack, _PlayerStatusInfo._Attack.Value);
-                        var fireRange = (int)TranslateStatusInBattleUseCase.Translate(StatusType.FireRange, _PlayerStatusInfo._FireRange.Value);
+                        var damageAmount = (int)TranslateStatusInBattleUseCase.Translate(StatusType.Attack, _PlayerStatusInfo._attack.Value);
+                        var fireRange = (int)TranslateStatusInBattleUseCase.Translate(StatusType.FireRange, _PlayerStatusInfo._fireRange.Value);
                         Owner._putBomb.SetBomb
                         (
                             (int)BombType.Normal,

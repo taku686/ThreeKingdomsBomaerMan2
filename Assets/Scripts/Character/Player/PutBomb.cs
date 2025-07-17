@@ -97,7 +97,7 @@ namespace Player.Common
             bomb.transform.position = new Vector3(playerPos.x, playerPos.y, playerPos.z);
         }
 
-        private static bool CanPutBomb(Vector3 startPos, BoxCollider boxCollider)
+        private static bool CanPutBomb(Vector3 startPos, Collider boxCollider)
         {
             var pos = new Vector3(startPos.x, startPos.y, startPos.z);
             boxCollider.enabled = false;
