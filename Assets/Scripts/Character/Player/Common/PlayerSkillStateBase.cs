@@ -33,7 +33,7 @@ namespace Player.Common
 
             protected override void OnUpdate()
             {
-                if (_SkillMasterData._SkillActionTypeEnum == SkillActionType.None)
+                if (GameCommonData.NoAnimationInSkillActionType(_SkillMasterData._SkillActionTypeEnum))
                 {
                     _StateMachine.Dispatch((int)PlayerState.Idle);
                 }

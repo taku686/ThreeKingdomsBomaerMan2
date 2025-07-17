@@ -271,8 +271,18 @@ namespace Common.Installer
             Container.BindFactory<int, PutBomb, PlayerStatusInfo, AbnormalCondition, IAttackBehaviour, IAttackBehaviour, AttributeChangeBombFactory.Factory>().FromFactory<AttributeChangeBombFactory>();
             Container.BindFactory<NormalChangeBomb, NormalChangeBomb.Factory>().AsCached();
             Container.BindFactory<int, PutBomb, PlayerStatusInfo, IAttackBehaviour, ParalysisChangeBomb, ParalysisChangeBomb.Factory>().AsCached();
+            Container.BindFactory<int, PutBomb, PlayerStatusInfo, IAttackBehaviour, HellFireChangeBomb, HellFireChangeBomb.Factory>().AsCached();
+            Container.BindFactory<int, PutBomb, PlayerStatusInfo, IAttackBehaviour, DarknessChangeBomb, DarknessChangeBomb.Factory>().AsCached();
+            Container.BindFactory<int, PutBomb, PlayerStatusInfo, IAttackBehaviour, LifeStealChangeBomb, LifeStealChangeBomb.Factory>().AsCached();
+            Container.BindFactory<int, PutBomb, PlayerStatusInfo, IAttackBehaviour, MiasmaChangeBomb, MiasmaChangeBomb.Factory>().AsCached();
+            Container.BindFactory<int, PutBomb, PlayerStatusInfo, IAttackBehaviour, SoakingWetChangeBomb, SoakingWetChangeBomb.Factory>().AsCached();
+            Container.BindFactory<int, PutBomb, PlayerStatusInfo, IAttackBehaviour, StigmataChangeBomb, StigmataChangeBomb.Factory>().AsCached();
+            Container.BindFactory<int, PutBomb, PlayerStatusInfo, IAttackBehaviour, CharmChangeBomb, CharmChangeBomb.Factory>().AsCached();
+            Container.BindFactory<int, PutBomb, PlayerStatusInfo, IAttackBehaviour, BurningChangeBomb, BurningChangeBomb.Factory>().AsCached();
+            Container.BindFactory<int, PutBomb, PlayerStatusInfo, IAttackBehaviour, ConfusionChangeBomb, ConfusionChangeBomb.Factory>().AsCached();
+            Container.BindFactory<int, PutBomb, PlayerStatusInfo, IAttackBehaviour, FrozenChangeBomb, FrozenChangeBomb.Factory>().AsCached();
+            Container.BindFactory<int, PutBomb, PlayerStatusInfo, IAttackBehaviour, PoisonChangeBomb, PoisonChangeBomb.Factory>().AsCached();
         }
-
 
         private void InstallBuffSkill()
         {

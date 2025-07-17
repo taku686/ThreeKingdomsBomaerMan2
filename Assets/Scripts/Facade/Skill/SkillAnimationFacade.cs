@@ -25,7 +25,7 @@ namespace Facade.Skill
 
         public void PlayBack(SkillMasterData skillMasterData)
         {
-            if (skillMasterData._SkillActionTypeEnum == SkillActionType.None)
+            if (GameCommonData.NoAnimationInSkillActionType(skillMasterData._SkillActionTypeEnum))
             {
                 return;
             }

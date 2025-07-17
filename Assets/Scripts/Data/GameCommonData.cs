@@ -126,6 +126,11 @@ namespace Common.Data
             return LayerMask.GetMask(ObstacleLayer);
         }
 
+        public static bool NoAnimationInSkillActionType(SkillActionType skillActionType)
+        {
+            return skillActionType is SkillActionType.Bomb or SkillActionType.None;
+        }
+
         public static int GetAnimatorHashKey(SkillActionType actionType)
         {
             return actionType switch
