@@ -80,7 +80,7 @@ namespace Manager.PlayFabManager
                 var id = skillData.Id;
                 var explanation = skillData.Explanation;
                 var name = skillData.Name;
-                await LoadSkillIconResources(id, skillData.IconID);
+                //await LoadSkillIconResources(id, skillData.IconID);
                 var sprite = _resourcesObjectRepository.GetSkillIcon(id);
                 var skillActionType = TranslateStringToSkillActionType(skillData._SkillActionType);
                 var skillType = (SkillType)skillData.SkillTypeInt;
@@ -170,7 +170,7 @@ namespace Manager.PlayFabManager
             {
                 var name = weaponData.Name;
                 var id = weaponData.Id;
-                await _resourcesObjectRepository.SetWeaponData(id);
+                //await _resourcesObjectRepository.SetWeaponData(id);
                 var weaponType = (WeaponType)weaponData.WeaponTypeInt;
                 var statusSkillIds = TranslateStringToIntArray(weaponData.StatusSkillId);
                 var statusSkillData = _skillMasterDataRepository.GetSkillDatum(statusSkillIds);

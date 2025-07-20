@@ -42,8 +42,7 @@ public class FadeView : MonoBehaviour
 
         while (Time.timeSinceLevelLoad <= endTime)
         {
-            _cutoutRange = (endTime - Time.timeSinceLevelLoad) / _fadeDuration;
-            _Range = _cutoutRange;
+            _Range = (endTime - Time.timeSinceLevelLoad) / _fadeDuration;
             await UniTask.Yield();
         }
 
@@ -61,12 +60,10 @@ public class FadeView : MonoBehaviour
 
         while (Time.timeSinceLevelLoad <= endTime)
         {
-            _cutoutRange = 1 - (endTime - Time.timeSinceLevelLoad) / _fadeDuration;
-            _Range = _cutoutRange;
+            _Range = 1 - (endTime - Time.timeSinceLevelLoad) / _fadeDuration;
             await UniTask.Yield();
         }
-
-
+        
         _cutoutRange = 1.1f;
         _Range = _cutoutRange;
         await UniTask.Delay(TimeSpan.FromSeconds(_stopDuration));
@@ -89,8 +86,5 @@ public class FadeView : MonoBehaviour
 
     private void OnDestroy()
     {
-        /*if (_fadeMaterial == null) return;
-        DestroyImmediate(_fadeMaterial);
-        _fadeMaterial = null;*/
     }
 }

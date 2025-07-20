@@ -235,24 +235,35 @@ namespace UI.Title
                 return;
             }
 
-            if (!_dataAcrossStates._changingScene)
+            SetActiveBlockPanel(true);
+
+            if (_dataAcrossStates._changingScene)
             {
-                SetActiveBlockPanel(true);
+                const float fadeMaxRange = 1.1f;
+                _fadeView._Range = fadeMaxRange;
+                const float waitTime = 1f;
+                await UniTask.Delay(TimeSpan.FromSeconds(waitTime));
+                _fadeView.gameObject.SetActive(true);
+                await _fadeView.FadeOutAsync();
+            }
+            else
+            {
                 await _fadeView.FadeInAsync();
             }
 
-            action.Invoke();
 
-            if (!_dataAcrossStates._changingScene)
-            {
-                await _fadeView.FadeOutAsync();
-                SetActiveBlockPanel(false);
-            }
+            action.Invoke();
 
             if (_dataAcrossStates._changingScene)
             {
                 _dataAcrossStates._changingScene = false;
             }
+            else
+            {
+                await _fadeView.FadeOutAsync();
+            }
+
+            SetActiveBlockPanel(false);
         }
 
         private bool DisableFadeView(int prevState)
