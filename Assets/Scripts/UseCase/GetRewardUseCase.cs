@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Common.Data;
 using Cysharp.Threading.Tasks;
 using Manager.NetworkManager;
@@ -22,7 +23,11 @@ namespace UseCase
             _userDataRepository = userDataRepository;
         }
 
-        public async UniTask InAsTask((int, GameCommonData.RewardType)[] rewardResults, int cost = 0, string key = "")
+        public async UniTask InAsTask
+        (
+            IEnumerable<(int, GameCommonData.RewardType)> rewardResults,
+            int cost = 0, string key = ""
+        )
         {
             var totalCoinAmount = 0;
             var totalGemAmount = 0;

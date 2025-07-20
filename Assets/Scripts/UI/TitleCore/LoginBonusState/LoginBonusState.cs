@@ -1,11 +1,9 @@
 using System.Threading;
 using Common.Data;
 using Cysharp.Threading.Tasks;
-using Manager.NetworkManager;
 using TitleCore.LoginBonusState;
 using UI.TitleCore.LoginBonusState;
 using UniRx;
-using UnityEngine;
 using StampUiAnimation = UI.Common.StampUiAnimation;
 
 namespace UI.Title
@@ -62,8 +60,9 @@ namespace UI.Title
                     .OnClickAsObservable()
                     .Where(_ => !data._todayReceived)
                     .Take(1)
+                    .Do(_ => stampAnimation.PlayStamp())
                     .SelectMany(_ => _LoginBonusFacade.ReceiveBonus().ToObservable())
-                    .Subscribe(_ => { stampAnimation.PlayStamp(() => TransitionScene(rewardData._rewardType)); })
+                    .Subscribe(_ => { TransitionScene(rewardData._rewardType); })
                     .AddTo(_cts.Token);
             }
 
